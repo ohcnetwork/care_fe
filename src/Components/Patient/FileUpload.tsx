@@ -858,7 +858,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
                     <CareIcon
                       icon="l-music"
-                      className="text-6xl text-gray-500"
+                      className="text-6xl text-secondary-500"
                     />
                   </div>
                 ) : (
@@ -880,7 +880,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
                     <CareIcon
                       icon={getIconClassName(item?.extension)}
-                      className="text-6xl text-gray-500"
+                      className="text-6xl text-secondary-500"
                     />
                   </div>
                 )}
@@ -1397,10 +1397,12 @@ export const FileUpload = (props: FileUploadProps) => {
                 className="text-lg text-danger-500"
               />
             </div>
-            <div className="text-grey-200 text-sm">
+            <div className="text-sm">
               <h1 className="text-xl text-black">Archive File</h1>
-              This action is irreversible. Once a file is archived it cannot be
-              unarchived.
+              <span className="text-sm text-secondary-600">
+                This action is irreversible. Once a file is archived it cannot
+                be unarchived.
+              </span>
             </div>
           </div>
         }
@@ -1447,10 +1449,12 @@ export const FileUpload = (props: FileUploadProps) => {
                 className="text-lg text-primary-500"
               />
             </div>
-            <div className="text-grey-200 text-sm">
+            <div className="text-sm">
               <h1 className="text-xl text-black">File Details</h1>
-              This file is archived. Once a file is archived it cannot be
-              unarchived.
+              <span className="text-sm font-normal text-secondary-600">
+                This file is archived. Once a file is archived it cannot be
+                unarchived.
+              </span>
             </div>
           </div>
         }
@@ -1596,7 +1600,7 @@ export const FileUpload = (props: FileUploadProps) => {
                             <label
                               className={classNames(
                                 consultation?.discharge_date
-                                  ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                                  ? "cursor-not-allowed bg-secondary-200 text-secondary-500"
                                   : "button-primary-default cursor-pointer transition-all duration-200 ease-in-out",
                                 "button-size-default button-shape-square inline-flex h-min w-full items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1",
                               )}
@@ -1646,7 +1650,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     </div>
                   )}
                   {file && (
-                    <div className="mt-2 flex items-center justify-between rounded bg-gray-200 px-4 py-2">
+                    <div className="mt-2 flex items-center justify-between rounded bg-secondary-200 px-4 py-2">
                       {file?.name}
                       <button
                         onClick={() => {
@@ -1684,7 +1688,7 @@ export const FileUpload = (props: FileUploadProps) => {
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
-                <div className="text-md flex items-center justify-center font-bold text-gray-500">
+                <div className="text-md flex items-center justify-center font-bold text-secondary-500">
                   {"No Unarchived File in the Current Page"}
                 </div>
               </div>
@@ -1709,7 +1713,7 @@ export const FileUpload = (props: FileUploadProps) => {
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
-                <div className="text-md flex items-center justify-center font-bold text-gray-500">
+                <div className="text-md flex items-center justify-center font-bold text-secondary-500">
                   {"No Archived File in the Current Page"}
                 </div>
               </div>
@@ -1735,7 +1739,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 )
               ) : (
                 <div className="mt-4 rounded-lg border bg-white p-4 shadow">
-                  <div className="text-md flex items-center justify-center font-bold text-gray-500">
+                  <div className="text-md flex items-center justify-center font-bold text-secondary-500">
                     {"No discharge summary files in the current Page"}
                   </div>
                 </div>

@@ -1143,7 +1143,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   if (!formField) setFormField(field);
                   return (
                     <>
-                      <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
+                      <div className="mb-2 overflow-visible rounded border border-secondary-200 p-4">
                         <ButtonV2
                           id="import-externalresult-button"
                           className="flex items-center gap-2"
@@ -1164,7 +1164,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </ButtonV2>
                       </div>
                       {enable_abdm && (
-                        <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                        <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                           <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                             ABHA Details
                           </h1>
@@ -1221,7 +1221,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     error=""
                                   />
                                 ) : (
-                                  <div className="mt-4 text-sm text-gray-500">
+                                  <div className="mt-4 text-sm text-secondary-500">
                                     No Abha Address Associated with this ABHA
                                     Number
                                   </div>
@@ -1231,7 +1231,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       )}
-                      <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                      <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                         <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                           Personal Details
                         </h1>
@@ -1354,7 +1354,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       errorClassName="hidden"
                                       trailingPadding="pr-4"
                                       trailing={
-                                        <p className="absolute right-10 space-x-1 whitespace-nowrap text-xs text-gray-700 sm:text-sm">
+                                        <p className="absolute right-10 space-x-1 whitespace-nowrap text-xs text-secondary-700 sm:text-sm">
                                           {field("age").value !== "" && (
                                             <>
                                               <span className="hidden sm:inline md:hidden lg:inline">
@@ -1734,7 +1734,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       </div>
-                      <div className="mb-8 rounded border border-gray-200 p-4">
+                      <div className="mb-8 rounded border border-secondary-200 p-4">
                         <AccordionV2
                           className="mt-2 shadow-none md:mt-0 lg:mt-0"
                           expandIcon={
@@ -1861,7 +1861,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex w-full flex-col gap-4 rounded border border-gray-200 bg-white p-4">
+                      <div className="flex w-full flex-col gap-4 rounded border border-secondary-200 bg-white p-4">
                         <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
                           <h1 className="text-left text-xl font-bold text-purple-500">
                             Insurance Details

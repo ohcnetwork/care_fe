@@ -27,7 +27,7 @@ let renderSelectables = (selections, updateCB) =>
       type_="button"
       key={index |> string_of_int}
       onClick={_ => updateCB(selection)}
-      className="w-full block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900">
+      className="w-full block px-4 py-2 text-sm leading-5 text-left text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 focus:outline-none focus:bg-secondary-100 focus:text-secondary-900">
       {selection |> str}
     </button>
   )
@@ -77,7 +77,10 @@ let make = (~id, ~value, ~updateCB, ~placeholder, ~selectables, ~label="", ~disa
       id
       value
       autoComplete="off"
-      onClick={e => {ReactEvent.Mouse.stopPropagation(e); setShowDropdown(_ => !showDropdown)}}
+      onClick={e => {
+        ReactEvent.Mouse.stopPropagation(e)
+        setShowDropdown(_ => !showDropdown)
+      }}
       onChange={e => updateCB(ReactEvent.Form.target(e)["value"])}
       className="cui-input-base appearance-none h-10 mt-1 block py-2 px-4"
       disabled

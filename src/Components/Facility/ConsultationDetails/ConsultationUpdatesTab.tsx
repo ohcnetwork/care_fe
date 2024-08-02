@@ -195,7 +195,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 }`}
               >
                 <div className="px-4 py-5 sm:p-6" id="discharge-information">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                     Discharge Information
                   </h3>
                   <div className="mt-2 grid gap-4">
@@ -247,7 +247,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             prescription_type="DISCHARGE"
                           />
                         </div>
-                        <hr className="my-2 border border-gray-300"></hr>
+                        <hr className="my-2 border border-secondary-300"></hr>
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
                             is_prn
@@ -319,7 +319,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {props.consultationData.history_of_present_illness && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
                 <div className="px-4 py-5 sm:p-6" id="history-presentillness">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                     History of Present Illness
                   </h3>
                   <div className="mt-2">
@@ -335,7 +335,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {props.consultationData.examination_details && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
                 <div className="px-4 py-5 sm:p-6" id="examination-details">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                     Examination details and Clinical conditions:{" "}
                   </h3>
                   <div className="mt-2">
@@ -350,7 +350,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {props.consultationData.treatment_plan && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
                 <div className="px-4 py-5 sm:p-6" id="treatment-summary">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                     Treatment Summary
                   </h3>
                   <div className="mt-2">
@@ -365,7 +365,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {props.consultationData.consultation_notes && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
                 <div className="px-4 py-5 sm:p-6" id="general-instructions">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                     General Instructions
                   </h3>
                   <div className="mt-2">
@@ -382,7 +382,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               props.consultationData.special_instruction) && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
                 <div className="px-4 py-5 sm:p-6" id="consultation-notes">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                     Notes
                   </h3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -414,24 +414,24 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             props.consultationData.procedure.length > 0 && (
               <div className="my-4 rounded-lg bg-white p-4 shadow">
                 <div className="overflow-x-auto" id="consultation-procedure">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y divide-secondary-200">
                     <thead>
                       <tr>
-                        <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-600">
+                        <th className="bg-secondary-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-secondary-600">
                           Procedure
                         </th>
-                        <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-600">
+                        <th className="bg-secondary-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-secondary-600">
                           Notes
                         </th>
-                        <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-600">
+                        <th className="bg-secondary-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-secondary-600">
                           Repetitive
                         </th>
-                        <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-600">
+                        <th className="bg-secondary-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-secondary-600">
                           Time / Frequency
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-secondary-200 bg-white">
                       {props.consultationData.procedure?.map(
                         (procedure, index) => (
                           <tr key={index}>
@@ -460,7 +460,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           {props.consultationData.intubation_start_date && (
             <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
               <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                   Date/Size/LL:{" "}
                 </h3>
                 <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -501,7 +501,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           {props.consultationData.lines?.length > 0 && (
             <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
               <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                   Lines and Catheters
                 </h3>
                 <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -536,7 +536,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="col-span-1 mt-4 overflow-hidden rounded-lg bg-white shadow">
               <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                <h3 className="text-lg font-semibold leading-relaxed text-secondary-900">
                   Body Details
                 </h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -588,7 +588,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               isAntenatal(props.patientData.last_menstruation_start_date)) ||
               isPostPartum(props.patientData.date_of_delivery)) && (
               <div className="mt-4 rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
+                <h3 className="mb-4 text-lg font-semibold leading-relaxed text-secondary-900">
                   Perinatal Status
                 </h3>
 

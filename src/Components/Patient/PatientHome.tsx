@@ -428,7 +428,7 @@ export const PatientHome = (props: any) => {
                     <div>
                       <a
                         href={`tel:${patientData.phone_number}`}
-                        className="text-sm font-medium text-black hover:text-gray-500"
+                        className="text-sm font-medium text-black hover:text-secondary-500"
                       >
                         {patientData.phone_number || "-"}
                       </a>
@@ -449,11 +449,11 @@ export const PatientHome = (props: any) => {
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Emergency Contact
                   </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900">
+                  <div className="mt-1 text-sm leading-5 text-secondary-900">
                     <div>
                       <a
                         href={`tel:${patientData.emergency_phone_number}`}
-                        className="text-sm font-medium text-black hover:text-gray-500"
+                        className="text-sm font-medium text-black hover:text-secondary-500"
                       >
                         {patientData.emergency_phone_number || "-"}
                       </a>
@@ -557,7 +557,7 @@ export const PatientHome = (props: any) => {
                       className={
                         "mb-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
                         (dayjs().isBefore(patientData.review_time)
-                          ? " bg-gray-100"
+                          ? " bg-secondary-100"
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
                       }
                     >
@@ -573,23 +573,23 @@ export const PatientHome = (props: any) => {
                 <div className="mb-6 rounded-sm bg-white p-2 text-center shadow">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
-                      <div className="text-sm font-normal leading-5 text-gray-500">
+                      <div className="text-sm font-normal leading-5 text-secondary-500">
                         Status
                       </div>
-                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                      <div className="mt-1 text-xl font-semibold leading-5 text-secondary-900">
                         {patientData.is_active ? "LIVE" : "DISCHARGED"}
                       </div>
                     </div>
                     <div className="w-1/2">
-                      <div className="text-sm font-normal leading-5 text-gray-500">
+                      <div className="text-sm font-normal leading-5 text-secondary-500">
                         Last Discharged Reason
                       </div>
-                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                      <div className="mt-1 text-xl font-semibold leading-5 text-secondary-900">
                         {patientData.is_active ? (
                           "-"
                         ) : !patientData.last_consultation
                             ?.new_discharge_reason ? (
-                          <span className="text-gray-800">
+                          <span className="text-secondary-800">
                             {patientData?.last_consultation?.suggestion === "OP"
                               ? "OP file closed"
                               : "UNKNOWN"}
@@ -613,10 +613,10 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div className="mt-2 flex justify-between rounded-sm bg-white p-2 px-4 text-center shadow">
                   <div className="w-1/2 border-r-2 pb-1 pr-2">
-                    <div className="text-sm font-normal leading-5 text-gray-500">
+                    <div className="text-sm font-normal leading-5 text-secondary-500">
                       Created
                     </div>
-                    <div className="mt-1 whitespace-normal text-sm font-semibold leading-5 text-gray-900">
+                    <div className="mt-1 whitespace-normal text-sm font-semibold leading-5 text-secondary-900">
                       <div className="flex justify-center text-sm font-semibold">
                         <RelativeDateUserMention
                           actionDate={patientData.created_date}
@@ -626,10 +626,10 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                   <div className="w-1/2 pb-1 pl-2">
-                    <div className="text-sm font-normal leading-5 text-gray-500">
+                    <div className="text-sm font-normal leading-5 text-secondary-500">
                       Last Edited
                     </div>
-                    <div className="mt-1 whitespace-normal text-sm leading-5 text-gray-900">
+                    <div className="mt-1 whitespace-normal text-sm leading-5 text-secondary-900">
                       <div className="flex justify-center whitespace-normal text-sm font-semibold">
                         <RelativeDateUserMention
                           actionDate={patientData.modified_date}
@@ -651,7 +651,7 @@ export const PatientHome = (props: any) => {
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
-                      <CareIcon icon="l-file-download" className="mr-2" />
+                      <CareIcon icon="l-file-download" className="text-lg" />
                       Death Report
                     </ButtonV2>
                   </div>
@@ -730,9 +730,9 @@ export const PatientHome = (props: any) => {
           </AccordionV2>
         </section>
 
-        <section className=" mt-7 h-full space-y-2 rounded-lg bg-white p-4 text-gray-100 shadow">
+        <section className=" mt-7 h-full space-y-2 rounded-lg bg-white p-4 text-secondary-100 shadow">
           <div
-            className="flex cursor-pointer justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-gray-900"
+            className="flex cursor-pointer justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-secondary-900"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
@@ -779,7 +779,7 @@ export const PatientHome = (props: any) => {
                                 icon="l-truck"
                                 className="mr-2 text-lg"
                               />
-                              <dd className="text-sm font-bold leading-5 text-gray-900">
+                              <dd className="text-sm font-bold leading-5 text-secondary-900">
                                 {shift.status}
                               </dd>
                             </dt>
@@ -793,7 +793,7 @@ export const PatientHome = (props: any) => {
                                 icon="l-plane-fly"
                                 className="mr-2 text-lg"
                               />
-                              <dd className="text-sm font-bold leading-5 text-gray-900">
+                              <dd className="text-sm font-bold leading-5 text-secondary-900">
                                 {(shift.origin_facility_object || {})?.name}
                               </dd>
                             </dt>
@@ -807,7 +807,7 @@ export const PatientHome = (props: any) => {
                                 icon="l-user-check"
                                 className="mr-2 text-lg"
                               />
-                              <dd className="text-sm font-bold leading-5 text-gray-900">
+                              <dd className="text-sm font-bold leading-5 text-secondary-900">
                                 {
                                   (
                                     shift.shifting_approving_facility_object ||
@@ -826,7 +826,7 @@ export const PatientHome = (props: any) => {
                                 icon="l-plane-arrival"
                                 className="mr-2 text-lg"
                               />
-                              <dd className="text-sm font-bold leading-5 text-gray-900">
+                              <dd className="text-sm font-bold leading-5 text-secondary-900">
                                 {(shift.assigned_facility_object || {})?.name ||
                                   "Yet to be decided"}
                               </dd>
@@ -841,7 +841,7 @@ export const PatientHome = (props: any) => {
                                 (dayjs()
                                   .subtract(2, "hours")
                                   .isBefore(shift.modified_date)
-                                  ? "text-gray-900"
+                                  ? "text-secondary-900"
                                   : "rounded p-1 font-normal text-red-600")
                               }
                             >
@@ -859,7 +859,7 @@ export const PatientHome = (props: any) => {
 
                       <div className="mt-2 flex">
                         <ButtonV2
-                          className="mr-2 w-full bg-white hover:bg-gray-100"
+                          className="mr-2 w-full bg-white hover:bg-secondary-100"
                           variant="secondary"
                           onClick={() =>
                             navigate(`/shifting/${shift.external_id}`)
@@ -909,7 +909,7 @@ export const PatientHome = (props: any) => {
                 </div>
               ))
             ) : (
-              <div className=" text-center text-gray-500">
+              <div className=" text-center text-secondary-500">
                 {isShiftDataLoading ? "Loading..." : "No Shifting Records!"}
               </div>
             )}
@@ -922,7 +922,7 @@ export const PatientHome = (props: any) => {
         >
           <div className="w-full">
             <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-              <div className="border-b border-dashed pb-2 text-xl font-bold text-gray-900">
+              <div className="border-b border-dashed pb-2 text-xl font-bold text-secondary-900">
                 Location
               </div>
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -984,7 +984,7 @@ export const PatientHome = (props: any) => {
           </div>
           <div className="w-full">
             <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-              <div className="border-b border-dashed pb-2 text-xl font-bold text-gray-900">
+              <div className="border-b border-dashed pb-2 text-xl font-bold text-secondary-900">
                 Medical
               </div>
               {!patientData.present_health &&
@@ -994,7 +994,7 @@ export const PatientHome = (props: any) => {
                 !patientData.medical_history?.some(
                   (history) => history.disease !== "NO",
                 ) && (
-                  <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+                  <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
                     No Medical History Available
                   </div>
                 )}
@@ -1069,7 +1069,7 @@ export const PatientHome = (props: any) => {
                   "w-full rounded-lg border",
                   isPatientEligibleForNewConsultation(patientData)
                     ? "cursor-pointer border-green-700 hover:bg-primary-400"
-                    : "border-gray-700 text-gray-700 hover:cursor-not-allowed",
+                    : "border-secondary-700 text-secondary-700 hover:cursor-not-allowed",
                 )}
                 onClick={() =>
                   isPatientEligibleForNewConsultation(patientData) &&
@@ -1082,7 +1082,7 @@ export const PatientHome = (props: any) => {
                   className={classNames(
                     "h-full space-y-2 rounded-lg bg-white p-4 shadow",
                     isPatientEligibleForNewConsultation(patientData) &&
-                      "hover:bg-gray-200",
+                      "hover:bg-secondary-200",
                   )}
                 >
                   <div
@@ -1111,7 +1111,7 @@ export const PatientHome = (props: any) => {
                 className="w-full"
                 onClick={() => navigate(`/patient/${id}/investigation_reports`)}
               >
-                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
+                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-secondary-200">
                   <div className="text-center text-green-700">
                     <span>
                       <CareIcon icon="l-file-search-alt" className="text-5xl" />
@@ -1132,7 +1132,7 @@ export const PatientHome = (props: any) => {
                   )
                 }
               >
-                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
+                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-secondary-200">
                   <div className="text-center text-green-700">
                     <span>
                       <CareIcon icon="l-file-upload" className="text-5xl" />
@@ -1156,14 +1156,14 @@ export const PatientHome = (props: any) => {
                 <div
                   className={`h-full space-y-2 rounded-lg border bg-white p-4 shadow ${
                     isPatientInactive(patientData, facilityId)
-                      ? " border-gray-700 hover:cursor-not-allowed"
-                      : " border-green-700 hover:cursor-pointer hover:bg-gray-200"
+                      ? " border-secondary-700 hover:cursor-not-allowed"
+                      : " border-green-700 hover:cursor-pointer hover:bg-secondary-200"
                   } `}
                 >
                   <div
                     className={`${
                       isPatientInactive(patientData, facilityId)
-                        ? "text-gray-700"
+                        ? "text-secondary-700"
                         : "text-green-700"
                     }  text-center `}
                   >
@@ -1176,7 +1176,7 @@ export const PatientHome = (props: any) => {
                     <p
                       className={`${
                         isPatientInactive(patientData, facilityId) &&
-                        "text-gray-700"
+                        "text-secondary-700"
                       }  text-center text-sm font-medium`}
                     >
                       Shift Patient
@@ -1198,14 +1198,14 @@ export const PatientHome = (props: any) => {
                   className={classNames(
                     "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
-                      ? " border-gray-700 hover:cursor-not-allowed"
-                      : " border-green-700 hover:cursor-pointer hover:bg-gray-200",
+                      ? " border-secondary-700 hover:cursor-not-allowed"
+                      : " border-green-700 hover:cursor-pointer hover:bg-secondary-200",
                   )}
                 >
                   <div
                     className={`${
                       isPatientInactive(patientData, facilityId)
-                        ? " text-gray-700 "
+                        ? " text-secondary-700 "
                         : " text-green-700 "
                     } text-center  `}
                   >
@@ -1217,7 +1217,7 @@ export const PatientHome = (props: any) => {
                     <p
                       className={`${
                         isPatientInactive(patientData, facilityId) &&
-                        " text-gray-700 "
+                        " text-secondary-700 "
                       } text-center text-sm font-medium`}
                     >
                       Request Sample Test
@@ -1233,7 +1233,7 @@ export const PatientHome = (props: any) => {
                   )
                 }
               >
-                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
+                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-secondary-200">
                   <div className="text-center text-green-700">
                     <span>
                       <CareIcon icon="l-clipboard-notes" className="text-5xl" />
@@ -1258,15 +1258,15 @@ export const PatientHome = (props: any) => {
                   className={classNames(
                     "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
-                      ? "border-gray-700 hover:cursor-not-allowed"
-                      : "border-green-700 hover:cursor-pointer hover:bg-gray-200",
+                      ? "border-secondary-700 hover:cursor-not-allowed"
+                      : "border-green-700 hover:cursor-pointer hover:bg-secondary-200",
                   )}
                 >
                   <div
                     className={classNames(
                       "text-center",
                       isPatientInactive(patientData, facilityId)
-                        ? "text-gray-700"
+                        ? "text-secondary-700"
                         : "text-green-700",
                     )}
                   >
@@ -1279,7 +1279,7 @@ export const PatientHome = (props: any) => {
                       className={classNames(
                         "text-center text-sm font-medium",
                         isPatientInactive(patientData, facilityId)
-                          ? "text-gray-700"
+                          ? "text-secondary-700"
                           : "text-black",
                       )}
                     >
@@ -1292,7 +1292,7 @@ export const PatientHome = (props: any) => {
           </div>
           <div className="mx-2 w-full lg:hidden">
             <div className="h-full space-y-2 rounded-lg bg-white p-4 shadow">
-              <div className="space-y-2 border-b border-dashed text-left text-lg font-semibold text-gray-900">
+              <div className="space-y-2 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                 <div>
                   <ButtonV2
                     className="w-full"
@@ -1450,7 +1450,7 @@ export const PatientHome = (props: any) => {
               </PaginatedList.WhenLoading>
               <PaginatedList.WhenEmpty className="py-2">
                 <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-                  <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+                  <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
                     No Consultation History Available
                   </div>
                 </div>
@@ -1490,7 +1490,7 @@ export const PatientHome = (props: any) => {
               </PaginatedList.WhenLoading>
               <PaginatedList.WhenEmpty className="py-2">
                 <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-                  <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+                  <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
                     No Sample Test History Available
                   </div>
                 </div>

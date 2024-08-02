@@ -38,7 +38,7 @@ export function useAsyncOptions<T extends Record<string, unknown>>(
 ) {
   const dispatch = useDispatch<any>();
   const [queryOptions, setQueryOptions] = useState<T[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchOptions = useMemo(
     () =>

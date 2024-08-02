@@ -85,7 +85,7 @@ export const FacilityHomeTriage = (props: any) => {
           {stats.length === 0 && (
             <>
               <hr />
-              <div className="mt-3 flex min-w-[1000px] items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-gray-600">
+              <div className="mt-3 flex min-w-[1000px] items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-secondary-600">
                 No Data Found
               </div>
             </>

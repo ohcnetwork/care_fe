@@ -21,7 +21,7 @@ interface CreateDiagnosesProps {
 export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
   return (
     <div className={props.className}>
-      <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
+      <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
         <ul className="flex w-full flex-col gap-2 p-4">
           {props.value.map((diagnosis, index) => (
             <li key={index} id={`diagnosis-entry-${index}`}>
@@ -45,7 +45,7 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
 
         {props.value.length === 0 && <NoDiagnosisAdded />}
 
-        <div className="w-full rounded-b-lg bg-gray-200 px-4 pt-4">
+        <div className="w-full rounded-b-lg bg-secondary-200 px-4 pt-4">
           <AddICD11Diagnosis
             disallowed={props.value.map(
               (obj) => obj.diagnosis_object as ICD11DiagnosisModel,
@@ -85,7 +85,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
   const [diagnoses, setDiagnoses] = useState(props.value);
   return (
     <div className={props.className}>
-      <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
+      <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
         <ul className="flex w-full flex-col gap-2 p-4">
           {diagnoses.map((diagnosis, index) => (
             <li key={index} id={`diagnosis-entry-${index}`}>
@@ -108,7 +108,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
 
         {diagnoses.length === 0 && <NoDiagnosisAdded />}
 
-        <div className="w-full rounded-b-lg bg-gray-200 px-4 pt-4">
+        <div className="w-full rounded-b-lg bg-secondary-200 px-4 pt-4">
           <AddICD11Diagnosis
             disallowed={diagnoses.map(
               (obj) => obj.diagnosis_object as ICD11DiagnosisModel,
@@ -188,7 +188,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
 
 const NoDiagnosisAdded = () => {
   return (
-    <div className="flex w-full justify-center gap-2 pb-8 text-center text-gray-500">
+    <div className="flex w-full justify-center gap-2 pb-8 text-center text-secondary-500">
       Atleast one diagnosis must be added
     </div>
   );

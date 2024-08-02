@@ -72,19 +72,19 @@ let editorToggle = (editorName, state, send) => {
       <CareIcon
         icon="l-user-nurse"
         className={`text-xl mr-4 ${Belt.Option.isNone(editorUpdated)
-            ? "text-gray-400"
+            ? "text-secondary-400"
             : "text-green-500"}`}
       />
       <div
         className={`font-semibold text-xl  ${Belt.Option.isNone(editorUpdated)
-            ? "text-gray-800"
+            ? "text-secondary-800"
             : "text-green-500"}`}>
         {str(editorNameToString(editorName))}
       </div>
     </div>
     <div>
       {Belt.Option.isNone(editorUpdated)
-        ? <CareIcon icon="l-check-circle" className="text-3xl text-gray-300" />
+        ? <CareIcon icon="l-check-circle" className="text-3xl text-secondary-300" />
         : <CareIcon icon="l-check-circle" className="text-3xl text-green-500" />}
     </div>
   </div>
@@ -151,7 +151,7 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             {str("Back")}
           </button>
           <div
-            className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
+            className="bg-white px-2 md:px-6 py-5 border-b border-secondary-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
             {switch editor {
             | NeurologicalMonitoringEditor =>
               <CriticalCare__NeurologicalMonitoringEditor
@@ -235,7 +235,7 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
         </div>
       | None =>
         <div
-          className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
+          className="bg-white px-2 md:px-6 py-5 border-b border-secondary-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
           <h2> {str("Record Updates")} </h2>
           <div>
             {basicEditor(~facilityId, ~patientId, ~consultationId, ~id)}

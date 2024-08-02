@@ -55,7 +55,7 @@ export default function ClaimsItemsBuilder(props: Props) {
           return (
             <div
               key={index}
-              className="rounded-lg border-2 border-dashed border-gray-200 p-4"
+              className="rounded-lg border-2 border-dashed border-secondary-200 p-4"
             >
               <div className="flex items-center justify-between">
                 <FieldLabel className="my-auto !font-bold">
@@ -94,7 +94,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                     <PMJAYProcedurePackageAutocomplete
                       required
                       className="flex-[7]"
-                      labelClassName="text-sm text-gray-700"
+                      labelClassName="text-sm text-secondary-700"
                       label="Procedure"
                       name="hbp"
                       value={obj}

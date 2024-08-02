@@ -94,6 +94,7 @@ export default function ManageUsers() {
       user_type: qParams.user_type,
       district_id: qParams.district,
       home_facility: qParams.home_facility,
+      last_active_days: qParams.last_active_days,
     },
   });
 
@@ -204,7 +205,7 @@ export default function ManageUsers() {
                       {user.username}
                     </div>
                   )}
-                  <div className="min-width-50 shrink-0 text-sm text-gray-600">
+                  <div className="min-width-50 shrink-0 text-sm text-secondary-600">
                     {user.last_login && cur_online ? (
                       <span>
                         {" "}
@@ -221,7 +222,7 @@ export default function ManageUsers() {
                           aria-label="Online"
                           className={classNames(
                             "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-gray-300",
+                            cur_online ? "bg-primary-400" : "bg-secondary-300",
                           )}
                         ></span>
                         <span className="pl-2">
@@ -288,7 +289,7 @@ export default function ManageUsers() {
                               {user.doctor_qualification}
                             </span>
                           ) : (
-                            <span className="text-gray-600">Unknown</span>
+                            <span className="text-secondary-600">Unknown</span>
                           )}
                         </UserDetails>
                       </div>
@@ -304,7 +305,7 @@ export default function ManageUsers() {
                               years
                             </span>
                           ) : (
-                            <span className="text-gray-600">Unknown</span>
+                            <span className="text-secondary-600">Unknown</span>
                           )}
                         </UserDetails>
                       </div>
@@ -318,7 +319,7 @@ export default function ManageUsers() {
                               {user.doctor_medical_council_registration}
                             </span>
                           ) : (
-                            <span className="text-gray-600">Unknown</span>
+                            <span className="text-secondary-600">Unknown</span>
                           )}
                         </UserDetails>
                       </div>
@@ -374,7 +375,7 @@ export default function ManageUsers() {
                         {user.weekly_working_hours} hours
                       </span>
                     ) : (
-                      <span className="text-gray-600">-</span>
+                      <span className="text-secondary-600">-</span>
                     )}
                   </UserDetails>
                 </div>
@@ -448,7 +449,7 @@ export default function ManageUsers() {
     manageUsers = (
       <div>
         <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-          <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+          <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
             No Users Found
           </div>
         </div>
@@ -557,11 +558,20 @@ export default function ManageUsers() {
               "home_facility",
               qParams.home_facility ? homeFacilityData?.name || "" : "",
             ),
+            value(
+              "Last Active",
+              "last_active_days",
+              (() => {
+                if (!qParams.last_active_days) return "";
+                if (qParams.last_active_days === "never") return "Never";
+                return `in the last ${qParams.last_active_days} day${qParams.last_active_days > 1 ? "s" : ""}`;
+              })(),
+            ),
           ]}
         />
       </div>
 
-      <div>
+      <div className="pt-4">
         <div>{manageUsers}</div>
       </div>
       {userData.show && (
@@ -755,7 +765,7 @@ export function UserFacilities(props: { user: any }) {
           {t("add")}
         </ButtonV2>
       </div>
-      <hr className="my-2 border-gray-300" />
+      <hr className="my-2 border-secondary-300" />
 
       {isLoading || userFacilitiesLoading ? (
         <div className="flex items-center justify-center">
@@ -766,7 +776,7 @@ export function UserFacilities(props: { user: any }) {
           {/* Home Facility section */}
           {user?.home_facility_object && (
             <div className="py-2" id="home-facility">
-              <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
+              <div className="relative rounded p-2 transition hover:bg-secondary-200 focus:bg-secondary-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
                   <span>{user?.home_facility_object?.name}</span>
                   <span
@@ -820,7 +830,7 @@ export function UserFacilities(props: { user: any }) {
                         id={`facility_${i}`}
                         key={`facility_${i}`}
                         className={classNames(
-                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg",
+                          "relative rounded p-2 transition hover:bg-secondary-200 focus:bg-secondary-200 md:rounded-lg",
                         )}
                       >
                         <div className="flex items-center justify-between">

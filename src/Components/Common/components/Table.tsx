@@ -51,7 +51,7 @@ export default function Table(props: {
                 );
               }
               return (
-                <div className="flex min-w-[24px] items-center justify-center py-[14px] text-center text-sm font-bold text-gray-900">
+                <div className="flex min-w-[24px] items-center justify-center py-[14px] text-center text-sm font-bold text-secondary-900">
                   <>{item}</>
                 </div>
               );

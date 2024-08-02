@@ -453,7 +453,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "route_to_facility":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -469,7 +469,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "encounter_date":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           if (
@@ -540,7 +540,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "consultation_notes":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (!state.form[field].replace(/\s/g, "").length) {
             errors[field] = "Consultation notes can not be empty";
@@ -608,7 +608,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
         case "treating_physician": {
           if (state.form.suggestion !== "DD" && !state.form[field]) {
-            errors[field] = "Please fill treating physician";
+            errors[field] = t("field_required");
             invalidForm = true;
             break;
           }
@@ -819,11 +819,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
         <CareIcon icon={section.iconClass} className="mr-3 text-xl" />
-        <label className="text-lg font-bold text-gray-900">
+        <label className="text-lg font-bold text-secondary-900">
           {sectionTitle}
           {required && <span className="text-danger-500">{" *"}</span>}
         </label>
-        <hr className="ml-6 flex-1 border border-gray-400" />
+        <hr className="ml-6 flex-1 border border-secondary-400" />
       </div>
     );
   };
@@ -932,11 +932,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             );
           })}
         </div>
-        <div className="flex h-full w-full overflow-auto xl:ml-72">
+        <div className="flex h-full w-full overflow-auto xl:ml-64 2xl:ml-72 ">
           <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
-              className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
+              className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-8 "
             >
               <DraftSection
                 handleDraftSelect={(newState: any) => {
@@ -1101,7 +1101,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         placeholder="Weight"
                         trailingPadding=" "
                         trailing={
-                          <p className="absolute right-10 whitespace-nowrap text-sm text-gray-700">
+                          <p className="absolute right-10 whitespace-nowrap text-sm text-secondary-700">
                             Weight (kg)
                           </p>
                         }
@@ -1114,7 +1114,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         placeholder="Height"
                         trailingPadding=" "
                         trailing={
-                          <p className="absolute right-10 whitespace-nowrap text-sm text-gray-700">
+                          <p className="absolute right-10 whitespace-nowrap text-sm text-secondary-700">
                             Height (cm)
                           </p>
                         }
@@ -1315,7 +1315,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                 <div className="flex flex-col gap-4 pb-4">
                   <div className="flex flex-col">
                     {sectionTitle("Diagnosis", true)}
-                    <p className="-mt-4 space-x-1 text-sm text-gray-700">
+                    <p className="-mt-4 space-x-1 text-sm text-secondary-700">
                       <span>Diagnoses as per ICD-11 recommended by WHO</span>
                     </p>
                   </div>
@@ -1437,6 +1437,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           userType={"Doctor"}
                           homeFacility={facilityId}
                           error={state.errors.treating_physician}
+                          noResultsError={t("no_treating_physicians_available")}
                         />
                       </div>
 
