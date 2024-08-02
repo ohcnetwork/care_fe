@@ -104,7 +104,7 @@ export default function RangeFormField(props: Props) {
 
   const handleChange = (v: number) => field.handleChange(unit.inversionFn(v));
 
-  const displayValue = value != null ? properRoundOf(value) : undefined;
+  const displayValue = value != null ? properRoundOf(value) : "";
 
   return (
     <FormField
