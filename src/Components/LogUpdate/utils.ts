@@ -2,47 +2,59 @@ import { IconName } from "../../CAREUI/icons/CareIcon";
 import { DailyRoundsModel } from "../Patient/models";
 
 export const REACTION_OPTIONS = [
-  { id: 0, value: "UNKNOWN", text: "Unknown" },
-  { id: 5, value: "BRISK", text: "Brisk" },
-  { id: 10, value: "SLUGGISH", text: "Sluggish" },
-  { id: 15, value: "FIXED", text: "Fixed" },
-  { id: 20, value: "CANNOT_BE_ASSESSED", text: "Cannot Be Assessed" },
+  { value: "UNKNOWN", text: "Unknown" },
+  { value: "BRISK", text: "Brisk" },
+  { value: "SLUGGISH", text: "Sluggish" },
+  { value: "FIXED", text: "Fixed" },
+  { value: "CANNOT_BE_ASSESSED", text: "Cannot Be Assessed" },
 ] as const;
 
 export const LIMB_RESPONSE_OPTIONS = [
-  { id: 0, value: "UNKNOWN", text: "Unknown" },
-  { id: 5, value: "STRONG", text: "Strong" },
-  { id: 10, value: "MODERATE", text: "Moderate" },
-  { id: 15, value: "WEAK", text: "Weak" },
-  { id: 20, value: "FLEXION", text: "Flexion" },
-  { id: 25, value: "EXTENSION", text: "Extension" },
-  { id: 30, value: "NONE", text: "None" },
+  { value: "UNKNOWN", text: "Unknown" },
+  { value: "STRONG", text: "Strong" },
+  { value: "MODERATE", text: "Moderate" },
+  { value: "WEAK", text: "Weak" },
+  { value: "FLEXION", text: "Flexion" },
+  { value: "EXTENSION", text: "Extension" },
+  { value: "NONE", text: "None" },
 ] as const;
 
 export const YES_NO_OPTIONS = [
-  { id: 1, text: "Yes", value: true },
-  { id: 0, text: "No", value: false },
+  { text: "Yes", value: true },
+  { text: "No", value: false },
+] as const;
+
+export const VENTILATOR_MODE_OPTIONS = [
+  "VCV",
+  "PCV",
+  "PRVC",
+  "APRV",
+  "VC_SIMV",
+  "PC_SIMV",
+  "PRVC_SIMV",
+  "ASV",
+  "PSV",
 ] as const;
 
 export const OXYGEN_MODALITY_OPTIONS = [
-  { id: 1, label: "Nasal Prongs", value: "NASAL_PRONGS" },
-  { id: 2, label: "Simple Face Mask", value: "SIMPLE_FACE_MASK" },
-  { id: 3, label: "Non Rebreathing Mask", value: "NON_REBREATHING_MASK" },
-  { id: 4, label: "High Flow Nasal Cannula", value: "HIGH_FLOW_NASAL_CANNULA" },
+  { label: "Nasal Prongs", value: "NASAL_PRONGS" },
+  { label: "Simple Face Mask", value: "SIMPLE_FACE_MASK" },
+  { label: "Non Rebreathing Mask", value: "NON_REBREATHING_MASK" },
+  { label: "High Flow Nasal Cannula", value: "HIGH_FLOW_NASAL_CANNULA" },
 ] as const;
 
 export const RESPIRATORY_SUPPORT_OPTIONS = [
-  { id: 0, text: "None", value: "UNKNOWN" },
-  { id: 1, text: "Invasive ventilator (IV)", value: "INVASIVE" },
-  { id: 2, text: "Non-Invasive ventilator (NIV)", value: "NON_INVASIVE" },
-  { id: 3, text: "Oxygen Support", value: "OXYGEN_SUPPORT" },
+  { text: "None", value: "UNKNOWN" },
+  { text: "Invasive ventilator (IV)", value: "INVASIVE" },
+  { text: "Non-Invasive ventilator (NIV)", value: "NON_INVASIVE" },
+  { text: "Oxygen Support", value: "OXYGEN_SUPPORT" },
 ] as const;
 
 export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
-  { id: 0, text: "Unknown", value: "UNKNOWN" },
-  { id: 1, text: "Once a day (OD)", value: "OD" },
-  { id: 2, text: "Twice a day (BD)", value: "BD" },
-  { id: 3, text: "Thrice a day (TD)", value: "TD" },
+  { text: "Unknown", value: "UNKNOWN" },
+  { text: "Once a day (OD)", value: "OD" },
+  { text: "Twice a day (BD)", value: "BD" },
+  { text: "Thrice a day (TD)", value: "TD" },
 ] as const;
 
 export type LogUpdateSectionProps = {

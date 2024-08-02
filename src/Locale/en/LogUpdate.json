@@ -1,0 +1,9 @@
+{
+    "VENTILATOR_MODE__CMV": "Control Mechanical Ventilation (CMV)",
+    "VENTILATOR_MODE__VCV": "Volume Control Ventilation (VCV)",
+    "VENTILATOR_MODE__PCV": "Pressure Control Ventilation (PCV)",
+    "VENTILATOR_MODE__SIMV": "Synchronised Intermittent Mandatory Ventilation (SIMV)",
+    "VENTILATOR_MODE__VC_SIMV": "Volume Controlled SIMV (VC-SIMV)",
+    "VENTILATOR_MODE__PC_SIMV": "Pressure Controlled SIMV (PC-SIMV)",
+    "VENTILATOR_MODE__PSV": "C-PAP / Pressure Support Ventilation (PSV)"
+}

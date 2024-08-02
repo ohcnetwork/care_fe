@@ -12,6 +12,7 @@ import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import { useSlugs } from "../../Common/hooks/useSlug";
 import { useTranslation } from "react-i18next";
+import { Success } from "../../Utils/Notifications";
 
 type Props = {
   facilityId: string;
@@ -163,7 +164,6 @@ const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
   const [diff, setDiff] = useState<Partial<DailyRoundsModel>>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // TODO: disable section submit button if diff empty
   // TODO: show notifcation when section submitted
 
   const Section = LogUpdateSections[section];
@@ -181,7 +181,7 @@ const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
       />
       <Submit
         className="mt-8 md:w-full"
-        disabled={isProcessing}
+        disabled={isProcessing || !Object.keys(diff).length}
         label="Update Details"
         onClick={async () => {
           setIsProcessing(true);
@@ -192,6 +192,9 @@ const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
           setIsProcessing(false);
           if (res?.ok) {
             onComplete();
+            Success({
+              msg: `${Section.meta.title} details succesfully updated.`,
+            });
           }
         }}
       />

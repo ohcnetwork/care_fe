@@ -488,6 +488,36 @@ export const getValueDescription = (
   return valueDescriptions?.find((vd) => (vd.till || 0) >= (value || 0));
 };
 
+export const rangeValueDescription = (range: {
+  low?: number;
+  high?: number;
+}) => {
+  const results: ValueDescription[] = [];
+
+  if (range.low != null) {
+    results.push({
+      till: range.low,
+      text: "Low",
+      className: "text-red-500",
+    });
+  }
+
+  results.push({
+    till: range.high,
+    text: "Normal",
+    className: "text-green-500",
+  });
+
+  if (range.high != null) {
+    results.push({
+      text: "High",
+      className: "text-red-500",
+    });
+  }
+
+  return results;
+};
+
 export const celsiusToFahrenheit = (celsius: number) => {
   return (celsius * 9) / 5 + 32;
 };

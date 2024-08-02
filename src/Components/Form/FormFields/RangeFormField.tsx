@@ -38,22 +38,7 @@ const unity = (v: number) => v;
 
 export default function RangeFormField(props: Props) {
   const field = useFormFieldPropsResolver(props);
-
-  const [unit, setUnit] = useState(() => {
-    if (props.units?.length) {
-      return {
-        label: props.units[0].label,
-        conversionFn: props.units[0].conversionFn || unity,
-        inversionFn: props.units[0].inversionFn || unity,
-      };
-    }
-
-    return {
-      label: props.unit || "",
-      conversionFn: unity,
-      inversionFn: unity,
-    };
-  });
+  const [unit, setUnit] = useState(getInitialUnit(props));
 
   // Value in current unit
   const value = (() => {
@@ -218,3 +203,19 @@ export default function RangeFormField(props: Props) {
     </FormField>
   );
 }
+
+const getInitialUnit = (props: Props) => {
+  if (props.units?.length) {
+    return {
+      label: props.units[0].label,
+      conversionFn: props.units[0].conversionFn || unity,
+      inversionFn: props.units[0].inversionFn || unity,
+    };
+  }
+
+  return {
+    label: props.unit || "",
+    conversionFn: unity,
+    inversionFn: unity,
+  };
+};

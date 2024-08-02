@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { ValueDescription } from "../../../Utils/utils";
+import { rangeValueDescription, ValueDescription } from "../../../Utils/utils";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { DailyRoundsModel } from "../../Patient/models";
@@ -15,11 +15,7 @@ const fields = [
     unit: "mmHg",
     min: 10,
     max: 400,
-    valueDescription: [
-      { till: 49, text: "Low", className: "text-red-500" },
-      { till: 200, text: "Normal", className: "text-green-500" },
-      { text: "High", className: "text-red-500" },
-    ],
+    valueDescription: rangeValueDescription({ low: 49, high: 200 }),
   },
   {
     key: "pco2",
@@ -31,11 +27,7 @@ const fields = [
     unit: "mmHg",
     min: 10,
     max: 200,
-    valueDescription: [
-      { till: 34, text: "Low", className: "text-red-500" },
-      { till: 45, text: "Normal", className: "text-green-500" },
-      { text: "High", className: "text-red-500" },
-    ],
+    valueDescription: rangeValueDescription({ low: 34, high: 45 }),
   },
   {
     key: "ph",
@@ -44,11 +36,7 @@ const fields = [
     min: 0,
     max: 14,
     step: 0.1,
-    valueDescription: [
-      { till: 7.35, text: "Low", className: "text-red-500" },
-      { till: 7.45, text: "Normal", className: "text-green-500" },
-      { text: "High", className: "text-red-500" },
-    ],
+    valueDescription: rangeValueDescription({ low: 7.35, high: 7.45 }),
   },
   {
     key: "hco3",
@@ -61,11 +49,7 @@ const fields = [
     min: 5,
     max: 80,
     step: 0.1,
-    valueDescription: [
-      { till: 21.9, text: "Low", className: "text-red-500" },
-      { till: 26, text: "Normal", className: "text-green-500" },
-      { text: "High", className: "text-red-500" },
-    ],
+    valueDescription: rangeValueDescription({ low: 21.9, high: 26 }),
   },
   {
     key: "base_excess",
@@ -73,11 +57,7 @@ const fields = [
     unit: "mmol/L",
     min: -20,
     max: 20,
-    valueDescription: [
-      { till: -3, text: "Low", className: "text-red-500" },
-      { till: 2, text: "Normal", className: "text-green-500" },
-      { text: "High", className: "text-red-500" },
-    ],
+    valueDescription: rangeValueDescription({ low: -3, high: 2 }),
   },
   {
     key: "lactate",
@@ -86,10 +66,7 @@ const fields = [
     min: 0,
     max: 20,
     step: 0.1,
-    valueDescription: [
-      { till: 2, text: "Normal", className: "text-green-500" },
-      { text: "High", className: "text-red-500" },
-    ],
+    valueDescription: rangeValueDescription({ low: 3 }),
   },
   {
     key: "sodium",
@@ -98,11 +75,7 @@ const fields = [
     min: 100,
     max: 170,
     step: 0.1,
-    valueDescription: [
-      { till: 134.9, text: "Low", className: "text-red-500" },
-      { till: 145, text: "Normal", className: "text-green-500" },
-      { text: "High", className: "text-red-500" },
-    ],
+    valueDescription: rangeValueDescription({ low: 134, high: 145 }),
   },
   {
     key: "potassium",
@@ -111,11 +84,7 @@ const fields = [
     min: 0,
     max: 10,
     step: 0.1,
-    valueDescription: [
-      { till: 3.4, text: "Low", className: "text-red-500" },
-      { till: 5.5, text: "Normal", className: "text-green-500" },
-      { text: "High", className: "text-red-500" },
-    ],
+    valueDescription: rangeValueDescription({ low: 3.4, high: 5.5 }),
   },
 ] satisfies {
   key: keyof DailyRoundsModel;

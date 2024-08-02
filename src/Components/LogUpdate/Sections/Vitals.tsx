@@ -1,5 +1,9 @@
 import { HumanBodyPaths } from "../../../CAREUI/interactive/HumanChart";
-import { celsiusToFahrenheit, fahrenheitToCelsius } from "../../../Utils/utils";
+import {
+  celsiusToFahrenheit,
+  fahrenheitToCelsius,
+  rangeValueDescription,
+} from "../../../Utils/utils";
 import { meanArterialPressure } from "../../Common/BloodPressureFormField";
 
 import RadioFormField from "../../Form/FormFields/RadioFormField";
@@ -30,11 +34,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         max={250}
         step={1}
         unit="mmHg"
-        valueDescriptions={[
-          { till: 99, text: "Low", className: "text-red-500" },
-          { till: 139, text: "Normal", className: "text-green-500" },
-          { text: "High", className: "text-red-500" },
-        ]}
+        valueDescriptions={rangeValueDescription({ low: 99, high: 139 })}
       />
       <RangeFormField
         label="Diastolic"
@@ -45,11 +45,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         max={180}
         step={1}
         unit="mmHg"
-        valueDescriptions={[
-          { till: 49, text: "Low", className: "text-red-500" },
-          { till: 89, text: "Normal", className: "text-green-500" },
-          { text: "High", className: "text-red-500" },
-        ]}
+        valueDescriptions={rangeValueDescription({ low: 49, high: 89 })}
       />
       <hr />
       <RangeFormField
@@ -65,10 +61,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         max={100}
         step={1}
         unit="%"
-        valueDescriptions={[
-          { till: 89, text: "Low", className: "text-red-500" },
-          { text: "Normal", className: "text-green-500" },
-        ]}
+        valueDescriptions={rangeValueDescription({ low: 89 })}
       />
       <RangeFormField
         label="Temperature"
@@ -78,11 +71,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         min={95}
         max={106}
         step={0.1}
-        valueDescriptions={[
-          { till: 97.4, text: "Low", className: "text-red-500" },
-          { till: 99.6, text: "Normal", className: "text-green-500" },
-          { text: "High", className: "text-red-500" },
-        ]}
+        valueDescriptions={rangeValueDescription({ low: 97.4, high: 99.6 })}
         units={[
           { label: "°F" },
           {
@@ -101,11 +90,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         max={150}
         step={1}
         unit="bpm"
-        valueDescriptions={[
-          { till: 11, text: "Low", className: "text-red-500" },
-          { till: 16, text: "Normal", className: "text-green-500" },
-          { text: "High", className: "text-red-500" },
-        ]}
+        valueDescriptions={rangeValueDescription({ low: 11, high: 16 })}
       />
       <PainChart
         pain={
@@ -131,11 +116,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         max={200}
         step={1}
         unit="bpm"
-        valueDescriptions={[
-          { till: 39, text: "Bradycardia", className: "text-red-500" },
-          { till: 100, text: "Normal", className: "text-green-500" },
-          { text: "High", className: "text-red-500" },
-        ]}
+        valueDescriptions={rangeValueDescription({ low: 39, high: 100 })}
       />
       <RadioFormField
         label="Heartbeat Rhythm"

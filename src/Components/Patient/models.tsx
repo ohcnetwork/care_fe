@@ -11,6 +11,8 @@ import { HumanBody } from "../../CAREUI/interactive/HumanChart";
 import {
   LIMB_RESPONSE_OPTIONS,
   OXYGEN_MODALITY_OPTIONS,
+  RESPIRATORY_SUPPORT_OPTIONS,
+  VENTILATOR_MODE_OPTIONS,
 } from "../LogUpdate/utils";
 
 export interface FlowModel {
@@ -307,12 +309,6 @@ export type PressureSore = {
   width: number;
 };
 export interface DailyRoundsModel {
-  ventilator_spo2?: number;
-  ventilator_interface?:
-    | "UNKNOWN"
-    | "OXYGEN_SUPPORT"
-    | "NON_INVASIVE"
-    | "INVASIVE";
   spo2?: string;
   rhythm?: (typeof RHYTHM_CHOICES)[number]["text"];
   rhythm_detail?: string;
@@ -382,10 +378,20 @@ export interface DailyRoundsModel {
   infusions?: NameQuantity[];
   iv_fluids?: NameQuantity[];
   output?: NameQuantity[];
+  ventilator_spo2?: number;
+  ventilator_interface?: (typeof RESPIRATORY_SUPPORT_OPTIONS)[number]["value"];
   ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
   ventilator_oxygen_modality_flow_rate?: number;
   ventilator_oxygen_modality_oxygen_rate?: number;
   ventilator_fi02?: number;
+  ventilator_mode?: (typeof VENTILATOR_MODE_OPTIONS)[number];
+  ventilator_peep?: number;
+  ventilator_pip?: number;
+  ventilator_mean_airway_pressure?: number;
+  ventilator_resp_rate?: number;
+  ventilator_pressure_support?: number;
+
+  ventilator_tidal_volume?: number;
   pressure_sore?: PressureSore[];
 }
 

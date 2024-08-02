@@ -1,3 +1,4 @@
+import { rangeValueDescription } from "../../../Utils/utils";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import {
@@ -17,11 +18,7 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
         value={log.blood_sugar_level}
         min={0}
         max={700}
-        valueDescriptions={[
-          { till: 69, text: "Low", className: "text-red-500" },
-          { till: 110, text: "Normal", className: "text-green-500" },
-          { text: "High", className: "text-red-500" },
-        ]}
+        valueDescriptions={rangeValueDescription({ low: 69, high: 110 })}
       />
       <br />
       <hr />

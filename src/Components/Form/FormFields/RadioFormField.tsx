@@ -1,3 +1,4 @@
+import { ChangeEventHandler, ReactNode } from "react";
 import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
@@ -40,22 +41,18 @@ const RadioFormField = <T,>(props: Props<T>) => {
             <label htmlFor="none">{props.unselectLabel}</label>
           </div>
         )}
-        {props.options.map((option, idx) => {
+        {props.options.map((option) => {
           const value = props.optionValue(option);
-          const optionId = `${props.name}-${idx}`;
           return (
-            <div className="flex items-center gap-2" key={idx}>
-              <input
-                className="h-4 w-4 rounded-full border-secondary-600 text-primary-600 focus:ring-2 focus:ring-primary-500"
-                type="radio"
-                id={optionId}
-                name={props.name}
-                value={props.optionValue(option)}
-                checked={value === field.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-              />
-              <label htmlFor={optionId}>{props.optionDisplay(option)}</label>
-            </div>
+            <RadioInput
+              key={value}
+              id={`${props.name}-option-${value}`}
+              label={props.optionDisplay(option)}
+              name={field.name}
+              value={props.optionValue(option)}
+              checked={value === field.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+            />
           );
         })}
       </div>
@@ -64,3 +61,27 @@ const RadioFormField = <T,>(props: Props<T>) => {
 };
 
 export default RadioFormField;
+
+export const RadioInput = (props: {
+  label?: ReactNode;
+  id?: string;
+  name?: string;
+  value?: string;
+  checked?: boolean;
+  onChange?: ChangeEventHandler<HTMLInputElement>;
+}) => {
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        className="h-4 w-4 rounded-full border-secondary-600 text-primary-600 focus:ring-2 focus:ring-primary-500"
+        type="radio"
+        id={props.id}
+        name={props.name}
+        value={props.value}
+        checked={props.checked}
+        onChange={(e) => props.onChange?.(e)}
+      />
+      <label htmlFor={props.id}>{props.label}</label>
+    </div>
+  );
+};
