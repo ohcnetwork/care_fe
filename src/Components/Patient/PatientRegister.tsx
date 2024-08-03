@@ -192,6 +192,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
   const [careExtId, setCareExtId] = useState("");
   const [formField, setFormField] = useState<any>();
+  const [resetNum, setResetNum] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
@@ -1003,7 +1004,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <DuplicatePatientDialog
           patientList={statusDialog.patientList}
           handleOk={handleDialogClose}
-          handleCancel={goBack}
+          handleCancel={() => {
+            setStatusDialog({ ...statusDialog, show: false });
+            setResetNum(true);
+          }}
           isNew={!id}
         />
       )}
@@ -1134,6 +1138,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               >
                 {(field) => {
                   if (!formField) setFormField(field);
+                  if (resetNum) {
+                    field("phone_number").onChange({
+                      name: "phone_number",
+                      value: "+91",
+                    });
+                    setResetNum(false);
+                  }
                   return (
                     <>
                       <div className="mb-2 overflow-visible rounded border border-secondary-200 p-4">
