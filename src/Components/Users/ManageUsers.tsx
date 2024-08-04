@@ -73,7 +73,7 @@ export default function ManageUsers() {
 
   const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.home_facility },
-    prefetch: !!qParams.home_facility,
+    prefetch: !!qParams.home_facility && qParams.home_facility !== "NONE",
   });
 
   const {
@@ -556,7 +556,11 @@ export default function ManageUsers() {
             value(
               "Home Facility",
               "home_facility",
-              qParams.home_facility ? homeFacilityData?.name || "" : "",
+              qParams.home_facility
+                ? qParams.home_facility === "NONE"
+                  ? "None"
+                  : homeFacilityData?.name || ""
+                : "",
             ),
             value(
               "Last Active",

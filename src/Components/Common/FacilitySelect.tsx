@@ -21,6 +21,7 @@ interface FacilitySelectProps {
   freeText?: boolean;
   selected?: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
+  allowNone?: boolean;
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
@@ -39,6 +40,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     facilityType,
     district,
     state,
+    allowNone = false,
     freeText = false,
     errors = "",
   } = props;
@@ -65,6 +67,9 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         data?.results?.push({
           name: text,
         });
+
+      if (allowNone)
+        return [{ name: "None", id: "NONE" }, ...(data?.results || [])];
 
       return data?.results;
     },
