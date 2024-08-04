@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 
 import dayjs from "dayjs";
-import { lazy, useCallback, useEffect, useState, useRef } from "react";
+import { lazy, useCallback, useEffect, useState} from "react";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -45,6 +45,7 @@ import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { scrollTo } from "../../Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -233,7 +234,7 @@ export const DailyRounds = (props: any) => {
           if (!state.form[field]) {
             errors[field] = "Please select a category";
             invalidForm = true;
-            patientCategory.current?.scrollIntoView({ behavior: 'smooth' });
+            scrollTo('patientCategory');
           }
           return;
         case "bp": {
@@ -522,11 +523,12 @@ export const DailyRounds = (props: any) => {
               optionValue={(option) => option.id}
             />
           </div>
-          <div className="w-full md:w-1/3" ref={patientCategory}>
+          <div className="w-full md:w-1/3">
             <PatientCategorySelect
               {...field("patient_category")}
               required
               label="Category"
+              id="patientCategory"
             />
           </div>
         </div>
