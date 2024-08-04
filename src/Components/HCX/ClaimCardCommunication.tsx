@@ -1,5 +1,5 @@
-import { HCXClaimModel } from "./models";
-import { useMemo, useRef, useState } from "react";
+import { HCXClaimModel, HCXCommunicationModel } from "./models";
+import { useState } from "react";
 import * as Notification from "../../Utils/Notifications";
 
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -11,17 +11,11 @@ import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
 import useFileUpload from "../../Utils/useFileUpload";
 import request from "../../Utils/request/request";
+import { FileUploadModel } from "../Patient/models";
 
 interface IProps {
   claim: HCXClaimModel;
   setShowMessages: (show: boolean) => void;
-}
-
-interface IMessage {
-  type?: string;
-  data?: string;
-  user?: string | null;
-  index?: number;
 }
 
 export default function ClaimCardCommunication({
@@ -31,7 +25,6 @@ export default function ClaimCardCommunication({
   const { t } = useTranslation();
   const [inputText, setInputText] = useState("");
   const [isSendingCommunication, setIsSendingCommunication] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
 
   const { UploadButton, files, removeFile, clearFiles, handleFileUpload } =
     useFileUpload({
@@ -44,23 +37,9 @@ export default function ClaimCardCommunication({
     useQuery(routes.listHCXCommunications, {
       query: {
         claim: claim.id,
-        ordering: "created_date",
+        ordering: "-created_date",
       },
     });
-
-  const messages = useMemo(() => {
-    return (
-      (communicationsResult?.results
-        ?.flatMap((communication, i) => {
-          return communication.content?.map((content) => ({
-            ...content,
-            user: communication.created_by,
-            index: i,
-          }));
-        })
-        .filter(Boolean) as IMessage[]) ?? []
-    );
-  }, [communicationsResult]);
 
   const handleSubmit = async () => {
     if (!claim.id) return;
@@ -95,8 +74,6 @@ export default function ClaimCardCommunication({
 
         setInputText("");
         clearFiles();
-
-        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       } else {
         Notification.Error({ msg: "Error sending communication to HCX" });
       }
@@ -115,29 +92,10 @@ export default function ClaimCardCommunication({
         />
       </div>
 
-      <div className="my-3 h-full w-full overflow-y-auto">
-        {messages?.map((message) => (
-          <div
-            className={classNames(
-              "mb-4 flex",
-              message.user ? "justify-end" : "justify-start",
-            )}
-          >
-            <p
-              className={classNames(
-                "ml-2 px-4 py-3 text-white",
-                message.user
-                  ? "rounded-bl-3xl rounded-tl-3xl rounded-tr-xl bg-blue-400"
-                  : "rounded-br-3xl rounded-tl-xl rounded-tr-3xl bg-gray-500",
-              )}
-            >
-              {message.data}
-            </p>
-          </div>
-        ))}
+      <CommunicationChatInterface
+        communications={communicationsResult?.results ?? []}
+      />
 
-        <div ref={bottomRef} />
-      </div>
       <div className="m-auto flex w-full items-center gap-3">
         <div className="relative w-full">
           <div className="absolute bottom-full flex max-w-full items-center gap-2 overflow-x-auto pb-2.5">
@@ -200,6 +158,143 @@ export default function ClaimCardCommunication({
           {t("send_message")}
         </ButtonV2>
       </div>
+    </div>
+  );
+}
+
+interface ICommunicationChatInterfaceProps {
+  communications: HCXCommunicationModel[];
+}
+
+function CommunicationChatInterface({
+  communications,
+}: ICommunicationChatInterfaceProps) {
+  return (
+    <div className="my-3 flex h-full w-full flex-col-reverse gap-4 overflow-y-auto">
+      {communications?.map((communication) => (
+        <CommunicationChatMessage communication={communication} />
+      ))}
+    </div>
+  );
+}
+
+interface ICommunicationChatMessageProps {
+  communication: HCXCommunicationModel;
+}
+
+function CommunicationChatMessage({
+  communication,
+}: ICommunicationChatMessageProps) {
+  const { t } = useTranslation();
+  const [attachments, setAttachments] = useState<null | FileUploadModel[]>(
+    null,
+  );
+  const [isFetchingAttachments, setIsFetchingAttachments] = useState(false);
+  const [isDownloadingAttachment, setIsDownloadingAttachment] = useState(false);
+
+  return (
+    <div
+      className={classNames(
+        "mb-4 flex flex-col gap-2",
+        communication.created_by ? "items-end pr-2" : "items-start pl-2",
+      )}
+    >
+      {communication.content?.map((message) => (
+        <p
+          className={classNames(
+            "ml-2 px-4 py-3 text-white",
+            communication.created_by
+              ? "rounded-bl-3xl rounded-tl-3xl rounded-tr-xl bg-blue-400"
+              : "rounded-br-3xl rounded-tl-xl rounded-tr-3xl bg-gray-500",
+          )}
+        >
+          {message.data}
+        </p>
+      ))}
+      {attachments ? (
+        <div className="flex max-w-full items-center gap-2 overflow-x-auto pb-2.5">
+          {attachments.length === 0 ? (
+            <p className="text-sm text-secondary-600">
+              {t("no_attachments_found")}
+            </p>
+          ) : (
+            attachments.map((attachment) => (
+              <div
+                key={attachment.id}
+                className="flex min-w-36 max-w-36 items-center gap-2"
+              >
+                <div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-300">
+                    <CareIcon icon="l-file" className="h-5 w-5" />
+                  </div>
+                </div>
+                <div className="flex flex-col items-start gap-1">
+                  <p className="w-24 truncate text-sm">{attachment.name}</p>
+                  <button
+                    disabled={isDownloadingAttachment}
+                    onClick={async () => {
+                      if (!attachment.id) return;
+
+                      setIsDownloadingAttachment(true);
+
+                      const { res, data } = await request(
+                        routes.retrieveUpload,
+                        {
+                          query: {
+                            file_type: "COMMUNICATION",
+                            associating_id: communication.id,
+                          },
+                          pathParams: { id: attachment.id },
+                        },
+                      );
+
+                      if (res?.ok) {
+                        const url = data?.read_signed_url;
+                        window.open(url, "_blank");
+                      } else {
+                        Notification.Error({
+                          msg: "Error downloading attachment",
+                        });
+                      }
+
+                      setIsDownloadingAttachment(false);
+                    }}
+                    className="cursor-pointer text-xs text-blue-500 hover:text-blue-700 hover:underline"
+                  >
+                    {t("open")}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={async () => {
+            setIsFetchingAttachments(true);
+
+            const { res, data } = await request(routes.viewUpload, {
+              query: {
+                file_type: "COMMUNICATION",
+                associating_id: communication.id,
+                is_archived: false,
+              },
+            });
+
+            if (res?.ok) {
+              Notification.Success({ msg: "Fetched attachments successfully" });
+              setAttachments(data?.results ?? []);
+            } else {
+              Notification.Error({ msg: "Error fetching attachments" });
+            }
+
+            setIsFetchingAttachments(false);
+          }}
+          className="cursor-pointer text-sm text-secondary-700 hover:text-secondary-900 hover:underline"
+        >
+          {isFetchingAttachments ? t("fetching") + "..." : t("see_attachments")}
+        </button>
+      )}
     </div>
   );
 }
