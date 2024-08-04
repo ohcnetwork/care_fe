@@ -138,8 +138,6 @@ export const DailyRounds = (props: any) => {
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
-  const patientCategory = useRef<HTMLDivElement | null>(null);
-
   const formFields = [
     "physical_examination_info",
     "other_details",
