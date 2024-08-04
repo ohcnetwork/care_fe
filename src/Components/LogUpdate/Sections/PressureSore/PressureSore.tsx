@@ -15,7 +15,7 @@ import { Error } from "../../../../Utils/Notifications";
 import { classNames, getValueDescription } from "../../../../Utils/utils";
 import { calculatePushScore } from "./utils";
 
-const PressureSore = ({ log, onChange }: LogUpdateSectionProps) => {
+const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
   const value = log.pressure_sore ?? [];
   const [current, setCurrent] = useState<IPressureSore>();
 
@@ -40,11 +40,17 @@ const PressureSore = ({ log, onChange }: LogUpdateSectionProps) => {
         show={!!current}
         value={current ?? getRegionInitialData("AnteriorAbdomen")}
         onCancel={() => setCurrent(undefined)}
-        onSave={(obj) => {
-          const pressure_sore = value.filter((v) => v.region !== obj.region);
-          pressure_sore.push(obj);
-          onChange({ pressure_sore });
-        }}
+        onSave={
+          readonly
+            ? undefined
+            : (obj) => {
+                const pressure_sore = value.filter(
+                  (v) => v.region !== obj.region,
+                );
+                pressure_sore.push(obj);
+                onChange({ pressure_sore });
+              }
+        }
       />
       <h4>Braden Scale (Risk Severity)</h4>
       <br />
@@ -82,7 +88,7 @@ type RegionEditorProps = {
   show: boolean;
   value: IPressureSore;
   onCancel: () => void;
-  onSave: (value: IPressureSore) => void;
+  onSave?: (value: IPressureSore) => void;
 };
 
 const RegionEditor = (props: RegionEditorProps) => {
@@ -93,18 +99,24 @@ const RegionEditor = (props: RegionEditorProps) => {
     setValue((base) => ({ ...base, ...diff }));
   };
 
+  const isReadOnly = !props.onSave;
+
   return (
     <PopupModal
       show={props.show}
       onHide={props.onCancel}
       className="flex w-72 flex-col items-center gap-4"
-      onSubmit={() => {
-        if (value.width <= 0 || value.length <= 0) {
-          Error({ msg: "Width & Length must be greater than 0." });
-        } else {
-          props.onSave(value);
-        }
-      }}
+      onSubmit={
+        props.onSave
+          ? () => {
+              if (value.width <= 0 || value.length <= 0) {
+                Error({ msg: "Width & Length must be greater than 0." });
+              } else {
+                props.onSave?.(value);
+              }
+            }
+          : undefined
+      }
     >
       <div className="px-4 pt-4">
         <h1 className="text-center text-lg font-black">
@@ -115,6 +127,7 @@ const RegionEditor = (props: RegionEditorProps) => {
           <TextFormField
             label="Width"
             name="width"
+            disabled={isReadOnly}
             labelClassName="text-xs"
             inputClassName="p-2"
             min={0}
@@ -126,6 +139,7 @@ const RegionEditor = (props: RegionEditorProps) => {
           <TextFormField
             label="Length"
             name="length"
+            disabled={isReadOnly}
             labelClassName="text-xs"
             inputClassName="p-2"
             min={0}
@@ -138,6 +152,7 @@ const RegionEditor = (props: RegionEditorProps) => {
             options={PressureSoreExudateAmountOptions}
             optionLabel={(o) => o}
             optionValue={(o) => o}
+            disabled={isReadOnly}
             labelClassName="text-xs"
             label="Exudate Amount"
             value={value.exudate_amount}
@@ -148,6 +163,7 @@ const RegionEditor = (props: RegionEditorProps) => {
             options={PressureSoreTissueTypeOptions}
             optionLabel={(o) => o}
             optionValue={(o) => o}
+            disabled={isReadOnly}
             labelClassName="text-xs"
             label="Tissue Type"
             value={value.tissue_type}
@@ -158,6 +174,7 @@ const RegionEditor = (props: RegionEditorProps) => {
         <div className="mt-2 w-full">
           <TextAreaFormField
             name="description"
+            disabled={isReadOnly}
             placeholder="Description"
             className="text-sm"
             value={value.description}

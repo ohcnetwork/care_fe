@@ -60,6 +60,7 @@ export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
 export type LogUpdateSectionProps = {
   log: DailyRoundsModel;
   onChange: (log: DailyRoundsModel) => void;
+  readonly?: boolean;
 };
 
 export type LogUpdateSectionMeta = {

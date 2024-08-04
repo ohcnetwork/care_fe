@@ -6,6 +6,7 @@ import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 import { formatDateTime } from "../../../Utils/utils";
 import { PressureSoreDiagramsRes } from "../models";
+import PressureSore from "../../LogUpdate/Sections/PressureSore/PressureSore";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -118,8 +119,17 @@ export const PressureSoreDiagrams = (props: any) => {
   return (
     <div>
       {dates && dropdown(dates)}
-      {/* TODO: replace with preview mode component */}
-      {!isLoading && selectedData.data ? <></> : <div className="h-screen" />}
+      {!isLoading && selectedData.data ? (
+        <PressureSore
+          log={{ pressure_sore: selectedData.data }}
+          readonly
+          onChange={() => {
+            //
+          }}
+        />
+      ) : (
+        <div className="h-screen" />
+      )}
       {totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination

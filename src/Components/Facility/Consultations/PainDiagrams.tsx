@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import { formatDateTime } from "../../../Utils/utils";
+import PainChart from "../../LogUpdate/components/PainChart";
 
 export const PainDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -106,8 +107,11 @@ export const PainDiagrams = (props: any) => {
   return (
     <div>
       {dates && dropdown(dates)}
-      {/* TODO: replace with preview mode component */}
-      {!isLoading && selectedData.data ? <></> : <div className="h-screen" />}
+      {!isLoading && selectedData.data ? (
+        <PainChart pain={selectedData.data} />
+      ) : (
+        <div className="h-screen" />
+      )}
     </div>
   );
 };
