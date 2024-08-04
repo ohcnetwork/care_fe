@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 
 import dayjs from "dayjs";
-import { lazy, useCallback, useEffect, useState } from "react";
+import { lazy, useCallback, useEffect, useState, useRef } from "react";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -137,6 +137,8 @@ export const DailyRounds = (props: any) => {
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
+  const patientCategory = useRef<HTMLDivElement | null>(null);
+
   const formFields = [
     "physical_examination_info",
     "other_details",
@@ -231,6 +233,7 @@ export const DailyRounds = (props: any) => {
           if (!state.form[field]) {
             errors[field] = "Please select a category";
             invalidForm = true;
+            patientCategory.current?.scrollIntoView({ behavior: 'smooth' });
           }
           return;
         case "bp": {
@@ -519,7 +522,7 @@ export const DailyRounds = (props: any) => {
               optionValue={(option) => option.id}
             />
           </div>
-          <div className="w-full md:w-1/3">
+          <div className="w-full md:w-1/3" ref={patientCategory}>
             <PatientCategorySelect
               {...field("patient_category")}
               required
