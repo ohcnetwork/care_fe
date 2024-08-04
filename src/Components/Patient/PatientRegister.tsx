@@ -1005,23 +1005,28 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           patientList={statusDialog.patientList}
           handleOk={handleDialogClose}
           handleCancel={() => {
-            setStatusDialog({ ...statusDialog, show: false });
+            handleDialogClose("close");
             setResetNum(true);
           }}
-          isNew={!id}
         />
       )}
       {statusDialog.transfer && (
         <DialogModal
           show={statusDialog.transfer}
-          onClose={() => handleDialogClose("back")}
+          onClose={() => {
+            setResetNum(true);
+            handleDialogClose("close");
+          }}
           title="Patient Transfer Form"
           className="max-w-md md:min-w-[600px]"
         >
           <TransferPatientDialog
             patientList={statusDialog.patientList}
             handleOk={() => handleDialogClose("close")}
-            handleCancel={() => handleDialogClose("back")}
+            handleCancel={() => {
+              setResetNum(true);
+              handleDialogClose("close");
+            }}
             facilityId={facilityId}
           />
         </DialogModal>
