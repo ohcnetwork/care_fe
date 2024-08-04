@@ -36,6 +36,7 @@
   "prev_sessions": "Prev Sessions",
   "next_sessions": "Next Sessions",
   "no_changes": "No changes",
+  "no_treating_physicians_available": "This facility does not have any home facility doctors. Please contact your admin.",
   "encounter_suggestion_edit_disallowed": "Not allowed to switch to this option in edit consultation",
   "encounter_date_field_label__A": "Date & Time of Admission to the Facility",
   "encounter_date_field_label__DC": "Date & Time of Domiciliary Care commencement",
@@ -44,5 +45,6 @@
   "encounter_date_field_label__HI": "Date & Time of Consultation",
   "encounter_date_field_label__R": "Date & Time of Consultation",
   "back_dated_encounter_date_caution": "You are creating an encounter for",
-  "encounter_duration_confirmation": "The duration of this encounter would be"
+  "encounter_duration_confirmation": "The duration of this encounter would be",
+  "consultation_notes": "General Instructions (Advice)"
 }

@@ -110,6 +110,7 @@
   "features": "Features",
   "pincode": "Pincode",
   "required": "Required",
+  "field_required": "This field is required",
   "litres": "Litres",
   "litres_per_day": "Litres/day",
   "invalid_pincode": "Invalid Pincode",
@@ -173,5 +174,8 @@
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
   "ration_card__APL": "APL",
-  "caution": "Caution"
+  "caution": "Caution",
+  "feed_optimal_experience_for_phones": "For optimal viewing experience, consider rotating your device.",
+  "feed_optimal_experience_for_apple_phones": "For optimal viewing experience, consider rotating your device. Ensure auto-rotate is enabled in your device settings.",
+  "action_irreversible": "This action is irreversible"
 }

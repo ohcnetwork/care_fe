@@ -12,6 +12,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import { compareBy } from "../../Utils/utils.js";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -57,6 +58,7 @@ const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
 export default function UpdateResult(props: any) {
   const { id } = props;
   const { goBack } = useAppHistory();
+  const { t } = useTranslation();
 
   const [state, dispatch] = useReducer(FormReducer, initialState);
   const [isLoading, setIsLoading] = useState(true);
@@ -132,7 +134,7 @@ export default function UpdateResult(props: any) {
       switch (field) {
         case "address":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;

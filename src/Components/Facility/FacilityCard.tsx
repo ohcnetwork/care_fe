@@ -215,7 +215,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   </div>
                 </div>
               </div>
-              <div className="bg-secondary-50 flex flex-wrap border-t px-2 py-1 md:px-3">
+              <div className="flex flex-wrap border-t bg-secondary-50 px-2 py-1 md:px-3">
                 {/* <div className="flex justify-between py-2"> */}
                 <div className="flex w-full flex-wrap justify-between gap-2 py-2">
                   <div className="flex flex-wrap gap-2">

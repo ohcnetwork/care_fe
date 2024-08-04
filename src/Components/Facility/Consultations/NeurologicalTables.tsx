@@ -36,7 +36,7 @@ const DataTable = (props: any) => {
                 key={`${title}_${i}`}
                 className="flex flex-col divide-x divide-secondary-200"
               >
-                <div className="bg-secondary-50 w-20 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-900">
+                <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-900">
                   {x.date}
                 </div>
                 <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
@@ -296,7 +296,7 @@ export const NeurologicalTable = (props: any) => {
                 key={`loc_${i}`}
                 className="min-w-max-content flex  flex-col  divide-x divide-secondary-200"
               >
-                <div className="bg-secondary-50 border-r px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-700">
+                <div className="border-r bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-700">
                   {x.date}
                 </div>
                 <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-secondary-700">
@@ -373,7 +373,7 @@ export const NeurologicalTable = (props: any) => {
                     key={`glascow_${i}`}
                     className="flex flex-col divide-x divide-secondary-200"
                   >
-                    <div className="bg-secondary-50 w-20 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-800">
+                    <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-800">
                       {x.date}
                     </div>
                     <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-secondary-800">
