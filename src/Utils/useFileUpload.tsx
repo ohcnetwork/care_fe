@@ -19,6 +19,7 @@ import imageCompression from "browser-image-compression";
 import { DEFAULT_ALLOWED_EXTENSIONS } from "../Common/constants";
 
 export type FileUploadOptions = {
+  multiple?: boolean;
   type: string;
   category?: FileCategory;
   onUpload?: (file: FileUploadModel) => void;
@@ -35,6 +36,7 @@ export type FileUploadButtonProps = {
   icon?: IconName;
   content?: string;
   className?: string;
+  children?: React.ReactNode;
 };
 
 export type FileUploadReturn = {
@@ -45,10 +47,12 @@ export type FileUploadReturn = {
   handleFileUpload: (associating_id: string) => Promise<void>;
   Dialogues: JSX.Element;
   UploadButton: (_: FileUploadButtonProps) => JSX.Element;
-  fileName: string;
-  file: File | null;
-  setFileName: (name: string) => void;
-  clearFile: () => void;
+  fileNames: string[];
+  files: File[];
+  setFileName: (names: string, index?: number) => void;
+  setFileNames: (names: string[]) => void;
+  removeFile: (index: number) => void;
+  clearFiles: () => void;
 };
 
 const videoConstraints = {
@@ -72,16 +76,16 @@ const ExtImage: string[] = [
 export default function useFileUpload(
   options: FileUploadOptions,
 ): FileUploadReturn {
-  const { type, onUpload, category = "UNSPECIFIED" } = options;
+  const { type, onUpload, category = "UNSPECIFIED", multiple } = options;
 
-  const [uploadFileName, setUploadFileName] = useState<string>("");
+  const [uploadFileNames, setUploadFileNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<null | number>(null);
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
   const [cameraFacingFront, setCameraFacingFront] = useState(true);
   const webRef = useRef<any>(null);
   const [previewImage, setPreviewImage] = useState(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   const handleSwitchCamera = useCallback(() => {
     setCameraFacingFront((prevState) => !prevState);
@@ -99,8 +103,8 @@ export default function useFileUpload(
       const myFile = new File([blob], `capture.${extension}`, {
         type: blob.type,
       });
-      setUploadFileName(uploadFileName || "");
-      setFile(myFile);
+      setUploadFileNames((prev) => [...prev, `capture.${extension}`]);
+      setFiles((prev) => [...prev, myFile]);
     });
   };
 
@@ -108,57 +112,56 @@ export default function useFileUpload(
     if (!e.target.files?.length) {
       return;
     }
-    const f = e.target.files[0];
-    const fileName = f.name;
-    setFile(e.target.files[0]);
-    setUploadFileName(
-      uploadFileName ||
-        fileName.substring(0, fileName.lastIndexOf(".")) ||
-        fileName,
-    );
+    const selectedFiles = Array.from(e.target.files);
+    const fileNames = selectedFiles.map((file) => file.name);
+    setFiles((prev) => [...prev, ...selectedFiles]);
+    setUploadFileNames((prev) => [...prev, ...fileNames]);
 
-    const ext: string = fileName.split(".")[1];
-
-    if (ExtImage.includes(ext)) {
-      const options = {
-        initialQuality: 0.6,
-        alwaysKeepResolution: true,
-      };
-      imageCompression(f, options).then((compressedFile: File) => {
-        setFile(compressedFile);
-      });
-      return;
-    }
-    setFile(f);
+    selectedFiles.forEach((file) => {
+      const ext: string = file.name.split(".")[1];
+      if (ExtImage.includes(ext)) {
+        const options = {
+          initialQuality: 0.6,
+          alwaysKeepResolution: true,
+        };
+        imageCompression(file, options).then((compressedFile: File) => {
+          setFiles((prev) =>
+            prev.map((f) => (f.name === file.name ? compressedFile : f)),
+          );
+        });
+      }
+    });
   };
 
   const validateFileUpload = () => {
-    const filenameLength = uploadFileName.trim().length;
-    const f = file;
-    if (f === undefined || f === null) {
-      setError("Please choose a file to upload");
+    if (files.length === 0) {
+      setError("Please choose files to upload");
       return false;
     }
-    if (filenameLength === 0) {
-      setError("Please give a name !!");
-      return false;
-    }
-    if (f.size > 10e7) {
-      setError("Maximum size of files is 100 MB");
-      return false;
-    }
-    const extension = f.name.split(".").pop();
-    if (
-      "allowedExtensions" in options &&
-      !options.allowedExtensions?.includes(extension || "")
-    ) {
-      setError(
-        `Invalid file type ".${extension}" Allowed types: ${options.allowedExtensions?.join(", ")}`,
-      );
-      return false;
+    for (const file of files) {
+      const filenameLength = file.name.trim().length;
+      if (filenameLength === 0) {
+        setError("Please give a name for all files!");
+        return false;
+      }
+      if (file.size > 10e7) {
+        setError("Maximum size of files is 100 MB");
+        return false;
+      }
+      const extension = file.name.split(".").pop();
+      if (
+        "allowedExtensions" in options &&
+        !options.allowedExtensions?.includes(extension || "")
+      ) {
+        setError(
+          `Invalid file type ".${extension}" Allowed types: ${options.allowedExtensions?.join(", ")}`,
+        );
+        return false;
+      }
     }
     return true;
   };
+
   const markUploadComplete = (
     data: CreateFileResponse,
     associatingId: string,
@@ -173,24 +176,20 @@ export default function useFileUpload(
     });
   };
 
-  const uploadfile = async (data: CreateFileResponse) => {
+  const uploadfile = async (data: CreateFileResponse, file: File) => {
     const url = data.signed_url;
     const internal_name = data.internal_name;
-    const f = file;
-    if (!f) return;
-    const newFile = new File([f], `${internal_name}`);
+    const newFile = new File([file], `${internal_name}`);
     console.log("filetype: ", newFile.type);
     return new Promise<void>((resolve, reject) => {
       uploadFile(
         url,
         newFile,
         "PUT",
-        { "Content-Type": file?.type },
+        { "Content-Type": file.type },
         (xhr: XMLHttpRequest) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setProgress(null);
-            setFile(null);
-            setUploadFileName("");
             Notification.Success({
               msg: "File Uploaded Successfully",
             });
@@ -219,27 +218,34 @@ export default function useFileUpload(
 
   const handleUpload = async (associating_id: string) => {
     if (!validateFileUpload()) return;
-    const f = file;
 
-    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
-    const name = f?.name;
     setProgress(0);
 
-    const { data } = await request(routes.createUpload, {
-      body: {
-        original_name: name ?? "",
-        file_type: type,
-        name: filename,
-        associating_id,
-        file_category: category,
-        mime_type: f?.type ?? "",
-      },
-    });
+    for (const [index, file] of files.entries()) {
+      const filename =
+        uploadFileNames[index] === "" && file
+          ? file.name
+          : uploadFileNames[index];
 
-    if (data) {
-      await uploadfile(data);
-      await markUploadComplete(data, associating_id);
+      const { data } = await request(routes.createUpload, {
+        body: {
+          original_name: file.name ?? "",
+          file_type: type,
+          name: filename,
+          associating_id,
+          file_category: category,
+          mime_type: file.type ?? "",
+        },
+      });
+
+      if (data) {
+        await uploadfile(data, file);
+        await markUploadComplete(data, associating_id);
+      }
     }
+
+    setFiles([]);
+    setUploadFileNames([]);
   };
 
   const cameraFacingMode = cameraFacingFront
@@ -417,13 +423,23 @@ export default function useFileUpload(
         props.className,
       )}
     >
-      <CareIcon icon={props.icon || "l-file-upload-alt"} className="text-lg" />
-      {props.content || t("choose_file")}
+      {props.children ? (
+        props.children
+      ) : (
+        <>
+          <CareIcon
+            icon={props.icon || "l-file-upload-alt"}
+            className="text-lg"
+          />
+          {props.content || t("choose_file")}
+        </>
+      )}
       <input
         id="file_upload_patient"
         title="changeFile"
         onChange={onFileChange}
         type="file"
+        multiple={multiple}
         accept={
           "allowedExtensions" in options
             ? options.allowedExtensions?.join(",")
@@ -448,12 +464,21 @@ export default function useFileUpload(
     handleFileUpload: handleUpload,
     Dialogues,
     UploadButton,
-    fileName: uploadFileName,
-    file: file,
-    setFileName: setUploadFileName,
-    clearFile: () => {
-      setFile(null);
-      setUploadFileName("");
+    fileNames: uploadFileNames,
+    files: files,
+    setFileNames: setUploadFileNames,
+    setFileName: (name: string, index = 0) => {
+      setUploadFileNames((prev) =>
+        prev.map((n, i) => (i === index ? name : n)),
+      );
+    },
+    removeFile: (index = 0) => {
+      setFiles((prev) => prev.filter((_, i) => i !== index));
+      setUploadFileNames((prev) => prev.filter((_, i) => i !== index));
+    },
+    clearFiles: () => {
+      setFiles([]);
+      setUploadFileNames([]);
     },
   };
 }
