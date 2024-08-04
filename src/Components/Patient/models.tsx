@@ -293,7 +293,7 @@ export interface BloodPressure {
   systolic?: number;
 }
 
-export interface PainScaleLog {
+export interface IPainScale {
   description: string;
   region: HumanBodyRegion;
   scale: number;
@@ -338,7 +338,7 @@ export interface DailyRoundsModel {
   created_by?: PerformedByModel;
   last_edited_by?: PerformedByModel;
   bed?: string;
-  pain_scale_enhanced?: PainScaleLog[];
+  pain_scale_enhanced?: IPainScale[];
   in_prone_position?: boolean;
   left_pupil_size?: number;
   left_pupil_size_detail?: string;

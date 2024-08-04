@@ -83,12 +83,12 @@ export default function PopupModal(props: Props) {
       )}
     >
       {children}
-      {props.onSubmit && (
-        <div className="flex w-full items-center justify-end gap-2 rounded-b-lg border-t border-t-secondary-300 bg-secondary-100 p-2">
-          <Cancel onClick={props.onHide} label={t("close")} shadow={false} />
+      <div className="flex w-full items-center justify-end gap-2 rounded-b-lg border-t border-t-secondary-300 bg-secondary-100 p-2">
+        <Cancel onClick={props.onHide} label={t("close")} shadow={false} />
+        {props.onSubmit && (
           <Submit onClick={props.onSubmit} label={t("save")} shadow={false} />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

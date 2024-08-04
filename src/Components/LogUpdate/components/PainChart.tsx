@@ -1,139 +1,175 @@
-import { useState } from "react";
-import { PainScaleLog } from "../../Patient/models";
+import { useEffect, useState } from "react";
+import { IPainScale } from "../../Patient/models";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import HumanBodyChart from "../../../CAREUI/interactive/HumanChart";
 import PopupModal from "../../../CAREUI/display/PopupModal";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import { getValueDescription } from "../../../Utils/utils";
+import { classNames, getValueDescription } from "../../../Utils/utils";
 import { HumanBodyRegion } from "../../../Common/constants";
+import { Error } from "../../../Utils/Notifications";
 
-export default function PainChart(props: {
-  pain: PainScaleLog[];
-  onChange?: (pain: PainScaleLog[]) => void;
-}) {
-  const { pain, onChange } = props;
-  const getTitle = (text: string) => text.split(/(?=[A-Z])/).join(" ");
+type Props = {
+  pain: IPainScale[];
+  onChange?: (pain: IPainScale[]) => void;
+};
 
-  const valueDescriptions = [
-    {
-      till: 0,
-      color: "#ECECEC",
-      text: "No Pain",
-      className: "bg-secondary-300 border border-secondary-400",
-    },
-    {
-      till: 3,
-      color: "#FF7000",
-      text: "Low",
-      className: "bg-red-400 text-white",
-    },
-    {
-      till: 7,
-      color: "#FF0000",
-      text: "Mild",
-      className: "bg-red-600 text-white",
-    },
-    {
-      till: 10,
-      color: "#CF0000",
-      text: "High",
-      className: "bg-red-800 text-white",
-    },
-  ];
+export default function PainChart({ pain, onChange }: Props) {
+  const [current, setCurrent] = useState<IPainScale>();
 
-  const [selectedRegion, setSelectedRegion] = useState<HumanBodyRegion>();
-  const selectedPain = pain.find((p) => p.region === selectedRegion);
-  const selectedValueDescription = getValueDescription(
-    valueDescriptions,
-    selectedPain?.scale || 0,
-  );
+  const valueDescription = (region: IPainScale["region"]) => {
+    const scale = pain.find((obj) => obj.region === region)?.scale;
+    if (scale != null) {
+      return getValueDescription(valueDescriptions, scale);
+    }
+  };
+
   return (
     <>
-      <PopupModal
-        show={selectedRegion != null}
-        onHide={() => setSelectedRegion(undefined)}
-        className={`flex w-[275px] flex-col items-center gap-4 ${onChange ? "pt-4" : "py-4"}`}
-        onSubmit={onChange ? () => setSelectedRegion(undefined) : undefined}
-      >
-        <h1 className="text-center text-lg font-black">
-          {getTitle(selectedRegion || "")}
-        </h1>
-        <div
-          className="text-center"
-          style={{
-            color:
-              (selectedPain?.scale || 0) > 0
-                ? selectedValueDescription?.color
-                : undefined,
-          }}
-        >
-          <div className="text-5xl font-black">
-            {selectedPain?.scale || "0"}
-          </div>
-          <div>{selectedValueDescription?.text}</div>
-        </div>
-        {onChange && (
-          <>
-            <div className="w-full p-4">
-              <RangeFormField
-                hideInput
-                name="pain-scale"
-                min={0}
-                max={10}
-                unit=""
-                value={selectedPain?.scale || 0}
-                className="block w-full"
-                onChange={(value) => {
-                  const newPain: PainScaleLog[] = pain.map((p) =>
-                    p.region === selectedRegion
-                      ? { ...p, scale: value.value }
-                      : p,
-                  );
-                  onChange?.(newPain);
-                }}
-                valueDescriptions={valueDescriptions.map((d) => ({
-                  ...d,
-                  text: "",
-                }))}
-              />
-            </div>
-            <div className="w-full px-4">
-              <TextAreaFormField
-                name="description"
-                placeholder="Pain Description"
-                className="text-sm"
-                value={selectedPain?.description}
-                onChange={(e) => {
-                  const newPain = pain.map((p) =>
-                    p.region === selectedRegion
-                      ? { ...p, description: e.value }
-                      : p,
-                  );
-                  onChange?.(newPain);
-                }}
-              />
-            </div>
-          </>
-        )}
-      </PopupModal>
-      <HumanBodyChart
-        onPartSelect={(region) => setSelectedRegion(region)}
-        regionColor={(region) =>
-          getValueDescription(
-            valueDescriptions,
-            pain.find((p) => p.region === region)?.scale || 0,
-          )?.color || "#ECECEC"
+      <RegionEditor
+        show={!!current}
+        value={current ?? getInitialData("AnteriorAbdomen")}
+        onCancel={() => setCurrent(undefined)}
+        onSave={
+          onChange
+            ? (obj) => {
+                const mutated = pain.filter((v) => v.region !== obj.region);
+                mutated.push(obj);
+                onChange(mutated);
+              }
+            : undefined
         }
-        regionLabelClassName={(region) =>
-          getValueDescription(
-            valueDescriptions,
-            pain.find((p) => p.region === region)?.scale || 0,
-          )?.className || ""
+      />
+      <HumanBodyChart
+        onPartSelect={(region) =>
+          setCurrent(
+            pain.find((o) => o.region === region) ?? getInitialData(region),
+          )
+        }
+        regionColor={(r) => valueDescription(r)?.color || "#ECECEC"}
+        regionLabelClassName={(r) =>
+          classNames(
+            "border transition-all duration-200 ease-in-out",
+            valueDescription(r)?.className ||
+              "border-secondary-400 bg-secondary-100",
+            current?.region === r &&
+              "font-bold shadow-lg ring-2 ring-primary-400",
+          )
         }
         regionText={(region) =>
-          pain.find((p) => p.region === region)?.scale.toString() || ""
+          pain.find((p) => p.region === region)?.scale.toString() ?? ""
         }
       />
     </>
   );
 }
+
+type RegionEditorProps = {
+  show: boolean;
+  value: IPainScale;
+  onCancel: () => void;
+  onSave?: (value: IPainScale) => void;
+};
+
+const RegionEditor = (props: RegionEditorProps) => {
+  const [value, setValue] = useState(props.value);
+  useEffect(() => setValue(props.value), [props.value]);
+
+  const update = (diff: Partial<IPainScale>) => {
+    setValue((base) => ({ ...base, ...diff }));
+  };
+
+  const valueDescription = getValueDescription(valueDescriptions, value.scale);
+
+  return (
+    <PopupModal
+      show={props.show}
+      onHide={props.onCancel}
+      className="flex flex-col items-center gap-4"
+      onSubmit={
+        props.onSave
+          ? () => {
+              if (value.scale <= 0) {
+                Error({ msg: "Scale must be greater than 0." });
+              } else {
+                props.onSave?.(value);
+              }
+            }
+          : undefined
+      }
+    >
+      <div className="p-4">
+        <h1 className="text-center text-lg font-black">
+          {value.region.split(/(?=[A-Z])/).join(" ")}
+        </h1>
+        <div
+          className="text-center"
+          style={{
+            color: value.scale > 0 ? valueDescription?.color : undefined,
+          }}
+        >
+          <div className="text-5xl font-black">{value.scale}</div>
+          <div>{valueDescription?.text}</div>
+        </div>
+        {props.onSave && (
+          <>
+            <RangeFormField
+              hideInput
+              name="pain-scale"
+              min={0}
+              max={10}
+              unit=""
+              value={value.scale}
+              className="block w-full"
+              onChange={({ value }) => update({ scale: value })}
+              valueDescriptions={valueDescriptions.map((d) => ({
+                ...d,
+                text: "",
+              }))}
+            />
+            <TextAreaFormField
+              name="description"
+              placeholder="Pain Description"
+              errorClassName="hidden"
+              className="text-sm"
+              value={value.description}
+              onChange={({ value }) => update({ description: value })}
+            />
+          </>
+        )}
+      </div>
+    </PopupModal>
+  );
+};
+
+const valueDescriptions = [
+  {
+    till: 0,
+    color: "#ECECEC",
+    text: "No Pain",
+    className: "bg-secondary-300 border border-secondary-400",
+  },
+  {
+    till: 3,
+    color: "#FF7000",
+    text: "Low",
+    className: "bg-red-400 text-white",
+  },
+  {
+    till: 7,
+    color: "#FF0000",
+    text: "Mild",
+    className: "bg-red-600 text-white",
+  },
+  {
+    till: 10,
+    color: "#CF0000",
+    text: "High",
+    className: "bg-red-800 text-white",
+  },
+];
+
+const getInitialData = (region: HumanBodyRegion): IPainScale => ({
+  region,
+  description: "",
+  scale: 0,
+});

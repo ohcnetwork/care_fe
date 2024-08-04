@@ -1,4 +1,3 @@
-import { HumanBodyPaths } from "../../../Common/constants";
 import {
   celsiusToFahrenheit,
   fahrenheitToCelsius,
@@ -92,18 +91,15 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         unit="bpm"
         valueDescriptions={rangeValueDescription({ low: 11, high: 16 })}
       />
+      <hr />
+      <div>
+        <h2 className="text-lg">Pain</h2>
+        <span className="text-secondary-800">
+          Mark region and intensity of pain
+        </span>
+      </div>
       <PainChart
-        pain={
-          log.pain_scale_enhanced?.length
-            ? log.pain_scale_enhanced
-            : [HumanBodyPaths.anterior, HumanBodyPaths.posterior].flatMap((p) =>
-                p.map((r) => ({
-                  region: r.region,
-                  scale: 0,
-                  description: "",
-                })),
-              )
-        }
+        pain={log.pain_scale_enhanced ?? []}
         onChange={(pain_scale_enhanced) => onChange({ pain_scale_enhanced })}
       />
       <hr />

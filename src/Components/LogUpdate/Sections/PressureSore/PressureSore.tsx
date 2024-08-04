@@ -36,7 +36,7 @@ const PressureSore = ({ log, onChange }: LogUpdateSectionProps) => {
   // TODO: wrap with a div with relative class so that the editor sticks on scroll.
   return (
     <>
-      <PressureSoreRegionEditor
+      <RegionEditor
         show={!!current}
         value={current ?? getRegionInitialData("AnteriorAbdomen")}
         onCancel={() => setCurrent(undefined)}
@@ -78,14 +78,14 @@ PressureSore.meta = {
 
 export default PressureSore;
 
-type PressureSoreRegionEditorProps = {
+type RegionEditorProps = {
   show: boolean;
   value: IPressureSore;
   onCancel: () => void;
   onSave: (value: IPressureSore) => void;
 };
 
-const PressureSoreRegionEditor = (props: PressureSoreRegionEditorProps) => {
+const RegionEditor = (props: RegionEditorProps) => {
   const [value, setValue] = useState(props.value);
   useEffect(() => setValue(props.value), [props.value]);
 
