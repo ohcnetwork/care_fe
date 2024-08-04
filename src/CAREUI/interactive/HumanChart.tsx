@@ -17,13 +17,16 @@ export default function HumanBodyChart({
   const getTitle = (text: string) => text.split(/(?=[A-Z])/).join(" ");
 
   return (
-    <div className="relative flex flex-col items-center gap-4 md:flex-row">
+    <div className="relative flex flex-col items-center gap-2 md:flex-row">
       {[HumanBodyPaths.anterior, HumanBodyPaths.posterior].map((paths, i) => (
-        <div className="flex flex-1 flex-col" key={i}>
+        <div
+          className="flex flex-1 flex-col gap-4 rounded-xl border-2 border-secondary-300 p-2"
+          key={i}
+        >
           <h2 className="text-center text-xl font-bold">
             {i === 0 ? "Front" : "Back"}
           </h2>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <div className="flex flex-wrap justify-center gap-2 border-b-2 border-secondary-200 py-4">
             {paths.map((path, j) => (
               <button
                 key={j}
@@ -48,7 +51,6 @@ export default function HumanBodyChart({
             viewBox="0 0 344.7 932.661"
           >
             {paths.map((path, j) => {
-              //const pathRef = useRef<SVGPathElement>(null);
               const value = regionText(path.region);
               return (
                 <Fragment key={j}>
