@@ -29,7 +29,6 @@ export type FormFieldBaseProps<T> = {
   onChange: FieldChangeEventHandler<T>;
   value?: T;
   error?: FieldError;
-  compact?: boolean;
 };
 
 /**

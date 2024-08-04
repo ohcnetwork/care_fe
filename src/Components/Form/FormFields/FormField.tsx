@@ -31,23 +31,20 @@ export const FieldLabel = (props: LabelProps) => {
 type ErrorProps = {
   error: FieldError;
   className?: string | undefined;
-  compact?: boolean;
 };
 
 export const FieldErrorText = (props: ErrorProps) => {
-  if (props.error && !props.compact) {
-    return (
-      <span
-        className={classNames(
-          "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
-          props.error ? "opacity-100" : "opacity-0",
-          props.className,
-        )}
-      >
-        {props.error}
-      </span>
-    );
-  }
+  return (
+    <span
+      className={classNames(
+        "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
+        props.error ? "opacity-100" : "opacity-0",
+        props.className,
+      )}
+    >
+      {props.error}
+    </span>
+  );
 };
 
 const FormField = ({
@@ -56,7 +53,6 @@ const FormField = ({
 }: {
   field?: FormFieldBaseProps<any>;
   children: React.ReactNode;
-  compact?: boolean;
 }) => {
   return (
     <div className={field?.className}>
@@ -75,11 +71,7 @@ const FormField = ({
         )}
       </div>
       <div className={field?.className}>{props.children}</div>
-      <FieldErrorText
-        error={field?.error}
-        className={field?.errorClassName}
-        compact={props.compact}
-      />
+      <FieldErrorText error={field?.error} className={field?.errorClassName} />
     </div>
   );
 };

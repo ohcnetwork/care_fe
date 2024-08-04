@@ -70,9 +70,7 @@ export default function HumanBodyChart({
                     className={
                       "cursor-pointer transition-all hover:fill-red-300"
                     }
-                    style={{
-                      fill: regionColor(path.region),
-                    }}
+                    style={{ fill: regionColor(path.region) }}
                     fill="currentColor"
                     id={`pain-chart-${path.region}`}
                     onClick={() => onPartSelect(path.region)}

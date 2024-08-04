@@ -5,7 +5,7 @@ import Dialysis from "./Dialysis";
 import IOBalance from "./IOBalance";
 import NeurologicalMonitoring from "./NeurologicalMonitoring";
 import NursingCare from "./NursingCare";
-import PressureSore from "./PressureSore";
+import PressureSore from "./PressureSore/PressureSore";
 import RespiratorySupport from "./RespiratorySupport";
 import Vitals from "./Vitals";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";

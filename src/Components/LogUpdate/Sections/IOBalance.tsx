@@ -1,10 +1,10 @@
 import { Fragment } from "react/jsx-runtime";
 import { DailyRoundsModel, NameQuantity } from "../../Patient/models";
-import SelectMenuV2 from "../../Form/SelectMenuV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
+import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 
 const sections = [
   {
@@ -70,7 +70,8 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
                           Type
                         </div>
                       )}
-                      <SelectMenuV2
+                      <SelectFormField
+                        name="name"
                         options={field.options
                           .filter(
                             (option) =>
@@ -91,12 +92,14 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
                           })
                         }
                         className="w-full"
+                        errorClassName="hidden"
                       />
                     </div>
                     <TextFormField
                       type="number"
+                      min={0}
+                      errorClassName="hidden"
                       name={name + " Quantity"}
-                      compact
                       value={quantity.toString()}
                       onChange={(val) =>
                         onChange({
