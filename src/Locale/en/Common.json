@@ -176,5 +176,7 @@
   "caution": "Caution",
   "feed_optimal_experience_for_phones": "For optimal viewing experience, consider rotating your device.",
   "feed_optimal_experience_for_apple_phones": "For optimal viewing experience, consider rotating your device. Ensure auto-rotate is enabled in your device settings.",
-  "action_irreversible": "This action is irreversible"
+  "action_irreversible": "This action is irreversible",
+  "send_message": "Send Message",
+  "enter_message": "Start typing your message..."
 }

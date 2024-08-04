@@ -1,13 +1,15 @@
-import { HCXClaimModel, HCXCommunicationModel } from "./models";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { HCXClaimModel } from "./models";
+import { useMemo, useRef, useState } from "react";
+import * as Notification from "../../Utils/Notifications";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import SendCommunicationModal from "./SendCommunicationModal";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { classNames } from "../../Utils/utils";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
+import { useTranslation } from "react-i18next";
+import useFileUpload from "../../Utils/useFileUpload";
 import request from "../../Utils/request/request";
 
 interface IProps {
@@ -26,11 +28,17 @@ export default function ClaimCardCommunication({
   claim,
   setShowMessages,
 }: IProps) {
-  const [responses, setResponses] = useState<IMessage[]>([]);
+  const { t } = useTranslation();
   const [inputText, setInputText] = useState("");
-  const [createdCommunication, setCreatedCommunication] =
-    useState<HCXCommunicationModel>();
+  const [isSendingCommunication, setIsSendingCommunication] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const { UploadButton, files, removeFile, clearFiles, handleFileUpload } =
+    useFileUpload({
+      multiple: true,
+      type: "COMMUNICATION",
+      allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
+    });
 
   const { data: communicationsResult, refetch: refetchCommunications } =
     useQuery(routes.listHCXCommunications, {
@@ -57,41 +65,48 @@ export default function ClaimCardCommunication({
   const handleSubmit = async () => {
     if (!claim.id) return;
 
+    setIsSendingCommunication(true);
+
     const { res, data } = await request(routes.createHCXCommunication, {
       body: {
         claim: claim.id,
-        content: responses.map((response) => ({
-          type: response.type as string,
-          data: response.data as string,
-        })),
+        content: [
+          {
+            type: "text",
+            data: inputText,
+          },
+        ],
       },
     });
 
-    if (res?.status === 201) {
-      setCreatedCommunication(data);
+    if (res?.status === 201 && data) {
+      await handleFileUpload(data.id as string);
+
+      const { res } = await request(routes.hcxSendCommunication, {
+        body: {
+          communication: data.id,
+        },
+      });
+
+      if (res?.ok) {
+        Notification.Success({ msg: "Sent communication to HCX" });
+
+        await refetchCommunications();
+
+        setInputText("");
+        clearFiles();
+
+        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      } else {
+        Notification.Error({ msg: "Error sending communication to HCX" });
+      }
     }
+
+    setIsSendingCommunication(false);
   };
-
-  useEffect(() => {
-    refetchCommunications();
-  }, [refetchCommunications, createdCommunication]);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [responses]);
 
   return (
     <div className="flex h-full flex-col justify-end">
-      {createdCommunication && (
-        <SendCommunicationModal
-          communication={createdCommunication}
-          show
-          onClose={() => {
-            setCreatedCommunication(undefined);
-            setResponses([]);
-          }}
-        />
-      )}
       <div className="flex justify-end">
         <CareIcon
           icon="l-info-circle"
@@ -121,54 +136,69 @@ export default function ClaimCardCommunication({
           </div>
         ))}
 
-        {responses.map((message, i) => (
-          <div className="mb-4 flex justify-end">
-            <p
-              onClick={() =>
-                setResponses((prev) => prev.filter((_, j) => i !== j))
-              }
-              className="group relative ml-2 flex items-center justify-center gap-2 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl bg-blue-400 px-4 py-3 text-white hover:bg-red-400"
-            >
-              <span className="group-hover:line-through group-hover:opacity-40">
-                {message.data}
-              </span>
-              <CareIcon
-                icon="l-trash"
-                className="left-1/2 top-1/3 hidden text-xl font-bold group-hover:absolute group-hover:block"
-              />
-            </p>
-          </div>
-        ))}
-
         <div ref={bottomRef} />
       </div>
       <div className="m-auto flex w-full items-center gap-3">
-        <TextAreaFormField
-          name="message"
-          value={inputText}
-          onChange={(e) => setInputText(e.value)}
-          placeholder="Enter a message"
-          rows={1}
-          className="-mb-3 w-full"
-        />
-        {inputText.length || !responses.length ? (
-          <ButtonV2
-            onClick={() => {
-              setResponses((prev) => [
-                ...prev,
-                { type: "text", data: inputText },
-              ]);
-              setInputText("");
-            }}
-            disabled={!inputText.length}
-          >
-            Add
-          </ButtonV2>
-        ) : (
-          <ButtonV2 disabled={!responses.length} onClick={handleSubmit}>
-            Submit
-          </ButtonV2>
-        )}
+        <div className="relative w-full">
+          <div className="absolute bottom-full flex max-w-full items-center gap-2 overflow-x-auto pb-2.5">
+            {files.map((file, i) => (
+              <div
+                key={file.name}
+                className="flex min-w-36 max-w-36 items-center gap-2"
+              >
+                <div>
+                  {file.type.includes("image") ? (
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      className="h-10 w-10 rounded object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-300">
+                      <CareIcon icon="l-file" className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="w-24 truncate text-sm">{file.name}</p>
+                  <div className="flex !items-center gap-2.5">
+                    <p className="text-xs text-gray-500">
+                      {(file.size / 1024).toFixed(2)} KB
+                    </p>
+                    <button
+                      onClick={() => {
+                        removeFile(i);
+                      }}
+                    >
+                      <CareIcon
+                        icon="l-trash"
+                        className="h-4 w-4 text-danger-500"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <TextAreaFormField
+            name="message"
+            value={inputText}
+            onChange={(e) => setInputText(e.value)}
+            placeholder={t("enter_message")}
+            rows={1}
+            className="-mb-3"
+          />
+        </div>
+        <UploadButton className="!w-fit">
+          <CareIcon icon="l-paperclip" className="h-5 w-5" />
+        </UploadButton>
+        <ButtonV2
+          disabled={!inputText}
+          loading={isSendingCommunication}
+          onClick={handleSubmit}
+        >
+          {t("send_message")}
+        </ButtonV2>
       </div>
     </div>
   );
