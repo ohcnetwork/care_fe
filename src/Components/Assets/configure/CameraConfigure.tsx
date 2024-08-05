@@ -1,13 +1,13 @@
 import { SyntheticEvent } from "react";
 import { AssetData } from "../AssetTypes";
-import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
-import { getCameraConfig } from "../../../Utils/transformUtils";
 import { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
 import { FieldErrorText } from "../../Form/FormFields/FormField";
+import CameraFeed from "../../CameraFeed/CameraFeed";
+import useOperateCamera from "../../CameraFeed/useOperateCamera";
 
 interface CameraConfigureProps {
   asset: AssetData;
@@ -16,22 +16,18 @@ interface CameraConfigureProps {
   bed: BedModel;
   newPreset: string;
   setNewPreset(preset: string): void;
-  refreshPresetsHash: number;
-  facilityMiddlewareHostname: string;
   isLoading: boolean;
 }
-export default function CameraConfigure(props: CameraConfigureProps) {
-  const {
-    asset,
-    addPreset,
-    setBed,
-    bed,
-    isLoading,
-    newPreset,
-    setNewPreset,
-    refreshPresetsHash,
-    facilityMiddlewareHostname,
-  } = props;
+export default function CameraConfigure({
+  asset,
+  addPreset,
+  setBed,
+  bed,
+  isLoading,
+  newPreset,
+  setNewPreset,
+}: CameraConfigureProps) {
+  const { operate, key } = useOperateCamera(asset.id);
 
   return (
     <div className="mb-5">
@@ -76,12 +72,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
         </form>
       </Card>
       <Card className="mt-4">
-        <LiveFeed
-          middlewareHostname={facilityMiddlewareHostname}
-          asset={getCameraConfig(asset)}
-          showRefreshButton={true}
-          refreshPresetsHash={refreshPresetsHash}
-        />
+        <CameraFeed asset={asset} key={key} operate={operate} />
       </Card>
     </div>
   );

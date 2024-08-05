@@ -10,20 +10,6 @@ interface UseMSEMediaPlayerOption {
   videoEl: HTMLVideoElement | null;
 }
 
-export interface ICameraAssetState {
-  id: string;
-  accessKey: string;
-  middleware_address: string;
-  location_middleware: string;
-}
-
-export enum StreamStatus {
-  Playing,
-  Stop,
-  Loading,
-  Offline,
-}
-
 interface UseMSEMediaPlayerReturnType {
   stopStream: (config: { id: string }, options: IOptions) => void;
   startStream: (options?: IOptions) => void;
