@@ -167,7 +167,14 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                       result: "success",
                     });
                     setHasMoved(false);
-                    setPreset(value);
+                    // Voluntarily copying to trigger change of reference of the position attribute, so that the useEffect of CameraFeed that handles the moves gets triggered.
+                    setPreset({
+                      ...value,
+                      meta: {
+                        ...value.meta,
+                        position: { ...value.meta.position },
+                      },
+                    });
                   }}
                 />
                 {isUpdatingPreset ? (
