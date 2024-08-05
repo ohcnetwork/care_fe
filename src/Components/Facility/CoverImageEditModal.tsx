@@ -28,6 +28,22 @@ interface Props {
   facility: FacilityModel;
 }
 
+const VideoConstraints = {
+  user: {
+    width: 1280,
+    height: 720,
+    facingMode: "user",
+  },
+  environment: {
+    width: 1280,
+    height: 720,
+    facingMode: { exact: "environment" },
+  },
+} as const;
+
+type IVideoConstraint =
+  (typeof VideoConstraints)[keyof typeof VideoConstraints];
+
 const CoverImageEditModal = ({
   open,
   onClose,
@@ -36,30 +52,25 @@ const CoverImageEditModal = ({
   facility,
 }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<any>();
+  const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<any>(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
-  const FACING_MODE_USER = "user";
-  const FACING_MODE_ENVIRONMENT = { exact: "environment" };
-  const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
-  const videoConstraints = {
-    width: 1280,
-    height: 720,
-    facingMode: "user",
-  };
+  const [constraint, setConstraint] = useState<IVideoConstraint>(
+    VideoConstraints.user,
+  );
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
   const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
-    setFacingMode((prevState: any) =>
-      prevState === FACING_MODE_USER
-        ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER,
+    setConstraint((prev) =>
+      prev.facingMode === "user"
+        ? VideoConstraints.environment
+        : VideoConstraints.user,
     );
   }, []);
 
@@ -322,7 +333,7 @@ const CoverImageEditModal = ({
                     screenshotFormat="image/jpeg"
                     width={1280}
                     ref={webRef}
-                    videoConstraints={{ ...videoConstraints, facingMode }}
+                    videoConstraints={constraint}
                   />
                 </>
               ) : (
