@@ -98,7 +98,7 @@ export default function ClaimCardCommunication({
 
       <div className="m-auto flex w-full items-center gap-3">
         <div className="relative w-full">
-          <div className="absolute bottom-full flex max-w-full items-center gap-2 overflow-x-auto pb-2.5">
+          <div className="absolute bottom-full flex max-w-full items-center gap-2 overflow-x-auto rounded-md bg-white p-2">
             {files.map((file, i) => (
               <div
                 key={file.name}
