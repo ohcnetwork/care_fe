@@ -39,9 +39,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [newPreset, setNewPreset] = useState("");
   const [loadingAddPreset, setLoadingAddPreset] = useState(false);
   const [loadingSetConfiguration, setLoadingSetConfiguration] = useState(false);
-  const [refreshPresetsHash, setRefreshPresetsHash] = useState(
-    Number(new Date()),
-  );
   const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
   });
@@ -121,7 +118,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
         });
         setBed({});
         setNewPreset("");
-        setRefreshPresetsHash(Number(new Date()));
       } else {
         Notification.Error({
           msg: "Something went wrong..!",
@@ -217,8 +213,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
           setNewPreset={setNewPreset}
           addPreset={addPreset}
           isLoading={loadingAddPreset}
-          refreshPresetsHash={refreshPresetsHash}
-          facilityMiddlewareHostname={resolvedMiddleware?.hostname || ""}
         />
       ) : null}
     </div>
