@@ -6,9 +6,9 @@ import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
-  PATIENT_SORT_OPTIONS,
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
+  DISCHARGED_PATIENT_SORT_OPTIONS,
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
@@ -894,9 +894,9 @@ export const PatientManager = () => {
               onClick={() => advancedFilter.setShow(true)}
             />
             <SortDropdownMenu
-              options={PATIENT_SORT_OPTIONS}
+              options={DISCHARGED_PATIENT_SORT_OPTIONS}
               selected={qParams.ordering}
-              onSelect={updateQuery}
+              onSelect={(e) => updateQuery({ ordering: e.ordering })}
             />
             <div className="tooltip w-full md:w-auto">
               {!isExportAllowed ? (
