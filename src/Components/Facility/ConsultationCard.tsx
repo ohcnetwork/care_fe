@@ -37,7 +37,6 @@ export const ConsultationCard = (props: ConsultationProps) => {
         {itemData.facility && itemData.patient && itemData.id ? (
           <Beds
             facilityId={itemData.facility}
-            patientId={itemData.patient}
             discharged={!!itemData.discharge_date}
             consultationId={itemData.id ?? ""}
             setState={setOpen}

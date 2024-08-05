@@ -1511,7 +1511,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   {sectionTitle("Bed Status")}
                   <Beds
                     facilityId={facilityId}
-                    patientId={patientId}
                     consultationId={id}
                     fetchPatientData={() => refetch()}
                   />

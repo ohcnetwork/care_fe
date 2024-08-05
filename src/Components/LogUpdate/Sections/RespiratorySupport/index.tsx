@@ -1,4 +1,11 @@
+import { useEffect } from "react";
+import { useSlugs } from "../../../../Common/hooks/useSlug";
+import routes from "../../../../Redux/api";
+import useQuery from "../../../../Utils/request/useQuery";
 import { rangeValueDescription } from "../../../../Utils/utils";
+import { AssetClass } from "../../../Assets/AssetTypes";
+import DialogModal from "../../../Common/Dialog";
+import Beds from "../../../Facility/Consultations/Beds";
 import RadioFormField from "../../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../../Form/FormFields/RangeFormField";
 import {
@@ -9,8 +16,43 @@ import {
 } from "../../utils";
 import OxygenRespiratorySupport from "./OxygenSupport";
 import VentilatorRespiratorySupport from "./Ventilator";
+import { Warn } from "../../../../Utils/Notifications";
 
 const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
+  const [facilityId, consultationId] = useSlugs("facility", "consultation");
+  const consultationQuery = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationId },
+  });
+
+  const warnForNoLinkedVentilator = (() => {
+    if (consultationQuery.loading) {
+      return false;
+    }
+
+    if (
+      !(
+        log.ventilator_interface === "INVASIVE" ||
+        log.ventilator_interface === "NON_INVASIVE"
+      )
+    ) {
+      return false;
+    }
+
+    const hasLinkedVentilator =
+      consultationQuery.data?.current_bed?.assets_objects?.some(
+        (a) => a.asset_class === AssetClass.VENTILATOR,
+      );
+    return hasLinkedVentilator === false;
+  })();
+
+  useEffect(() => {
+    if (warnForNoLinkedVentilator) {
+      Warn({
+        msg: "No ventilator assets were found to be linked to the current bed.",
+      });
+    }
+  }, [warnForNoLinkedVentilator]);
+
   return (
     <div className="flex flex-col gap-8">
       <RadioFormField
@@ -60,6 +102,20 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
           })
         }
       />
+
+      <DialogModal
+        title="Link Ventilator to Bed"
+        show={warnForNoLinkedVentilator}
+        onClose={() => onChange({ ventilator_interface: "UNKNOWN" })}
+        className="md:max-w-3xl"
+      >
+        <Beds
+          facilityId={facilityId}
+          consultationId={consultationId}
+          fetchPatientData={() => consultationQuery.refetch()}
+        />
+      </DialogModal>
+
       {log.ventilator_interface && log.ventilator_interface !== "UNKNOWN" && (
         <div className="ml-2 space-y-4 border-l-4 border-l-secondary-300 pl-6">
           {log.ventilator_interface === "OXYGEN_SUPPORT" && (

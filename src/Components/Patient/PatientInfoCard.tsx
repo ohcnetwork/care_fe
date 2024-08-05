@@ -145,7 +145,6 @@ export default function PatientInfoCard(props: {
         {patient?.facility && patient?.id && consultation?.id ? (
           <Beds
             facilityId={patient?.facility}
-            patientId={patient?.id}
             discharged={!!consultation?.discharge_date}
             consultationId={consultation?.id ?? ""}
             setState={setOpen}
