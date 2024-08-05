@@ -537,7 +537,7 @@ const AssetManage = (props: AssetManageProps) => {
               <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Last Updated
               </th>
-              <th className="bg-secondary-50 relative right-10 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
+              <th className="relative right-10 bg-secondary-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Edit
               </th>
             </tr>
@@ -564,7 +564,7 @@ const AssetManage = (props: AssetManageProps) => {
               <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Moved By
               </th>
-              <th className="bg-secondary-50 relative right-5 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
+              <th className="relative right-5 bg-secondary-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Moved On
               </th>
             </tr>

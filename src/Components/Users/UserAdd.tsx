@@ -41,6 +41,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -163,6 +164,7 @@ export const validateRule = (
 };
 
 export const UserAdd = (props: UserProps) => {
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { userId } = props;
 
@@ -355,7 +357,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "doctor_experience_commenced_on":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (
             state.form.user_type === "Doctor" &&
@@ -368,7 +370,7 @@ export const UserAdd = (props: UserProps) => {
         case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -605,7 +607,7 @@ export const UserAdd = (props: UserProps) => {
       options={
         <Link
           href="https://school.coronasafe.network/targets/12953"
-          className="bg-secondary-50 inline-block rounded border border-secondary-600 px-4 py-2 text-secondary-600 transition hover:bg-secondary-100"
+          className="inline-block rounded border border-secondary-600 bg-secondary-50 px-4 py-2 text-secondary-600 transition hover:bg-secondary-100"
           target="_blank"
         >
           <CareIcon icon="l-question-circle" className="text-lg" /> &nbsp;Need
