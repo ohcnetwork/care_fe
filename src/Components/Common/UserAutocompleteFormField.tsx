@@ -9,6 +9,7 @@ import {
 import { UserModel } from "../Users/models";
 import { isUserOnline } from "../../Utils/utils";
 import { UserRole } from "../../Common/constants";
+import { useEffect } from "react";
 
 type Props = FormFieldBaseProps<UserModel> & {
   placeholder?: string;
@@ -16,6 +17,7 @@ type Props = FormFieldBaseProps<UserModel> & {
   homeFacility?: string;
   userType?: UserRole;
   showActiveStatus?: boolean;
+  noResultsError?: string;
 };
 
 export default function UserAutocompleteFormField(props: Props) {
@@ -59,18 +61,30 @@ export default function UserAutocompleteFormField(props: Props) {
     );
   };
 
+  const items = options(field.value && [field.value]);
+
+  useEffect(() => {
+    if (props.required && !isLoading && !items.length && props.noResultsError) {
+      field.handleChange(undefined as unknown as UserModel);
+    }
+  }, [isLoading, items, props.required]);
+
+  const noResultError =
+    (props.required && !isLoading && !items.length && props.noResultsError) ||
+    undefined;
+
   return (
     <FormField field={field}>
       <div className="relative">
         <Autocomplete
           id={field.id}
-          disabled={field.disabled}
+          disabled={field.disabled || !!noResultError}
           // Voluntarily casting type as true to ignore type errors.
           required={field.required as true}
-          placeholder={props.placeholder}
+          placeholder={noResultError || props.placeholder}
           value={field.value}
           onChange={field.handleChange}
-          options={options(field.value && [field.value])}
+          options={items}
           optionLabel={getUserFullName}
           optionIcon={getStatusIcon}
           optionDescription={(option) => `${option.user_type}`}

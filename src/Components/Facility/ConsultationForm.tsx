@@ -386,8 +386,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             admitted: data.admitted ? String(data.admitted) : "false",
             admitted_to: data.admitted_to ? data.admitted_to : "",
             category: data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
-                ""
+              ? (PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
+                "")
               : "",
             patient_no: data.patient_no ?? "",
             OPconsultation: data.consultation_notes,
@@ -453,7 +453,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "route_to_facility":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -469,7 +469,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "encounter_date":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           if (
@@ -540,7 +540,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "consultation_notes":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (!state.form[field].replace(/\s/g, "").length) {
             errors[field] = "Consultation notes can not be empty";
@@ -608,7 +608,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
         case "treating_physician": {
           if (state.form.suggestion !== "DD" && !state.form[field]) {
-            errors[field] = "Please fill treating physician";
+            errors[field] = t("field_required");
             invalidForm = true;
             break;
           }
@@ -1437,6 +1437,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           userType={"Doctor"}
                           homeFacility={facilityId}
                           error={state.errors.treating_physician}
+                          noResultsError={t("no_treating_physicians_available")}
                         />
                       </div>
 

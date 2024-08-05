@@ -121,7 +121,7 @@ const AssetsList = () => {
       if (!isValidURL(assetURL)) {
         setIsLoading(false);
         Notification.Error({
-          msg: "Invalid QR code scanned !!!",
+          msg: t("invalid_asset_id_msg"),
         });
         return;
       }
@@ -137,7 +137,7 @@ const AssetsList = () => {
         if (!data) {
           setIsLoading(false);
           Notification.Error({
-            msg: "Invalid QR code scanned !!!",
+            msg: t("invalid_asset_id_msg"),
           });
           return;
         }
@@ -151,17 +151,22 @@ const AssetsList = () => {
         } else {
           setIsLoading(false);
           Notification.Error({
-            msg: "Asset not found !!!",
+            msg: t("asset_not_found_msg"),
           });
         }
       } else {
         setIsLoading(false);
         Notification.Error({
-          msg: "Invalid QR code scanned !!!",
+          msg: t("invalid_asset_id_msg"),
         });
       }
     } catch (err) {
       console.log(err);
+      Notification.Error({
+        msg: t("invalid_asset_id_msg"),
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 

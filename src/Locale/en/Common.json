@@ -110,6 +110,7 @@
   "features": "Features",
   "pincode": "Pincode",
   "required": "Required",
+  "field_required": "This field is required",
   "litres": "Litres",
   "litres_per_day": "Litres/day",
   "invalid_pincode": "Invalid Pincode",
