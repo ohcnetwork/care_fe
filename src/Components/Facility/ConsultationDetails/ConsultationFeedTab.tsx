@@ -59,11 +59,17 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         return;
       }
 
-      const preset = data.results.find(
+      const presets = data.results.filter(
         (obj) =>
           obj.asset_object.meta?.asset_type === "CAMERA" &&
           obj.meta.type !== "boundary",
       );
+
+      const lastPresetId = sessionStorage.getItem(
+        getFeedPresetKey(props.consultationId),
+      );
+      const preset =
+        presets.find((obj) => obj.id === lastPresetId) ?? presets[0];
 
       if (preset) {
         setPreset(preset);
@@ -104,6 +110,13 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
       divRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [!!bed, loading, !!asset, divRef.current]);
+
+  useEffect(() => {
+    const feedPresetKey = getFeedPresetKey(props.consultationId);
+    if (preset) {
+      sessionStorage.setItem(feedPresetKey, preset.id);
+    }
+  }, [preset, props.consultationId]);
 
   if (loading) {
     return <Loading />;
@@ -204,4 +217,8 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
       </div>
     </>
   );
+};
+
+const getFeedPresetKey = (consultationId: string) => {
+  return `encounterFeedPreset[${consultationId}]`;
 };
