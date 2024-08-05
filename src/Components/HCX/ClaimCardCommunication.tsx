@@ -147,9 +147,11 @@ export default function ClaimCardCommunication({
             className="-mb-3"
           />
         </div>
-        <UploadButton className="!w-fit">
-          <CareIcon icon="l-paperclip" className="h-5 w-5" />
-        </UploadButton>
+        <div className="w-fit">
+          <UploadButton>
+            <CareIcon icon="l-paperclip" className="h-5 w-5" />
+          </UploadButton>
+        </div>
         <ButtonV2
           disabled={!inputText}
           loading={isSendingCommunication}
