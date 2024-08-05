@@ -240,6 +240,7 @@ export const DailyRounds = (props: any) => {
           if (error) {
             errors.bp = error;
             invalidForm = true;
+            scrollTo('bloodPressure');
           }
           return;
         }
@@ -592,7 +593,7 @@ export const DailyRounds = (props: any) => {
             <>
               <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
-              <BloodPressureFormField {...field("bp")} label="Blood Pressure" />
+              <BloodPressureFormField {...field("bp")} label="Blood Pressure" id='bloodPressure'/>
 
               <RangeAutocompleteFormField
                 {...field("pulse")}
