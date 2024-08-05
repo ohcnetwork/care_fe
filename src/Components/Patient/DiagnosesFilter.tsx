@@ -7,6 +7,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { mergeQueryOptions } from "../../Utils/utils";
 import { debounce } from "lodash-es";
+import { Error } from "../../Utils/Notifications";
 
 export const FILTER_BY_DIAGNOSES_KEYS = [
   "diagnoses",
@@ -34,7 +35,15 @@ interface Props {
 export default function DiagnosesFilter(props: Props) {
   const { t } = useTranslation();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
-  const { data, loading, refetch } = useQuery(routes.listICD11Diagnosis);
+  const { res, data, loading, refetch } = useQuery(routes.listICD11Diagnosis, {
+    silent: true,
+  });
+
+  useEffect(() => {
+    if (res?.status === 500) {
+      Error({ msg: "ICD-11 Diagnosis functionality is facing issues." });
+    }
+  }, [res?.status]);
 
   useEffect(() => {
     if (!props.value) {

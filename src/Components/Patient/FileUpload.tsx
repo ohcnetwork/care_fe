@@ -13,7 +13,7 @@ import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
-import { formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import HeadedTabs from "../Common/HeadedTabs";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -57,7 +57,7 @@ export const header_content_type: URLS = {
 };
 
 // Array of image extensions
-const ExtImage: string[] = [
+export const ExtImage: string[] = [
   "jpeg",
   "jpg",
   "png",
@@ -119,12 +119,13 @@ interface URLS {
   [id: string]: string;
 }
 
-interface ModalDetails {
+export interface ModalDetails {
   name?: string;
   id?: string;
   reason?: string;
   userArchived?: string;
   archiveTime?: any;
+  associatedId?: string;
 }
 
 export interface StateInterface {
@@ -256,6 +257,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
     prefetch: !!patientId,
+  });
+
+  const { data: consultation } = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationId },
+    prefetch: !!consultationId,
   });
 
   const captureImage = () => {
@@ -852,7 +858,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
                     <CareIcon
                       icon="l-music"
-                      className="text-6xl text-gray-500"
+                      className="text-6xl text-secondary-500"
                     />
                   </div>
                 ) : (
@@ -874,7 +880,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
                     <CareIcon
                       icon={getIconClassName(item?.extension)}
-                      className="text-6xl text-gray-500"
+                      className="text-6xl text-secondary-500"
                     />
                   </div>
                 )}
@@ -1391,10 +1397,12 @@ export const FileUpload = (props: FileUploadProps) => {
                 className="text-lg text-danger-500"
               />
             </div>
-            <div className="text-grey-200 text-sm">
+            <div className="text-sm">
               <h1 className="text-xl text-black">Archive File</h1>
-              This action is irreversible. Once a file is archived it cannot be
-              unarchived.
+              <span className="text-sm text-secondary-600">
+                This action is irreversible. Once a file is archived it cannot
+                be unarchived.
+              </span>
             </div>
           </div>
         }
@@ -1441,10 +1449,12 @@ export const FileUpload = (props: FileUploadProps) => {
                 className="text-lg text-primary-500"
               />
             </div>
-            <div className="text-grey-200 text-sm">
+            <div className="text-sm">
               <h1 className="text-xl text-black">File Details</h1>
-              This file is archived. Once a file is archived it cannot be
-              unarchived.
+              <span className="text-sm font-normal text-secondary-600">
+                This file is archived. Once a file is archived it cannot be
+                unarchived.
+              </span>
             </div>
           </div>
         }
@@ -1526,6 +1536,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     )}
                     <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
                       <VoiceRecorder
+                        isDisabled={!!consultation?.discharge_date}
                         createAudioBlob={createAudioBlob}
                         confirmAudioBlobExists={confirmAudioBlobExists}
                         reset={resetRecording}
@@ -1586,7 +1597,14 @@ export const FileUpload = (props: FileUploadProps) => {
                       <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                         {({ isAuthorized }) =>
                           isAuthorized ? (
-                            <label className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500">
+                            <label
+                              className={classNames(
+                                consultation?.discharge_date
+                                  ? "cursor-not-allowed bg-secondary-200 text-secondary-500"
+                                  : "button-primary-default cursor-pointer transition-all duration-200 ease-in-out",
+                                "button-size-default button-shape-square inline-flex h-min w-full items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1",
+                              )}
+                            >
                               <CareIcon
                                 icon="l-file-upload-alt"
                                 className="text-lg"
@@ -1599,6 +1617,7 @@ export const FileUpload = (props: FileUploadProps) => {
                                 type="file"
                                 accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
                                 hidden
+                                disabled={!!consultation?.discharge_date}
                               />
                             </label>
                           ) : (
@@ -1607,6 +1626,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         }
                       </AuthorizedChild>
                       <ButtonV2
+                        disabled={!!consultation?.discharge_date}
                         onClick={() => setModalOpenForCamera(true)}
                         className="w-full"
                       >
@@ -1630,7 +1650,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     </div>
                   )}
                   {file && (
-                    <div className="mt-2 flex items-center justify-between rounded bg-gray-200 px-4 py-2">
+                    <div className="mt-2 flex items-center justify-between rounded bg-secondary-200 px-4 py-2">
                       {file?.name}
                       <button
                         onClick={() => {
@@ -1668,7 +1688,7 @@ export const FileUpload = (props: FileUploadProps) => {
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
-                <div className="text-md flex items-center justify-center font-bold text-gray-500">
+                <div className="text-md flex items-center justify-center font-bold text-secondary-500">
                   {"No Unarchived File in the Current Page"}
                 </div>
               </div>
@@ -1693,7 +1713,7 @@ export const FileUpload = (props: FileUploadProps) => {
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
-                <div className="text-md flex items-center justify-center font-bold text-gray-500">
+                <div className="text-md flex items-center justify-center font-bold text-secondary-500">
                   {"No Archived File in the Current Page"}
                 </div>
               </div>
@@ -1719,7 +1739,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 )
               ) : (
                 <div className="mt-4 rounded-lg border bg-white p-4 shadow">
-                  <div className="text-md flex items-center justify-center font-bold text-gray-500">
+                  <div className="text-md flex items-center justify-center font-bold text-secondary-500">
                     {"No discharge summary files in the current Page"}
                   </div>
                 </div>

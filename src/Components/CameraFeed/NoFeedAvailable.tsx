@@ -28,7 +28,7 @@ export default function NoFeedAvailable(props: Props) {
     >
       <CareIcon icon={props.icon} className="text-2xl" />
       <span className="text-xs font-bold">{props.message}</span>
-      <span className="hidden px-10 font-mono text-[10px] text-gray-500 md:block">
+      <span className="hidden px-10 font-mono text-xs text-secondary-500 md:block">
         {redactedURL}
       </span>
       <div className="mt-4 flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import { classNames } from "../../../Utils/utils";
 
 export type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
@@ -8,6 +9,7 @@ export type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
   rows?: number;
   // prefixIcon?: React.ReactNode;
   // suffixIcon?: React.ReactNode;
+  innerClassName?: string;
   onFocus?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
 };
@@ -17,7 +19,7 @@ const TextAreaFormField = forwardRef(
     { rows = 3, ...props }: TextAreaFormFieldProps,
     ref?: React.Ref<HTMLTextAreaElement>,
   ) => {
-    const field = useFormFieldPropsResolver(props as any);
+    const field = useFormFieldPropsResolver(props);
     return (
       <FormField field={field}>
         <textarea
@@ -30,9 +32,11 @@ const TextAreaFormField = forwardRef(
           onChange={(e) => field.handleChange(e.target.value)}
           placeholder={props.placeholder}
           rows={rows}
-          className={`cui-input-base resize-none ${
-            field.error && "border-danger-500"
-          }`}
+          className={classNames(
+            "cui-input-base resize-none",
+            field.error && "border-danger-500",
+            props.innerClassName,
+          )}
           onFocus={props.onFocus}
           onBlur={props.onBlur}
         />

@@ -1,15 +1,16 @@
 import { useReducer, useState } from "react";
-import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
+import { DOCTOR_SPECIALIZATION } from "../../Common/constants.js";
 import * as Notification from "../../Utils/Notifications.js";
-import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import { DoctorModal } from "./models";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+import ButtonV2, { Cancel } from "../Common/components/ButtonV2.js";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField.js";
+import TextFormField from "../Form/FormFields/TextFormField.js";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils.js";
+import SelectMenuV2 from "../Form/SelectMenuV2.js";
+import { DoctorModal } from "./models.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
+import { useTranslation } from "react-i18next";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;
@@ -57,7 +58,8 @@ const getAllowedDoctorTypes = (existing?: DoctorModal[]) => {
   });
 };
 
-export const DoctorCapacity = (props: DoctorCapacityProps) => {
+export const StaffCapacity = (props: DoctorCapacityProps) => {
+  const { t } = useTranslation();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
@@ -84,21 +86,21 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
     doctorTypes.filter((i) => i.disabled).length ===
     DOCTOR_SPECIALIZATION.length - 1;
 
-  const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
+  const headerText = !id ? "Add Staff Capacity" : "Edit Staff Capacity";
   const buttonText = !id
-    ? `Save ${!isLastOptionType ? "& Add More" : "Doctor Capacity"}`
-    : "Update Doctor Capacity";
+    ? `Save ${!isLastOptionType ? "& Add More" : "Staff Capacity"}`
+    : "Update Staff Capacity";
 
   const validateData = () => {
     const errors = { ...initForm };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       if (!state.form[field]) {
-        errors[field] = "Field is required";
+        errors[field] = t("field_required");
         invalidForm = true;
       }
       if (field === "count" && state.form[field] < 0) {
-        errors[field] = "Doctor count cannot be negative";
+        errors[field] = "Staff count cannot be negative";
         invalidForm = true;
       }
     });
@@ -139,9 +141,9 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         specializationsQuery.refetch();
         dispatch({ type: "set_form", form: initForm });
         if (!id) {
-          Notification.Success({ msg: "Doctor count added successfully" });
+          Notification.Success({ msg: "Staff count added successfully" });
         } else {
-          Notification.Success({ msg: "Doctor count updated successfully" });
+          Notification.Success({ msg: "Staff count updated successfully" });
         }
       }
       handleUpdate();
@@ -157,7 +159,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
           <div role="status">
             <svg
               aria-hidden="true"
-              className="mr-2 h-8 w-8 animate-spin fill-primary text-gray-200 dark:text-gray-600"
+              className="mr-2 h-8 w-8 animate-spin fill-primary text-secondary-200 dark:text-secondary-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -177,13 +179,15 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
       ) : (
         <div className={className}>
           <div>
-            <FieldLabel className="mb-2" required={true}>
-              Area of specialization
+            <FieldLabel className="mb-2" required>
+              Staff Type
             </FieldLabel>
             <SelectMenuV2
               id="area-of-specialization"
               value={doctorTypes.find((type) => type.id == state.form.area)?.id}
-              options={doctorTypes.filter((type) => !type.disabled)}
+              options={
+                id ? doctorTypes : doctorTypes.filter((type) => !type.disabled)
+              }
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
               requiredError={state.errors.area.length !== 0}
@@ -212,9 +216,9 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
           </div>
           <div className="cui-form-button-group mt-4">
             <Cancel onClick={() => handleClose()} />
-            {!isLastOptionType && headerText === "Add Doctor Capacity" && (
+            {!isLastOptionType && headerText === "Add Staff Capacity" && (
               <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
-                Save Doctor Capacity
+                Save Staff Capacity
               </ButtonV2>
             )}
             <ButtonV2 id="doctor-save" onClick={handleSubmit}>

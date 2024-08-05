@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 export const VoiceRecorder = (props: any) => {
   const { t } = useTranslation();
   const {
+    isDisabled,
     createAudioBlob,
     confirmAudioBlobExists,
     reset,
@@ -47,7 +48,7 @@ export const VoiceRecorder = (props: any) => {
         {isRecording ? (
           <>
             <div className="flex space-x-2">
-              <div className="bg-gray-100 p-2 text-primary-700">
+              <div className="bg-secondary-100 p-2 text-primary-700">
                 <CareIcon
                   icon="l-record-audio"
                   className="mr-2 animate-pulse"
@@ -75,6 +76,7 @@ export const VoiceRecorder = (props: any) => {
             {!audioURL && (
               <ButtonV2
                 id="record-audio"
+                disabled={isDisabled}
                 onClick={startRecording}
                 authorizeFor={NonReadOnlyUsers}
                 className="w-full md:w-fit"

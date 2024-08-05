@@ -1,8 +1,15 @@
+import { cy } from "local-cypress";
 export class PatientPrescription {
   clickAddPrescription() {
-    cy.contains("button", "Add Prescription Medication")
-      .should("be.visible")
-      .click();
+    cy.get("#add-prescription").scrollIntoView();
+    cy.verifyAndClickElement(
+      "#add-prescription",
+      "Add Prescription Medication",
+    );
+  }
+
+  clickAddPrnPrescriptionButton() {
+    cy.contains("button", "Add PRN Prescription").click();
   }
 
   interceptMedibase() {
@@ -16,6 +23,24 @@ export class PatientPrescription {
     );
   }
 
+  clickTitratedDosage() {
+    cy.get("#titrated-dosage").click();
+  }
+
+  clickAdministerButton() {
+    cy.get("#administer-medicine").scrollIntoView().should("be.visible");
+    cy.verifyAndClickElement("#administer-medicine", "Administer");
+  }
+
+  clickAdministerBulkMedicine() {
+    cy.get("#bulk-administer").should("be.visible");
+    cy.get("#bulk-administer").click();
+  }
+
+  clickAllVisibleAdministration() {
+    cy.get("#should_administer").should("be.visible").click();
+  }
+
   selectMedicinebox() {
     cy.get(
       "div#medicine_object input[placeholder='Select'][role='combobox']",
@@ -27,7 +52,30 @@ export class PatientPrescription {
   }
 
   enterDosage(doseAmount: string) {
+    cy.get("#base_dosage").clear({ force: true });
+    cy.get("#base_dosage").click({ force: true });
     cy.get("#base_dosage").type(doseAmount, { force: true });
+  }
+
+  enterIndicator(indicator: string) {
+    cy.get("#indicator").type(indicator);
+  }
+
+  enterDiscontinueReason(reason: string) {
+    cy.wait(2000);
+    cy.get("#discontinuedReason").type(reason);
+  }
+
+  enterAdministerDosage(dosage: string) {
+    cy.get("#dosage").type(dosage);
+  }
+
+  enterAdministerNotes(notes: string) {
+    cy.get("#administration_notes").type(notes);
+  }
+
+  enterTargetDosage(targetDosage: string) {
+    cy.get("#target_dosage").type(targetDosage, { force: true });
   }
 
   selectDosageFrequency(frequency: string) {
@@ -41,20 +89,18 @@ export class PatientPrescription {
     );
   }
 
-  discontinuePreviousPrescription() {
-    cy.intercept(
-      "POST",
-      "**/api/v1/consultation/*/prescriptions/*/discontinue/",
-    ).as("deletePrescription");
-    cy.get("button").contains("Discontinue").click();
-    cy.get("#submit").contains("Discontinue").click();
-    cy.wait("@deletePrescription").its("response.statusCode").should("eq", 200);
+  clickAdministerSelectedMedicine() {
+    cy.get("#administer-selected-medicine").should("be.visible");
+    cy.get("#administer-selected-medicine").click();
   }
 
   visitMedicineTab() {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.get("#consultation_tab_nav").contains("Medicines").click();
-    cy.get("a[href='prescriptions']").first().click();
+  }
+
+  visitEditPrescription() {
+    cy.get("#edit-prescription").click();
   }
 }
 export default PatientPrescription;

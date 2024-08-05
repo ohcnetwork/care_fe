@@ -10,7 +10,7 @@ interface Props {
   isNew: boolean;
 }
 
-const tdClass = "border border-gray-400 p-2 text-left";
+const tdClass = "border border-secondary-400 p-2 text-left";
 
 const DuplicatePatientDialog = (props: Props) => {
   const { patientList, handleOk, handleCancel, isNew } = props;
@@ -32,7 +32,7 @@ const DuplicatePatientDialog = (props: Props) => {
           </p>
         </div>
         <div>
-          <div className="max-h-[200px] overflow-auto rounded border border-y-gray-400">
+          <div className="max-h-[200px] overflow-auto rounded border border-y-secondary-400">
             <table className="relative w-full border-collapse">
               <thead>
                 <tr className="border-separate">
@@ -51,7 +51,9 @@ const DuplicatePatientDialog = (props: Props) => {
                   return (
                     <tr key={i}>
                       <td className={tdClass}>
-                        <div className="font-semibold">{patient.name}</div>
+                        <div className="font-semibold capitalize">
+                          {patient.name}
+                        </div>
                         <div className="break-words text-xs">
                           ID : {patient.patient_id}
                         </div>

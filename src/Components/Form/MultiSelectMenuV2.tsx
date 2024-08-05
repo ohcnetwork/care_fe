@@ -16,6 +16,7 @@ type Props<T, V = T> = {
   optionDescription?: OptionCallback<T, ReactNode>;
   optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
   className?: string;
   disabled?: boolean;
   renderSelectedOptions?: OptionCallback<T[], ReactNode>;
@@ -42,12 +43,13 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       option,
       label,
       selectedLabel,
-      description: props.optionDescription && props.optionDescription(option),
-      icon: props.optionIcon && props.optionIcon(option),
+      description: props.optionDescription?.(option),
+      icon: props.optionIcon?.(option),
       value,
+      disabled: props.optionDisabled?.(option),
       isSelected: props.value?.includes(value as any) ?? false,
       displayChip: (
-        <div className="rounded-full border border-secondary-400 bg-secondary-100 px-2 text-xs text-gray-900">
+        <div className="rounded-full border border-secondary-400 bg-secondary-100 px-2 text-xs text-secondary-900">
           {selectedLabel}
         </div>
       ),
@@ -98,7 +100,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                 >
                   <div className="relative z-0 flex w-full items-center">
                     <div className="relative flex flex-1 items-center pr-4 focus:z-10">
-                      <p className="ml-2.5 text-sm font-normal text-gray-600">
+                      <p className="ml-2.5 text-sm font-normal text-secondary-600">
                         <Placeholder />
                       </p>
 
@@ -124,13 +126,13 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                     </div>
                     <CareIcon
                       icon="l-angle-down"
-                      className="-mb-0.5 text-lg text-gray-900"
+                      className="-mb-0.5 text-lg text-secondary-900"
                     />
                   </div>
                 </Listbox.Button>
               </div>
               <DropdownTransition show={open}>
-                <Listbox.Options className="cui-dropdown-base absolute top-12">
+                <Listbox.Options className="cui-dropdown-base absolute top-full">
                   {options.map((option, index) => (
                     <Listbox.Option
                       id={`${props.id}-option-${index}`}
@@ -138,6 +140,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       className={dropdownOptionClassNames}
                       value={option}
                       onClick={() => handleSingleSelect(option)}
+                      disabled={option.disabled}
                     >
                       {({ active }) => (
                         <div className="flex flex-col gap-2">
@@ -152,9 +155,14 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                           </div>
                           {option.description && (
                             <p
-                              className={`font-normal ${
-                                active ? "text-primary-200" : "text-gray-700"
-                              }`}
+                              className={classNames(
+                                "text-sm font-normal",
+                                option.disabled
+                                  ? "text-secondary-500"
+                                  : active
+                                    ? "text-primary-200"
+                                    : "text-secondary-500",
+                              )}
                             >
                               {option.description}
                             </p>
@@ -185,7 +193,7 @@ export const MultiSelectOptionChip = ({
   onRemove,
 }: MultiSelectOptionChipProps) => {
   return (
-    <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
+    <span className="flex items-center gap-2 rounded-full border-secondary-300 bg-secondary-200 px-3 text-xs text-secondary-700">
       <p className="py-1">{label}</p>
       {onRemove && (
         <p
@@ -205,17 +213,20 @@ export const MultiSelectOptionChip = ({
 interface OptionRenderPropArg {
   active: boolean;
   selected: boolean;
+  disabled: boolean;
 }
 
 export const dropdownOptionClassNames = ({
   active,
   selected,
+  disabled,
 }: OptionRenderPropArg) => {
   return classNames(
     "group/option relative w-full cursor-default select-none p-4 text-sm transition-colors duration-75 ease-in-out",
-    active && "bg-primary-500 text-white",
-    !active && selected && "text-primary-500",
-    !active && !selected && "text-gray-900",
+    !disabled && active && "bg-primary-500 text-white",
+    !disabled && !active && selected && "text-primary-500",
+    !disabled && !active && !selected && "text-secondary-900",
+    disabled && "cursor-not-allowed text-secondary-600",
     selected ? "font-semibold" : "font-normal",
   );
 };

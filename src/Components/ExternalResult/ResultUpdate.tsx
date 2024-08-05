@@ -12,6 +12,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import { compareBy } from "../../Utils/utils.js";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -57,6 +58,7 @@ const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
 export default function UpdateResult(props: any) {
   const { id } = props;
   const { goBack } = useAppHistory();
+  const { t } = useTranslation();
 
   const [state, dispatch] = useReducer(FormReducer, initialState);
   const [isLoading, setIsLoading] = useState(true);
@@ -132,7 +134,7 @@ export default function UpdateResult(props: any) {
       switch (field) {
         case "address":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -216,14 +218,14 @@ export default function UpdateResult(props: any) {
         backUrl={`/external_results/${id}`}
       >
         <div className="md:p-4">
-          <div className="border-b border-gray-200 px-4 py-5 sm:px-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">
+          <div className="border-b border-secondary-200 px-4 py-5 sm:px-6">
+            <h3 className="text-lg font-medium leading-6 text-secondary-900">
               {state.form.name} - {state.form.age} {state.form.age_in}
             </h3>
-            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-secondary-500">
               SRF ID: {state.form.srf_id}
             </p>
-            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-secondary-500">
               Care external results ID: {id}
             </p>
           </div>

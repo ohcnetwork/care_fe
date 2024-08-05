@@ -71,8 +71,12 @@ class FacilityManage {
     cy.get("#hf_id").click().clear().click().type(address);
   }
 
-  verifySuccessMessageVisibilityAndContent(text) {
-    cy.get(".pnotify-text").should("be.visible").contains(text);
+  verifySuccessMessageVisibilityAndContent(text, isRegex = false) {
+    if (isRegex) {
+      cy.get(".pnotify-text").should("be.visible").contains(text);
+    } else {
+      cy.get(".pnotify-text").should("be.visible").and("contain.text", text);
+    }
   }
 
   verifyMiddlewareAddressValue(expectedValue) {

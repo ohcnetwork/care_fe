@@ -6,7 +6,7 @@ on:
   pull_request:
     branches:
       - develop
-      - master
+      - staging
   workflow_dispatch:
 
 jobs:
@@ -31,6 +31,7 @@ jobs:
       - name: Start care docker containers 🐳
         run: |
           cd care
+          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
           make docker_config_file=docker-compose.pre-built.yaml up 
           make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
           cd ..

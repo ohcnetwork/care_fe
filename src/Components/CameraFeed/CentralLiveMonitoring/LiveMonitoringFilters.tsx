@@ -7,6 +7,7 @@ import useFilters from "../../../Common/hooks/useFilters";
 import { Fragment } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useSlug from "../../../Common/hooks/useSlug";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   perPageLimit: number;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const LiveMonitoringFilters = (props: Props) => {
+  const { t } = useTranslation();
   const facilityId = useSlug("facility");
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: props.perPageLimit,
@@ -25,9 +27,9 @@ const LiveMonitoringFilters = (props: Props) => {
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
       <Popover className="relative">
         <Popover.Button>
-          <ButtonV2 variant="secondary" border>
+          <ButtonV2 variant={qParams.location ? "primary" : "secondary"} border>
             <CareIcon icon="l-setting" className="text-lg" />
-            Settings and Filters
+            {t("settings_and_filters")}
           </ButtonV2>
         </Popover.Button>
         <Transition
@@ -40,10 +42,10 @@ const LiveMonitoringFilters = (props: Props) => {
           leaveTo="opacity-0 translate-y-1"
         >
           <Popover.Panel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
-            <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
-              <div className="rounded-t-lg bg-gray-100 px-6 py-4">
+            <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
+              <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                 <div className="flow-root rounded-md">
-                  <span className="block text-sm text-gray-800">
+                  <span className="block text-sm text-secondary-800">
                     <span className="font-bold ">{props.totalCount}</span>{" "}
                     Camera(s) present
                   </span>
@@ -73,37 +75,6 @@ const LiveMonitoringFilters = (props: Props) => {
                     />
                   </div>
                 </div>
-                {/* <CheckBoxFormField
-                  name="in_use_by_consultation"
-                  label="Hide cameras without patient"
-                  value={qParams.in_use_by_consultation === "true"}
-                  onChange={({ name, value }) => {
-                    if (value) {
-                      updateQuery({ [name]: value });
-                    } else {
-                      removeFilter(name);
-                    }
-                  }}
-                  labelClassName="text-sm"
-                  errorClassName="hidden"
-                />
-                <CheckBoxFormField
-                  name="is_working"
-                  label="Camera is Working"
-                  value={
-                    qParams.is_working === "true" ||
-                    qParams.is_working === undefined
-                  }
-                  onChange={({ name, value }) => {
-                    if (value) {
-                      updateQuery({ [name]: value });
-                    } else {
-                      removeFilter(name);
-                    }
-                  }}
-                  labelClassName="text-sm"
-                  errorClassName="hidden"
-                /> */}
                 <ButtonV2
                   variant="secondary"
                   border

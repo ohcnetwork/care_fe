@@ -11,8 +11,10 @@ import routes from "../../../Redux/api.js";
 import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import { isAppleDevice } from "../../../Utils/utils.js";
+import { classNames, isAppleDevice } from "../../../Utils/utils.js";
 import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
+import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
+import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -22,6 +24,13 @@ interface ConsultationDoctorNotesProps {
 
 const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const { patientId, facilityId, consultationId } = props;
+
+  const authUser = useAuthUser();
+  const [thread, setThread] = useState(
+    authUser.user_type === "Nurse"
+      ? PATIENT_NOTES_THREADS.Nurses
+      : PATIENT_NOTES_THREADS.Doctors,
+  );
 
   const [patientActive, setPatientActive] = useState(true);
   const [noteField, setNoteField] = useState("");
@@ -40,10 +49,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [state, setState] = useState(initialData);
 
   const onAddNote = async () => {
-    const payload = {
-      note: noteField,
-      consultation: consultationId,
-    };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
@@ -55,7 +60,11 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       pathParams: {
         patientId: patientId,
       },
-      body: payload,
+      body: {
+        note: noteField,
+        thread,
+        consultation: consultationId,
+      },
     });
 
     if (res?.status === 201) {
@@ -103,7 +112,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   return (
     <Page
-      title="Doctor Notes"
+      title="Discussion Notes"
       className="flex h-screen flex-col"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
@@ -111,12 +120,34 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="mx-3 my-2 flex grow flex-col rounded-lg bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
+      <div className="relative mx-3 my-2 flex grow flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
+        <div className="absolute inset-x-0 top-0 flex bg-secondary-200 text-sm shadow-md">
+          {Object.values(PATIENT_NOTES_THREADS).map((current) => (
+            <button
+              key={current}
+              className={classNames(
+                "flex flex-1 justify-center border-b-2 py-2",
+                thread === current
+                  ? "border-primary-500 font-bold text-secondary-800"
+                  : "border-secondary-300 text-secondary-800",
+              )}
+              onClick={() => setThread(current)}
+            >
+              {
+                {
+                  10: "Doctor's Discussions",
+                  20: "Nurse's Discussions",
+                }[current]
+              }
+            </button>
+          ))}
+        </div>
         <PatientConsultationNotesList
           state={state}
           setState={setState}
           reload={reload}
           setReload={setReload}
+          thread={thread}
         />
 
         <div className="relative mx-4 flex items-center">
@@ -127,7 +158,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             name="note"
             value={noteField}
             onChange={(e) => setNoteField(e.value)}
-            className="grow"
+            className="w-full grow"
+            innerClassName="pr-10"
             errorClassName="hidden"
             placeholder="Type your Note"
             disabled={!patientActive}

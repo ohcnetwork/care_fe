@@ -105,40 +105,68 @@ const AssetsList = () => {
     prefetch: !!(qParams.facility && qParams.location),
   });
 
-  const getAssetIdFromQR = async (assetUrl: string) => {
+  function isValidURL(url: string) {
+    try {
+      new URL(url);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  const accessAssetIdFromQR = async (assetURL: string) => {
     try {
       setIsLoading(true);
       setIsScannerActive(false);
-      const params = parseQueryParams(assetUrl);
-      // QR Maybe searchParams "asset" or "assetQR"
-      const assetId = params.asset || params.assetQR;
-      if (assetId) {
-        const { data } = await request(routes.listAssets, {
-          query: { qr_code_id: assetId },
+      if (!isValidURL(assetURL)) {
+        setIsLoading(false);
+        Notification.Error({
+          msg: t("invalid_asset_id_msg"),
         });
-        return data?.results[0].id;
+        return;
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+      const params = parseQueryParams(assetURL);
+      // QR Maybe searchParams "asset" or "assetQR"
+      // If no params found, then use assetText
+      const assetId = params.asset || params.assetQR;
 
-  const checkValidAssetId = async (assetId: string) => {
-    const { data: assetData } = await request(routes.getAsset, {
-      pathParams: { external_id: assetId },
-    });
-    try {
-      if (assetData) {
-        navigate(
-          `/facility/${assetData.location_object.facility?.id}/assets/${assetId}`,
-        );
+      if (assetId) {
+        const { data } = await request(routes.listAssetQR, {
+          pathParams: { qr_code_id: assetId },
+        });
+        if (!data) {
+          setIsLoading(false);
+          Notification.Error({
+            msg: t("invalid_asset_id_msg"),
+          });
+          return;
+        }
+        const { data: assetData } = await request(routes.listAssets, {
+          query: { qr_code_id: assetId, limit: 1 },
+        });
+        if (assetData?.results.length === 1) {
+          navigate(
+            `/facility/${assetData.results[0].location_object.facility?.id}/assets/${assetData.results[0].id}`,
+          );
+        } else {
+          setIsLoading(false);
+          Notification.Error({
+            msg: t("asset_not_found_msg"),
+          });
+        }
+      } else {
+        setIsLoading(false);
+        Notification.Error({
+          msg: t("invalid_asset_id_msg"),
+        });
       }
     } catch (err) {
       console.log(err);
-      setIsLoading(false);
       Notification.Error({
-        msg: "Invalid QR code scanned !!!",
+        msg: t("invalid_asset_id_msg"),
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -159,8 +187,7 @@ const AssetsList = () => {
         <Scanner
           onResult={async (text) => {
             if (text) {
-              const assetId = await getAssetIdFromQR(text);
-              checkValidAssetId(assetId ?? text);
+              await accessAssetIdFromQR(text);
             }
           }}
           onError={(e) => {
@@ -259,7 +286,7 @@ const AssetsList = () => {
   } else {
     manageAssets = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
-        <p className="text-2xl font-bold text-gray-600">No Assets Found</p>
+        <p className="text-2xl font-bold text-secondary-600">No Assets Found</p>
       </div>
     );
   }

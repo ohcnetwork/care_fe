@@ -45,7 +45,7 @@ export class AssetPage {
     vendorName: string,
     serialNumber: string,
     lastServicedOn: string,
-    notes: string
+    notes: string,
   ) {
     cy.get("[data-testid=asset-name-input] input").type(name);
     cy.get("[data-testid=asset-description-input] textarea").type(description);
@@ -61,7 +61,7 @@ export class AssetPage {
     cy.get("[data-testid=asset-vendor-name-input] input").type(vendorName);
     cy.get("[data-testid=asset-serial-number-input] input").type(serialNumber);
     cy.get(
-      "[data-testid=asset-last-serviced-on-input] input[type='text']"
+      "[data-testid=asset-last-serviced-on-input] input[type='text']",
     ).click();
     cy.get("#date-input").click().type(lastServicedOn);
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
@@ -101,7 +101,7 @@ export class AssetPage {
     supportName: string,
     vendorName: string,
     notes: string,
-    lastServicedOn: string
+    lastServicedOn: string,
   ) {
     cy.get("[data-testid=asset-update-button]").click();
     cy.get("[data-testid=asset-name-input] input").clear().type(name);
@@ -119,7 +119,7 @@ export class AssetPage {
       .clear()
       .type(vendorName);
     cy.get(
-      "[data-testid=asset-last-serviced-on-input] input[type='text']"
+      "[data-testid=asset-last-serviced-on-input] input[type='text']",
     ).click();
     cy.get("#date-input").click().clear().type(lastServicedOn);
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
@@ -130,7 +130,7 @@ export class AssetPage {
     localIp: string,
     userName: string,
     password: string,
-    streamUuid: string
+    streamUuid: string,
   ) {
     cy.get("[data-testid=asset-configure-button]").click();
     cy.get("[name=middleware_hostname]").type(hostName);
@@ -186,28 +186,28 @@ export class AssetPage {
   verifyEmptyAssetNameError() {
     cy.get("[data-testid=asset-name-input] span").should(
       "contain",
-      "Asset name can't be empty"
+      "Asset name can't be empty",
     );
   }
 
   verifyEmptyLocationError() {
     cy.get("[data-testid=asset-location-input] span").should(
       "contain",
-      "Select a location"
+      "Select a location",
     );
   }
 
   verifyEmptyStatusError() {
     cy.get("[data-testid=asset-working-status-input] span").should(
       "contain",
-      "Field is required"
+      "This field is required",
     );
   }
 
   verifyEmptyPhoneError() {
     cy.get("#customer-support-phone-div span").should(
       "contain",
-      "Please enter valid phone number"
+      "Please enter valid phone number",
     );
   }
 
@@ -320,7 +320,7 @@ export class AssetPage {
     cy.get("#edit-history-asset-servicedon").should("have.text", "01/09/2023");
     cy.get("#edit-history-asset-note").should(
       "have.text",
-      "Dummy Notes Editted"
+      "Dummy Notes Editted",
     );
     cy.get("#view-history-back-button").contains("Back").click();
     cy.get("#view-history-back-button").contains("Close").click();
@@ -338,11 +338,11 @@ export class AssetPage {
     cy.get("#transaction-history").scrollIntoView();
     cy.get("#transaction-history table tbody tr:first-child td:eq(0)").should(
       "contain",
-      initiallocationName
+      initiallocationName,
     );
     cy.get("#transaction-history table tbody tr:first-child td:eq(1)").should(
       "contain",
-      locationName
+      locationName,
     );
   }
 

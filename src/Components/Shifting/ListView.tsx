@@ -69,7 +69,7 @@ export default function ListView() {
   const showShiftingCardList = (data: any) => {
     if (data && !data.length) {
       return (
-        <div className="mt-64 flex flex-1 justify-center text-gray-600">
+        <div className="mt-64 flex flex-1 justify-center text-secondary-600">
           {t("no_patients_to_show")}
         </div>
       );
@@ -78,14 +78,7 @@ export default function ListView() {
     return data.map((shift: any) => (
       <div key={`shift_${shift.id}`} className="mt-6 w-full">
         <div className="h-full overflow-hidden rounded-lg bg-white shadow">
-          <div
-            className={
-              "flex h-full flex-col justify-between p-4 " +
-              (shift.patient_object.disease_status == "POSITIVE"
-                ? "bg-red-50"
-                : "")
-            }
-          >
+          <div className="flex h-full flex-col justify-between p-4">
             <div>
               <div className="flex justify-between">
                 <div className="mb-2 text-xl font-bold capitalize">
@@ -104,10 +97,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("shifting_status")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-truck" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {shift.status}
                     </dd>
                   </dt>
@@ -115,10 +108,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("phone_number")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-mobile-android" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {shift.patient_object.phone_number || ""}
                     </dd>
                   </dt>
@@ -126,10 +119,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("origin_facility")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-plane-departure" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {(shift.origin_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -138,10 +131,10 @@ export default function ListView() {
                   <div className="sm:col-span-1">
                     <dt
                       title={t("shifting_approving_facility")}
-                      className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                      className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                     >
                       <CareIcon icon="l-user-check" className="mr-2" />
-                      <dd className="text-sm font-bold leading-5 text-gray-900">
+                      <dd className="text-sm font-bold leading-5 text-secondary-900">
                         {(shift.shifting_approving_facility_object || {}).name}
                       </dd>
                     </dt>
@@ -150,11 +143,11 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("assigned_facility")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-plane-arrival" className="m-2" />
 
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {shift.assigned_facility_external ||
                         shift.assigned_facility_object?.name ||
                         t("yet_to_be_decided")}
@@ -170,7 +163,7 @@ export default function ListView() {
                       (dayjs()
                         .subtract(2, "hours")
                         .isBefore(shift.modified_date)
-                        ? "text-gray-900"
+                        ? "text-secondary-900"
                         : "rounded bg-red-400 p-1 text-white")
                     }
                   >
@@ -184,10 +177,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("patient_address")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-home" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {shift.patient_object.address || "--"}
                     </dd>
                   </dt>

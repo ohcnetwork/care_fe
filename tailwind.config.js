@@ -3,6 +3,7 @@ const colors = require("tailwindcss/colors");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
 const gray = {
+  50: "#F9FAFB",
   100: "#FBFAFC",
   200: "#F7F5FA",
   300: "#F1EDF7",
@@ -43,7 +44,7 @@ module.exports = {
           800: "#03543F",
           900: "#014737",
         },
-        secondary: gray, // equivalent to our custom gray, but will become equivalent to tailwind's gray in tailwind v3.2
+        secondary: gray,
         danger: colors.red,
         warning: colors.amber,
         alert: colors.violet,
@@ -69,13 +70,6 @@ module.exports = {
             DEFAULT: gray[400],
             fore: gray[800],
           },
-        },
-        doctors: {
-          general: "#D79B00",
-          critical: "#C81E1E",
-          paediatrics: "#453C52",
-          other: "#03543F",
-          pulmonology: "#000080",
         },
       },
       padding: {

@@ -5,6 +5,9 @@ open CriticalCare__Types
 external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
   "updateDailyRound"
 
+@module("../CriticalCare__API")
+external getAsset: (string, (int => int) => unit) => option<unit => unit> = "getAsset"
+
 open VentilatorParameters
 
 let string_of_int = data => Belt.Option.mapWithDefault(data, "", Js.Int.toString)
@@ -14,19 +17,19 @@ let reducer = (state: VentilatorParameters.state, action: VentilatorParameters.a
   switch action {
   | SetBilateralAirEntry(bilateral_air_entry) => {
       ...state,
-      bilateral_air_entry: bilateral_air_entry,
+      bilateral_air_entry,
     }
   | SetETCO2(etco2) => {
       ...state,
-      etco2: etco2,
+      etco2,
     }
   | SetVentilatorInterface(ventilator_interface) => {
       ...state,
-      ventilator_interface: ventilator_interface,
+      ventilator_interface,
     }
   | SetVentilatorMode(ventilator_mode) => {
       ...state,
-      ventilator_mode: ventilator_mode,
+      ventilator_mode,
     }
 
   | SetOxygenModality(oxygen_modality) => {
@@ -59,7 +62,7 @@ let reducer = (state: VentilatorParameters.state, action: VentilatorParameters.a
     }
   | SetOxygenModalityOxygenRate(ventilator_oxygen_modality_oxygen_rate) => {
       ...state,
-      ventilator_oxygen_modality_oxygen_rate: ventilator_oxygen_modality_oxygen_rate,
+      ventilator_oxygen_modality_oxygen_rate,
     }
   | SetOxygenModalityFlowRate(oxygen_modality_flow_rate) => {
       ...state,
@@ -112,7 +115,7 @@ let makePayload = (state: VentilatorParameters.state) => {
   DictUtils.setOptionalNumber("ventilator_tidal_volume", state.ventilator_tidal_volume, payload)
   DictUtils.setOptionalNumber(
     "ventilator_oxygen_modality_oxygen_rate",
-    state.ventilator_interface === UNKNOWN &&
+    state.ventilator_interface === OXYGEN_SUPPORT &&
       state.ventilator_oxygen_modality !== HIGH_FLOW_NASAL_CANNULA
       ? state.ventilator_oxygen_modality_oxygen_rate
       : None,
@@ -204,8 +207,22 @@ let initialState: VentilatorParameters.t => VentilatorParameters.state = ventila
 }
 
 @react.component
-let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId, ~updateCB) => {
+let make = (
+  ~ventilatorParameters: VentilatorParameters.t,
+  ~id,
+  ~consultationId,
+  ~updateCB,
+  ~facilityId,
+  ~patientId,
+) => {
   let (state, send) = React.useReducer(reducer, initialState(ventilatorParameters))
+  let (isOpen, setIsOpen) = React.useState(() => false)
+  let toggleOpen = () => setIsOpen(prevState => !prevState)
+  let (asset, setAsset) = React.useState(() => 0)
+
+  React.useEffect1(() => {
+    getAsset(consultationId, setAsset)
+  }, [isOpen])
 
   let editor = switch state.ventilator_interface {
   | INVASIVE => <CriticalCare__VentilatorParametersEditor__Invasive state send />
@@ -216,7 +233,7 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
 
   <div>
     <CriticalCare__PageTitle title="Respiratory Support" />
-     <div>
+    <div>
       <div className="px-5 my-10">
         <div className=" text-xl font-bold my-2"> {str("Bilateral Air Entry")} </div>
         <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
@@ -225,19 +242,18 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
             id="bilateral-air-entry-yes"
             label="Yes"
             checked={switch state.bilateral_air_entry {
-              | Some(bae) => bae
-              | None => false
+            | Some(bae) => bae
+            | None => false
             }}
             onChange={_ => send(SetBilateralAirEntry(Some(true)))}
           />
-          
           <Radio
             key="bilateral-air-entry-no"
             id="bilateral-air-entry-no"
             label="No"
             checked={switch state.bilateral_air_entry {
-              | Some(bae) => !bae
-              | None => false
+            | Some(bae) => !bae
+            | None => false
             }}
             onChange={_ => send(SetBilateralAirEntry(Some(false)))}
           />
@@ -255,7 +271,6 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
         hasError={ValidationUtils.isInputInRangeInt(0, 200, state.etco2)}
       />
     </div>
-
     <div className="py-6">
       <div className="mb-6">
         <h4> {str("Respiratory Support")} </h4>
@@ -282,10 +297,39 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
       </div>
       <button
         disabled={state.saving}
-        onClick={_ => saveData(id, consultationId, state, send, updateCB)}
+        onClick={_ => {
+          // here checking if any asset linked or not before proceeding
+          if (
+            asset == 0 &&
+              (state.ventilator_interface !=
+                CriticalCare__VentilatorParameters.decodeVentilatorInterfaceType(
+                  ventilatorInterfaceOptions[0].value,
+                ) &&
+              state.ventilator_interface !=
+                CriticalCare__VentilatorParameters.decodeVentilatorInterfaceType(
+                  ventilatorInterfaceOptions[3].value,
+                ))
+          ) {
+            toggleOpen()
+          } else {
+            saveData(id, consultationId, state, send, updateCB)
+          }
+        }}
         className="btn btn-primary btn-large w-full">
         {str("Update Details")}
       </button>
+      <DialogModal
+        title={str("Link an asset to proceed")}
+        show={isOpen}
+        onClose={_ => toggleOpen()}
+        className="md:max-w-3xl">
+        <Beds
+          facilityId={facilityId}
+          patientId={patientId}
+          consultationId={consultationId}
+          setState={_ => toggleOpen()}
+        />
+      </DialogModal>
     </div>
   </div>
 }

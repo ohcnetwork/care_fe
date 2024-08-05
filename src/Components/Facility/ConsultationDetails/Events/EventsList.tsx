@@ -18,8 +18,8 @@ export default function EventsList() {
         <>
           <div className="mt-4 flex w-full flex-col gap-4">
             <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
-              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
-                <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700  ">
+              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
+                <span className="flex justify-center rounded-lg bg-white p-3 text-secondary-700  ">
                   {t("no_consultation_updates")}
                 </span>
               </PaginatedList.WhenEmpty>
@@ -30,13 +30,10 @@ export default function EventsList() {
                 {(item, items) => (
                   <TimelineNode
                     name={
-                      item.event_type.name
-                        .split("_")
-                        .map(
-                          (text) =>
-                            text[0].toUpperCase() + text.toLowerCase().slice(1),
-                        )
-                        .join(" ") + " Event"
+                      t(item.event_type.name.toLowerCase()).replaceAll(
+                        /_/g,
+                        " ",
+                      ) + " Event"
                     }
                     event={{
                       type: item.change_type.replace(/_/g, " ").toLowerCase(),
@@ -47,19 +44,21 @@ export default function EventsList() {
                     isLast={items.indexOf(item) == items.length - 1}
                   >
                     {(() => {
-                      const values = Object.entries(item.value).filter(
-                        ([_, value]) => value !== null && value !== undefined,
+                      const entries = Object.entries(item.value).filter(
+                        ([_, value]) => value != null && value !== "",
                       );
 
-                      if (values.length === 0) {
+                      if (entries.length === 0) {
                         return (
                           <div className="flex w-full flex-col items-center gap-2 md:flex-row">
-                            <span className="text-xs uppercase text-gray-700">
+                            <span className="text-xs uppercase text-secondary-700">
                               {t("no_changes")}
                             </span>
                           </div>
                         );
                       }
+
+                      const values = Object.fromEntries(entries);
 
                       switch (item.event_type.name) {
                         case "INTERNAL_TRANSFER":

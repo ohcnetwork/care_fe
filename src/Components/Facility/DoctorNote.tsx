@@ -12,6 +12,7 @@ interface DoctorNoteProps {
 
 const DoctorNote = (props: DoctorNoteProps) => {
   const { state, handleNext, setReload, disableEdit } = props;
+
   return (
     <div
       className="m-2 flex h-[390px] grow flex-col-reverse overflow-auto bg-white"
@@ -31,7 +32,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
           dataLength={state.notes.length}
           scrollableTarget="patient-notes-list"
         >
-          {state.notes.map((note: any) => (
+          {state.notes.map((note) => (
             <PatientNoteCard
               note={note}
               key={note.id}
@@ -41,7 +42,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
           ))}
         </InfiniteScroll>
       ) : (
-        <div className="mt-2 flex items-center justify-center text-2xl font-bold text-gray-500">
+        <div className="mt-2 flex h-full items-center justify-center text-2xl font-bold text-secondary-500">
           No Notes Found
         </div>
       )}

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
 import DoctorNote from "./DoctorNote";
-import { PatientNoteStateType } from "./models";
+import { PatientNoteStateType, PatientNotesModel } from "./models";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
@@ -13,12 +13,13 @@ interface PatientNotesProps {
   facilityId: string;
   reload?: boolean;
   setReload?: any;
+  thread: PatientNotesModel["thread"];
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientNotesList = (props: PatientNotesProps) => {
-  const { state, setState, reload, setReload } = props;
+  const { state, setState, reload, setReload, thread } = props;
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,7 +27,10 @@ const PatientNotesList = (props: PatientNotesProps) => {
     setIsLoading(true);
     const { data }: any = await request(routes.getPatientNotes, {
       pathParams: { patientId: props.patientId },
-      query: { offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT },
+      query: {
+        offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
+        thread,
+      },
     });
 
     if (state.cPage === 1) {
@@ -53,6 +57,10 @@ const PatientNotesList = (props: PatientNotesProps) => {
   }, [reload]);
 
   useEffect(() => {
+    fetchNotes();
+  }, [thread]);
+
+  useEffect(() => {
     setReload(true);
   }, []);
 
@@ -66,9 +74,9 @@ const PatientNotesList = (props: PatientNotesProps) => {
     }
   };
 
-  if (isLoading && !state.notes.length) {
+  if (isLoading) {
     return (
-      <div className=" flex h-[400px] w-full items-center justify-center bg-white">
+      <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
       </div>
     );

@@ -34,7 +34,7 @@
 #### Install the required dependencies
 
 ```sh
-npm install --legacy-peer-deps
+npm install
 ```
 
 #### 🏃 Run the app in development mode
@@ -70,6 +70,13 @@ Authenticate to staging API with any of the following credentials
 - Ensure the issue number is mentioned in the PR with a closing tag by following the PR body template. (Refer: [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword))
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
+
+### Testing
+
+To ensure the quality of our pull requests, we use a variety of tools:
+
+- **Automated E2E Testing:** We use Cypress for end-to-end testing to automatically verify the functionality and performance of our code.
+- **Manual Real Device Testing:** We use BrowserStack to manually test our code on real devices, ensuring compatibility and functionality across different platforms and browsers.
 
 #### 🧪 Run cypress tests
 
@@ -110,6 +117,7 @@ npm run cypress:open       # To debug and run tests individually.
 - [CARE Documentation](https://docs.coronasafe.network/coronasafe-care-documentation/)
 - [Swagger API Documentation](https://careapi.ohc.network/swagger/)
 - [Storybook component library](https://careui.coronasafe.in/)
+- [Testing Documentation](https://docs.coronasafe.network/care-testing-documentation/)
 
 ## 🚀 Production
 

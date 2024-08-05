@@ -25,13 +25,13 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
-import { FacilityDoctorList } from "./FacilityDoctorList.js";
 import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
 import useSlug from "../../Common/hooks/useSlug.js";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
+import { FacilityStaffList } from "./FacilityStaffList.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -107,7 +107,7 @@ export const FacilityHome = (props: any) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-t-lg bg-black text-sm text-gray-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
     >
       <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
@@ -157,7 +157,7 @@ export const FacilityHome = (props: any) => {
       {hasCoverImage ? (
         <div
           className={
-            "group relative h-48 w-full text-clip rounded-t bg-gray-200 opacity-100 transition-all duration-200 ease-in-out md:h-0 md:opacity-0"
+            "group relative h-48 w-full text-clip rounded-t bg-secondary-200 opacity-100 transition-all duration-200 ease-in-out md:h-0 md:opacity-0"
           }
         >
           <CoverImage />
@@ -165,7 +165,7 @@ export const FacilityHome = (props: any) => {
         </div>
       ) : (
         <div
-          className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch bg-gray-300 md:hidden ${
+          className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch bg-secondary-300 md:hidden ${
             hasPermissionToEditCoverImage && "cursor-pointer"
           }`}
           onClick={() =>
@@ -174,7 +174,7 @@ export const FacilityHome = (props: any) => {
         >
           <CareIcon
             icon="l-hospital"
-            className="block p-10 text-4xl text-gray-500"
+            className="block p-10 text-4xl text-secondary-500"
             aria-hidden="true"
           />
           {editCoverImageTooltip}
@@ -200,9 +200,9 @@ export const FacilityHome = (props: any) => {
                   {hasCoverImage ? (
                     <CoverImage />
                   ) : (
-                    <div className="flex h-80 w-[88px] items-center justify-center rounded-lg bg-gray-200 font-medium text-gray-700 lg:h-80 lg:w-80">
+                    <div className="flex h-80 w-[88px] items-center justify-center rounded-lg bg-secondary-200 font-medium text-secondary-700 lg:h-80 lg:w-80">
                       <svg
-                        className="h-8 w-8 fill-current text-gray-500"
+                        className="h-8 w-8 fill-current text-secondary-500"
                         viewBox="0 0 40 32"
                         xmlns="http://www.w3.org/2000/svg"
                       >
@@ -220,7 +220,7 @@ export const FacilityHome = (props: any) => {
                       </h1>
                       {facilityData?.modified_date && (
                         <RecordMeta
-                          className="mt-1 text-sm text-gray-700"
+                          className="mt-1 text-sm text-secondary-700"
                           prefix={t("updated")}
                           time={facilityData?.modified_date}
                         />
@@ -386,7 +386,14 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                {hasPermissionToDeleteFacility && (
+                <DropdownItem
+                  id="view-abdm-records"
+                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
+                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
+                >
+                  View ABDM Records
+                </DropdownItem>
+                {hasPermissionToDeleteFacility ? (
                   <DropdownItem
                     id="delete-facility"
                     variant="danger"
@@ -396,6 +403,8 @@ export const FacilityHome = (props: any) => {
                   >
                     Delete Facility
                   </DropdownItem>
+                ) : (
+                  <></>
                 )}
               </DropdownMenu>
             </div>
@@ -436,25 +445,12 @@ export const FacilityHome = (props: any) => {
                 <CareIcon icon="l-user-injured" className="text-lg" />
                 <span>View Patients</span>
               </ButtonV2>
-              <ButtonV2
-                id="view-patient-facility-list"
-                variant="primary"
-                ghost
-                border
-                className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() =>
-                  navigate(`/facility/${facilityId}/discharged-patients`)
-                }
-              >
-                <CareIcon icon="l-user-injured" className="text-lg" />
-                <span>View Discharged Patients</span>
-              </ButtonV2>
             </div>
           </div>
         </div>
       </div>
       <FacilityBedCapacity facilityId={facilityId} />
-      <FacilityDoctorList facilityId={facilityId} />
+      <FacilityStaffList facilityId={facilityId} />
 
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
@@ -527,7 +523,7 @@ const LiveMonitoringButton = () => {
         leaveTo="opacity-0 translate-y-1"
       >
         <Popover.Panel className="absolute z-30 mt-1 w-full px-4 sm:px-0 md:w-96 lg:max-w-3xl lg:translate-x-[-168px]">
-          <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
+          <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
             <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
               <div>
                 <FieldLabel htmlFor="location" className="text-sm">

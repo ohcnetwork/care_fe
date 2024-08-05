@@ -3,15 +3,17 @@ import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
-import { DoctorCapacity } from "./DoctorCapacity";
+import { StaffCapacity } from "./StaffCapacity";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { DoctorModal } from "./models";
-import DoctorsCountCard from "./DoctorsCountCard";
+import DoctorsCountCard from "./StaffCountCard";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
-export const FacilityDoctorList = (props: any) => {
+export const FacilityStaffList = (props: any) => {
+  const { t } = useTranslation();
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
   const [totalDoctors, setTotalDoctors] = useState(0);
 
@@ -33,14 +35,13 @@ export const FacilityDoctorList = (props: any) => {
   let doctorList: any = null;
   if (!doctorQuery.data || !doctorQuery.data.results.length) {
     doctorList = (
-      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
-        No Doctors Found
+      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
+        {t("no_staff")}
       </h5>
     );
   } else {
     doctorList = (
       <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {/* Total Doctors Count Card */}
         <div className="w-full">
           <div className="flex h-full flex-col rounded-sm border border-primary-500 bg-primary-100 shadow-sm">
             <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
@@ -49,7 +50,7 @@ export const FacilityDoctorList = (props: any) => {
               </div>
               <div id="facility-doctor-totalcapacity">
                 <div className="text-sm font-medium text-[#808080]">
-                  Total Doctors
+                  Total Staff
                 </div>
                 <h2 className="mt-2 text-xl font-bold">{totalDoctors}</h2>
               </div>
@@ -87,7 +88,7 @@ export const FacilityDoctorList = (props: any) => {
     <section id="facility-doctor-capacity-details">
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <div className="justify-between md:flex md:pb-2">
-          <div className="mb-2 text-xl font-bold">Doctors List</div>
+          <div className="mb-2 text-xl font-bold">Staff Capacity</div>
           <ButtonV2
             id="facility-add-doctortype"
             className="w-full md:w-auto"
@@ -96,7 +97,7 @@ export const FacilityDoctorList = (props: any) => {
             authorizeFor={NonReadOnlyUsers}
           >
             <CareIcon icon="l-user-md" className="mr-2 text-base text-white" />
-            Add Doctor Types
+            Add Staff Types
           </ButtonV2>
         </div>
         <div className="mt-4" id="facility-totaldoctor-capacity">
@@ -108,10 +109,10 @@ export const FacilityDoctorList = (props: any) => {
         <DialogModal
           show={doctorCapacityModalOpen}
           onClose={() => setDoctorCapacityModalOpen(false)}
-          title="Add Doctor Capacity"
+          title="Add Staff Capacity"
           className="max-w-md md:min-w-[600px]"
         >
-          <DoctorCapacity
+          <StaffCapacity
             facilityId={props.facilityId}
             handleClose={() => setDoctorCapacityModalOpen(false)}
             handleUpdate={async () => {

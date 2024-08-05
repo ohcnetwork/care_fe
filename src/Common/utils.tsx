@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
 import { OptionsType } from "./constants";
+import { humanizeStrings } from "../Utils/utils";
 
 export interface statusType {
   aborted?: boolean;
@@ -34,14 +35,15 @@ export const parseOptionId: (
   options: readonly OptionsType[],
   id: string | string[],
 ) => string = (options, id) => {
-  const textArray = options
-    .filter((option) => {
-      return id instanceof Array
-        ? id.map((i) => String(i)).includes(String(option.id))
-        : String(option.id) === String(id);
-    })
-    .map((option) => option.text);
-  return textArray.join(", ");
+  return humanizeStrings(
+    options
+      .filter((option) => {
+        return id instanceof Array
+          ? id.map((i) => String(i)).includes(String(option.id))
+          : String(option.id) === String(id);
+      })
+      .map((option) => option.text),
+  );
 };
 
 export const deepEqual = (x: any, y: any): boolean => {

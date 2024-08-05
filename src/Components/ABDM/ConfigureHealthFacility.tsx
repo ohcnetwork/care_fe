@@ -162,7 +162,7 @@ export const ConfigureHealthFacility = (props: any) => {
                   {state.form.health_facility?.registered ? (
                     <>
                       <div className="tooltip-text -ml-20 -mt-36 flex w-48 flex-col gap-4 whitespace-break-spaces">
-                        <span className="text-gray-100">
+                        <span className="text-secondary-100">
                           The ABDM health facility is successfully linked with
                           care{" "}
                           <strong>and registered as a service in bridge</strong>
@@ -176,7 +176,7 @@ export const ConfigureHealthFacility = (props: any) => {
                   ) : (
                     <>
                       <div className="tooltip-text -ml-20 -mt-44 flex w-48 flex-col gap-4 whitespace-break-spaces">
-                        <span className="text-gray-100">
+                        <span className="text-secondary-100">
                           The ABDM health facility is successfully linked with
                           care{" "}
                           <strong>

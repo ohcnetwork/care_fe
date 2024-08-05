@@ -10,6 +10,11 @@ class FacilityPage {
       .should("eq", 200);
   }
 
+  typeFacilitySearch(facilityName) {
+    cy.get("#search").click().clear();
+    cy.get("#search").click().type(facilityName);
+  }
+
   visitUpdateFacilityPage(url: string) {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.visit(url);
@@ -225,7 +230,7 @@ class FacilityPage {
     homeQuarantine,
     isolation,
     referred,
-    confirmedPositive
+    confirmedPositive,
   ) {
     cy.get("#num_patients_visited").clear().click().type(visited);
     cy.get("#num_patients_home_quarantine")
@@ -292,8 +297,8 @@ class FacilityPage {
   }
 
   selectLocation(location: string) {
+    cy.intercept("https://maps.googleapis.com/**").as("mapApi");
     cy.get("span > svg.care-svg-icon__baseline.care-l-map-marker").click();
-    cy.intercept("https://maps.googleapis.com/maps/api/mapsjs/*").as("mapApi");
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
     cy.wait(2000);
@@ -324,7 +329,7 @@ class FacilityPage {
   verifyFacilityBadgeContent(expectedText: string) {
     cy.get("[data-testid='Facility/District Name']").should(
       "contain",
-      expectedText
+      expectedText,
     );
   }
 
@@ -380,7 +385,7 @@ class FacilityPage {
 
   clickAddInventory() {
     cy.intercept("POST", "**/api/v1/facility/*/inventory/").as(
-      "createInventory"
+      "createInventory",
     );
     cy.get("button").contains("Add/Update Inventory").click();
     cy.wait("@createInventory").its("response.statusCode").should("eq", 201);
@@ -396,7 +401,7 @@ class FacilityPage {
     facility: string,
     title: string,
     quantity: string,
-    description: string
+    description: string,
   ) {
     cy.get("#refering_facility_contact_name").type(name);
     cy.get("#refering_facility_contact_number").type(phone_number);

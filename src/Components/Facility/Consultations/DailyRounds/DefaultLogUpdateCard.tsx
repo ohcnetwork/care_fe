@@ -16,7 +16,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
 
   return (
     <div
-      className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container"
+      className="flex w-full flex-col gap-4 rounded-lg border border-secondary-400 p-4 @container"
       id="dailyround-entry"
     >
       <LogUpdateCardAttribute
@@ -49,6 +49,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
         </ButtonV2>
         <ButtonV2
           variant="secondary"
+          disabled={!!props.consultationData?.discharge_date}
           border
           ghost
           size="small"
