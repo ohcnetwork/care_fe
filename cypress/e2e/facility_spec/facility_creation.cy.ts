@@ -58,12 +58,15 @@ describe("Facility Creation", () => {
     "Invalid Phone Number",
   ];
   const bedErrorMessage = [
-    "Field is required",
+    "This field is required",
     "Total capacity cannot be 0",
-    "Field is required",
+    "This field is required",
   ];
-  const doctorErrorMessage = ["Field is required", "Field is required"];
-  const triageErrorMessage = ["Field is required"];
+  const doctorErrorMessage = [
+    "This field is required",
+    "This field is required",
+  ];
+  const triageErrorMessage = ["This field is required"];
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
