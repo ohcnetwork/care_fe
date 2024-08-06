@@ -56,7 +56,9 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const prescriptionList = [
     ...(data?.results ?? []),
-    ...(showDiscontinued ? discontinuedPrescriptions.data?.results ?? [] : []),
+    ...(showDiscontinued
+      ? (discontinuedPrescriptions.data?.results ?? [])
+      : []),
   ];
 
   const { activityTimelineBounds, prescriptions } = useMemo(
@@ -90,25 +92,31 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         options={
           !readonly &&
           !!data?.results && (
-            <AuthorizedForConsultationRelatedActions>
-              <ButtonV2
-                id="edit-prescription"
-                variant="secondary"
-                border
-                href="prescriptions"
-                className="w-full"
-              >
-                <CareIcon icon="l-pen" className="text-lg" />
-                <span className="hidden lg:block">
-                  {t("edit_prescriptions")}
-                </span>
-                <span className="block lg:hidden">{t("edit")}</span>
+            <>
+              <AuthorizedForConsultationRelatedActions>
+                <ButtonV2
+                  id="edit-prescription"
+                  variant="secondary"
+                  border
+                  href="prescriptions"
+                  className="w-full"
+                >
+                  <CareIcon icon="l-pen" className="text-lg" />
+                  <span className="hidden lg:block">
+                    {t("edit_prescriptions")}
+                  </span>
+                  <span className="block lg:hidden">{t("edit")}</span>
+                </ButtonV2>
+                <BulkAdminister
+                  prescriptions={data.results}
+                  onDone={() => refetch()}
+                />
+              </AuthorizedForConsultationRelatedActions>
+              <ButtonV2 href="prescriptions/print" ghost border>
+                <CareIcon icon="l-print" className="text-lg" />
+                Print
               </ButtonV2>
-              <BulkAdminister
-                prescriptions={data.results}
-                onDone={() => refetch()}
-              />
-            </AuthorizedForConsultationRelatedActions>
+            </>
           )
         }
       />
