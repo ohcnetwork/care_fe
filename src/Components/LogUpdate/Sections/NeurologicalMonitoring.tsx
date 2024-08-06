@@ -24,6 +24,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
           label="The patient is in prone position"
           value={log.in_prone_position}
           onChange={(e) => onChange({ in_prone_position: e.value })}
+          errorClassName="hidden"
         />
       </div>
       <br />
