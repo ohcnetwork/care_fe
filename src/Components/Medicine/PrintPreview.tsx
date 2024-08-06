@@ -26,6 +26,9 @@ export default function PrescriptionsPrintPreview() {
 
   return (
     <PrintPreview
+      title={
+        patient ? `Prescriptions - ${patient.name}` : "Print Prescriptions"
+      }
       disabled={!prescriptionsQuery.data?.results?.length || !patient}
     >
       <div className="mb-4 grid grid-cols-2 border-2 border-secondary-400">
