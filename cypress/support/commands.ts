@@ -204,12 +204,3 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
     });
   });
 });
-
-Cypress.Commands.overwrite(
-  "click",
-  (originalFn, subject, positionOrX, y, options = {}) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return originalFn(subject, positionOrX, y, { force: true, ...options });
-  },
-);
