@@ -5,10 +5,7 @@ import {
   RHYTHM_CHOICES,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 import { loadInvestigations } from "../Common/prescription-builder/InvestigationBuilder";
-import { ICD11DiagnosisModel } from "../Diagnosis/types";
 import { SYMPTOM_CHOICES } from "../Symptoms/types";
 import { Field, ScribeForm } from "./Scribe";
 
@@ -225,14 +222,14 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example:
       "[{diagnosis: '4A42.0 Paediatric onset systemic sclerosis', verification_status: 'confirmed', is_principal: true}, {diagnosis: 2, verification_status: 'provisional', is_principal: false}]",
     description:
-      "A list of objects to store the patient's diagnosis along with their verification status and whether it is the principal diagnosis. By default set is_principal to false. NOTE: only one principal diagnosis can exist. The diagnosis field should be a string that may contain a corresponding diagnosis ID. The verification_status field should be a string with one of the following values: 'unconfirmed', 'provisional', 'differential', or 'confirmed'. The is_principal field should be a boolean value.",
+      "A list of objects to store the patient's diagnosis along with their verification status and whether it is the principal diagnosis. If not specifically said, set is_principal to false. NOTE: only one principal diagnosis can exist. The diagnosis field should be a string that may contain a corresponding diagnosis ID. The verification_status field should be a string with one of the following values: 'unconfirmed', 'provisional', 'differential', or 'confirmed'.",
     validator: (value) => {
       if (!Array.isArray(value)) return false;
-      value.forEach(d => {
+      value.forEach((d) => {
         if (!d.diagnosis || !d.verification_status) return false;
       });
       return true;
-    }
+    },
   },
   {
     friendlyName: "Investigations",
@@ -274,12 +271,58 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Prescriptions",
     id: "prescriptions",
     type: `{
-    
+      base_dosage: number + " " + ("mg" | "g" | "ml" | "drop(s)" | "ampule(s)" | "tsp" | "mcg" | "unit(s)"),
+      days: number,
+      dosage_type: "REGULAR" | "TITRATED",
+      frequency: "STAT" | "OD" | "HS" | "BD" | "TID" | "QID" | "Q4H" | "QOD" | "QWK",
+      medicine: string,
+      notes: string,
+      route: "ORAL" | "IV" | "IM" | "SC" | "INHALATION" | "NASOGASTRIC" | "INTRATHECAL" | "TRANSDERMAL" | "RECTAL" | "SUBLINGUAL",
+      instruction_on_titration: string,
+      target_dosage: number + " " + ("mg" | "g" | "ml" | "drop(s)" | "ampule(s)" | "tsp" | "mcg" | "unit(s)"),
     }[]`,
     default: [],
-    example: "",
-    description: "Leave blank.",
-    validator: () => {
+    example: `[
+      {base_dosage: "5 ampule(s)", days: 7, dosage_type: "REGULAR", frequency: "STAT", medicine: "DOLO", notes: "Give with water", route: "ORAL"},
+      {base_dosage: "7 ml", days: 3, dosage_type: "TITRATED", frequency: "Q4H", medicine: "Albumin", route: "INHALATION", instruction_on_titration: "Example", target_dosage: "40 ml"},
+    ]`,
+    description: `A list of objects to store the patient's prescriptions. The prescription can be regular or titrated. If titrated, the prescription should also include instruction_on_titration, and a target_dosage. NOTE: target_dosage should have the same unit as base_dosage. 
+    The frequency should be any of the mentioned ones. They are short for:
+    STAT: Imediately,
+    OD: Once daily,
+    HS: Night Only,
+    BD: Twice Daily,
+    TID: 8th Hourly,
+    QID: 6th Hourly,
+    Q4H: 4th Hourly,
+    QOD: Alternate Day,
+    QWK: Once a Week
+    `,
+    validator: (value) => {
+      if (!Array.isArray(value)) return false;
+      return true;
+    },
+  },
+  {
+    friendlyName: "PRN Prescriptions",
+    id: "prn_prescriptions",
+    type: `{
+      base_dosage: number + " " + ("mg" | "g" | "ml" | "drop(s)" | "ampule(s)" | "tsp" | "mcg" | "unit(s)"),
+      dosage_type: "PRN",
+      medicine: string,
+      notes: string,
+      route: "ORAL" | "IV" | "IM" | "SC" | "INHALATION" | "NASOGASTRIC" | "INTRATHECAL" | "TRANSDERMAL" | "RECTAL" | "SUBLINGUAL",
+      indicator: string,
+      min_hours_between_doses: number,
+      max_dosage: number + " " + ("mg" | "g" | "ml" | "drop(s)" | "ampule(s)" | "tsp" | "mcg" | "unit(s)"),
+    }[]`,
+    default: [],
+    example: `[
+      {base_dosage: "3 drop(s)", dosage_type:"PRN", indicator: "If patient gets fever", max_dosage: "5 drops(s)", min_hours_between_doses: 12, route: "IV", medicine: "Glentona", notes: "Example"}
+    ]`,
+    description: "A list of objects to store the patient's PRN prescriptions.",
+    validator: (value) => {
+      if (!Array.isArray(value)) return false;
       return true;
     },
   },
@@ -315,18 +358,6 @@ export const SCRIBE_FORMS: { [key: string]: ScribeForm } = {
     id: "daily_round",
     name: "Daily Round",
     fields: async () => {
-      const { res, data } = await request(routes.listICD11Diagnosis, {
-        silent: true,
-      });
-      let icd11Diagnoses: ICD11DiagnosisModel[] = [];
-
-      if (res?.ok && data) icd11Diagnoses = data;
-
-      const icd11DiagnosisOptions = icd11Diagnoses?.map((diagnosis) => ({
-        id: diagnosis.id,
-        text: diagnosis.label,
-      }));
-
       const investigations = await loadInvestigations();
 
       return DAILY_ROUND_FORM_SCRIBE_DATA.map((field) => {

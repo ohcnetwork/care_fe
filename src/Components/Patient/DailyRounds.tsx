@@ -47,6 +47,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import SymptomsApi from "../Symptoms/api";
 import DiagnosesRoutes from "../Diagnosis/routes";
+import MedicineRoutes from "../Medicine/routes";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -56,6 +57,8 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
+  const [diagnosisSeed, setDiagnosesSeed] = useState(1);
+  const [prescriptionSeed, setPrescriptionSeed] = useState(1);
 
   const initForm: any = {
     physical_examination_info: "",
@@ -170,7 +173,7 @@ export const DailyRounds = (props: any) => {
           ...data,
           patient_category: data.patient_category
             ? PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
-              ?.id ?? ""
+                ?.id ?? ""
             : "",
           rhythm:
             (data.rhythm &&
@@ -492,13 +495,11 @@ export const DailyRounds = (props: any) => {
                 });
                 if (res?.ok) setSymptomsSeed((s) => s + 1);
               }
-              rounds_type = "DOCTORS_LOG";
             }
 
             // ICD11 Diagnosis
             if (fields.icd11_diagnosis) {
               for (const diagnosis of fields.icd11_diagnosis) {
-
                 // Fetch available diagnoses
 
                 const { res: icdRes, data: icdData } = await request(
@@ -506,7 +507,7 @@ export const DailyRounds = (props: any) => {
                   {
                     query: { query: diagnosis.diagnosis },
                   },
-                )
+                );
 
                 if (!icdRes?.ok) {
                   error({
@@ -515,11 +516,11 @@ export const DailyRounds = (props: any) => {
                   continue;
                 }
 
-                const awailableDiagnosis = icdData?.[0]?.id;
+                const availableDiagnosis = icdData?.[0]?.id;
 
-                if (!awailableDiagnosis) {
+                if (!availableDiagnosis) {
                   error({
-                    text: "Diagnosis not found",
+                    text: "Could not find the requested diagnosis. Please enter manually.",
                   });
                   continue;
                 }
@@ -528,20 +529,82 @@ export const DailyRounds = (props: any) => {
                   DiagnosesRoutes.createConsultationDiagnosis,
                   {
                     pathParams: { consultation: consultationId },
-                    body: diagnosis,
+                    body: {
+                      ...diagnosis,
+                      diagnosis: availableDiagnosis,
+                    },
                   },
                 );
 
                 if (res?.ok)
                   setDiagnoses((diagnoses) => [
                     ...(diagnoses || []),
-                    fields.icd11_diagnosis,
+                    {
+                      ...diagnosis,
+                      diagnosis_object: icdData?.[0],
+                    },
                   ]);
+                setDiagnosesSeed((s) => s + 1);
               }
-              rounds_type = "DOCTORS_LOG";
             }
 
-            if ("investigations" in fields) {
+            // Prescriptions
+            if (fields.prescriptions || fields.prn_prescriptions) {
+              const combined_prescriptions = [
+                ...(fields.prescriptions || []),
+                ...(fields.prn_prescriptions || []),
+              ];
+              for (const prescription of combined_prescriptions) {
+                // fetch medicine
+                const { res: medicineRes, data: medicineData } = await request(
+                  routes.listMedibaseMedicines,
+                  {
+                    query: { query: prescription.medicine },
+                  },
+                );
+
+                if (!medicineRes?.ok) {
+                  error({
+                    text: "Failed to fetch medicine",
+                  });
+                  continue;
+                }
+
+                const availableMedicine = medicineData?.[0]?.id;
+
+                if (!availableMedicine) {
+                  error({
+                    text: "Could not find the requested medicine. Please enter manually.",
+                  });
+                  continue;
+                }
+
+                const { res } = await request(
+                  MedicineRoutes.createPrescription,
+                  {
+                    pathParams: { consultation: consultationId },
+                    body: {
+                      ...prescription,
+                      medicine: availableMedicine,
+                    },
+                  },
+                );
+
+                if (res?.ok) setPrescriptionSeed((s) => s + 1);
+              }
+            }
+
+            if (
+              Object.keys(fields).some((f) =>
+                [
+                  "investigations",
+                  "icd11_diagnosis",
+                  "additional_symptoms",
+                  "prescriptions",
+                  "prn_prescriptions",
+                ].includes(f),
+              )
+            ) {
               rounds_type = "DOCTORS_LOG";
             }
 
@@ -655,124 +718,124 @@ export const DailyRounds = (props: any) => {
           {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
             state.form.rounds_type,
           ) && (
-              <>
-                <h3 className="mb-6 md:col-span-2">Vitals</h3>
+            <>
+              <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
-                <BloodPressureFormField {...field("bp")} label="Blood Pressure" />
+              <BloodPressureFormField {...field("bp")} label="Blood Pressure" />
 
-                <RangeAutocompleteFormField
-                  {...field("pulse")}
-                  label="Pulse"
-                  unit="bpm"
-                  start={0}
-                  end={200}
-                  step={1}
-                  thresholds={[
-                    {
-                      value: 0,
-                      className: "text-danger-500",
-                      label: "Bradycardia",
-                    },
-                    {
-                      value: 40,
-                      className: "text-primary-500",
-                      label: "Normal",
-                    },
-                    {
-                      value: 100,
-                      className: "text-danger-500",
-                      label: "Tachycardia",
-                    },
-                  ]}
-                />
+              <RangeAutocompleteFormField
+                {...field("pulse")}
+                label="Pulse"
+                unit="bpm"
+                start={0}
+                end={200}
+                step={1}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
+                    label: "Bradycardia",
+                  },
+                  {
+                    value: 40,
+                    className: "text-primary-500",
+                    label: "Normal",
+                  },
+                  {
+                    value: 100,
+                    className: "text-danger-500",
+                    label: "Tachycardia",
+                  },
+                ]}
+              />
 
-                <TemperatureFormField
-                  {...field("temperature")}
-                  label="Temperature"
-                />
+              <TemperatureFormField
+                {...field("temperature")}
+                label="Temperature"
+              />
 
-                <RangeAutocompleteFormField
-                  {...field("resp")}
-                  label="Respiratory Rate"
-                  unit="bpm"
-                  start={0}
-                  end={150}
-                  step={1}
-                  thresholds={[
-                    {
-                      value: 0,
-                      className: "text-danger-500",
-                      label: "Bradypnea",
-                    },
-                    {
-                      value: 12,
-                      className: "text-primary-500",
-                      label: "Normal",
-                    },
-                    {
-                      value: 16,
-                      className: "text-danger-500",
-                      label: "Tachypnea",
-                    },
-                  ]}
-                />
+              <RangeAutocompleteFormField
+                {...field("resp")}
+                label="Respiratory Rate"
+                unit="bpm"
+                start={0}
+                end={150}
+                step={1}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
+                    label: "Bradypnea",
+                  },
+                  {
+                    value: 12,
+                    className: "text-primary-500",
+                    label: "Normal",
+                  },
+                  {
+                    value: 16,
+                    className: "text-danger-500",
+                    label: "Tachypnea",
+                  },
+                ]}
+              />
 
-                <RangeAutocompleteFormField
-                  {...field("ventilator_spo2")}
-                  label="SPO2"
-                  unit="%"
-                  start={0}
-                  end={100}
-                  step={1}
-                  thresholds={[
-                    {
-                      value: 0,
-                      className: "text-danger-500",
-                      label: "Low",
-                    },
-                    {
-                      value: 90,
-                      className: "text-primary-500",
-                      label: "Normal",
-                    },
-                    {
-                      value: 100,
-                      className: "text-danger-500",
-                      label: "High",
-                    },
-                  ]}
-                />
+              <RangeAutocompleteFormField
+                {...field("ventilator_spo2")}
+                label="SPO2"
+                unit="%"
+                start={0}
+                end={100}
+                step={1}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
+                    label: "Low",
+                  },
+                  {
+                    value: 90,
+                    className: "text-primary-500",
+                    label: "Normal",
+                  },
+                  {
+                    value: 100,
+                    className: "text-danger-500",
+                    label: "High",
+                  },
+                ]}
+              />
 
-                <SelectFormField
-                  {...field("rhythm")}
-                  label="Rhythm"
-                  placeholder="Unknown"
-                  options={RHYTHM_CHOICES}
-                  optionLabel={(option) => option.desc}
-                  optionValue={(option) => option.id}
-                />
+              <SelectFormField
+                {...field("rhythm")}
+                label="Rhythm"
+                placeholder="Unknown"
+                options={RHYTHM_CHOICES}
+                optionLabel={(option) => option.desc}
+                optionValue={(option) => option.id}
+              />
 
-                <TextAreaFormField
-                  {...field("rhythm_detail")}
-                  className="md:col-span-1"
-                  label="Rhythm Description"
-                  rows={7}
-                />
+              <TextAreaFormField
+                {...field("rhythm_detail")}
+                className="md:col-span-1"
+                label="Rhythm Description"
+                rows={7}
+              />
 
-                <RadioFormField
-                  label="Level Of Consciousness"
-                  {...field("consciousness_level")}
-                  options={CONSCIOUSNESS_LEVEL.map((level) => ({
-                    label: level.text,
-                    value: level.id,
-                  }))}
-                  optionDisplay={(option) => option.label}
-                  optionValue={(option) => option.value}
-                  unselectLabel="Unknown"
-                  containerClassName="grid gap-1 grid-cols-1"
-                />
-              </>
-            )}
+              <RadioFormField
+                label="Level Of Consciousness"
+                {...field("consciousness_level")}
+                options={CONSCIOUSNESS_LEVEL.map((level) => ({
+                  label: level.text,
+                  value: level.id,
+                }))}
+                optionDisplay={(option) => option.label}
+                optionValue={(option) => option.value}
+                unselectLabel="Unknown"
+                containerClassName="grid gap-1 grid-cols-1"
+              />
+            </>
+          )}
 
           {state.form.rounds_type === "DOCTORS_LOG" && (
             <>
@@ -783,7 +846,10 @@ export const DailyRounds = (props: any) => {
                   </h3>
                   {/*  */}
                   {diagnoses ? (
-                    <EditDiagnosesBuilder value={diagnoses} />
+                    <EditDiagnosesBuilder
+                      value={diagnoses}
+                      key={diagnosisSeed}
+                    />
                   ) : (
                     <div className="flex animate-pulse justify-center py-4 text-center font-medium text-secondary-800">
                       Fetching existing diagnosis of patient...
@@ -824,6 +890,7 @@ export const DailyRounds = (props: any) => {
                     discontinued={
                       showDiscontinuedPrescriptions ? undefined : false
                     }
+                    key={prescriptionSeed}
                     actions={["discontinue"]}
                   />
                 </div>
@@ -848,6 +915,7 @@ export const DailyRounds = (props: any) => {
                       showDiscontinuedPrescriptions ? undefined : false
                     }
                     actions={["discontinue"]}
+                    key={prescriptionSeed}
                   />
                 </div>
               </div>
