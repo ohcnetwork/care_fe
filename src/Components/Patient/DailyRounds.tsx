@@ -694,8 +694,8 @@ export const DailyRounds = (props: any) => {
                 label="Level Of Consciousness"
                 {...field("consciousness_level")}
                 options={CONSCIOUSNESS_LEVEL.map((level) => ({
-                  label: level.text,
-                  value: level.id,
+                  label: t(`CONSCIOUSNESS_LEVEL__${level.value}`),
+                  value: level.value,
                 }))}
                 optionDisplay={(option) => option.label}
                 optionValue={(option) => option.value}

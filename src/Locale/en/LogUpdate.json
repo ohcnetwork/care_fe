@@ -5,5 +5,11 @@
     "VENTILATOR_MODE__SIMV": "Synchronised Intermittent Mandatory Ventilation (SIMV)",
     "VENTILATOR_MODE__VC_SIMV": "Volume Controlled SIMV (VC-SIMV)",
     "VENTILATOR_MODE__PC_SIMV": "Pressure Controlled SIMV (PC-SIMV)",
-    "VENTILATOR_MODE__PSV": "C-PAP / Pressure Support Ventilation (PSV)"
+    "VENTILATOR_MODE__PSV": "C-PAP / Pressure Support Ventilation (PSV)",
+    "CONSCIOUSNESS_LEVEL__UNRESPONSIVE": "Unresponsive",
+    "CONSCIOUSNESS_LEVEL__RESPONDS_TO_PAIN": "Responds to Pain",
+    "CONSCIOUSNESS_LEVEL__RESPONDS_TO_VOICE": "Responds to Voice",
+    "CONSCIOUSNESS_LEVEL__ALERT": "Alert",
+    "CONSCIOUSNESS_LEVEL__AGITATED_OR_CONFUSED": "Agitated or Confused",
+    "CONSCIOUSNESS_LEVEL__ONSET_OF_AGITATION_AND_CONFUSION": "Onset of Agitation and Confusion"
 }

@@ -1,14 +1,15 @@
 import { lazy, useState } from "react";
-import { CONSCIOUSNESS_LEVEL } from "../../Common/constants";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { formatDateTime } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export const DailyRoundListDetails = (props: any) => {
+  const { t } = useTranslation();
   const { facilityId, patientId, consultationId, id } = props;
   const [dailyRoundListDetailsData, setDailyRoundListDetails] =
     useState<DailyRoundsModel>({});
@@ -138,9 +139,9 @@ export const DailyRoundListDetails = (props: any) => {
               Level Of Consciousness:{" "}
             </span>
             {(dailyRoundListDetailsData.consciousness_level &&
-              CONSCIOUSNESS_LEVEL.find(
-                (i) => i.id === dailyRoundListDetailsData.consciousness_level,
-              )?.text) ||
+              t(
+                `CONSCIOUSNESS_LEVEL__${dailyRoundListDetailsData.consciousness_level}`,
+              )) ||
               "-"}
           </div>
           <div>

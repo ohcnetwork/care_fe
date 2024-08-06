@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -172,7 +173,10 @@ export const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "ALERT",
     description:
       "An option to store the level of consciousness of the patient.",
-    options: CONSCIOUSNESS_LEVEL,
+    options: CONSCIOUSNESS_LEVEL.map((loc) => ({
+      ...loc,
+      text: t(`CONSCIOUSNESS_LEVEL__${loc.value}`),
+    })),
   },
 ];
 

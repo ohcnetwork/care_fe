@@ -5,12 +5,14 @@ import request from "../../../Utils/request/request";
 
 import Pagination from "../../Common/Pagination";
 import {
+  CONSCIOUSNESS_LEVEL,
   EYE_OPEN_SCALE,
   MOTOR_RESPONSE_SCALE,
   PAGINATION_LIMIT,
   VERBAL_RESPONSE_SCALE,
 } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
+import { t } from "i18next";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -93,15 +95,6 @@ export const NeurologicalTable = (props: any) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const LOC_OPTIONS = [
-    { id: 0, value: "Unknown" },
-    { id: 5, value: "Alert" },
-    { id: 10, value: "Drowsy" },
-    { id: 15, value: "Stuporous" },
-    { id: 20, value: "Comatose" },
-    { id: 25, value: "Cannot Be Assessed" },
-  ];
-
   const REACTION_OPTIONS = [
     { id: 0, value: "Unknown" },
     { id: 5, value: "Brisk" },
@@ -179,11 +172,12 @@ export const NeurologicalTable = (props: any) => {
   Object.entries(results).map((x: any) => {
     const value: any = x[1];
     if (x[1].consciousness_level) {
+      const loc = CONSCIOUSNESS_LEVEL.find(
+        (item) => item.id === x[1].consciousness_level,
+      );
       locData.push({
         date: formatDateTime(x[0]),
-        loc:
-          LOC_OPTIONS.find((item) => item.id === x[1].consciousness_level)
-            ?.value || "--",
+        loc: (loc && t(`CONSCIOUSNESS_LEVEL__${loc.value}`)) || "--",
       });
     }
 

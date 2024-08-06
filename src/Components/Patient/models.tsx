@@ -331,7 +331,7 @@ export interface DailyRoundsModel {
   created_date?: string;
   modified_date?: string;
   taken_at?: string;
-  consciousness_level?: (typeof CONSCIOUSNESS_LEVEL)[number]["id"];
+  consciousness_level?: (typeof CONSCIOUSNESS_LEVEL)[number]["value"];
   rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;

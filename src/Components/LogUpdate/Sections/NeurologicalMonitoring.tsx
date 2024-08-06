@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   CONSCIOUSNESS_LEVEL,
   EYE_OPEN_SCALE,
@@ -16,6 +17,7 @@ import {
 } from "../utils";
 
 const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-2">
       <div className="mt-4 rounded-lg bg-secondary-100 p-4">
@@ -32,13 +34,13 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
       <RadioFormField
         name="consciousness_level"
         options={CONSCIOUSNESS_LEVEL}
-        optionDisplay={(c) => c.text}
-        optionValue={(c) => c.id}
+        optionDisplay={(c) => t(`CONSCIOUSNESS_LEVEL__${c.value}`)}
+        optionValue={(c) => c.value}
         value={log.consciousness_level}
         onChange={(c) =>
           onChange({
             consciousness_level:
-              c.value as (typeof CONSCIOUSNESS_LEVEL)[number]["id"],
+              c.value as (typeof CONSCIOUSNESS_LEVEL)[number]["value"],
           })
         }
         layout="vertical"

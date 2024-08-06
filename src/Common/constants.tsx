@@ -339,14 +339,14 @@ export const DISCHARGE_REASONS = [
 ] as const;
 
 export const CONSCIOUSNESS_LEVEL = [
-  { id: "UNRESPONSIVE", text: "Unresponsive" },
-  { id: "RESPONDS_TO_PAIN", text: "Responds to Pain" },
-  { id: "RESPONDS_TO_VOICE", text: "Responds to Voice" },
-  { id: "ALERT", text: "Alert" },
-  { id: "AGITATED_OR_CONFUSED", text: "Agitated or Confused" },
+  { id: 20, value: "UNRESPONSIVE" },
+  { id: 15, value: "RESPONDS_TO_PAIN" },
+  { id: 10, value: "RESPONDS_TO_VOICE" },
+  { id: 5, value: "ALERT" },
+  { id: 25, value: "AGITATED_OR_CONFUSED" },
   {
-    id: "ONSET_OF_AGITATION_AND_CONFUSION",
-    text: "Onset of Agitation and Confusion",
+    id: 30,
+    value: "ONSET_OF_AGITATION_AND_CONFUSION",
   },
 ] as const;
 
