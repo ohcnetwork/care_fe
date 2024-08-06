@@ -20,7 +20,7 @@ const RadioFormField = <T,>(props: Props<T>) => {
         className={classNames(
           {
             auto: "flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-x-6",
-            vertical: "flex flex-col gap-2",
+            vertical: "flex flex-col gap-1",
             horizontal: "flex justify-between gap-4",
             grid: "grid grid-cols-2 gap-x-8 gap-y-2",
           }[props.layout ?? "auto"],
