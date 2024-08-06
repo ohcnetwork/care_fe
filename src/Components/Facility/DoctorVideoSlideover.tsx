@@ -243,7 +243,13 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
             // Show online icon based on last_login
             user.last_login &&
             Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
-              <CareIcon icon={icon} className="text-xl text-green-600" />
+              <>
+                <CareIcon icon={icon} className="text-xl text-green-600" />
+                <span
+                  className="relative top-2 h-3 w-3 rounded-full bg-primary-500"
+                  aria-label="Online"
+                />
+              </>
             ) : (
               <CareIcon icon={icon} className="text-2xl text-gray-600" />
             )
