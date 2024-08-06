@@ -17,8 +17,13 @@ import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import { Popover, Transition } from "@headlessui/react";
-import { Fragment, lazy, useEffect, useState } from "react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
+import { lazy, useEffect, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   getPincodeDetails,
@@ -939,7 +944,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <div className="flex flex-col justify-center md:block">
                     <Popover id="map-popover" className="relative">
                       <>
-                        <Popover.Button>
+                        <PopoverButton>
                           <ButtonV2
                             circle
                             type="button"
@@ -951,10 +956,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                               Select location from map
                             </span>
                           </ButtonV2>
-                        </Popover.Button>
+                        </PopoverButton>
 
                         <Transition
-                          as={Fragment}
                           enter="transition ease-out duration-200"
                           enterFrom="opacity-0 translate-y-1"
                           enterTo="opacity-100 translate-y-0"
@@ -962,7 +966,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                           leaveFrom="opacity-100 translate-y-0"
                           leaveTo="opacity-0 translate-y-1"
                         >
-                          <Popover.Panel className="absolute -right-40 bottom-10 sm:-right-48">
+                          <PopoverPanel className="absolute -right-40 bottom-10 sm:-right-48">
                             <GLocationPicker
                               lat={Number(state.form.latitude)}
                               lng={Number(state.form.longitude)}
@@ -972,7 +976,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                 handleSelectCurrentLocation
                               }
                             />
-                          </Popover.Panel>
+                          </PopoverPanel>
                         </Transition>
                       </>
                     </Popover>

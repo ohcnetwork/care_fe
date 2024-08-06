@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Popover } from "@headlessui/react";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import routes from "../../Redux/api";
@@ -474,7 +474,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
   return (
     <Popover>
-      <Popover.Button>
+      <PopoverButton>
         <ButtonV2
           onClick={() => setOpen(!open)}
           className="rounded py-2 font-bold"
@@ -482,9 +482,9 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
           <CareIcon icon="l-microphone" className="mr-1" />
           Voice AutoFill
         </ButtonV2>
-      </Popover.Button>
+      </PopoverButton>
       {open && (
-        <Popover.Panel className="absolute right-6 z-10 w-[370px]" static>
+        <PopoverPanel className="absolute right-6 z-10 w-[370px]" static>
           <div className="text-center">
             <span className="mt-2 inline-block align-middle" aria-hidden="true">
               &#8203;
@@ -654,7 +654,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
               </div>
             </div>
           </div>
-        </Popover.Panel>
+        </PopoverPanel>
       )}
     </Popover>
   );

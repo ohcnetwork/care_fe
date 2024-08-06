@@ -1,6 +1,12 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../Common/components/HelperComponents";
-import { Listbox } from "@headlessui/react";
+import {
+  Label,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
 import { ReactNode, useRef } from "react";
 
@@ -89,12 +95,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       >
         {({ open }) => (
           <>
-            <Listbox.Label className="sr-only !relative">
-              {props.placeholder}
-            </Listbox.Label>
+            <Label className="sr-only !relative">{props.placeholder}</Label>
             <div className="relative">
               <div>
-                <Listbox.Button
+                <ListboxButton
                   className="cui-input-base flex w-full rounded"
                   ref={buttonRef}
                 >
@@ -129,12 +133,16 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       className="-mb-0.5 text-lg text-secondary-900"
                     />
                   </div>
-                </Listbox.Button>
+                </ListboxButton>
               </div>
               <DropdownTransition show={open}>
-                <Listbox.Options className="cui-dropdown-base absolute top-full">
+                <ListboxOptions
+                  as="ul"
+                  className="cui-dropdown-base absolute top-full"
+                >
                   {options.map((option, index) => (
-                    <Listbox.Option
+                    <ListboxOption
+                      as="li"
                       id={`${props.id}-option-${index}`}
                       key={index}
                       className={dropdownOptionClassNames}
@@ -142,7 +150,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       onClick={() => handleSingleSelect(option)}
                       disabled={option.disabled}
                     >
-                      {({ active }) => (
+                      {({ focus }) => (
                         <div className="flex flex-col gap-2">
                           <div className="flex justify-between">
                             {option.label}
@@ -159,7 +167,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                                 "text-sm font-normal",
                                 option.disabled
                                   ? "text-secondary-500"
-                                  : active
+                                  : focus
                                     ? "text-primary-200"
                                     : "text-secondary-500",
                               )}
@@ -169,9 +177,9 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                           )}
                         </div>
                       )}
-                    </Listbox.Option>
+                    </ListboxOption>
                   ))}
-                </Listbox.Options>
+                </ListboxOptions>
               </DropdownTransition>
             </div>
           </>
@@ -211,21 +219,21 @@ export const MultiSelectOptionChip = ({
 };
 
 interface OptionRenderPropArg {
-  active: boolean;
+  focus: boolean;
   selected: boolean;
   disabled: boolean;
 }
 
 export const dropdownOptionClassNames = ({
-  active,
+  focus,
   selected,
   disabled,
 }: OptionRenderPropArg) => {
   return classNames(
     "group/option relative w-full cursor-default select-none p-4 text-sm transition-colors duration-75 ease-in-out",
-    !disabled && active && "bg-primary-500 text-white",
-    !disabled && !active && selected && "text-primary-500",
-    !disabled && !active && !selected && "text-secondary-900",
+    !disabled && focus && "bg-primary-500 text-white",
+    !disabled && !focus && selected && "text-primary-500",
+    !disabled && !focus && !selected && "text-secondary-900",
     disabled && "cursor-not-allowed text-secondary-600",
     selected ? "font-semibold" : "font-normal",
   );

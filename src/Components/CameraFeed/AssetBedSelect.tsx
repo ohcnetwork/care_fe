@@ -1,6 +1,11 @@
-import { Fragment } from "react";
 import { AssetBedModel } from "../Assets/AssetTypes";
-import { Listbox, Transition } from "@headlessui/react";
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+  Transition,
+} from "@headlessui/react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
@@ -78,7 +83,7 @@ export const CameraPresetDropdown = (
       disabled={options.length === 0 || props.disabled}
     >
       <div className="relative flex-1">
-        <Listbox.Button
+        <ListboxButton
           className={classNames(
             "button-size-small button-shape-square relative inline-flex h-min min-w-32 cursor-pointer items-center gap-2 whitespace-pre pr-12 text-left text-sm font-medium shadow outline-offset-1 transition-all duration-200 ease-in-out enabled:hover:shadow-md disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 md:min-w-40",
             selected
@@ -102,16 +107,19 @@ export const CameraPresetDropdown = (
           <span className="pointer-events-none absolute inset-y-0 right-0 mr-1 mt-1 flex items-center">
             <CareIcon icon="l-angle-down" className="text-xl text-zinc-400" />
           </span>
-        </Listbox.Button>
+        </ListboxButton>
         <Transition
-          as={Fragment}
           leave="transition ease-in duration-300"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Listbox.Options className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-gray-500 focus:outline-none md:max-h-60">
+          <ListboxOptions
+            as="ul"
+            className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-gray-500 focus:outline-none md:max-h-60"
+          >
             {options?.map((obj) => (
-              <Listbox.Option
+              <ListboxOption
+                as="li"
                 key={obj.id}
                 className={(args) =>
                   classNames(dropdownOptionClassNames(args), "px-2 py-1.5")
@@ -119,9 +127,9 @@ export const CameraPresetDropdown = (
                 value={obj}
               >
                 <span>{label(obj)}</span>
-              </Listbox.Option>
+              </ListboxOption>
             ))}
-          </Listbox.Options>
+          </ListboxOptions>
         </Transition>
       </div>
     </Listbox>

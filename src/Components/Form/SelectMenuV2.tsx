@@ -1,4 +1,10 @@
-import { Listbox } from "@headlessui/react";
+import {
+  Label,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
@@ -89,11 +95,9 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
       >
         {({ open }) => (
           <>
-            <Listbox.Label className="sr-only !relative">
-              {props.placeholder}
-            </Listbox.Label>
+            <Label className="sr-only !relative">{props.placeholder}</Label>
             <div className="relative">
-              <Listbox.Button
+              <ListboxButton
                 className={`${
                   props?.requiredError ? "border-red-500" : ""
                 } cui-input-base flex w-full rounded`}
@@ -118,7 +122,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     />
                   )}
                 </div>
-              </Listbox.Button>
+              </ListboxButton>
               <div
                 className={classNames(
                   "absolute z-10 w-full",
@@ -126,16 +130,17 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                 )}
               >
                 <DropdownTransition show={open}>
-                  <Listbox.Options className="cui-dropdown-base">
+                  <ListboxOptions as="ul" className="cui-dropdown-base">
                     {options.map((option, index) => (
-                      <Listbox.Option
+                      <ListboxOption
+                        as="li"
                         id={`${props.id}-option-${option.value}`}
                         key={index}
                         className={dropdownOptionClassNames}
                         value={option}
                         disabled={option.disabled}
                       >
-                        {({ active, selected }) => (
+                        {({ focus, selected }) => (
                           <div className="flex flex-col gap-2">
                             <div className="flex justify-between">
                               {option.label}
@@ -154,7 +159,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                                   "text-sm font-normal",
                                   option.disabled
                                     ? "text-secondary-700"
-                                    : active
+                                    : focus
                                       ? "text-primary-200"
                                       : "text-secondary-700",
                                 )}
@@ -164,9 +169,9 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                             )}
                           </div>
                         )}
-                      </Listbox.Option>
+                      </ListboxOption>
                     ))}
-                  </Listbox.Options>
+                  </ListboxOptions>
                 </DropdownTransition>
               </div>
             </div>
