@@ -34,7 +34,7 @@ const fields = [
     label: "pH",
     unit: "",
     min: 0,
-    max: 14,
+    max: 10,
     step: 0.1,
     valueDescription: rangeValueDescription({ low: 7.35, high: 7.45 }),
   },
