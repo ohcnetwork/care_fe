@@ -52,7 +52,7 @@ export const PrimaryParametersPlot = ({
             "insulin_intake_frequency",
             "insulin_intake_dose",
             "ventilator_spo2",
-            "ventilator_fi02",
+            "ventilator_fio2",
             "rhythm",
             "rhythm_detail",
           ],
@@ -195,7 +195,7 @@ export const PrimaryParametersPlot = ({
             title="Ventilator FIO2 (%)"
             name="fio2"
             xData={dates}
-            yData={yAxisData("ventilator_fi02")}
+            yData={yAxisData("ventilator_fio2")}
             low={21}
             high={60}
           />
@@ -222,11 +222,10 @@ export const PrimaryParametersPlot = ({
                         <div className="relative flex space-x-3">
                           <div>
                             <span
-                              className={`flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white ${
-                                rhythmDetails.rhythm === 5
+                              className={`flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white ${rhythmDetails.rhythm === 5
                                   ? " text-green-500 "
                                   : " text-red-500 "
-                              }`}
+                                }`}
                             >
                               {rhythmDetails.rhythm === 5 ? (
                                 <CareIcon
@@ -244,11 +243,10 @@ export const PrimaryParametersPlot = ({
                           <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                             <div>
                               <p
-                                className={`text-sm ${
-                                  rhythmDetails.rhythm === 5
+                                className={`text-sm ${rhythmDetails.rhythm === 5
                                     ? " text-green-500 "
                                     : " text-red-500 "
-                                }`}
+                                  }`}
                               >
                                 <span className="mr-5">
                                   {rhythmDetails.rhythm === 5

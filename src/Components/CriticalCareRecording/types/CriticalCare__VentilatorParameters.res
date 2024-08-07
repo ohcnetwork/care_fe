@@ -156,7 +156,7 @@ type t = {
   ventilator_tidal_volume: option<int>,
   ventilator_oxygen_modality_oxygen_rate: option<int>,
   ventilator_oxygen_modality_flow_rate: option<int>,
-  ventilator_fi02: option<int>,
+  ventilator_fio2: option<int>,
   ventilator_spo2: option<int>,
   bilateral_air_entry: option<bool>,
   etco2: option<int>,
@@ -173,7 +173,7 @@ let pressureSupport = t => t.ventilator_pressure_support
 let tidalVolume = t => t.ventilator_tidal_volume
 let oxygenModalityOxygenRate = t => t.ventilator_oxygen_modality_oxygen_rate
 let oxygenModalityFlowRate = t => t.ventilator_oxygen_modality_flow_rate
-let fio2 = t => t.ventilator_fi02
+let fio2 = t => t.ventilator_fio2
 let spo2 = t => t.ventilator_spo2
 
 let getParentVentilatorMode = ventilatorModeType => {
@@ -202,7 +202,7 @@ type state = {
   ventilator_tidal_volume: option<int>,
   ventilator_oxygen_modality_oxygen_rate: option<int>,
   ventilator_oxygen_modality_flow_rate: option<int>,
-  ventilator_fi02: option<int>,
+  ventilator_fio2: option<int>,
   ventilator_spo2: option<int>,
   bilateral_air_entry: option<bool>,
   etco2: option<int>,
@@ -240,7 +240,7 @@ let make = (
   ~ventilator_tidal_volume,
   ~ventilator_oxygen_modality_oxygen_rate,
   ~ventilator_oxygen_modality_flow_rate,
-  ~ventilator_fi02,
+  ~ventilator_fio2,
   ~ventilator_spo2,
   ~bilateral_air_entry,
   ~etco2,
@@ -256,7 +256,7 @@ let make = (
   ventilator_tidal_volume: ventilator_tidal_volume,
   ventilator_oxygen_modality_oxygen_rate: ventilator_oxygen_modality_oxygen_rate,
   ventilator_oxygen_modality_flow_rate: ventilator_oxygen_modality_flow_rate,
-  ventilator_fi02: ventilator_fi02,
+  ventilator_fio2: ventilator_fio2,
   ventilator_spo2: ventilator_spo2,
   bilateral_air_entry: bilateral_air_entry,
   etco2: etco2,
@@ -277,7 +277,7 @@ let makeFromJs = dailyRound => {
     ~ventilator_tidal_volume=dailyRound["ventilator_tidal_volume"]->Js.Nullable.toOption,
     ~ventilator_oxygen_modality_oxygen_rate=dailyRound["ventilator_oxygen_modality_oxygen_rate"]->Js.Nullable.toOption,
     ~ventilator_oxygen_modality_flow_rate=dailyRound["ventilator_oxygen_modality_flow_rate"]->Js.Nullable.toOption,
-    ~ventilator_fi02=dailyRound["ventilator_fi02"]->Js.Nullable.toOption,
+    ~ventilator_fio2=dailyRound["ventilator_fio2"]->Js.Nullable.toOption,
     ~ventilator_spo2=dailyRound["ventilator_spo2"]->Js.Nullable.toOption,
     ~bilateral_air_entry=dailyRound["bilateral_air_entry"]->Js.Nullable.toOption,
     ~etco2=dailyRound["etco2"]->Js.Nullable.toOption,

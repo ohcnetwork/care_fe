@@ -80,7 +80,7 @@ let silderOptionArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
-    "id": "ventilator_fi02",
+    "id": "ventilator_fio2",
     "min": 21.0,
     "max": 60.0,
   },
@@ -190,7 +190,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           | "ventilator_resp_rate" => state.ventilator_resp_rate
           | "ventilator_pressure_support" => state.ventilator_pressure_support
           | "ventilator_tidal_volume" => state.ventilator_tidal_volume
-          | "ventilator_fi02" => state.ventilator_fi02
+          | "ventilator_fio2" => state.ventilator_fio2
           | "ventilator_spo2" => state.ventilator_spo2
           | _ => None
           }
@@ -206,7 +206,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
             | "ventilator_resp_rate" => SetRespiratoryRate(s)
             | "ventilator_pressure_support" => SetPressureSupport(s)
             | "ventilator_tidal_volume" => SetTidalVolume(s)
-            | "ventilator_fi02" => SetFIO2(s)
+            | "ventilator_fio2" => SetFIO2(s)
             | "ventilator_spo2" => SetSPO2(s)
             }
           <Slider

@@ -70,7 +70,7 @@ let reducer = (state: VentilatorParameters.state, action: VentilatorParameters.a
     }
   | SetFIO2(fio2) => {
       ...state,
-      ventilator_fi02: fio2,
+      ventilator_fio2: fio2,
     }
   | SetSPO2(spo2) => {
       ...state,
@@ -129,11 +129,11 @@ let makePayload = (state: VentilatorParameters.state) => {
     payload,
   )
   DictUtils.setOptionalNumber(
-    "ventilator_fi02",
+    "ventilator_fio2",
     state.ventilator_oxygen_modality === HIGH_FLOW_NASAL_CANNULA ||
     state.ventilator_interface === INVASIVE ||
     state.ventilator_interface === NON_INVASIVE
-      ? state.ventilator_fi02
+      ? state.ventilator_fio2
       : None,
     payload,
   )
@@ -198,7 +198,7 @@ let initialState: VentilatorParameters.t => VentilatorParameters.state = ventila
     ventilator_tidal_volume: ventilatorParameters.ventilator_tidal_volume,
     ventilator_oxygen_modality_oxygen_rate: ventilatorParameters.ventilator_oxygen_modality_oxygen_rate,
     ventilator_oxygen_modality_flow_rate: ventilatorParameters.ventilator_oxygen_modality_flow_rate,
-    ventilator_fi02: ventilatorParameters.ventilator_fi02,
+    ventilator_fio2: ventilatorParameters.ventilator_fio2,
     ventilator_spo2: ventilatorParameters.ventilator_spo2,
     etco2: ventilatorParameters.etco2,
     bilateral_air_entry: ventilatorParameters.bilateral_air_entry,

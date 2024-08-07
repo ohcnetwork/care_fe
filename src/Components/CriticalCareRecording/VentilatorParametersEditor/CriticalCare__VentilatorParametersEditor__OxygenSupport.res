@@ -15,7 +15,7 @@ let silderOptionArray = [
     "end": "100",
     "interval": "10",
     "step": 1.0,
-    "id": "ventilator_fi02",
+    "id": "ventilator_fio2",
     "min": 21.0,
     "max": 60.0,
   },
@@ -100,17 +100,17 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
     |> Array.map(option => {
       let value: option<int> = switch option["id"] {
       | "ventilator_oxygen_modality_flow_rate" => state.ventilator_oxygen_modality_flow_rate
-      | "ventilator_fi02" => state.ventilator_fi02
+      | "ventilator_fio2" => state.ventilator_fio2
       | "ventilator_spo2" => state.ventilator_spo2
       | _ => None
       }
       let handleChange: option<int> => VentilatorParameters.action = s =>
         switch option["id"] {
-        | "ventilator_fi02" => SetFIO2(s)
+        | "ventilator_fio2" => SetFIO2(s)
         | "ventilator_spo2" => SetSPO2(s)
         }
       let className =
-        option["id"] === "ventilator_fi02" &&
+        option["id"] === "ventilator_fio2" &&
           state.ventilator_oxygen_modality !== HIGH_FLOW_NASAL_CANNULA
           ? "hidden"
           : ""
