@@ -277,7 +277,7 @@ export const NeurologicalTable = (props: any) => {
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
-                className="min-w-max-content flex flex-col divide-x divide-secondary-200"
+                className="min-w-max-content flex flex-col divide-x divide-secondary-200 whitespace-nowrap"
               >
                 <div className="border-r bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-700">
                   {x.date}
