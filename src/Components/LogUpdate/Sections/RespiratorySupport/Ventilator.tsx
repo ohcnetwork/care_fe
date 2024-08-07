@@ -75,6 +75,7 @@ const VentilatorRespiratorySupport = ({
         value={log.ventilator_tidal_volume}
         min={0}
         max={1000}
+        valueDescriptions={rangeValueDescription({})}
       />
       <RangeFormField
         label={
