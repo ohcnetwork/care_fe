@@ -9,6 +9,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { getBedTypes } from "../../Common/constants";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import { useTranslation } from "react-i18next";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;
@@ -49,6 +50,7 @@ const bedCountReducer = (state = initialState, action: any) => {
 };
 
 export const BedCapacity = (props: BedCapacityProps) => {
+  const { t } = useTranslation();
   const config = useConfig();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
@@ -127,7 +129,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       if (!state.form[field]) {
-        errors[field] = "Field is required";
+        errors[field] = t("field_required");
         invalidForm = true;
       } else if (
         field === "currentOccupancy" &&

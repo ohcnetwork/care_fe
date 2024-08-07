@@ -453,7 +453,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "route_to_facility":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -469,7 +469,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "encounter_date":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           if (
@@ -540,7 +540,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "consultation_notes":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (!state.form[field].replace(/\s/g, "").length) {
             errors[field] = "Consultation notes can not be empty";
@@ -608,7 +608,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
         case "treating_physician": {
           if (state.form.suggestion !== "DD" && !state.form[field]) {
-            errors[field] = "Please fill treating physician";
+            errors[field] = t("field_required");
             invalidForm = true;
             break;
           }
@@ -1084,12 +1084,18 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     <div className="flex items-center justify-between">
                       <FieldLabel>Body Surface Area</FieldLabel>
                       <span className="mb-2 text-sm font-medium text-black">
-                        {Math.sqrt(
-                          (Number(state.form.weight) *
-                            Number(state.form.height)) /
-                            3600,
-                        ).toFixed(2)}
-                        m<sup>2</sup>
+                        {state.form.weight && state.form.height ? (
+                          <>
+                            {Math.sqrt(
+                              (Number(state.form.weight) *
+                                Number(state.form.height)) /
+                                3600,
+                            ).toFixed(2)}
+                            m<sup>2</sup>
+                          </>
+                        ) : (
+                          "Not specified"
+                        )}
                       </span>
                     </div>
 
@@ -1437,6 +1443,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           userType={"Doctor"}
                           homeFacility={facilityId}
                           error={state.errors.treating_physician}
+                          noResultsError={t("no_treating_physicians_available")}
                         />
                       </div>
 
