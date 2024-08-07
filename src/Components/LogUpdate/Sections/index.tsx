@@ -9,6 +9,7 @@ import PressureSore from "./PressureSore/PressureSore";
 import RespiratorySupport from "./RespiratorySupport";
 import Vitals from "./Vitals";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
+import { DailyRoundTypes } from "../../Patient/models";
 
 const LogUpdateSections = {
   Vitals,
@@ -26,3 +27,24 @@ const LogUpdateSections = {
 >;
 
 export default LogUpdateSections;
+
+export const RoundTypeSections = {
+  NORMAL: [],
+  AUTOMATED: [],
+  TELEMEDICINE: [],
+  VENTILATOR: [
+    "Vitals",
+    "NeurologicalMonitoring",
+    "RespiratorySupport",
+    "ABGAnalysis",
+    "BloodSugar",
+    "IOBalance",
+    "Dialysis",
+    "PressureSore",
+    "NursingCare",
+  ],
+  DOCTORS_LOG: ["NeurologicalMonitoring", "RespiratorySupport"],
+} as const satisfies Record<
+  (typeof DailyRoundTypes)[number],
+  (keyof typeof LogUpdateSections)[]
+>;

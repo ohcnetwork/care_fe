@@ -1,6 +1,6 @@
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import LogUpdateSections from "./Sections";
+import LogUpdateSections, { RoundTypeSections } from "./Sections";
 import React, { useState } from "react";
 import Loading from "../Common/Loading";
 import { DailyRoundsModel } from "../Patient/models";
@@ -37,6 +37,7 @@ export default function CriticalCareEditor(props: Props) {
     return <Loading />;
   }
 
+  const sections = RoundTypeSections[query.data.rounds_type ?? "VENTILATOR"];
   const consultationDashboardUrl = `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`;
 
   return (
@@ -97,7 +98,7 @@ export default function CriticalCareEditor(props: Props) {
                 <CareIcon icon="l-check-circle" className="text-2xl" />
               </ButtonV2>
             </li>
-            {Object.keys(LogUpdateSections).map((key) => {
+            {sections.map((key) => {
               const isCompleted = completed.includes(key as SectionKey);
               const section = LogUpdateSections[key as SectionKey];
 
