@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import CircularProgress from "../Common/components/CircularProgress";
 import DialogModal from "../Common/Dialog";
 import OtpFormField from "../Form/FormFields/OtpFormField";
 import QRScanner from "../Common/QRScanner";
@@ -182,17 +181,6 @@ const ScanABHAQRSection = ({
       return "abha-address";
     }
   }, [qrValue]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center gap-2">
-        <span className="text-3xl font-semibold text-secondary-700">
-          Loading
-        </span>
-        <CircularProgress className="text-green-500" />
-      </div>
-    );
-  }
 
   return (
     <div>
