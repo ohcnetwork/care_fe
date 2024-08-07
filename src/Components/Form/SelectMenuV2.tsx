@@ -23,6 +23,7 @@ type SelectMenuProps<T, V = T> = {
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;
   className?: string;
+  inputClassName?: string;
   requiredError?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -94,9 +95,11 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
             </Listbox.Label>
             <div className="relative">
               <Listbox.Button
-                className={`${
-                  props?.requiredError ? "border-red-500" : ""
-                } cui-input-base flex w-full rounded`}
+                className={classNames(
+                  "cui-input-base flex w-full rounded",
+                  props?.requiredError && "border-red-500",
+                  props.inputClassName,
+                )}
                 onFocus={props.onFocus}
                 onBlur={props.onBlur}
               >

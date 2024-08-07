@@ -7,6 +7,7 @@ import {
   ValueDescription,
 } from "../../../Utils/utils";
 import TextFormField from "./TextFormField";
+import { SelectFormField } from "./SelectFormField";
 
 type BaseProps = FormFieldBaseProps<number> & {
   min: number;
@@ -112,54 +113,49 @@ export default function RangeFormField(props: Props) {
               {valueDescription?.text}
             </div>
             {!props.hideInput && (
-              <TextFormField
-                name="range"
-                type="number"
-                value={displayValue}
-                placeholder="--.--"
-                onChange={(e) => handleChange(parseFloat(e.value))}
-                min={min}
-                max={max}
-                errorClassName="hidden"
-                inputClassName={classNames(
-                  "py-1.5",
-                  unit.label ? "w-36" : "w-24",
+              <>
+                <TextFormField
+                  name="range"
+                  type="number"
+                  value={displayValue}
+                  placeholder="--.--"
+                  onChange={(e) => handleChange(parseFloat(e.value))}
+                  min={min}
+                  max={max}
+                  errorClassName="hidden"
+                  inputClassName="py-1.5 mr-4"
+                />
+                {props.units?.length ? (
+                  <SelectFormField
+                    id={field.name + "_units"}
+                    name={field.name + "_units"}
+                    inputClassName="py-1.5"
+                    className="-ml-1"
+                    value={unit.label}
+                    options={props.units}
+                    optionLabel={(o) => o.label}
+                    optionValue={(o) => o.label}
+                    onChange={(e) => {
+                      const resolved = props.units.find(
+                        (o) => o.label === e.value,
+                      );
+                      if (resolved) {
+                        setUnit({
+                          label: resolved.label,
+                          conversionFn: resolved.conversionFn ?? unity,
+                          inversionFn: resolved.inversionFn ?? unity,
+                        });
+                      }
+                    }}
+                    disabled={props.disabled}
+                    errorClassName="hidden"
+                  />
+                ) : (
+                  <p className="whitespace-nowrap text-xs font-bold text-secondary-700">
+                    {unit.label}
+                  </p>
                 )}
-                trailingPadding=" "
-                trailing={
-                  props.units?.length ? (
-                    <select
-                      id={field.name + "_units"}
-                      name={field.name + "_units"}
-                      className="cui-input-base mr-4 h-full border-0 bg-transparent py-0 pl-2 pr-8 text-xs font-bold text-secondary-700 focus:ring-2 focus:ring-inset"
-                      value={unit.label}
-                      onChange={(e) => {
-                        const resolved = props.units.find(
-                          (o) => o.label === e.target.value,
-                        );
-                        if (resolved) {
-                          setUnit({
-                            label: resolved.label,
-                            conversionFn: resolved.conversionFn ?? unity,
-                            inversionFn: resolved.inversionFn ?? unity,
-                          });
-                        }
-                      }}
-                      disabled={props.disabled}
-                    >
-                      {props.units.map(({ label }, i) => (
-                        <option key={i} value={label}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <p className="absolute right-10 whitespace-nowrap text-xs font-bold text-secondary-700">
-                      {unit.label}
-                    </p>
-                  )
-                }
-              />
+              </>
             )}
           </div>
         ),
