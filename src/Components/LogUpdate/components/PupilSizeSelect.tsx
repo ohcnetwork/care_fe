@@ -1,6 +1,7 @@
 import { classNames, getValueDescription } from "../../../Utils/utils";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
+import { LogUpdateSectionProps } from "../utils";
 
 const PupilSizeValueDescriptions = [
   { till: 2, text: "Constricted", color: "red" },
@@ -8,31 +9,25 @@ const PupilSizeValueDescriptions = [
   { till: 8, text: "Dilated", color: "red" },
 ];
 
-type Props = {
-  pupilSize?: number | null;
-  detail?: string | null;
-  onChange?: (val: number | null) => void;
-  onDetailChange?: (val: string) => void;
-  className?: string;
-};
-
 const min = 1;
 const max = 8;
 
 export default function PupilSizeSelect({
-  pupilSize,
-  detail,
+  log,
   onChange,
-  onDetailChange,
-  className,
-}: Props) {
+  side,
+  readonly,
+}: LogUpdateSectionProps & { side: "left" | "right" }) {
+  const pupilSize = log[`${side}_pupil_size`];
+  const detail = log[`${side}_pupil_size_detail`];
+
   const valueDescription =
     pupilSize != null && min <= pupilSize && pupilSize <= max
       ? getValueDescription(PupilSizeValueDescriptions, pupilSize)
       : null;
 
   return (
-    <div className={`flex flex-col ${className} gap-4`}>
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h5>Size</h5>
         <span style={{ color: valueDescription?.color }}>
@@ -45,7 +40,7 @@ export default function PupilSizeSelect({
         {Array.from({ length: max - min + 1 }, (_, i) => i + min).map(
           (size) => (
             <button
-              disabled={!onChange}
+              disabled={readonly}
               key={size}
               className={classNames(
                 "flex aspect-square h-20 flex-col items-center justify-between rounded-lg border py-2 transition-all duration-200 ease-in-out",
@@ -53,7 +48,7 @@ export default function PupilSizeSelect({
                   ? "border-primary-500 bg-primary-100 shadow-md"
                   : "border-secondary-300 bg-white hover:bg-secondary-200",
               )}
-              onClick={() => onChange?.(size)}
+              onClick={() => onChange({ [`${side}_pupil_size`]: size })}
             >
               <div
                 className="aspect-square rounded-full bg-black transition-all"
@@ -101,9 +96,12 @@ export default function PupilSizeSelect({
       >
         <CheckBoxFormField
           label="Cannot be Assessed"
-          name="pupil_reaction"
+          name={`${side}_pupil_size_detail_checked`}
+          id={`${side}_pupil_size_detail_checked`}
           value={pupilSize === 0}
-          onChange={({ value }) => onChange?.(value ? 0 : null)}
+          onChange={({ value }) =>
+            onChange({ [`${side}_pupil_size`]: value ? 0 : undefined })
+          }
           errorClassName="hidden"
         />
         {pupilSize === 0 && (
@@ -112,8 +110,10 @@ export default function PupilSizeSelect({
             labelClassName="text-sm sm:font-medium"
             name="pupil_size_unknown_reason"
             value={detail || ""}
-            onChange={(val) => onDetailChange?.(val.value)}
-            disabled={!onDetailChange}
+            onChange={({ value }) =>
+              onChange({ [`${side}_pupil_size_detail`]: value })
+            }
+            disabled={readonly}
           />
         )}
       </div>

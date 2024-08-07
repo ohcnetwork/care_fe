@@ -54,22 +54,15 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
           <div className="flex flex-wrap gap-8">
             {(["left", "right"] as const).map((d, i) => (
               <div key={i}>
-                <h4 className="capitalize">{d} Pupil</h4>
-                <PupilSizeSelect
-                  pupilSize={log[`${d}_pupil_size`]}
-                  detail={log[`${d}_pupil_size_detail`]}
-                  onChange={(val) => onChange({ [`${d}_pupil_size`]: val })}
-                  onDetailChange={(val) =>
-                    onChange({ [`${d}_pupil_size_detail`]: val })
-                  }
-                  className="mt-4"
-                />
+                <h4 className="mb-4 capitalize">{d} Pupil</h4>
+                <PupilSizeSelect log={log} onChange={onChange} side={d} />
                 <br />
                 <h5>Reaction</h5>
                 <RadioFormField
                   options={REACTION_OPTIONS.filter(
                     (o) => o.value !== "UNKNOWN",
                   )}
+                  id={`${d}_reaction`}
                   optionDisplay={(c) => c.text}
                   optionValue={(c) => c.value}
                   name={`${d}_pupil_light_reaction`}
