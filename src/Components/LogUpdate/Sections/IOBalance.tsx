@@ -1,5 +1,5 @@
 import { Fragment } from "react/jsx-runtime";
-import { DailyRoundsModel, NameQuantity } from "../../Patient/models";
+import { DailyRoundsModel } from "../../Patient/models";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
@@ -61,96 +61,87 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
           {fields.map((field, i) => (
             <div key={i} className="flex flex-col gap-4">
               <h4>{field.name}</h4>
-              {(log[field.key] as NameQuantity[] | undefined)?.map(
-                ({ name, quantity }, j) => (
-                  <div key={j} className="flex items-end gap-4">
-                    <div className="flex-1">
-                      {j == 0 && (
-                        <div className="mb-2 text-sm text-secondary-800">
-                          Type
-                        </div>
-                      )}
-                      <SelectFormField
-                        name="name"
-                        options={field.options
-                          .filter(
-                            (option) =>
-                              !(log[field.key] as NameQuantity[] | undefined)
-                                ?.map((f) => f.name)
-                                .includes(option),
-                          )
-                          .concat(field.options.includes(name) ? [name] : [])}
-                        optionLabel={(f) => f}
-                        value={name}
-                        onChange={(val) =>
-                          onChange({
-                            [field.key]: (
-                              log[field.key] as NameQuantity[] | undefined
-                            )?.map((f, fi) =>
-                              j === fi ? { ...f, name: val } : f,
-                            ),
-                          })
-                        }
-                        className="w-full"
-                        errorClassName="hidden"
-                      />
-                    </div>
-                    <TextFormField
-                      type="number"
-                      min={0}
-                      errorClassName="hidden"
-                      name={name + " Quantity"}
-                      value={quantity.toString()}
-                      onChange={(val) =>
+              {log[field.key]?.map(({ name, quantity }, j) => (
+                <div key={j} className="flex items-end gap-4">
+                  <div className="flex-1">
+                    {j == 0 && (
+                      <div className="mb-2 text-sm text-secondary-800">
+                        Type
+                      </div>
+                    )}
+                    <SelectFormField
+                      name="name"
+                      options={field.options
+                        .filter(
+                          (option) =>
+                            !log[field.key]
+                              ?.map((f) => f.name)
+                              .includes(option),
+                        )
+                        .concat(field.options.includes(name) ? [name] : [])}
+                      optionLabel={(f) => f}
+                      value={name}
+                      onChange={({ value }) =>
                         onChange({
-                          [field.key]: (
-                            log[field.key] as NameQuantity[] | undefined
-                          )?.map((f, fi) =>
-                            j === fi
-                              ? { ...f, quantity: parseInt(val.value) }
-                              : f,
+                          [field.key]: log[field.key]?.map((f, fi) =>
+                            j === fi ? { ...f, name: value } : f,
                           ),
                         })
                       }
-                      label={
-                        j == 0 && (
-                          <div className="text-sm text-secondary-800">
-                            Quantity
-                          </div>
-                        )
-                      }
+                      className="w-full"
+                      errorClassName="hidden"
                     />
-                    <ButtonV2
-                      variant="secondary"
-                      className="text-lg text-red-500"
-                      onClick={() =>
-                        onChange({
-                          [field.key]: (
-                            log[field.key] as NameQuantity[] | undefined
-                          )?.filter((f, fi) => j !== fi),
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-trash" />
-                    </ButtonV2>
                   </div>
-                ),
-              )}
+                  <TextFormField
+                    type="number"
+                    min={0}
+                    errorClassName="hidden"
+                    name={name + " Quantity"}
+                    value={quantity.toString()}
+                    onChange={(val) =>
+                      onChange({
+                        [field.key]: log[field.key]?.map((f, fi) =>
+                          j === fi
+                            ? { ...f, quantity: parseInt(val.value) }
+                            : f,
+                        ),
+                      })
+                    }
+                    label={
+                      j == 0 && (
+                        <div className="text-sm text-secondary-800">
+                          Quantity
+                        </div>
+                      )
+                    }
+                  />
+                  <ButtonV2
+                    variant="secondary"
+                    className="text-lg text-red-500"
+                    onClick={() =>
+                      onChange({
+                        [field.key]: log[field.key]?.filter(
+                          (f, fi) => j !== fi,
+                        ),
+                      })
+                    }
+                  >
+                    <CareIcon icon="l-trash" />
+                  </ButtonV2>
+                </div>
+              ))}
               <ButtonV2
                 variant="secondary"
                 className="bg-secondary-200"
                 onClick={() =>
                   onChange({
                     [field.key]: [
-                      ...((log[field.key] as NameQuantity[] | undefined) || []),
+                      ...(log[field.key] || []),
                       { name: null, quantity: 0 },
                     ],
                   })
                 }
-                disabled={
-                  field.options.length ===
-                  (log[field.key] as NameQuantity[] | undefined)?.length
-                }
+                disabled={field.options.length === log[field.key]?.length}
               >
                 <CareIcon icon="l-plus" />
                 Add {field.name}
@@ -161,18 +152,12 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
             <h4>Total</h4>
             <div>
               {fields
-                .flatMap((f) =>
-                  ((log[f.key] as NameQuantity[]) || []).map((f) => f.quantity),
-                )
+                .flatMap((f) => (log[f.key] || []).map((f) => f.quantity))
                 .join("+")}
               =
               <span className="text-3xl font-black text-primary-500">
                 {fields
-                  .flatMap((f) =>
-                    ((log[f.key] as NameQuantity[]) || []).map(
-                      (f) => f.quantity,
-                    ),
-                  )
+                  .flatMap((f) => (log[f.key] || []).map((f) => f.quantity))
                   .reduce((a, b) => a + b, 0)}
               </span>
             </div>
@@ -185,9 +170,7 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
           {sections
             .map((s) =>
               s.fields
-                .flatMap((f) =>
-                  ((log[f.key] as NameQuantity[]) || []).map((f) => f.quantity),
-                )
+                .flatMap((f) => (log[f.key] || []).map((f) => f.quantity))
                 .reduce((a, b) => a + b, 0),
             )
             .join("-")}
@@ -196,11 +179,7 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
             {sections
               .map((s) =>
                 s.fields
-                  .flatMap((f) =>
-                    ((log[f.key] as NameQuantity[]) || []).map(
-                      (f) => f.quantity,
-                    ),
-                  )
+                  .flatMap((f) => (log[f.key] || []).map((f) => f.quantity))
                   .reduce((a, b) => a + b, 0),
               )
               .reduce((a, b) => a - b)}
