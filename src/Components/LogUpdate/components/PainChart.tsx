@@ -35,6 +35,7 @@ export default function PainChart({ pain, onChange }: Props) {
                 const mutated = pain.filter((v) => v.region !== obj.region);
                 mutated.push(obj);
                 onChange(mutated);
+                setCurrent(undefined);
               }
             : undefined
         }

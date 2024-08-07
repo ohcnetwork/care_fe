@@ -49,6 +49,7 @@ const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
                 );
                 pressure_sore.push(obj);
                 onChange({ pressure_sore });
+                setCurrent(undefined);
               }
         }
       />
