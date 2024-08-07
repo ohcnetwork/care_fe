@@ -96,16 +96,8 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
       )}
       <div className="flex items-center justify-between">
         <h3>Glasgow Coma Scale</h3>
-        <div>
-          <span className="text-xs text-secondary-700">Total&nbsp;</span>
-          <span className="text-5xl font-bold text-primary-400">
-            {(log.glasgow_eye_open || 0) +
-              (log.glasgow_verbal_response || 0) +
-              (log.glasgow_motor_response || 0)}
-          </span>
-        </div>
       </div>
-      <div className="space-y-6 pl-2">
+      <div className="p-2">
         <RadioFormField
           label={<b>Eye Opening Response</b>}
           options={EYE_OPEN_SCALE.toReversed()}
@@ -145,11 +137,20 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
             })
           }
           layout="vertical"
+          errorClassName="hidden"
         />
+      </div>
+      <div className="text-end">
+        <span className="text-xs text-secondary-700">Total&nbsp;</span>
+        <span className="text-5xl font-bold text-primary-400">
+          {(log.glasgow_eye_open || 0) +
+            (log.glasgow_verbal_response || 0) +
+            (log.glasgow_motor_response || 0)}
+        </span>
       </div>
       <hr />
       <h3>Limb Response</h3>
-      <div className="space-y-4 pl-1">
+      <div className="p-2">
         {(
           [
             "limb_response_upper_extremity_left",
