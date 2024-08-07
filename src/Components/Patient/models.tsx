@@ -351,7 +351,6 @@ export interface DailyRoundsModel {
   glasgow_eye_open?: number;
   glasgow_motor_response?: number;
   glasgow_verbal_response?: number;
-  consciousness_level_detail?: string;
   limb_response_upper_extremity_right?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
   limb_response_upper_extremity_left?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
   limb_response_lower_extremity_left?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];

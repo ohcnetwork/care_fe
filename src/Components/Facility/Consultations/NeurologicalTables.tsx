@@ -123,7 +123,6 @@ export const NeurologicalTable = (props: any) => {
           page: currentPage,
           fields: [
             "consciousness_level",
-            "consciousness_level_detail",
             "left_pupil_size",
             "left_pupil_size_detail",
             "right_pupil_size",
@@ -161,7 +160,6 @@ export const NeurologicalTable = (props: any) => {
   };
 
   const locData: any = [];
-  const locDescription: any = [];
   const sizeData: any = [];
   const sizeDescription: any = [];
   const reactionData: any = [];
@@ -192,13 +190,6 @@ export const NeurologicalTable = (props: any) => {
         verbal: value.glasgow_verbal_response || "-",
         motor: value.glasgow_motor_response || "-",
         total: value.glasgow_total_calculated || "-",
-      });
-    }
-
-    if (x[1].consciousness_level_detail) {
-      locDescription.push({
-        date: formatDateTime(x[0]),
-        loc: x[1].consciousness_level_detail,
       });
     }
 
@@ -277,8 +268,6 @@ export const NeurologicalTable = (props: any) => {
     }
   });
 
-  console.log("locDes", locDescription);
-
   return (
     <div className="mt-2">
       <div className="mb-6">
@@ -298,25 +287,6 @@ export const NeurologicalTable = (props: any) => {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-        <div>
-          <div className="text-xl font-semibold">
-            Level Of Consciousness Description
-          </div>
-          <div className="rounded-lg border bg-white p-4 shadow">
-            {locDescription.length ? (
-              locDescription.map((x: any, i: any) => (
-                <div key={`loc_desc_${i}`} className="mb-2">
-                  <div className="text-sm font-semibold">{`- ${x.date}`}</div>
-                  <div className="pl-2 text-secondary-800">{x.loc}</div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-sm font-semibold text-secondary-800">
-                No Data Available!
-              </div>
-            )}
           </div>
         </div>
       </div>
