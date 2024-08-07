@@ -386,8 +386,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             admitted: data.admitted ? String(data.admitted) : "false",
             admitted_to: data.admitted_to ? data.admitted_to : "",
             category: data.category
-              ? (PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
-                "")
+              ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
+                ""
               : "",
             patient_no: data.patient_no ?? "",
             OPconsultation: data.consultation_notes,
@@ -1084,12 +1084,18 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     <div className="flex items-center justify-between">
                       <FieldLabel>Body Surface Area</FieldLabel>
                       <span className="mb-2 text-sm font-medium text-black">
-                        {Math.sqrt(
-                          (Number(state.form.weight) *
-                            Number(state.form.height)) /
-                            3600,
-                        ).toFixed(2)}
-                        m<sup>2</sup>
+                        {state.form.weight && state.form.height ? (
+                          <>
+                            {Math.sqrt(
+                              (Number(state.form.weight) *
+                                Number(state.form.height)) /
+                                3600,
+                            ).toFixed(2)}
+                            m<sup>2</sup>
+                          </>
+                        ) : (
+                          "Not specified"
+                        )}
                       </span>
                     </div>
 
