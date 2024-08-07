@@ -56,6 +56,7 @@ interface IProps {
   error?: string;
   label?: string;
   disabled?: boolean;
+  disableScanner?: boolean;
 }
 
 const QRScanner = ({
@@ -66,6 +67,7 @@ const QRScanner = ({
   className = "",
   error = "",
   label = "QR Code",
+  disableScanner = false,
 }: IProps) => {
   const [showScanner, setShowScanner] = useState(false);
 
@@ -73,11 +75,13 @@ const QRScanner = ({
     <div className={className}>
       <TextFormField
         trailing={
-          <CareIcon
-            icon="l-focus"
-            onClick={() => setShowScanner(true)}
-            className="z-50 cursor-pointer text-black"
-          />
+          disableScanner ? null : (
+            <CareIcon
+              icon="l-focus"
+              onClick={() => setShowScanner(true)}
+              className="z-50 cursor-pointer text-black"
+            />
+          )
         }
         error={error}
         disabled={disabled}
@@ -89,18 +93,20 @@ const QRScanner = ({
         onChange={(e) => onChange(e.value)}
       />
 
-      <QRScannerModal
-        show={showScanner}
-        disabled={disabled}
-        onClose={() => setShowScanner(false)}
-        onScan={async (scannedValue) => {
-          const parsedValue = parse?.(scannedValue) ?? null;
-          if (parsedValue) {
-            onChange(parsedValue);
-            setShowScanner(false);
-          }
-        }}
-      />
+      {!disableScanner && (
+        <QRScannerModal
+          show={showScanner}
+          disabled={disabled}
+          onClose={() => setShowScanner(false)}
+          onScan={async (scannedValue) => {
+            const parsedValue = parse?.(scannedValue) ?? null;
+            if (parsedValue) {
+              onChange(parsedValue);
+              setShowScanner(false);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

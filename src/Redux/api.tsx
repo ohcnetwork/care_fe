@@ -112,6 +112,7 @@ import { HCXPolicyModel } from "../Components/HCX/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
 import { ScribeModel } from "../Components/Scribe/Scribe";
+import { AbhaNumberModel } from "../Components/ABDM/types/abha";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1524,6 +1525,144 @@ const routes = {
       method: "POST",
       TRes: Type<unknown>(),
       TBody: Type<{ id: string }>(),
+    },
+  },
+
+  abdm: {
+    healthId: {
+      abhaCreateSendAadhaarOtp: {
+        path: "/v3/health_id/abha_create__send_aadhaar_otp/",
+        method: "POST",
+        TBody: Type<{
+          aadhaar: string;
+        }>(),
+        TRes: Type<{
+          transaction_id: string;
+          detail: string;
+        }>(),
+      },
+
+      abhaCreateVerifyAadhaarOtp: {
+        path: "/v3/health_id/abha_create__verify_aadhaar_otp/",
+        method: "POST",
+        TBody: Type<{
+          transaction_id: string;
+          otp: string;
+          mobile: string;
+        }>(),
+        TRes: Type<{
+          transaction_id: string;
+          detail: string;
+          is_new: boolean;
+          abha_number: AbhaNumberModel;
+        }>(),
+      },
+
+      abhaCreateLinkMobileNumber: {
+        path: "/v3/health_id/abha_create__link_mobile_number/",
+        method: "POST",
+        TBody: Type<{
+          transaction_id: string;
+          mobile: string;
+        }>(),
+        TRes: Type<{
+          transaction_id: string;
+          detail: string;
+        }>(),
+      },
+
+      abhaCreateVerifyMobileNumber: {
+        path: "/v3/health_id/abha_create__verify_mobile_otp/",
+        method: "POST",
+        TBody: Type<{
+          transaction_id: string;
+          otp: string;
+        }>(),
+        TRes: Type<{
+          transaction_id: string;
+          detail: string;
+        }>(),
+      },
+
+      abhaCreateAbhaAddressSuggestion: {
+        path: "/v3/health_id/abha_create__abha_address_suggestion/",
+        method: "POST",
+        TBody: Type<{
+          transaction_id: string;
+        }>(),
+        TRes: Type<{
+          transaction_id: string;
+          abha_addresses: string[];
+        }>(),
+      },
+
+      abhaCreateEnrolAbhaAddress: {
+        path: "/v3/health_id/abha_create__enrol_abha_address/",
+        method: "POST",
+        TBody: Type<{
+          transaction_id: string;
+          abha_address: string;
+        }>(),
+        TRes: Type<{
+          transaction_id: string;
+          health_id: string;
+          preferred_abha_address: string;
+          abha_number?: AbhaNumberModel;
+        }>(),
+      },
+
+      linkAbhaNumberAndPatient: {
+        path: "/v3/health_id/link_abha_number_and_patient/",
+        method: "POST",
+        TBody: Type<{
+          abha_number: string;
+          patient: string;
+        }>(),
+        TRes: Type<{
+          detail: string;
+        }>(),
+      },
+
+      abhaLoginCheckAuthMethods: {
+        path: "/v3/health_id/abha_login__check_auth_methods/",
+        method: "POST",
+        TBody: Type<{
+          abha_address: string;
+        }>(),
+        TRes: Type<{
+          abha_number: string;
+          auth_methods: string[];
+        }>(),
+      },
+
+      abhaLoginSendOtp: {
+        path: "/v3/health_id/abha_login__send_otp/",
+        method: "POST",
+        TBody: Type<{
+          type: "abha-number" | "abha-address" | "mobile" | "aadhaar";
+          value: string;
+          otp_system: "abdm" | "aadhaar";
+        }>(),
+        TRes: Type<{
+          transaction_id: string;
+          detail: string;
+        }>(),
+      },
+
+      abhaLoginVerifyOtp: {
+        path: "/v3/health_id/abha_login__verify_otp/",
+        method: "POST",
+        TBody: Type<{
+          type: "abha-number" | "abha-address" | "mobile" | "aadhaar";
+          otp: string;
+          transaction_id: string;
+          otp_system: "abdm" | "aadhaar";
+        }>(),
+        TRes: Type<{
+          abha_number: AbhaNumberModel;
+          created: boolean;
+        }>(),
+      },
     },
   },
 
