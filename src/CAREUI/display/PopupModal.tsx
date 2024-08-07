@@ -2,6 +2,8 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { Cancel, Submit } from "../../Components/Common/components/ButtonV2";
 import { classNames } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import DialogModal from "../../Components/Common/Dialog";
 
 type Props = {
   show: boolean;
@@ -12,6 +14,34 @@ type Props = {
 };
 
 export default function PopupModal(props: Props) {
+  const { t } = useTranslation();
+  const isMobile = useBreakpoints({ default: true, lg: false });
+
+  if (!isMobile) {
+    return <DesktopView {...props} />;
+  }
+
+  return (
+    <DialogModal
+      title=""
+      show={props.show}
+      onClose={props.onHide}
+      className="!p-4 !pt-0"
+    >
+      <div className="space-y-6">
+        {props.children}
+        <div className="cui-form-button-group px-4">
+          <Cancel onClick={props.onHide} label={t("close")} shadow={false} />
+          {props.onSubmit && (
+            <Submit onClick={props.onSubmit} label={t("save")} shadow={false} />
+          )}
+        </div>
+      </div>
+    </DialogModal>
+  );
+}
+
+const DesktopView = (props: Props) => {
   const { t } = useTranslation();
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -91,4 +121,4 @@ export default function PopupModal(props: Props) {
       </div>
     </div>
   );
-}
+};

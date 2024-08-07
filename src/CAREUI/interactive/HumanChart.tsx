@@ -17,7 +17,7 @@ export default function HumanBodyChart({
   const getTitle = (text: string) => text.split(/(?=[A-Z])/).join(" ");
 
   return (
-    <div className="relative flex flex-col items-start gap-2 md:flex-row">
+    <div className="relative flex flex-col items-start gap-2 lg:flex-row">
       {[HumanBodyPaths.anterior, HumanBodyPaths.posterior].map((paths, i) => (
         <div
           className="flex flex-1 flex-col gap-4 rounded-xl border-2 border-secondary-300 p-2"
