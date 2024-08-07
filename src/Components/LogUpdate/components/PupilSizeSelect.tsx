@@ -27,7 +27,7 @@ export default function PupilSizeSelect({
   className,
 }: Props) {
   const valueDescription =
-    typeof pupilSize === "number"
+    pupilSize != null && min <= pupilSize && pupilSize <= max
       ? getValueDescription(PupilSizeValueDescriptions, pupilSize)
       : null;
 
