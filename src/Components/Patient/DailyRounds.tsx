@@ -528,7 +528,7 @@ export const DailyRounds = (props: any) => {
                   continue;
                 }
 
-                const { res } = await request(
+                const { res, data } = await request(
                   DiagnosesRoutes.createConsultationDiagnosis,
                   {
                     pathParams: { consultation: consultationId },
@@ -539,14 +539,8 @@ export const DailyRounds = (props: any) => {
                   },
                 );
 
-                if (res?.ok)
-                  setDiagnoses((diagnoses) => [
-                    ...(diagnoses || []),
-                    {
-                      ...diagnosis,
-                      diagnosis_object: icdData?.[0],
-                    },
-                  ]);
+                if (res?.ok && data)
+                  setDiagnoses((diagnoses) => [...(diagnoses || []), data]);
                 setDiagnosesSeed((s) => s + 1);
               }
             }
