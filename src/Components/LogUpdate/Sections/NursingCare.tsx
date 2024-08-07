@@ -18,10 +18,10 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
             className={classNames(
               "overflow-hidden rounded-lg shadow-none transition-all duration-200 ease-in-out",
               obj &&
-                "border border-secondary-400 bg-secondary-100 focus-within:shadow-lg",
+                "border border-secondary-400 bg-secondary-100 focus-within:shadow-md",
             )}
           >
-            <div className="p-4">
+            <div className="px-4 pt-4">
               <CheckBoxFormField
                 label={field.desc}
                 name={`${field.text}__enabled`}
@@ -42,6 +42,7 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
                     });
                   }
                 }}
+                errorClassName="hidden"
               />
             </div>
             {obj && (
@@ -59,6 +60,7 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
                     })
                   }
                   placeholder="Description"
+                  errorClassName="hidden"
                 />
               </div>
             )}
