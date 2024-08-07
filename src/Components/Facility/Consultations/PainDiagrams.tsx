@@ -105,7 +105,7 @@ export const PainDiagrams = (props: any) => {
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       {dates && dropdown(dates)}
       {!isLoading && selectedData.data ? (
         <PainChart pain={selectedData.data} />

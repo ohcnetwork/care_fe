@@ -117,7 +117,7 @@ export const PressureSoreDiagrams = (props: any) => {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       {dates && dropdown(dates)}
       {!isLoading && selectedData.data ? (
         <PressureSore
