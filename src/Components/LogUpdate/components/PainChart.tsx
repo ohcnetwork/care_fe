@@ -151,19 +151,19 @@ const valueDescriptions = [
   },
   {
     till: 3,
-    color: "#FF7000",
+    color: "#f87171",
     text: "Low",
     className: "bg-red-400 text-white",
   },
   {
     till: 7,
-    color: "#FF0000",
+    color: "#dc2626",
     text: "Mild",
     className: "bg-red-600 text-white",
   },
   {
     till: 10,
-    color: "#CF0000",
+    color: "#991b1b",
     text: "High",
     className: "bg-red-800 text-white",
   },
