@@ -232,7 +232,7 @@ export const DailyRounds = (props: any) => {
           if (!state.form[field]) {
             errors[field] = "Please select a category";
             invalidForm = true;
-            scrollTo("patient_category");
+            scrollTo("patientCategory");
           }
           return;
         case "bp": {
@@ -240,7 +240,7 @@ export const DailyRounds = (props: any) => {
           if (error) {
             errors.bp = error;
             invalidForm = true;
-            scrollTo("blood_pressure");
+            scrollTo("bloodPressure");
           }
           return;
         }
@@ -527,7 +527,7 @@ export const DailyRounds = (props: any) => {
               {...field("patient_category")}
               required
               label="Category"
-              id="patient_catergory"
+              id="patientCategory"
             />
           </div>
         </div>
@@ -593,7 +593,7 @@ export const DailyRounds = (props: any) => {
             <>
               <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
-              <BloodPressureFormField {...field("bp")} label="Blood Pressure" id="blood_pressure" />
+              <BloodPressureFormField {...field("bp")} label="Blood Pressure" id="bloodPressure" />
 
               <RangeAutocompleteFormField
                 {...field("pulse")}
