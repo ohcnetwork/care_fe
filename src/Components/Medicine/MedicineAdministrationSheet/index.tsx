@@ -116,7 +116,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
                 href="prescriptions/print"
                 ghost
                 border
-                disabled={!data.results}
+                disabled={!data.results.length}
                 className="w-full"
               >
                 <CareIcon icon="l-print" className="text-lg" />
