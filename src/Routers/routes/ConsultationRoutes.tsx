@@ -10,6 +10,7 @@ import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
 import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
 import PatientConsentRecords from "../../Components/Patient/PatientConsentRecords";
 import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
+import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -48,6 +49,8 @@ export default {
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
     (path: any) => <ManagePrescriptions {...path} />,
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions/print":
+    () => <PrescriptionsPrintPreview />,
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigation": ({
     facilityId,
     patientId,

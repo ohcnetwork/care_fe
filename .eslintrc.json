@@ -46,10 +46,6 @@
     "i18next"
   ],
   "rules": {
-    "quotes": [
-      "error",
-      "double"
-    ],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
