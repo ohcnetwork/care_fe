@@ -15,8 +15,6 @@ import { Prescription } from "./models";
 import useConfig from "../../Common/hooks/useConfig";
 import { ReactNode } from "react";
 
-// TODO: follow format of aparna
-
 export default function PrescriptionsPrintPreview() {
   const { main_logo } = useConfig();
   const { t } = useTranslation();
