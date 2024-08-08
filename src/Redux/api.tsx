@@ -92,7 +92,6 @@ import {
   SkillModel,
   SkillObjectModel,
   UpdatePasswordForm,
-  UserAssignedModel,
   UserBareMinimum,
   UserModel,
 } from "../Components/Users/models";
