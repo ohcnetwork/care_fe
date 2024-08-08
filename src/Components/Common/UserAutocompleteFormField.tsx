@@ -7,7 +7,7 @@ import {
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 import { UserModel } from "../Users/models";
-import { isUserOnline } from "../../Utils/utils";
+import { formatName, fullName, isUserOnline } from "../../Utils/utils";
 import { UserRole } from "../../Common/constants";
 import { useEffect } from "react";
 
@@ -85,7 +85,7 @@ export default function UserAutocompleteFormField(props: Props) {
           value={field.value}
           onChange={field.handleChange}
           options={items}
-          optionLabel={getUserFullName}
+          optionLabel={formatName}
           optionIcon={getStatusIcon}
           optionDescription={(option) => `${option.user_type}`}
           optionValue={(option) => option}
@@ -105,8 +105,3 @@ export default function UserAutocompleteFormField(props: Props) {
     </FormField>
   );
 }
-
-const getUserFullName = (user: UserModel) => {
-  const personName = user.first_name + " " + user.last_name;
-  return personName.trim().length > 0 ? personName : user.username || "";
-};

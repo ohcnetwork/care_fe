@@ -18,6 +18,7 @@ import {
   classNames,
   formatDate,
   formatDateTime,
+  formatName,
   formatPatientAge,
   isAntenatal,
   isPostPartum,
@@ -275,14 +276,9 @@ export const PatientHome = (props: any) => {
                 <p className="mx-3 flex flex-1 justify-center gap-2 rounded-lg bg-green-200 p-3 text-center font-bold text-green-800 shadow">
                   <span className="inline">
                     Assigned Doctor:
-                    {
-                      patientData?.last_consultation?.assigned_to_object
-                        .first_name
-                    }
-                    {
-                      patientData?.last_consultation?.assigned_to_object
-                        .last_name
-                    }
+                    {formatName(
+                      patientData.last_consultation.assigned_to_object,
+                    )}
                   </span>
                   {patientData?.last_consultation?.assigned_to_object
                     .alt_phone_number && (
@@ -300,8 +296,7 @@ export const PatientHome = (props: any) => {
                 <p className="mx-2 flex-1 rounded-lg bg-primary-200 p-3 text-center font-bold text-primary-800 shadow">
                   <span className="inline">
                     Assigned Volunteer:
-                    {patientData.assigned_to_object.first_name}
-                    {patientData.assigned_to_object.last_name}
+                    {formatName(patientData.assigned_to_object)}
                   </span>
                 </p>
               )}
