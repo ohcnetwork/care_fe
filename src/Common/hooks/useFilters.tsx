@@ -163,7 +163,6 @@ export default function useFilters({
 
   const FilterBadges = ({
     badges,
-    children,
   }: {
     badges: (utils: typeof badgeUtils) => FilterBadgeProps[];
     children?: React.ReactNode;
@@ -184,7 +183,7 @@ export default function useFilters({
       return acc;
     }, [] as string[]);
 
-    const show = activeFilters.length >= 1 || children;
+    const show = activeFilters.length >= 1;
 
     return (
       <div
@@ -193,7 +192,7 @@ export default function useFilters({
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
-        {children}
+
         {show && (
           <button
             id="clear-all-filters"

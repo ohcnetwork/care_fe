@@ -8,7 +8,6 @@ import useQuery from "../../Utils/request/useQuery";
 import SearchInput from "../Form/SearchInput";
 import {
   ADMITTED_TO,
-  CONSENT_TYPE_CHOICES,
   DISCHARGED_PATIENT_SORT_OPTIONS,
   DISCHARGE_REASONS,
   GENDER_TYPES,
@@ -35,7 +34,6 @@ import {
 } from "../Patient/DiagnosesFilter";
 import { getDiagnosesByIds } from "../Diagnosis/utils";
 import { ICD11DiagnosisModel } from "./models";
-import FilterBadge from "../../CAREUI/display/FilterBadge";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -131,68 +129,6 @@ const DischargedPatientsList = ({
     qParams.diagnoses_unconfirmed,
     qParams.diagnoses_differential,
   ]);
-
-  const LastAdmittedToTypeBadges = () => {
-    const badge = (key: string, value: any, id: string) => {
-      return (
-        value && (
-          <FilterBadge
-            name={key}
-            value={value}
-            onRemove={() => {
-              const lcat = qParams.last_consultation_admitted_bed_type_list
-                .split(",")
-                .filter((x: string) => x != id)
-                .join(",");
-              updateQuery({
-                ...qParams,
-                last_consultation_admitted_bed_type_list: lcat,
-              });
-            }}
-          />
-        )
-      );
-    };
-    return qParams.last_consultation_admitted_bed_type_list
-      .split(",")
-      .map((id: string) => {
-        const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
-        return badge("Bed Type", text, id);
-      });
-  };
-
-  const HasConsentTypesBadges = () => {
-    const badge = (key: string, value: any, id: string) => {
-      return (
-        value && (
-          <FilterBadge
-            name={key}
-            value={value}
-            onRemove={() => {
-              const lcat = qParams.last_consultation__consent_types
-                .split(",")
-                .filter((x: string) => x != id)
-                .join(",");
-              updateQuery({
-                ...qParams,
-                last_consultation__consent_types: lcat,
-              });
-            }}
-          />
-        )
-      );
-    };
-
-    return qParams.last_consultation__consent_types
-      .split(",")
-      .map((id: string) => {
-        const text = [
-          ...CONSENT_TYPE_CHOICES,
-          { id: "None", text: "No Consents" },
-        ].find((obj) => obj.id == id)?.text;
-        return badge("Has Consent", text, id);
-      });
-  };
 
   const queryField = <T,>(name: string, defaultValue?: T) => {
     return {
@@ -418,14 +354,6 @@ const DischargedPatientsList = ({
               ) || "",
             ),
           ]}
-          children={
-            <>
-              {qParams.last_consultation_admitted_bed_type_list &&
-                LastAdmittedToTypeBadges()}
-              {qParams.last_consultation__consent_types &&
-                HasConsentTypesBadges()}
-            </>
-          }
         />
       </div>
       <PaginatedList
