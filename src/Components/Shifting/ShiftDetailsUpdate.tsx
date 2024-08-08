@@ -34,7 +34,7 @@ import Card from "../../CAREUI/display/Card";
 import RadioFormField from "../Form/FormFields/RadioFormField.js";
 import Page from "../Common/components/Page.js";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField.js";
-import { UserModel } from "../Users/models.js";
+import { UserBareMinimum } from "../Users/models.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import { IShift } from "./models.js";
@@ -57,7 +57,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const [qParams, _] = useQueryParams();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [assignedUser, SetAssignedUser] = useState<UserModel>();
+  const [assignedUser, SetAssignedUser] = useState<UserBareMinimum>();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {} as ConsultationModel,
@@ -184,7 +184,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     return !isInvalidForm;
   };
 
-  const handleAssignedUserSelect = (event: FieldChangeEvent<UserModel>) => {
+  const handleAssignedUserSelect = (
+    event: FieldChangeEvent<UserBareMinimum>,
+  ) => {
     const user = event.value;
     const form = { ...state.form };
     form["assigned_to"] = user?.id;

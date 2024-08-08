@@ -1391,7 +1391,6 @@ export const PatientHome = (props: any) => {
         description={
           <div className="mt-6">
             <UserAutocompleteFormField
-              showActiveStatus
               value={assignedVolunteerObject}
               onChange={handleVolunteerSelect}
               userType={"Volunteer"}

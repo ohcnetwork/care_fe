@@ -1,107 +1,177 @@
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { getFacilityUsers, getUserList } from "../../Redux/actions";
 import { Autocomplete } from "../Form/FormFields/Autocomplete";
 import FormField from "../Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
-import { UserModel } from "../Users/models";
-import { formatName, fullName, isUserOnline } from "../../Utils/utils";
+import {
+  classNames,
+  formatName,
+  isUserOnline,
+  mergeQueryOptions,
+} from "../../Utils/utils";
 import { UserRole } from "../../Common/constants";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { UserBareMinimum } from "../Users/models";
 
-type Props = FormFieldBaseProps<UserModel> & {
+type BaseProps = FormFieldBaseProps<UserBareMinimum> & {
   placeholder?: string;
-  facilityId?: string;
-  homeFacility?: string;
   userType?: UserRole;
-  showActiveStatus?: boolean;
   noResultsError?: string;
 };
 
+type LinkedFacilitySearchProps = BaseProps & {
+  facilityId: string;
+  homeFacility?: undefined;
+};
+
+type UserSearchProps = BaseProps & {
+  facilityId?: undefined;
+  homeFacility?: string;
+};
+
+type Props = UserSearchProps | LinkedFacilitySearchProps;
+
+/**
+ * **Deprecated.**
+ *
+ * This component simply acts as a proxy to the `UserAutocomplete` or
+ * `LinkedFacilityUserAutocomplete` components based on the props passed. Use
+ * those components directly instead.
+ */
 export default function UserAutocompleteFormField(props: Props) {
+  if (props.facilityId) {
+    return <LinkedFacilityUserAutocomplete {...props} />;
+  }
+  return <UserAutocomplete {...(props as UserSearchProps)} />;
+}
+
+export const LinkedFacilityUserAutocomplete = (
+  props: LinkedFacilitySearchProps,
+) => {
   const field = useFormFieldPropsResolver(props);
-  const { fetchOptions, isLoading, options } = useAsyncOptions<UserModel>(
-    "id",
-    { queryResponseExtractor: (data) => data.results },
+
+  const [query, setQuery] = useState("");
+
+  const { data, loading } = useQuery(routes.getFacilityUsers, {
+    pathParams: { facility_id: props.facilityId },
+    query: {
+      user_type: props.userType,
+      search_text: query,
+      limit: 50,
+      offset: 0,
+    },
+  });
+
+  const options = mergeQueryOptions(
+    field.value && !query ? [field.value] : [],
+    data?.results ?? [],
+    (obj) => obj.username,
   );
 
-  let search_filter: {
-    limit: number;
-    offset: number;
-    home_facility?: string;
-    user_type?: string;
-    search_text?: string;
-  } = { limit: 50, offset: 0 };
-
-  if (props.showActiveStatus && props.userType) {
-    search_filter = { ...search_filter, user_type: props.userType };
-  }
-
-  if (props.homeFacility) {
-    search_filter = { ...search_filter, home_facility: props.homeFacility };
-  }
-
-  const getStatusIcon = (option: UserModel) => {
-    if (!props.showActiveStatus) return null;
-
-    return (
-      <div className="mr-6 mt-[2px]">
-        <svg
-          className={`h-3 w-3 ${
-            isUserOnline(option) ? "text-green-500" : "text-secondary-400"
-          }`}
-          fill="currentColor"
-          viewBox="0 0 8 8"
-        >
-          <circle cx="4" cy="4" r="4" />
-        </svg>
-      </div>
-    );
-  };
-
-  const items = options(field.value && [field.value]);
+  const noResultError =
+    (!query &&
+      !loading &&
+      field.required &&
+      !options.length &&
+      props.noResultsError) ||
+    undefined;
 
   useEffect(() => {
-    if (props.required && !isLoading && !items.length && props.noResultsError) {
-      field.handleChange(undefined as unknown as UserModel);
+    if (noResultError) {
+      field.handleChange(undefined as unknown as UserBareMinimum);
     }
-  }, [isLoading, items, props.required]);
-
-  const noResultError =
-    (props.required && !isLoading && !items.length && props.noResultsError) ||
-    undefined;
+  }, [noResultError]);
 
   return (
     <FormField field={field}>
-      <div className="relative">
-        <Autocomplete
-          id={field.id}
-          disabled={field.disabled || !!noResultError}
-          // Voluntarily casting type as true to ignore type errors.
-          required={field.required as true}
-          placeholder={noResultError || props.placeholder}
-          value={field.value}
-          onChange={field.handleChange}
-          options={items}
-          optionLabel={formatName}
-          optionIcon={getStatusIcon}
-          optionDescription={(option) => `${option.user_type}`}
-          optionValue={(option) => option}
-          onQuery={(query) =>
-            fetchOptions(
-              props.facilityId
-                ? getFacilityUsers(props.facilityId, {
-                    ...search_filter,
-                    search_text: query,
-                  })
-                : getUserList({ ...search_filter, search_text: query }),
-            )
-          }
-          isLoading={isLoading}
-        />
-      </div>
+      <Autocomplete
+        id={field.id}
+        disabled={field.disabled || !!noResultError}
+        // Voluntarily casting type as true to ignore type errors.
+        required={field.required as true}
+        placeholder={noResultError || props.placeholder}
+        value={field.value}
+        onChange={field.handleChange}
+        options={options}
+        optionLabel={formatName}
+        optionIcon={userOnlineDot}
+        optionDescription={(option) =>
+          `${option.user_type} - ${option.username}`
+        }
+        optionValue={(option) => option}
+        onQuery={setQuery}
+        isLoading={loading}
+      />
     </FormField>
   );
-}
+};
+export const UserAutocomplete = (props: UserSearchProps) => {
+  const field = useFormFieldPropsResolver(props);
+
+  const [query, setQuery] = useState("");
+
+  const { data, loading } = useQuery(routes.userList, {
+    query: {
+      home_facility: props.homeFacility,
+      user_type: props.userType,
+      search_text: query,
+      limit: 50,
+      offset: 0,
+    },
+  });
+
+  const options = mergeQueryOptions(
+    field.value && !query ? [field.value] : [],
+    data?.results ?? [],
+    (obj) => obj.username,
+  );
+
+  const noResultError =
+    (!query &&
+      !loading &&
+      field.required &&
+      !options.length &&
+      props.noResultsError) ||
+    undefined;
+
+  useEffect(() => {
+    if (noResultError) {
+      field.handleChange(undefined as unknown as UserBareMinimum);
+    }
+  }, [noResultError]);
+
+  return (
+    <FormField field={field}>
+      <Autocomplete
+        id={field.id}
+        disabled={field.disabled || !!noResultError}
+        // Voluntarily casting type as true to ignore type errors.
+        required={field.required as true}
+        placeholder={noResultError || props.placeholder}
+        value={field.value}
+        onChange={field.handleChange}
+        options={options}
+        optionLabel={formatName}
+        optionIcon={userOnlineDot}
+        optionDescription={(option) =>
+          `${option.user_type} - ${option.username}`
+        }
+        optionValue={(option) => option}
+        onQuery={setQuery}
+        isLoading={loading}
+      />
+    </FormField>
+  );
+};
+
+const userOnlineDot = (user: UserBareMinimum) => (
+  <div
+    className={classNames(
+      "mr-4 size-2.5 rounded-full ",
+      isUserOnline(user) ? "bg-primary-500" : "bg-secondary-400",
+    )}
+  />
+);
