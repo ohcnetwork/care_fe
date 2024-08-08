@@ -3,7 +3,7 @@ import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import { classNames, relativeTime } from "../../Utils/utils";
+import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
 import { Warn } from "../../Utils/Notifications";
@@ -241,9 +241,14 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
         <div className="flex flex-none items-center justify-center sm:h-6 sm:w-6 md:h-10 md:w-10">
           {
             // Show online icon based on last_login
-            user.last_login &&
-            Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
-              <CareIcon icon={icon} className="text-xl text-green-600" />
+            user.last_login && isUserOnline(user) ? (
+              <>
+                <CareIcon icon={icon} className="text-xl text-green-600" />
+                <span
+                  className="relative top-2 h-3 w-3 rounded-full bg-primary-500"
+                  aria-label="Online"
+                />
+              </>
             ) : (
               <CareIcon icon={icon} className="text-2xl text-secondary-600" />
             )
