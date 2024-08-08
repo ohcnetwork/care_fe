@@ -92,7 +92,7 @@ import {
   SkillModel,
   SkillObjectModel,
   UpdatePasswordForm,
-  UserBareMinimum,
+  UserAssignedModel,
   UserModel,
 } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -395,7 +395,7 @@ const routes = {
 
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
-    TRes: Type<PaginatedResponse<UserBareMinimum>>(),
+    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
   },
 
   listFacilityAssetLocation: {
