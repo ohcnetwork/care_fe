@@ -661,7 +661,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </span>
               </div>
             }
-            tab1="Log Updates"
+            tab1="Log Update"
             onClickTab1={() => setShowEvents(false)}
             onClickTab2={() => setShowEvents(true)}
             isTab2Active={showEvents}

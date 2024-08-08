@@ -575,12 +575,12 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
   },
   {
     id: "PATIENT_CONSULTATION_CREATED",
-    text: "Patient Consultation Created",
+    text: "Patient Log Created",
     icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATED",
-    text: "Patient Log Update Updated",
+    text: "Patient Log Updated",
     icon: "l-heart-medical",
   },
   {
