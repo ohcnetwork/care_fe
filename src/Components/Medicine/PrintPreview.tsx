@@ -49,10 +49,11 @@ export default function PrescriptionsPrintPreview() {
       }
       disabled={!(patient && encounter && items)}
     >
-      <div className="flex w-full justify-center pb-6">
+      <div className="mb-3 flex items-center justify-between p-4">
+        <h3>{encounter?.facility_name}</h3>
         <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
       </div>
-      <div className="mb-6 grid grid-cols-8 gap-y-2 border-2 border-secondary-400 p-2">
+      <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
         <PatientDetail name="Patient" className="col-span-5">
           {patient && (
             <>
@@ -66,11 +67,15 @@ export default function PrescriptionsPrintPreview() {
           {encounter?.patient_no}
         </PatientDetail>
 
-        <PatientDetail name="D.O.A" className="col-span-2">
+        <PatientDetail
+          name={
+            encounter
+              ? `${t(`encounter_suggestion__${encounter.suggestion}`)} on`
+              : ""
+          }
+          className="col-span-5"
+        >
           {formatDate(encounter?.encounter_date)}
-        </PatientDetail>
-        <PatientDetail name="Facility" className="col-span-3">
-          {encounter?.facility_name}
         </PatientDetail>
         <PatientDetail name="Bed" className="col-span-3">
           {encounter?.current_bed?.bed_object.location_object?.name}
@@ -119,7 +124,7 @@ const PatientDetail = ({
   return (
     <div
       className={classNames(
-        "inline-flex items-center whitespace-nowrap tracking-wide",
+        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
         className,
       )}
     >
@@ -159,9 +164,9 @@ const PrescriptionsTable = ({
         <tr>
           <th className="max-w-52 p-1">Medicine</th>
           <th className="p-1">Dosage</th>
-          <th className="p-1">Route</th>
-          <th className="p-1">{prn ? "Indicator" : "Frequency"}</th>
-          <th className="p-1">Notes</th>
+          <th className="p-1">Directions</th>
+          {/* <th className="p-1">{prn ? "Indicator" : "Freq."}</th> */}
+          <th className="max-w-32 p-1">Notes / Instructions</th>
         </tr>
       </thead>
       <tbody className="border-b-2 border-secondary-400">
@@ -178,9 +183,9 @@ const PrescriptionEntry = ({ obj }: { obj: Prescription }) => {
   const medicine = obj.medicine_object;
 
   return (
-    <tr className="cursor-pointer border-y border-y-secondary-400 text-center text-xs transition-all duration-200 ease-in-out even:bg-secondary-100 hover:bg-primary-100">
-      <td className="px-1 py-2 text-start text-sm">
-        <p className="max-w-52">
+    <tr className="border-y border-y-secondary-400 text-center text-xs transition-all duration-200 ease-in-out even:bg-secondary-100">
+      <td className="max-w-52 px-2 py-2 text-start text-sm">
+        <p>
           <strong className="uppercase">
             {medicine?.name ?? obj.medicine_old}
           </strong>{" "}
@@ -202,7 +207,7 @@ const PrescriptionEntry = ({ obj }: { obj: Prescription }) => {
           </span>
         )}
       </td>
-      <td className="space-y-1 px-1 py-1 text-center">
+      <td className="space-y-1 px-2 py-1 text-center">
         {obj.dosage_type === "TITRATED" && <p>Titrated</p>}
         <p className="font-semibold">
           {obj.base_dosage}{" "}
@@ -223,20 +228,46 @@ const PrescriptionEntry = ({ obj }: { obj: Prescription }) => {
             b/w doses
           </p>
         )}
-        {obj.days != null && (
+      </td>
+      <td className="max-w-32 whitespace-break-spaces px-2 py-1">
+        {obj.route && (
           <p>
-            Days: <span className="font-semibold">{obj.days} day(s)</span>
+            <span className="text-secondary-700">Route: </span>
+            <span className="font-medium">
+              {t(`PRESCRIPTION_ROUTE_${obj.route}`)}
+            </span>
+          </p>
+        )}
+        {obj.frequency && (
+          <p>
+            <span className="text-secondary-700">Freq: </span>
+            <span className="font-medium">
+              {t(`PRESCRIPTION_FREQUENCY_${obj.frequency}`)}
+            </span>
+          </p>
+        )}
+        {obj.days && (
+          <p>
+            <span className="text-secondary-700">Days: </span>
+            <span className="font-medium">{obj.days} day(s)</span>
+          </p>
+        )}
+        {obj.indicator && (
+          <p>
+            <span className="text-secondary-700">Indicator: </span>
+            <span className="font-medium">{obj.indicator}</span>
           </p>
         )}
       </td>
-      <td className="max-w-20 break-words px-1 py-1">
-        {obj.route && t(`PRESCRIPTION_ROUTE_${obj.route}`)}
+      <td className="max-w-36 whitespace-break-spaces break-words px-2 py-1 text-left text-xs">
+        {obj.notes}
+        {obj.instruction_on_titration && (
+          <p className="pt-1">
+            <span className="text-secondary-700">Titration instructions:</span>{" "}
+            {obj.instruction_on_titration}
+          </p>
+        )}
       </td>
-      <td className="px-1 py-1 text-xs">
-        {obj.frequency && t(`PRESCRIPTION_FREQUENCY_${obj.frequency}`)}
-        {obj.indicator}
-      </td>
-      <td className="w-32 break-words px-1 py-1">{obj.notes}</td>
     </tr>
   );
 };

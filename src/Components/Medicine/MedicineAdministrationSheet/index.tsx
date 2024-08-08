@@ -112,7 +112,13 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
                   onDone={() => refetch()}
                 />
               </AuthorizedForConsultationRelatedActions>
-              <ButtonV2 href="prescriptions/print" ghost border>
+              <ButtonV2
+                href="prescriptions/print"
+                ghost
+                border
+                disabled={!data.results}
+                className="w-full"
+              >
                 <CareIcon icon="l-print" className="text-lg" />
                 Print
               </ButtonV2>
