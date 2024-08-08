@@ -10,7 +10,15 @@ export default function ManagePrescriptions() {
   const { goBack } = useAppHistory();
 
   return (
-    <Page title={t("manage_prescriptions")}>
+    <Page
+      title={t("manage_prescriptions")}
+      options={
+        <ButtonV2 href="prescriptions/print">
+          <CareIcon icon="l-print" className="text-lg" />
+          Print
+        </ButtonV2>
+      }
+    >
       <div
         className="mx-auto flex w-full max-w-5xl flex-col gap-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
         id="medicine-preview"
