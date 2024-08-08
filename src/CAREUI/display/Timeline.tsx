@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { PerformedByModel } from "../../Components/HCX/misc";
 import { classNames, formatName } from "../../Utils/utils";
@@ -52,9 +52,10 @@ interface TimelineNodeProps {
 
 export const TimelineNode = (props: TimelineNodeProps) => {
   const name = useContext(TimelineContext);
-  const [newName, setNewName] = useState("");
-  if (!newName && props.name === "daily round details Event")
-    setNewName(props.name.replace("daily round", "log update"));
+  let newName: string | null = null;
+  if (props.name === "daily round details Event") {
+    newName = props.name.replace("daily round", "log update");
+  }
   const { t } = useTranslation();
 
   return (
