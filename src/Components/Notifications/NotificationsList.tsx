@@ -354,6 +354,7 @@ export default function NotificationsList({
             "PATIENT_CONSULTATION_UPDATED",
             "PATIENT_CONSULTATION_UPDATE_CREATED",
             "PATIENT_CONSULTATION_UPDATE_UPDATED",
+            "PATIENT_CONSULTATION_CREATED",
           ];
           const modifiedData = res.data.results.map((notification: any) => {
             if (toChangeId.includes(notification.event)) {
