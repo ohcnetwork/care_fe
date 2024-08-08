@@ -128,10 +128,10 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "bp",
     id: "bp",
     default: { systolic: null, diastolic: null, mean: null },
-    type: "{ systolic: number, diastolic: number, mean: number }",
-    example: "{ systolic: 120, diastolic: 80, mean: 100 }",
+    type: "{ systolic?: number, diastolic?: number }",
+    example: "{ systolic: 120 }",
     description:
-      "An object to store the blood pressure of the patient. It contains two integers, systolic and diastolic. Output mean is calculated from these two.",
+      "An object to store the blood pressure of the patient. It may contain two integers, systolic and diastolic. Output mean is calculated from these two.",
     validator: (value) => {
       if (typeof value !== "object") return false;
       if (value.systolic && typeof value.systolic !== "number") return false;

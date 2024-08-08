@@ -58,7 +58,6 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
-  const [diagnosisSeed, setDiagnosesSeed] = useState(1);
   const [prescriptionSeed, setPrescriptionSeed] = useState(1);
 
   const initForm: any = {
@@ -541,7 +540,6 @@ export const DailyRounds = (props: any) => {
 
                 if (res?.ok && data)
                   setDiagnoses((diagnoses) => [...(diagnoses || []), data]);
-                setDiagnosesSeed((s) => s + 1);
               }
             }
 
@@ -848,10 +846,7 @@ export const DailyRounds = (props: any) => {
                   </h3>
                   {/*  */}
                   {diagnoses ? (
-                    <EditDiagnosesBuilder
-                      value={diagnoses}
-                      key={diagnosisSeed}
-                    />
+                    <EditDiagnosesBuilder value={diagnoses} />
                   ) : (
                     <div className="flex animate-pulse justify-center py-4 text-center font-medium text-secondary-800">
                       Fetching existing diagnosis of patient...
