@@ -113,7 +113,7 @@ let make = (
     <div>
       <div
         className="bg-white px-2 md:px-6 py-5 border-b border-secondary-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
-        <h1 className="text-4xl sm:text-5xl"> {str("Consultation Update")} </h1>
+        <h1 className="text-4xl sm:text-5xl"> {str("Log Update")} </h1>
         <div>
           <CriticalCare__PageTitle title="General" />
           <DailyRound__General others title renderOptionalDescription />

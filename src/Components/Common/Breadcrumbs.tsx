@@ -13,6 +13,7 @@ const MENU_TAGS: { [key: string]: string } = {
   external_results: "External Results",
   users: "Users",
   notice_board: "Notice Board",
+  "daily-rounds": "Log Update",
 };
 
 const capitalize = (string: string) => {
