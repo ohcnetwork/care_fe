@@ -184,11 +184,11 @@ export default function useFilters({
       return acc;
     }, [] as string[]);
 
-    const show = activeFilters.length > 0 || children;
+    const show = activeFilters.length >= 1 || children;
 
     return (
       <div
-        className={`col-span-3 my-2 flex w-full flex-wrap items-center gap-2 ${show ? "" : "hidden"}`}
+        className={`col-span-3 my-2 flex w-full flex-wrap items-center gap-2 ${activeFilters.length >= 1 ? "" : "hidden"}`}
       >
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
