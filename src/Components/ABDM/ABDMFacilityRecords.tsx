@@ -86,8 +86,8 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               consent.expiry,
                           ) < new Date()
                             ? "EXPIRED"
-                            : consent.consent_artefacts?.[0]?.status ??
-                              consent.status}
+                            : (consent.consent_artefacts?.[0]?.status ??
+                              consent.status)}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
@@ -101,13 +101,6 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               )
                             : "-"}
                         </td>
-
-                        {/* <td className="px-3 py-4 text-center text-sm">
-                          {`${consent.requester?.first_name} ${consent.requester?.last_name}`.trim()}
-                          <p className="text-secondary-600">
-                            ({consent.requester.username})
-                          </p>
-                        </td> */}
 
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
