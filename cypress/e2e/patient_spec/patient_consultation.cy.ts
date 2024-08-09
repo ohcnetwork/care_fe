@@ -95,7 +95,7 @@ describe("Patient Consultation in multiple combination", () => {
     cy.get("#treating_physician")
       .click()
       .type("there should be no options that matches this $3@rcH text!");
-    cy.get("#treating_physician").click().clear();
+    cy.get("#treating_physician").clear();
     patientTreatmentPlan.fillTreatingPhysican(doctorName);
     cy.submitButton("Create Consultation");
     // the above submit should fail as IP number is missing
