@@ -163,7 +163,6 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
         <div className="relative">
           <div className="flex">
             <Combobox.Input
-              id={props.id}
               className="cui-input-base truncate pr-16"
               placeholder={props.placeholder ?? "Select"}
               displayValue={(value: any) => value?.label || ""}
