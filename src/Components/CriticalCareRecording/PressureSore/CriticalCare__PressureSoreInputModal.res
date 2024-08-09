@@ -110,41 +110,47 @@ let make = (
                         <label className="block font-medium text-black text-left">
                           {str("Width")}
                         </label>
-                        <input
-                          type_="number"
-                          value={state.width->Belt.Float.toString}
-                          step={0.1}
-                          placeholder="Width (cm)"
-                          className="cui-input-base px-2 py-1"
-                          disabled={previewMode}
-                          onChange={e => {
-                            let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
-                            switch value {
-                            | Some(value) => setState(prev => {...prev, width: value})
-                            | None => setState(prev => {...prev, width: 0.0})
-                            }
-                          }}
-                        />
+                        <div className="relative mt-1 flex items-center">
+                          <input
+                            type_="number"
+                            value={state.width->Belt.Float.toString}
+                            step={0.1}
+                            placeholder="Width (cm)"
+                            className="cui-input-base px-2 py-1"
+                            disabled={previewMode}
+                            onChange={e => {
+                              let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
+                              switch value {
+                              | Some(value) => setState(prev => {...prev, width: value})
+                              | None => setState(prev => {...prev, width: 0.0})
+                              }
+                            }}
+                          />
+                          <span className="absolute inset-y-0 right-5 flex items-center pr-3 text-grey-500 font-medium">{str("cm")}</span>
+                        </div>
                       </div>
                       <div>
                         <label className="block font-medium text-black text-left">
                           {str("Height")}
                         </label>
-                        <input
-                          type_="number"
-                          value={state.length->Belt.Float.toString}
-                          step={0.1}
-                          placeholder="Length (cm)"
-                          className="cui-input-base px-2 py-1"
-                          disabled={previewMode}
-                          onChange={e => {
-                            let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
-                            switch value {
-                            | Some(value) => setState(prev => {...prev, length: value})
-                            | None => setState(prev => {...prev, length: 0.0})
-                            }
-                          }}
-                        />
+                        <div className="relative mt-1 flex items-center">
+                          <input
+                            type_="number"
+                            value={state.length->Belt.Float.toString}
+                            step={0.1}
+                            placeholder="Length (cm)"
+                            className="cui-input-base px-2 py-1"
+                            disabled={previewMode}
+                            onChange={e => {
+                              let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
+                              switch value {
+                              | Some(value) => setState(prev => {...prev, length: value})
+                              | None => setState(prev => {...prev, length: 0.0})
+                              }
+                            }}
+                          />
+                          <span className="absolute inset-y-0 right-5 flex items-center pr-3 text-grey-500 font-medium">{str("cm")}</span>
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 mt-2">
