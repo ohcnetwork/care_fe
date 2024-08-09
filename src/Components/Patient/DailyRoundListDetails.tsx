@@ -33,8 +33,9 @@ export const DailyRoundListDetails = (props: any) => {
 
   return (
     <Page
-      title={`Consultation Update #${id}`}
+      title={`Log Update #${id}`}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
+      crumbsReplacements={{ ["daily-rounds"]: { name: "Log Update" } }}
     >
       <div
         className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500"

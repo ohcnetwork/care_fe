@@ -44,51 +44,54 @@ export default function EventsList() {
                 <LoadingLogUpdateCard />
               </PaginatedList.WhenLoading>
               <PaginatedList.Items<EventGeneric> className="flex grow flex-col gap-3">
-                {(item, items) => (
-                  <TimelineNode
-                    name={
-                      t(item.event_type.name.toLowerCase()).replaceAll(
-                        /_/g,
-                        " ",
-                      ) + " Event"
-                    }
-                    event={{
-                      type: item.change_type.replace(/_/g, " ").toLowerCase(),
-                      timestamp: item.created_date?.toString() ?? "",
-                      by: item.caused_by,
-                      icon: getEventIcon(item.event_type.name),
-                    }}
-                    isLast={items.indexOf(item) == items.length - 1}
-                  >
-                    {(() => {
-                      const entries = Object.entries(item.value).filter(
-                        ([_, value]) => value != null && value !== "",
-                      );
-
-                      if (entries.length === 0) {
-                        return (
-                          <div className="flex w-full flex-col items-center gap-2 md:flex-row">
-                            <span className="text-xs uppercase text-secondary-700">
-                              {t("no_changes")}
-                            </span>
-                          </div>
+                {(item, items) => {
+                  const name: string =
+                    item.event_type.name === "DAILY_ROUND_DETAILS"
+                      ? "LOG_UPDATE_DETAILS"
+                      : item.event_type.name;
+                  return (
+                    <TimelineNode
+                      name={
+                        t(name.toLowerCase()).replaceAll(/_/g, " ") + " Event"
+                      }
+                      event={{
+                        type: item.change_type.replace(/_/g, " ").toLowerCase(),
+                        timestamp: item.created_date?.toString() ?? "",
+                        by: item.caused_by,
+                        icon: getEventIcon(item.event_type.name),
+                      }}
+                      isLast={items.indexOf(item) == items.length - 1}
+                    >
+                      {(() => {
+                        const entries = Object.entries(item.value).filter(
+                          ([_, value]) => value != null && value !== "",
                         );
-                      }
 
-                      const values = Object.fromEntries(entries);
+                        if (entries.length === 0) {
+                          return (
+                            <div className="flex w-full flex-col items-center gap-2 md:flex-row">
+                              <span className="text-xs uppercase text-secondary-700">
+                                {t("no_changes")}
+                              </span>
+                            </div>
+                          );
+                        }
 
-                      switch (item.event_type.name) {
-                        case "INTERNAL_TRANSFER":
-                        case "CLINICAL":
-                        case "DIAGNOSIS":
-                        case "ENCOUNTER_SUMMARY":
-                        case "HEALTH":
-                        default:
-                          return <GenericEvent values={values} />;
-                      }
-                    })()}
-                  </TimelineNode>
-                )}
+                        const values = Object.fromEntries(entries);
+
+                        switch (item.event_type.name) {
+                          case "INTERNAL_TRANSFER":
+                          case "CLINICAL":
+                          case "DIAGNOSIS":
+                          case "ENCOUNTER_SUMMARY":
+                          case "HEALTH":
+                          default:
+                            return <GenericEvent values={values} />;
+                        }
+                      })()}
+                    </TimelineNode>
+                  );
+                }}
               </PaginatedList.Items>
               <div className="flex w-full items-center justify-center">
                 <PaginatedList.Paginator hideIfSinglePage />

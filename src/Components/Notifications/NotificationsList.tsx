@@ -350,7 +350,25 @@ export default function NotificationsList({
     })
       .then((res) => {
         if (res && res.data) {
-          setData(res.data.results);
+          const toChangeId = [
+            "PATIENT_CONSULTATION_UPDATED",
+            "PATIENT_CONSULTATION_UPDATE_CREATED",
+            "PATIENT_CONSULTATION_UPDATE_UPDATED",
+          ];
+          const modifiedData = res.data.results.map((notification: any) => {
+            if (toChangeId.includes(notification.event)) {
+              return {
+                ...notification,
+                message: notification.message.replace(
+                  "Consultation",
+                  "Log Update",
+                ),
+              };
+            } else {
+              return notification;
+            }
+          });
+          setData(modifiedData);
           setUnreadCount(
             res.data.results?.reduce(
               (acc: number, result: any) => acc + (result.read_at ? 0 : 1),
