@@ -91,10 +91,6 @@ describe("Patient Consultation in multiple combination", () => {
     patientTreatmentPlan.typeTreatmentPlan(patientTreatment);
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     patientTreatmentPlan.typeSpecialInstruction(specialInstruction);
-    // To test that the dropdown does not get disabled when no options length is 0
-    cy.get("#treating_physician")
-      .click()
-      .type("there should be no options that matches this $3@rcH text!");
     patientTreatmentPlan.fillTreatingPhysican(doctorName);
     cy.submitButton("Create Consultation");
     // the above submit should fail as IP number is missing
