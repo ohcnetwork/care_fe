@@ -5,7 +5,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Loading from "../Common/Loading";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatName } from "../../Utils/utils";
 import { Link } from "raviger";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
@@ -75,7 +75,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
             }
           </h5>
           <h6 className="mt-1 leading-6 text-secondary-700">
-            {consent.requester.first_name} {consent.requester.last_name}
+            {formatName(consent.requester)}
           </h6>
         </div>
         <div className="flex flex-col items-center">

@@ -3,12 +3,7 @@ import { useFacilityQuery } from "../Resource/BadgesList";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import { UserModel } from "../Users/models";
-
-export function formatFacilityBadgeValue(user: UserModel | undefined) {
-  return user ? `${user.first_name} ${user.last_name}` : "";
-}
-
+import { formatName } from "../../Utils/utils";
 export default function BadgesList(props: any) {
   const { qParams, FilterBadges } = props;
 
@@ -53,7 +48,7 @@ export default function BadgesList(props: any) {
           t("assigned_to"),
           "assigned_to",
           qParams.assigned_to
-            ? formatFacilityBadgeValue(assignedUser?.results[0])
+            ? assignedUser?.results[0] && formatName(assignedUser?.results[0])
             : "",
         ),
         value(

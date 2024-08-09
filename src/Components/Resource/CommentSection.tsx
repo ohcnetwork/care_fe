@@ -1,6 +1,6 @@
 import { useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
-import { formatDateTime } from "../../Utils/utils";
+import { formatDateTime, formatName } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
 import ButtonV2 from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -98,8 +98,7 @@ export const Comment = ({
         {created_by_object?.first_name?.charAt(0) || "U"}
       </div>
       <span className="pl-2 text-sm text-secondary-700">
-        {created_by_object?.first_name || "Unknown"}{" "}
-        {created_by_object?.last_name}
+        {formatName(created_by_object)}
       </span>
     </div>
   </div>
