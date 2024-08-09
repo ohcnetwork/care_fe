@@ -33,7 +33,7 @@ import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import { UserBareMinimum } from "../Users/models";
 
 import { navigate } from "raviger";
@@ -1432,7 +1432,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         ref={fieldRef["treating_physician"]}
                       >
-                        <UserAutocompleteFormField
+                        <UserAutocomplete
                           name={"treating_physician"}
                           label={t("treating_doctor")}
                           placeholder="Attending Doctors Name and Designation"
@@ -1484,7 +1484,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           className="col-span-6 flex-[2]"
                           ref={fieldRef["assigned_to"]}
                         >
-                          <UserAutocompleteFormField
+                          <UserAutocomplete
                             value={state.form.assigned_to_object ?? undefined}
                             onChange={handleDoctorSelect}
                             userType={"Doctor"}

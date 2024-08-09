@@ -33,7 +33,7 @@ import CircularProgress from "../Common/components/CircularProgress.js";
 import Card from "../../CAREUI/display/Card";
 import RadioFormField from "../Form/FormFields/RadioFormField.js";
 import Page from "../Common/components/Page.js";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField.js";
+import { LinkedFacilityUsers } from "../Common/UserAutocompleteFormField.js";
 import { UserBareMinimum } from "../Users/models.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
@@ -359,7 +359,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             (assignedUserLoading ? (
               <CircularProgress />
             ) : (
-              <UserAutocompleteFormField
+              <LinkedFacilityUsers
                 name="assigned_to"
                 label={t("assigned_to")}
                 value={assignedUser}

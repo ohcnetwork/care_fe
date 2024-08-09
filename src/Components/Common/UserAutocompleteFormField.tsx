@@ -32,25 +32,66 @@ type UserSearchProps = BaseProps & {
   homeFacility?: string;
 };
 
-type Props = UserSearchProps | LinkedFacilitySearchProps;
+export default function UserAutocomplete(props: UserSearchProps) {
+  const field = useFormFieldPropsResolver(props);
+  const [query, setQuery] = useState("");
+  const [disabled, setDisabled] = useState(false);
 
-/**
- * **Deprecated.**
- *
- * This component simply acts as a proxy to the `UserAutocomplete` or
- * `LinkedFacilityUserAutocomplete` components based on the props passed. Use
- * those components directly instead.
- */
-export default function UserAutocompleteFormField(props: Props) {
-  if (props.facilityId) {
-    return <LinkedFacilityUserAutocomplete {...props} />;
-  }
-  return <UserAutocomplete {...(props as UserSearchProps)} />;
+  const { data, loading } = useQuery(routes.userList, {
+    query: {
+      home_facility: props.homeFacility,
+      user_type: props.userType,
+      search_text: query,
+      limit: 50,
+      offset: 0,
+    },
+  });
+
+  useEffect(() => {
+    if (
+      loading ||
+      query ||
+      !field.required ||
+      !props.noResultsError ||
+      !data?.results
+    ) {
+      return;
+    }
+
+    if (data.results.length === 0) {
+      setDisabled(true);
+      field.handleChange(undefined as unknown as UserBareMinimum);
+    }
+  }, [loading, query, field.required, data?.results, props.noResultsError]);
+
+  return (
+    <FormField field={field}>
+      <Autocomplete
+        id={field.id}
+        disabled={field.disabled || disabled}
+        required={field.required as true}
+        placeholder={(disabled && props.noResultsError) || props.placeholder}
+        value={field.value}
+        onChange={field.handleChange}
+        options={mergeQueryOptions(
+          field.value ? [field.value] : [],
+          data?.results ?? [],
+          (obj) => obj.username,
+        )}
+        optionLabel={formatName}
+        optionIcon={userOnlineDot}
+        optionDescription={(option) =>
+          `${option.user_type} - ${option.username}`
+        }
+        optionValue={(option) => option}
+        onQuery={setQuery}
+        isLoading={loading}
+      />
+    </FormField>
+  );
 }
 
-export const LinkedFacilityUserAutocomplete = (
-  props: LinkedFacilitySearchProps,
-) => {
+export const LinkedFacilityUsers = (props: LinkedFacilitySearchProps) => {
   const field = useFormFieldPropsResolver(props);
 
   const [query, setQuery] = useState("");
@@ -65,17 +106,11 @@ export const LinkedFacilityUserAutocomplete = (
     },
   });
 
-  const options = mergeQueryOptions(
-    field.value && !query ? [field.value] : [],
-    data?.results ?? [],
-    (obj) => obj.username,
-  );
-
   const noResultError =
     (!query &&
       !loading &&
       field.required &&
-      !options.length &&
+      !data?.results?.length &&
       props.noResultsError) ||
     undefined;
 
@@ -95,65 +130,11 @@ export const LinkedFacilityUserAutocomplete = (
         placeholder={noResultError || props.placeholder}
         value={field.value}
         onChange={field.handleChange}
-        options={options}
-        optionLabel={formatName}
-        optionIcon={userOnlineDot}
-        optionDescription={(option) =>
-          `${option.user_type} - ${option.username}`
-        }
-        optionValue={(option) => option}
-        onQuery={setQuery}
-        isLoading={loading}
-      />
-    </FormField>
-  );
-};
-export const UserAutocomplete = (props: UserSearchProps) => {
-  const field = useFormFieldPropsResolver(props);
-
-  const [query, setQuery] = useState("");
-
-  const { data, loading } = useQuery(routes.userList, {
-    query: {
-      home_facility: props.homeFacility,
-      user_type: props.userType,
-      search_text: query,
-      limit: 50,
-      offset: 0,
-    },
-  });
-
-  const options = mergeQueryOptions(
-    field.value && !query ? [field.value] : [],
-    data?.results ?? [],
-    (obj) => obj.username,
-  );
-
-  const noResultError =
-    (!query &&
-      !loading &&
-      field.required &&
-      !options.length &&
-      props.noResultsError) ||
-    undefined;
-
-  useEffect(() => {
-    if (noResultError) {
-      field.handleChange(undefined as unknown as UserBareMinimum);
-    }
-  }, [noResultError]);
-
-  return (
-    <FormField field={field}>
-      <Autocomplete
-        id={field.id}
-        disabled={field.disabled || !!noResultError}
-        // Voluntarily casting type as true to ignore type errors.
-        required={field.required as true}
-        placeholder={noResultError || props.placeholder}
-        value={field.value}
-        onChange={field.handleChange}
-        options={options}
+        options={mergeQueryOptions(
+          field.value ? [field.value] : [],
+          data?.results ?? [],
+          (obj) => obj.username,
+        )}
         optionLabel={formatName}
         optionIcon={userOnlineDot}
         optionDescription={(option) =>

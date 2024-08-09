@@ -31,7 +31,7 @@ import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
@@ -1390,7 +1390,7 @@ export const PatientHome = (props: any) => {
         onClose={() => setOpenAssignVolunteerDialog(false)}
         description={
           <div className="mt-6">
-            <UserAutocompleteFormField
+            <UserAutocomplete
               value={assignedVolunteerObject}
               onChange={handleVolunteerSelect}
               userType={"Volunteer"}
