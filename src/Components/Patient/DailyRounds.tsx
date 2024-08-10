@@ -476,7 +476,7 @@ export const DailyRounds = (props: any) => {
       }}
       backUrl={
         id
-          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log-update`
           : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
       }
       className="mx-auto max-w-4xl"

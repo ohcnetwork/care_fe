@@ -45,14 +45,13 @@ export default function EventsList() {
               </PaginatedList.WhenLoading>
               <PaginatedList.Items<EventGeneric> className="flex grow flex-col gap-3">
                 {(item, items) => {
-                  const name: string =
-                    item.event_type.name === "DAILY_ROUND_DETAILS"
-                      ? "LOG_UPDATE_DETAILS"
-                      : item.event_type.name;
                   return (
                     <TimelineNode
                       name={
-                        t(name.toLowerCase()).replaceAll(/_/g, " ") + " Event"
+                        t(item.event_type.name.toLowerCase()).replaceAll(
+                          /_/g,
+                          " ",
+                        ) + " Event"
                       }
                       event={{
                         type: item.change_type.replace(/_/g, " ").toLowerCase(),

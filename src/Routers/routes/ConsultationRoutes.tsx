@@ -82,7 +82,7 @@ export default {
       consultationId={id}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update":
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/log-update/:id/update":
     ({ facilityId, patientId, consultationId, id }: any) => (
       <DailyRounds
         facilityId={facilityId}
@@ -91,7 +91,7 @@ export default {
         id={id}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id":
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/log-update/:id":
     ({ facilityId, patientId, consultationId, id }: any) => (
       <DailyRoundListDetails
         facilityId={facilityId}

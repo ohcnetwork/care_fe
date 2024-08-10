@@ -351,7 +351,6 @@ export default function NotificationsList({
       .then((res) => {
         if (res && res.data) {
           const toChangeId = [
-            "PATIENT_CONSULTATION_UPDATED",
             "PATIENT_CONSULTATION_UPDATE_CREATED",
             "PATIENT_CONSULTATION_UPDATE_UPDATED",
           ];
