@@ -8,17 +8,15 @@ import DialogModal from "../../../Common/Dialog";
 import Beds from "../../../Facility/Consultations/Beds";
 import RadioFormField from "../../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../../Form/FormFields/RangeFormField";
-import {
-  LogUpdateSectionMeta,
-  LogUpdateSectionProps,
-  RESPIRATORY_SUPPORT_OPTIONS,
-  YES_NO_OPTIONS,
-} from "../../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../../utils";
 import OxygenRespiratorySupport from "./OxygenSupport";
 import VentilatorRespiratorySupport from "./Ventilator";
 import { Warn } from "../../../../Utils/Notifications";
+import { useTranslation } from "react-i18next";
+import { RESPIRATORY_SUPPORT } from "../../../../Common/constants";
 
 const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
+  const { t } = useTranslation();
   const [facilityId, consultationId] = useSlugs("facility", "consultation");
   const consultationQuery = useQuery(routes.getConsultation, {
     pathParams: { id: consultationId },
@@ -58,17 +56,18 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
       <RadioFormField
         label="Bilateral Air Entry"
         labelClassName="text-lg sm:font-bold"
-        options={YES_NO_OPTIONS}
-        optionDisplay={(c) => c.text}
-        optionValue={(c) => c.text}
+        options={[true, false]}
+        optionDisplay={(c) => (c ? "Yes" : "No")}
+        optionValue={(c) => JSON.stringify(c)}
         name="bilateral_air_entry"
         value={
-          YES_NO_OPTIONS.find((o) => o.value === log.bilateral_air_entry)?.text
+          log.bilateral_air_entry != null
+            ? JSON.stringify(log.bilateral_air_entry)
+            : undefined
         }
         onChange={(c) =>
           onChange({
-            bilateral_air_entry: YES_NO_OPTIONS.find((o) => o.text === c.value)
-              ?.value,
+            bilateral_air_entry: c.value == null ? null : JSON.parse(c.value),
           })
         }
       />
@@ -90,8 +89,8 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
       <hr />
       <RadioFormField
         label={<h4>Respiratory Support</h4>}
-        options={RESPIRATORY_SUPPORT_OPTIONS}
-        optionDisplay={(c) => c.text}
+        options={RESPIRATORY_SUPPORT}
+        optionDisplay={(c) => t(`RESPIRATORY_SUPPORT__${c.value}`)}
         optionValue={(c) => c.value}
         name="respiratory_support"
         value={log.ventilator_interface}

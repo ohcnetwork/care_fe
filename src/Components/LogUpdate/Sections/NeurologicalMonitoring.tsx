@@ -2,19 +2,16 @@ import { useTranslation } from "react-i18next";
 import {
   CONSCIOUSNESS_LEVEL,
   EYE_OPEN_SCALE,
+  LIMB_RESPONSE_OPTIONS,
   MOTOR_RESPONSE_SCALE,
+  PUPIL_REACTION_OPTIONS,
   VERBAL_RESPONSE_SCALE,
 } from "../../../Common/constants";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import PupilSizeSelect from "../components/PupilSizeSelect";
-import {
-  LIMB_RESPONSE_OPTIONS,
-  LogUpdateSectionMeta,
-  LogUpdateSectionProps,
-  REACTION_OPTIONS,
-} from "../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();
@@ -59,11 +56,11 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
                 <br />
                 <h5>Reaction</h5>
                 <RadioFormField
-                  options={REACTION_OPTIONS.filter(
+                  options={PUPIL_REACTION_OPTIONS.filter(
                     (o) => o.value !== "UNKNOWN",
                   )}
                   id={`${d}_reaction`}
-                  optionDisplay={(c) => c.text}
+                  optionDisplay={(c) => t(`PUPIL_REACTION__${c.value}`)}
                   optionValue={(c) => c.value}
                   name={`${d}_pupil_light_reaction`}
                   value={log[`${d}_pupil_light_reaction`]}
@@ -167,7 +164,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
               </span>
             }
             options={LIMB_RESPONSE_OPTIONS.filter((o) => o.value !== "UNKNOWN")}
-            optionDisplay={(c) => c.text}
+            optionDisplay={(c) => t(`LIMB_RESPONSE__${c.value}`)}
             optionValue={(c) => c.value}
             name={key}
             value={log[key]}

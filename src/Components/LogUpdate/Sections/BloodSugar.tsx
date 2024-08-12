@@ -1,13 +1,13 @@
+import { useTranslation } from "react-i18next";
 import { rangeValueDescription } from "../../../Utils/utils";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
-import {
-  INSULIN_INTAKE_FREQUENCY_OPTIONS,
-  LogUpdateSectionMeta,
-  LogUpdateSectionProps,
-} from "../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
+import { INSULIN_INTAKE_FREQUENCY_OPTIONS } from "../../../Common/constants";
 
 const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-4">
       <RangeFormField
@@ -38,11 +38,13 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
         label="Frequency"
         name="insulin_intake_frequency"
         options={INSULIN_INTAKE_FREQUENCY_OPTIONS}
-        optionDisplay={(c) => c.text}
-        optionValue={(c) => c.value}
+        optionDisplay={(c) => t(`INSULIN_INTAKE_FREQUENCY__${c}`)}
+        optionValue={(c) => c}
         value={log.insulin_intake_frequency}
         onChange={(c) =>
-          onChange({ insulin_intake_frequency: c.value || undefined })
+          onChange({
+            insulin_intake_frequency: c.value || undefined,
+          })
         }
       />
     </div>

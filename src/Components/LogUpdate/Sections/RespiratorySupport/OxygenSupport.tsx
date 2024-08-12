@@ -1,15 +1,19 @@
+import { useTranslation } from "react-i18next";
 import { rangeValueDescription } from "../../../../Utils/utils";
 import RadioFormField from "../../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../../Form/FormFields/RangeFormField";
-import { LogUpdateSectionProps, OXYGEN_MODALITY_OPTIONS } from "../../utils";
+import { LogUpdateSectionProps } from "../../utils";
+import { OXYGEN_MODALITY_OPTIONS } from "../../../../Common/constants";
 
 const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
+  const { t } = useTranslation();
+
   return (
     <>
       <RadioFormField
         label={<h4>Oxygen Modality</h4>}
         options={OXYGEN_MODALITY_OPTIONS}
-        optionDisplay={(c) => c.label}
+        optionDisplay={(c) => t(`OXYGEN_MODALITY__${c.value}`)}
         optionValue={(c) => c.value}
         name="ventilator_oxygen_modality"
         value={log.ventilator_oxygen_modality}

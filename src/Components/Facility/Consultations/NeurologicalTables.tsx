@@ -7,12 +7,14 @@ import Pagination from "../../Common/Pagination";
 import {
   CONSCIOUSNESS_LEVEL,
   EYE_OPEN_SCALE,
+  LIMB_RESPONSE_OPTIONS,
   MOTOR_RESPONSE_SCALE,
   PAGINATION_LIMIT,
+  PUPIL_REACTION_OPTIONS,
   VERBAL_RESPONSE_SCALE,
 } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -89,29 +91,22 @@ const DataDescription = (props: any) => {
 };
 
 export const NeurologicalTable = (props: any) => {
+  const { t } = useTranslation();
   const { consultationId } = props;
   // const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const REACTION_OPTIONS = [
-    { id: 0, value: "Unknown" },
-    { id: 5, value: "Brisk" },
-    { id: 10, value: "Sluggish" },
-    { id: 15, value: "Fixed" },
-    { id: 20, value: "Cannot Be Assessed" },
-  ];
+  const REACTION_OPTIONS = PUPIL_REACTION_OPTIONS.map(({ id, value }) => ({
+    id,
+    value: t(`PUPIL_REACTION__${value}`),
+  }));
 
-  const LIMP_OPTIONS = [
-    { id: 0, value: "Unknown" },
-    { id: 5, value: "Strong" },
-    { id: 10, value: "Moderate" },
-    { id: 15, value: "Weak" },
-    { id: 20, value: "Flexion" },
-    { id: 25, value: "Extension" },
-    { id: 30, value: "None" },
-  ];
+  const LIMP_OPTIONS = LIMB_RESPONSE_OPTIONS.map(({ id, value }) => ({
+    id,
+    value: t(`LIMB_RESPONSE__${value}`),
+  }));
 
   useEffect(() => {
     const fetchDailyRounds = async (

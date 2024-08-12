@@ -380,7 +380,7 @@ export default function PatientInfoCard(props: {
                       "Respiratory Support",
                       RESPIRATORY_SUPPORT.find(
                         (resp) =>
-                          resp.text ===
+                          resp.value ===
                           consultation?.last_daily_round?.ventilator_interface,
                       )?.id ?? "UNKNOWN",
                       consultation?.last_daily_round?.ventilator_interface,

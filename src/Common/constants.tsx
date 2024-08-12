@@ -357,15 +357,30 @@ export const CONSCIOUSNESS_LEVEL = [
   },
 ] as const;
 
-export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
-  { id: 1, text: "CVP catheter " },
-  { id: 2, text: "Arterial Line" },
-  { id: 3, text: "Quinton catheter" },
-  { id: 4, text: "Chest Tubes (ICD)" },
-  { id: 5, text: "NG Tube/GT" },
-  { id: 6, text: "Urine Catheters" },
-  { id: 7, text: "Other" },
-];
+export const PUPIL_REACTION_OPTIONS = [
+  { id: 0, value: "UNKNOWN" },
+  { id: 5, value: "BRISK" },
+  { id: 10, value: "SLUGGISH" },
+  { id: 15, value: "FIXED" },
+  { id: 20, value: "CANNOT_BE_ASSESSED" },
+] as const;
+
+export const LIMB_RESPONSE_OPTIONS = [
+  { id: 0, value: "UNKNOWN" },
+  { id: 5, value: "STRONG" },
+  { id: 10, value: "MODERATE" },
+  { id: 15, value: "WEAK" },
+  { id: 20, value: "FLEXION" },
+  { id: 25, value: "EXTENSION" },
+  { id: 30, value: "NONE" },
+] as const;
+
+export const OXYGEN_MODALITY_OPTIONS = [
+  { value: "NASAL_PRONGS" },
+  { value: "SIMPLE_FACE_MASK" },
+  { value: "NON_REBREATHING_MASK" },
+  { value: "HIGH_FLOW_NASAL_CANNULA" },
+] as const;
 
 export const GENDER_TYPES = [
   { id: 1, text: "Male", icon: "M" },
@@ -401,10 +416,29 @@ export const ADMITTED_TO = [
 ];
 
 export const RESPIRATORY_SUPPORT = [
-  { id: "NIV", text: "NON_INVASIVE" },
-  { id: "IV", text: "INVASIVE" },
-  { id: "O2", text: "OXYGEN_SUPPORT" },
-  { id: "NONE", text: "UNKNOWN" },
+  { id: "NIV", value: "NON_INVASIVE" },
+  { id: "IV", value: "INVASIVE" },
+  { id: "O2", value: "OXYGEN_SUPPORT" },
+  { id: "NONE", value: "UNKNOWN" },
+] as const;
+
+export const VENTILATOR_MODE_OPTIONS = [
+  "VCV",
+  "PCV",
+  "PRVC",
+  "APRV",
+  "VC_SIMV",
+  "PC_SIMV",
+  "PRVC_SIMV",
+  "ASV",
+  "PSV",
+] as const;
+
+export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
+  "UNKNOWN",
+  "OD",
+  "BD",
+  "TD",
 ] as const;
 
 export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";

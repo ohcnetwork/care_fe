@@ -3,16 +3,16 @@ import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
-type Props<T> = FormFieldBaseProps<string | null> & {
+type Props<T, V = string> = FormFieldBaseProps<V | null> & {
   options: readonly T[];
   optionDisplay: (option: T) => React.ReactNode;
-  optionValue: (option: T) => string;
+  optionValue: (option: T) => V;
   containerClassName?: string;
   unselectLabel?: string;
   layout?: "vertical" | "horizontal" | "grid" | "auto";
 };
 
-const RadioFormField = <T,>(props: Props<T>) => {
+const RadioFormField = <T, V extends string>(props: Props<T, V>) => {
   const field = useFormFieldPropsResolver(props);
   return (
     <FormField field={field}>
@@ -51,7 +51,7 @@ const RadioFormField = <T,>(props: Props<T>) => {
               name={field.name}
               value={props.optionValue(option)}
               checked={value === field.value}
-              onChange={(e) => field.handleChange(e.target.value)}
+              onChange={(e) => field.handleChange(e.target.value as V)}
             />
           );
         })}

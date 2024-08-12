@@ -3,19 +3,18 @@ import { PerformedByModel } from "../HCX/misc";
 import {
   CONSCIOUSNESS_LEVEL,
   HumanBodyRegion,
+  INSULIN_INTAKE_FREQUENCY_OPTIONS,
+  LIMB_RESPONSE_OPTIONS,
   NURSING_CARE_FIELDS,
   OCCUPATION_TYPES,
+  OXYGEN_MODALITY_OPTIONS,
   PressureSoreExudateAmountOptions,
   PressureSoreTissueTypeOptions,
   RATION_CARD_CATEGORY,
+  RESPIRATORY_SUPPORT,
   RHYTHM_CHOICES,
-} from "../../Common/constants";
-import {
-  LIMB_RESPONSE_OPTIONS,
-  OXYGEN_MODALITY_OPTIONS,
-  RESPIRATORY_SUPPORT_OPTIONS,
   VENTILATOR_MODE_OPTIONS,
-} from "../LogUpdate/utils";
+} from "../../Common/constants";
 
 export interface FlowModel {
   id?: number;
@@ -368,7 +367,7 @@ export interface DailyRoundsModel {
   potassium?: number;
   blood_sugar_level?: number;
   insulin_intake_dose?: number;
-  insulin_intake_frequency?: string;
+  insulin_intake_frequency?: (typeof INSULIN_INTAKE_FREQUENCY_OPTIONS)[number];
   dialysis_fluid_balance?: number;
   dialysis_net_balance?: number;
   nursing?: {
@@ -380,7 +379,7 @@ export interface DailyRoundsModel {
   iv_fluids?: NameQuantity[];
   output?: NameQuantity[];
   ventilator_spo2?: number;
-  ventilator_interface?: (typeof RESPIRATORY_SUPPORT_OPTIONS)[number]["value"];
+  ventilator_interface?: (typeof RESPIRATORY_SUPPORT)[number]["value"];
   ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
   ventilator_oxygen_modality_flow_rate?: number;
   ventilator_oxygen_modality_oxygen_rate?: number;
