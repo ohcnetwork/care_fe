@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { downloadResourceRequests } from "../../Redux/actions";
 import { navigate } from "raviger";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatName } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDateTime } from "../../Utils/utils";
 import { ExportButton } from "../Common/Export";
@@ -126,8 +126,7 @@ const ResourceCard = ({ resource }: any) => {
                   >
                     <CareIcon icon="l-user" className="mr-2 text-xl" />
                     <dd className="text-sm font-bold leading-5 text-secondary-900">
-                      {resource.assigned_to_object.first_name}{" "}
-                      {resource.assigned_to_object.last_name} -{" "}
+                      {formatName(resource.assigned_to_object)} -{" "}
                       {resource.assigned_to_object.user_type}
                     </dd>
                   </dt>

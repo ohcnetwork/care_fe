@@ -9,6 +9,7 @@ import {
 import {
   classNames,
   formatDateTime,
+  formatName,
   formatPatientAge,
 } from "../../Utils/utils";
 import { downloadShiftRequests } from "../../Redux/actions";
@@ -174,8 +175,8 @@ const ShiftCard = ({ shift, filter }: any) => {
                   >
                     <CareIcon icon="l-user" className="mr-2 text-xl" />
                     <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
-                      {shift.assigned_to_object.first_name}{" "}
-                      {shift.assigned_to_object.last_name} -{" "}
+                      {formatName(shift.assigned_to_object)}
+                      {" - "}
                       {shift.assigned_to_object.user_type}
                     </dd>
                   </dt>

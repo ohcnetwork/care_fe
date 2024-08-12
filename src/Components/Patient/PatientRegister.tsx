@@ -192,6 +192,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
   const [careExtId, setCareExtId] = useState("");
   const [formField, setFormField] = useState<any>();
+  const [resetNum, setResetNum] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
@@ -1003,21 +1004,29 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <DuplicatePatientDialog
           patientList={statusDialog.patientList}
           handleOk={handleDialogClose}
-          handleCancel={goBack}
-          isNew={!id}
+          handleCancel={() => {
+            handleDialogClose("close");
+            setResetNum(true);
+          }}
         />
       )}
       {statusDialog.transfer && (
         <DialogModal
           show={statusDialog.transfer}
-          onClose={() => handleDialogClose("back")}
+          onClose={() => {
+            setResetNum(true);
+            handleDialogClose("close");
+          }}
           title="Patient Transfer Form"
           className="max-w-md md:min-w-[600px]"
         >
           <TransferPatientDialog
             patientList={statusDialog.patientList}
             handleOk={() => handleDialogClose("close")}
-            handleCancel={() => handleDialogClose("back")}
+            handleCancel={() => {
+              setResetNum(true);
+              handleDialogClose("close");
+            }}
             facilityId={facilityId}
           />
         </DialogModal>
@@ -1134,6 +1143,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               >
                 {(field) => {
                   if (!formField) setFormField(field);
+                  if (resetNum) {
+                    field("phone_number").onChange({
+                      name: "phone_number",
+                      value: "+91",
+                    });
+                    setResetNum(false);
+                  }
                   return (
                     <>
                       <div className="mb-2 overflow-visible rounded border border-secondary-200 p-4">

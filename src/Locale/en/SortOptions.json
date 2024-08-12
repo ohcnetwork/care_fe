@@ -9,6 +9,8 @@
   "facility__name,-last_consultation__current_bed__bed__name": "Bed No. N-1",
   "-review_time": "Latest review date first",
   "review_time": "Oldest review date first",
+  "taken_at": "Oldest taken date first",
+  "-taken_at": "Latest taken date first",
   "name": "Patient name A-Z",
   "-name": "Patient name Z-A",
   "bed__name": "Bed No. 1-N",
