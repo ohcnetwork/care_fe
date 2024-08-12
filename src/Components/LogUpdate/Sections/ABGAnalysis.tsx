@@ -4,7 +4,7 @@ import RangeFormField from "../../Form/FormFields/RangeFormField";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { DailyRoundsModel } from "../../Patient/models";
 
-const fields = [
+export const ABGAnalysisFields = [
   {
     key: "po2",
     label: (
@@ -99,7 +99,7 @@ const fields = [
 const ABGAnalysis = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
     <div className="flex flex-col gap-8">
-      {fields.map((field, index) => (
+      {ABGAnalysisFields.map((field, index) => (
         <RangeFormField
           key={index}
           label={field.label}

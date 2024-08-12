@@ -11,6 +11,7 @@ import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDocto
 import PatientConsentRecords from "../../Components/Patient/PatientConsentRecords";
 import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
 import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
+import CriticalCarePreview from "../../Components/LogUpdate/CriticalCarePreview";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -101,8 +102,13 @@ export default {
       />
     ),
 
-  // "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
-  //   () => <CriticalCareRecording readonly />,
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
+    (params: {
+      facilityId: string;
+      patientId: string;
+      consultationId: string;
+      id: string;
+    }) => <CriticalCarePreview {...params} />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
     (params: {
       facilityId: string;

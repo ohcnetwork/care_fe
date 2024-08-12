@@ -485,7 +485,7 @@ export const getValueDescription = (
   valueDescriptions: ValueDescription[],
   value: number,
 ) => {
-  return valueDescriptions?.find((vd) => (vd.till || 0) >= (value || 0));
+  return valueDescriptions.find((vd) => (vd.till || 0) >= (value || 0));
 };
 
 export const rangeValueDescription = (range: {
