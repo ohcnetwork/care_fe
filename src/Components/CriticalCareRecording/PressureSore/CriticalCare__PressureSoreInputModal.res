@@ -202,13 +202,13 @@ let make = (
                       <div className="grid grid-cols-2 items-center gap-4 justify-around mt-4">
                         <div className="flex flex-col items-center text-center">
                           <div className="text-black font-bold text-xl">
-                            {str(state.width->Belt.Float.toString)}
+                            {str(`${state.width->Belt.Float.toString} cm`)}
                           </div>
                           <div className="text-sm text-secondary-700"> {str("Width")} </div>
                         </div>
                         <div className="flex flex-col items-center text-center">
                           <div className="text-black font-bold text-xl">
-                            {str(state.length->Belt.Float.toString)}
+                            {str(`${state.length->Belt.Float.toString} cm`)}
                           </div>
                           <div className="text-sm text-secondary-700"> {str("Length")} </div>
                         </div>

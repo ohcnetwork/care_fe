@@ -18,7 +18,13 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
   }
 
   if (typeof value === "number") {
-    return value % 1 ? value.toFixed(2) : value;
+    const formattedValue = value % 1 ? value.toFixed(2) : value;
+
+    if (key === "length" || key === "width") {
+      return `${formattedValue} cm`;
+    }
+
+    return formattedValue;
   }
 
   if (typeof value === "string") {
@@ -74,7 +80,9 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
         <span className="text-xs uppercase text-secondary-700">
           {key.replaceAll(/_/g, " ")}
         </span>
-        <span className="text-sm font-semibold capitalize text-secondary-700">
+        <span
+          className={`text-sm font-semibold text-secondary-700 ${key === "length" || key === "width" ? "" : "capitalize"}`}
+        >
           {formatValue(value, key)}
         </span>
       </div>
