@@ -18,6 +18,7 @@ import {
   classNames,
   formatDate,
   formatDateTime,
+  formatName,
   formatPatientAge,
   humanizeStrings,
 } from "../../Utils/utils.js";
@@ -485,7 +486,7 @@ export default function PatientInfoCard(props: {
                       {t("treating_doctor")}:{" "}
                     </span>
                     {consultation?.treating_physician_object
-                      ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
+                      ? formatName(consultation.treating_physician_object)
                       : consultation?.deprecated_verified_by}
                     <CareIcon
                       icon="l-check"

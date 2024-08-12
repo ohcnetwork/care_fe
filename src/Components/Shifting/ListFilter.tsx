@@ -21,7 +21,7 @@ import useConfig from "../../Common/hooks/useConfig";
 
 import useMergeState from "../../Common/hooks/useMergeState";
 import { useTranslation } from "react-i18next";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import { dateQueryString, parsePhoneNumber } from "../../Utils/utils";
 import dayjs from "dayjs";
 import useQuery from "../../Utils/request/useQuery";
@@ -268,7 +268,7 @@ export default function ListFilter(props: any) {
       {isAssignedLoading ? (
         <CircularProgress className="h-5 w-5" />
       ) : (
-        <UserAutocompleteFormField
+        <UserAutocomplete
           label={t("assigned_to")}
           name="assigned_to"
           id="assigned-to"

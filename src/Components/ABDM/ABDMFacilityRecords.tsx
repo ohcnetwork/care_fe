@@ -101,13 +101,6 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                             : "-"}
                         </td>
 
-                        {/* <td className="px-3 py-4 text-center text-sm">
-                          {`${consent.requester?.first_name} ${consent.requester?.last_name}`.trim()}
-                          <p className="text-secondary-600">
-                            ({consent.requester.username})
-                          </p>
-                        </td> */}
-
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.from_time ??

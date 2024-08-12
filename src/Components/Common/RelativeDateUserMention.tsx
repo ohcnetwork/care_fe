@@ -1,5 +1,5 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatDateTime, relativeDate } from "../../Utils/utils";
+import { formatDateTime, formatName, relativeDate } from "../../Utils/utils";
 import { PerformedByModel } from "../HCX/misc";
 
 function RelativeDateUserMention(props: {
@@ -28,7 +28,7 @@ function RelativeDateUserMention(props: {
             }`}
           >
             <div className="flex flex-col whitespace-normal text-sm font-semibold leading-5 text-white">
-              <p className="flex justify-center">{`${props.user.first_name} ${props.user.last_name}`}</p>
+              <p className="flex justify-center">{formatName(props.user)}</p>
               <p className="flex justify-center">{`@${props.user.username}`}</p>
               <p className="flex justify-center">{props.user.user_type}</p>
             </div>

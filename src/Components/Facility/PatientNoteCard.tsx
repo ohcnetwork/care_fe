@@ -1,4 +1,9 @@
-import { relativeDate, formatDateTime, classNames } from "../../Utils/utils";
+import {
+  relativeDate,
+  formatDateTime,
+  classNames,
+  formatName,
+} from "../../Utils/utils";
 import { USER_TYPES_MAP } from "../../Common/constants";
 import { PatientNotesEditModel, PatientNotesModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -78,8 +83,7 @@ const PatientNoteCard = ({
           <div>
             <div>
               <span className="text-sm font-semibold text-secondary-700">
-                {note.created_by_object?.first_name || "Unknown"}{" "}
-                {note.created_by_object?.last_name}
+                {formatName(note.created_by_object)}
               </span>
               {note.user_type && (
                 <span className="pl-2 text-sm text-secondary-700">

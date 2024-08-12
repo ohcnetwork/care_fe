@@ -3,7 +3,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
-import { isUserOnline, relativeTime } from "../../Utils/utils";
+import { formatName, isUserOnline, relativeTime } from "../../Utils/utils";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -173,7 +173,7 @@ export default function FacilityUsers(props: any) {
                   id="name"
                   className="mt-2 flex gap-3 text-2xl font-bold capitalize"
                 >
-                  {`${user.first_name} ${user.last_name}`}
+                  {formatName(user)}
                 </div>
 
                 <div className="flex justify-between">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import CircularProgress from "../Common/components/CircularProgress";
 import * as Notification from "../../Utils/Notifications.js";
-import { formatDateTime } from "../../Utils/utils";
+import { formatDateTime, formatName } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import ButtonV2 from "../Common/components/ButtonV2";
 import routes from "../../Redux/api";
@@ -107,8 +107,7 @@ export const Comment = ({
           {created_by_object?.first_name?.charAt(0) || t("unknown")}
         </div>
         <span className="pl-2 text-sm text-secondary-700">
-          {created_by_object?.first_name || t("unknown")}{" "}
-          {created_by_object?.last_name}
+          {formatName(created_by_object)}
         </span>
       </div>
     </div>
