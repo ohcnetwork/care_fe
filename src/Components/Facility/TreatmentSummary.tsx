@@ -9,6 +9,9 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { ConsultationModel } from "./models";
+import { useMemo } from "react";
+import { ConsultationDiagnosis } from "../Diagnosis/types";
 
 const TreatmentSummary = (props: any) => {
   const { consultationId, patientId } = props;
@@ -108,74 +111,40 @@ const TreatmentSummary = (props: any) => {
               </div>
             </div>
 
-            <div className="border-b-2 border-gray-800 px-5 py-2">
-              <b>Comorbidities :</b>
-              <div className="mx-0 sm:mx-5 print:mx-5">
-                <table className="w-full border-collapse border border-gray-800">
-                  <thead>
-                    <tr>
-                      <th className="border border-gray-800">Disease</th>
-                      <th className="border border-gray-800">Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {patientData?.medical_history &&
-                    patientData.medical_history.length > 0 ? (
-                      patientData.medical_history.map(
-                        (obj: any, index: number) => {
-                          return (
-                            <tr key={index}>
-                              <td className="border border-gray-800 text-center">
-                                {obj["disease"]}
-                              </td>
-                              <td className="border border-gray-800 text-center">
-                                {obj["details"] ? obj["details"] : "---"}
-                              </td>
-                            </tr>
-                          );
-                        },
-                      )
-                    ) : (
+            {/* Comorbidities */}
+            {!!patientData?.medical_history?.filter(
+              (comorbidities) => comorbidities.disease !== "NO",
+            ).length && (
+              <div className="border-b-2 border-gray-800 px-5 py-2">
+                <b>Comorbidities :</b>
+                <div className="mx-0 sm:mx-5 print:mx-5">
+                  <table className="w-full border-collapse border border-gray-800">
+                    <thead>
                       <tr>
-                        <td className="border border-gray-800 text-center">
-                          ---
-                        </td>
-                        <td className="border border-gray-800 text-center">
-                          ---
-                        </td>
+                        <th className="border border-gray-800">Disease</th>
+                        <th className="border border-gray-800">Details</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="border-b-2 border-gray-800 px-5 py-2">
-              <b>Diagnosis :</b>
-              <div className="mx-5">
-                <div>
-                  <b>History of present illness :</b>
-                  {consultationData?.history_of_present_illness
-                    ? consultationData.history_of_present_illness
-                    : "    ---"}
-                </div>
-
-                <div>
-                  <b>Examination details and clinical conditions :</b>
-                  {consultationData?.examination_details
-                    ? consultationData.examination_details
-                    : "    ---"}
-                </div>
-
-                <div>
-                  <b>Physical Examination info :</b>
-                  {consultationData?.last_daily_round?.physical_examination_info
-                    ? consultationData.last_daily_round
-                        ?.physical_examination_info
-                    : "    ---"}
+                    </thead>
+                    <tbody>
+                      {patientData.medical_history.map((obj, index) => {
+                        return (
+                          <tr key={index}>
+                            <td className="border border-gray-800 text-center">
+                              {obj["disease"]}
+                            </td>
+                            <td className="border border-gray-800 text-center">
+                              {obj["details"] || "---"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            </div>
+            )}
+
+            <DiagnosisSection consultationData={consultationData} />
 
             <div className="border-b-2 border-gray-800 px-5 py-2">
               <b>General Instructions :</b>
@@ -337,3 +306,74 @@ const TreatmentSummary = (props: any) => {
 };
 
 export default TreatmentSummary;
+
+interface IDiagnosisSection {
+  consultationData?: ConsultationModel;
+}
+
+type DiagnosisType =
+  | "principal"
+  | "confirmed"
+  | "provisional"
+  | "unconfirmed"
+  | "differential";
+
+function DiagnosisSection({ consultationData }: IDiagnosisSection) {
+  const diagnoses = useMemo(() => {
+    return consultationData?.diagnoses?.reduce(
+      (acc, curr) => {
+        if (curr.is_principal) {
+          acc.principal.push(curr);
+        } else if (
+          ["confirmed", "provisional", "unconfirmed", "differential"].includes(
+            curr.verification_status,
+          )
+        ) {
+          acc[curr.verification_status as keyof typeof acc].push(curr);
+        }
+
+        return acc;
+      },
+      {
+        principal: [],
+        confirmed: [],
+        provisional: [],
+        unconfirmed: [],
+        differential: [],
+      } as Record<DiagnosisType, ConsultationDiagnosis[]>,
+    );
+  }, [consultationData?.diagnoses]);
+
+  if (!diagnoses) {
+    return null;
+  }
+
+  return (
+    <div className="border-b-2 border-gray-800 px-5 py-2">
+      <b>Diagnosis :</b>
+      <div className="mx-5">
+        {(
+          [
+            { key: "principal", title: "Principal Diagnosis" },
+            { key: "confirmed", title: "Confirmed Diagnosis" },
+            { key: "provisional", title: "Provisional Diagnosis" },
+            { key: "unconfirmed", title: "Unconfirmed Diagnosis" },
+            { key: "differential", title: "Differential Diagnosis" },
+          ] as { key: DiagnosisType; title: string }[]
+        ).map(
+          (item) =>
+            !!diagnoses[item.key].length && (
+              <div>
+                <b>{item.title} :</b>
+                <ol className="mx-6 list-decimal">
+                  {diagnoses[item.key].map((d) => (
+                    <li key={d.id}>{d.diagnosis_object.label}</li>
+                  ))}
+                </ol>
+              </div>
+            ),
+        )}
+      </div>
+    </div>
+  );
+}
