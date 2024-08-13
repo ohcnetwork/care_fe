@@ -13,6 +13,7 @@ import {
   ValueDescription,
 } from "../../Utils/utils";
 import { VentilatorFields } from "./Sections/RespiratorySupport/Ventilator";
+import PressureSore from "./Sections/PressureSore/PressureSore";
 
 type Props = {
   facilityId: string;
@@ -188,6 +189,16 @@ export default function CriticalCarePreview(props: Props) {
             label="Net Balance"
             value={data.dialysis_net_balance}
             suffix="ml/h"
+          />
+        </Section>
+
+        <Section title="Pressure Sore">
+          <PressureSore
+            log={data}
+            readonly
+            onChange={() => {
+              //
+            }}
           />
         </Section>
 
