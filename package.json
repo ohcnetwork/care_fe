@@ -49,7 +49,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.0.18",
+    "@fontsource/inter": "^5.0.20",
     "@glennsl/bs-json": "^5.0.4",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.3",
