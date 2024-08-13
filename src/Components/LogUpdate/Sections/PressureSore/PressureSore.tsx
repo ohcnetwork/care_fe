@@ -217,7 +217,7 @@ const valueDescriptions = [
     className: "bg-red-600 text-white border border-secondary-400",
   },
   {
-    till: 10,
+    till: 17,
     color: "#991b1b",
     text: "",
     className: "bg-red-800 text-white border border-secondary-400",
