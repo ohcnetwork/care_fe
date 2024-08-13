@@ -1,16 +1,18 @@
-import { NURSING_CARE_FIELDS } from "../../../Common/constants";
+import { useTranslation } from "react-i18next";
+import { NURSING_CARE_PROCEDURES } from "../../../Common/constants";
 import { classNames } from "../../../Utils/utils";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
+  const { t } = useTranslation();
   const nursing = log.nursing || [];
 
   return (
     <div className="flex flex-col">
-      {NURSING_CARE_FIELDS.map((field, i) => {
-        const obj = nursing.find((n) => n.procedure === field.text);
+      {NURSING_CARE_PROCEDURES.map((procedure, i) => {
+        const obj = nursing.find((n) => n.procedure === procedure);
 
         return (
           <div
@@ -23,22 +25,17 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
           >
             <div className="px-4 pt-4">
               <CheckBoxFormField
-                label={field.desc}
-                name={`${field.text}__enabled`}
+                label={t(`NURSING_CARE_PROCEDURE__${procedure}`)}
+                name={`${procedure}__enabled`}
                 value={!!obj}
                 onChange={(e) => {
                   if (e.value) {
                     onChange({
-                      nursing: [
-                        ...nursing,
-                        { procedure: field.text, description: "" },
-                      ],
+                      nursing: [...nursing, { procedure, description: "" }],
                     });
                   } else {
                     onChange({
-                      nursing: nursing.filter(
-                        (n) => n.procedure !== field.text,
-                      ),
+                      nursing: nursing.filter((n) => n.procedure !== procedure),
                     });
                   }
                 }}
@@ -48,12 +45,12 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
             {obj && (
               <div className="p-4">
                 <TextAreaFormField
-                  name={`${field.text}__description`}
+                  name={`${procedure}__description`}
                   value={obj.description}
                   onChange={(val) =>
                     onChange({
                       nursing: nursing.map((n) =>
-                        n.procedure === field.text
+                        n.procedure === procedure
                           ? { ...n, description: val.value }
                           : n,
                       ),

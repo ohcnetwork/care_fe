@@ -39,5 +39,18 @@
   "INSULIN_INTAKE_FREQUENCY__UNKNOWN": "Unknown",
   "INSULIN_INTAKE_FREQUENCY__OD": "Once a day (OD)",
   "INSULIN_INTAKE_FREQUENCY__BD": "Twice a day (BD)",
-  "INSULIN_INTAKE_FREQUENCY__TD": "Thrice a day (TD)"
+  "INSULIN_INTAKE_FREQUENCY__TD": "Thrice a day (TD)",
+  "NURSING_CARE_PROCEDURE__personal_hygiene": "Personal Hygiene",
+  "NURSING_CARE_PROCEDURE__positioning": "Positioning",
+  "NURSING_CARE_PROCEDURE__suctioning": "Suctioning",
+  "NURSING_CARE_PROCEDURE__ryles_tube_care": "Ryles Tube Care",
+  "NURSING_CARE_PROCEDURE__iv_sitecare": "IV Site Care",
+  "NURSING_CARE_PROCEDURE__nubulisation": "Nubulisation",
+  "NURSING_CARE_PROCEDURE__dressing": "Dressing",
+  "NURSING_CARE_PROCEDURE__dvt_pump_stocking": "DVT Pump Stocking",
+  "NURSING_CARE_PROCEDURE__restrain": "Restrain",
+  "NURSING_CARE_PROCEDURE__chest_tube_care": "Chest Tube Care",
+  "NURSING_CARE_PROCEDURE__tracheostomy_care": "Tracheostomy Care",
+  "NURSING_CARE_PROCEDURE__stoma_care": "Stoma Care",
+  "NURSING_CARE_PROCEDURE__catheter_care": "Catheter Care"
 }

@@ -5,7 +5,7 @@ import {
   HumanBodyRegion,
   INSULIN_INTAKE_FREQUENCY_OPTIONS,
   LIMB_RESPONSE_OPTIONS,
-  NURSING_CARE_FIELDS,
+  NURSING_CARE_PROCEDURES,
   OCCUPATION_TYPES,
   OXYGEN_MODALITY_OPTIONS,
   PressureSoreExudateAmountOptions,
@@ -371,7 +371,7 @@ export interface DailyRoundsModel {
   dialysis_fluid_balance?: number;
   dialysis_net_balance?: number;
   nursing?: {
-    procedure: (typeof NURSING_CARE_FIELDS)[number]["text"];
+    procedure: (typeof NURSING_CARE_PROCEDURES)[number];
     description: string;
   }[];
   feeds?: NameQuantity[];

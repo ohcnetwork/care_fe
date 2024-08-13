@@ -699,21 +699,21 @@ export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const NURSING_CARE_FIELDS: Array<OptionsType> = [
-  { id: 1, text: "personal_hygiene", desc: "Personal Hygiene" },
-  { id: 2, text: "positioning", desc: "Positioning" },
-  { id: 3, text: "suctioning", desc: "Suctioning" },
-  { id: 4, text: "ryles_tube_care", desc: "Ryles Tube Care" },
-  { id: 5, text: "iv_sitecare", desc: "IV Site Care" },
-  { id: 6, text: "nubulisation", desc: "Nubulisation" },
-  { id: 7, text: "dressing", desc: "Dressing" },
-  { id: 8, text: "dvt_pump_stocking", desc: "DVT Pump Stocking" },
-  { id: 9, text: "restrain", desc: "Restrain" },
-  { id: 10, text: "chest_tube_care", desc: "Chest Tube Care" },
-  { id: 11, text: "tracheostomy_care", desc: "Tracheostomy Care" },
-  { id: 12, text: "stoma_care", desc: "Stoma Care" },
-  { id: 13, text: "catheter_care", desc: "Catheter Care" },
-];
+export const NURSING_CARE_PROCEDURES = [
+  "personal_hygiene",
+  "positioning",
+  "suctioning",
+  "ryles_tube_care",
+  "iv_sitecare",
+  "nubulisation",
+  "dressing",
+  "dvt_pump_stocking",
+  "restrain",
+  "chest_tube_care",
+  "tracheostomy_care",
+  "stoma_care",
+  "catheter_care",
+] as const;
 
 export const EYE_OPEN_SCALE = [
   { value: 4, text: "Spontaneous" },

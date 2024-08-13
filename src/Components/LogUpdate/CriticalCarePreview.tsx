@@ -192,6 +192,21 @@ export default function CriticalCarePreview(props: Props) {
           />
         </Section>
 
+        {data.nursing?.length && (
+          <Section title="Nursing Care">
+            <ul>
+              {data.nursing.map((care) => (
+                <li key={care.procedure}>
+                  <Detail
+                    label={t(`NURSING_CARE_PROCEDURE__${care.procedure}`)}
+                    value={care.description}
+                  />
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
         <Section title="Pressure Sore">
           <PressureSore
             log={data}
