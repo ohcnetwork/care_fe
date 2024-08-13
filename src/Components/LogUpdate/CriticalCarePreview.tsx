@@ -15,6 +15,8 @@ import {
 import { VentilatorFields } from "./Sections/RespiratorySupport/Ventilator";
 import PressureSore from "./Sections/PressureSore/PressureSore";
 import { IOBalanceSections } from "./Sections/IOBalance";
+import PainChart from "./components/PainChart";
+import { meanArterialPressure } from "../Common/BloodPressureFormField";
 
 type Props = {
   facilityId: string;
@@ -191,6 +193,81 @@ export default function CriticalCarePreview(props: Props) {
             value={data.dialysis_net_balance}
             suffix="ml/h"
           />
+        </Section>
+
+        <Section title="Vitals">
+          {data.bp && (
+            <div className="mb-2 max-w-96 space-y-1 rounded border border-secondary-300 bg-secondary-100 p-3">
+              <h5>Blood Pressure</h5>
+              <RangeDetail
+                label="Systolic"
+                value={data.bp.systolic}
+                max={250}
+                unit="mmHg"
+                valueDescriptions={rangeValueDescription({
+                  low: 99,
+                  high: 139,
+                })}
+              />
+              <RangeDetail
+                label="Diastolic"
+                value={data.bp.diastolic}
+                max={180}
+                unit="mmHg"
+                valueDescriptions={rangeValueDescription({ low: 49, high: 89 })}
+              />
+              <Detail label="Mean" value={meanArterialPressure(data.bp)} />
+            </div>
+          )}
+          <RangeDetail
+            label={
+              <span>
+                SpO<sub>2</sub>
+              </span>
+            }
+            value={data.ventilator_spo2}
+            max={100}
+            unit="%"
+            valueDescriptions={rangeValueDescription({ low: 89 })}
+          />
+          <RangeDetail
+            label="Temperature"
+            value={data.temperature}
+            max={106}
+            unit="°F"
+            valueDescriptions={rangeValueDescription({ low: 97.4, high: 99.6 })}
+          />
+          <RangeDetail
+            label="Respiratory Rate"
+            value={data.resp}
+            max={150}
+            unit="bpm"
+            valueDescriptions={rangeValueDescription({ low: 11, high: 16 })}
+          />
+          <RangeDetail
+            label="Pulse"
+            value={data.pulse}
+            unit="bpm"
+            max={200}
+            valueDescriptions={[
+              {
+                till: 40,
+                className: "text-red-500",
+                text: "Bradycardia",
+              },
+              {
+                till: 100,
+                className: "text-green-500",
+                text: "Normal",
+              },
+              {
+                className: "text-red-500",
+                text: "Tachycardia",
+              },
+            ]}
+          />
+          <h4 className="py-4">Pain Scale</h4>
+          <PainChart pain={data.pain_scale_enhanced ?? []} />
         </Section>
 
         {!!IOBalanceSections.flatMap((s) =>
@@ -371,13 +448,15 @@ export default function CriticalCarePreview(props: Props) {
               {VentilatorFields.map((field) => {
                 const value = data[field.key];
                 return (
-                  <RangeDetail
-                    label={field.label}
-                    value={value}
-                    valueDescriptions={field.valueDescription}
-                    max={field.max}
-                    unit={field.unit}
-                  />
+                  <div className="pt-1">
+                    <RangeDetail
+                      label={field.label}
+                      value={value}
+                      valueDescriptions={field.valueDescription}
+                      max={field.max}
+                      unit={field.unit}
+                    />
+                  </div>
                 );
               })}
             </>

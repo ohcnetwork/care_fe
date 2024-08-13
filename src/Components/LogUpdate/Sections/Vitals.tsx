@@ -112,7 +112,22 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         max={200}
         step={1}
         unit="bpm"
-        valueDescriptions={rangeValueDescription({ low: 39, high: 100 })}
+        valueDescriptions={[
+          {
+            till: 40,
+            className: "text-red-500",
+            text: "Bradycardia",
+          },
+          {
+            till: 100,
+            className: "text-green-500",
+            text: "Normal",
+          },
+          {
+            className: "text-red-500",
+            text: "Tachycardia",
+          },
+        ]}
       />
       <RadioFormField
         label="Heartbeat Rhythm"
