@@ -32,7 +32,10 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
       return trimmed;
     }
 
-    if (new Date(trimmed).toString() !== "Invalid Date") {
+    const dateTimeRegex =
+      /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?)?$/;
+
+    if (trimmed.match(dateTimeRegex)) {
       return new Date(trimmed).toLocaleString();
     }
 

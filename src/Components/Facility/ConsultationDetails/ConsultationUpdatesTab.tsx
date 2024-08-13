@@ -555,24 +555,35 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   <div id="patient-weight">
                     Weight {" - "}
                     <span className="font-semibold">
-                      {props.consultationData.weight ?? "-"} Kg
+                      {props.consultationData.weight
+                        ? `${props.consultationData.weight} kg`
+                        : "Unspecified"}
                     </span>
                   </div>
                   <div id="patient-height">
                     Height {" - "}
                     <span className="font-semibold">
-                      {props.consultationData.height ?? "-"} cm
+                      {props.consultationData.height
+                        ? `${props.consultationData.height} cm`
+                        : "Unspecified"}
                     </span>
                   </div>
                   <div>
                     Body Surface Area {" - "}
-                    <span className="font-semibold">
-                      {Math.sqrt(
-                        (Number(props.consultationData.weight) *
-                          Number(props.consultationData.height)) /
-                          3600,
-                      ).toFixed(2)}{" "}
-                      m<sup>2</sup>
+                    <span className="font-semibold ">
+                      {props.consultationData.weight &&
+                      props.consultationData.height ? (
+                        <>
+                          {Math.sqrt(
+                            (Number(props.consultationData.weight) *
+                              Number(props.consultationData.height)) /
+                              3600,
+                          ).toFixed(2)}
+                          m<sup>2</sup>
+                        </>
+                      ) : (
+                        "Unspecified"
+                      )}
                     </span>
                   </div>
                   <div>

@@ -14,7 +14,12 @@ import routes from "../../Redux/api.js";
 import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request.js";
 import useQuery from "../../Utils/request/useQuery.js";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
+import {
+  classNames,
+  formatName,
+  isUserOnline,
+  relativeTime,
+} from "../../Utils/utils";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -178,7 +183,7 @@ export default function ManageUsers() {
     setUserData({
       show: true,
       username: user.username,
-      name: `${user.first_name} ${user.last_name}`,
+      name: formatName(user),
     });
   };
 
@@ -238,7 +243,7 @@ export default function ManageUsers() {
                   id="name"
                   className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
                 >
-                  {`${user.first_name} ${user.last_name}`}
+                  {formatName(user)}
 
                   {user.last_login && cur_online ? (
                     <div
