@@ -1,6 +1,7 @@
 import {
   celsiusToFahrenheit,
   fahrenheitToCelsius,
+  properRoundOf,
   rangeValueDescription,
 } from "../../../Utils/utils";
 import { meanArterialPressure } from "../../Common/BloodPressureFormField";
@@ -8,26 +9,31 @@ import { meanArterialPressure } from "../../Common/BloodPressureFormField";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
+import { FieldChangeEvent } from "../../Form/FormFields/Utils";
 import { DailyRoundsModel } from "../../Patient/models";
 import PainChart from "../components/PainChart";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
+  const handleBloodPressureChange = (event: FieldChangeEvent<number>) => {
+    const bp = {
+      ...(log.bp ?? {}),
+      [event.name]: event.value,
+    };
+    bp.mean = meanArterialPressure(bp);
+    onChange({ bp });
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-end justify-between">
         <h2 className="text-lg">Blood Pressure</h2>
-        <span>
-          MAP:{" "}
-          {log.bp && log.bp.diastolic && log.bp.systolic
-            ? meanArterialPressure(log.bp)?.toFixed()
-            : "--"}
-        </span>
+        <span>MAP: {(log.bp?.mean && properRoundOf(log.bp.mean)) || "--"}</span>
       </div>
       <RangeFormField
         label="Systolic"
         name="systolic"
-        onChange={(c) => onChange({ bp: { ...log.bp, systolic: c.value } })}
+        onChange={handleBloodPressureChange}
         value={log.bp?.systolic}
         min={0}
         max={250}
@@ -38,7 +44,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
       <RangeFormField
         label="Diastolic"
         name="diastolic"
-        onChange={(c) => onChange({ bp: { ...log.bp, diastolic: c.value } })}
+        onChange={handleBloodPressureChange}
         value={log.bp?.diastolic}
         min={30}
         max={180}
