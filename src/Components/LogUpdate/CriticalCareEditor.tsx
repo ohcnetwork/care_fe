@@ -37,7 +37,9 @@ export default function CriticalCareEditor(props: Props) {
     return <Loading />;
   }
 
-  const sections = RoundTypeSections[query.data.rounds_type ?? "VENTILATOR"];
+  const roundType = query.data.rounds_type ?? "VENTILATOR";
+
+  const sections = RoundTypeSections[roundType];
   const consultationDashboardUrl = `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`;
 
   return (
@@ -146,7 +148,15 @@ export default function CriticalCareEditor(props: Props) {
           <Submit
             label="Complete"
             className="mt-8 md:w-full"
-            href={consultationDashboardUrl}
+            onClick={() => {
+              if (roundType === "VENTILATOR") {
+                Success({ msg: "Detailed Log Update filed successfully" });
+              } else if (roundType === "DOCTORS_LOG") {
+                Success({ msg: "Progress Note Log Update filed successfully" });
+              }
+
+              navigate(consultationDashboardUrl);
+            }}
           />
         )}
       </Card>
