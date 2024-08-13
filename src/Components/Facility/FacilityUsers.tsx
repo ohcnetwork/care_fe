@@ -3,7 +3,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
-import { isUserOnline, relativeTime } from "../../Utils/utils";
+import { formatName, isUserOnline, relativeTime } from "../../Utils/utils";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -151,13 +151,15 @@ export default function FacilityUsers(props: any) {
                       {user.username}
                     </div>
                   )}
-                  <div className="min-width-50 shrink-0 text-sm text-gray-600">
+                  <div className="min-width-50 shrink-0 text-sm text-secondary-600">
                     Last Online:{" "}
                     <span
                       aria-label="Online"
                       className={
                         "inline-block h-2 w-2 shrink-0 rounded-full " +
-                        (isUserOnline(user) ? "bg-primary-400" : "bg-gray-300")
+                        (isUserOnline(user)
+                          ? "bg-primary-400"
+                          : "bg-secondary-300")
                       }
                     ></span>
                     <span className="pl-2">
@@ -171,7 +173,7 @@ export default function FacilityUsers(props: any) {
                   id="name"
                   className="mt-2 flex gap-3 text-2xl font-bold capitalize"
                 >
-                  {`${user.first_name} ${user.last_name}`}
+                  {formatName(user)}
                 </div>
 
                 <div className="flex justify-between">
@@ -183,10 +185,10 @@ export default function FacilityUsers(props: any) {
                 </div>
                 <div className="flex justify-between">
                   {user.phone_number && (
-                    <div className="mt-2 border-t bg-gray-50 px-6 py-2">
+                    <div className="mt-2 border-t bg-secondary-50 px-6 py-2">
                       <div className="flex justify-between py-4">
                         <div>
-                          <div className="leading-relaxed text-gray-500">
+                          <div className="leading-relaxed text-secondary-500">
                             Phone:
                           </div>
                           <a

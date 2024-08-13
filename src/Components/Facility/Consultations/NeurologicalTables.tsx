@@ -17,15 +17,15 @@ const DataTable = (props: any) => {
   return (
     <div>
       <div className="text-xl font-semibold">{title}</div>
-      <div className="w-max-content mb-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
+      <div className="w-max-content mb-4 flex max-w-full flex-row divide-y divide-secondary-200 overflow-hidden shadow sm:rounded-lg">
         <div className="flex flex-col justify-between">
-          <div className="bg-gray-50 px-2 py-6 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-700">
+          <div className="bg-secondary-50 px-2 py-6 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-700">
             Time
           </div>
-          <div className="bg-gray-50 px-2 py-5 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-700">
+          <div className="bg-secondary-50 px-2 py-5 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-700">
             Left
           </div>
-          <div className="bg-gray-50 px-2 py-5 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-700">
+          <div className="bg-secondary-50 px-2 py-5 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-700">
             Right
           </div>
         </div>
@@ -34,15 +34,15 @@ const DataTable = (props: any) => {
             return (
               <div
                 key={`${title}_${i}`}
-                className="flex flex-col divide-x divide-gray-200"
+                className="flex flex-col divide-x divide-secondary-200"
               >
-                <div className="w-20 bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-900">
+                <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-900">
                   {x.date}
                 </div>
-                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-gray-900">
+                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
                   {x.left}
                 </div>
-                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-gray-900">
+                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
                   {x.right}
                 </div>
               </div>
@@ -65,19 +65,19 @@ const DataDescription = (props: any) => {
         {data.length ? (
           data.map((x: any, i: any) => (
             <div key={`${title}_${i}`} className="mb-2">
-              <div className="text-sm font-bold text-gray-800">{`- ${x.date}`}</div>
-              <div className="pl-2 text-gray-800">
+              <div className="text-sm font-bold text-secondary-800">{`- ${x.date}`}</div>
+              <div className="pl-2 text-secondary-800">
                 <span className="font-semibold">Left: </span>
                 {x.left}
               </div>
-              <div className="pl-2 text-gray-800">
+              <div className="pl-2 text-secondary-800">
                 <span className="font-semibold">Right: </span>
                 {x.right}
               </div>
             </div>
           ))
         ) : (
-          <div className="text-center text-sm font-semibold text-gray-700">
+          <div className="text-center text-sm font-semibold text-secondary-700">
             No Data Available!
           </div>
         )}
@@ -93,13 +93,17 @@ export const NeurologicalTable = (props: any) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  // To be removed in favour of proper fix upcoming in https://github.com/coronasafe/care_fe/pull/8119/files#diff-3f2dc697ea8b52c1b3b887c76623edb0a4e6ace175573dfbd3a7476ffee979a9L96-L103
   const LOC_OPTIONS = [
-    { id: 0, value: "Unknown" },
+    { id: 20, value: "Unresponsive" },
+    { id: 15, value: "Responds to Pain" },
+    { id: 10, value: "Responds to Voice" },
     { id: 5, value: "Alert" },
-    { id: 10, value: "Drowsy" },
-    { id: 15, value: "Stuporous" },
-    { id: 20, value: "Comatose" },
-    { id: 25, value: "Cannot Be Assessed" },
+    { id: 25, value: "Agitated or Confused" },
+    {
+      id: 30,
+      value: "Onset of Agitation and Confusion",
+    },
   ];
 
   const REACTION_OPTIONS = [
@@ -289,17 +293,17 @@ export const NeurologicalTable = (props: any) => {
     <div className="mt-2">
       <div className="mb-6">
         <div className="text-xl font-semibold">Level Of Consciousness</div>
-        <div className="w-max-content my-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
+        <div className="w-max-content my-4 flex max-w-full flex-row divide-y divide-secondary-200 overflow-hidden shadow sm:rounded-lg">
           <div className="flex flex-row overflow-x-auto">
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
-                className="min-w-max-content flex  flex-col  divide-x divide-gray-200"
+                className="min-w-max-content flex flex-col divide-x divide-secondary-200 whitespace-nowrap"
               >
-                <div className="border-r bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-700">
+                <div className="border-r bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-700">
                   {x.date}
                 </div>
-                <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-700">
+                <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-secondary-700">
                   {x.loc}
                 </div>
               </div>
@@ -315,11 +319,11 @@ export const NeurologicalTable = (props: any) => {
               locDescription.map((x: any, i: any) => (
                 <div key={`loc_desc_${i}`} className="mb-2">
                   <div className="text-sm font-semibold">{`- ${x.date}`}</div>
-                  <div className="pl-2 text-gray-800">{x.loc}</div>
+                  <div className="pl-2 text-secondary-800">{x.loc}</div>
                 </div>
               ))
             ) : (
-              <div className="text-center text-sm font-semibold text-gray-800">
+              <div className="text-center text-sm font-semibold text-secondary-800">
                 No Data Available!
               </div>
             )}
@@ -348,21 +352,21 @@ export const NeurologicalTable = (props: any) => {
       <div className="mt-4">
         <div className="text-xl font-semibold">Glasgow Coma Scale</div>
         <div className="mb-6 mt-2">
-          <div className="w-max-content mb-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
+          <div className="w-max-content mb-4 flex max-w-full flex-row divide-y divide-secondary-200 overflow-hidden shadow sm:rounded-lg">
             <div className="flex flex-col ">
-              <div className="bg-gray-50 px-2 py-7 text-center text-sm font-medium uppercase leading-4 tracking-wider text-gray-700">
+              <div className="bg-secondary-50 px-2 py-7 text-center text-sm font-medium uppercase leading-4 tracking-wider text-secondary-700">
                 Time
               </div>
-              <div className="bg-gray-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-gray-700">
+              <div className="bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
                 Eye
               </div>
-              <div className="bg-gray-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-gray-700">
+              <div className="bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
                 Verbal
               </div>
-              <div className="bg-gray-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-gray-700">
+              <div className="bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
                 Motor
               </div>
-              <div className="bg-gray-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-gray-700">
+              <div className="bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
                 Total
               </div>
             </div>
@@ -371,21 +375,21 @@ export const NeurologicalTable = (props: any) => {
                 return (
                   <div
                     key={`glascow_${i}`}
-                    className="flex flex-col divide-x divide-gray-200"
+                    className="flex flex-col divide-x divide-secondary-200"
                   >
-                    <div className="w-20 bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-800">
+                    <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-800">
                       {x.date}
                     </div>
-                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-800">
+                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-secondary-800">
                       {x.eye}
                     </div>
-                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-800">
+                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-secondary-800">
                       {x.verbal}
                     </div>
-                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-800">
+                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-secondary-800">
                       {x.motor}
                     </div>
-                    <div className="whitespace-nowrap border-t-2 border-gray-500 bg-white px-6 py-4 text-center text-sm font-semibold leading-5 text-gray-800">
+                    <div className="whitespace-nowrap border-t-2 border-secondary-500 bg-white px-6 py-4 text-center text-sm font-semibold leading-5 text-secondary-800">
                       {x.total}
                     </div>
                   </div>
@@ -405,7 +409,7 @@ export const NeurologicalTable = (props: any) => {
                 {EYE_OPEN_SCALE.map((x: any) => (
                   <div
                     key={`eye_${x.value}`}
-                    className="pl-2 leading-relaxed text-gray-800"
+                    className="pl-2 leading-relaxed text-secondary-800"
                   >
                     <span className="text-sm font-semibold">{x.value}</span> -{" "}
                     {x.text}
@@ -419,7 +423,7 @@ export const NeurologicalTable = (props: any) => {
                 {VERBAL_RESPONSE_SCALE.map((x: any) => (
                   <div
                     key={`verbal_${x.value}`}
-                    className="pl-2 leading-relaxed text-gray-800"
+                    className="pl-2 leading-relaxed text-secondary-800"
                   >
                     <span className="text-sm font-semibold">{x.value}</span> -{" "}
                     {x.text}
@@ -433,7 +437,7 @@ export const NeurologicalTable = (props: any) => {
                 {MOTOR_RESPONSE_SCALE.map((x: any) => (
                   <div
                     key={`motor_${x.value}`}
-                    className="pl-2 leading-relaxed text-gray-800"
+                    className="pl-2 leading-relaxed text-secondary-800"
                   >
                     <span className="text-sm font-semibold">{x.value}</span> -{" "}
                     {x.text}

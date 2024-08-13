@@ -56,7 +56,9 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const prescriptionList = [
     ...(data?.results ?? []),
-    ...(showDiscontinued ? discontinuedPrescriptions.data?.results ?? [] : []),
+    ...(showDiscontinued
+      ? (discontinuedPrescriptions.data?.results ?? [])
+      : []),
   ];
 
   const { activityTimelineBounds, prescriptions } = useMemo(
@@ -90,25 +92,37 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         options={
           !readonly &&
           !!data?.results && (
-            <AuthorizedForConsultationRelatedActions>
+            <>
+              <AuthorizedForConsultationRelatedActions>
+                <ButtonV2
+                  id="edit-prescription"
+                  variant="secondary"
+                  border
+                  href="prescriptions"
+                  className="w-full"
+                >
+                  <CareIcon icon="l-pen" className="text-lg" />
+                  <span className="hidden lg:block">
+                    {t("edit_prescriptions")}
+                  </span>
+                  <span className="block lg:hidden">{t("edit")}</span>
+                </ButtonV2>
+                <BulkAdminister
+                  prescriptions={data.results}
+                  onDone={() => refetch()}
+                />
+              </AuthorizedForConsultationRelatedActions>
               <ButtonV2
-                id="edit-prescription"
-                variant="secondary"
+                href="prescriptions/print"
+                ghost
                 border
-                href="prescriptions"
+                disabled={!data.results.length}
                 className="w-full"
               >
-                <CareIcon icon="l-pen" className="text-lg" />
-                <span className="hidden lg:block">
-                  {t("edit_prescriptions")}
-                </span>
-                <span className="block lg:hidden">{t("edit")}</span>
+                <CareIcon icon="l-print" className="text-lg" />
+                Print
               </ButtonV2>
-              <BulkAdminister
-                prescriptions={data.results}
-                onDone={() => refetch()}
-              />
-            </AuthorizedForConsultationRelatedActions>
+            </>
           )
         }
       />
@@ -150,8 +164,9 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         </ScrollOverlay>
         {!!discontinuedCount && (
           <ButtonV2
+            id="discontinued-medicine"
             variant="secondary"
-            className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-gray-100"
+            className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-secondary-100"
             disabled={loading || discontinuedPrescriptions.loading}
             onClick={() => setShowDiscontinued(!showDiscontinued)}
           >
@@ -177,7 +192,7 @@ export default MedicineAdministrationSheet;
 
 const NoPrescriptions = ({ prn }: { prn: boolean }) => {
   return (
-    <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
+    <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-secondary-500">
       <CareIcon icon="l-tablets" className="text-5xl" />
       <h3 className="text-lg font-medium">
         {prn

@@ -7,19 +7,36 @@ import LoadingLogUpdateCard from "../../Consultations/DailyRounds/LoadingCard";
 import GenericEvent from "./GenericEvent";
 import { getEventIcon } from "./iconMap";
 import { EventGeneric } from "./types";
+import SortDropdownMenu from "../../../Common/SortDropdown";
+import { EVENTS_SORT_OPTIONS } from "../../../../Common/constants";
+import { QueryParams } from "../../../../Utils/request/types";
+import { useState } from "react";
 
 export default function EventsList() {
   const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
+  const [query, setQuery] = useState<QueryParams>();
 
   return (
-    <PaginatedList route={routes.getEvents} pathParams={{ consultationId }}>
+    <PaginatedList
+      route={routes.getEvents}
+      pathParams={{ consultationId }}
+      query={query}
+    >
       {() => (
         <>
+          <div className="m-1 flex flex-1 justify-end">
+            <SortDropdownMenu
+              options={EVENTS_SORT_OPTIONS}
+              selected={query?.ordering?.toString()}
+              onSelect={setQuery}
+            />
+          </div>
+
           <div className="mt-4 flex w-full flex-col gap-4">
             <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
-              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
-                <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700  ">
+              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
+                <span className="flex justify-center rounded-lg bg-white p-3 text-secondary-700  ">
                   {t("no_consultation_updates")}
                 </span>
               </PaginatedList.WhenEmpty>
@@ -30,13 +47,10 @@ export default function EventsList() {
                 {(item, items) => (
                   <TimelineNode
                     name={
-                      item.event_type.name
-                        .split("_")
-                        .map(
-                          (text) =>
-                            text[0].toUpperCase() + text.toLowerCase().slice(1),
-                        )
-                        .join(" ") + " Event"
+                      t(item.event_type.name.toLowerCase()).replaceAll(
+                        /_/g,
+                        " ",
+                      ) + " Event"
                     }
                     event={{
                       type: item.change_type.replace(/_/g, " ").toLowerCase(),
@@ -54,7 +68,7 @@ export default function EventsList() {
                       if (entries.length === 0) {
                         return (
                           <div className="flex w-full flex-col items-center gap-2 md:flex-row">
-                            <span className="text-xs uppercase text-gray-700">
+                            <span className="text-xs uppercase text-secondary-700">
                               {t("no_changes")}
                             </span>
                           </div>

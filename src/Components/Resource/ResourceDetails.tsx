@@ -1,5 +1,5 @@
 import { useState, lazy } from "react";
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
@@ -241,8 +241,7 @@ export default function ResourceDetails(props: { id: string }) {
                 <div className="pr-16 sm:px-16 sm:text-center">
                   <p className="font-bold text-primary-800">
                     <span className="inline">
-                      Assigned to: {data.assigned_to_object.first_name}{" "}
-                      {data.assigned_to_object.last_name} -{" "}
+                      Assigned to: {formatName(data.assigned_to_object)} -{" "}
                       {data.assigned_to_object.user_type}
                     </span>
                   </p>
@@ -357,10 +356,9 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="text-sm font-medium leading-5 text-black">
                 Created
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900">
+              <div className="mt-1 text-sm leading-5 text-secondary-900">
                 <div className="text-sm">
-                  {data?.created_by_object?.first_name}{" "}
-                  {data?.created_by_object?.last_name}
+                  {formatName(data.created_by_object)}
                 </div>
                 <div className="text-xs">
                   {data.created_date && formatDateTime(data.created_date)}
@@ -371,10 +369,9 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="text-sm font-medium leading-5 text-black">
                 Last Edited
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900">
+              <div className="mt-1 text-sm leading-5 text-secondary-900">
                 <div className="text-sm">
-                  {data?.last_edited_by_object?.first_name}{" "}
-                  {data?.last_edited_by_object?.last_name}
+                  {formatName(data.last_edited_by_object)}
                 </div>
                 <div className="text-xs">
                   {data.modified_date && formatDateTime(data.modified_date)}

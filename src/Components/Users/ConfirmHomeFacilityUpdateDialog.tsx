@@ -34,7 +34,7 @@ const ConfirmHomeFacilityUpdateDialog = (props: ConfirmDialogProps) => {
       disabled={disable}
       variant="danger"
     >
-      <div className="flex leading-relaxed text-gray-800">
+      <div className="flex leading-relaxed text-secondary-800">
         <div>
           Are you sure you want to replace{" "}
           <strong>{previousFacilityName}</strong> with{" "}

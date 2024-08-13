@@ -28,6 +28,22 @@ interface Props {
   facility: FacilityModel;
 }
 
+const VideoConstraints = {
+  user: {
+    width: 1280,
+    height: 720,
+    facingMode: "user",
+  },
+  environment: {
+    width: 1280,
+    height: 720,
+    facingMode: { exact: "environment" },
+  },
+} as const;
+
+type IVideoConstraint =
+  (typeof VideoConstraints)[keyof typeof VideoConstraints];
+
 const CoverImageEditModal = ({
   open,
   onClose,
@@ -35,31 +51,26 @@ const CoverImageEditModal = ({
   onDelete,
   facility,
 }: Props) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<any>();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const webRef = useRef<any>(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
     useState(false);
-  const FACING_MODE_USER = "user";
-  const FACING_MODE_ENVIRONMENT = { exact: "environment" };
-  const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
-  const videoConstraints = {
-    width: 1280,
-    height: 720,
-    facingMode: "user",
-  };
+  const [constraint, setConstraint] = useState<IVideoConstraint>(
+    VideoConstraints.user,
+  );
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
   const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
-    setFacingMode((prevState: any) =>
-      prevState === FACING_MODE_USER
-        ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER,
+    setConstraint((prev) =>
+      prev.facingMode === "user"
+        ? VideoConstraints.environment
+        : VideoConstraints.user,
     );
   }, []);
 
@@ -106,7 +117,7 @@ const CoverImageEditModal = ({
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
     const url = `/api/v1/facility/${facility.id}/cover_image/`;
-    setIsUploading(true);
+    setIsProcessing(true);
 
     uploadFile(
       url,
@@ -123,7 +134,7 @@ const CoverImageEditModal = ({
           Notification.Error({
             msg: "Something went wrong!",
           });
-          setIsUploading(false);
+          setIsProcessing(false);
         }
       },
       null,
@@ -131,26 +142,28 @@ const CoverImageEditModal = ({
         Notification.Error({
           msg: "Network Failure. Please check your internet connectivity.",
         });
-        setIsUploading(false);
+        setIsProcessing(false);
       },
     );
 
     await sleep(1000);
-    setIsUploading(false);
+    setIsProcessing(false);
     setIsCaptureImgBeingUploaded(false);
     onSave && onSave();
     closeModal();
   };
 
   const handleDelete = async () => {
+    setIsProcessing(true);
     const { res } = await request(routes.deleteFacilityCoverImage, {
       pathParams: { id: facility.id! },
     });
     if (res?.ok) {
       Success({ msg: "Cover image deleted" });
-      onDelete?.();
-      closeModal();
     }
+    setIsProcessing(false);
+    onDelete?.();
+    closeModal();
   };
 
   const hasImage = !!(preview || facility.read_cover_image_url);
@@ -195,7 +208,7 @@ const CoverImageEditModal = ({
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <p className="text-center font-medium text-gray-700">
+                <p className="text-center font-medium text-secondary-700">
                   {commonHint}
                 </p>
               </>
@@ -209,7 +222,7 @@ const CoverImageEditModal = ({
                 } ${
                   dragProps.fileDropError !== ""
                     ? "border-red-500"
-                    : "border-gray-500"
+                    : "border-secondary-500"
                 }`}
               >
                 <svg
@@ -222,7 +235,7 @@ const CoverImageEditModal = ({
                   } ${
                     dragProps.fileDropError !== ""
                       ? "text-red-500"
-                      : "text-gray-600"
+                      : "text-secondary-600"
                   }`}
                 >
                   <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
@@ -233,14 +246,14 @@ const CoverImageEditModal = ({
                   } ${
                     dragProps.fileDropError !== ""
                       ? "text-red-500"
-                      : "text-gray-700"
+                      : "text-secondary-700"
                   } text-center`}
                 >
                   {dragProps.fileDropError !== ""
                     ? dragProps.fileDropError
                     : `${t("drag_drop_image_to_upload")}`}
                 </p>
-                <p className="mt-4 text-center font-medium text-gray-700">
+                <p className="mt-4 text-center font-medium text-secondary-700">
                   {t("no_cover_photo_uploaded_for_this_facility")}. {commonHint}
                 </p>
               </div>
@@ -277,13 +290,13 @@ const CoverImageEditModal = ({
                   closeModal();
                   dragProps.setFileDropError("");
                 }}
-                disabled={isUploading}
+                disabled={isProcessing}
               />
               {facility.read_cover_image_url && (
                 <ButtonV2
                   variant="danger"
                   onClick={handleDelete}
-                  disabled={isUploading}
+                  disabled={isProcessing}
                 >
                   {t("delete")}
                 </ButtonV2>
@@ -291,15 +304,15 @@ const CoverImageEditModal = ({
               <ButtonV2
                 id="save-cover-image"
                 onClick={handleUpload}
-                disabled={isUploading}
+                disabled={isProcessing}
               >
-                {isUploading ? (
+                {isProcessing ? (
                   <CareIcon icon="l-spinner" className="animate-spin text-lg" />
                 ) : (
                   <CareIcon icon="l-save" className="text-lg" />
                 )}
                 <span>
-                  {isUploading ? `${t("uploading")}...` : `${t("save")}`}
+                  {isProcessing ? `${t("uploading")}...` : `${t("save")}`}
                 </span>
               </ButtonV2>
             </div>
@@ -320,7 +333,7 @@ const CoverImageEditModal = ({
                     screenshotFormat="image/jpeg"
                     width={1280}
                     ref={webRef}
-                    videoConstraints={{ ...videoConstraints, facingMode }}
+                    videoConstraints={constraint}
                   />
                 </>
               ) : (
@@ -365,7 +378,7 @@ const CoverImageEditModal = ({
                           setPreviewImage(null);
                         }}
                         className="my-2 w-full"
-                        disabled={isUploading}
+                        disabled={isProcessing}
                       >
                         {t("retake")}
                       </ButtonV2>
@@ -390,7 +403,7 @@ const CoverImageEditModal = ({
                     setIsCameraOpen(false);
                     webRef.current.stopCamera();
                   }}
-                  className="border-grey-200 my-2 w-full border-2"
+                  className="my-2 w-full"
                 >
                   {t("close")}
                 </ButtonV2>
@@ -430,7 +443,7 @@ const CoverImageEditModal = ({
                         >
                           {t("retake")}
                         </ButtonV2>
-                        <Submit disabled={isUploading} onClick={handleUpload}>
+                        <Submit disabled={isProcessing} onClick={handleUpload}>
                           {isCaptureImgBeingUploaded ? (
                             <>
                               <CareIcon

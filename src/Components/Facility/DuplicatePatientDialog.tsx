@@ -7,13 +7,12 @@ interface Props {
   patientList: Array<DupPatientModel>;
   handleOk: (action: string) => void;
   handleCancel: () => void;
-  isNew: boolean;
 }
 
-const tdClass = "border border-gray-400 p-2 text-left";
+const tdClass = "border border-secondary-400 p-2 text-left";
 
 const DuplicatePatientDialog = (props: Props) => {
-  const { patientList, handleOk, handleCancel, isNew } = props;
+  const { patientList, handleOk, handleCancel } = props;
   const [action, setAction] = useState("");
 
   return (
@@ -32,7 +31,7 @@ const DuplicatePatientDialog = (props: Props) => {
           </p>
         </div>
         <div>
-          <div className="max-h-[200px] overflow-auto rounded border border-y-gray-400">
+          <div className="max-h-[200px] overflow-auto rounded border border-y-secondary-400">
             <table className="relative w-full border-collapse">
               <thead>
                 <tr className="border-separate">
@@ -118,7 +117,7 @@ const DuplicatePatientDialog = (props: Props) => {
         <Cancel
           onClick={handleCancel}
           className="mb-2 sm:mb-0"
-          label={`Cancel ${isNew ? "Registration" : "Update"}`}
+          label={"Close"}
         />
         <Submit
           id="submit-continue-button"

@@ -46,6 +46,15 @@ export const USER_TYPE_OPTIONS = [
   { id: "StateAdmin", role: "State Admin", readOnly: false },
 ] as const;
 
+export const USER_LAST_ACTIVE_OPTIONS = [
+  { id: 1, text: "24 hours" },
+  { id: 7, text: "7 days" },
+  { id: 30, text: "30 days" },
+  { id: 90, text: "90 days" },
+  { id: 365, text: "1 Year" },
+  { id: "never", text: "Never" },
+];
+
 export type UserRole = (typeof USER_TYPE_OPTIONS)[number]["id"];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
@@ -192,6 +201,13 @@ export const PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-name" },
 ];
 
+export const EVENTS_SORT_OPTIONS: SortOption[] = [
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-taken_at" },
+  { isAscending: true, value: "taken_at" },
+];
+
 export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-created_date" },
   { isAscending: true, value: "created_date" },
@@ -313,8 +329,12 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 36 * 60, text: "36 hr" },
   { id: 2 * 24 * 60, text: "2 days" },
   { id: 3 * 24 * 60, text: "3 days" },
+  { id: 5 * 24 * 60, text: "5 days" },
   { id: 7 * 24 * 60, text: "7 days" },
+  { id: 10 * 24 * 60, text: "10 days" },
   { id: 14 * 24 * 60, text: "2 weeks" },
+  { id: 21 * 24 * 60, text: "3 weeks" },
+  { id: 25 * 24 * 60, text: "25 days" },
   { id: 30 * 24 * 60, text: "1 month" },
 ];
 

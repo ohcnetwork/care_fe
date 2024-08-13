@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { downloadResourceRequests } from "../../Redux/actions";
 import { navigate } from "raviger";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatName } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDateTime } from "../../Utils/utils";
 import { ExportButton } from "../Common/Export";
@@ -66,10 +66,10 @@ const ResourceCard = ({ resource }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title=" Origin facility"
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-plane-departure" className="mr-2 text-xl" />
-                  <dd className="text-sm font-bold leading-5 text-gray-900">
+                  <dd className="text-sm font-bold leading-5 text-secondary-900">
                     {(resource.origin_facility_object || {}).name}
                   </dd>
                 </dt>
@@ -77,10 +77,10 @@ const ResourceCard = ({ resource }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title="Resource approving facility"
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-user-check" className="mr-2 text-xl" />
-                  <dd className="text-sm font-bold leading-5 text-gray-900">
+                  <dd className="text-sm font-bold leading-5 text-secondary-900">
                     {(resource.approving_facility_object || {}).name}
                   </dd>
                 </dt>
@@ -89,11 +89,11 @@ const ResourceCard = ({ resource }: any) => {
                 <div className="sm:col-span-1">
                   <dt
                     title=" Assigned facility"
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-plane-arrival" className="mr-2 text-xl" />
 
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {(resource.assigned_facility_object || {}).name ||
                         "Yet to be decided"}
                     </dd>
@@ -108,7 +108,7 @@ const ResourceCard = ({ resource }: any) => {
                     (dayjs()
                       .subtract(2, "hours")
                       .isBefore(resource.modified_date)
-                      ? "text-gray-900"
+                      ? "text-secondary-900"
                       : "rounded bg-red-400 p-1 text-white")
                   }
                 >
@@ -122,12 +122,11 @@ const ResourceCard = ({ resource }: any) => {
                 <div className="sm:col-span-1">
                   <dt
                     title="Assigned to"
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-user" className="mr-2 text-xl" />
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
-                      {resource.assigned_to_object.first_name}{" "}
-                      {resource.assigned_to_object.last_name} -{" "}
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
+                      {formatName(resource.assigned_to_object)} -{" "}
                       {resource.assigned_to_object.user_type}
                     </dd>
                   </dt>
@@ -233,11 +232,11 @@ export default function ResourceBoard({
     <div
       ref={drop}
       className={classNames(
-        "e mr-2 h-full w-full  shrink-0 overflow-y-auto rounded-md bg-gray-200 pb-4 @lg:w-1/2 @3xl:w-1/3 @7xl:w-1/4",
+        "e mr-2 h-full w-full  shrink-0 overflow-y-auto rounded-md bg-secondary-200 pb-4 @lg:w-1/2 @3xl:w-1/3 @7xl:w-1/4",
         isOver && "cursor-move",
       )}
     >
-      <div className="sticky top-0 rounded bg-gray-200 pt-2">
+      <div className="sticky top-0 rounded bg-secondary-200 pt-2">
         <div className="mx-2 flex items-center justify-between rounded bg-white p-4 shadow">
           <h3 className="flex h-8 items-center text-xs">
             {renderBoardTitle(board)}{" "}
@@ -259,13 +258,13 @@ export default function ResourceBoard({
       <div className="mt-2 flex flex-col pb-2 text-sm">
         {isLoading.board ? (
           <div className="m-1">
-            <div className="mx-auto w-full max-w-sm rounded-md border border-gray-300 bg-white p-4 shadow">
+            <div className="mx-auto w-full max-w-sm rounded-md border border-secondary-300 bg-white p-4 shadow">
               <div className="flex animate-pulse space-x-4 ">
                 <div className="flex-1 space-y-4 py-1">
-                  <div className="h-4 w-3/4 rounded bg-gray-400"></div>
+                  <div className="h-4 w-3/4 rounded bg-secondary-400"></div>
                   <div className="space-y-2">
-                    <div className="h-4 rounded bg-gray-400"></div>
-                    <div className="h-4 w-5/6 rounded bg-gray-400"></div>
+                    <div className="h-4 rounded bg-secondary-400"></div>
+                    <div className="h-4 w-5/6 rounded bg-secondary-400"></div>
                   </div>
                 </div>
               </div>
@@ -280,13 +279,13 @@ export default function ResourceBoard({
           data &&
           data?.results.length < (data?.count || 0) &&
           (isLoading.more ? (
-            <div className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white">
+            <div className="mx-auto my-4 rounded-md bg-secondary-100 p-2 px-4 hover:bg-white">
               Loading
             </div>
           ) : (
             <button
               onClick={(_) => handlePagination()}
-              className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white"
+              className="mx-auto my-4 rounded-md bg-secondary-100 p-2 px-4 hover:bg-white"
             >
               More...
             </button>

@@ -71,6 +71,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
         )}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
+        minQueryLength={2}
         onQuery={(query) => refetch({ query: { query } })}
         isLoading={loading}
         error={hasError ? t("diagnosis_already_added") : undefined}

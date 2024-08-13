@@ -44,13 +44,13 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
               {/* eslint-disable-next-line tailwindcss/migration-from-tailwind-2 */}
               <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5  sm:rounded-lg">
-                <table className="min-w-full table-fixed divide-y divide-gray-300">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full table-fixed divide-y divide-secondary-300">
+                  <thead className="bg-secondary-50">
                     <tr>
                       {TableHeads.map((head) => (
                         <th
                           scope="col"
-                          className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900"
+                          className="px-3 py-3.5 text-center text-sm font-semibold text-secondary-900"
                         >
                           {head}
                         </th>
@@ -62,7 +62,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <ButtonV2
                           onClick={() => refetch()}
                           ghost
-                          className="max-w-2xl text-sm text-gray-700 hover:text-gray-900"
+                          className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
                         >
                           <CareIcon icon="l-refresh" /> Refresh
                         </ButtonV2>
@@ -70,12 +70,12 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
+                  <tbody className="divide-y divide-secondary-200 bg-white">
                     {consentsResult?.results.map((consent) => (
                       <tr key={consent.id}>
                         <td className="px-3 py-4 text-center text-sm">
                           {consent.patient_abha_object?.name}
-                          <p className="text-gray-600">
+                          <p className="text-secondary-600">
                             ({consent.patient_abha})
                           </p>
                         </td>
@@ -86,8 +86,8 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               consent.expiry,
                           ) < new Date()
                             ? "EXPIRED"
-                            : consent.consent_artefacts?.[0]?.status ??
-                              consent.status}
+                            : (consent.consent_artefacts?.[0]?.status ??
+                              consent.status)}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
@@ -101,13 +101,6 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               )
                             : "-"}
                         </td>
-
-                        {/* <td className="px-3 py-4 text-center text-sm">
-                          {`${consent.requester?.first_name} ${consent.requester?.last_name}`.trim()}
-                          <p className="text-gray-600">
-                            ({consent.requester.username})
-                          </p>
-                        </td> */}
 
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
@@ -134,7 +127,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               consent.consent_artefacts?.[0]?.hi_types ??
                               consent.hi_types
                             )?.map((hiType) => (
-                              <span className="mb-2 mr-2 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                              <span className="mb-2 mr-2 rounded-full bg-secondary-100 px-2 py-1 text-xs font-medium text-secondary-600">
                                 {hiType}
                               </span>
                             ))}
@@ -159,7 +152,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                                 View
                               </Link>
                             ) : (
-                              <p className="cursor-not-allowed text-gray-600 opacity-70 ">
+                              <p className="cursor-not-allowed text-secondary-600 opacity-70 ">
                                 View
                               </p>
                             )}

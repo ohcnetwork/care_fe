@@ -11,12 +11,12 @@ class PatientLogupdate {
 
   selectBed(bed: string) {
     cy.searchAndSelectOption("input[name='bed']", bed);
-    cy.submitButton("Move to bed");
+    cy.submitButton("Update");
     cy.wait(2000);
   }
 
   selectPatientCategory(category: string) {
-    cy.clickAndSelectOption("#patient_category", category);
+    cy.clickAndSelectOption("#patientCategory", category);
   }
 
   typePhysicalExamination(examination: string) {
