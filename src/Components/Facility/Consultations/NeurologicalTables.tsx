@@ -93,13 +93,17 @@ export const NeurologicalTable = (props: any) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  // To be removed in favour of proper fix upcoming in https://github.com/coronasafe/care_fe/pull/8119/files#diff-3f2dc697ea8b52c1b3b887c76623edb0a4e6ace175573dfbd3a7476ffee979a9L96-L103
   const LOC_OPTIONS = [
-    { id: 0, value: "Unknown" },
+    { id: 20, value: "Unresponsive" },
+    { id: 15, value: "Responds to Pain" },
+    { id: 10, value: "Responds to Voice" },
     { id: 5, value: "Alert" },
-    { id: 10, value: "Drowsy" },
-    { id: 15, value: "Stuporous" },
-    { id: 20, value: "Comatose" },
-    { id: 25, value: "Cannot Be Assessed" },
+    { id: 25, value: "Agitated or Confused" },
+    {
+      id: 30,
+      value: "Onset of Agitation and Confusion",
+    },
   ];
 
   const REACTION_OPTIONS = [
@@ -294,7 +298,7 @@ export const NeurologicalTable = (props: any) => {
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
-                className="min-w-max-content flex  flex-col  divide-x divide-secondary-200"
+                className="min-w-max-content flex flex-col divide-x divide-secondary-200 whitespace-nowrap"
               >
                 <div className="border-r bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-700">
                   {x.date}

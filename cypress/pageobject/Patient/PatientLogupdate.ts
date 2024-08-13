@@ -16,7 +16,7 @@ class PatientLogupdate {
   }
 
   selectPatientCategory(category: string) {
-    cy.clickAndSelectOption("#patient_category", category);
+    cy.clickAndSelectOption("#patientCategory", category);
   }
 
   typePhysicalExamination(examination: string) {

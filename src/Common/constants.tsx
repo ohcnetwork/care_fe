@@ -201,6 +201,13 @@ export const PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-name" },
 ];
 
+export const EVENTS_SORT_OPTIONS: SortOption[] = [
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-taken_at" },
+  { isAscending: true, value: "taken_at" },
+];
+
 export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-created_date" },
   { isAscending: true, value: "created_date" },
