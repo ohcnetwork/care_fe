@@ -6,7 +6,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 
-const sections = [
+export const IOBalanceSections = [
   {
     name: "Intake",
     fields: [
@@ -55,7 +55,7 @@ const sections = [
 const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
     <div className="flex flex-col gap-8">
-      {sections.map(({ name, fields }, k) => (
+      {IOBalanceSections.map(({ name, fields }, k) => (
         <Fragment key={k}>
           <h3 className="font-black">{name}</h3>
           {fields.map((field, i) => (
@@ -110,7 +110,7 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
                     label={
                       j == 0 && (
                         <div className="text-sm text-secondary-800">
-                          Quantity
+                          Quantity (ml)
                         </div>
                       )
                     }
@@ -158,7 +158,8 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
               <span className="text-3xl font-black text-primary-500">
                 {fields
                   .flatMap((f) => (log[f.key] || []).map((f) => f.quantity))
-                  .reduce((a, b) => a + b, 0)}
+                  .reduce((a, b) => a + b, 0)}{" "}
+                ml
               </span>
             </div>
           </div>
@@ -167,22 +168,19 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
       <div className="flex items-center justify-between">
         <h4>I/O Balance</h4>
         <div>
-          {sections
-            .map((s) =>
+          {IOBalanceSections.map((s) =>
+            s.fields
+              .flatMap((f) => (log[f.key] || []).map((f) => f.quantity))
+              .reduce((a, b) => a + b, 0),
+          ).join("-")}
+          =
+          <span className="text-3xl font-black text-primary-500">
+            {IOBalanceSections.map((s) =>
               s.fields
                 .flatMap((f) => (log[f.key] || []).map((f) => f.quantity))
                 .reduce((a, b) => a + b, 0),
-            )
-            .join("-")}
-          =
-          <span className="text-3xl font-black text-primary-500">
-            {sections
-              .map((s) =>
-                s.fields
-                  .flatMap((f) => (log[f.key] || []).map((f) => f.quantity))
-                  .reduce((a, b) => a + b, 0),
-              )
-              .reduce((a, b) => a - b)}
+            ).reduce((a, b) => a - b)}{" "}
+            ml
           </span>
         </div>
       </div>

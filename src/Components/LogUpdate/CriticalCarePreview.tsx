@@ -14,6 +14,7 @@ import {
 } from "../../Utils/utils";
 import { VentilatorFields } from "./Sections/RespiratorySupport/Ventilator";
 import PressureSore from "./Sections/PressureSore/PressureSore";
+import { IOBalanceSections } from "./Sections/IOBalance";
 
 type Props = {
   facilityId: string;
@@ -192,7 +193,70 @@ export default function CriticalCarePreview(props: Props) {
           />
         </Section>
 
-        {data.nursing?.length && (
+        {!!IOBalanceSections.flatMap((s) =>
+          s.fields.flatMap((f) => data[f.key] ?? []),
+        ).length && (
+          <Section title="I/O Balance">
+            <div className="space-y-3">
+              {IOBalanceSections.map(({ name, fields }) => (
+                <div key={name} className="space-y-2">
+                  <h5>{name}</h5>
+                  <table className="border-collapse rounded bg-secondary-100 text-sm">
+                    <thead className="border border-secondary-400">
+                      <tr>
+                        <th className="min-w-48 px-2 py-1 text-left">Name</th>
+                        <th className="min-w-32 px-2 py-1 text-right">
+                          Quantity
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="border border-secondary-400">
+                      {fields.map((category) =>
+                        data[category.key]?.map((row) => (
+                          <tr>
+                            <td className="px-2 py-1">
+                              <span className="font-semibold">
+                                {category.name}
+                              </span>
+                              : {row.name}
+                            </td>
+                            <td className="px-2 py-1 text-right">
+                              {row.quantity} ml
+                            </td>
+                          </tr>
+                        )),
+                      )}
+                    </tbody>
+                    <tfoot className="border border-secondary-400 font-bold">
+                      <tr>
+                        <td className="px-2 py-1">Total {name}</td>
+                        <td className="px-2 py-1 text-right">
+                          {fields
+                            .flatMap((f) =>
+                              (data[f.key] || []).map((f) => f.quantity),
+                            )
+                            .reduce((a, b) => a + b, 0)}{" "}
+                          ml
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              ))}
+              <Detail
+                label="I/O Balance"
+                value={IOBalanceSections.map((s) =>
+                  s.fields
+                    .flatMap((f) => (data[f.key] || []).map((f) => f.quantity))
+                    .reduce((a, b) => a + b, 0),
+                ).reduce((a, b) => a - b)}
+                suffix="ml"
+              />
+            </div>
+          </Section>
+        )}
+
+        {!!data.nursing?.length && (
           <Section title="Nursing Care">
             <ul>
               {data.nursing.map((care) => (
