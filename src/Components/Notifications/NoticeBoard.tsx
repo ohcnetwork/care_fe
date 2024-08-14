@@ -40,10 +40,10 @@ export const NoticeBoard = () => {
     );
   } else {
     notices = (
-      <div className=" m-auto flex max-w-xs items-center ">
+      <div className="m-auto flex max-w-xs items-center">
         <div className="my-36">
           <CareIcon icon="l-bell-slash" className="h-auto text-secondary-500" />
-          <div className=" m-auto mt-6 text-2xl text-secondary-500">
+          <div className="m-auto mt-6 text-2xl text-secondary-500">
             No Notice Available
           </div>
         </div>

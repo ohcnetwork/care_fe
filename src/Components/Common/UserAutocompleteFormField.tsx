@@ -151,7 +151,7 @@ export const LinkedFacilityUsers = (props: LinkedFacilitySearchProps) => {
 const userOnlineDot = (user: UserBareMinimum) => (
   <div
     className={classNames(
-      "mr-4 size-2.5 rounded-full ",
+      "mr-4 size-2.5 rounded-full",
       isUserOnline(user) ? "bg-primary-500" : "bg-secondary-400",
     )}
   />

@@ -109,7 +109,7 @@ export default function ResponsiveMedicineTable(props: {
               }
               className={
                 props.list.length - 1 === index
-                  ? "bg-white p-5 "
+                  ? "bg-white p-5"
                   : "border-b border-b-secondary-400 bg-white p-5"
               }
               key={index}

@@ -67,7 +67,7 @@ const TreatmentSummary = (props: any) => {
             </div>
 
             <div className="grid border-b-2 border-secondary-800 sm:grid-cols-2 print:grid-cols-3 print:md:grid-cols-3">
-              <div className="col-span-1 grid sm:grid-cols-2 print:grid-cols-2 ">
+              <div className="col-span-1 grid sm:grid-cols-2 print:grid-cols-2">
                 <div className="col-span-1 border-b-2 border-secondary-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
                   <b>Age :</b>{" "}
                   {patientData ? formatPatientAge(patientData, true) : ""}

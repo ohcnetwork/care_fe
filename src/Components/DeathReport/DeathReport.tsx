@@ -142,7 +142,7 @@ export default function PrintDeathReport(props: { id: string }) {
 
   const previewData = () => (
     <div className="my-4">
-      <div className="my-4 flex justify-end ">
+      <div className="my-4 flex justify-end">
         <button
           id="print-deathreport"
           onClick={(_) => window.print()}

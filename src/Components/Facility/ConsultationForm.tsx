@@ -934,11 +934,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             );
           })}
         </div>
-        <div className="flex h-full w-full overflow-auto xl:ml-64 2xl:ml-72 ">
+        <div className="flex h-full w-full overflow-auto xl:ml-64 2xl:ml-72">
           <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
-              className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-8 "
+              className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-8"
             >
               <DraftSection
                 handleDraftSelect={(newState: any) => {
@@ -1517,7 +1517,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   {sectionTitle("Bed Status")}
                   <Beds
                     facilityId={facilityId}
-                    patientId={patientId}
                     consultationId={id}
                     fetchPatientData={() => refetch()}
                   />
