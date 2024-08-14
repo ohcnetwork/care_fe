@@ -607,6 +607,8 @@ const routes = {
   updateDailyRound: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
     method: "PATCH",
+    TBody: Type<Partial<DailyRoundsModel>>(),
+    TRes: Type<DailyRoundsModel>(),
   },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",

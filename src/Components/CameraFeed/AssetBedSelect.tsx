@@ -109,7 +109,7 @@ export const CameraPresetDropdown = (
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Listbox.Options className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-gray-500 focus:outline-none md:max-h-60">
+          <Listbox.Options className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-secondary-500 focus:outline-none md:max-h-60">
             {options?.map((obj) => (
               <Listbox.Option
                 key={obj.id}

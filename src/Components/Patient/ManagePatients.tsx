@@ -732,7 +732,7 @@ export const PatientManager = () => {
                   {
                     RESPIRATORY_SUPPORT.find(
                       (resp) =>
-                        resp.text ===
+                        resp.value ===
                         patient.last_consultation?.last_daily_round
                           ?.ventilator_interface,
                     )?.id
@@ -1092,7 +1092,7 @@ export const PatientManager = () => {
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
+                t(`RESPIRATORY_SUPPORT_SHORT__${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",

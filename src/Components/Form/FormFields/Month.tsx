@@ -35,7 +35,7 @@ const MonthFormField = (props: Props) => {
   }, [month, year]);
 
   return (
-    <FormField field={field} className="flex items-center gap-1">
+    <FormField field={field}>
       <AutocompleteFormField
         name={field.name + "__month"}
         required={field.required}

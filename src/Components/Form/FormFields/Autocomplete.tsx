@@ -12,7 +12,7 @@ type OptionCallback<T, R> = (option: T) => R;
 
 type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   placeholder?: string;
-  options: T[];
+  options: readonly T[];
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, string>;
@@ -61,7 +61,7 @@ export default AutocompleteFormField;
 
 type AutocompleteProps<T, V = T> = {
   id?: string;
-  options: T[];
+  options: readonly T[];
   disabled?: boolean | undefined;
   value: V | undefined;
   placeholder?: string;
