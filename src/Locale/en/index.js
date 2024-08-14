@@ -10,6 +10,7 @@ import ErrorPages from "./ErrorPages.json";
 import ExternalResult from "./ExternalResult.json";
 import Facility from "./Facility.json";
 import Hub from "./Hub.json";
+import LogUpdate from "./LogUpdate.json";
 import Medicine from "./Medicine.json";
 import Notifications from "./Notifications.json";
 import Resource from "./Resource.json";
@@ -35,5 +36,6 @@ export default {
   ...Shifting,
   ...Bed,
   ...Users,
+  ...LogUpdate,
   SortOptions,
 };

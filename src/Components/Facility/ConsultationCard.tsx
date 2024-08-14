@@ -37,7 +37,6 @@ export const ConsultationCard = (props: ConsultationProps) => {
         {itemData.facility && itemData.patient && itemData.id ? (
           <Beds
             facilityId={itemData.facility}
-            patientId={itemData.patient}
             discharged={!!itemData.discharge_date}
             consultationId={itemData.id ?? ""}
             setState={setOpen}
@@ -145,8 +144,8 @@ export const ConsultationCard = (props: ConsultationProps) => {
         <div className="mt-8 flex flex-col">
           {
             <div className="flex flex-col items-center text-sm text-secondary-700 md:flex-row">
-              <div className=" font-medium text-black">Created : </div>
-              <div className=" ml-1 text-black">
+              <div className="font-medium text-black">Created : </div>
+              <div className="ml-1 text-black">
                 <RelativeDateUserMention
                   tooltipPosition="right"
                   actionDate={itemData.created_date}
@@ -156,8 +155,8 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </div>
           }
           <div className="flex flex-col items-center text-sm text-secondary-700 md:flex-row">
-            <div className=" font-medium text-black">Last Modified : </div>
-            <div className=" ml-1 text-secondary-700">
+            <div className="font-medium text-black">Last Modified : </div>
+            <div className="ml-1 text-secondary-700">
               <RelativeDateUserMention
                 tooltipPosition="right"
                 actionDate={itemData.modified_date}

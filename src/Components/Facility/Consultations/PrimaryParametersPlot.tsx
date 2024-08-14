@@ -224,8 +224,8 @@ export const PrimaryParametersPlot = ({
                             <span
                               className={`flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white ${
                                 rhythmDetails.rhythm === 5
-                                  ? " text-green-500 "
-                                  : " text-red-500 "
+                                  ? "text-green-500"
+                                  : "text-red-500"
                               }`}
                             >
                               {rhythmDetails.rhythm === 5 ? (
@@ -246,8 +246,8 @@ export const PrimaryParametersPlot = ({
                               <p
                                 className={`text-sm ${
                                   rhythmDetails.rhythm === 5
-                                    ? " text-green-500 "
-                                    : " text-red-500 "
+                                    ? "text-green-500"
+                                    : "text-red-500"
                                 }`}
                               >
                                 <span className="mr-5">

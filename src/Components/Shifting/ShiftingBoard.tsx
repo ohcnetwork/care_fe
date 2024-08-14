@@ -378,7 +378,7 @@ export default function ShiftingBoard({
         {isLoading ? (
           <div className="m-1">
             <div className="mx-auto w-full max-w-sm rounded-md border border-secondary-300 bg-white p-4 shadow">
-              <div className="flex animate-pulse space-x-4 ">
+              <div className="flex animate-pulse space-x-4">
                 <div className="flex-1 space-y-4 py-1">
                   <div className="h-4 w-3/4 rounded bg-secondary-400"></div>
                   <div className="space-y-2">

@@ -125,7 +125,7 @@ export const AutocompleteMutliSelect = <T, V>(
               placeholder={
                 value.length
                   ? `${value.length} item(s) selected`
-                  : props.placeholder ?? "Select"
+                  : (props.placeholder ?? "Select")
               }
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
               autoComplete="off"

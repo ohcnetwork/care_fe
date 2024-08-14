@@ -224,7 +224,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         <div className="absolute bottom-0 left-8 transition-all delay-100 duration-200 ease-in-out group-hover:bottom-5 group-hover:delay-0">
           <div className="grid grid-cols-3 gap-1">{controls.position}</div>
         </div>
-        <div className="absolute  bottom-5 right-0 transition-all delay-100 duration-200 ease-in-out group-hover:right-8 group-hover:delay-0">
+        <div className="absolute bottom-5 right-0 transition-all delay-100 duration-200 ease-in-out group-hover:right-8 group-hover:delay-0">
           <div className="flex flex-col items-center justify-center gap-1">
             {controls.zoom}
             {controls.reset}

@@ -26,7 +26,6 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import Checkbox from "../Common/components/CheckBox";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -41,6 +40,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -689,14 +689,10 @@ export const UserAdd = (props: UserProps) => {
                 required
                 types={["mobile", "landline"]}
               />
-              <Checkbox
-                checked={state.form.phone_number_is_whatsapp}
-                onCheck={(checked) => {
-                  handleFieldChange({
-                    name: "phone_number_is_whatsapp",
-                    value: checked,
-                  });
-                }}
+              <CheckBoxFormField
+                name="phone_number_is_whatsapp"
+                value={state.form.phone_number_is_whatsapp}
+                onChange={handleFieldChange}
                 label="Is the phone number a WhatsApp number?"
               />
             </div>
