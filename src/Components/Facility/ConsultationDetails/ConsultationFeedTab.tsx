@@ -20,12 +20,14 @@ import ConfirmDialog from "../../Common/ConfirmDialog";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { Warn } from "../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
+import { GetStatusResponse } from "../../CameraFeed/routes";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const facility = useSlug("facility");
   const bed = props.consultationData.current_bed?.bed_object;
+  const feedStateSessionKey = getFeedStateKey(props.consultationId);
 
   const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<AssetBedModel>();
@@ -65,11 +67,23 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
           obj.meta.type !== "boundary",
       );
 
-      const lastPresetId = sessionStorage.getItem(
-        getFeedPresetKey(props.consultationId),
-      );
+      const lastStateJSON = sessionStorage.getItem(feedStateSessionKey);
       const preset =
-        presets.find((obj) => obj.id === lastPresetId) ?? presets[0];
+        (() => {
+          if (lastStateJSON) {
+            const lastState = JSON.parse(lastStateJSON) as LastFeedState;
+            if (lastState.type === "preset") {
+              return presets.find((obj) => obj.id === lastState.value);
+            }
+            if (lastState.type === "position") {
+              return {
+                ...presets[0],
+                id: "",
+                meta: { ...presets[0].meta, position: lastState.value },
+              };
+            }
+          }
+        })() ?? presets[0];
 
       if (preset) {
         setPreset(preset);
@@ -112,9 +126,15 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   }, [!!bed, loading, !!asset, divRef.current]);
 
   useEffect(() => {
-    const feedPresetKey = getFeedPresetKey(props.consultationId);
-    if (preset) {
-      sessionStorage.setItem(feedPresetKey, preset.id);
+    const feedPresetKey = getFeedStateKey(props.consultationId);
+    if (preset?.id) {
+      sessionStorage.setItem(
+        feedPresetKey,
+        JSON.stringify({
+          type: "preset",
+          value: preset.id,
+        } satisfies LastAccessedPreset),
+      );
     }
   }, [preset, props.consultationId]);
 
@@ -148,7 +168,21 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
           key={key}
           asset={asset}
           preset={preset?.meta.position}
-          onMove={() => setHasMoved(true)}
+          onMove={() => {
+            setHasMoved(true);
+            setTimeout(async () => {
+              const { data } = await operate({ type: "get_status" });
+              if (data) {
+                sessionStorage.setItem(
+                  feedStateSessionKey,
+                  JSON.stringify({
+                    type: "position",
+                    value: (data as GetStatusResponse).result.position,
+                  } satisfies LastAccessedPosition),
+                );
+              }
+            }, 3000);
+          }}
           operate={operate}
           onStreamError={() => {
             triggerGoal("Camera Feed Viewed", {
@@ -226,6 +260,18 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   );
 };
 
-const getFeedPresetKey = (consultationId: string) => {
-  return `encounterFeedPreset[${consultationId}]`;
+type LastAccessedPreset = {
+  type: "preset";
+  value: string;
+};
+
+type LastAccessedPosition = {
+  type: "position";
+  value: PTZPayload;
+};
+
+type LastFeedState = LastAccessedPosition | LastAccessedPreset;
+
+const getFeedStateKey = (consultationId: string) => {
+  return `encounterFeedState[${consultationId}]`;
 };
