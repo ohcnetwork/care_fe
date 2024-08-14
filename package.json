@@ -53,7 +53,7 @@
     "@pnotify/mobile": "^5.2.0",
     "@sentry/browser": "^8.12.0",
     "@yudiel/react-qr-scanner": "^2.0.0-beta.3",
-    "axios": "^1.6.8",
+    "axios": "^1.7.4",
     "browser-image-compression": "^2.0.2",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.11",
