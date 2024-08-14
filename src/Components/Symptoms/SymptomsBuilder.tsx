@@ -178,7 +178,7 @@ const SymptomEntry = (props: {
   return (
     <div className="grid grid-cols-6 items-center gap-2 lg:grid-cols-8 xl:grid-cols-5">
       <DateFormField
-        className="col-span-3 w-full lg:col-span-2 xl:col-span-1 "
+        className="col-span-3 w-full lg:col-span-2 xl:col-span-1"
         name="onset_date"
         value={new Date(symptom.onset_date)}
         disableFuture

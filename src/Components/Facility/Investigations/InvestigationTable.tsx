@@ -85,7 +85,7 @@ export const InvestigationTable = ({
     <div className="m-4 p-4">
       <div className="mb flex flex-col items-center justify-between sm:flex-row">
         {title && <div className="text-xl font-bold">{title}</div>}
-        <div className="flex flex-col py-2 sm:flex-row ">
+        <div className="flex flex-col py-2 sm:flex-row">
           <ButtonV2
             variant="primary"
             onClick={() => window.print()}

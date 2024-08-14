@@ -146,7 +146,6 @@ export default function PatientInfoCard(props: {
         {patient?.facility && patient?.id && consultation?.id ? (
           <Beds
             facilityId={patient?.facility}
-            patientId={patient?.id}
             discharged={!!consultation?.discharge_date}
             consultationId={consultation?.id ?? ""}
             setState={setOpen}
@@ -203,7 +202,7 @@ export default function PatientInfoCard(props: {
                     <p className="w-full truncate px-2 text-center text-base font-bold">
                       {consultation?.current_bed?.bed_object.name}
                     </p>
-                    <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
+                    <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm">
                       <span>
                         {
                           consultation?.current_bed?.bed_object?.location_object
@@ -337,7 +336,7 @@ export default function PatientInfoCard(props: {
                           className={
                             "inline-flex w-full items-center justify-center rounded border border-secondary-500 p-1 text-xs font-semibold leading-4 " +
                             (dayjs().isBefore(patient.review_time)
-                              ? " bg-secondary-100 "
+                              ? " bg-secondary-100"
                               : " bg-red-400 text-white")
                           }
                         >
@@ -381,7 +380,7 @@ export default function PatientInfoCard(props: {
                       "Respiratory Support",
                       RESPIRATORY_SUPPORT.find(
                         (resp) =>
-                          resp.text ===
+                          resp.value ===
                           consultation?.last_daily_round?.ventilator_interface,
                       )?.id ?? "UNKNOWN",
                       consultation?.last_daily_round?.ventilator_interface,
@@ -935,7 +934,7 @@ export default function PatientInfoCard(props: {
                     }}
                     className={classNames(
                       medicoLegalCase ? "bg-primary" : "bg-secondary-200",
-                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ",
+                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
                     )}
                   >
                     <span

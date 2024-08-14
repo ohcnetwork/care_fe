@@ -110,7 +110,7 @@ const AssetManage = (props: AssetManageProps) => {
 
   const PrintPreview = () => (
     <div className="">
-      <div className="my-4 flex justify-end ">
+      <div className="my-4 flex justify-end">
         <button
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"

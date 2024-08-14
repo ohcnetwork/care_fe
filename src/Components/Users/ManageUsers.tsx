@@ -198,10 +198,7 @@ export default function ManageUsers() {
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
-                <div
-                  className="flex flex-col
-                flex-wrap justify-between gap-3 @sm:flex-row"
-                >
+                <div className="flex flex-col flex-wrap justify-between gap-3 @sm:flex-row">
                   {user.username && (
                     <div
                       id="username"
@@ -264,8 +261,8 @@ export default function ManageUsers() {
                 <div
                   className={`flex ${
                     isExtremeSmallScreen
-                      ? " flex-wrap "
-                      : " flex-col justify-between md:flex-row "
+                      ? "flex-wrap"
+                      : "flex-col justify-between md:flex-row"
                   } gap-2 md:grid md:grid-cols-2`}
                 >
                   {user.user_type && (
@@ -340,9 +337,7 @@ export default function ManageUsers() {
                 )}
                 <div
                   className={`${
-                    isExtremeSmallScreen
-                      ? "flex flex-wrap "
-                      : "grid grid-cols-2 "
+                    isExtremeSmallScreen ? "flex flex-wrap" : "grid grid-cols-2"
                   }`}
                 >
                   {user.created_by && (
@@ -786,7 +781,7 @@ export function UserFacilities(props: { user: any }) {
                   <span>{user?.home_facility_object?.name}</span>
                   <span
                     className={
-                      "flex items-center justify-center  rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
+                      "flex items-center justify-center rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
                     }
                   >
                     <CareIcon icon="l-estate" className="mr-1 pt-px text-lg" />

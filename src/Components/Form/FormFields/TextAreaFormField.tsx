@@ -27,7 +27,7 @@ const TextAreaFormField = forwardRef(
           ref={ref}
           disabled={field.disabled}
           name={field.name}
-          value={field.value}
+          value={field.value ?? ""}
           required={field.required}
           onChange={(e) => field.handleChange(e.target.value)}
           placeholder={props.placeholder}

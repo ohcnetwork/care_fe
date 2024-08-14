@@ -472,7 +472,7 @@ const LiveFeed = (props: any) => {
             </div>
             <div
               className={`${
-                isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
+                isExtremeSmallScreen ? "flex flex-wrap" : "md:flex"
               } mt-4 max-w-lg`}
             >
               {cameraPTZ.map((option) => {
@@ -512,7 +512,7 @@ const LiveFeed = (props: any) => {
           <div className="mx-4 flex max-w-sm flex-col">
             <nav className="flex flex-wrap">
               <button
-                className={`flex-1 p-4  text-center font-bold  text-secondary-700 hover:text-secondary-800  ${
+                className={`flex-1 p-4 text-center font-bold text-secondary-700 hover:text-secondary-800 ${
                   showDefaultPresets
                     ? "border-b-2 border-primary-500 text-primary-600"
                     : ""
@@ -524,7 +524,7 @@ const LiveFeed = (props: any) => {
                 Default Presets
               </button>
               <button
-                className={`flex-1 p-4  text-center font-bold  text-secondary-700 hover:text-secondary-800  ${
+                className={`flex-1 p-4 text-center font-bold text-secondary-700 hover:text-secondary-800 ${
                   !showDefaultPresets
                     ? "border-b-2 border-primary-500 text-primary-600"
                     : ""
@@ -539,7 +539,7 @@ const LiveFeed = (props: any) => {
             <div className="my-2 w-full space-y-4">
               <div
                 className={`grid ${
-                  isExtremeSmallScreen ? " sm:grid-cols-2 " : " grid-cols-2 "
+                  isExtremeSmallScreen ? "sm:grid-cols-2" : "grid-cols-2"
                 } my-auto gap-2`}
               >
                 {showDefaultPresets ? (
@@ -547,7 +547,7 @@ const LiveFeed = (props: any) => {
                     {viewOptions(presetsPage)?.map((option: any, i) => (
                       <button
                         key={i}
-                        className="flex w-full flex-wrap gap-2 truncate whitespace-pre-wrap rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
+                        className="flex w-full flex-wrap gap-2 truncate whitespace-pre-wrap rounded-md border border-white bg-green-100 p-3 text-black hover:bg-green-500 hover:text-white"
                         onClick={() => {
                           setLoading(`Moving to Preset ${option.label}`);
                           gotoPreset(
@@ -571,7 +571,7 @@ const LiveFeed = (props: any) => {
                       <div className="flex flex-col">
                         <button
                           key={preset.id}
-                          className="flex h-full flex-col truncate whitespace-pre-wrap rounded-t-md border border-white  bg-green-100 p-2 text-black hover:bg-green-500 hover:text-white"
+                          className="flex h-full flex-col truncate whitespace-pre-wrap rounded-t-md border border-white bg-green-100 p-2 text-black hover:bg-green-500 hover:text-white"
                           onClick={() => {
                             setLoading("Moving");
                             gotoBedPreset(preset);
@@ -592,13 +592,13 @@ const LiveFeed = (props: any) => {
                         <div className="flex">
                           <button
                             onClick={() => setToUpdate(preset)}
-                            className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                            className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200"
                           >
                             <CareIcon icon="l-pen" />
                           </button>
                           <button
                             onClick={() => setToDelete(preset)}
-                            className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
+                            className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200"
                           >
                             <CareIcon icon="l-trash" />
                           </button>
@@ -612,7 +612,7 @@ const LiveFeed = (props: any) => {
               {showDefaultPresets ? (
                 <div className="flex flex-row gap-1">
                   <button
-                    className="flex-1 p-4  text-center font-bold  text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
+                    className="flex-1 p-4 text-center font-bold text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
                     disabled={presetsPage < 10}
                     onClick={() => {
                       setPresetsPage(presetsPage - 10);
@@ -621,7 +621,7 @@ const LiveFeed = (props: any) => {
                     <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
-                    className="flex-1 p-4  text-center font-bold  text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
+                    className="flex-1 p-4 text-center font-bold text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
                     disabled={presetsPage >= presets?.length}
                     onClick={() => {
                       setPresetsPage(presetsPage + 10);
@@ -633,7 +633,7 @@ const LiveFeed = (props: any) => {
               ) : (
                 <div className="flex flex-row gap-1">
                   <button
-                    className="flex-1 p-4  text-center font-bold  text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
+                    className="flex-1 p-4 text-center font-bold text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
                     disabled={page.offset === 0}
                     onClick={() => {
                       handlePagination(page.offset - page.limit);
@@ -642,7 +642,7 @@ const LiveFeed = (props: any) => {
                     <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
-                    className="flex-1 p-4  text-center font-bold  text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
+                    className="flex-1 p-4 text-center font-bold text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
                     disabled={page.offset + page.limit >= page.count}
                     onClick={() => {
                       handlePagination(page.offset + page.limit);
