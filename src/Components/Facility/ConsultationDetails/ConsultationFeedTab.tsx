@@ -27,7 +27,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
   const facility = useSlug("facility");
   const bed = props.consultationData.current_bed?.bed_object;
-  const feedStateSessionKey = getFeedStateKey(props.consultationId);
+  const feedStateSessionKey = `encounterFeedState[${props.consultationId}]`;
 
   const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<AssetBedModel>();
@@ -126,17 +126,16 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   }, [!!bed, loading, !!asset, divRef.current]);
 
   useEffect(() => {
-    const feedPresetKey = getFeedStateKey(props.consultationId);
     if (preset?.id) {
       sessionStorage.setItem(
-        feedPresetKey,
+        feedStateSessionKey,
         JSON.stringify({
           type: "preset",
           value: preset.id,
         } satisfies LastAccessedPreset),
       );
     }
-  }, [preset, props.consultationId]);
+  }, [feedStateSessionKey, preset]);
 
   if (loading) {
     return <Loading />;
@@ -271,7 +270,3 @@ type LastAccessedPosition = {
 };
 
 type LastFeedState = LastAccessedPosition | LastAccessedPreset;
-
-const getFeedStateKey = (consultationId: string) => {
-  return `encounterFeedState[${consultationId}]`;
-};
