@@ -1660,3 +1660,27 @@ export const PressureSoreTissueTypeOptions = [
   "Slough",
   "Necrotic",
 ] as const;
+
+export const PREVIEW_EXTENSIONS = [
+  ".html",
+  ".htm",
+  ".pdf",
+  ".mp4",
+  ".webm",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+] as const;
+
+export const IMAGE_EXTENSIONS = [
+  "jpeg",
+  "jpg",
+  "png",
+  "gif",
+  "svg",
+  "bmp",
+  "webp",
+  "jfif",
+] as const;

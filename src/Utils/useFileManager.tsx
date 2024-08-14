@@ -1,7 +1,7 @@
 import { useState } from "react";
 import FilePreviewDialog from "../Components/Common/FilePreviewDialog";
 import { FileUploadModel } from "../Components/Patient/models";
-import { ExtImage, StateInterface } from "../Components/Patient/FileUpload";
+import { StateInterface } from "../Components/Patient/FileUpload";
 import request from "./request/request";
 import routes from "../Redux/api";
 import DialogModal from "../Components/Common/Dialog";
@@ -11,13 +11,13 @@ import { Cancel, Submit } from "../Components/Common/components/ButtonV2";
 import { formatDateTime } from "./utils";
 import * as Notification from "./Notifications.js";
 import TextFormField from "../Components/Form/FormFields/TextFormField";
+import { IMAGE_EXTENSIONS, PREVIEW_EXTENSIONS } from "../Common/constants";
 
 export interface FileManagerOptions {
   type: string;
   onArchive?: () => void;
   onEdit?: () => void;
 }
-
 export interface FileManagerResult {
   viewFile: (file: FileUploadModel, associating_id: string) => void;
   archiveFile: (
@@ -25,8 +25,10 @@ export interface FileManagerResult {
     associating_id: string,
     skipPrompt?: { reason: string },
   ) => void;
-  editFile: (file: FileUploadModel) => void;
+  editFile: (file: FileUploadModel, associating_id: string) => void;
   Dialogues: React.ReactNode;
+  isPreviewable: (file: FileUploadModel) => boolean;
+  getFileType: (file: FileUploadModel) => "UNKNOWN" | "IMAGE";
 }
 
 export default function useFileManager(
@@ -92,7 +94,9 @@ export default function useFileManager(
       open: true,
       name: data.name as string,
       extension,
-      isImage: ExtImage.includes(extension),
+      isImage: IMAGE_EXTENSIONS.includes(
+        extension as (typeof IMAGE_EXTENSIONS)[number],
+      ),
     });
     downloadFileUrl(signedUrl);
     setFileUrl(signedUrl);
@@ -195,8 +199,8 @@ export default function useFileManager(
     setEditing(false);
   };
 
-  const editFile = (file: FileUploadModel) => {
-    setEditDialogueOpen(file);
+  const editFile = (file: FileUploadModel, associating_id: string) => {
+    setEditDialogueOpen({ ...file, associating_id });
   };
 
   const Dialogues = (
@@ -388,10 +392,28 @@ export default function useFileManager(
     </>
   );
 
+  const isPreviewable = (file: FileUploadModel) =>
+    !!file.extension &&
+    PREVIEW_EXTENSIONS.includes(
+      file.extension as (typeof PREVIEW_EXTENSIONS)[number],
+    );
+  const getFileType = (file: FileUploadModel) => {
+    if (!file.extension) return "UNKNOWN";
+    if (
+      IMAGE_EXTENSIONS.includes(
+        file.extension as (typeof IMAGE_EXTENSIONS)[number],
+      )
+    )
+      return "IMAGE";
+    return "UNKNOWN";
+  };
+
   return {
     viewFile,
     archiveFile,
     editFile,
     Dialogues,
+    isPreviewable,
+    getFileType,
   };
 }

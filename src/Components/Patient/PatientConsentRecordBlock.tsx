@@ -22,7 +22,7 @@ export default function PatientConsentRecordBlockGroup(props: {
     file_associating_id: string,
     skipPrompt?: { reason: string },
   ) => void;
-  editFile: (file: FileUploadModel) => void;
+  editFile: (file: FileUploadModel, file_associating_id: string) => void;
   showArchive: boolean;
   files?: FileUploadModel[];
 }) {
@@ -149,7 +149,7 @@ export default function PatientConsentRecordBlockGroup(props: {
             {!file.is_archived && hasEditPermission(file) && (
               <ButtonV2
                 variant={"secondary"}
-                onClick={() => editFile(file)}
+                onClick={() => editFile(file, consentRecord.id)}
                 className=""
               >
                 <CareIcon icon={"l-pen"} />

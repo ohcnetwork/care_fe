@@ -9,12 +9,12 @@ import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import SearchInput from "../Form/SearchInput";
+import Tabs from "../Common/components/Tabs";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -67,12 +67,13 @@ export default function BoardView() {
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("search_resource")}
           />
-          <SwitchTabs
-            tab1="Active"
-            tab2="Completed"
-            onClickTab1={() => setBoardFilter(ACTIVE)}
-            onClickTab2={() => setBoardFilter(COMPLETED)}
-            isTab2Active={boardFilter !== ACTIVE}
+          <Tabs
+            tabs={[
+              { text: "Active", value: 0 },
+              { text: "Completed", value: 1 },
+            ]}
+            onTabChange={(tab) => setBoardFilter(tab ? COMPLETED : ACTIVE)}
+            currentTab={boardFilter !== ACTIVE ? 1 : 0}
           />
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2 className="py-[11px]" onClick={onListViewBtnClick}>

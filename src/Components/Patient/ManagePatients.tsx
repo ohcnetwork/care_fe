@@ -31,7 +31,6 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import {
   formatPatientAge,
   humanizeStrings,
@@ -53,6 +52,7 @@ import {
 } from "./DiagnosesFilter.js";
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
+import Tabs from "../Common/components/Tabs.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -846,32 +846,36 @@ export const PatientManager = () => {
             </ButtonV2>
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-            <SwitchTabs
-              tab1="Live"
-              tab2="Discharged"
-              onClickTab1={() => updateQuery({ is_active: "True" })}
-              onClickTab2={() => {
-                // Navigate to dedicated discharged list page if filtered by a facility or user has access only to one facility.
-                const id = qParams.facility || onlyAccessibleFacility?.id;
-                if (id) {
-                  navigate(`facility/${id}/discharged-patients`);
-                  return;
-                }
+            <Tabs
+              tabs={[
+                { text: "Live", value: 0 },
+                { text: "Discharged", value: 1 },
+              ]}
+              onTabChange={(tab) => {
+                if (tab === "LIVE") {
+                  updateQuery({ is_active: "True" });
+                } else {
+                  const id = qParams.facility || onlyAccessibleFacility?.id;
+                  if (id) {
+                    navigate(`facility/${id}/discharged-patients`);
+                    return;
+                  }
 
-                if (
-                  authUser.user_type === "StateAdmin" ||
-                  authUser.user_type === "StateReadOnlyAdmin"
-                ) {
-                  updateQuery({ is_active: "False" });
-                  return;
-                }
+                  if (
+                    authUser.user_type === "StateAdmin" ||
+                    authUser.user_type === "StateReadOnlyAdmin"
+                  ) {
+                    updateQuery({ is_active: "False" });
+                    return;
+                  }
 
-                Notification.Warn({
-                  msg: "Facility needs to be selected to view discharged patients.",
-                });
-                setShowDialog("list-discharged");
+                  Notification.Warn({
+                    msg: "Facility needs to be selected to view discharged patients.",
+                  });
+                  setShowDialog("list-discharged");
+                }
               }}
-              isTab2Active={!!tabValue}
+              currentTab={tabValue}
             />
             {!!params.facility && (
               <ButtonV2

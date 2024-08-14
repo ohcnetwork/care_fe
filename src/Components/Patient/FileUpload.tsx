@@ -1,29 +1,20 @@
 import CircularProgress from "../Common/components/CircularProgress";
-import {
-  useCallback,
-  useState,
-  useRef,
-  lazy,
-  ChangeEvent,
-  useEffect,
-} from "react";
+import { useCallback, useState, lazy, ChangeEvent, useEffect } from "react";
 import { CreateFileResponse, FileUploadModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Pagination from "../Common/Pagination";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import {
+  IMAGE_EXTENSIONS,
+  RESULTS_PER_PAGE_LIMIT,
+} from "../../Common/constants";
 import imageCompression from "browser-image-compression";
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { classNames } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import HeadedTabs from "../Common/HeadedTabs";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
+import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import Webcam from "react-webcam";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 import Page from "../Common/components/Page";
@@ -31,8 +22,10 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-import FilePreviewDialog from "../Common/FilePreviewDialog";
 import uploadFile from "../../Utils/request/uploadFile";
+import useFileUpload from "../../Utils/useFileUpload";
+import useFileManager from "../../Utils/useFileManager";
+import Tabs from "../Common/components/Tabs";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -55,31 +48,6 @@ export const header_content_type: URLS = {
   svg: "image/svg+xml",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
-
-// Array of image extensions
-export const ExtImage: string[] = [
-  "jpeg",
-  "jpg",
-  "png",
-  "gif",
-  "svg",
-  "bmp",
-  "webp",
-  "jfif",
-];
-
-const previewExtensions = [
-  ".html",
-  ".htm",
-  ".pdf",
-  ".mp4",
-  ".webm",
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".gif",
-  ".webp",
-];
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
@@ -174,41 +142,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [uploadFileError, setUploadFileError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
-  const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
   const [audioFileError, setAudioFileError] = useState<string>("");
-  const [downloadURL, setDownloadURL] = useState<string>();
-  const FACING_MODE_USER = "user";
-  const FACING_MODE_ENVIRONMENT = { exact: "environment" };
-  const webRef = useRef<any>(null);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
-  const videoConstraints = {
-    width: { ideal: 4096 },
-    height: { ideal: 2160 },
-    facingMode: "user",
-  };
-  const { width } = useWindowDimensions();
-  const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
-  const handleSwitchCamera = useCallback(() => {
-    setFacingMode((prevState: any) =>
-      prevState === FACING_MODE_USER
-        ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER,
-    );
-  }, []);
-  const initialState = {
-    open: false,
-    isImage: false,
-    name: "",
-    extension: "",
-    zoom: 4,
-    isZoomInDisabled: false,
-    isZoomOutDisabled: false,
-    rotation: 0,
-  };
-  const [file_state, setFileState] = useState<StateInterface>(initialState);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalArchievedFilesCount, setTotalArchievedFilesCount] = useState(0);
   const [totalUnarchievedFilesCount, setTotalUnarchievedFilesCount] =
@@ -216,22 +151,12 @@ export const FileUpload = (props: FileUploadProps) => {
   const [totalDischargeSummaryFilesCount, setTotalDischargeSummaryFilesCount] =
     useState(0);
   const [offset, setOffset] = useState(0);
-  const [modalOpenForEdit, setModalOpenForEdit] = useState(false);
-  const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
-  const [modalOpenForArchive, setModalOpenForArchive] = useState(false);
-  const [modalOpenForMoreDetails, setModalOpenForMoreDetails] = useState(false);
-  const [archiveReason, setArchiveReason] = useState("");
-  const [archiveReasonError, setArchiveReasonError] = useState("");
-  const [modalDetails, setModalDetails] = useState<ModalDetails>();
-  const [editFileName, setEditFileName] = useState<any>("");
-  const [editFileNameError, setEditFileNameError] = useState("");
-  const [btnloader, setbtnloader] = useState(false);
   const [sortFileState, setSortFileState] = useState("UNARCHIVED");
   const authUser = useAuthUser();
   const limit = RESULTS_PER_PAGE_LIMIT;
   const [tabs, setTabs] = useState([
-    { name: "Unarchived Files", value: "UNARCHIVED" },
-    { name: "Archived Files", value: "ARCHIVED" },
+    { text: "Active Files", value: "UNARCHIVED" },
+    { text: "Archived Files", value: "ARCHIVED" },
   ]);
   const [isMicPermission, setIsMicPermission] = useState(true);
 
@@ -254,6 +179,21 @@ export const FileUpload = (props: FileUploadProps) => {
     };
   }, []);
 
+  const fileUpload = useFileUpload({
+    type,
+    allowAllExtensions: true,
+  });
+
+  const fileManager = useFileManager({
+    type,
+    onArchive: async () => {
+      fetchData();
+    },
+    onEdit: async () => {
+      fetchData();
+    },
+  });
+
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
     prefetch: !!patientId,
@@ -263,18 +203,6 @@ export const FileUpload = (props: FileUploadProps) => {
     pathParams: { id: consultationId },
     prefetch: !!consultationId,
   });
-
-  const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const extension = blob.type.split("/").pop();
-      const myFile = new File([blob], `image.${extension}`, {
-        type: blob.type,
-      });
-      setFile(myFile);
-    });
-  };
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -316,18 +244,6 @@ export const FileUpload = (props: FileUploadProps) => {
     } catch (err) {
       Notification.Error({ msg: "Failed to download file" });
     }
-  };
-
-  const handleClose = () => {
-    setDownloadURL("");
-    setPreviewImage(null);
-    setFileState({
-      ...file_state,
-      open: false,
-      zoom: 4,
-      isZoomInDisabled: false,
-      isZoomOutDisabled: false,
-    });
   };
 
   const getAssociatedId = () => {
@@ -400,7 +316,7 @@ export const FileUpload = (props: FileUploadProps) => {
           setTabs([
             ...tabs,
             {
-              name: "Discharge Summary",
+              text: "Discharge Summary",
               value: "DISCHARGE_SUMMARY",
             },
           ]);
@@ -418,7 +334,7 @@ export const FileUpload = (props: FileUploadProps) => {
   // Store signed urls for non previewable files
   const prefetch_download_urls = async (files: FileUploadModel[]) => {
     const unsupportedFiles = files.filter(
-      (x) => !previewExtensions.includes(x.extension ?? ""),
+      (x) => fileManager.getFileType(x) === "UNKNOWN",
     );
     const query = { file_type: type, associating_id: getAssociatedId() };
     const urls = await Promise.all(
@@ -432,13 +348,6 @@ export const FileUpload = (props: FileUploadProps) => {
       }),
     );
     seturl(Object.fromEntries(urls));
-  };
-
-  // Function to extract the extension of the file
-  const getExtension = (url: string) => {
-    const div1 = url.split("?")[0].split(".");
-    const ext: string = div1[div1.length - 1].toLowerCase();
-    return ext;
   };
 
   const getIconClassName = (extensionName: string | undefined) => {
@@ -493,105 +402,8 @@ export const FileUpload = (props: FileUploadProps) => {
     return "l-file-medical";
   };
 
-  const loadFile = async (id: string) => {
-    setFileUrl("");
-    setFileState({ ...file_state, open: true });
-    const { data } = await request(routes.retrieveUpload, {
-      query: {
-        file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
-        associating_id: getAssociatedId(),
-      },
-      pathParams: { id },
-    });
-
-    if (!data) return;
-
-    const signedUrl = data.read_signed_url as string;
-    const extension = getExtension(signedUrl);
-
-    setFileState({
-      ...file_state,
-      open: true,
-      name: data.name as string,
-      extension,
-      isImage: ExtImage.includes(extension),
-    });
-    downloadFileUrl(signedUrl);
-    setFileUrl(signedUrl);
-  };
-
-  const validateEditFileName = (name: any) => {
-    if (name.trim() === "") {
-      setEditFileNameError("Please enter a name!");
-      return false;
-    } else {
-      setEditFileNameError("");
-      return true;
-    }
-  };
-
-  const validateArchiveReason = (name: any) => {
-    if (name.trim() === "") {
-      setArchiveReasonError("Please enter a valid reason!");
-      return false;
-    } else {
-      setArchiveReasonError("");
-      return true;
-    }
-  };
-
-  const partialupdateFileName = async (id: string, name: string) => {
-    if (!validateEditFileName(name)) {
-      setbtnloader(false);
-      return;
-    }
-
-    const fileType =
-      sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type;
-
-    const { res } = await request(routes.editUpload, {
-      body: { name },
-      pathParams: {
-        id,
-        fileType,
-        associatingId: getAssociatedId(),
-      },
-    });
-
-    if (res?.ok) {
-      fetchData();
-      Notification.Success({ msg: "File name changed successfully" });
-      setModalOpenForEdit(false);
-    }
-    setbtnloader(false);
-  };
-
-  const archiveFile = async (id: string, archive_reason: string) => {
-    if (!validateArchiveReason(archiveReason)) {
-      setbtnloader(false);
-      return;
-    }
-
-    const { res } = await request(routes.editUpload, {
-      body: { is_archived: true, archive_reason },
-      pathParams: {
-        id,
-        fileType: type,
-        associatingId: getAssociatedId(),
-      },
-    });
-
-    if (res?.ok) {
-      fetchData();
-      Notification.Success({ msg: "File archived successfully" });
-      setModalOpenForArchive(false);
-    }
-
-    setbtnloader(false);
-  };
-
   const renderFileUpload = (item: FileUploadModel) => {
-    const isPreviewSupported = previewExtensions.includes(item.extension ?? "");
+    const isPreviewSupported = fileManager.isPreviewable(item);
     return (
       <div
         className={"mt-4 rounded-lg border bg-white p-4 shadow"}
@@ -678,14 +490,9 @@ export const FileUpload = (props: FileUploadProps) => {
                         authUser.user_type === "StateAdmin" ? (
                           <>
                             <ButtonV2
-                              onClick={() => {
-                                setModalDetails({
-                                  name: item.name,
-                                  id: item.id,
-                                });
-                                setEditFileName(item?.name);
-                                setModalOpenForEdit(true);
-                              }}
+                              onClick={() =>
+                                fileManager.editFile(item, getAssociatedId())
+                              }
                               className="m-1 w-full sm:w-auto"
                             >
                               <CareIcon icon="l-pen" className="text-lg" />
@@ -700,14 +507,9 @@ export const FileUpload = (props: FileUploadProps) => {
                         authUser.user_type === "StateAdmin" ? (
                           <>
                             <ButtonV2
-                              onClick={() => {
-                                setArchiveReason("");
-                                setModalDetails({
-                                  name: item.name,
-                                  id: item.id,
-                                });
-                                setModalOpenForArchive(true);
-                              }}
+                              onClick={() =>
+                                fileManager.archiveFile(item, getAssociatedId())
+                              }
                               className="m-1 w-full sm:w-auto"
                             >
                               <CareIcon icon="l-archive" className="text-lg" />
@@ -764,9 +566,9 @@ export const FileUpload = (props: FileUploadProps) => {
                 <div className="flex flex-wrap items-center">
                   {isPreviewSupported ? (
                     <ButtonV2
-                      onClick={() => {
-                        loadFile(item.id!);
-                      }}
+                      onClick={() =>
+                        fileManager.viewFile(item, getAssociatedId())
+                      }
                       className="m-1 w-full sm:w-auto"
                     >
                       {" "}
@@ -797,11 +599,9 @@ export const FileUpload = (props: FileUploadProps) => {
                     <>
                       {" "}
                       <ButtonV2
-                        onClick={() => {
-                          setModalDetails({ name: item.name, id: item.id });
-                          setEditFileName(item?.name);
-                          setModalOpenForEdit(true);
-                        }}
+                        onClick={() =>
+                          fileManager.editFile(item, getAssociatedId())
+                        }
                         className="m-1 w-full sm:w-auto"
                       >
                         <CareIcon icon="l-pen" className="text-lg" />
@@ -817,11 +617,9 @@ export const FileUpload = (props: FileUploadProps) => {
                     authUser.user_type === "StateAdmin") ? (
                     <>
                       <ButtonV2
-                        onClick={() => {
-                          setArchiveReason("");
-                          setModalDetails({ name: item.name, id: item.id });
-                          setModalOpenForArchive(true);
-                        }}
+                        onClick={() =>
+                          fileManager.archiveFile(item, getAssociatedId())
+                        }
                         className="m-1 w-full sm:w-auto"
                       >
                         <CareIcon icon="l-archive" className="text-lg" />
@@ -918,15 +716,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 ARCHIVED
               </ButtonV2>
               <ButtonV2
-                onClick={() => {
-                  setModalDetails({
-                    name: item.name,
-                    reason: item.archive_reason,
-                    userArchived: item.archived_by?.username,
-                    archiveTime: item.archived_datetime,
-                  });
-                  setModalOpenForMoreDetails(true);
-                }}
+                onClick={() => fileManager.archiveFile(item, getAssociatedId())}
                 className="m-1 w-full sm:w-auto"
               >
                 <CareIcon icon="l-question-circle" className="text-lg" />
@@ -960,7 +750,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
     const ext: string = fileName.split(".")[1];
 
-    if (ExtImage.includes(ext)) {
+    if (IMAGE_EXTENSIONS.includes(ext as (typeof IMAGE_EXTENSIONS)[number])) {
       const options = {
         initialQuality: 0.6,
         alwaysKeepResolution: true,
@@ -1072,10 +862,6 @@ export const FileUpload = (props: FileUploadProps) => {
     }
   };
 
-  const createAudioBlob = (createdBlob: Blob) => {
-    setAudioBlob(createdBlob);
-  };
-
   const confirmAudioBlobExists = () => {
     setAudioBlobExists(true);
   };
@@ -1157,331 +943,14 @@ export const FileUpload = (props: FileUploadProps) => {
     setAudioBlobExists(false);
   };
 
-  // For creating the Download File URL
-  const downloadFileUrl = (url: string) => {
-    fetch(url)
-      .then((res) => res.blob())
-      .then((blob) => {
-        setDownloadURL(URL.createObjectURL(blob));
-      });
-  };
-
   const handleTabChange = (tabValue: string) => {
     setSortFileState(tabValue);
   };
 
   return (
     <div className={`${hideBack ? "py-2" : "p-4"} ${props.className}`}>
-      <FilePreviewDialog
-        show={file_state.open}
-        fileUrl={fileUrl}
-        file_state={file_state}
-        setFileState={setFileState}
-        downloadURL={downloadURL}
-        onClose={handleClose}
-        fixedWidth={false}
-        className="h-[80vh] w-full md:h-screen"
-      />
-      <DialogModal
-        show={modalOpenForCamera}
-        title={
-          <div className="flex flex-row">
-            <div className="rounded-full bg-primary-100 px-5 py-4">
-              <CareIcon
-                icon="l-camera-change"
-                className="text-lg text-primary-500"
-              />
-            </div>
-            <div className="m-4">
-              <h1 className="text-xl text-black"> Camera</h1>
-            </div>
-          </div>
-        }
-        className="max-w-2xl"
-        onClose={() => setModalOpenForCamera(false)}
-      >
-        <div>
-          {!previewImage ? (
-            <div className="m-3">
-              <Webcam
-                forceScreenshotSourceSize
-                screenshotQuality={1}
-                audio={false}
-                screenshotFormat="image/jpeg"
-                ref={webRef}
-                videoConstraints={{ ...videoConstraints, facingMode }}
-              />
-            </div>
-          ) : (
-            <div className="m-3">
-              <img src={previewImage} />
-            </div>
-          )}
-        </div>
-
-        {/* buttons for mobile screens */}
-        <div className="m-4 flex justify-evenly sm:hidden">
-          <div>
-            {!previewImage ? (
-              <ButtonV2 onClick={handleSwitchCamera} className="m-2">
-                {t("switch")}
-              </ButtonV2>
-            ) : (
-              <></>
-            )}
-          </div>
-          <div>
-            {!previewImage ? (
-              <>
-                <div>
-                  <ButtonV2
-                    onClick={() => {
-                      captureImage();
-                    }}
-                    className="m-2"
-                  >
-                    {t("capture")}
-                  </ButtonV2>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex space-x-2">
-                  <ButtonV2
-                    onClick={() => {
-                      setPreviewImage(null);
-                    }}
-                    className="m-2"
-                  >
-                    {t("retake")}
-                  </ButtonV2>
-                  <Submit
-                    onClick={() => {
-                      setPreviewImage(null);
-                      setModalOpenForCamera(false);
-                    }}
-                    className="m-2"
-                  >
-                    {t("submit")}
-                  </Submit>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="sm:flex-1">
-            <ButtonV2
-              variant="secondary"
-              onClick={() => {
-                setPreviewImage(null);
-                setModalOpenForCamera(false);
-              }}
-              className="m-2"
-            >
-              {t("close")}
-            </ButtonV2>
-          </div>
-        </div>
-        {/* buttons for laptop screens */}
-        <div className={`${isLaptopScreen ? " " : "hidden"}`}>
-          <div className="m-4 flex lg:hidden">
-            <ButtonV2 onClick={handleSwitchCamera}>
-              <CareIcon icon="l-camera-change" className="text-lg" />
-              {`${t("switch")} ${t("camera")}`}
-            </ButtonV2>
-          </div>
-
-          <div className="flex justify-end gap-2 p-4">
-            <div>
-              {!previewImage ? (
-                <>
-                  <div>
-                    <ButtonV2
-                      onClick={() => {
-                        captureImage();
-                      }}
-                    >
-                      <CareIcon icon="l-capture" className="text-lg" />
-                      {t("capture")}
-                    </ButtonV2>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex space-x-2">
-                    <ButtonV2
-                      onClick={() => {
-                        setPreviewImage(null);
-                      }}
-                    >
-                      {t("retake")}
-                    </ButtonV2>
-                    <Submit
-                      onClick={() => {
-                        setModalOpenForCamera(false);
-                        setPreviewImage(null);
-                      }}
-                    >
-                      {t("submit")}
-                    </Submit>
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="sm:flex-1" />
-            <ButtonV2
-              variant="secondary"
-              onClick={() => {
-                setPreviewImage(null);
-                setModalOpenForCamera(false);
-              }}
-            >
-              {`${t("close")} ${t("camera")}`}
-            </ButtonV2>
-          </div>
-        </div>
-      </DialogModal>
-      <DialogModal
-        show={modalOpenForEdit}
-        title={
-          <div className="flex flex-row">
-            <div className="rounded-full bg-primary-100 px-5 py-4">
-              <CareIcon
-                icon="l-edit-alt"
-                className="text-lg text-primary-500"
-              />
-            </div>
-            <div className="m-4">
-              <h1 className="text-xl text-black">Rename File</h1>
-            </div>
-          </div>
-        }
-        onClose={() => setModalOpenForEdit(false)}
-      >
-        <form
-          onSubmit={(event: any) => {
-            event.preventDefault();
-            setbtnloader(true);
-            partialupdateFileName(modalDetails!.id!, editFileName);
-          }}
-          className="flex w-full flex-col"
-        >
-          <div>
-            <TextFormField
-              name="editFileName"
-              label="Enter the file name"
-              value={editFileName}
-              onChange={(e) => setEditFileName(e.value)}
-              error={editFileNameError}
-            />
-          </div>
-          <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
-            <Cancel onClick={() => setModalOpenForEdit(false)} />
-            <Submit
-              disabled={
-                btnloader ||
-                modalDetails?.name === editFileName ||
-                editFileName.length === 0
-              }
-              label="Proceed"
-            />
-          </div>
-        </form>
-      </DialogModal>
-      <DialogModal
-        show={modalOpenForArchive}
-        title={
-          <div className="flex flex-row">
-            <div className="my-1 mr-3 rounded-full bg-red-100 px-5 py-4 text-center">
-              <CareIcon
-                icon="l-exclamation-triangle"
-                className="text-lg text-danger-500"
-              />
-            </div>
-            <div className="text-sm">
-              <h1 className="text-xl text-black">Archive File</h1>
-              <span className="text-sm text-secondary-600">
-                This action is irreversible. Once a file is archived it cannot
-                be unarchived.
-              </span>
-            </div>
-          </div>
-        }
-        onClose={() => setModalOpenForArchive(false)}
-      >
-        <form
-          onSubmit={(event: any) => {
-            event.preventDefault();
-            setbtnloader(true);
-            archiveFile(modalDetails!.id!, archiveReason);
-          }}
-          className="mx-2 my-4 flex w-full flex-col"
-        >
-          <div>
-            <TextAreaFormField
-              name="editFileName"
-              label={
-                <span>
-                  State the reason for archiving <b>{modalDetails?.name}</b>{" "}
-                  file?
-                </span>
-              }
-              rows={6}
-              required
-              placeholder="Type the reason..."
-              value={archiveReason}
-              onChange={(e) => setArchiveReason(e.value)}
-              error={archiveReasonError}
-            />
-          </div>
-          <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
-            <Cancel onClick={() => setModalOpenForArchive(false)} />
-            <Submit disabled={btnloader} label="Proceed" />
-          </div>
-        </form>
-      </DialogModal>
-      <DialogModal
-        show={modalOpenForMoreDetails}
-        title={
-          <div className="flex flex-row">
-            <div className="my-1 mr-3 rounded-full bg-primary-100 px-5 py-4 text-center">
-              <CareIcon
-                icon="l-question-circle"
-                className="text-lg text-primary-500"
-              />
-            </div>
-            <div className="text-sm">
-              <h1 className="text-xl text-black">File Details</h1>
-              <span className="text-sm font-normal text-secondary-600">
-                This file is archived. Once a file is archived it cannot be
-                unarchived.
-              </span>
-            </div>
-          </div>
-        }
-        onClose={() => setModalOpenForMoreDetails(false)}
-      >
-        <div className="flex flex-col">
-          <div>
-            <div className="text-md m-2 text-center">
-              <b id="archive-file-name">{modalDetails?.name}</b> file is
-              archived.
-            </div>
-            <div className="text-md text-center" id="archive-file-reason">
-              <b>Reason:</b> {modalDetails?.reason}
-            </div>
-            <div className="text-md text-center">
-              <b>Archived by:</b> {modalDetails?.userArchived}
-            </div>
-            <div className="text-md text-center">
-              <b>Time of Archive: </b>
-              {formatDateTime(modalDetails?.archiveTime)}
-            </div>
-          </div>
-          <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
-            <Cancel onClick={(_) => setModalOpenForMoreDetails(false)} />
-          </div>
-        </div>
-      </DialogModal>
+      {fileUpload.Dialogues}
+      {fileManager.Dialogues}
       {!props.hideUpload && (
         <Page
           changePageMetadata={changePageMetadata}
@@ -1537,7 +1006,9 @@ export const FileUpload = (props: FileUploadProps) => {
                     <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
                       <VoiceRecorder
                         isDisabled={!!consultation?.discharge_date}
-                        createAudioBlob={createAudioBlob}
+                        createAudioBlob={(createdBlob: Blob) =>
+                          setAudioBlob(createdBlob)
+                        }
                         confirmAudioBlobExists={confirmAudioBlobExists}
                         reset={resetRecording}
                         setResetRecording={setResetRecording}
@@ -1627,7 +1098,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       </AuthorizedChild>
                       <ButtonV2
                         disabled={!!consultation?.discharge_date}
-                        onClick={() => setModalOpenForCamera(true)}
+                        onClick={() => fileUpload.handleCameraCapture()}
                         className="w-full"
                       >
                         <CareIcon icon="l-camera" className="mr-2 text-lg" />
@@ -1674,10 +1145,11 @@ export const FileUpload = (props: FileUploadProps) => {
         breadcrumbs={false}
         changePageMetadata={changePageMetadata}
       >
-        <HeadedTabs
+        <Tabs
           tabs={tabs}
-          handleChange={handleTabChange}
-          currentTabState={sortFileState}
+          className="my-4"
+          onTabChange={(v) => handleTabChange(v.toString())}
+          currentTab={sortFileState}
         />
         {sortFileState === "UNARCHIVED" ? (
           // First it would check the filtered array contains any files or not else it would state the message

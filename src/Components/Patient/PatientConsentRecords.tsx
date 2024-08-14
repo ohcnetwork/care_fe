@@ -15,9 +15,9 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import useFileUpload from "../../Utils/useFileUpload";
 import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import useFileManager from "../../Utils/useFileManager";
 import { PatientConsentModel } from "../Facility/models";
+import Tabs from "../Common/components/Tabs";
 
 export default function PatientConsentRecords(props: {
   facilityId: string;
@@ -140,13 +140,14 @@ export default function PatientConsentRecords(props: {
         title="Archive Previous Records"
         className="w-auto"
       />
-      <SwitchTabs
-        tab1="Active"
-        tab2="Archived"
+      <Tabs
+        tabs={[
+          { text: "Active", value: 0 },
+          { text: "Archived", value: 1 },
+        ]}
         className="my-4"
-        onClickTab1={() => setShowArchived(false)}
-        onClickTab2={() => setShowArchived(true)}
-        isTab2Active={showArchived}
+        onTabChange={(v) => setShowArchived(!!v)}
+        currentTab={showArchived ? 1 : 0}
       />
       <div className="mt-8 flex flex-col gap-4 lg:flex-row-reverse">
         <div className="shrink-0 lg:w-[350px]">
