@@ -57,9 +57,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Tele-medicine log update created successfully");
+    cy.verifyNotification("Telemedicine log created successfully");
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
@@ -82,9 +82,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Normal log update created successfully");
+    cy.verifyNotification("Brief Update log created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
     cy.contains("Daily Rounds").click();
@@ -107,7 +107,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickClearButtonInElement("#diastolic");
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
-    cy.verifyNotification("Normal log update details updated successfully");
+    cy.verifyNotification("Brief Update log updated successfully");
     cy.contains("Daily Rounds").click();
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
@@ -137,10 +137,10 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.wait(2000);
-    cy.verifyNotification("Normal log update created successfully");
+    cy.verifyNotification("Brief Update log created successfully");
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
     cy.verifyContentPresence("#encounter-symptoms", [additionalSymptoms]);
@@ -161,9 +161,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typePulse(patientPulse);
     patientLogupdate.typeTemperature(patientTemperature);
     patientLogupdate.typeRespiratory(patientRespiratory);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Normal log update created successfully");
+    cy.verifyNotification("Brief Update log created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["9"]);
     // Verify the Incomplete data will give blank info
@@ -173,7 +173,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeDiastolic(patientDiastolic);
     patientLogupdate.typePulse(patientPulse);
     cy.submitButton("Save");
-    cy.verifyNotification("Normal log update created successfully");
+    cy.verifyNotification("Brief Update log created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["-"]);
   });

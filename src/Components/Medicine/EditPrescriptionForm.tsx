@@ -77,6 +77,9 @@ export default function EditPrescriptionForm(props: Props) {
 
         if (success) {
           props.onDone(true);
+          Notification.Success({ msg: "Prescription edited successfully" });
+        } else {
+          Notification.Error({ msg: "Failed to edit prescription" });
         }
       }}
       noPadding

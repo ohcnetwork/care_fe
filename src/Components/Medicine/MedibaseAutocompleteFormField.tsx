@@ -91,10 +91,10 @@ const OptionDescription = ({ medicine }: { medicine: MedibaseMedicine }) => {
 const OptionChip = (props: { name?: string; value: string }) => {
   return (
     <div className="mt-1 flex h-fit max-w-fit gap-1 whitespace-nowrap rounded-full border border-secondary-400 bg-secondary-100 px-2 text-center text-xs uppercase sm:mt-0">
-      <span className="font-normal text-gray-800">
+      <span className="font-normal text-secondary-800">
         {props.name && props.name + ":"}
       </span>
-      <span className="font-medium text-gray-900">{props.value}</span>
+      <span className="font-medium text-secondary-900">{props.value}</span>
     </div>
   );
 };

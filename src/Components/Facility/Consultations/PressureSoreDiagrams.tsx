@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
-import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.bs";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 import { formatDateTime } from "../../../Utils/utils";
 import { PressureSoreDiagramsRes } from "../models";
+import PressureSore from "../../LogUpdate/Sections/PressureSore/PressureSore";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -89,7 +89,7 @@ export const PressureSoreDiagrams = (props: any) => {
         <div className="p-2">Choose Date and Time</div>
         <select
           title="date"
-          className="relative rounded border-gray-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-gray-300  focus:outline-none focus:ring-1 focus:ring-gray-300"
+          className="relative rounded border-secondary-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-secondary-300 focus:outline-none focus:ring-1 focus:ring-secondary-300"
           onChange={(e) => {
             setSelectedDateData(results, e.target.value);
           }}
@@ -107,7 +107,7 @@ export const PressureSoreDiagrams = (props: any) => {
       <div>
         <select
           title="date"
-          className="border-2 border-gray-400 py-2 pl-3 pr-8"
+          className="border-2 border-secondary-400 py-2 pl-3 pr-8"
           disabled={true}
         >
           <option>No Data Found</option>
@@ -117,13 +117,15 @@ export const PressureSoreDiagrams = (props: any) => {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       {dates && dropdown(dates)}
       {!isLoading && selectedData.data ? (
-        <CriticalCare__PressureScoreViewer
-          pressureSoreParameter={selectedData.data}
-          id={selectedData.id}
-          consultationId={consultationId}
+        <PressureSore
+          log={{ pressure_sore: selectedData.data }}
+          readonly
+          onChange={() => {
+            //
+          }}
         />
       ) : (
         <div className="h-screen" />

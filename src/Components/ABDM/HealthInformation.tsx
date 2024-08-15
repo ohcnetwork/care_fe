@@ -33,14 +33,14 @@ export default function HealthInformation({ artefactId }: IProps) {
       <div className="mt-10 flex flex-col items-center justify-center gap-6">
         {!!error?.is_archived && (
           <>
-            <h3 className="text-2xl font-semibold text-gray-700">
+            <h3 className="text-2xl font-semibold text-secondary-700">
               This record has been archived
             </h3>
-            <h5 className="mt-2 text-sm text-gray-500">
+            <h5 className="mt-2 text-sm text-secondary-500">
               This record has been archived and is no longer available for
               viewing.
             </h5>
-            <h4 className="mt-2 text-center text-gray-500">
+            <h4 className="mt-2 text-center text-secondary-500">
               This record was archived on{" "}
               {new Date(error?.archived_time as string).toLocaleString()} as{" "}
               {error?.archived_reason as string}
@@ -49,13 +49,13 @@ export default function HealthInformation({ artefactId }: IProps) {
         )}
         {error && !error?.is_archived && (
           <>
-            <h3 className="text-2xl font-semibold text-gray-700">
+            <h3 className="text-2xl font-semibold text-secondary-700">
               This record hasn't been fetched yet
             </h3>
-            <h5 className="mt-2 text-sm text-gray-500">
+            <h5 className="mt-2 text-sm text-secondary-500">
               This record hasn't been fetched yet. Please try again later.
             </h5>
-            <h4 className="mt-2 text-gray-500">
+            <h4 className="mt-2 text-secondary-500">
               Waiting for the HIP to send the record.
             </h4>
           </>

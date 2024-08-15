@@ -16,5 +16,7 @@
   "unsubscribe_failed": "Unsubscribe failed.",
   "unsubscribe": "Unsubscribe",
   "escape": "Escape",
-  "loading": "Loading..."
+  "loading": "Loading...",
+  "invalid_asset_id_msg": "Oops! The asset ID you entered does not appear to be valid.",
+  "asset_not_found_msg": "Oops! The asset you are looking for does not exist. Please check the asset id."
 }

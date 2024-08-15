@@ -14,7 +14,11 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatDateTime, formatPatientAge } from "../../Utils/utils";
+import {
+  formatDateTime,
+  formatName,
+  formatPatientAge,
+} from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 
 import { useTranslation } from "react-i18next";
@@ -299,7 +303,7 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <div id="section-to-print" className="print bg-white ">
+      <div id="section-to-print" className="print bg-white">
         <div>{data.is_kasp && <img alt="logo" src={header_logo.dark} />}</div>
         <div className="mx-2">
           <div className="mt-6">
@@ -468,7 +472,7 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="mt-20 flex justify-center text-center">
             {t("auto_generated_for_care")}
           </div>
-          <div className="font-xs font-gray-600 text-center font-mono">
+          <div className="font-xs font-secondary-600 text-center font-mono">
             {window.location.origin}/shifting/{data.id}
           </div>
         </div>
@@ -535,9 +539,8 @@ export default function ShiftDetails(props: { id: string }) {
                 <div className="pr-16 sm:px-16 sm:text-center">
                   <p className="font-bold text-primary-800">
                     <span className="inline">
-                      {t("assigned_to")}: {data?.assigned_to_object.first_name}{" "}
-                      {data.assigned_to_object.last_name} -{" "}
-                      {data.assigned_to_object.user_type}
+                      {t("assigned_to")}: {formatName(data.assigned_to_object)}{" "}
+                      - {data.assigned_to_object.user_type}
                     </span>
                   </p>
                 </div>
@@ -773,10 +776,10 @@ export default function ShiftDetails(props: { id: string }) {
 
               <div className="mt-2 grid rounded-lg bg-white p-2 px-4 text-center shadow lg:grid-cols-2">
                 <div className="border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pb-0">
-                  <div className="text-sm font-medium leading-5 text-gray-500">
+                  <div className="text-sm font-medium leading-5 text-secondary-500">
                     {t("created")}
                   </div>
-                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-secondary-900">
                     <RecordMeta
                       time={data?.created_date}
                       user={data?.created_by_object}
@@ -786,10 +789,10 @@ export default function ShiftDetails(props: { id: string }) {
                   </div>
                 </div>
                 <div className="mt-2 lg:mt-0">
-                  <div className="text-sm font-medium leading-5 text-gray-500">
+                  <div className="text-sm font-medium leading-5 text-secondary-500">
                     {t("last_edited")}
                   </div>
-                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-secondary-900">
                     <RecordMeta
                       time={data?.modified_date}
                       user={data?.last_edited_by_object}

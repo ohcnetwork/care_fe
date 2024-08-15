@@ -16,7 +16,7 @@ export const FieldLabel = (props: LabelProps) => {
     <label
       id={props.id}
       className={classNames(
-        "block text-base font-normal text-gray-900",
+        "block text-base font-normal text-secondary-900",
         !props.noPadding && "mb-2",
         props.className,
       )}
@@ -32,27 +32,27 @@ type ErrorProps = {
   error: FieldError;
   className?: string | undefined;
 };
-export const FieldErrorText = ({ error, className }: ErrorProps) => {
+
+export const FieldErrorText = (props: ErrorProps) => {
   return (
     <span
       className={classNames(
         "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
-        error ? "opacity-100" : "opacity-0",
-        className,
+        props.error ? "opacity-100" : "opacity-0",
+        props.className,
       )}
     >
-      {error}
+      {props.error}
     </span>
   );
 };
 
 const FormField = ({
   field,
-  children,
+  ...props
 }: {
   field?: FormFieldBaseProps<any>;
   children: React.ReactNode;
-  className?: string;
 }) => {
   return (
     <div className={field?.className}>
@@ -70,7 +70,7 @@ const FormField = ({
           <span className="mb-2 text-xs">{field?.labelSuffix}</span>
         )}
       </div>
-      <div className={field?.className}>{children}</div>
+      <div className={field?.className}>{props.children}</div>
       <FieldErrorText error={field?.error} className={field?.errorClassName} />
     </div>
   );

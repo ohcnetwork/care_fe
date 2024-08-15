@@ -4,7 +4,6 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
@@ -15,6 +14,7 @@ import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTex
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
+import { Link } from "raviger";
 
 interface PatientNotesProps {
   patientId: string;
@@ -130,7 +130,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     <div className="flex gap-1">
       {show && (
         <Link
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
           href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
         >
           <CareIcon
@@ -142,7 +142,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       <div
         id="expand_doctor_notes"
         className={classNames(
-          "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
+          "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
           show && "rotate-180",
         )}
         onClick={() => setShow(!show)}
@@ -153,7 +153,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         />
       </div>
       <div
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
         onClick={() => setShowPatientNotesPopup(false)}
       >
         <CareIcon
@@ -186,7 +186,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           {notesActionIcons}
         </div>
       ) : (
-        <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md ">
+        <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md">
           <div className="flex w-full items-center justify-between bg-primary-800 p-2 px-4 text-white">
             <span className="font-semibold">Discussion Notes</span>
             {notesActionIcons}

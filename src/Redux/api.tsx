@@ -65,6 +65,7 @@ import {
   LocalBodyModel,
   LocationModel,
   MinimumQuantityItemResponse,
+  PatientConsentModel,
   PatientNotesEditModel,
   PatientNotesModel,
   PatientStatsModel,
@@ -619,6 +620,8 @@ const routes = {
   updateDailyRound: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
     method: "PATCH",
+    TBody: Type<Partial<DailyRoundsModel>>(),
+    TRes: Type<DailyRoundsModel>(),
   },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
@@ -1011,6 +1014,30 @@ const routes = {
     path: "/api/v1/facility/{facility_external_id}/discharged_patients/",
     method: "GET",
     TRes: Type<PaginatedResponse<PatientModel>>(),
+  },
+
+  // Consents
+  listConsents: {
+    path: "/api/v1/consultation/{consultationId}/consents/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientConsentModel>>(),
+  },
+  getConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/{id}/",
+    method: "GET",
+    TRes: Type<PatientConsentModel>(),
+  },
+  createConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/",
+    method: "POST",
+    TRes: Type<PatientConsentModel>(),
+    TBody: Type<Partial<PatientConsentModel>>(),
+  },
+  partialUpdateConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/{id}/",
+    method: "PATCH",
+    TRes: Type<PatientConsentModel>(),
+    TBody: Type<Partial<PatientConsentModel>>(),
   },
 
   //Profile

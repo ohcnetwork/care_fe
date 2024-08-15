@@ -215,7 +215,7 @@ export const PrimaryParametersPlot = ({
                       <div className="relative pb-8">
                         {rhythmIdx !== obj[1].length ? (
                           <span
-                            className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
+                            className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-secondary-200"
                             aria-hidden="true"
                           />
                         ) : null}
@@ -224,8 +224,8 @@ export const PrimaryParametersPlot = ({
                             <span
                               className={`flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white ${
                                 rhythmDetails.rhythm === 5
-                                  ? " text-green-500 "
-                                  : " text-red-500 "
+                                  ? "text-green-500"
+                                  : "text-red-500"
                               }`}
                             >
                               {rhythmDetails.rhythm === 5 ? (
@@ -246,8 +246,8 @@ export const PrimaryParametersPlot = ({
                               <p
                                 className={`text-sm ${
                                   rhythmDetails.rhythm === 5
-                                    ? " text-green-500 "
-                                    : " text-red-500 "
+                                    ? "text-green-500"
+                                    : "text-red-500"
                                 }`}
                               >
                                 <span className="mr-5">
@@ -258,7 +258,7 @@ export const PrimaryParametersPlot = ({
                                 <span>{rhythmDetails.rhythm_detail}</span>
                               </p>
                             </div>
-                            <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                            <div className="whitespace-nowrap text-right text-sm text-secondary-500">
                               <p>
                                 {rhythmDetails.time}, {obj[0]}
                               </p>

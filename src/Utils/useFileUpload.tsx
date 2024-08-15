@@ -16,6 +16,7 @@ import routes from "../Redux/api";
 import uploadFile from "./request/uploadFile";
 import * as Notification from "./Notifications.js";
 import imageCompression from "browser-image-compression";
+import { DEFAULT_ALLOWED_EXTENSIONS } from "../Common/constants";
 
 export type FileUploadOptions = {
   type: string;
@@ -23,10 +24,10 @@ export type FileUploadOptions = {
   onUpload?: (file: FileUploadModel) => void;
 } & (
   | {
-      allowAllExtensions?: boolean;
+      allowedExtensions?: string[];
     }
   | {
-      allowedExtensions?: string[];
+      allowAllExtensions?: boolean;
     }
 );
 
@@ -146,6 +147,16 @@ export default function useFileUpload(
       setError("Maximum size of files is 100 MB");
       return false;
     }
+    const extension = f.name.split(".").pop();
+    if (
+      "allowedExtensions" in options &&
+      !options.allowedExtensions?.includes(extension || "")
+    ) {
+      setError(
+        `Invalid file type ".${extension}" Allowed types: ${options.allowedExtensions?.join(", ")}`,
+      );
+      return false;
+    }
     return true;
   };
   const markUploadComplete = (
@@ -247,7 +258,7 @@ export default function useFileUpload(
             />
           </div>
           <div className="m-4">
-            <h1 className="text-xl text-black "> Camera</h1>
+            <h1 className="text-xl text-black"> Camera</h1>
           </div>
         </div>
       }
@@ -277,7 +288,7 @@ export default function useFileUpload(
       </div>
 
       {/* buttons for mobile screens */}
-      <div className="m-4 flex justify-evenly sm:hidden ">
+      <div className="m-4 flex justify-evenly sm:hidden">
         <div>
           {!previewImage ? (
             <ButtonV2 onClick={handleSwitchCamera} className="m-2">
@@ -339,7 +350,7 @@ export default function useFileUpload(
         </div>
       </div>
       {/* buttons for laptop screens */}
-      <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+      <div className={`${isLaptopScreen ? " " : "hidden"}`}>
         <div className="m-4 flex lg:hidden">
           <ButtonV2 onClick={handleSwitchCamera}>
             <CareIcon icon="l-camera-change" className="text-lg" />
@@ -347,7 +358,7 @@ export default function useFileUpload(
           </ButtonV2>
         </div>
 
-        <div className="flex justify-end  gap-2 p-4">
+        <div className="flex justify-end gap-2 p-4">
           <div>
             {!previewImage ? (
               <>
@@ -414,11 +425,11 @@ export default function useFileUpload(
         onChange={onFileChange}
         type="file"
         accept={
-          "allowAllExtensions" in options
-            ? "image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
-            : "allowedExtensions" in options
-              ? options.allowedExtensions?.join(",")
-              : ""
+          "allowedExtensions" in options
+            ? options.allowedExtensions?.join(",")
+            : "allowAllExtensions" in options
+              ? "*"
+              : DEFAULT_ALLOWED_EXTENSIONS.join(",")
         }
         hidden
       />
