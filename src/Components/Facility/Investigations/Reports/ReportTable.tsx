@@ -7,7 +7,7 @@ import { FC } from "react";
 
 const ReportRow = ({ data, name, min, max }: any) => {
   return (
-    <tr className="even:bg-secondary-50 bg-white">
+    <tr className="bg-white even:bg-secondary-50">
       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-secondary-900">
         {name}
       </td>
@@ -77,7 +77,7 @@ const ReportTable: FC<ReportTableProps> = ({
         </div>
       )}
 
-      <div className=" my-4 p-4" id="section-to-print">
+      <div className="my-4 p-4" id="section-to-print">
         {title && (
           <h1 className="text-xl font-bold text-secondary-800">{title}</h1>
         )}
@@ -91,15 +91,15 @@ const ReportTable: FC<ReportTableProps> = ({
         )}
         <br />
         <div className="my-4">
-          <span className="m-1  inline-block rounded-full bg-yellow-200 px-6 py-1 font-medium text-yellow-900">
+          <span className="m-1 inline-block rounded-full bg-yellow-200 px-6 py-1 font-medium text-yellow-900">
             Below Ideal
           </span>
 
-          <span className="m-1  inline-block rounded-full bg-primary-200 px-6 py-1 font-medium text-primary-900">
+          <span className="m-1 inline-block rounded-full bg-primary-200 px-6 py-1 font-medium text-primary-900">
             Ideal
           </span>
 
-          <span className="m-1  inline-block rounded-full bg-red-200 px-6 py-1 font-medium text-red-900">
+          <span className="m-1 inline-block rounded-full bg-red-200 px-6 py-1 font-medium text-red-900">
             Above Ideal
           </span>
         </div>
@@ -118,7 +118,7 @@ const ReportTable: FC<ReportTableProps> = ({
                   <th
                     scope="col"
                     key={session.session_external_id}
-                    className="bg-[#4B5563] px-6 py-3 text-center text-xs  font-semibold tracking-wider text-[#F9FAFB]"
+                    className="bg-[#4B5563] px-6 py-3 text-center text-xs font-semibold tracking-wider text-[#F9FAFB]"
                   >
                     <div className="flex flex-col items-center justify-center gap-1">
                       {formatDateTime(session.session_created_date)}

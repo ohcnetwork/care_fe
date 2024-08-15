@@ -27,6 +27,7 @@ import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { validateRule } from "./UserAdd";
 import ProfilePicUploadModal from "./ProfilePicUploadModal";
+import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
@@ -112,6 +113,7 @@ const editFormReducer = (state: State, action: Action) => {
 
 export default function UserProfile() {
   const { signOut, refetchUser } = useAuthContext();
+  const { t } = useTranslation();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const [editProfilePic, setEditProfilePic] = useState(false);
   const [updateStatus, setUpdateStatus] = useState({
@@ -203,7 +205,7 @@ export default function UserProfile() {
         case "lastName":
         case "gender":
           if (!states.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -256,7 +258,7 @@ export default function UserProfile() {
           return;
         case "email":
           if (!states.form[field]) {
-            errors[field] = "This field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (!validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
@@ -265,7 +267,7 @@ export default function UserProfile() {
           return;
         case "doctor_experience_commenced_on":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (
             (states.form.user_type === "Doctor" &&
@@ -280,7 +282,7 @@ export default function UserProfile() {
         case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -516,7 +518,7 @@ export default function UserProfile() {
           </div>
           <div className="mt-5 lg:col-span-2 lg:mt-0">
             {!showEdit && !isLoading && (
-              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
+              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
                 <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
                   <div
                     className="my-2 sm:col-span-1"
@@ -530,7 +532,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="contactno-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -542,7 +544,7 @@ export default function UserProfile() {
                   </div>
 
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="whatsapp-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -553,7 +555,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="emailid-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -564,7 +566,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="firstname-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -575,7 +577,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="lastname-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -586,7 +588,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="date_of_birth-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -598,7 +600,7 @@ export default function UserProfile() {
                         : "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Access Level
                     </dt>
@@ -608,7 +610,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="gender-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -618,7 +620,7 @@ export default function UserProfile() {
                       {userData?.gender || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Local Body
                     </dt>
@@ -626,7 +628,7 @@ export default function UserProfile() {
                       {userData?.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       District
                     </dt>
@@ -634,7 +636,7 @@ export default function UserProfile() {
                       {userData?.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       State
                     </dt>
@@ -642,7 +644,7 @@ export default function UserProfile() {
                       {userData?.state_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Skills
                     </dt>
@@ -666,7 +668,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="averageworkinghour-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">

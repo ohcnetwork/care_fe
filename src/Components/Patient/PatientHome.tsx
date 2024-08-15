@@ -18,6 +18,7 @@ import {
   classNames,
   formatDate,
   formatDateTime,
+  formatName,
   formatPatientAge,
   isAntenatal,
   isPostPartum,
@@ -30,7 +31,7 @@ import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
@@ -275,14 +276,9 @@ export const PatientHome = (props: any) => {
                 <p className="mx-3 flex flex-1 justify-center gap-2 rounded-lg bg-green-200 p-3 text-center font-bold text-green-800 shadow">
                   <span className="inline">
                     Assigned Doctor:
-                    {
-                      patientData?.last_consultation?.assigned_to_object
-                        .first_name
-                    }
-                    {
-                      patientData?.last_consultation?.assigned_to_object
-                        .last_name
-                    }
+                    {formatName(
+                      patientData.last_consultation.assigned_to_object,
+                    )}
                   </span>
                   {patientData?.last_consultation?.assigned_to_object
                     .alt_phone_number && (
@@ -300,8 +296,7 @@ export const PatientHome = (props: any) => {
                 <p className="mx-2 flex-1 rounded-lg bg-primary-200 p-3 text-center font-bold text-primary-800 shadow">
                   <span className="inline">
                     Assigned Volunteer:
-                    {patientData.assigned_to_object.first_name}
-                    {patientData.assigned_to_object.last_name}
+                    {formatName(patientData.assigned_to_object)}
                   </span>
                 </p>
               )}
@@ -422,7 +417,7 @@ export const PatientHome = (props: any) => {
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Phone
                   </div>
-                  <div className="mt-1 text-sm leading-5 ">
+                  <div className="mt-1 text-sm leading-5">
                     <div>
                       <a
                         href={`tel:${patientData.phone_number}`}
@@ -524,7 +519,7 @@ export const PatientHome = (props: any) => {
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Occupation
                   </div>
-                  <div className="mt-1  text-sm font-medium leading-5 ">
+                  <div className="mt-1 text-sm font-medium leading-5">
                     {parseOccupation(patientData.meta_info?.occupation) || "-"}
                   </div>
                 </div>
@@ -532,7 +527,7 @@ export const PatientHome = (props: any) => {
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Ration Card Category
                   </div>
-                  <div className="mt-1  text-sm font-medium leading-5 ">
+                  <div className="mt-1 text-sm font-medium leading-5">
                     {patientData.ration_card_category
                       ? t(`ration_card__${patientData.ration_card_category}`)
                       : "-"}
@@ -706,7 +701,7 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </section>
-        <section className=" mt-7 h-full space-y-2 rounded-lg bg-white p-4 text-secondary-100 shadow">
+        <section className="mt-7 h-full space-y-2 rounded-lg bg-white p-4 text-secondary-100 shadow">
           <div
             className="flex cursor-pointer justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-secondary-900"
             onClick={() => {
@@ -732,7 +727,7 @@ export const PatientHome = (props: any) => {
           >
             {activeShiftingData?.count ? (
               activeShiftingData.results.map((shift: any) => (
-                <div key={`shift_${shift.id}`} className="mx-2 ">
+                <div key={`shift_${shift.id}`} className="mx-2">
                   <div className="h-full overflow-hidden rounded-lg bg-white shadow">
                     <div className="flex h-full flex-col justify-between p-4">
                       <div>
@@ -885,7 +880,7 @@ export const PatientHome = (props: any) => {
                 </div>
               ))
             ) : (
-              <div className=" text-center text-secondary-500">
+              <div className="text-center text-secondary-500">
                 {isShiftDataLoading ? "Loading..." : "No Shifting Records!"}
               </div>
             )}
@@ -1132,8 +1127,8 @@ export const PatientHome = (props: any) => {
                 <div
                   className={`h-full space-y-2 rounded-lg border bg-white p-4 shadow ${
                     isPatientInactive(patientData, facilityId)
-                      ? " border-secondary-700 hover:cursor-not-allowed"
-                      : " border-green-700 hover:cursor-pointer hover:bg-secondary-200"
+                      ? "border-secondary-700 hover:cursor-not-allowed"
+                      : "border-green-700 hover:cursor-pointer hover:bg-secondary-200"
                   } `}
                 >
                   <div
@@ -1141,7 +1136,7 @@ export const PatientHome = (props: any) => {
                       isPatientInactive(patientData, facilityId)
                         ? "text-secondary-700"
                         : "text-green-700"
-                    }  text-center `}
+                    } text-center`}
                   >
                     <span>
                       <CareIcon icon="l-ambulance" className="text-5xl" />
@@ -1153,7 +1148,7 @@ export const PatientHome = (props: any) => {
                       className={`${
                         isPatientInactive(patientData, facilityId) &&
                         "text-secondary-700"
-                      }  text-center text-sm font-medium`}
+                      } text-center text-sm font-medium`}
                     >
                       Shift Patient
                     </p>
@@ -1174,16 +1169,16 @@ export const PatientHome = (props: any) => {
                   className={classNames(
                     "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
-                      ? " border-secondary-700 hover:cursor-not-allowed"
-                      : " border-green-700 hover:cursor-pointer hover:bg-secondary-200",
+                      ? "border-secondary-700 hover:cursor-not-allowed"
+                      : "border-green-700 hover:cursor-pointer hover:bg-secondary-200",
                   )}
                 >
                   <div
                     className={`${
                       isPatientInactive(patientData, facilityId)
-                        ? " text-secondary-700 "
-                        : " text-green-700 "
-                    } text-center  `}
+                        ? "text-secondary-700"
+                        : "text-green-700"
+                    } text-center`}
                   >
                     <span>
                       <CareIcon icon="l-medkit" className="text-5xl" />
@@ -1193,7 +1188,7 @@ export const PatientHome = (props: any) => {
                     <p
                       className={`${
                         isPatientInactive(patientData, facilityId) &&
-                        " text-secondary-700 "
+                        "text-secondary-700"
                       } text-center text-sm font-medium`}
                     >
                       Request Sample Test
@@ -1395,8 +1390,7 @@ export const PatientHome = (props: any) => {
         onClose={() => setOpenAssignVolunteerDialog(false)}
         description={
           <div className="mt-6">
-            <UserAutocompleteFormField
-              showActiveStatus
+            <UserAutocomplete
               value={assignedVolunteerObject}
               onChange={handleVolunteerSelect}
               userType={"Volunteer"}

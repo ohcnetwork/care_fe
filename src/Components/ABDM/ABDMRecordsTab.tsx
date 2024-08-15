@@ -5,7 +5,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Loading from "../Common/Loading";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatName } from "../../Utils/utils";
 import { Link } from "raviger";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
@@ -75,7 +75,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
             }
           </h5>
           <h6 className="mt-1 leading-6 text-secondary-700">
-            {consent.requester.first_name} {consent.requester.last_name}
+            {formatName(consent.requester)}
           </h6>
         </div>
         <div className="flex flex-col items-center">
@@ -121,13 +121,13 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
         </div>
       </div>
       {consent.consent_artefacts?.length ? (
-        <div className="bg-secondary-50 flex flex-wrap items-center justify-center border-t border-secondary-200 px-4 py-5 sm:gap-4">
+        <div className="flex flex-wrap items-center justify-center border-t border-secondary-200 bg-secondary-50 px-4 py-5 sm:gap-4">
           {consent.consent_artefacts?.map((artefact) => (
             <ConsentArtefactCard key={artefact.id} artefact={artefact} />
           ))}
         </div>
       ) : (
-        <div className="bg-secondary-50 border-t border-secondary-200 px-4 py-5 sm:gap-4">
+        <div className="border-t border-secondary-200 bg-secondary-50 px-4 py-5 sm:gap-4">
           <p className="text-center text-sm text-secondary-800">
             {consent.status === "REQUESTED"
               ? "Waiting for the Patient to approve the consent request"

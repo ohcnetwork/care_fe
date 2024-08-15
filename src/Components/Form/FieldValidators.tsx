@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 export type FieldError = string | undefined;
 export type FieldValidator<T> = (value: T, ...args: any) => FieldError;
 
@@ -42,7 +44,7 @@ export const AnyValidator = <T,>(
   return validator;
 };
 
-export const RequiredFieldValidator = (message = "Field is required") => {
+export const RequiredFieldValidator = (message = t("field_required")) => {
   return <T,>(value: T): FieldError => {
     if (!value) return message;
     if (Array.isArray(value) && value.length === 0) return message;

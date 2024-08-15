@@ -100,6 +100,8 @@ const ButtonV2 = ({
   tooltipClassName,
   ...props
 }: ButtonProps) => {
+  shadow ??= !ghost;
+
   const className = classNames(
     props.className,
     "inline-flex h-min cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500",
@@ -107,7 +109,7 @@ const ButtonV2 = ({
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-lg",
+    shadow && "shadow enabled:hover:shadow-md",
     tooltip && "tooltip",
   );
 
@@ -126,7 +128,7 @@ const ButtonV2 = ({
 
   if (href && !(disabled || loading)) {
     return (
-      <Link href={href} target={target}>
+      <Link href={href} target={target} className={props.className}>
         <button {...props} disabled={disabled || loading} className={className}>
           {children}
         </button>

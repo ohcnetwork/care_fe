@@ -371,7 +371,7 @@ const DischargedPatientsList = ({
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
+                t(`RESPIRATORY_SUPPORT_SHORT__${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",
@@ -480,7 +480,7 @@ export default DischargedPatientsList;
 const PatientListItem = ({ patient }: { patient: PatientModel }) => {
   return (
     <div className="flex rounded-lg border bg-white p-5 shadow hover:ring-1 hover:ring-primary-400">
-      <div className="bg-secondary-50 flex rounded border border-secondary-300 p-6">
+      <div className="flex rounded border border-secondary-300 bg-secondary-50 p-6">
         <CareIcon
           icon="l-user-injured"
           className="text-3xl text-secondary-800"

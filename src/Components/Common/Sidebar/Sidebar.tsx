@@ -108,8 +108,8 @@ const StatelessSidebar = ({
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
-          ? " overflow-visible "
-          : " overflow-y-auto overflow-x-hidden "
+          ? "overflow-visible"
+          : "overflow-y-auto overflow-x-hidden"
       }`}
     >
       <div className="h-3" /> {/* flexible spacing */}

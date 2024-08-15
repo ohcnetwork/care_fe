@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+
 interface IProps {
   values: Record<string, unknown>;
 }
@@ -30,7 +32,10 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
       return trimmed;
     }
 
-    if (new Date(trimmed).toString() !== "Invalid Date") {
+    const dateTimeRegex =
+      /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?)?$/;
+
+    if (trimmed.match(dateTimeRegex)) {
       return new Date(trimmed).toLocaleString();
     }
 
@@ -80,12 +85,13 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
 };
 
 export default function GenericEvent(props: IProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-secondary-400 p-4 @container">
       {Object.entries(props.values).map(([key, value]) => (
         <div className="flex w-full flex-col items-start gap-2">
-          <span className="text-xs uppercase text-secondary-700">
-            {key.replaceAll(/_/g, " ")}
+          <span className="text-xs capitalize text-secondary-700">
+            {t(key).replaceAll(/_/g, " ")}
           </span>
           <span className="break-all text-sm font-semibold text-secondary-700">
             {formatValue(value, key)}

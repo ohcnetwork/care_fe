@@ -311,7 +311,6 @@ export type DialysisPlotsRes = {
 
 export type NeurologicalTablesFields =
   | "consciousness_level"
-  | "consciousness_level_detail"
   | "left_pupil_size"
   | "left_pupil_size_detail"
   | "right_pupil_size"
@@ -331,7 +330,6 @@ export type NeurologicalTablesFields =
 
 export type NeurologicalTablesRes = {
   consciousness_level: number;
-  consciousness_level_detail: string;
   left_pupil_size: number;
   left_pupil_size_detail: string;
   right_pupil_size: number;

@@ -63,7 +63,6 @@ import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import Error404 from "../ErrorPages/404";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
-import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import { useTranslation } from "react-i18next";
@@ -192,6 +191,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
   const [careExtId, setCareExtId] = useState("");
   const [formField, setFormField] = useState<any>();
+  const [resetNum, setResetNum] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
@@ -1003,21 +1003,29 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <DuplicatePatientDialog
           patientList={statusDialog.patientList}
           handleOk={handleDialogClose}
-          handleCancel={goBack}
-          isNew={!id}
+          handleCancel={() => {
+            handleDialogClose("close");
+            setResetNum(true);
+          }}
         />
       )}
       {statusDialog.transfer && (
         <DialogModal
           show={statusDialog.transfer}
-          onClose={() => handleDialogClose("back")}
+          onClose={() => {
+            setResetNum(true);
+            handleDialogClose("close");
+          }}
           title="Patient Transfer Form"
           className="max-w-md md:min-w-[600px]"
         >
           <TransferPatientDialog
             patientList={statusDialog.patientList}
             handleOk={() => handleDialogClose("close")}
-            handleCancel={() => handleDialogClose("back")}
+            handleCancel={() => {
+              setResetNum(true);
+              handleDialogClose("close");
+            }}
             facilityId={facilityId}
           />
         </DialogModal>
@@ -1134,6 +1142,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               >
                 {(field) => {
                   if (!formField) setFormField(field);
+                  if (resetNum) {
+                    field("phone_number").onChange({
+                      name: "phone_number",
+                      value: "+91",
+                    });
+                    setResetNum(false);
+                  }
                   return (
                     <>
                       <div className="mb-2 overflow-visible rounded border border-secondary-200 p-4">
@@ -1246,14 +1261,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               }}
                               types={["mobile", "landline"]}
                             />
-                            <Checkbox
+                            <CheckBoxFormField
                               label="Is the phone number an emergency number?"
                               className="font-bold"
                               id="emergency_contact_checkbox"
-                              checked={isEmergencyNumberEnabled}
-                              onCheck={(checked) => {
-                                setIsEmergencyNumberEnabled(checked);
-                                checked
+                              name="emergency_contact_checkbox"
+                              value={isEmergencyNumberEnabled}
+                              onChange={({ value }) => {
+                                setIsEmergencyNumberEnabled(value);
+                                value
                                   ? field("emergency_phone_number").onChange({
                                       name: field("emergency_phone_number")
                                         .name,
