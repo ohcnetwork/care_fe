@@ -24,9 +24,16 @@ interface Props {
   onClose: () => void;
   onSave?: () => void;
   onDelete?: () => void;
+  onRefetch?: () => void;
 }
 
-const ProfilePicUploadModal = ({ open, onClose, onSave, onDelete }: Props) => {
+const ProfilePicUploadModal = ({
+  open,
+  onClose,
+  onSave,
+  onDelete,
+  onRefetch,
+}: Props) => {
   const user = useAuthUser();
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -93,6 +100,7 @@ const ProfilePicUploadModal = ({ open, onClose, onSave, onDelete }: Props) => {
       onSave?.();
       closeModal();
       setUploadPercent(0);
+      onRefetch?.();
     }
   }, [uploadPercent]);
 
@@ -304,7 +312,7 @@ const ProfilePicUploadModal = ({ open, onClose, onSave, onDelete }: Props) => {
               )}
             </div>
             {/* buttons for mobile screens */}
-            <div className="m-4 flex flex-col justify-evenly sm:hidden ">
+            <div className="m-4 flex flex-col justify-evenly sm:hidden">
               <div>
                 {!previewImage ? (
                   <ButtonV2
@@ -370,7 +378,7 @@ const ProfilePicUploadModal = ({ open, onClose, onSave, onDelete }: Props) => {
               </div>
             </div>
             {/* buttons for laptop screens */}
-            <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+            <div className={`${isLaptopScreen ? " " : "hidden"}`}>
               <div className="m-4 flex lg:hidden">
                 <ButtonV2 onClick={handleSwitchCamera}>
                   <CareIcon icon="l-camera-change" className="text-lg" />
@@ -378,7 +386,7 @@ const ProfilePicUploadModal = ({ open, onClose, onSave, onDelete }: Props) => {
                 </ButtonV2>
               </div>
 
-              <div className="flex justify-end  gap-2 p-4">
+              <div className="flex justify-end gap-2 p-4">
                 <div>
                   {!previewImage ? (
                     <>
