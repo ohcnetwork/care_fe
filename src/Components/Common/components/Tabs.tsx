@@ -16,7 +16,6 @@ export default function Tabs(props: {
 
   useEffect(() => {
     const currentTabIndex = tabs.findIndex((t) => t.value === currentTab);
-    console.log(currentTabIndex, ref.current, tabSwitcherRef.current);
     if (
       typeof currentTabIndex != "number" ||
       !ref.current ||

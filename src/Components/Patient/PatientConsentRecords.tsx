@@ -18,6 +18,7 @@ import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
 import useFileManager from "../../Utils/useFileManager";
 import { PatientConsentModel } from "../Facility/models";
 import Tabs from "../Common/components/Tabs";
+import { t } from "i18next";
 
 export default function PatientConsentRecords(props: {
   facilityId: string;
@@ -109,8 +110,8 @@ export default function PatientConsentRecords(props: {
           name:
             patient?.last_consultation?.suggestion === "A"
               ? `Admitted on ${formatDateTime(
-                  patient?.last_consultation?.encounter_date,
-                )}`
+                patient?.last_consultation?.encounter_date,
+              )}`
               : patient?.last_consultation?.suggestion_text,
         },
       }}
@@ -193,7 +194,7 @@ export default function PatientConsentRecords(props: {
                         record.type === 2 &&
                         newConsent.type === 2 &&
                         record.patient_code_status !==
-                          newConsent.patient_code_status &&
+                        newConsent.patient_code_status &&
                         record.archived !== true,
                     );
                     if (diffPCS) {
@@ -222,7 +223,15 @@ export default function PatientConsentRecords(props: {
               </>
             ) : (
               <>
-                <fileUpload.UploadButton />
+                <label
+                  className={
+                    "button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out"
+                  }
+                >
+                  <CareIcon icon={"l-file-upload-alt"} className="text-lg" />
+                  {t("choose_file")}
+                  <fileUpload.Input />
+                </label>
                 <button
                   type="button"
                   className="flex aspect-square h-9 shrink-0 items-center justify-center rounded text-xl transition-all hover:bg-black/10"
@@ -257,10 +266,7 @@ export default function PatientConsentRecords(props: {
                 key={index}
                 consultationId={consultationId}
                 consentRecord={record}
-                previewFile={fileManager.viewFile}
-                archiveFile={fileManager.archiveFile}
-                editFile={fileManager.editFile}
-                showArchive={showArchived}
+                fileManager={fileManager}
                 files={record.files?.filter(
                   (f) =>
                     f.associating_id === record.id &&

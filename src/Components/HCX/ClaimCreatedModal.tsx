@@ -50,7 +50,7 @@ export default function ClaimCreatedModal({ claim, ...props }: Props) {
       }
     >
       <div className="p-4 pt-8">
-        <FileUpload type="CLAIM" claimId={claim.id!} hideBack unspecified />
+        <FileUpload type="CLAIM" claimId={claim.id} />
       </div>
     </DialogModal>
   );

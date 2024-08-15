@@ -43,7 +43,7 @@ export const VoiceRecorder = (props: any) => {
   }, [isRecording, reset, setResetRecording, resetRecording]);
 
   return (
-    <div className="w-full md:w-auto">
+    <div className="w-full">
       <div>
         {isRecording ? (
           <>
@@ -79,7 +79,7 @@ export const VoiceRecorder = (props: any) => {
                 disabled={isDisabled}
                 onClick={startRecording}
                 authorizeFor={NonReadOnlyUsers}
-                className="w-full md:w-fit"
+                className="w-full"
               >
                 <CareIcon icon="l-microphone" className="text-lg" />
                 {t("record")}

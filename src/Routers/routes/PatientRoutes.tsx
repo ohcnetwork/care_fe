@@ -1,5 +1,4 @@
 import InvestigationReports from "../../Components/Facility/Investigations/Reports";
-import { FileUpload } from "../../Components/Patient/FileUpload";
 import { PatientManager } from "../../Components/Patient/ManagePatients";
 import { PatientHome } from "../../Components/Patient/PatientHome";
 import PatientNotes from "../../Components/Patient/PatientNotes";
@@ -7,6 +6,7 @@ import { PatientRegister } from "../../Components/Patient/PatientRegister";
 import { DetailRoute } from "../types";
 import DeathReport from "../../Components/DeathReport/DeathReport";
 import { InsuranceDetails } from "../../Components/Patient/InsuranceDetails";
+import FileUploadPage from "../../Components/Patient/FileUploadPage";
 
 export default {
   "/patients": () => <PatientManager />,
@@ -35,16 +35,6 @@ export default {
   "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
-  }: any) => (
-    <FileUpload
-      patientId={patientId}
-      facilityId={facilityId}
-      consultationId=""
-      type="PATIENT"
-      hideBack={false}
-      audio={true}
-      unspecified={true}
-    />
-  ),
+  }: any) => <FileUploadPage facilityId={facilityId} patientId={patientId} type="PATIENT" />,
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
 };

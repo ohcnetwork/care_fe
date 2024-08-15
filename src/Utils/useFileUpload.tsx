@@ -1,16 +1,15 @@
-import { ChangeEvent, useCallback, useRef, useState } from "react";
+import { ChangeEvent, DetailedHTMLProps, InputHTMLAttributes, useCallback, useRef, useState } from "react";
 import {
   CreateFileResponse,
   FileCategory,
   FileUploadModel,
 } from "../Components/Patient/models";
 import DialogModal from "../Components/Common/Dialog";
-import CareIcon, { IconName } from "../CAREUI/icons/CareIcon";
+import CareIcon from "../CAREUI/icons/CareIcon";
 import Webcam from "react-webcam";
 import ButtonV2, { Submit } from "../Components/Common/components/ButtonV2";
 import { t } from "i18next";
 import useWindowDimensions from "../Common/hooks/useWindowDimensions";
-import { classNames } from "./utils";
 import request from "./request/request";
 import routes from "../Redux/api";
 import uploadFile from "./request/uploadFile";
@@ -23,19 +22,15 @@ export type FileUploadOptions = {
   category?: FileCategory;
   onUpload?: (file: FileUploadModel) => void;
 } & (
-  | {
+    | {
       allowedExtensions?: string[];
     }
-  | {
+    | {
       allowAllExtensions?: boolean;
     }
-);
+  );
 
-export type FileUploadButtonProps = {
-  icon?: IconName;
-  content?: string;
-  className?: string;
-};
+export interface FileInputProps extends Omit<DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, "id" | "title" | "type" | "accept" | "onChange"> { }
 
 export type FileUploadReturn = {
   progress: null | number;
@@ -44,7 +39,7 @@ export type FileUploadReturn = {
   handleAudioCapture: () => void;
   handleFileUpload: (associating_id: string) => Promise<void>;
   Dialogues: JSX.Element;
-  UploadButton: (_: FileUploadButtonProps) => JSX.Element;
+  Input: (_: FileInputProps) => JSX.Element;
   fileName: string;
   file: File | null;
   setFileName: (name: string) => void;
@@ -113,8 +108,8 @@ export default function useFileUpload(
     setFile(e.target.files[0]);
     setUploadFileName(
       uploadFileName ||
-        fileName.substring(0, fileName.lastIndexOf(".")) ||
-        fileName,
+      fileName.substring(0, fileName.lastIndexOf(".")) ||
+      fileName,
     );
 
     const ext: string = fileName.split(".")[1];
@@ -410,44 +405,36 @@ export default function useFileUpload(
     </DialogModal>
   );
 
-  const UploadButton = (props: FileUploadButtonProps) => (
-    <label
-      className={classNames(
-        "button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out",
-        props.className,
-      )}
-    >
-      <CareIcon icon={props.icon || "l-file-upload-alt"} className="text-lg" />
-      {props.content || t("choose_file")}
-      <input
-        id="file_upload_patient"
-        title="changeFile"
-        onChange={onFileChange}
-        type="file"
-        accept={
-          "allowedExtensions" in options
-            ? options.allowedExtensions?.join(",")
-            : "allowAllExtensions" in options
-              ? "*"
-              : DEFAULT_ALLOWED_EXTENSIONS.join(",")
-        }
-        hidden
-      />
-    </label>
-  );
+  const Input = (props: FileInputProps) => (
+    <input
+      {...props}
+      id="file_upload_patient"
+      title="changeFile"
+      onChange={onFileChange}
+      type="file"
+      accept={
+        "allowedExtensions" in options
+          ? options.allowedExtensions?.join(",")
+          : "allowAllExtensions" in options
+            ? "*"
+            : DEFAULT_ALLOWED_EXTENSIONS.join(",")
+      }
+      hidden={props.hidden || true}
+    />
+  )
+
+  const handleAudioCapture = () => {
+
+  }
 
   return {
     progress,
     error,
-    handleCameraCapture: () => {
-      setCameraModalOpen(true);
-    },
-    handleAudioCapture: () => {
-      console.log("Audio capture not implemented");
-    },
+    handleCameraCapture: () => setCameraModalOpen(true),
+    handleAudioCapture,
     handleFileUpload: handleUpload,
     Dialogues,
-    UploadButton,
+    Input,
     fileName: uploadFileName,
     file: file,
     setFileName: setUploadFileName,

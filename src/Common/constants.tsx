@@ -223,11 +223,11 @@ export const getBedTypes = ({
 }: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
   const kaspBedTypes = kasp_enabled
     ? [
-        { id: 40, text: kasp_string + " Ordinary Beds" },
-        { id: 60, text: kasp_string + " Oxygen beds" },
-        { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
-        { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
-      ]
+      { id: 40, text: kasp_string + " Ordinary Beds" },
+      { id: 60, text: kasp_string + " Oxygen beds" },
+      { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
+      { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
+    ]
     : [];
 
   return [
@@ -448,11 +448,11 @@ export const PATIENT_CATEGORIES: {
   text: PatientCategory;
   twClass: string;
 }[] = [
-  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Mild", twClass: "patient-stable" },
-  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
-  { id: "Critical", text: "Critical", twClass: "patient-critical" },
-];
+    { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
+    { id: "Stable", text: "Mild", twClass: "patient-stable" },
+    { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
+    { id: "Critical", text: "Critical", twClass: "patient-critical" },
+  ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 
@@ -884,37 +884,37 @@ export const FACILITY_FEATURE_TYPES: {
   name: string;
   icon: IconName;
 }[] = [
-  {
-    id: 1,
-    name: "CT Scan",
-    icon: "l-compact-disc",
-  },
-  {
-    id: 2,
-    name: "Maternity Care",
-    icon: "l-baby-carriage",
-  },
-  {
-    id: 3,
-    name: "X-Ray",
-    icon: "l-clipboard-alt",
-  },
-  {
-    id: 4,
-    name: "Neonatal Care",
-    icon: "l-baby-carriage",
-  },
-  {
-    id: 5,
-    name: "Operation Theater",
-    icon: "l-syringe",
-  },
-  {
-    id: 6,
-    name: "Blood Bank",
-    icon: "l-medical-drip",
-  },
-];
+    {
+      id: 1,
+      name: "CT Scan",
+      icon: "l-compact-disc",
+    },
+    {
+      id: 2,
+      name: "Maternity Care",
+      icon: "l-baby-carriage",
+    },
+    {
+      id: 3,
+      name: "X-Ray",
+      icon: "l-clipboard-alt",
+    },
+    {
+      id: 4,
+      name: "Neonatal Care",
+      icon: "l-baby-carriage",
+    },
+    {
+      id: 5,
+      name: "Operation Theater",
+      icon: "l-syringe",
+    },
+    {
+      id: 6,
+      name: "Blood Bank",
+      icon: "l-medical-drip",
+    },
+  ];
 
 export const WAVEFORM_VIEWABLE_LENGTH = 400;
 
@@ -1661,26 +1661,77 @@ export const PressureSoreTissueTypeOptions = [
   "Necrotic",
 ] as const;
 
-export const PREVIEW_EXTENSIONS = [
-  ".html",
-  ".htm",
-  ".pdf",
-  ".mp4",
-  ".webm",
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".gif",
-  ".webp",
-] as const;
+export const FILE_EXTENSIONS = {
+  IMAGE: [
+    "jpeg",
+    "jpg",
+    "png",
+    "gif",
+    "svg",
+    "bmp",
+    "webp",
+    "jfif",
+  ],
+  AUDIO: [
+    "mp3",
+    "wav"
+  ],
+  VIDEO: [
+    "webm",
+    "mpg",
+    "mp2",
+    "mpeg",
+    "mpe",
+    "mpv",
+    "ogg",
+    "mp4",
+    "m4v",
+    "avi",
+    "wmv",
+    "mov",
+    "qt",
+    "flv",
+    "swf",
+  ],
+  PRESENTATION: [
+    "pptx"
+  ],
+  DOCUMENT: [
+    "pdf",
+    "docx"
+  ]
+} as const;
 
-export const IMAGE_EXTENSIONS = [
-  "jpeg",
+export const PREVIEWABLE_FILE_EXTENSIONS = [
+  "html",
+  "htm",
+  "pdf",
+  "mp4",
+  "webm",
   "jpg",
+  "jpeg",
   "png",
   "gif",
-  "svg",
-  "bmp",
   "webp",
-  "jfif",
-] as const;
+
+] as const
+
+export const HEADER_CONTENT_TYPES = {
+  pdf: "application/pdf",
+  txt: "text/plain",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  doc: "application/msword",
+  xls: "application/vnd.ms-excel",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  epub: "application/epub+zip",
+  gif: "image/gif",
+  html: "text/html",
+  htm: "text/html",
+  mp4: "video/mp4",
+  png: "image/png",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  svg: "image/svg+xml",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+} as const;

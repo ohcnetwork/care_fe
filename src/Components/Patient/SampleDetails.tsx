@@ -428,7 +428,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         {showPatientCard(sampleDetails?.patient_object)}
       </div>
 
-      <div>
+      <div className="mb-4">
         <h4 className="mt-8">Sample Test History</h4>
         {sampleDetails?.flow &&
           sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
@@ -437,12 +437,9 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       <FileUpload
         sampleId={id}
         patientId=""
-        facilityId=""
         consultationId=""
         type="SAMPLE_MANAGEMENT"
-        hideBack={true}
-        unspecified={true}
-        audio={true}
+        allowAudio={true}
       />
     </Page>
   );
