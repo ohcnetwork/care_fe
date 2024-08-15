@@ -14,18 +14,22 @@ type Props = {
 export default function PrintPreview(props: Props) {
   return (
     <Page title={props.title}>
-      <div className="mx-auto my-8 w-[50rem]">
-        <div className="top-0 z-20 flex justify-end gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8">
-          <ButtonV2 disabled={props.disabled} onClick={() => window.print()}>
-            <CareIcon icon="l-print" className="text-lg" />
-            Print
-          </ButtonV2>
-        </div>
+      <div className="my-8 md:mx-auto md:w-[50rem]">
+        <div className="top-0 z-20 flex flex-wrap justify-end gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8"></div>
 
-        <div className="bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out">
+        <div className="bg-white  text-sm shadow-2xl transition-all duration-200 ease-in-out md:p-10">
+          <div className="flex justify-end p-5">
+            <ButtonV2 disabled={props.disabled} onClick={() => window.print()}>
+              <CareIcon icon="l-print" className="text-lg" />
+              Print
+            </ButtonV2>
+          </div>
           <div
             id="section-to-print"
-            className={classNames("w-full", props.className)}
+            className={classNames(
+              "w-full scale-75 md:scale-100",
+              props.className,
+            )}
           >
             {props.children}
           </div>

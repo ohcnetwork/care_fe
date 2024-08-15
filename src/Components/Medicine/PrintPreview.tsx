@@ -52,7 +52,7 @@ export default function PrescriptionsPrintPreview() {
         <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
       </div>
       <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
-        <PatientDetail name="Patient" className="col-span-5">
+        <PatientDetail name="Patient" className="col-span-5 ">
           {patient && (
             <>
               <span className="uppercase">{patient.name}</span> -{" "}
@@ -71,7 +71,7 @@ export default function PrescriptionsPrintPreview() {
               ? `${t(`encounter_suggestion__${encounter.suggestion}`)} on`
               : ""
           }
-          className="col-span-5"
+          className="col-span-5 "
         >
           {formatDate(encounter?.encounter_date)}
         </PatientDetail>
@@ -122,7 +122,7 @@ const PatientDetail = ({
   return (
     <div
       className={classNames(
-        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
+        "inline-flex items-center whitespace-nowrap text-[9px] tracking-wide md:text-sm",
         className,
       )}
     >

@@ -24,6 +24,7 @@ module.exports = {
       ...defaultTheme.screens,
       "3xl": "1920px",
     },
+
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
