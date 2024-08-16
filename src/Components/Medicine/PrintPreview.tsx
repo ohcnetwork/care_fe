@@ -42,61 +42,62 @@ export default function PrescriptionsPrintPreview() {
 
   return (
     <PrintPreview
-      title={
-        patient ? `Prescriptions - ${patient.name}` : "Print Prescriptions"
-      }
+      title={patient ? `Prescriptions - ${patient.name}` : "Print Prescriptions"}
       disabled={!(patient && encounter && items)}
     >
       <div className="mb-3 flex items-center justify-between p-4">
         <h3>{encounter?.facility_name}</h3>
         <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
       </div>
-      <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
-        <PatientDetail name="Patient" className="col-span-5">
-          {patient && (
-            <>
-              <span className="uppercase">{patient.name}</span> -{" "}
-              {t(`GENDER__${patient.gender}`)},{" "}
-              {patientAgeInYears(patient).toString()}yrs
-            </>
-          )}
-        </PatientDetail>
-        <PatientDetail name="IP/OP No." className="col-span-3">
-          {encounter?.patient_no}
-        </PatientDetail>
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-1.5 border-2 border-secondary-400 p-2">
+  <PatientDetail name="Patient" className="col-span-1 md:col-span-2 lg:col-span-2">
+    {patient && (
+      <>
+        <span className="uppercase">{patient.name}</span> -{" "}
+        {t(`GENDER__${patient.gender}`)},{" "}
+        {patientAgeInYears(patient).toString()}yrs
+      </>
+    )}
+  </PatientDetail>
+  <PatientDetail name="IP/OP No." className="col-span-1 md:col-span-1 lg:col-span-1">
+    {encounter?.patient_no}
+  </PatientDetail>
 
-        <PatientDetail
-          name={
-            encounter
-              ? `${t(`encounter_suggestion__${encounter.suggestion}`)} on`
-              : ""
-          }
-          className="col-span-5"
-        >
-          {formatDate(encounter?.encounter_date)}
-        </PatientDetail>
-        <PatientDetail name="Bed" className="col-span-3">
-          {encounter?.current_bed?.bed_object.location_object?.name}
-          {" - "}
-          {encounter?.current_bed?.bed_object.name}
-        </PatientDetail>
+  <PatientDetail
+    name={
+      encounter
+        ? `${t(`encounter_suggestion__${encounter.suggestion}`)} on`
+        : ""
+    }
+    className="col-span-1 md:col-span-2 lg:col-span-2"
+  >
+    {formatDate(encounter?.encounter_date)}
+  </PatientDetail>
+  <PatientDetail name="Bed" className="col-span-1 md:col-span-1 lg:col-span-1">
+    {encounter?.current_bed?.bed_object.location_object?.name}
+    {" - "}
+    {encounter?.current_bed?.bed_object.name}
+  </PatientDetail>
 
-        <PatientDetail name="Allergy to medication" className="col-span-8">
-          {patient?.allergies ?? "None"}
-        </PatientDetail>
-      </div>
+  <PatientDetail name="Allergy to medication" className="col-span-1 md:col-span-2 lg:col-span-4">
+    {patient?.allergies ?? "None"}
+  </PatientDetail>
+</div>
 
-      <PrescriptionsTable items={normalPrescriptions} />
+
+      <PrescriptionsTable items={normalPrescriptions}/>
       <PrescriptionsTable items={prnPrescriptions} prn />
 
-      <div className="pt-12">
-        <p className="font-medium text-secondary-800">
+      <div className="pt-12 px-4">
+        <p className="font-medium text-secondary-800 text-base">
           Sign of the Consulting Doctor
         </p>
-        <PatientDetail name="Name of the Consulting Doctor">
-          {encounter?.treating_physician_object &&
-            formatName(encounter?.treating_physician_object)}
-        </PatientDetail>
+        <div className="w-full">
+          <PatientDetail name="Name of the Consulting Doctor">
+            {encounter?.treating_physician_object &&
+              formatName(encounter?.treating_physician_object)}
+          </PatientDetail>
+        </div>
         <p className="pt-6 text-center text-xs font-medium text-secondary-700">
           Generated on: {formatDateTime(new Date())}
         </p>
@@ -106,6 +107,8 @@ export default function PrescriptionsPrintPreview() {
           authorized the same by affixing signature.
         </p>
       </div>
+
+
     </PrintPreview>
   );
 }
@@ -150,30 +153,33 @@ const PrescriptionsTable = ({
   }
 
   if (!items.length) {
-    return;
+    return <div>No prescriptions available</div>; // Add a fallback message for empty items
   }
 
   return (
-    <table className="mb-8 mt-4 w-full border-collapse border-2 border-secondary-400">
-      <caption className="mb-2 caption-top text-lg font-bold">
-        {prn && "PRN"} Prescriptions
-      </caption>
-      <thead className="border-b-2 border-secondary-400 bg-secondary-50">
-        <tr>
-          <th className="max-w-52 p-1">Medicine</th>
-          <th className="p-1">Dosage</th>
-          <th className="p-1">Directions</th>
-          <th className="max-w-32 p-1">Notes / Instructions</th>
-        </tr>
-      </thead>
-      <tbody className="border-b-2 border-secondary-400">
-        {items.map((item) => (
-          <PrescriptionEntry key={item.id} obj={item} />
-        ))}
-      </tbody>
-    </table>
+    <div className="overflow-x-auto">
+      <table className="mb-8 mt-4 w-full max-w-full border-collapse border-2 border-secondary-400">
+        <caption className="mb-2 caption-top text-lg font-bold">
+          {prn && "PRN"} Prescriptions
+        </caption>
+        <thead className="border-b-2 border-secondary-400 bg-secondary-50">
+          <tr>
+            <th className="p-2 text-left text-sm md:text-base">Medicine</th>
+            <th className="p-2 text-left text-sm md:text-base">Dosage</th>
+            <th className="p-2 text-left text-sm md:text-base">Directions</th>
+            <th className="p-2 text-left text-sm md:text-base">Notes / Instructions</th>
+          </tr>
+        </thead>
+        <tbody className="border-b-2 border-secondary-400">
+          {items.map((item) => (
+            <PrescriptionEntry key={item.id} obj={item} />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
+
 
 const PrescriptionEntry = ({ obj }: { obj: Prescription }) => {
   const { t } = useTranslation();
