@@ -1,4 +1,3 @@
-import { t } from "i18next";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -212,8 +211,8 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     description:
       "An option to store the level of consciousness of the patient.",
     options: CONSCIOUSNESS_LEVEL.map((loc) => ({
-      ...loc,
-      text: t(`CONSCIOUSNESS_LEVEL__${loc.value}`),
+      id: loc.id,
+      text: loc.value,
     })),
     validator: (value) => typeof value === "string",
   },
