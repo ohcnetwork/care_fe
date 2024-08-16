@@ -92,7 +92,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
         signIn,
         signOut,
         user,
-        refetchUser: refetch as unknown as () => Promise<void>,
+        refetchUser: refetch,
       }}
     >
       {!res.ok || !user ? unauthorized : children}
