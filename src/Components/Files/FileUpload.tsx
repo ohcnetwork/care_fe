@@ -1,0 +1,348 @@
+import { useState, ReactNode } from "react";
+import { FileUploadModel } from "../Patient/models.js";
+import Pagination from "../Common/Pagination.js";
+import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants.js";
+import { useTranslation } from "react-i18next";
+import ButtonV2 from "../Common/components/ButtonV2.js";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon.js";
+import TextFormField from "../Form/FormFields/TextFormField.js";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor.js";
+import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import useFileUpload from "../../Utils/useFileUpload.js";
+import useFileManager from "../../Utils/useFileManager.js";
+import Tabs from "../Common/components/Tabs.js";
+import FileBlock from "./FileBlock.js";
+
+export const LinearProgressWithLabel = (props: any) => {
+  return (
+    <div className="flex align-middle">
+      <div className="my-auto mr-2 w-full">
+        <div className="mr-2 h-1.5 w-full rounded-full bg-primary-200">
+          <div
+            className="h-1.5 rounded-full bg-primary-500"
+            style={{ width: `${props.value}%` }}
+          />
+        </div>
+      </div>
+      <div className="min-w-[35]">
+        <p className="text-slate-600">{`${Math.round(props.value)}%`}</p>
+      </div>
+    </div>
+  );
+};
+
+interface FileUploadProps {
+  type: string;
+  patientId?: string;
+  consultationId?: string;
+  consentId?: string;
+  allowAudio?: boolean;
+  sampleId?: string;
+  claimId?: string;
+  className?: string;
+  hideUpload?: boolean;
+}
+
+export interface ModalDetails {
+  name?: string;
+  id?: string;
+  reason?: string;
+  userArchived?: string;
+  archiveTime?: any;
+  associatedId?: string;
+}
+
+export interface StateInterface {
+  open: boolean;
+  isImage: boolean;
+  name: string;
+  extension: string;
+  zoom: number;
+  isZoomInDisabled: boolean;
+  isZoomOutDisabled: boolean;
+  rotation: number;
+}
+
+export const FileUpload = (props: FileUploadProps) => {
+  const { t } = useTranslation();
+  const {
+    consultationId,
+    patientId,
+    consentId,
+    type,
+    sampleId,
+    claimId,
+    allowAudio,
+    hideUpload,
+  } = props;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [offset, setOffset] = useState(0);
+  const [tab, setTab] = useState("UNARCHIVED");
+  const authUser = useAuthUser();
+
+  const handlePagination = (page: number, limit: number) => {
+    const offset = (page - 1) * limit;
+    setCurrentPage(page);
+    setOffset(offset);
+  };
+
+  const UPLOAD_HEADING: { [index: string]: string } = {
+    PATIENT: "Upload New Patient File",
+    CONSULTATION: "Upload New Consultation File",
+    SAMPLE_MANAGEMENT: "Upload Sample Report",
+    CLAIM: "Upload Supporting Info",
+  };
+  const VIEW_HEADING: { [index: string]: string } = {
+    PATIENT: "Patient Files",
+    CONSULTATION: "Consultation Files",
+    SAMPLE_MANAGEMENT: "Sample Report",
+    CLAIM: "Supporting Info",
+  };
+
+  const associatedId =
+    {
+      PATIENT: patientId,
+      CONSENT_RECORD: consentId,
+      CONSULTATION: consultationId,
+      SAMPLE_MANAGEMENT: sampleId,
+      CLAIM: claimId,
+    }[type] || "";
+
+  const activeFilesQuery = useQuery(routes.viewUpload, {
+    query: {
+      file_type: type,
+      associating_id: associatedId,
+      is_archived: false,
+      limit: RESULTS_PER_PAGE_LIMIT,
+      offset: offset,
+    },
+  });
+
+  const archivedFilesQuery = useQuery(routes.viewUpload, {
+    query: {
+      file_type: type,
+      associating_id: associatedId,
+      is_archived: true,
+      limit: RESULTS_PER_PAGE_LIMIT,
+      offset: offset,
+    },
+  });
+
+  const dischargeSummaryQuery = useQuery(routes.viewUpload, {
+    query: {
+      file_type: "DISCHARGE_SUMMARY",
+      associating_id: associatedId,
+      is_archived: false,
+      limit: RESULTS_PER_PAGE_LIMIT,
+      offset: offset,
+    },
+    prefetch: type === "CONSULTATION",
+  });
+
+  const queries = {
+    UNARCHIVED: activeFilesQuery,
+    ARCHIVED: archivedFilesQuery,
+    DISCHARGE_SUMMARY: dischargeSummaryQuery,
+  };
+
+  const refetchAll = async () =>
+    Promise.all(Object.values(queries).map((q) => q.refetch()));
+  const loading = Object.values(queries).some((q) => q.loading);
+
+  const fileQuery = queries[tab as keyof typeof queries];
+
+  const tabs = [
+    { text: "Active Files", value: "UNARCHIVED" },
+    { text: "Archived Files", value: "ARCHIVED" },
+    ...(dischargeSummaryQuery.data?.results?.length
+      ? [
+          {
+            text: "Discharge Summary",
+            value: "DISCHARGE_SUMMARY",
+          },
+        ]
+      : []),
+  ];
+
+  const fileUpload = useFileUpload({
+    type,
+    allowedExtensions: [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "bmp",
+      "tiff",
+      "mp4",
+      "mov",
+      "avi",
+      "wmv",
+      "mp3",
+      "wav",
+      "ogg",
+      "txt",
+      "csv",
+      "rtf",
+      "doc",
+      "odt",
+      "pdf",
+      "xls",
+      "xlsx",
+      "ods",
+      "pdf",
+    ],
+    onUpload: refetchAll,
+  });
+
+  const fileManager = useFileManager({
+    type,
+    onArchive: refetchAll,
+    onEdit: refetchAll,
+  });
+
+  const uploadButtons: {
+    name: string;
+    icon: IconName;
+    onClick?: () => void;
+    children?: ReactNode;
+    show?: boolean;
+  }[] = [
+    {
+      name: t("choose_file"),
+      icon: "l-file-upload-alt",
+      children: <fileUpload.Input />,
+    },
+    {
+      name: t("open_camera"),
+      icon: "l-camera",
+      onClick: fileUpload.handleCameraCapture,
+    },
+    {
+      name: t("record"),
+      icon: "l-microphone",
+      onClick: fileUpload.handleAudioCapture,
+      show: allowAudio,
+    },
+  ];
+
+  return (
+    <div className={`md:p-4 ${props.className}`}>
+      {fileUpload.Dialogues}
+      {fileManager.Dialogues}
+      {!hideUpload && (
+        <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+          {({ isAuthorized }) =>
+            isAuthorized ? (
+              <>
+                <h4 className="mb-6 text-2xl">{UPLOAD_HEADING[type]}</h4>
+                {fileUpload.file ? (
+                  <div className="mb-8 rounded-lg border border-secondary-300 bg-white p-4">
+                    <TextFormField
+                      name="consultation_file"
+                      type="text"
+                      label="Enter File Name"
+                      required
+                      value={fileUpload.fileName}
+                      disabled={!!fileUpload.progress}
+                      onChange={(e: any) => {
+                        fileUpload.setFileName(e.value);
+                      }}
+                      error={fileUpload.error || undefined}
+                    />
+                    <div className="flex items-center gap-2">
+                      <ButtonV2
+                        onClick={() => {
+                          fileUpload.handleFileUpload(associatedId);
+                        }}
+                        loading={!!fileUpload.progress}
+                        className="w-full"
+                      >
+                        <CareIcon icon="l-check" className="" />
+                        Upload
+                      </ButtonV2>
+                      <ButtonV2
+                        variant="danger"
+                        onClick={fileUpload.clearFile}
+                        disabled={!!fileUpload.progress}
+                      >
+                        <CareIcon icon="l-trash-alt" className="" />
+                        Discard
+                      </ButtonV2>
+                    </div>
+                    {!!fileUpload.progress && (
+                      <LinearProgressWithLabel value={fileUpload.progress} />
+                    )}
+                  </div>
+                ) : (
+                  <div className="mb-8 flex flex-col items-center gap-4 md:flex-row">
+                    {uploadButtons
+                      .filter((b) => b.show !== false)
+                      .map((button, i) => (
+                        <label
+                          key={i}
+                          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary-500/20 bg-primary-500/10 p-3 text-primary-700 transition-all hover:bg-primary-500/20 md:p-6"
+                          onClick={button.onClick}
+                        >
+                          <CareIcon icon={button.icon} className="text-2xl" />
+                          <div className="text-lg">{button.name}</div>
+                          {button.children}
+                        </label>
+                      ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <></>
+            )
+          }
+        </AuthorizedChild>
+      )}
+      <div className="mb-4 flex flex-col items-center justify-between gap-4 md:flex-row">
+        <h3>{VIEW_HEADING[type]}</h3>
+        <Tabs
+          tabs={tabs}
+          onTabChange={(v) => setTab(v.toString())}
+          currentTab={tab}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        {!(fileQuery?.data?.results || []).length && loading && (
+          <div className="skeleton-animate-alpha h-32 rounded-lg" />
+        )}
+        {fileQuery?.data?.results.map((item: FileUploadModel) => (
+          <FileBlock
+            file={item}
+            key={item.id}
+            fileManager={fileManager}
+            associating_id={associatedId}
+            editable={
+              item?.uploaded_by?.username === authUser.username ||
+              authUser.user_type === "DistrictAdmin" ||
+              authUser.user_type === "StateAdmin"
+            }
+          />
+        ))}
+        {!(fileQuery?.data?.results || []).length && (
+          <div className="mt-4">
+            <div className="text-md flex items-center justify-center font-semibold capitalize text-secondary-500">
+              No {tab.toLowerCase()} files found
+            </div>
+          </div>
+        )}
+      </div>
+      {(fileQuery?.data?.results || []).length > RESULTS_PER_PAGE_LIMIT && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={RESULTS_PER_PAGE_LIMIT}
+            data={{ totalCount: (fileQuery?.data?.results || []).length }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
+    </div>
+  );
+};

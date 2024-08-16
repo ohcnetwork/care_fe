@@ -5,7 +5,7 @@ import { HCXActions } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
-import { FileUpload } from "../Patient/FileUpload";
+import { FileUpload } from "../Files/FileUpload";
 import { HCXClaimModel } from "./models";
 
 interface Props {

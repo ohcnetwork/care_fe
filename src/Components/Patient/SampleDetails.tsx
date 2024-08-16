@@ -4,7 +4,7 @@ import { lazy } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
-import { FileUpload } from "./FileUpload";
+import { FileUpload } from "../Files/FileUpload";
 import Page from "../Common/components/Page";
 import _ from "lodash-es";
 import { formatDateTime, formatPatientAge } from "../../Utils/utils";

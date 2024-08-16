@@ -1,7 +1,7 @@
 import { useState } from "react";
 import FilePreviewDialog from "../Components/Common/FilePreviewDialog";
 import { FileUploadModel } from "../Components/Patient/models";
-import { StateInterface } from "../Components/Patient/FileUpload";
+import { StateInterface } from "../Components/Files/FileUpload";
 import request from "./request/request";
 import routes from "../Redux/api";
 import DialogModal from "../Components/Common/Dialog";
@@ -11,7 +11,10 @@ import { Cancel, Submit } from "../Components/Common/components/ButtonV2";
 import { formatDateTime } from "./utils";
 import * as Notification from "./Notifications.js";
 import TextFormField from "../Components/Form/FormFields/TextFormField";
-import { FILE_EXTENSIONS, PREVIEWABLE_FILE_EXTENSIONS } from "../Common/constants";
+import {
+  FILE_EXTENSIONS,
+  PREVIEWABLE_FILE_EXTENSIONS,
+} from "../Common/constants";
 
 export interface FileManagerOptions {
   type: string;
@@ -28,9 +31,14 @@ export interface FileManagerResult {
   editFile: (file: FileUploadModel, associating_id: string) => void;
   Dialogues: React.ReactNode;
   isPreviewable: (file: FileUploadModel) => boolean;
-  getFileType: (file: FileUploadModel) => keyof typeof FILE_EXTENSIONS | "UNKNOWN";
-  downloadFile: (file: FileUploadModel, associating_id: string) => Promise<void>,
-  type: string
+  getFileType: (
+    file: FileUploadModel,
+  ) => keyof typeof FILE_EXTENSIONS | "UNKNOWN";
+  downloadFile: (
+    file: FileUploadModel,
+    associating_id: string,
+  ) => Promise<void>;
+  type: string;
 }
 
 export default function useFileManager(
@@ -397,19 +405,25 @@ export default function useFileManager(
   const isPreviewable = (file: FileUploadModel) =>
     !!file.extension &&
     PREVIEWABLE_FILE_EXTENSIONS.includes(
-      file.extension.slice(1) as (typeof PREVIEWABLE_FILE_EXTENSIONS[number]),
+      file.extension.slice(1) as (typeof PREVIEWABLE_FILE_EXTENSIONS)[number],
     );
 
-  const getFileType: (f: FileUploadModel) => (keyof typeof FILE_EXTENSIONS) | "UNKNOWN" = (file: FileUploadModel) => {
+  const getFileType: (
+    f: FileUploadModel,
+  ) => keyof typeof FILE_EXTENSIONS | "UNKNOWN" = (file: FileUploadModel) => {
     if (!file.extension) return "UNKNOWN";
-    const ftype = (Object.keys(FILE_EXTENSIONS) as (keyof typeof FILE_EXTENSIONS)[]).find(
-      (type) =>
-        FILE_EXTENSIONS[type].includes((file.extension?.slice(1) || "") as never)
-    )
+    const ftype = (
+      Object.keys(FILE_EXTENSIONS) as (keyof typeof FILE_EXTENSIONS)[]
+    ).find((type) =>
+      FILE_EXTENSIONS[type].includes((file.extension?.slice(1) || "") as never),
+    );
     return ftype || "UNKNOWN";
   };
 
-  const downloadFile = async (file: FileUploadModel, associating_id: string) => {
+  const downloadFile = async (
+    file: FileUploadModel,
+    associating_id: string,
+  ) => {
     try {
       if (!file.id) return;
       Notification.Success({ msg: "Downloading file..." });
@@ -445,6 +459,6 @@ export default function useFileManager(
     isPreviewable,
     getFileType,
     downloadFile,
-    type: fileType
+    type: fileType,
   };
 }
