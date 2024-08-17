@@ -110,8 +110,8 @@ export default function PatientConsentRecords(props: {
           name:
             patient?.last_consultation?.suggestion === "A"
               ? `Admitted on ${formatDateTime(
-                patient?.last_consultation?.encounter_date,
-              )}`
+                  patient?.last_consultation?.encounter_date,
+                )}`
               : patient?.last_consultation?.suggestion_text,
         },
       }}
@@ -194,7 +194,7 @@ export default function PatientConsentRecords(props: {
                         record.type === 2 &&
                         newConsent.type === 2 &&
                         record.patient_code_status !==
-                        newConsent.patient_code_status &&
+                          newConsent.patient_code_status &&
                         record.archived !== true,
                     );
                     if (diffPCS) {

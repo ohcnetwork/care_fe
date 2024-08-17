@@ -87,7 +87,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Brief Update log created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
-    cy.contains("Daily Rounds").click();
+    cy.contains("button", "Daily Rounds").click();
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
       patientCategory,
@@ -108,7 +108,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
     cy.verifyNotification("Brief Update log updated successfully");
-    cy.contains("Daily Rounds").click();
+    cy.contains("button", "Daily Rounds").click();
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
       patientModifiedDiastolic,

@@ -35,6 +35,12 @@ export default {
   "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
-  }: any) => <FileUploadPage facilityId={facilityId} patientId={patientId} type="PATIENT" />,
+  }: any) => (
+    <FileUploadPage
+      facilityId={facilityId}
+      patientId={patientId}
+      type="PATIENT"
+    />
+  ),
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,
 };

@@ -16,15 +16,10 @@ import { FileManagerResult } from "../../Utils/useFileManager";
 export default function PatientConsentRecordBlockGroup(props: {
   consentRecord: PatientConsentModel;
   consultationId: string;
-  fileManager: FileManagerResult
+  fileManager: FileManagerResult;
   files?: FileUploadModel[];
 }) {
-  const {
-    consentRecord,
-    fileManager,
-    files,
-    consultationId,
-  } = props;
+  const { consentRecord, fileManager, files, consultationId } = props;
 
   const authUser = useAuthUser();
 

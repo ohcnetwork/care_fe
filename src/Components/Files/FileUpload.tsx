@@ -140,6 +140,7 @@ export const FileUpload = (props: FileUploadProps) => {
       offset: offset,
     },
     prefetch: type === "CONSULTATION",
+    silent: true,
   });
 
   const queries = {
@@ -209,22 +210,26 @@ export const FileUpload = (props: FileUploadProps) => {
     onClick?: () => void;
     children?: ReactNode;
     show?: boolean;
+    id: string;
   }[] = [
     {
       name: t("choose_file"),
       icon: "l-file-upload-alt",
       children: <fileUpload.Input />,
+      id: "upload-file",
     },
     {
       name: t("open_camera"),
       icon: "l-camera",
       onClick: fileUpload.handleCameraCapture,
+      id: "open-webcam",
     },
     {
       name: t("record"),
       icon: "l-microphone",
       onClick: fileUpload.handleAudioCapture,
       show: allowAudio,
+      id: "record-audio",
     },
   ];
 
@@ -244,21 +249,21 @@ export const FileUpload = (props: FileUploadProps) => {
                       name="consultation_file"
                       type="text"
                       label="Enter File Name"
+                      id="upload-file-name"
                       required
                       value={fileUpload.fileName}
                       disabled={!!fileUpload.progress}
-                      onChange={(e: any) => {
-                        fileUpload.setFileName(e.value);
-                      }}
+                      onChange={(e) => fileUpload.setFileName(e.value)}
                       error={fileUpload.error || undefined}
                     />
                     <div className="flex items-center gap-2">
                       <ButtonV2
-                        onClick={() => {
-                          fileUpload.handleFileUpload(associatedId);
-                        }}
+                        onClick={() =>
+                          fileUpload.handleFileUpload(associatedId)
+                        }
                         loading={!!fileUpload.progress}
                         className="w-full"
+                        id="upload_file_button"
                       >
                         <CareIcon icon="l-check" className="" />
                         Upload
@@ -285,6 +290,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           key={i}
                           className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary-500/20 bg-primary-500/10 p-3 text-primary-700 transition-all hover:bg-primary-500/20 md:p-6"
                           onClick={button.onClick}
+                          id={button.id}
                         >
                           <CareIcon icon={button.icon} className="text-2xl" />
                           <div className="text-lg">{button.name}</div>

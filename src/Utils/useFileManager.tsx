@@ -259,6 +259,7 @@ export default function useFileManager(
           <div>
             <TextAreaFormField
               name="editFileName"
+              id="archive-file-reason"
               label={
                 <span>
                   State the reason for archiving{" "}
@@ -341,7 +342,12 @@ export default function useFileManager(
                 <div className="text-xs uppercase text-secondary-700">
                   {item.label}
                 </div>
-                <div className="break-words text-base">{item.content}</div>
+                <div
+                  className="break-words text-base"
+                  data-archive-info={item.label}
+                >
+                  {item.content}
+                </div>
               </div>
             </div>
           ))}
@@ -378,6 +384,7 @@ export default function useFileManager(
           <div>
             <TextFormField
               name="editFileName"
+              id="edit-file-name"
               label="Enter the file name"
               value={editDialogueOpen?.name}
               onChange={(e) => {

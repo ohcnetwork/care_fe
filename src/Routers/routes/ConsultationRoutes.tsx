@@ -37,7 +37,14 @@ export default {
     facilityId,
     patientId,
     id,
-  }: any) => <FileUploadPage facilityId={facilityId} patientId={patientId} consultationId={id} type="CONSULTATION" />,
+  }: any) => (
+    <FileUploadPage
+      facilityId={facilityId}
+      patientId={patientId}
+      consultationId={id}
+      type="CONSULTATION"
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
     (path: any) => <ManagePrescriptions {...path} />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions/print":

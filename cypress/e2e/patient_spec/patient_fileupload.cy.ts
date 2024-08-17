@@ -36,7 +36,7 @@ function runTests(testDescription, visitPatientFileUploadSection) {
       cy.verifyNotification("File Uploaded Successfully");
       patientFileUpload.verifyUploadFilePresence(cypressAudioName);
       // Verify the download of the audio file
-      cy.get("button").contains("DOWNLOAD").click();
+      cy.get("button").contains("Download").click();
       cy.verifyNotification("Downloading file...");
     });
 

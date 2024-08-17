@@ -146,6 +146,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
           <div className="mt-4">
             <button
               onClick={handleStopRecording}
+              id="stop-recording"
               className="inline-flex aspect-square w-32 animate-pulse items-center justify-center rounded-full bg-red-500/20 text-2xl text-red-500 hover:bg-red-500/30"
             >
               {timer.time}
@@ -172,6 +173,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             <button
               onClick={handleSubmit}
               className="rounded-md bg-primary-500 px-4 py-2 text-white transition-all hover:bg-primary-600"
+              id="save-recording"
             >
               <CareIcon icon="l-check" className="mr-2 text-lg" />
               Done
