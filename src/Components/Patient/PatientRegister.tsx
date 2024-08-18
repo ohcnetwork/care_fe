@@ -40,7 +40,6 @@ import Form from "../Form/Form";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
@@ -67,6 +66,8 @@ import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import { useTranslation } from "react-i18next";
+import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index.js";
+import { AbhaNumberModel } from "../ABDM/types/abha.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -684,7 +685,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     });
     const data = {
-      abha_number: state.form.abha_number,
       phone_number: parsePhoneNumber(formData.phone_number),
       emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
       date_of_birth:
@@ -773,6 +773,28 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           body: { ...data, facility: facilityId },
         });
     if (res?.ok && requestData) {
+      if (state.form.abha_number) {
+        const { res, data } = await request(
+          routes.abdm.healthId.linkAbhaNumberAndPatient,
+          {
+            body: {
+              patient: requestData.id,
+              abha_number: state.form.abha_number,
+            },
+          },
+        );
+
+        if (res?.status === 200 && data) {
+          Notification.Success({
+            msg: t("abha_number_linked_successfully"),
+          });
+        } else {
+          Notification.Error({
+            msg: t("failed_to_link_abha_number"),
+          });
+        }
+      }
+
       await Promise.all(
         insuranceDetails.map(async (obj) => {
           const policy = {
@@ -827,62 +849,50 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     setIsLoading(false);
   };
 
-  const handleAbhaLinking = (
-    {
-      id,
-      abha_profile: {
-        healthIdNumber,
-        healthId,
-        name,
-        mobile,
-        gender,
-        monthOfBirth,
-        dayOfBirth,
-        yearOfBirth,
-        pincode,
-      },
-    }: any,
-    field: any,
+  const populateAbhaValues = (
+    abhaProfile: AbhaNumberModel,
+    field: FormContextValue<PatientModel>,
   ) => {
-    const values: any = {};
-    if (id) values["abha_number"] = id;
-    if (healthIdNumber) values["health_id_number"] = healthIdNumber;
-    if (healthId) values["health_id"] = healthId;
+    const values = {
+      abha_number: abhaProfile.external_id,
+      health_id_number: abhaProfile.abha_number,
+      health_id: abhaProfile.health_id,
+    };
 
-    if (name)
+    if (abhaProfile.name)
       field("name").onChange({
         name: "name",
-        value: name,
+        value: abhaProfile.name,
       });
 
-    if (mobile) {
+    if (abhaProfile.mobile) {
       field("phone_number").onChange({
         name: "phone_number",
-        value: parsePhoneNumber(mobile, "IN"),
+        value: parsePhoneNumber(abhaProfile.mobile, "IN"),
       });
 
       field("emergency_phone_number").onChange({
         name: "emergency_phone_number",
-        value: parsePhoneNumber(mobile, "IN"),
+        value: parsePhoneNumber(abhaProfile.mobile, "IN"),
       });
     }
 
-    if (gender)
+    if (abhaProfile.gender)
       field("gender").onChange({
         name: "gender",
-        value: gender === "M" ? "1" : gender === "F" ? "2" : "3",
+        value: { M: "1", F: "2", O: "3" }[abhaProfile.gender],
       });
 
-    if (monthOfBirth && dayOfBirth && yearOfBirth)
+    if (abhaProfile.date_of_birth)
       field("date_of_birth").onChange({
         name: "date_of_birth",
-        value: new Date(`${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`),
+        value: new Date(abhaProfile.date_of_birth),
       });
 
-    if (pincode)
+    if (abhaProfile.pincode)
       field("pincode").onChange({
         name: "pincode",
-        value: pincode,
+        value: abhaProfile.pincode,
       });
 
     dispatch({ type: "set_form", form: { ...state.form, ...values } });
@@ -1167,41 +1177,31 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       {enable_abdm && (
                         <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
                           <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
-                            ABHA Details
+                            {t("abha_details")}
                           </h1>
-                          {showLinkAbhaNumberModal && (
-                            <LinkABHANumberModal
-                              show={showLinkAbhaNumberModal}
-                              onClose={() => setShowLinkAbhaNumberModal(false)}
-                              onSuccess={(data: any) => {
-                                if (id) {
-                                  navigate(
-                                    `/facility/${facilityId}/patient/${id}`,
-                                  );
-                                  return;
-                                }
 
-                                handleAbhaLinking(data, field);
-                              }}
-                            />
-                          )}
-                          {!state.form.abha_number ? (
-                            <button
-                              className="btn btn-primary my-4"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setShowLinkAbhaNumberModal(true);
-                              }}
-                            >
-                              Link Abha Number
-                            </button>
-                          ) : (
+                          <LinkAbhaNumber
+                            show={showLinkAbhaNumberModal}
+                            onClose={() => setShowLinkAbhaNumberModal(false)}
+                            onSuccess={(abhaProfile: AbhaNumberModel) => {
+                              if (id) {
+                                Notification.Warn({
+                                  msg: "To link Abha Number, please save the patient details",
+                                });
+                              }
+
+                              populateAbhaValues(abhaProfile, field);
+                            }}
+                          />
+
+                          {state.form.health_id_number ||
+                          state.form.health_id ? (
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                               <div id="abha-number">
                                 <TextFormField
                                   id="abha-number"
                                   name="abha-number"
-                                  label="ABHA Number"
+                                  label={t("abha_number")}
                                   type="text"
                                   value={state.form.health_id_number}
                                   onChange={() => null}
@@ -1210,25 +1210,26 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </div>
                               <div id="health-id">
-                                {state.form.health_id ? (
-                                  <TextFormField
-                                    id="health-id"
-                                    name="health-id"
-                                    label="Abha Address"
-                                    type="text"
-                                    value={state.form.health_id}
-                                    onChange={() => null}
-                                    disabled={true}
-                                    error=""
-                                  />
-                                ) : (
-                                  <div className="mt-4 text-sm text-gray-500">
-                                    No Abha Address Associated with this ABHA
-                                    Number
-                                  </div>
-                                )}
+                                <TextFormField
+                                  id="health-id"
+                                  name="health-id"
+                                  label={t("abha_address")}
+                                  type="text"
+                                  value={state.form.health_id}
+                                  onChange={() => null}
+                                  disabled={true}
+                                  error=""
+                                />
                               </div>
                             </div>
+                          ) : (
+                            <ButtonV2
+                              id="link-abha-number"
+                              type="button"
+                              onClick={() => setShowLinkAbhaNumberModal(true)}
+                            >
+                              {t("link_abha_number")}
+                            </ButtonV2>
                           )}
                         </div>
                       )}

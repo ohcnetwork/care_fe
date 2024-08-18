@@ -93,8 +93,6 @@ export default function PatientInfoCard(props: {
     consultation?.medico_legal_case ?? false,
   );
 
-  console.log(props.abhaNumber);
-
   const category: PatientCategory | undefined =
     consultation?.last_daily_round?.patient_category ?? consultation?.category;
   const categoryClass = category
@@ -997,7 +995,6 @@ export default function PatientInfoCard(props: {
         show={showLinkABHANumber}
         onClose={() => setShowLinkABHANumber(false)}
         onSuccess={async (abhaProfile) => {
-          // TODO: Link the ABHA number to the patient
           const { res, data } = await request(
             routes.abdm.healthId.linkAbhaNumberAndPatient,
             {

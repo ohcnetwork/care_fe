@@ -224,5 +224,9 @@
     "verify_otp_success": "OTP has been verified successfully.",
     "verify_otp_error": "Failed to verify OTP. Please try again later.",
     "abha_number_linked_successfully": "ABHA Number has been linked successfully.",
-    "failed_to_link_abha_number": "Failed to link ABHA Number. Please try again later."
+    "failed_to_link_abha_number": "Failed to link ABHA Number. Please try again later.",
+    "link_abha_number": "Link ABHA Number",
+    "abha_details": "ABHA Details",
+    "abha_number": "ABHA Number",
+    "abha_address": "ABHA Address"
 }
