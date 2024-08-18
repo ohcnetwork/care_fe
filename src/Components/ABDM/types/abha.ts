@@ -17,6 +17,7 @@ export type AbhaNumberModel = {
   district: string | null;
   state: string | null;
   pincode: string | null;
+  mobile: string | null;
   email: string | null;
   profile_photo: string | null;
   new: boolean;
