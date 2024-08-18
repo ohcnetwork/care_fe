@@ -1349,6 +1349,14 @@ const routes = {
   },
 
   abdm: {
+    abhaNumber: {
+      get: {
+        path: "/api/abdm/abha_number/{abhaNumberId}/",
+        method: "GET",
+        TRes: Type<AbhaNumberModel>(),
+      },
+    },
+
     healthId: {
       abhaCreateSendAadhaarOtp: {
         path: "/api/abdm/v3/health_id/create/send_aadhaar_otp/",

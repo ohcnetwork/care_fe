@@ -222,5 +222,7 @@
     "send_otp_success": "OTP has been sent to the respective mobile number",
     "send_otp_error": "Failed to send OTP. Please try again later.",
     "verify_otp_success": "OTP has been verified successfully.",
-    "verify_otp_error": "Failed to verify OTP. Please try again later."
+    "verify_otp_error": "Failed to verify OTP. Please try again later.",
+    "abha_number_linked_successfully": "ABHA Number has been linked successfully.",
+    "failed_to_link_abha_number": "Failed to link ABHA Number. Please try again later."
 }

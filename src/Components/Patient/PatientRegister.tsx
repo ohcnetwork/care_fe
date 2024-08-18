@@ -365,7 +365,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         pathParams: { id: id ? id : 0 },
       });
       const { data: abhaNumberData } = await request(
-        routes.abha.getAbhaNumber,
+        routes.abdm.abhaNumber.get,
         {
           pathParams: { abhaNumberId: id ?? "" },
           silent: true,

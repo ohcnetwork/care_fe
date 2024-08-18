@@ -21,7 +21,6 @@ import {
   formatPatientAge,
 } from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal.js";
 import LinkCareContextModal from "../ABDM/LinkCareContextModal.js";
 import DialogModal from "../Common/Dialog.js";
 import ButtonV2 from "../Common/components/ButtonV2.js";
@@ -42,6 +41,7 @@ import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
+import LinkAbhaNumber from "../ABDM/LinkAbhaNumber";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -92,6 +92,8 @@ export default function PatientInfoCard(props: {
   const [medicoLegalCase, setMedicoLegalCase] = useState(
     consultation?.medico_legal_case ?? false,
   );
+
+  console.log(props.abhaNumber);
 
   const category: PatientCategory | undefined =
     consultation?.last_daily_round?.patient_category ?? consultation?.category;
@@ -991,12 +993,34 @@ export default function PatientInfoCard(props: {
           </div>
         </div>
       </section>
-      <LinkABHANumberModal
+      <LinkAbhaNumber
         show={showLinkABHANumber}
         onClose={() => setShowLinkABHANumber(false)}
-        patientId={patient.id as any}
-        onSuccess={(_) => {
-          window.location.href += "?show-abha-profile=true";
+        onSuccess={async (abhaProfile) => {
+          // TODO: Link the ABHA number to the patient
+          const { res, data } = await request(
+            routes.abdm.healthId.linkAbhaNumberAndPatient,
+            {
+              body: {
+                patient: patient.id,
+                abha_number: abhaProfile.external_id,
+              },
+            },
+          );
+
+          if (res?.status === 200 && data) {
+            Notification.Success({
+              msg: t("abha_number_linked_successfully"),
+            });
+
+            props.fetchPatientData?.({ aborted: false });
+            setShowLinkABHANumber(false);
+            setShowABHAProfile(true);
+          } else {
+            Notification.Error({
+              msg: t("failed_to_link_abha_number"),
+            });
+          }
         }}
       />
       <ABHAProfileModal
