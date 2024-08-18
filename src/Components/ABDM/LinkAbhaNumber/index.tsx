@@ -5,6 +5,7 @@ import ButtonV2 from "../../Common/components/ButtonV2";
 import { classNames } from "../../../Utils/utils";
 import CreateWithAadhaar from "./CreateWithAadhaar";
 import { useTranslation } from "react-i18next";
+import LinkWithOtp from "./LinkWithOtp";
 
 interface ILinkAbhaNumberProps {
   show: boolean;
@@ -51,6 +52,10 @@ export default function LinkAbhaNumber({
     >
       {currentAbhaLinkOption === "create_with_aadhaar" && (
         <CreateWithAadhaar onSuccess={onSuccess} />
+      )}
+
+      {currentAbhaLinkOption === "link_with_otp" && (
+        <LinkWithOtp onSuccess={onSuccess} />
       )}
 
       <div>
