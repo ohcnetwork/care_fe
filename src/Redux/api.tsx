@@ -1349,6 +1349,47 @@ const routes = {
   },
 
   abdm: {
+    healthFacility: {
+      list: {
+        path: "/api/abdm/health_facility/",
+        method: "GET",
+      },
+
+      create: {
+        path: "/api/abdm/health_facility/",
+        method: "POST",
+        TRes: Type<IHealthFacility>(),
+        TBody: Type<IcreateHealthFacilityTBody>(),
+      },
+
+      get: {
+        path: "/api/abdm/health_facility/{facility_id}/",
+        method: "GET",
+        TRes: Type<IHealthFacility>(),
+      },
+
+      update: {
+        path: "/api/abdm/health_facility/{facility_id}/",
+        method: "PUT",
+        TRes: Type<IHealthFacility>(),
+        TBody: Type<IcreateHealthFacilityTBody>(),
+      },
+
+      partialUpdate: {
+        path: "/api/abdm/health_facility/{facility_id}/",
+        method: "PATCH",
+        TRes: Type<IHealthFacility>(),
+        TBody: Type<IpartialUpdateHealthFacilityTBody>(),
+      },
+
+      registerAsService: {
+        path: "/api/abdm/health_facility/{facility_id}/register_service/",
+        method: "POST",
+        TRes: Type<IHealthFacility>(),
+        TBody: Type<IcreateHealthFacilityTBody>(),
+      },
+    },
+
     abhaNumber: {
       get: {
         path: "/api/abdm/abha_number/{abhaNumberId}/",

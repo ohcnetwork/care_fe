@@ -43,7 +43,7 @@ export const ConfigureHealthFacility = (props: any) => {
   const { facilityId } = props;
   const [isLoading, setIsLoading] = useState(false);
 
-  const { loading } = useQuery(routes.abha.getHealthFacility, {
+  const { loading } = useQuery(routes.abdm.healthFacility.get, {
     pathParams: { facility_id: facilityId },
     silent: true,
     onResponse(res) {
@@ -77,7 +77,7 @@ export const ConfigureHealthFacility = (props: any) => {
     let responseData = null;
     if (state.form.hf_id === state.form.health_facility?.hf_id) {
       const { res, data } = await request(
-        routes.abha.registerHealthFacilityAsService,
+        routes.abdm.healthFacility.registerAsService,
         {
           pathParams: {
             facility_id: facilityId,
@@ -88,7 +88,7 @@ export const ConfigureHealthFacility = (props: any) => {
       responseData = data;
     } else if (state.form.health_facility) {
       const { res, data } = await request(
-        routes.abha.partialUpdateHealthFacility,
+        routes.abdm.healthFacility.partialUpdate,
         {
           pathParams: {
             facility_id: facilityId,
@@ -101,7 +101,7 @@ export const ConfigureHealthFacility = (props: any) => {
       response = res;
       responseData = data;
     } else {
-      const { res, data } = await request(routes.abha.createHealthFacility, {
+      const { res, data } = await request(routes.abdm.healthFacility.create, {
         body: {
           facility: facilityId,
           hf_id: state.form.hf_id,
