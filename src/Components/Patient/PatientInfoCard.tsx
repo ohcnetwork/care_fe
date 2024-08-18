@@ -797,24 +797,6 @@ export default function PatientInfoCard(props: {
                             <div
                               className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                               onClick={() => {
-                                triggerGoal("Patient Card Button Clicked", {
-                                  buttonName: "Link Care Context",
-                                  consultationId: consultation?.id,
-                                  userId: authUser?.id,
-                                });
-                                close();
-                                setShowLinkCareContext(true);
-                              }}
-                            >
-                              <CareIcon
-                                icon="l-link"
-                                className="text-lg text-primary-500"
-                              />
-                              <span>Link Care Context</span>
-                            </div>
-                            <div
-                              className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                              onClick={() => {
                                 close();
                                 setShowFetchABDMRecords(true);
                                 triggerGoal("Patient Card Button Clicked", {
