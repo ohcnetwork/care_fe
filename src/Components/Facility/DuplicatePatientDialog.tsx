@@ -80,7 +80,7 @@ const DuplicatePatientDialog = (props: Props) => {
                 onChange={(e) => setAction(e.target.value)}
               />
               <p>
-                Admit the patient record to your facility by adding the date of
+                Admit the patient record to your facility by adding the year of
                 birth
               </p>
             </label>
@@ -109,7 +109,7 @@ const DuplicatePatientDialog = (props: Props) => {
           <p>
             Please contact your district care coordinator, the shifting facility
             or the patient themselves if you are not sure about the patient's
-            date of birth.
+            year of birth.
           </p>
         </div>
       </div>
