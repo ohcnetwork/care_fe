@@ -1,11 +1,18 @@
 import CircularProgress from "./components/CircularProgress";
 import { useTranslation } from "react-i18next";
 import { StateInterface } from "../Patient/FileUpload";
-import { Dispatch, ReactNode, SetStateAction, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import ButtonV2, { Cancel } from "./components/ButtonV2";
 import DialogModal from "./Dialog";
 import PDFViewer from "./PDFViewer";
+import { FileUploadModel } from "../Patient/models";
 
 export const zoom_values = [
   "scale-25",
@@ -30,6 +37,8 @@ type FilePreviewProps = {
   className?: string;
   titleAction?: ReactNode;
   fixedWidth?: boolean;
+  uploadedFiles?: Array<FileUploadModel>;
+  loadFile?: (id: string) => Promise<void>;
 };
 
 const previewExtensions = [
@@ -46,12 +55,30 @@ const previewExtensions = [
 ];
 
 const FilePreviewDialog = (props: FilePreviewProps) => {
-  const { show, onClose, file_state, setFileState, downloadURL, fileUrl } =
-    props;
+  const {
+    show,
+    onClose,
+    file_state,
+    setFileState,
+    downloadURL,
+    fileUrl,
+    uploadedFiles,
+    loadFile,
+  } = props;
   const { t } = useTranslation();
 
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const [index, setIndex] = useState<number>(-1);
+
+  useEffect(() => {
+    if (uploadedFiles && show) {
+      const index = uploadedFiles.findIndex(
+        (file) => file.id === file_state.id,
+      );
+      setIndex(index);
+    }
+  });
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -69,9 +96,15 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     });
   };
 
+  const handleNext = (newIndex: number) => {
+    const id = uploadedFiles![newIndex].id;
+    loadFile!(id!);
+  };
+
   const handleClose = () => {
     setPage(1);
     setNumPages(1);
+    setIndex(-1);
     onClose?.();
   };
 
@@ -124,7 +157,17 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               <Cancel onClick={onClose} label="Close" />
             </div>
           </div>
-          <div className="flex flex-1 items-center justify-center">
+          <div className="flex flex-1 items-center justify-center gap-2">
+            <ButtonV2
+              className={
+                uploadedFiles && index === 0
+                  ? "pointer-events-none invisible opacity-0"
+                  : ""
+              }
+              onClick={() => handleNext(index - 1)}
+            >
+              &lt;
+            </ButtonV2>
             <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
               {file_state.isImage ? (
                 <img
@@ -160,6 +203,16 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </div>
               )}
             </div>
+            <ButtonV2
+              className={
+                uploadedFiles && index === uploadedFiles.length - 1
+                  ? "pointer-events-none invisible opacity-0"
+                  : ""
+              }
+              onClick={() => handleNext(index + 1)}
+            >
+              &gt;
+            </ButtonV2>
           </div>
           <div className="flex items-center justify-between">
             <div className="mt-2 flex w-full flex-col justify-center gap-3 md:flex-row">

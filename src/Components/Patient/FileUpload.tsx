@@ -137,6 +137,7 @@ export interface StateInterface {
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
   rotation: number;
+  id?: string;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
@@ -515,6 +516,7 @@ export const FileUpload = (props: FileUploadProps) => {
       name: data.name as string,
       extension,
       isImage: ExtImage.includes(extension),
+      id: id,
     });
     downloadFileUrl(signedUrl);
     setFileUrl(signedUrl);
@@ -1181,6 +1183,18 @@ export const FileUpload = (props: FileUploadProps) => {
         onClose={handleClose}
         fixedWidth={false}
         className="h-[80vh] w-full md:h-screen"
+        uploadedFiles={
+          sortFileState === "UNARCHIVED"
+            ? uploadedUnarchievedFiles.filter(
+                (each) => each.file_category !== "AUDIO",
+              )
+            : sortFileState === "DISCHARGE_SUMMARY"
+              ? uploadedDischargeSummaryFiles.filter(
+                  (each) => each.file_category !== "AUDIO",
+                )
+              : undefined
+        }
+        loadFile={loadFile}
       />
       <DialogModal
         show={modalOpenForCamera}
