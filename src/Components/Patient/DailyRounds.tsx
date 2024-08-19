@@ -143,9 +143,9 @@ export const DailyRounds = (props: any) => {
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id
     ? !["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)
-      ? "Save"
-      : "Save and Continue"
-    : "Continue";
+      ? t("save")
+      : t("save_and_continue")
+    : t("continue");
 
   const formFields = [
     "physical_examination_info",
