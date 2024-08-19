@@ -145,6 +145,8 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     return <span>No bed/asset linked allocated</span>;
   }
 
+  const cannotSaveToPreset = !hasMoved || !preset?.id;
+
   return (
     <>
       <ConfirmDialog
@@ -231,13 +233,13 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                 ) : (
                   <ButtonV2
                     size="small"
-                    variant={hasMoved ? "secondary" : "secondary"}
-                    disabled={!hasMoved}
+                    variant="secondary"
+                    disabled={cannotSaveToPreset}
                     border
-                    ghost={!hasMoved}
-                    shadow={hasMoved}
+                    ghost={cannotSaveToPreset}
+                    shadow={!cannotSaveToPreset}
                     tooltip={
-                      hasMoved
+                      !cannotSaveToPreset
                         ? "Save current position to selected preset"
                         : "Change camera position to update preset"
                     }
