@@ -1,9 +1,6 @@
 import { useState } from "react";
 import * as Notification from "../../../Utils/Notifications.js";
 import Page from "../../Common/components/Page";
-// import ButtonV2 from "../../Common/components/ButtonV2";
-// import CareIcon from "../../../CAREUI/icons/CareIcon";
-// import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
 import { useMessageListener } from "../../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
 import { PatientNoteStateType, PaitentNotesReplyModel } from "../models.js";
@@ -11,23 +8,21 @@ import routes from "../../../Redux/api.js";
 import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import { classNames } from "../../../Utils/utils.js";
-// import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
 import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
-import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
 import RichTextEditor from "../../Common/RichTextEditor/RichTextEditor";
 import SwitchTabs from "../../Common/components/SwitchTabs.js";
+import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
   facilityId: string;
   consultationId: string;
-  noteId?: string;
 }
 
 const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
-  const { patientId, facilityId, consultationId, noteId } = props;
+  const { patientId, facilityId, consultationId } = props;
 
   const authUser = useAuthUser();
   const [thread, setThread] = useState(
@@ -36,18 +31,19 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       : PATIENT_NOTES_THREADS.Doctors,
   );
 
-  // const [patientActive, setPatientActive] = useState(true);
+  const [patientActive, setPatientActive] = useState(true);
   const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  // const [focused, setFocused] = useState(false);
   const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
   const [mode, setMode] = useState<"thread-view" | "default-view">(
     "default-view",
   );
+  const [threadViewNote, setThreadViewNote] = useState("");
+  console.log("ConsultationDoctorNotes -> threadViewNote", threadViewNote);
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -93,7 +89,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     pathParams: { id: patientId },
     onResponse: ({ data }) => {
       if (data) {
-        // setPatientActive(data.is_active ?? true);
+        setPatientActive(data.is_active ?? true);
         setPatientName(data.name ?? "");
         setFacilityName(data.facility_object?.name ?? "");
       }
@@ -111,18 +107,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       setReload(true);
     }
   });
-
-  if (noteId) {
-    return (
-      <PatientNotesDetailedView
-        patientId={patientId}
-        facilityId={facilityId}
-        consultationId={consultationId}
-        noteId={noteId}
-        thread={thread}
-      />
-    );
-  }
 
   return (
     <Page
@@ -166,25 +150,42 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             </button>
           ))}
         </div>
-        <PatientConsultationNotesList
-          state={state}
-          setState={setState}
-          reload={reload}
-          setReload={setReload}
-          thread={thread}
-          setReplyTo={setReplyTo}
-          mode={mode}
-        />
-        <DoctorNoteReplyPreviewCard
-          parentNote={reply_to}
-          cancelReply={() => setReplyTo(undefined)}
-        >
-          <RichTextEditor
-            initialMarkdown={noteField}
-            onChange={setNoteField}
-            onAddNote={onAddNote}
-          />
-        </DoctorNoteReplyPreviewCard>
+        <div className="flex">
+          <div className="flex-1">
+            <PatientConsultationNotesList
+              state={state}
+              setState={setState}
+              reload={reload}
+              setReload={setReload}
+              thread={thread}
+              setReplyTo={setReplyTo}
+              mode={mode}
+              setThreadViewNote={setThreadViewNote}
+            />
+
+            <DoctorNoteReplyPreviewCard
+              parentNote={reply_to}
+              cancelReply={() => setReplyTo(undefined)}
+            >
+              <RichTextEditor
+                initialMarkdown={noteField}
+                onChange={setNoteField}
+                onAddNote={onAddNote}
+                isAuthorized={patientActive}
+              />
+            </DoctorNoteReplyPreviewCard>
+          </div>
+
+          {threadViewNote && (
+            <PatientNotesDetailedView
+              patientId={patientId}
+              consultationId={consultationId}
+              noteId={threadViewNote}
+              thread={thread}
+              setThreadViewNote={setThreadViewNote}
+            />
+          )}
+        </div>
       </div>
     </Page>
   );

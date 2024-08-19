@@ -148,15 +148,6 @@ export default {
         consultationId={consultationId}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/notes/:noteId":
-    ({ facilityId, patientId, consultationId, noteId }: any) => (
-      <ConsultationDoctorNotes
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={consultationId}
-        noteId={noteId}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
     ({ facilityId, patientId, consultationId, tab }: any) => (
       <ConsultationDetails

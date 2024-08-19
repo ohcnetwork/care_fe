@@ -16,9 +16,8 @@ import DialogModal from "../Common/Dialog";
 import { t } from "i18next";
 import dayjs from "dayjs";
 import Spinner from "../Common/Spinner";
-// import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 import useSlug from "../../Common/hooks/useSlug";
-import { navigate } from "raviger";
 import MarkdownPreview from "../Common/RichTextEditor/MarkdownPreview";
 import { ExtImage, StateInterface } from "../Patient/FileUpload";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
@@ -31,6 +30,7 @@ const PatientNoteCard = ({
   allowThreadView = false,
   setReplyTo,
   mode = "default-view",
+  setThreadViewNote,
 }: {
   note: PatientNotesModel;
   setReload: any;
@@ -39,17 +39,14 @@ const PatientNoteCard = ({
   allowThreadView?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
   mode?: "thread-view" | "default-view";
+  setThreadViewNote?: (noteId: string) => void;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [noteField, setNoteField] = useState(note.note);
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistory, setEditHistory] = useState<PatientNotesEditModel[]>([]);
-  // const authUser = useAuthUser();
+  const authUser = useAuthUser();
   const patientId = useSlug("patient");
-  const facilityId = useSlug("facility");
-  const consultationId = useSlug("consultation");
-
-  const currentPath = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`;
 
   const file_type = "NOTES";
   const [file_state, setFileState] = useState<StateInterface>({
@@ -223,9 +220,9 @@ const PatientNoteCard = ({
               )
             }
           </div>
-          <div className="right-0 top-0 z-10 flex gap-2 transition-opacity duration-100 group-hover:opacity-100 max-sm:flex-col sm:absolute sm:opacity-0 ">
+          <div className="right-0 top-0 z-10 flex gap-2 transition-opacity duration-100 group-hover:opacity-100 max-sm:flex-col sm:absolute sm:opacity-0">
             {!disableEdit &&
-              // note.created_by_object.id === authUser.id &&
+              note.created_by_object.id === authUser.id &&
               !isEditing && (
                 <ButtonV2
                   ghost
@@ -288,7 +285,8 @@ const PatientNoteCard = ({
             ) : (
               <div
                 onClick={() => {
-                  if (allowThreadView) navigate(`${currentPath}/${note.id}`);
+                  if (allowThreadView && setThreadViewNote)
+                    setThreadViewNote(note.id);
                 }}
                 className={`pl-11 text-sm text-gray-700 ${allowThreadView && "cursor-pointer"}`}
               >

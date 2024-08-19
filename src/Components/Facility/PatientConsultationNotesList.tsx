@@ -16,6 +16,7 @@ interface PatientNotesProps {
   thread: PatientNotesModel["thread"];
   setReplyTo?: (value: PatientNotesModel | undefined) => void;
   mode?: "thread-view" | "default-view";
+  setThreadViewNote?: (noteId: string) => void;
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
@@ -30,6 +31,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     thread,
     setReplyTo,
     mode = "default-view",
+    setThreadViewNote,
   } = props;
   const consultationId = useSlug("consultation") ?? "";
 
@@ -108,6 +110,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
       disableEdit={disableEdit}
       setReplyTo={setReplyTo}
       mode={mode}
+      setThreadViewNote={setThreadViewNote}
     />
   );
 };

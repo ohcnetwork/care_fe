@@ -11,14 +11,23 @@ interface DoctorNoteProps {
   disableEdit?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
   mode?: "thread-view" | "default-view";
+  setThreadViewNote?: (noteId: string) => void;
 }
 
 const DoctorNote = (props: DoctorNoteProps) => {
-  const { state, handleNext, setReload, disableEdit, setReplyTo, mode } = props;
+  const {
+    state,
+    handleNext,
+    setReload,
+    disableEdit,
+    setReplyTo,
+    mode,
+    setThreadViewNote,
+  } = props;
 
   return (
     <div
-      className="mt-4 flex h-[400px] grow flex-col-reverse overflow-y-scroll bg-white sm:ml-2"
+      className="mt-4 flex h-[600px] grow flex-col-reverse overflow-y-scroll bg-white sm:ml-2"
       id="patient-notes-list"
     >
       {state.notes.length ? (
@@ -48,6 +57,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
                     mode={mode}
                     allowThreadView
                     // allowReply={false}
+                    setThreadViewNote={setThreadViewNote}
                   />
                 </div>
               );
