@@ -62,7 +62,7 @@ export default function UserAutocomplete(props: UserSearchProps) {
       setDisabled(true);
       field.handleChange(undefined as unknown as UserBareMinimum);
     }
-  }, [loading, query, field.required, data?.results, props.noResultsError]);
+  }, [loading, field.required, data?.results, props.noResultsError]);
 
   return (
     <FormField field={field}>
@@ -151,7 +151,7 @@ export const LinkedFacilityUsers = (props: LinkedFacilitySearchProps) => {
 const userOnlineDot = (user: UserBareMinimum) => (
   <div
     className={classNames(
-      "mr-4 size-2.5 rounded-full ",
+      "mr-4 size-2.5 rounded-full",
       isUserOnline(user) ? "bg-primary-500" : "bg-secondary-400",
     )}
   />

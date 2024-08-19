@@ -210,13 +210,16 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "ALERT",
     description:
       "An option to store the level of consciousness of the patient.",
-    options: CONSCIOUSNESS_LEVEL,
+    options: CONSCIOUSNESS_LEVEL.map((loc) => ({
+      id: loc.id,
+      text: loc.value,
+    })),
     validator: (value) => typeof value === "string",
   },
   {
     friendlyName: "Diagnosis",
     id: "icd11_diagnosis",
-    type: "{diagnosis: string, verification_status: \"unconfirmed\" | \"provisional\" | \"differential\" | \"confirmed\", is_principal: boolean}[]",
+    type: '{diagnosis: string, verification_status: "unconfirmed" | "provisional" | "differential" | "confirmed", is_principal: boolean}[]',
     default: [],
     example:
       "[{diagnosis: '4A42.0 Paediatric onset systemic sclerosis', verification_status: 'confirmed', is_principal: true}, {diagnosis: 2, verification_status: 'provisional', is_principal: false}]",

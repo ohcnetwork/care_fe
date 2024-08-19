@@ -29,7 +29,7 @@ export default function BinaryChronologicalChart(props: {
                   <div>
                     <span
                       className={`flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white ${
-                        entry.value ? " text-green-500 " : " text-red-500 "
+                        entry.value ? "text-green-500" : "text-red-500"
                       }`}
                     >
                       {entry.value ? (
@@ -43,7 +43,7 @@ export default function BinaryChronologicalChart(props: {
                     <div>
                       <p
                         className={`text-sm ${
-                          entry.value ? " text-green-500 " : " text-red-500 "
+                          entry.value ? "text-green-500" : "text-red-500"
                         }`}
                       >
                         <span className="mr-5">

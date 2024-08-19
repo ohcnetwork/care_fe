@@ -121,7 +121,7 @@ export default function InventoryLog(props: any) {
                   This action will not affect the total stock.
                 </div>
               ) : (
-                <div className="text-justify text-sm leading-snug ">
+                <div className="text-justify text-sm leading-snug">
                   <b>Marks this transaction as accident</b>
                   <br />
                   This action will not affect the total stock.
@@ -236,12 +236,12 @@ export default function InventoryLog(props: any) {
         backUrl={`/facility/${facilityId}/inventory`}
       >
         <div className="container mx-auto px-4 sm:px-8">
-          <div className="py-8 ">
+          <div className="py-8">
             <div className="flex justify-between">
               <h4>Item: {data?.results[0].item_object.name}</h4>
               {data?.results && data.results[0].current_stock > 0 && (
-                <div className="tooltip ">
-                  <div className="tooltip-text tooltip-left text-justify text-sm leading-snug ">
+                <div className="tooltip">
+                  <div className="tooltip-text tooltip-left text-justify text-sm leading-snug">
                     <b>Deletes the last transaction</b>
                     <br />
                     It does by creating an equivalent undo transaction

@@ -343,7 +343,7 @@ const CoverImageEditModal = ({
               )}
             </div>
             {/* buttons for mobile screens */}
-            <div className="m-4 flex flex-col justify-evenly sm:hidden ">
+            <div className="m-4 flex flex-col justify-evenly sm:hidden">
               <div>
                 {!previewImage ? (
                   <ButtonV2
@@ -410,7 +410,7 @@ const CoverImageEditModal = ({
               </div>
             </div>
             {/* buttons for laptop screens */}
-            <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+            <div className={`${isLaptopScreen ? " " : "hidden"}`}>
               <div className="m-4 flex lg:hidden">
                 <ButtonV2 onClick={handleSwitchCamera}>
                   <CareIcon icon="l-camera-change" className="text-lg" />
@@ -418,7 +418,7 @@ const CoverImageEditModal = ({
                 </ButtonV2>
               </div>
 
-              <div className="flex justify-end  gap-2 p-4">
+              <div className="flex justify-end gap-2 p-4">
                 <div>
                   {!previewImage ? (
                     <>

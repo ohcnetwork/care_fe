@@ -5,12 +5,13 @@ import ManagePrescriptions from "../../Components/Medicine/ManagePrescriptions";
 import { DailyRoundListDetails } from "../../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../../Components/Patient/DailyRounds";
 import { FileUpload } from "../../Components/Patient/FileUpload";
-import { make as CriticalCareRecording } from "../../Components/CriticalCareRecording/CriticalCareRecording.bs";
 import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
 import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
 import PatientConsentRecords from "../../Components/Patient/PatientConsentRecords";
+import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
 import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
+import CriticalCarePreview from "../../Components/LogUpdate/CriticalCarePreview";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -102,25 +103,19 @@ export default {
     ),
 
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
-    ({ facilityId, patientId, consultationId, id }: any) => (
-      <CriticalCareRecording
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={consultationId}
-        id={id}
-        preview={true}
-      />
-    ),
+    (params: {
+      facilityId: string;
+      patientId: string;
+      consultationId: string;
+      id: string;
+    }) => <CriticalCarePreview {...params} />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
-    ({ facilityId, patientId, consultationId, id }: any) => (
-      <CriticalCareRecording
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={consultationId}
-        id={id}
-        preview={false}
-      />
-    ),
+    (params: {
+      facilityId: string;
+      patientId: string;
+      consultationId: string;
+      id: string;
+    }) => <CriticalCareEditor {...params} />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId": ({
     facilityId,
     patientId,

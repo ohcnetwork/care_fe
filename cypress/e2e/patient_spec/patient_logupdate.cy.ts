@@ -57,7 +57,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.verifyNotification("Telemedicine log created successfully");
   });
@@ -82,7 +82,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.verifyNotification("Brief Update log created successfully");
     cy.closeNotification();
@@ -137,7 +137,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.wait(2000);
     cy.verifyNotification("Brief Update log created successfully");
@@ -161,7 +161,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typePulse(patientPulse);
     patientLogupdate.typeTemperature(patientTemperature);
     patientLogupdate.typeRespiratory(patientRespiratory);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.verifyNotification("Brief Update log created successfully");
     cy.closeNotification();
