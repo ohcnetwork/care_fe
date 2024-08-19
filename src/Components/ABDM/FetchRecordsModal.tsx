@@ -16,12 +16,8 @@ import DateFormField from "../Form/FormFields/DateFormField.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api";
 import { useMessageListener } from "../../Common/hooks/useMessageListener.js";
-import CircularProgress from "../Common/components/CircularProgress.js";
-import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import { classNames } from "../../Utils/utils.js";
 import { AbhaNumberModel } from "./types/abha.js";
 import { ConsentHIType, ConsentPurpose } from "./types/consent.js";
-import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -35,7 +31,7 @@ interface IProps {
 export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
   const [idVerificationStatus, setIdVerificationStatus] = useState<
     "pending" | "in-progress" | "verified" | "failed"
-  >("pending");
+  >("verified");
   const [purpose, setPurpose] = useState<ConsentPurpose>("CAREMGT");
   const [fromDate, setFromDate] = useState<Date>(
     dayjs().subtract(30, "day").toDate(),
@@ -47,9 +43,9 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
     dayjs().add(30, "day").toDate(),
   );
   const [errors, setErrors] = useState<any>({});
-  const notificationSubscriptionState = useNotificationSubscriptionState([
-    show,
-  ]);
+  // const notificationSubscriptionState = useNotificationSubscriptionState([
+  //   show,
+  // ]);
 
   useMessageListener((data) => {
     if (data.type === "MESSAGE" && data.from === "patients/on_find") {
@@ -71,7 +67,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
       show={show}
       onClose={onClose}
     >
-      {["unsubscribed", "subscribed_on_other_device"].includes(
+      {/* {["unsubscribed", "subscribed_on_other_device"].includes(
         notificationSubscriptionState,
       ) && (
         <p className="my-4 text-sm text-warning-600">
@@ -79,7 +75,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
           Notifications needs to be enabled on this device to verify the
           patient.
         </p>
-      )}
+      )} */}
 
       <div className="flex items-center gap-3">
         <TextFormField
@@ -92,7 +88,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
           className="flex-1"
         />
 
-        <ButtonV2
+        {/* <ButtonV2
           onClick={async () => {
             const { res } = await request(routes.abha.findPatient, {
               body: {
@@ -131,7 +127,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
               failed: "Retry",
             }[idVerificationStatus]
           }
-        </ButtonV2>
+        </ButtonV2> */}
       </div>
       <SelectFormField
         label="Purpose of Request"
@@ -210,7 +206,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
             }
 
             setIsMakingConsentRequest(true);
-            const { res } = await request(routes.abha.createConsent, {
+            const { res } = await request(routes.abdm.consent.create, {
               body: {
                 patient_abha: abha?.health_id as string,
                 hi_types: hiTypes,

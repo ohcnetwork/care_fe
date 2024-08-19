@@ -1349,6 +1349,45 @@ const routes = {
   },
 
   abdm: {
+    consent: {
+      list: {
+        path: "/api/abdm/consent/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<ConsentRequestModel>>(),
+      },
+
+      create: {
+        path: "/api/abdm/consent/",
+        method: "POST",
+        TRes: Type<ConsentRequestModel>(),
+        TBody: Type<CreateConsentTBody>(),
+      },
+
+      get: {
+        path: "/api/abdm/consent/{id}/",
+        method: "GET",
+      },
+
+      checkStatus: {
+        path: "/api/abdm/v3/hiu/consent_request_status/",
+        method: "POST",
+        TBody: Type<{
+          consent_request: string;
+        }>(),
+        TRes: Type<{
+          detail: string;
+        }>(),
+      },
+    },
+
+    healthInformation: {
+      get: {
+        path: "/api/abdm/health_information/{artefactId}",
+        method: "GET",
+        TRes: Type<HealthInformationModel>(),
+      },
+    },
+
     healthFacility: {
       list: {
         path: "/api/abdm/health_facility/",

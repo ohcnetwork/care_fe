@@ -88,16 +88,22 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
         <div className="flex flex-col items-center">
           <ButtonV2
             onClick={async () => {
-              const { res, error } = await request(
-                routes.abha.checkConsentStatus,
+              const { res, data, error } = await request(
+                routes.abdm.consent.checkStatus,
                 {
-                  pathParams: { id: consent.id },
+                  body: {
+                    consent_request: consent.id,
+                  },
                 },
               );
 
-              if (res?.status === 200) {
+              if (res?.status === 202) {
                 Notification.Success({
-                  msg: "Checking Status!",
+                  msg:
+                    data?.detail ?? "Consent request status is being checked!",
+                });
+                Notification.Warn({
+                  msg: "This is an asynchronous operation, please check back after some time!",
                 });
               } else {
                 Notification.Error({
@@ -159,7 +165,7 @@ interface IProps {
 }
 
 export default function ABDMRecordsTab({ patientId }: IProps) {
-  const { data, loading } = useQuery(routes.abha.listConsents, {
+  const { data, loading } = useQuery(routes.abdm.consent.list, {
     query: {
       patient: patientId,
       ordering: "-created_date",

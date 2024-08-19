@@ -27,7 +27,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
     data: consentsResult,
     loading,
     refetch,
-  } = useQuery(routes.abha.listConsents, {
+  } = useQuery(routes.abdm.consent.list, {
     query: { facility: facilityId, ordering: "-created_date" },
   });
 

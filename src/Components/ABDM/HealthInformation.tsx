@@ -9,7 +9,7 @@ interface IProps {
 }
 
 export default function HealthInformation({ artefactId }: IProps) {
-  const { data, loading, error } = useQuery(routes.abha.getHealthInformation, {
+  const { data, loading, error } = useQuery(routes.abdm.healthInformation.get, {
     pathParams: { artefactId },
     silent: true,
   });
