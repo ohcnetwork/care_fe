@@ -1127,6 +1127,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 validate={validateForm}
                 onSubmit={handleSubmit}
                 submitLabel={buttonText}
+                disabled={isLoading}
                 onCancel={() => navigate("/facility")}
                 className="bg-transparent px-1 py-2 md:px-2"
                 onDraftRestore={(newState) => {
