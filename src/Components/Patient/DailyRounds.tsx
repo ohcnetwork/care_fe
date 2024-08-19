@@ -141,7 +141,11 @@ export const DailyRounds = (props: any) => {
   const [showDiscontinuedPrescriptions, setShowDiscontinuedPrescriptions] =
     useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
-  const buttonText = !id ? "Save" : "Continue";
+  const buttonText = !id
+    ? !["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)
+      ? "Save"
+      : "Save and Continue"
+    : "Continue";
 
   const formFields = [
     "physical_examination_info",
