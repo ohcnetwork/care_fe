@@ -44,6 +44,7 @@ const Form = <T extends FormDetails>({
   }, [asyncGetDefaults]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    setIsLoading(true);
     event.preventDefault();
     event.stopPropagation();
 
@@ -66,6 +67,7 @@ const Form = <T extends FormDetails>({
         errors: { ...state.errors, ...errors },
       });
     }
+    setIsLoading(false);
   };
 
   const { Provider, Consumer } = useMemo(() => createFormContext<T>(), []);
@@ -117,6 +119,7 @@ const Form = <T extends FormDetails>({
               <Cancel
                 onClick={props.onCancel}
                 label={props.cancelLabel ?? "Cancel"}
+                disabled={isLoading}
               />
               <Submit
                 data-testid="submit-button"

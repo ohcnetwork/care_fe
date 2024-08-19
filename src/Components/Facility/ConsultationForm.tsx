@@ -1501,12 +1501,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     onClick={() =>
                       navigate(`/facility/${facilityId}/patient/${patientId}`)
                     }
+                    disabled={isLoading}
                   />
                   <Submit
                     onClick={handleSubmit}
                     label={
                       isUpdate ? "Update Consultation" : "Create Consultation"
                     }
+                    disabled={isLoading}
                   />
                 </div>
               </div>
