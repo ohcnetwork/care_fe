@@ -423,7 +423,7 @@ export const DailyRounds = (props: any) => {
     return <Loading />;
   }
 
-  const roundTypes = [];
+  const roundTypes: { id: string; text: string }[] = [];
 
   if (
     ["Doctor", "Staff", "DistrictAdmin", "StateAdmin"].includes(
@@ -594,11 +594,11 @@ export const DailyRounds = (props: any) => {
                 [
                   "investigations",
                   "icd11_diagnosis",
-                  "additional_symptoms",
                   "prescriptions",
                   "prn_prescriptions",
                 ].includes(f),
-              )
+              ) &&
+              roundTypes.some((t) => t.id === "DOCTORS_LOG")
             ) {
               rounds_type = "DOCTORS_LOG";
             }
