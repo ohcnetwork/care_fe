@@ -18,7 +18,14 @@ import {
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useEffect, useReducer, useState } from "react";
+import {
+  lazy,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import AccordionV2 from "../Common/components/AccordionV2";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -170,6 +177,7 @@ export const parseOccupationFromExt = (occupation: Occupation) => {
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const submitController = useRef<AbortController>();
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
@@ -760,9 +768,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       ? await request(routes.updatePatient, {
           pathParams: { id },
           body: data,
+          controllerRef: submitController,
         })
       : await request(routes.addPatient, {
           body: { ...data, facility: facilityId },
+          controllerRef: submitController,
         });
     if (res?.ok && requestData) {
       await Promise.all(

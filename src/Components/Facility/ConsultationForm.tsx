@@ -15,7 +15,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import { LegacyRef, createRef, lazy, useEffect, useState } from "react";
+import { LegacyRef, createRef, lazy, useEffect, useRef, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
@@ -230,6 +230,7 @@ type Props = {
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
+  const submitController = useRef<AbortController>();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState,
@@ -739,11 +740,18 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         patient_no: state.form.patient_no || null,
       };
 
+      request(id ? routes.updateConsultation : routes.createConsultation, {
+        pathParams: id ? { id } : undefined,
+        body: data,
+        controllerRef: submitController,
+      });
+
       const { data: obj } = await request(
         id ? routes.updateConsultation : routes.createConsultation,
         {
           pathParams: id ? { id } : undefined,
           body: data,
+          controllerRef: submitController,
         },
       );
 
