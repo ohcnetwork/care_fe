@@ -47,7 +47,7 @@ export default function AdministrationEventCell({
           className="w-full md:max-w-4xl"
           show={showTimeline}
         >
-          <div className="mt-6 text-sm font-medium text-gray-700">
+          <div className="mt-6 text-sm font-medium text-secondary-700">
             Administrations on{" "}
             <span className="text-black">
               {formatDateTime(start, "DD/MM/YYYY")}
@@ -87,7 +87,9 @@ export default function AdministrationEventCell({
 
   // Check if cell belongs to after prescription.created_date
   if (dayjs(start).isAfter(prescription.created_date)) {
-    return <CareIcon icon="l-minus-circle" className="text-xl text-gray-400" />;
+    return (
+      <CareIcon icon="l-minus-circle" className="text-xl text-secondary-400" />
+    );
   }
 
   // Check if cell belongs to a discontinued prescription
@@ -105,7 +107,7 @@ export default function AdministrationEventCell({
             "text-xl",
             dayjs(prescription.discontinued_date).isBetween(start, end)
               ? "text-danger-700"
-              : "text-gray-400",
+              : "text-secondary-400",
           )}
         />
         <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">

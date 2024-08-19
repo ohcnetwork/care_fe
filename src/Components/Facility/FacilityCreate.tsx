@@ -531,7 +531,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   if (!capacityData || !capacityData.length) {
     capacityList = (
-      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
+      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         {t("no_bed_types_found")}
       </h5>
     );
@@ -595,7 +595,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
     doctorList = (
-      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
+      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         {t("no_staff")}
       </h5>
     );
@@ -708,7 +708,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             />
           </div>
           <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-            <div className="justify-between md:flex  md:border-b md:pb-2">
+            <div className="justify-between md:flex md:border-b md:pb-2">
               <div className="mb-2 text-xl font-semibold">
                 {t("bed_capacity")}
               </div>
@@ -1000,5 +1000,5 @@ export const FacilityCreate = (props: FacilityProps) => {
 };
 
 const FieldUnit = ({ unit }: { unit: string }) => {
-  return <p className="absolute right-10 text-xs text-gray-700">{unit}</p>;
+  return <p className="absolute right-10 text-xs text-secondary-700">{unit}</p>;
 };

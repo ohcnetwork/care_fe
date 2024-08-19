@@ -2,9 +2,18 @@ import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import {
   CONSCIOUSNESS_LEVEL,
+  HumanBodyRegion,
+  INSULIN_INTAKE_FREQUENCY_OPTIONS,
+  LIMB_RESPONSE_OPTIONS,
+  NURSING_CARE_PROCEDURES,
   OCCUPATION_TYPES,
+  OXYGEN_MODALITY_OPTIONS,
+  PressureSoreExudateAmountOptions,
+  PressureSoreTissueTypeOptions,
   RATION_CARD_CATEGORY,
+  RESPIRATORY_SUPPORT,
   RHYTHM_CHOICES,
+  VENTILATOR_MODE_OPTIONS,
 } from "../../Common/constants";
 
 export interface FlowModel {
@@ -246,11 +255,6 @@ export interface SampleListModel {
   fast_track?: string;
 }
 
-export interface DailyRoundsOutput {
-  name: string;
-  quantity: number;
-}
-
 export const DailyRoundTypes = [
   "NORMAL",
   "DOCTORS_LOG",
@@ -265,20 +269,31 @@ export interface BloodPressure {
   systolic?: number;
 }
 
+export interface IPainScale {
+  description: string;
+  region: HumanBodyRegion;
+  scale: number;
+}
+
+export type NameQuantity = { name: string; quantity: number };
+
+export type IPressureSore = {
+  region: HumanBodyRegion;
+  width: number;
+  length: number;
+  description: string;
+  scale: number;
+  exudate_amount: (typeof PressureSoreExudateAmountOptions)[number];
+  tissue_type: (typeof PressureSoreTissueTypeOptions)[number];
+};
 export interface DailyRoundsModel {
-  ventilator_spo2?: number;
-  ventilator_interface?:
-    | "UNKNOWN"
-    | "OXYGEN_SUPPORT"
-    | "NON_INVASIVE"
-    | "INVASIVE";
-  spo2?: string;
+  spo2?: number;
   rhythm?: (typeof RHYTHM_CHOICES)[number]["text"];
   rhythm_detail?: string;
   bp?: BloodPressure;
   pulse?: number;
   resp?: number;
-  temperature?: string;
+  temperature?: number;
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;
@@ -288,18 +303,73 @@ export interface DailyRoundsModel {
   id?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
-  output?: DailyRoundsOutput[];
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
   taken_at?: string;
-  consciousness_level?: (typeof CONSCIOUSNESS_LEVEL)[number]["id"];
+  consciousness_level?: (typeof CONSCIOUSNESS_LEVEL)[number]["value"];
   rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
   created_by?: PerformedByModel;
   last_edited_by?: PerformedByModel;
   bed?: string;
+  pain_scale_enhanced?: IPainScale[];
+  in_prone_position?: boolean;
+  left_pupil_size?: number;
+  left_pupil_size_detail?: string;
+  left_pupil_light_reaction?: string;
+  left_pupil_light_reaction_detail?: string;
+  right_pupil_size?: number;
+  right_pupil_size_detail?: string;
+  right_pupil_light_reaction?: string;
+  right_pupil_light_reaction_detail?: string;
+  glasgow_eye_open?: number;
+  glasgow_motor_response?: number;
+  glasgow_verbal_response?: number;
+  limb_response_upper_extremity_right?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_upper_extremity_left?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_lower_extremity_left?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_lower_extremity_right?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  glasgow_total_calculated?: number;
+  bilateral_air_entry?: boolean;
+  etco2?: number;
+  po2?: number;
+  pco2?: number;
+  ph?: number;
+  hco3?: number;
+  base_excess?: number;
+  lactate?: number;
+  sodium?: number;
+  potassium?: number;
+  blood_sugar_level?: number;
+  insulin_intake_dose?: number;
+  insulin_intake_frequency?: (typeof INSULIN_INTAKE_FREQUENCY_OPTIONS)[number];
+  dialysis_fluid_balance?: number;
+  dialysis_net_balance?: number;
+  nursing?: {
+    procedure: (typeof NURSING_CARE_PROCEDURES)[number];
+    description: string;
+  }[];
+  feeds?: NameQuantity[];
+  infusions?: NameQuantity[];
+  iv_fluids?: NameQuantity[];
+  output?: NameQuantity[];
+  ventilator_spo2?: number;
+  ventilator_interface?: (typeof RESPIRATORY_SUPPORT)[number]["value"];
+  ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
+  ventilator_oxygen_modality_flow_rate?: number;
+  ventilator_oxygen_modality_oxygen_rate?: number;
+  ventilator_fi02?: number;
+  ventilator_mode?: (typeof VENTILATOR_MODE_OPTIONS)[number];
+  ventilator_peep?: number;
+  ventilator_pip?: number;
+  ventilator_mean_airway_pressure?: number;
+  ventilator_resp_rate?: number;
+  ventilator_pressure_support?: number;
+
+  ventilator_tidal_volume?: number;
+  pressure_sore?: IPressureSore[];
 }
 
 export interface FacilityNameModel {

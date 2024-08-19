@@ -21,8 +21,15 @@ export interface Field {
   description: string;
   type: string;
   example: string;
-  default: string;
+  default: any;
   options?: readonly FieldOption[];
+  validator: (value: any) => boolean;
+}
+
+export interface ScribeForm {
+  id: string;
+  name: string;
+  fields: () => Promise<Field[]> | Field[];
 }
 
 export type ScribeModel = {
@@ -45,7 +52,8 @@ export type ScribeModel = {
 };
 
 interface ScribeProps {
-  fields: Field[];
+  form: ScribeForm;
+  existingData?: { [key: string]: any };
   onFormUpdate: (fields: any) => void;
 }
 
@@ -54,7 +62,7 @@ const SCRIBE_FILE_TYPES = {
   SCRIBE: 1,
 };
 
-export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
+export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
   const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
@@ -71,6 +79,21 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   const [updatedTranscript, setUpdatedTranscript] = useState<string>("");
   const [scribeID, setScribeID] = useState<string>("");
   const stageRef = useRef(stage);
+  const [fields, setFields] = useState<Field[]>([]);
+
+  useEffect(() => {
+    const loadFields = async () => {
+      const fields = await form.fields();
+      setFields(
+        fields.map((f) => ({
+          ...f,
+          validate: undefined,
+          default: JSON.stringify(f.default),
+        })),
+      );
+    };
+    loadFields();
+  }, [form]);
 
   useEffect(() => {
     if (stageRef.current === "cancelled") {
@@ -312,8 +335,20 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
       setProgress(100);
       const parsedFormData = JSON.parse(updatedFieldsResponse ?? "{}");
       if (stageRef.current === "cancelled") return;
-      setFormFields(parsedFormData);
-      onFormUpdate(parsedFormData);
+
+      // run type validations
+      const validated = Object.entries(parsedFormData)
+        .filter(([k, v]) => {
+          const f = fields.find((f) => f.id === k);
+          if (!f) return false;
+          if (v === f.default) return false;
+          //if (f.validator) return f.validator(f.type === "number" ? Number(v) : v);
+          return true;
+        })
+        .map(([k, v]) => ({ [k]: v }))
+        .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      setFormFields(validated as any);
+      onFormUpdate(validated);
       setStage("final-review");
     } catch (error) {
       setErrors(["Error retrieving form data"]);
@@ -373,35 +408,76 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     stageRef.current = "cancelled";
   };
 
-  const processFormField = (
+  function processFormField(
     fieldDetails: Field | undefined,
-    formFields: { [key: string]: string | string[] | number },
+    formFields: { [key: string]: any },
     field: string,
-  ) => {
-    if (fieldDetails?.options) {
-      // Check if the form field is an array (multiple selections allowed)
-      if (Array.isArray(formFields[field])) {
-        // Map each selected option ID to its corresponding text
-        return (formFields[field] as string[])
-          .map((option) => {
-            const optionDetails = fieldDetails.options?.find(
-              (o) => o.id === option,
-            );
-            return optionDetails?.text ?? option; // Use option text if found, otherwise fallback to option ID
-          })
-          .join(", ");
-      } else {
-        // Single selection scenario, find the option that matches the field value
-        return (
-          fieldDetails.options?.find((o) => o.id === formFields[field])?.text ??
-          JSON.stringify(formFields[field])
-        );
+  ): React.ReactNode {
+    const value = formFields[field];
+    if (!fieldDetails || !value) return value;
+
+    const { options } = fieldDetails;
+
+    const getHumanizedKey = (key: string): string => {
+      return key
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    };
+
+    const getOptionText = (value: string | number): string => {
+      if (!options) return value.toString();
+      const option = options.find((opt) => opt.id === value);
+      return option ? option.text : value.toString();
+    };
+
+    const renderPrimitive = (value: any): any => {
+      return options ? getOptionText(value) : value;
+    };
+
+    const renderArray = (values: any[]): React.ReactNode => {
+      return values.map((value) => renderPrimitive(value)).join(", ");
+    };
+
+    const renderObject = (obj: { [key: string]: any }): React.ReactNode => {
+      return (
+        <div className="flex flex-col gap-2 text-sm">
+          {Object.keys(obj).map((key, keyIndex) => (
+            <div key={keyIndex}>
+              <b>{getHumanizedKey(key)}</b>: {renderPrimitive(obj[key])}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const renderObjectArray = (objects: any[]): React.ReactNode => {
+      return (
+        <div className="flex flex-col gap-2 text-sm">
+          {objects.map((obj, objIndex) => (
+            <div key={objIndex}>{renderObject(obj)}</div>
+          ))}
+        </div>
+      );
+    };
+
+    if (Array.isArray(value)) {
+      if (
+        value.length > 0 &&
+        typeof value[0] === "object" &&
+        !Array.isArray(value[0])
+      ) {
+        return renderObjectArray(value);
       }
-    } else {
-      // If no options are available, return the field value in JSON string format
-      return JSON.stringify(formFields[field]);
+      return renderArray(value);
     }
-  };
+
+    if (typeof value === "object") {
+      return renderObject(value);
+    }
+
+    return renderPrimitive(value);
+  }
 
   const renderContentBasedOnStage = () => {
     switch (stage) {
@@ -410,7 +486,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
           <button
             onClick={handleStartRecordingClick}
             disabled={isRecording}
-            className="flex items-center justify-center rounded-full border border-black px-2 py-2 font-bold hover:border-red-500 hover:bg-gray-200 hover:text-red-500"
+            className="flex items-center justify-center rounded-full border border-black px-2 py-2 font-bold hover:border-red-500 hover:bg-secondary-200 hover:text-red-500"
           >
             <CareIcon
               icon="l-microphone"
@@ -425,7 +501,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
             disabled={!isRecording}
             onMouseEnter={() => setIsHoveringCancelRecord(true)}
             onMouseLeave={() => setIsHoveringCancelRecord(false)}
-            className="flex animate-pulse items-center justify-center rounded-full border border-red-500 bg-red-100 px-2 py-2 font-bold text-red-500 hover:border-black hover:bg-gray-200 hover:text-black"
+            className="flex animate-pulse items-center justify-center rounded-full border border-red-500 bg-red-100 px-2 py-2 font-bold text-red-500 hover:border-black hover:bg-secondary-200 hover:text-black"
           >
             {isHoveringCancelRecord ? (
               <CareIcon
@@ -490,9 +566,9 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
               &#8203;
             </span>
 
-            <div className="inline-block max-h-[75vh] w-full max-w-md overflow-hidden overflow-y-auto rounded-2xl border-2 border-gray-300 bg-white p-6 text-left align-middle shadow-xl transition-all">
+            <div className="inline-block max-h-[75vh] w-full max-w-md overflow-hidden overflow-y-auto rounded-2xl border-2 border-secondary-300 bg-white p-6 text-left align-middle shadow-xl transition-all">
               <div className="flex justify-between">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">
+                <h3 className="text-lg font-medium leading-6 text-secondary-900">
                   Voice AutoFill
                 </h3>
 
@@ -507,7 +583,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                 >
                   <CareIcon
                     icon="l-times-circle"
-                    className=" flex -scale-x-100 justify-center text-lg"
+                    className="flex -scale-x-100 justify-center text-lg"
                   />
                 </ButtonV2>
               </div>
@@ -516,7 +592,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                 stage === "final-review" ||
                 stage === "recording-review") && (
                 <div className="flex flex-col justify-center gap-4 rounded-md p-2">
-                  <p className="text-sm font-semibold text-gray-600">
+                  <p className="text-sm font-semibold text-secondary-600">
                     Recorded Audio
                   </p>
                   {audioBlobs.length > 0 &&
@@ -541,15 +617,15 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
               {(stage === "review" || stage === "final-review") && (
                 <div className="my-2 w-full">
                   <div className="flex justify-between">
-                    <p className="mb-2 text-sm font-semibold text-gray-600">
+                    <p className="mb-2 text-sm font-semibold text-secondary-600">
                       Transcript
                     </p>
-                    <p className="mb-2 text-sm italic text-gray-500">
+                    <p className="mb-2 text-sm italic text-secondary-500">
                       (Edit if needed)
                     </p>
                   </div>
                   <textarea
-                    className="h-32 w-full rounded-md border border-gray-300 p-2 font-mono text-sm"
+                    className="h-32 w-full rounded-md border border-secondary-300 p-2 font-mono text-sm"
                     value={updatedTranscript}
                     onChange={handleEditChange}
                   />
@@ -569,7 +645,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                     Regenerate Transcript
                   </ButtonV2>
                   {stage === "review" && (
-                    <p className="animate-pulse text-sm text-gray-500">
+                    <p className="animate-pulse text-sm text-secondary-500">
                       {getStageMessage(stage)}
                     </p>
                   )}
@@ -581,10 +657,10 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                   {!isGPTProcessing &&
                     Object.keys(formFields ?? {}).length > 0 && (
                       <div className="mt-4">
-                        <p className="mb-2 text-sm font-semibold text-gray-600">
+                        <p className="mb-2 text-sm font-semibold text-secondary-600">
                           Form Data
                         </p>
-                        <div className="max-h-80 divide-y divide-gray-300 overflow-scroll rounded-lg border border-gray-300 text-sm">
+                        <div className="max-h-80 divide-y divide-secondary-300 overflow-scroll rounded-lg border border-secondary-300 text-sm">
                           {Object.keys(formFields ?? {})
                             .filter((field) => formFields?.[field])
                             .map((field) => {
@@ -596,16 +672,16 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                                   key={field}
                                   className="flex flex-col bg-white px-3 py-1"
                                 >
-                                  <p className="mb-1 font-bold text-gray-600">
+                                  <p className="mb-1 font-bold text-secondary-600">
                                     {fieldDetails?.friendlyName}
                                   </p>
-                                  <p className="text-gray-800">
+                                  <div className="text-secondary-800">
                                     {processFormField(
                                       fieldDetails,
                                       formFields,
                                       field,
                                     )}
-                                  </p>
+                                  </div>
                                 </div>
                               );
                             })}
@@ -613,7 +689,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                       </div>
                     )}
                   {stage === "final-review" && (
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-secondary-600">
                       {getStageMessage(stage)}
                     </p>
                   )}
@@ -634,7 +710,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                   </p>
                 ))}
                 {!(stage === "review" || stage === "final-review") && (
-                  <p className="animate-pulse text-sm text-gray-500">
+                  <p className="animate-pulse text-sm text-secondary-500">
                     {getStageMessage(stage)}
                   </p>
                 )}

@@ -23,6 +23,7 @@ type SelectMenuProps<T, V = T> = {
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;
   className?: string;
+  inputClassName?: string;
   requiredError?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -62,10 +63,12 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const showChevronIcon = props.showChevronIcon ?? true;
 
   const placeholder =
-    valueOptions?.length > 0 ? props.placeholder ?? "Select" : "No options";
+    valueOptions?.length > 0 ? (props.placeholder ?? "Select") : "No options";
   const defaultOption = {
     label: placeholder,
-    selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
+    selectedLabel: (
+      <span className="font-normal text-secondary-600">{placeholder}</span>
+    ),
     description: undefined,
     icon: undefined,
     value: undefined,
@@ -92,16 +95,18 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
             </Listbox.Label>
             <div className="relative">
               <Listbox.Button
-                className={`${
-                  props?.requiredError ? "border-red-500" : ""
-                } cui-input-base flex w-full rounded`}
+                className={classNames(
+                  "cui-input-base flex w-full rounded",
+                  props?.requiredError && "border-red-500",
+                  props.inputClassName,
+                )}
                 onFocus={props.onFocus}
                 onBlur={props.onBlur}
               >
                 <div className="relative z-0 flex w-full items-center">
                   <div className="relative flex flex-1 items-center focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (
-                      <div className="ml-2 text-sm text-gray-700">
+                      <div className="ml-2 text-sm text-secondary-700">
                         {value.icon}
                       </div>
                     )}
@@ -112,7 +117,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                   {showChevronIcon && (
                     <CareIcon
                       icon="l-angle-down"
-                      className="-mb-0.5 text-lg text-gray-900"
+                      className="-mb-0.5 text-lg text-secondary-900"
                     />
                   )}
                 </div>
@@ -147,18 +152,18 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                                   )}
                             </div>
                             {option.description && (
-                              <p
+                              <span
                                 className={classNames(
                                   "text-sm font-normal",
                                   option.disabled
-                                    ? "text-gray-700"
+                                    ? "text-secondary-700"
                                     : active
                                       ? "text-primary-200"
-                                      : "text-gray-700",
+                                      : "text-secondary-700",
                                 )}
                               >
                                 {option.description}
-                              </p>
+                              </span>
                             )}
                           </div>
                         )}

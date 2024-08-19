@@ -18,7 +18,7 @@ interface Props {
   onChange: (selected: any) => void;
   optionLabel?: (option: any) => string;
   optionLabelChip?: (option: any) => string;
-  showNOptions?: number;
+  showNOptions?: number | undefined;
   multiple?: boolean;
   compareBy?: string;
   debounceTime?: number;
@@ -40,7 +40,7 @@ const AutoCompleteAsync = (props: Props) => {
     onChange,
     optionLabel = (option: any) => option.label,
     optionLabelChip = (option: any) => option.label,
-    showNOptions = 10,
+    showNOptions,
     multiple = false,
     compareBy,
     debounceTime = 300,
@@ -62,8 +62,13 @@ const AutoCompleteAsync = (props: Props) => {
     () =>
       debounce(async (query: string) => {
         setLoading(true);
-        const data = await fetchData(query);
-        setData(data?.slice(0, showNOptions) || []);
+        const data = (await fetchData(query)) || [];
+
+        if (showNOptions !== undefined) {
+          setData(data.slice(0, showNOptions));
+        } else {
+          setData(data);
+        }
         setLoading(false);
       }, debounceTime),
     [fetchData, showNOptions, debounceTime],
@@ -102,7 +107,6 @@ const AutoCompleteAsync = (props: Props) => {
               onChange={({ target }) => setQuery(target.value)}
               onFocus={props.onFocus}
               onBlur={() => {
-                setQuery("");
                 props.onBlur?.();
               }}
               autoComplete="off"
@@ -114,7 +118,7 @@ const AutoCompleteAsync = (props: Props) => {
                     <div className="tooltip" id="clear-button">
                       <CareIcon
                         icon="l-times-circle"
-                        className="mb-[-5px] h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
+                        className="mb-[-5px] h-4 w-4 text-secondary-800 transition-colors duration-200 ease-in-out hover:text-secondary-500"
                         onClick={(e) => {
                           e.preventDefault();
                           onChange(null);
@@ -140,7 +144,7 @@ const AutoCompleteAsync = (props: Props) => {
           <DropdownTransition>
             <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 text-sm">
               {data?.length === 0 ? (
-                <div className="relative cursor-default select-none px-4 py-2 text-gray-700">
+                <div className="relative cursor-default select-none px-4 py-2 text-secondary-700">
                   {query !== ""
                     ? "Nothing found."
                     : "Start typing to search..."}
@@ -157,7 +161,7 @@ const AutoCompleteAsync = (props: Props) => {
                         <div className="flex items-center gap-2">
                           {optionLabel(item)}
                           {optionLabelChip(item) && (
-                            <div className="mt-1 h-fit max-w-fit rounded-full border border-secondary-400 bg-secondary-100 px-2 text-center text-xs text-gray-900 sm:mt-0">
+                            <div className="mt-1 h-fit max-w-fit rounded-full border border-secondary-400 bg-secondary-100 px-2 text-center text-xs text-secondary-900 sm:mt-0">
                               {optionLabelChip(item)}
                             </div>
                           )}

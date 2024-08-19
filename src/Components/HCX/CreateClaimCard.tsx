@@ -182,7 +182,7 @@ export default function CreateClaimCard({
         <span
           className={classNames(
             policy ? "opacity-0" : "opacity-100",
-            "text-gray-700 transition-opacity duration-300 ease-in-out",
+            "text-secondary-700 transition-opacity duration-300 ease-in-out",
           )}
         >
           Select a policy to add items

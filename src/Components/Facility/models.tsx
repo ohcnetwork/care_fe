@@ -12,7 +12,11 @@ import { InvestigationType } from "../Common/prescription-builder/InvestigationB
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import {
+  AssignedToObjectModel,
+  DailyRoundsModel,
+  FileUploadModel,
+} from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
 
@@ -105,6 +109,7 @@ export interface PatientConsentModel {
   patient_code_status:
     | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
     | null;
+  files: FileUploadModel[] | null;
   archived: boolean;
   archived_by?: UserBareMinimum;
   archived_date: string;
@@ -180,6 +185,7 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
+  has_consents?: (typeof CONSENT_TYPE_CHOICES)[number]["id"][];
 }
 
 export interface PatientStatsModel {
@@ -202,6 +208,7 @@ export interface DupPatientModel {
   date_of_birth: string;
   year_of_birth: number;
   state_id: number;
+  is_expired: boolean;
 }
 
 export interface InventoryItemsModel {
@@ -241,7 +248,8 @@ export interface BedModel {
   facility?: string;
   location_object?: {
     name: string;
-    id?: string;
+    id: string;
+    facility?: { name: string; id: string };
   };
   location?: string;
   is_occupied?: boolean;
@@ -303,7 +311,6 @@ export type DialysisPlotsRes = {
 
 export type NeurologicalTablesFields =
   | "consciousness_level"
-  | "consciousness_level_detail"
   | "left_pupil_size"
   | "left_pupil_size_detail"
   | "right_pupil_size"
@@ -323,7 +330,6 @@ export type NeurologicalTablesFields =
 
 export type NeurologicalTablesRes = {
   consciousness_level: number;
-  consciousness_level_detail: string;
   left_pupil_size: number;
   left_pupil_size_detail: string;
   right_pupil_size: number;

@@ -224,10 +224,12 @@ export default function useFileManager(
                 className="text-lg text-danger-500"
               />
             </div>
-            <div className="text-grey-200 text-sm">
+            <div className="text-sm">
               <h1 className="text-xl text-black">Archive File</h1>
-              This action is irreversible. Once a file is archived it cannot be
-              unarchived.
+              <span className="text-sm text-secondary-600">
+                This action is irreversible. Once a file is archived it cannot
+                be unarchived.
+              </span>
             </div>
           </div>
         }
@@ -277,7 +279,7 @@ export default function useFileManager(
         className="md:w-[700px]"
         onClose={() => setArchiveDialogueOpen(null)}
       >
-        <div className="mb-8 text-xs text-gray-700">
+        <div className="mb-8 text-xs text-secondary-700">
           <CareIcon icon="l-archive" className="mr-2" />
           This file has been archived and cannot be unarchived.
         </div>
@@ -322,7 +324,7 @@ export default function useFileManager(
                 />
               </div>
               <div>
-                <div className="text-xs uppercase text-gray-700">
+                <div className="text-xs uppercase text-secondary-700">
                   {item.label}
                 </div>
                 <div className="break-words text-base">{item.content}</div>
@@ -345,7 +347,7 @@ export default function useFileManager(
               />
             </div>
             <div className="m-4">
-              <h1 className="text-xl text-black ">Rename File</h1>
+              <h1 className="text-xl text-black">Rename File</h1>
             </div>
           </div>
         }

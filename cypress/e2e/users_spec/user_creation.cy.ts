@@ -50,8 +50,8 @@ describe("User Creation", () => {
   ];
 
   const EXPECTED_PROFILE_ERROR_MESSAGES = [
-    "Field is required",
-    "Field is required",
+    "This field is required",
+    "This field is required",
     "Please enter valid phone number",
   ];
 

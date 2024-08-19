@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
 import { FormErrors } from "../Form/Utils";
 import { Prescription } from "./models";
@@ -73,7 +74,7 @@ export const AdministrationDosageValidator = (
     const baseDosage = getDosageValue(base_dosage);
     const targetDosage = getDosageValue(target_dosage);
 
-    if (!valueDosage) return "This field is required";
+    if (!valueDosage) return t("field_required");
 
     if (value?.split(" ")[1] !== base_dosage?.split(" ")[1])
       return "Unit must be the same as start and target dosage's unit";

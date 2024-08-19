@@ -114,18 +114,18 @@ export default function PatientConsentRecordBlockGroup(props: {
       {files?.map((file: FileUploadModel, i: number) => (
         <div
           key={i}
-          className={`flex flex-col justify-between gap-2 rounded-lg border border-gray-300 xl:flex-row xl:items-center ${showArchive ? "text-gray-600" : "bg-white"}  px-4 py-2 transition-all hover:bg-gray-100`}
+          className={`flex flex-col justify-between gap-2 rounded-lg border border-secondary-300 xl:flex-row xl:items-center ${showArchive ? "text-secondary-600" : "bg-white"} px-4 py-2 transition-all hover:bg-secondary-100`}
         >
-          <div className="flex items-center gap-4 ">
+          <div className="flex items-center gap-4">
             <div>
-              <CareIcon icon="l-file" className="text-5xl text-gray-600" />
+              <CareIcon icon="l-file" className="text-5xl text-secondary-600" />
             </div>
             <div className="min-w-[40%] break-all">
               <div className="">
                 {file.name}
                 {file.extension} {file.is_archived && "(Archived)"}
               </div>
-              <div className="text-xs text-gray-700">
+              <div className="text-xs text-secondary-700">
                 {dayjs(
                   file.is_archived ? file.archived_datetime : file.created_date,
                 ).format("DD MMM YYYY, hh:mm A")}{" "}

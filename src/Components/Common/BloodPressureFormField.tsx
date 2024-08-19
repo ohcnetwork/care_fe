@@ -65,7 +65,7 @@ export default function BloodPressureFormField(props: Props) {
             },
           ]}
         />
-        <span className="px-2 text-lg font-medium text-gray-400">/</span>
+        <span className="px-2 text-lg font-medium text-secondary-400">/</span>
         <RangeAutocompleteFormField
           name="diastolic"
           placeholder="Diastolic"

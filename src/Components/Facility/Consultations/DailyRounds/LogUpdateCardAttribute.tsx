@@ -3,7 +3,7 @@ import PatientCategoryBadge from "../../../Common/PatientCategoryBadge";
 import {
   BloodPressure,
   DailyRoundsModel,
-  DailyRoundsOutput,
+  NameQuantity,
 } from "../../../Patient/models";
 import { PatientCategory } from "../../models";
 
@@ -44,7 +44,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
       return (
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold text-secondary-700">
             {(attributeValue as BloodPressure).systolic}/
             {(attributeValue as BloodPressure).diastolic} mmHg
           </span>
@@ -55,8 +55,8 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
       return (
         <div className="flex flex-col gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
-          <span className="flex flex-wrap gap-x-2 gap-y-1 text-sm text-gray-700">
-            {(attributeValue as DailyRoundsOutput[]).map((output) => (
+          <span className="flex flex-wrap gap-x-2 gap-y-1 text-sm text-secondary-700">
+            {(attributeValue as NameQuantity[]).map((output) => (
               <span className="font-semibold" key={output.name}>
                 {output.name}: {output.quantity}
               </span>
@@ -69,7 +69,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
       return (
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold text-secondary-700">
             {t(attributeValue)}
           </span>
         </div>
@@ -79,7 +79,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
       return (
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold text-secondary-700">
             {typeof attributeValue === "object"
               ? JSON.stringify(attributeValue)
               : attributeValue}
@@ -93,7 +93,7 @@ export default LogUpdateCardAttribute;
 
 const AttributeLabel = (props: { attributeKey: string }) => {
   return (
-    <span className="text-xs uppercase text-gray-700">
+    <span className="text-xs uppercase text-secondary-700">
       {props.attributeKey.replaceAll("_", " ")}
     </span>
   );

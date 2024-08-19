@@ -44,7 +44,7 @@ export const InsuranceDetails = (props: IProps) => {
       {loading ? (
         <Loading />
       ) : insuranceDetials?.count === 0 ? (
-        <div className="mt-5 flex w-full items-center justify-center text-xl font-bold text-gray-500">
+        <div className="mt-5 flex w-full items-center justify-center text-xl font-bold text-secondary-500">
           No Insurance Details Available
         </div>
       ) : (

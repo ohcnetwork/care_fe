@@ -62,7 +62,6 @@ import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import Error404 from "../ErrorPages/404";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
-import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import { useTranslation } from "react-i18next";
@@ -193,6 +192,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
   const [careExtId, setCareExtId] = useState("");
   const [formField, setFormField] = useState<any>();
+  const [resetNum, setResetNum] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
@@ -1021,21 +1021,29 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         <DuplicatePatientDialog
           patientList={statusDialog.patientList}
           handleOk={handleDialogClose}
-          handleCancel={goBack}
-          isNew={!id}
+          handleCancel={() => {
+            handleDialogClose("close");
+            setResetNum(true);
+          }}
         />
       )}
       {statusDialog.transfer && (
         <DialogModal
           show={statusDialog.transfer}
-          onClose={() => handleDialogClose("back")}
+          onClose={() => {
+            setResetNum(true);
+            handleDialogClose("close");
+          }}
           title="Patient Transfer Form"
           className="max-w-md md:min-w-[600px]"
         >
           <TransferPatientDialog
             patientList={statusDialog.patientList}
             handleOk={() => handleDialogClose("close")}
-            handleCancel={() => handleDialogClose("back")}
+            handleCancel={() => {
+              setResetNum(true);
+              handleDialogClose("close");
+            }}
             facilityId={facilityId}
           />
         </DialogModal>
@@ -1152,9 +1160,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               >
                 {(field) => {
                   if (!formField) setFormField(field);
+                  if (resetNum) {
+                    field("phone_number").onChange({
+                      name: "phone_number",
+                      value: "+91",
+                    });
+                    setResetNum(false);
+                  }
                   return (
                     <>
-                      <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
+                      <div className="mb-2 overflow-visible rounded border border-secondary-200 p-4">
                         <ButtonV2
                           id="import-externalresult-button"
                           className="flex items-center gap-2"
@@ -1175,7 +1190,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </ButtonV2>
                       </div>
                       {enable_abdm && (
-                        <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                        <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                           <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                             {t("abha_details")}
                           </h1>
@@ -1233,7 +1248,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       )}
-                      <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                      <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                         <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                           Personal Details
                         </h1>
@@ -1255,14 +1270,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               }}
                               types={["mobile", "landline"]}
                             />
-                            <Checkbox
+                            <CheckBoxFormField
                               label="Is the phone number an emergency number?"
                               className="font-bold"
                               id="emergency_contact_checkbox"
-                              checked={isEmergencyNumberEnabled}
-                              onCheck={(checked) => {
-                                setIsEmergencyNumberEnabled(checked);
-                                checked
+                              name="emergency_contact_checkbox"
+                              value={isEmergencyNumberEnabled}
+                              onChange={({ value }) => {
+                                setIsEmergencyNumberEnabled(value);
+                                value
                                   ? field("emergency_phone_number").onChange({
                                       name: field("emergency_phone_number")
                                         .name,
@@ -1356,7 +1372,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       errorClassName="hidden"
                                       trailingPadding="pr-4"
                                       trailing={
-                                        <p className="absolute right-10 space-x-1 whitespace-nowrap text-xs text-gray-700 sm:text-sm">
+                                        <p className="absolute right-10 space-x-1 whitespace-nowrap text-xs text-secondary-700 sm:text-sm">
                                           {field("age").value !== "" && (
                                             <>
                                               <span className="hidden sm:inline md:hidden lg:inline">
@@ -1736,7 +1752,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       </div>
-                      <div className="mb-8 rounded border border-gray-200 p-4">
+                      <div className="mb-8 rounded border border-secondary-200 p-4">
                         <AccordionV2
                           className="mt-2 shadow-none md:mt-0 lg:mt-0"
                           expandIcon={
@@ -1927,7 +1943,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex w-full flex-col gap-4 rounded border border-gray-200 bg-white p-4">
+                      <div className="flex w-full flex-col gap-4 rounded border border-secondary-200 bg-white p-4">
                         <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
                           <h1 className="text-left text-xl font-bold text-purple-500">
                             Insurance Details
