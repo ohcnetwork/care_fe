@@ -62,7 +62,7 @@ export default function UserAutocomplete(props: UserSearchProps) {
       setDisabled(true);
       field.handleChange(undefined as unknown as UserBareMinimum);
     }
-  }, [loading, query, field.required, data?.results, props.noResultsError]);
+  }, [loading, field.required, data?.results, props.noResultsError]);
 
   return (
     <FormField field={field}>
