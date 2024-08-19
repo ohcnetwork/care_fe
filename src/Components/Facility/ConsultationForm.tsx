@@ -89,8 +89,8 @@ type FormDetails = {
   referred_from_facility_external?: string;
   referred_by_external?: string;
   transferred_from_location?: string;
-  treating_physician?: string;
-  treating_physician_object?: UserBareMinimum | null;
+  treating_physician: string;
+  treating_physician_object: UserBareMinimum | null;
   create_diagnoses: CreateDiagnosis[];
   diagnoses: ConsultationDiagnosis[];
   symptoms: EncounterSymptom[];
