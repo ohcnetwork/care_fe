@@ -59,7 +59,6 @@ export default function UserAutocomplete(props: UserSearchProps) {
     }
 
     if (data.results.length === 0) {
-      console.log({ query });
       setDisabled(true);
       field.handleChange(undefined as unknown as UserBareMinimum);
     }
