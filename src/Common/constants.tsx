@@ -745,6 +745,7 @@ export const CONSULTATION_TABS = [
   { text: "ABG", desc: "ABG" },
   { text: "MEDICINES", desc: "Medicines" },
   { text: "FILES", desc: "Files" },
+  { text: "DISCUSSION_NOTES_FILES", desc: "Discussion Notes" },
   { text: "INVESTIGATIONS", desc: "Investigations" },
   { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
   { text: "VENTILATOR", desc: "Ventilation" },

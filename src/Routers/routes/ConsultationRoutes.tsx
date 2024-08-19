@@ -12,6 +12,7 @@ import PatientConsentRecords from "../../Components/Patient/PatientConsentRecord
 import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
 import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
 import CriticalCarePreview from "../../Components/LogUpdate/CriticalCarePreview";
+import { DiscussionNotesFiles } from "../../Components/Patient/DiscussionNotesFiles";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -48,6 +49,14 @@ export default {
       unspecified={true}
     />
   ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/discussion_notes_files":
+    ({ facilityId, patientId, id }: any) => (
+      <DiscussionNotesFiles
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={id}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
     (path: any) => <ManagePrescriptions {...path} />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions/print":
