@@ -78,7 +78,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       );
       setIndex(index);
     }
-  });
+  }, [uploadedFiles]);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -158,16 +158,14 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center gap-2">
-            <ButtonV2
-              className={
-                uploadedFiles && index === 0
-                  ? "pointer-events-none invisible opacity-0"
-                  : ""
-              }
-              onClick={() => handleNext(index - 1)}
-            >
-              &lt;
-            </ButtonV2>
+            {uploadedFiles && (
+              <ButtonV2
+                disabled={index === 0}
+                onClick={() => handleNext(index - 1)}
+              >
+                &lt;
+              </ButtonV2>
+            )}
             <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
               {file_state.isImage ? (
                 <img
@@ -203,16 +201,14 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </div>
               )}
             </div>
-            <ButtonV2
-              className={
-                uploadedFiles && index === uploadedFiles.length - 1
-                  ? "pointer-events-none invisible opacity-0"
-                  : ""
-              }
-              onClick={() => handleNext(index + 1)}
-            >
-              &gt;
-            </ButtonV2>
+            {uploadedFiles && (
+              <ButtonV2
+                disabled={index === uploadedFiles!.length - 1}
+                onClick={() => handleNext(index + 1)}
+              >
+                &gt;
+              </ButtonV2>
+            )}
           </div>
           <div className="flex items-center justify-between">
             <div className="mt-2 flex w-full flex-col justify-center gap-3 md:flex-row">
