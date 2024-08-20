@@ -6,25 +6,49 @@ import { Prescription } from "./models";
 export const PrescriptionFormValidator = () => {
   return (form: Prescription): FormErrors<Prescription> => {
     const errors: Partial<Record<keyof Prescription, FieldError>> = {};
+
     errors.medicine_object = RequiredFieldValidator()(form.medicine_object);
+
     if (form.dosage_type === "TITRATED") {
       errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
       errors.target_dosage = RequiredFieldValidator()(form.target_dosage);
+
       if (
         form.base_dosage &&
         form.target_dosage &&
         form.base_dosage.split(" ")[1] !== form.target_dosage.split(" ")[1]
       ) {
-        errors.base_dosage = "Unit must be same as target dosage's unit";
-        errors.target_dosage = "Unit must be same as base dosage's unit";
+        errors.base_dosage = "Unit must be the same as target dosage's unit";
+        errors.target_dosage = "Unit must be the same as base dosage's unit";
       }
-    } else errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
-    if (form.dosage_type === "PRN")
+    } else {
+      errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
+    }
+
+    if (form.dosage_type === "PRN") {
       errors.indicator = RequiredFieldValidator()(form.indicator);
-    if (form.dosage_type !== "PRN")
+
+      const baseDosageValue = getDosageValue(form.base_dosage);
+      const maxDosageValue = getDosageValue(form.max_dosage);
+
+      if (
+        baseDosageValue &&
+        maxDosageValue &&
+        baseDosageValue > maxDosageValue
+      ) {
+        errors.max_dosage =
+          "Max dosage in 24 hours must be greater than or equal to base dosage";
+      }
+    } else {
       errors.frequency = RequiredFieldValidator()(form.frequency);
+    }
+
     return errors;
   };
+};
+
+const getDosageValue = (dosage: string | undefined) => {
+  return dosage ? Number(dosage.split(" ")[0]) : undefined;
 };
 
 export const EditPrescriptionFormValidator = (old: Prescription) => {
@@ -66,10 +90,6 @@ export const AdministrationDosageValidator = (
   target_dosage: Prescription["target_dosage"],
 ) => {
   return (value: Prescription["base_dosage"]) => {
-    const getDosageValue = (dosage: string | undefined) => {
-      return dosage ? Number(dosage.split(" ")[0]) : undefined;
-    };
-
     const valueDosage = getDosageValue(value);
     const baseDosage = getDosageValue(base_dosage);
     const targetDosage = getDosageValue(target_dosage);
