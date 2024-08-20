@@ -539,15 +539,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           return;
-        case "consultation_notes":
-          if (!state.form[field]) {
-            errors[field] = t("field_required");
-            invalidForm = true;
-          } else if (!state.form[field].replace(/\s/g, "").length) {
-            errors[field] = "Consultation notes can not be empty";
-            invalidForm = true;
-          }
-          return;
         case "is_telemedicine":
           if (
             state.form.admitted_to === "Home Isolation" &&
@@ -1415,7 +1406,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <TextAreaFormField
                           label="General Instructions (Advice)"
-                          required
                           placeholder="Consultation Notes"
                           {...field("consultation_notes")}
                         />
