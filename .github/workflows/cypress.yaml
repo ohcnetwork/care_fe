@@ -24,7 +24,12 @@ jobs:
 
       - name: Set backend branch
         id: backend-branch
-        run: echo "::set-output name=branch::$(if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then echo 'staging'; else echo 'develop'; fi)"
+        run: |
+          if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then
+            echo "branch=staging" >> $GITHUB_OUTPUT
+          else
+            echo "branch=main" >> $GITHUB_OUTPUT
+          fi
 
       - name: Checkout care 📥
         uses: actions/checkout@v3
