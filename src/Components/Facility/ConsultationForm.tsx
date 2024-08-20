@@ -599,9 +599,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         }
 
         case "treating_physician": {
-          if (state.form.suggestion === "DC") {
-            break;
-          }
           if (state.form.suggestion !== "DD" && !state.form[field]) {
             errors[field] = t("field_required");
             invalidForm = true;
@@ -626,7 +623,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
       }
     });
-
     if (invalidForm) {
       dispatch({ type: "set_errors", errors });
       const firstError = Object.keys(errors).find((key) => errors[key]);
@@ -1438,7 +1434,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           name={"treating_physician"}
                           label={t("treating_doctor")}
                           placeholder="Attending Doctors Name and Designation"
-                          required={state.form.suggestion !== "DC"}
+                          required
                           value={
                             state.form.treating_physician_object ?? undefined
                           }
