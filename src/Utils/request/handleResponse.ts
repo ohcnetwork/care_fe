@@ -27,7 +27,7 @@ export default function handleResponse(
 
     // Handle session expiry
     if (error?.detail === "Authentication credentials were not provided.") {
-      notify?.Error({ msg: "Session expired. Please Login again." });
+      navigate(`/session-expired?redirect=${window.location.href}`);
       return;
     }
 
