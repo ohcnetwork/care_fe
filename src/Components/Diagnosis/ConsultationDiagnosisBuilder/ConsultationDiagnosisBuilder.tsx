@@ -11,6 +11,7 @@ import request from "../../../Utils/request/request";
 import DiagnosesRoutes from "../routes";
 import * as Notification from "../../../Utils/Notifications";
 import PrincipalDiagnosisSelect from "./PrincipalDiagnosisSelect";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface CreateDiagnosesProps {
   className?: string;
@@ -78,6 +79,7 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
 interface EditDiagnosesProps {
   className?: string;
   value: ConsultationDiagnosis[];
+  suggestions?: ICD11DiagnosisModel[];
 }
 
 export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
@@ -139,6 +141,19 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
               return false;
             }}
           />
+          {props.suggestions?.length && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {props.suggestions?.map((suggestion, i) => (
+                <button
+                  key={i}
+                  className="flex items-center gap-2 rounded-full border border-primary-500 px-4 py-1 text-sm text-primary-500 transition-all hover:bg-primary-400/10"
+                >
+                  <CareIcon icon="l-heart-medical" />
+                  {suggestion.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

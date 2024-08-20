@@ -268,7 +268,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       });
       return true;
     },
-  },
+  } /*
   {
     friendlyName: "Prescriptions",
     id: "prescriptions",
@@ -328,7 +328,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       return true;
     },
   },
-  /*{
+  {
     friendlyName: "Round Type",
     id: "rounds_type",
     type: "string",
@@ -353,7 +353,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       "A string to store the date and time at which the round was taken or measured. 'The round was taken yesterday/today' would amount to yesterday/today's date.",
     validator: (value) => typeof value === "string",
    },
-*/
+*/,
 ];
 
 export const SCRIBE_FORMS: { [key: string]: ScribeForm } = {
