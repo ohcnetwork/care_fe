@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import CircularProgress from "../Common/components/CircularProgress";
 import routes from "../../Redux/api";
-import { PatientNotesModel } from "./models";
+import { PaitentNotesReplyModel, PatientNotesModel } from "./models";
 import request from "../../Utils/request/request";
 import PatientNoteCard from "./PatientNoteCard";
 import RichTextEditor from "../Common/RichTextEditor/RichTextEditor";
 import * as Notification from "../../../src/Utils/Notifications";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";
 
 interface Props {
   patientId: string;
@@ -23,6 +24,9 @@ const PatientNotesDetailedView = (props: Props) => {
   const [reload, setReload] = useState(false);
   const [state, setState] = useState<PatientNotesModel>();
   const [noteField, setNoteField] = useState("");
+  const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
+    undefined,
+  );
 
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
@@ -127,22 +131,37 @@ const PatientNotesDetailedView = (props: Props) => {
             {
               <div className="flex max-h-[430px] flex-col-reverse overflow-x-hidden overflow-y-scroll">
                 {state.replies.map((reply) => (
-                  <div className="ml-2 mt-3" key={reply.id}>
-                    <PatientNoteCard
-                      note={reply as PatientNotesModel}
-                      setReload={setReload}
-                      allowReply={false}
-                    />
-                  </div>
+                  <DoctorNoteReplyPreviewCard
+                    key={reply.id}
+                    parentNote={
+                      reply.reply_to_object?.id !== state.id
+                        ? reply.reply_to_object
+                        : undefined
+                    }
+                  >
+                    <div className="mt-3">
+                      <PatientNoteCard
+                        note={reply as PatientNotesModel}
+                        setReload={setReload}
+                        allowReply={false}
+                        setReplyTo={setReplyTo}
+                      />
+                    </div>
+                  </DoctorNoteReplyPreviewCard>
                 ))}
               </div>
             }
           </div>
-          <RichTextEditor
-            onAddNote={onAddNote}
-            onChange={setNoteField}
-            initialMarkdown={noteField}
-          />
+          <DoctorNoteReplyPreviewCard
+            parentNote={reply_to}
+            cancelReply={() => setReplyTo(undefined)}
+          >
+            <RichTextEditor
+              onAddNote={onAddNote}
+              onChange={setNoteField}
+              initialMarkdown={noteField}
+            />
+          </DoctorNoteReplyPreviewCard>
         </div>
       )}
     </div>

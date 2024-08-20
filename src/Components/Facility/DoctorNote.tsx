@@ -45,7 +45,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
           scrollableTarget="patient-notes-list"
         >
           {state.notes.map((note) => {
-            if (mode === "thread-view") {
+            if (mode === "thread-view" && !note.parent_note_object) {
               return (
                 <div className="mt-3">
                   <PatientNoteCard
