@@ -28,7 +28,7 @@ jobs:
           if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then
             echo "branch=staging" >> $GITHUB_OUTPUT
           else
-            echo "branch=main" >> $GITHUB_OUTPUT
+            echo "branch=develop" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout care 📥
