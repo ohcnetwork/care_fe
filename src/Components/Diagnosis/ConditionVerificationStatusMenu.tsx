@@ -34,7 +34,7 @@ export default function ConditionVerificationStatusMenu<
           "border !border-secondary-400 bg-white hover:bg-secondary-300",
       )}
       id="condition-verification-status-menu"
-      title={props.value ? t(props.value) : props.placeholder ?? t("add_as")}
+      title={props.value ? t(props.value) : (props.placeholder ?? t("add_as"))}
       disabled={props.disabled}
       variant={props.value ? StatusStyle[props.value].variant : "primary"}
     >

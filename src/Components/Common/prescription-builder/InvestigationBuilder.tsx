@@ -29,59 +29,7 @@ export interface InvestigationBuilderProps<T> {
   setInvestigations: React.Dispatch<React.SetStateAction<T[]>>;
 }
 
-export default function InvestigationBuilder(
-  props: InvestigationBuilderProps<InvestigationType>,
-) {
-  const { investigations, setInvestigations } = props;
-  const [investigationsList, setInvestigationsList] = useState<string[]>([]);
-  const [activeIdx, setActiveIdx] = useState<number | null>(null);
-  const additionalInvestigations = [
-    ["Vitals", ["Temp", "Blood Pressure", "Respiratory Rate", "Pulse Rate"]],
-    [
-      "ABG",
-      [
-        "PO2",
-        "PCO2",
-        "PH",
-        "HCO3",
-        "Base excess",
-        "Lactate",
-        "Sodium",
-        "Potassium",
-      ],
-    ],
-  ];
-
-  const setItem = (object: InvestigationType, i: number) => {
-    setInvestigations(
-      investigations.map((investigation, index) =>
-        index === i ? object : investigation,
-      ),
-    );
-  };
-
-  useEffect(() => {
-    loadInvestigations();
-  }, []);
-
-  const loadInvestigations = async () => {
-    const invs = await fetchInvestigations();
-    const groups = await fetchInvestigationGroups();
-
-    let additionalStrings: string[] = [];
-    additionalInvestigations.forEach((investigation) => {
-      additionalStrings.push((investigation[0] as string) + " (GROUP)");
-      additionalStrings = [
-        ...additionalStrings,
-        ...(investigation[1] as string[]).map(
-          (i: any) => i + " -- ( " + investigation[0] + " )",
-        ),
-      ];
-    });
-
-    setInvestigationsList([...groups, ...invs, ...additionalStrings]);
-  };
-
+export const loadInvestigations = async () => {
   const fetchInvestigations = async () => {
     const { data } = await request(routes.listInvestigations);
     return (
@@ -99,9 +47,62 @@ export default function InvestigationBuilder(
     return data?.results.map((group) => `${group.name} (GROUP)`) ?? [];
   };
 
+  const invs = await fetchInvestigations();
+  const groups = await fetchInvestigationGroups();
+
+  let additionalStrings: string[] = [];
+  const additionalInvestigations = [
+    ["Vitals", ["Temp", "Blood Pressure", "Respiratory Rate", "Pulse Rate"]],
+    [
+      "ABG",
+      [
+        "PO2",
+        "PCO2",
+        "PH",
+        "HCO3",
+        "Base excess",
+        "Lactate",
+        "Sodium",
+        "Potassium",
+      ],
+    ],
+  ];
+  additionalInvestigations.forEach((investigation) => {
+    additionalStrings.push((investigation[0] as string) + " (GROUP)");
+    additionalStrings = [
+      ...additionalStrings,
+      ...(investigation[1] as string[]).map(
+        (i: any) => i + " -- ( " + investigation[0] + " )",
+      ),
+    ];
+  });
+
+  return [...groups, ...invs, ...additionalStrings];
+};
+
+export default function InvestigationBuilder(
+  props: InvestigationBuilderProps<InvestigationType>,
+) {
+  const { investigations, setInvestigations } = props;
+  const [investigationsList, setInvestigationsList] = useState<string[]>([]);
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
+  const setItem = (object: InvestigationType, i: number) => {
+    setInvestigations(
+      investigations?.map((investigation, index) =>
+        index === i ? object : investigation,
+      ),
+    );
+  };
+
+  useEffect(() => {
+    const load = async () => setInvestigationsList(await loadInvestigations());
+    load();
+  }, []);
+
   return (
     <div className="mt-2">
-      {investigations.map((investigation, i) => {
+      {investigations?.map((investigation, i) => {
         const setFrequency = (frequency: string) => {
           setItem(
             {

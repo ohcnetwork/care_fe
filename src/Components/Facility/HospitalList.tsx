@@ -130,7 +130,7 @@ export const HospitalList = () => {
   } else if (permittedData.results && permittedData.results.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
       <div className="w-full rounded-lg bg-white p-3">
-        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-secondary-600">
+        <div className="mt-4 flex w-full justify-center text-2xl font-bold text-secondary-600">
           {t("no_facilities")}
         </div>
       </div>
