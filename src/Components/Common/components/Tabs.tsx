@@ -28,13 +28,14 @@ export default function Tabs(props: {
     tabSwitcherRef.current.style.left =
       tabButton.getBoundingClientRect().left -
       ref.current.getBoundingClientRect().left +
+      ref.current.scrollLeft +
       "px";
   }, [currentTab, tabSwitcherRef.current, ref.current, dimensions]);
 
   return (
     <div
       className={classNames(
-        "relative inline-flex w-full items-center justify-between rounded-md bg-primary-500/10 p-2 md:w-auto",
+        "relative inline-flex w-full items-center justify-between overflow-auto rounded-md bg-primary-500/10 p-2 md:w-auto",
         className,
       )}
       ref={ref}
@@ -53,7 +54,7 @@ export default function Tabs(props: {
           {tab.text}
         </div>
       ))}
-      <div className="absolute inset-2 z-20 flex items-center justify-between">
+      <div className="absolute inset-2 z-10 flex items-center justify-between">
         {tabs.map((tab, i) => (
           <button
             key={i}

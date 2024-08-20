@@ -204,6 +204,12 @@ export const FileUpload = (props: FileUploadProps) => {
     onEdit: refetchAll,
   });
 
+  const dischargeSummaryFileManager = useFileManager({
+    type: "DISCHARGE_SUMMARY",
+    onArchive: refetchAll,
+    onEdit: refetchAll,
+  });
+
   const uploadButtons: {
     name: string;
     icon: IconName;
@@ -237,6 +243,7 @@ export const FileUpload = (props: FileUploadProps) => {
     <div className={`md:p-4 ${props.className}`}>
       {fileUpload.Dialogues}
       {fileManager.Dialogues}
+      {dischargeSummaryFileManager.Dialogues}
       {!hideUpload && (
         <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
           {({ isAuthorized }) =>
@@ -245,6 +252,19 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4 className="mb-6 text-2xl">{UPLOAD_HEADING[type]}</h4>
                 {fileUpload.file ? (
                   <div className="mb-8 rounded-lg border border-secondary-300 bg-white p-4">
+                    <div className="mb-4 flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                      <span>
+                        <CareIcon icon="l-paperclip" className="mr-2" />
+                        {fileUpload.file.name}
+                      </span>
+                      <button
+                        onClick={fileUpload.clearFile}
+                        disabled={!!fileUpload.progress}
+                        className="text-lg"
+                      >
+                        <CareIcon icon="l-times" />
+                      </button>
+                    </div>
                     <TextFormField
                       name="consultation_file"
                       type="text"
@@ -322,13 +342,18 @@ export const FileUpload = (props: FileUploadProps) => {
           <FileBlock
             file={item}
             key={item.id}
-            fileManager={fileManager}
+            fileManager={
+              tab !== "DISCHARGE_SUMMARY"
+                ? fileManager
+                : dischargeSummaryFileManager
+            }
             associating_id={associatedId}
             editable={
               item?.uploaded_by?.username === authUser.username ||
               authUser.user_type === "DistrictAdmin" ||
               authUser.user_type === "StateAdmin"
             }
+            archivable={tab !== "DISCHARGE_SUMMARY"}
           />
         ))}
         {!(fileQuery?.data?.results || []).length && (

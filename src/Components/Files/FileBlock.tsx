@@ -12,10 +12,17 @@ export interface FileBlockProps {
   fileManager: FileManagerResult;
   associating_id: string;
   editable: boolean;
+  archivable?: boolean;
 }
 
 export default function FileBlock(props: FileBlockProps) {
-  const { file, fileManager, associating_id, editable = false } = props;
+  const {
+    file,
+    fileManager,
+    associating_id,
+    editable = false,
+    archivable = false,
+  } = props;
 
   const filetype = fileManager.getFileType(file);
 
@@ -104,7 +111,7 @@ export default function FileBlock(props: FileBlockProps) {
               Rename
             </ButtonV2>
           )}
-          {(file.is_archived || editable) && (
+          {(file.is_archived || editable) && archivable && (
             <ButtonV2
               variant={file.is_archived ? "primary" : "secondary"}
               onClick={() => fileManager.archiveFile(file, associating_id)}
