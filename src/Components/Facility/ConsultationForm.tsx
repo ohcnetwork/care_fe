@@ -15,7 +15,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import { LegacyRef, createRef, lazy, useEffect, useState } from "react";
+import { LegacyRef, createRef, lazy, useEffect, useRef, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
@@ -230,6 +230,7 @@ type Props = {
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
+  const submitController = useRef<AbortController>();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState,
@@ -538,15 +539,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           return;
-        case "consultation_notes":
-          if (!state.form[field]) {
-            errors[field] = t("field_required");
-            invalidForm = true;
-          } else if (!state.form[field].replace(/\s/g, "").length) {
-            errors[field] = "Consultation notes can not be empty";
-            invalidForm = true;
-          }
-          return;
         case "is_telemedicine":
           if (
             state.form.admitted_to === "Home Isolation" &&
@@ -744,6 +736,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         {
           pathParams: id ? { id } : undefined,
           body: data,
+          controllerRef: submitController,
         },
       );
 
@@ -1403,7 +1396,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <TextAreaFormField
                           label="General Instructions (Advice)"
-                          required
                           placeholder="Consultation Notes"
                           {...field("consultation_notes")}
                         />
