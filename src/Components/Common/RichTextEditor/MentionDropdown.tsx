@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
 import useSlug from "../../../Common/hooks/useSlug";
@@ -24,6 +24,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
   const users = data?.results || [];
 
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -41,6 +42,45 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
     );
   }, [users, filter]);
 
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Enter" && filteredUsers.length > 0) {
+        event.preventDefault();
+        if (selectedIndex !== null) {
+          onSelect({
+            id: filteredUsers[selectedIndex].id.toString(),
+            username: filteredUsers[selectedIndex].username,
+          });
+        } else {
+          onSelect({
+            id: filteredUsers[0].id.toString(),
+            username: filteredUsers[0].username,
+          });
+        }
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        setSelectedIndex((prevIndex) => {
+          if (prevIndex === null) return 0;
+          return Math.min(filteredUsers.length - 1, prevIndex + 1);
+        });
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        setSelectedIndex((prevIndex) => {
+          if (prevIndex === null) return filteredUsers.length - 1;
+          return Math.max(0, prevIndex - 1);
+        });
+      }
+    },
+    [filteredUsers, selectedIndex, onSelect],
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
   return (
     <div
       className="absolute z-10 max-h-36 w-64 overflow-y-scroll rounded-md bg-white text-sm shadow-lg"
@@ -48,10 +88,12 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
     >
       {loading && <div className="p-2 text-gray-500">Loading...</div>}
       {filteredUsers.length > 0 && !loading ? (
-        filteredUsers.map((user) => (
+        filteredUsers.map((user, index) => (
           <div
             key={user.id}
-            className="flex cursor-pointer items-center gap-2 p-2 hover:bg-gray-100"
+            className={`flex cursor-pointer items-center gap-2 p-2 ${
+              index === selectedIndex ? "bg-gray-100" : "hover:bg-gray-100"
+            }`}
             onClick={() =>
               onSelect({ id: user.id.toString(), username: user.username })
             }
