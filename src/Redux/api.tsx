@@ -1652,11 +1652,6 @@ const routes = {
     path: "/api/v1/hcx/claim/{external_id}/",
     method: "DELETE",
   },
-
-  hcxMakeClaim: {
-    path: "/api/v1/hcx/make_claim/",
-    method: "POST",
-  },
 } as const;
 
 export default routes;

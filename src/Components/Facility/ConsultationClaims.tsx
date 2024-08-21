@@ -1,13 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { HCXActions } from "../../Redux/actions";
+import { useState } from "react";
 import PageTitle from "../Common/PageTitle";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import CreateClaimCard from "../HCX/CreateClaimCard";
-import { HCXClaimModel } from "../HCX/models";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications";
+import useQuery from "../../Utils/request/useQuery";
+import HcxApis from "../HCX/apis";
 
 interface Props {
   facilityId: string;
@@ -20,32 +19,24 @@ export default function ConsultationClaims({
   consultationId,
   patientId,
 }: Props) {
-  const dispatch = useDispatch<any>();
-  const [claims, setClaims] = useState<HCXClaimModel[]>();
   const [isCreateLoading, setIsCreateLoading] = useState(false);
-
-  const fetchClaims = useCallback(async () => {
-    const res = await dispatch(
-      HCXActions.claims.list({
-        ordering: "-modified_date",
-        consultation: consultationId,
-      }),
-    );
-
-    if (res.data && res.data.results) {
-      setClaims(res.data.results);
-      if (isCreateLoading)
+  const { data, refetch } = useQuery(HcxApis.claims.list, {
+    query: {
+      consultation: consultationId,
+      ordering: "-modified_date",
+    },
+    onResponse: ({ data }) => {
+      if (!isCreateLoading) {
+        return;
+      }
+      if (data?.results) {
         Notification.Success({ msg: "Fetched Claim Approval Results" });
-    } else {
-      if (isCreateLoading)
+      } else {
         Notification.Success({ msg: "Error Fetched Claim Approval Results" });
-    }
-    setIsCreateLoading(false);
-  }, [dispatch, consultationId]);
-
-  useEffect(() => {
-    fetchClaims();
-  }, [fetchClaims]);
+      }
+      setIsCreateLoading(false);
+    },
+  });
 
   useMessageListener((data) => {
     if (
@@ -53,7 +44,7 @@ export default function ConsultationClaims({
       (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
       data.message === "success"
     ) {
-      fetchClaims();
+      refetch();
     }
   });
 
@@ -81,7 +72,7 @@ export default function ConsultationClaims({
         </div>
 
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
-          {claims?.map((claim) => (
+          {data?.results.map((claim) => (
             <div className="rounded-lg bg-white p-8">
               <ClaimDetailCard claim={claim} />
             </div>

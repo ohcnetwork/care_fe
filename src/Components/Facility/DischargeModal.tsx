@@ -1,7 +1,7 @@
 import * as Notification from "../../Utils/Notifications";
 
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
@@ -10,14 +10,11 @@ import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DISCHARGE_REASONS } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { dischargePatient } from "../../Redux/actions";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
 import CircularProgress from "../Common/components/CircularProgress";
@@ -28,6 +25,10 @@ import { FieldError } from "../Form/FieldValidators";
 import { useTranslation } from "react-i18next";
 import useConfirmedAction from "../../Common/hooks/useConfirmedAction";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import useQuery from "../../Utils/request/useQuery";
+import HcxApis from "../HCX/apis";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -62,8 +63,6 @@ const DischargeModal = ({
 }: IProps) => {
   const { t } = useTranslation();
   const { enable_hcx } = useConfig();
-
-  const dispatch: any = useDispatch();
   const [preDischargeForm, setPreDischargeForm] =
     useState<PreDischargeFormInterface>({
       new_discharge_reason,
@@ -98,30 +97,27 @@ const DischargeModal = ({
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
 
-  const fetchLatestClaim = useCallback(async () => {
-    const res = await dispatch(
-      HCXActions.claims.list({
-        ordering: "-modified_date",
-        use: "claim",
-        consultation: consultationData.id,
-      }),
-    );
-
-    if (res?.data?.results?.length > 0) {
-      setLatestClaim(res.data.results[0]);
-      if (isCreateClaimLoading)
-        Notification.Success({ msg: "Fetched Claim Approval Results" });
-    } else {
-      setLatestClaim(undefined);
-      if (isCreateClaimLoading)
-        Notification.Success({ msg: "Error Fetched Claim Approval Results" });
-    }
-    setIsCreateClaimLoading(false);
-  }, [consultationData.id, dispatch]);
-
-  useEffect(() => {
-    fetchLatestClaim();
-  }, [fetchLatestClaim]);
+  const claimsQuery = useQuery(HcxApis.claims.list, {
+    query: {
+      ordering: "-modified_date",
+      use: "claim",
+      consultation: consultationData.id,
+    },
+    onResponse: ({ data }) => {
+      if (data?.results.length) {
+        setLatestClaim(data.results[0]);
+        if (isCreateClaimLoading) {
+          Notification.Success({ msg: "Fetched Claim Approval Results" });
+        }
+      } else {
+        setLatestClaim(undefined);
+        if (isCreateClaimLoading) {
+          Notification.Success({ msg: "Error Fetched Claim Approval Results" });
+        }
+      }
+      setIsCreateClaimLoading(false);
+    },
+  });
 
   useMessageListener((data) => {
     if (
@@ -129,7 +125,7 @@ const DischargeModal = ({
       (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
       data.message === "success"
     ) {
-      fetchLatestClaim();
+      claimsQuery.refetch();
     }
   });
 
@@ -165,19 +161,16 @@ const DischargeModal = ({
 
   const submitAction = useConfirmedAction(async () => {
     setIsSendingDischargeApi(true);
-    const dischargeResponse = await dispatch(
-      dischargePatient(
-        {
-          ...preDischargeForm,
-          new_discharge_reason: discharge_reason,
-          discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
-        },
-        { id: consultationData.id },
-      ),
-    );
+    const { res } = await request(routes.dischargePatient, {
+      pathParams: { id: consultationData.id },
+      body: {
+        ...preDischargeForm,
+        new_discharge_reason: discharge_reason,
+        discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
+      },
+    });
     setIsSendingDischargeApi(false);
-
-    if (dischargeResponse?.status === 200) {
+    if (res?.ok) {
       Notification.Success({ msg: "Patient Discharged Successfully" });
       afterSubmit?.();
     }
@@ -395,7 +388,7 @@ const DischargeModal = ({
               <CreateClaimCard
                 consultationId={consultationData.id ?? ""}
                 patientId={consultationData.patient ?? ""}
-                use="claim"
+                use="Claim"
                 isCreating={isCreateClaimLoading}
                 setIsCreating={setIsCreateClaimLoading}
               />

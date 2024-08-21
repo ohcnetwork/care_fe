@@ -21,6 +21,8 @@ export type Route<TData, TBody> =
   | QueryRoute<TData>
   | MutationRoute<TData, TBody>;
 
+export type ApiRoutes = Record<string, Route<unknown, unknown>>;
+
 export interface RequestResult<TData> {
   res: Response | undefined;
   data: TData | undefined;

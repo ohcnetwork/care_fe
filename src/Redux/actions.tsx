@@ -65,10 +65,6 @@ export const getConsultation = (id: string) => {
   return fireRequest("getConsultation", [], {}, { id: id });
 };
 
-export const dischargePatient = (params: object, pathParams: object) => {
-  return fireRequest("dischargePatient", [], params, pathParams);
-};
-
 //Shift
 export const listShiftRequests = (params: object, key: string) => {
   return fireRequest("listShiftRequests", [], params, null, key);
@@ -168,9 +164,5 @@ export const HCXActions = {
         `listPreAuths-${consultation}`,
       );
     },
-  },
-
-  makeClaim(claim: string) {
-    return fireRequest("hcxMakeClaim", [], { claim });
   },
 };

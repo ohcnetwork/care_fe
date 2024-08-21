@@ -1,5 +1,5 @@
 import { Type } from "../../Redux/api";
-import { PaginatedResponse } from "../../Utils/request/types";
+import { ApiRoutes, PaginatedResponse } from "../../Utils/request/types";
 import { MedicineAdministrationRecord, Prescription } from "./models";
 
 const MedicineRoutes = {
@@ -54,6 +54,6 @@ const MedicineRoutes = {
     TBody: Type<Record<string, never>>(),
     TRes: Type<Record<string, never>>(),
   },
-} as const;
+} as const satisfies ApiRoutes;
 
 export default MedicineRoutes;
