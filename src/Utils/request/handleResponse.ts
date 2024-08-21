@@ -20,14 +20,15 @@ export default function handleResponse(
 
   // Other Errors between 400-599 (inclusive)
   if (res.status >= 400 && res.status < 600) {
-    // Invalid token
-    if (!silent && error?.code === "token_not_valid") {
-      navigate(`/session-expired?redirect=${window.location.href}`);
-    }
-
-    // Handle session expiry
-    if (error?.detail === "Authentication credentials were not provided.") {
-      navigate(`/session-expired?redirect=${window.location.href}`);
+    // Handle invalid token / session expiry
+    if (
+      !silent &&
+      (error?.code === "token_not_valid" ||
+        error?.detail === "Authentication credentials were not provided.")
+    ) {
+      if (!location.pathname.startsWith("/session-expired")) {
+        navigate(`/session-expired?redirect=${window.location.href}`);
+      }
       return;
     }
 
