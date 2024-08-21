@@ -89,14 +89,15 @@ export default function GenericEvent(props: IProps) {
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-secondary-400 p-4 @container">
       {Object.entries(props.values)
-        .filter(([_, value]) => formatValue(value) !== null)
-        .map(([key, value]) => (
+        .map(([key, value]) => ({ key, value: formatValue(value, key) }))
+        .filter(({ value }) => value != null)
+        .map(({ key, value }) => (
           <div key={key} className="flex w-full flex-col items-start gap-2">
             <span className="text-xs capitalize text-secondary-700">
               {t(key).replaceAll(/_/g, " ")}
             </span>
             <span className="break-all text-sm font-semibold text-secondary-700">
-              {formatValue(value, key)}
+              {value}
             </span>
           </div>
         ))}
