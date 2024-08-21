@@ -129,7 +129,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 id="delete-facility-bedcapacity"
                 onClick={() => setOpenDeleteDialog(true)}
                 authorizeFor={NonReadOnlyUsers}
-                className=" tooltip bg-opacity/10 flex aspect-square h-7 w-7 flex-col items-center justify-center rounded bg-red-100 px-4 py-0 hover:bg-red-200"
+                className="tooltip bg-opacity/10 flex aspect-square h-7 w-7 flex-col items-center justify-center rounded bg-red-100 px-4 py-0 hover:bg-red-200"
                 variant="secondary"
                 ghost
               >

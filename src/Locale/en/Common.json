@@ -26,6 +26,7 @@
   "Notifications": "Notifications",
   "Submit": "Submit",
   "Cancel": "Cancel",
+  "back": "Back",
   "powered_by": "Powered By",
   "care": "CARE",
   "something_went_wrong": "Something went wrong..!",
@@ -118,6 +119,8 @@
   "latitude_invalid": "Latitude must be between -90 and 90",
   "longitude_invalid": "Longitude must be between -180 and 180",
   "save": "Save",
+  "continue" : "Continue",
+  "save_and_continue": "Save and Continue",
   "select": "Select",
   "lsg": "Lsg",
   "delete": "Delete",
@@ -145,10 +148,6 @@
   "add_as": "Add as",
   "sort_by": "Sort By",
   "none": "None",
-  "RESPIRATORY_SUPPORT_UNKNOWN": "None",
-  "RESPIRATORY_SUPPORT_OXYGEN_SUPPORT": "O2 Support",
-  "RESPIRATORY_SUPPORT_NON_INVASIVE": "NIV",
-  "RESPIRATORY_SUPPORT_INVASIVE": "IV",
   "choose_file": "Choose File",
   "view_faciliy": "View Facility",
   "view_patients": "View Patients",
@@ -177,5 +176,8 @@
   "caution": "Caution",
   "feed_optimal_experience_for_phones": "For optimal viewing experience, consider rotating your device.",
   "feed_optimal_experience_for_apple_phones": "For optimal viewing experience, consider rotating your device. Ensure auto-rotate is enabled in your device settings.",
-  "action_irreversible": "This action is irreversible"
+  "action_irreversible": "This action is irreversible",
+  "GENDER__1": "Male",
+  "GENDER__2": "Female",
+  "GENDER__3": "Non-binary"
 }

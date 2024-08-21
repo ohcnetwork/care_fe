@@ -46,7 +46,7 @@ const LiveMonitoringFilters = (props: Props) => {
               <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                 <div className="flow-root rounded-md">
                   <span className="block text-sm text-secondary-800">
-                    <span className="font-bold ">{props.totalCount}</span>{" "}
+                    <span className="font-bold">{props.totalCount}</span>{" "}
                     Camera(s) present
                   </span>
                 </div>

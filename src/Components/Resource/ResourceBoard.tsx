@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { downloadResourceRequests } from "../../Redux/actions";
 import { navigate } from "raviger";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatName } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDateTime } from "../../Utils/utils";
 import { ExportButton } from "../Common/Export";
@@ -126,8 +126,7 @@ const ResourceCard = ({ resource }: any) => {
                   >
                     <CareIcon icon="l-user" className="mr-2 text-xl" />
                     <dd className="text-sm font-bold leading-5 text-secondary-900">
-                      {resource.assigned_to_object.first_name}{" "}
-                      {resource.assigned_to_object.last_name} -{" "}
+                      {formatName(resource.assigned_to_object)} -{" "}
                       {resource.assigned_to_object.user_type}
                     </dd>
                   </dt>
@@ -233,7 +232,7 @@ export default function ResourceBoard({
     <div
       ref={drop}
       className={classNames(
-        "e mr-2 h-full w-full  shrink-0 overflow-y-auto rounded-md bg-secondary-200 pb-4 @lg:w-1/2 @3xl:w-1/3 @7xl:w-1/4",
+        "e mr-2 h-full w-full shrink-0 overflow-y-auto rounded-md bg-secondary-200 pb-4 @lg:w-1/2 @3xl:w-1/3 @7xl:w-1/4",
         isOver && "cursor-move",
       )}
     >
@@ -260,7 +259,7 @@ export default function ResourceBoard({
         {isLoading.board ? (
           <div className="m-1">
             <div className="mx-auto w-full max-w-sm rounded-md border border-secondary-300 bg-white p-4 shadow">
-              <div className="flex animate-pulse space-x-4 ">
+              <div className="flex animate-pulse space-x-4">
                 <div className="flex-1 space-y-4 py-1">
                   <div className="h-4 w-3/4 rounded bg-secondary-400"></div>
                   <div className="space-y-2">

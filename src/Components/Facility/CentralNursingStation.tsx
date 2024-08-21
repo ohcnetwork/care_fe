@@ -107,7 +107,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                   <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                     <div className="flow-root rounded-md">
                       <span className="block text-sm text-secondary-800">
-                        <span className="font-bold ">{totalCount}</span> Vitals
+                        <span className="font-bold">{totalCount}</span> Vitals
                         Monitor present
                       </span>
                     </div>

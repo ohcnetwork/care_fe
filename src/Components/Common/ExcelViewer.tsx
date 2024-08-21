@@ -39,9 +39,9 @@ const ExcelViewer = ({
   const [selectedRowsData, setSelectedRowsData] = useState<any[]>([]);
 
   const initialSelectedRows = fileData
-    ? fileData
+    ? (fileData
         .map((_, i) => i)
-        .filter((i) => !errors.some((err) => err.index === i)) ?? []
+        .filter((i) => !errors.some((err) => err.index === i)) ?? [])
     : [];
 
   const [selectedRows, setSelectedRows] =
@@ -132,9 +132,7 @@ const ExcelViewer = ({
                         return (
                           <tr
                             key={currentRowIndex}
-                            className={`
-                            ${rowIndex % 2 === 0 ? "bg-secondary-50" : "bg-white"}
-                          `}
+                            className={` ${rowIndex % 2 === 0 ? "bg-secondary-50" : "bg-white"} `}
                           >
                             {showCheckbox && (
                               <td className="w-5 px-4">
@@ -197,10 +195,7 @@ const ExcelViewer = ({
                                   <>
                                     <td
                                       key={colIndex}
-                                      className={`
-                                  max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap border px-4 py-2
-                                  ${!!error && "text-red-500"}
-                                `}
+                                      className={`max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap border px-4 py-2 ${!!error && "text-red-500"} `}
                                       title={
                                         error ? error.error : String(value)
                                       }

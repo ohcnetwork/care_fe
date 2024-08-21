@@ -32,7 +32,10 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
       return trimmed;
     }
 
-    if (new Date(trimmed).toString() !== "Invalid Date") {
+    const dateTimeRegex =
+      /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?)?$/;
+
+    if (trimmed.match(dateTimeRegex)) {
       return new Date(trimmed).toLocaleString();
     }
 
@@ -90,7 +93,7 @@ export default function GenericEvent(props: IProps) {
           <span className="text-xs capitalize text-secondary-700">
             {t(key).replaceAll(/_/g, " ")}
           </span>
-          <span className="break-all text-sm font-semibold text-secondary-700">
+          <span className="break-words text-sm font-semibold text-secondary-700">
             {formatValue(value, key)}
           </span>
         </div>

@@ -21,6 +21,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   leadingPadding?: string | undefined;
   min?: string | number;
   max?: string | number;
+  step?: string | number;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
@@ -49,7 +50,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         hasLeading && (props.leadingPadding || "pl-10"),
         hasTrailing && (props.trailingPadding || "pr-10"),
         field.error && "border-danger-500",
-        field.className,
+        props.inputClassName,
       )}
       disabled={field.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
@@ -64,6 +65,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
       onBlur={props.onBlur}
       onChange={(e) => field.handleChange(e.target.value)}
       onKeyDown={props.onKeyDown}
+      step={props.step}
     />
   );
 

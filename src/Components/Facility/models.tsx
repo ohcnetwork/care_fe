@@ -107,8 +107,8 @@ export interface PatientConsentModel {
   id: string;
   type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
   patient_code_status:
-  | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
-  | null;
+    | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
+    | null;
   files: FileUploadModel[] | null;
   archived: boolean;
   archived_by?: UserBareMinimum;
@@ -311,7 +311,6 @@ export type DialysisPlotsRes = {
 
 export type NeurologicalTablesFields =
   | "consciousness_level"
-  | "consciousness_level_detail"
   | "left_pupil_size"
   | "left_pupil_size_detail"
   | "right_pupil_size"
@@ -331,7 +330,6 @@ export type NeurologicalTablesFields =
 
 export type NeurologicalTablesRes = {
   consciousness_level: number;
-  consciousness_level_detail: string;
   left_pupil_size: number;
   left_pupil_size_detail: string;
   right_pupil_size: number;
@@ -448,15 +446,15 @@ export type VentilatorPlotRes = {
 export interface DailyRoundsBody {
   page?: number;
   fields:
-  | ABGPlotsFields[]
-  | DialysisPlotsFields[]
-  | NeurologicalTablesFields[]
-  | NursingPlotFields[]
-  | NutritionPlotsFields[]
-  | PainDiagramsFields[]
-  | PressureSoreDiagramsFields[]
-  | PrimaryParametersPlotFields[]
-  | VentilatorPlotFields[];
+    | ABGPlotsFields[]
+    | DialysisPlotsFields[]
+    | NeurologicalTablesFields[]
+    | NursingPlotFields[]
+    | NutritionPlotsFields[]
+    | PainDiagramsFields[]
+    | PressureSoreDiagramsFields[]
+    | PrimaryParametersPlotFields[]
+    | VentilatorPlotFields[];
 }
 
 export interface DailyRoundsRes {
@@ -464,15 +462,15 @@ export interface DailyRoundsRes {
   page_size: number;
   results: {
     [date: string]:
-    | PressureSoreDiagramsRes
-    | ABGPlotsRes
-    | DialysisPlotsRes
-    | NeurologicalTablesRes
-    | NursingPlotRes
-    | NutritionPlotsRes
-    | PainDiagramsRes
-    | PrimaryParametersPlotRes
-    | VentilatorPlotRes;
+      | PressureSoreDiagramsRes
+      | ABGPlotsRes
+      | DialysisPlotsRes
+      | NeurologicalTablesRes
+      | NursingPlotRes
+      | NutritionPlotsRes
+      | PainDiagramsRes
+      | PrimaryParametersPlotRes
+      | VentilatorPlotRes;
   };
 }
 

@@ -1,6 +1,6 @@
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
-import { formatDateTime } from "../../Utils/utils";
+import { formatDateTime, formatName } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useQuery from "../../Utils/request/useQuery";
@@ -25,7 +25,7 @@ export const NoticeBoard = () => {
             <div className="px-6 py-4">
               <div className="text-justify text-lg">{item.message}</div>
               <div className="text-md my-2 text-secondary-700">
-                {`${item.caused_by.first_name} ${item.caused_by.last_name}`} -{" "}
+                {formatName(item.caused_by)} -{" "}
                 <span className="font-bold text-primary-700">
                   {item.caused_by.user_type}
                 </span>
@@ -40,10 +40,10 @@ export const NoticeBoard = () => {
     );
   } else {
     notices = (
-      <div className=" m-auto flex max-w-xs items-center ">
+      <div className="m-auto flex max-w-xs items-center">
         <div className="my-36">
           <CareIcon icon="l-bell-slash" className="h-auto text-secondary-500" />
-          <div className=" m-auto mt-6 text-2xl text-secondary-500">
+          <div className="m-auto mt-6 text-2xl text-secondary-500">
             No Notice Available
           </div>
         </div>
