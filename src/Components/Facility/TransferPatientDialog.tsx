@@ -163,8 +163,7 @@ const TransferPatientDialog = (props: Props) => {
         <div className="grid grid-cols-1 gap-4">
           <div>
             <p className="leading-relaxed">
-              Note: Date of birth must match the patient to process the transfer
-              request.
+              {t("patient_transfer_birth_match_note")}
             </p>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
