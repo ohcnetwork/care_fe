@@ -74,6 +74,8 @@ const NotificationTile = ({
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
       case "PATIENT_NOTE_ADDED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/notes`;
+      case "PATIENT_NOTE_MENTIONED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/notes`;
       case "MESSAGE":
         return "/notice_board/";
       default:
