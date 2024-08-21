@@ -16,7 +16,7 @@ import useFileManager from "../../Utils/useFileManager.js";
 import Tabs from "../Common/components/Tabs.js";
 import FileBlock from "./FileBlock.js";
 
-export const LinearProgressWithLabel = (props: any) => {
+export const LinearProgressWithLabel = (props: { value: number }) => {
   return (
     <div className="flex align-middle">
       <div className="my-auto mr-2 w-full">
@@ -51,7 +51,7 @@ export interface ModalDetails {
   id?: string;
   reason?: string;
   userArchived?: string;
-  archiveTime?: any;
+  archiveTime?: string;
   associatedId?: string;
 }
 
