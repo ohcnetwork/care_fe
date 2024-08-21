@@ -35,30 +35,22 @@ const DataTable = (props: any) => {
         </div>
         <div className="flex flex-row overflow-x-auto">
           {data.map((x: any, i: any) => {
-            if (
-              x.left !== "N/A" &&
-              x.left !== null &&
-              x.right !== "N/A" &&
-              x.right !== null
-            ) {
-              return (
-                <div
-                  key={`${title}_${i}`}
-                  className="flex flex-col divide-x divide-secondary-200"
-                >
-                  <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-900">
-                    {x.date}
-                  </div>
-                  <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
-                    {x.left}
-                  </div>
-                  <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
-                    {x.right}
-                  </div>
+            return (
+              <div
+                key={`${title}_${i}`}
+                className="flex flex-col divide-x divide-secondary-200"
+              >
+                <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-900">
+                  {x.date}
                 </div>
-              );
-            }
-            return null;
+                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
+                  {x.left}
+                </div>
+                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
+                  {x.right}
+                </div>
+              </div>
+            );
           })}
         </div>
       </div>
