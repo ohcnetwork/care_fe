@@ -28,6 +28,10 @@ export class PatientConsultationPage {
     cy.searchAndSelectOption("#referred_to", referance);
   }
 
+  selectBed(bedNo: string) {
+    cy.searchAndSelectOption("#bed", bedNo);
+  }
+
   selectPatientWard(ward: string) {
     cy.searchAndSelectOption("#transferred_from_location", ward);
   }

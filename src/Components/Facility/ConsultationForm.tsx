@@ -731,12 +731,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         patient_no: state.form.patient_no || null,
       };
 
-      request(id ? routes.updateConsultation : routes.createConsultation, {
-        pathParams: id ? { id } : undefined,
-        body: data,
-        controllerRef: submitController,
-      });
-
       const { data: obj } = await request(
         id ? routes.updateConsultation : routes.createConsultation,
         {
