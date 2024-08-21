@@ -539,6 +539,15 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           return;
+        case "consultation_notes":
+          if (!state.form[field]) {
+            errors[field] = t("field_required");
+            invalidForm = true;
+          } else if (!state.form[field].replace(/\s/g, "").length) {
+            errors[field] = "Consultation notes can not be empty";
+            invalidForm = true;
+          }
+          return;
         case "is_telemedicine":
           if (
             state.form.admitted_to === "Home Isolation" &&
@@ -599,9 +608,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         }
 
         case "treating_physician": {
-          if (state.form.suggestion === "DC") {
-            break;
-          }
           if (state.form.suggestion !== "DD" && !state.form[field]) {
             errors[field] = t("field_required");
             invalidForm = true;
@@ -626,7 +632,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
       }
     });
-
     if (invalidForm) {
       dispatch({ type: "set_errors", errors });
       const firstError = Object.keys(errors).find((key) => errors[key]);
@@ -734,12 +739,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
         patient_no: state.form.patient_no || null,
       };
-
-      request(id ? routes.updateConsultation : routes.createConsultation, {
-        pathParams: id ? { id } : undefined,
-        body: data,
-        controllerRef: submitController,
-      });
 
       const { data: obj } = await request(
         id ? routes.updateConsultation : routes.createConsultation,
@@ -1406,6 +1405,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <TextAreaFormField
                           label="General Instructions (Advice)"
+                          required
                           placeholder="Consultation Notes"
                           {...field("consultation_notes")}
                         />
@@ -1438,7 +1438,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           name={"treating_physician"}
                           label={t("treating_doctor")}
                           placeholder="Attending Doctors Name and Designation"
-                          required={state.form.suggestion !== "DC"}
+                          required
                           value={
                             state.form.treating_physician_object ?? undefined
                           }
