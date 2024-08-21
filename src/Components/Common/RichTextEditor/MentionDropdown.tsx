@@ -37,7 +37,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) =>
-      user.username.toLowerCase().includes(filter.toLowerCase()),
+      user.username.toLowerCase().startsWith(filter.toLowerCase()),
     );
   }, [users, filter]);
 

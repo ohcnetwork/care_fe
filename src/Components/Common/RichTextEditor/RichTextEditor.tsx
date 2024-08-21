@@ -408,7 +408,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
     }
   };
-
   const handleInput = useCallback((event: React.FormEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
     const text = target.textContent || "";
@@ -416,27 +415,31 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     resetStyling();
 
-    if (lastChar === "@") {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0 && editorRef.current) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        setMentionPosition({
-          top: rect.bottom + window.scrollY + 30,
-          left: rect.left + window.scrollX + 10,
-        });
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0 && editorRef.current) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      setMentionPosition({
+        top: rect.bottom + window.scrollY + 30,
+        left: rect.left + window.scrollX + 10,
+      });
+
+      lastCaretPosition.current = range.cloneRange();
+
+      if (lastChar === "@") {
         setShowMentions(true);
-        lastCaretPosition.current = range.cloneRange();
-
+        setMentionFilter("");
+      } else if (text.includes("@")) {
         const lastAtSymbolIndex = text.lastIndexOf("@");
-
-        const filterText = text.slice(lastAtSymbolIndex + 1);
+        const filterText = text.slice(lastAtSymbolIndex + 1).trim();
         setMentionFilter(filterText);
+      } else {
+        setShowMentions(false);
+        setMentionFilter("");
       }
-    } else {
-      setShowMentions(false);
-      setMentionFilter("");
     }
+
     saveState();
   }, []);
 
@@ -756,7 +759,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       </div>
 
       {/* toolbar-2 */}
-      <div className="flex items-center space-x-2 rounded-b-md border border-gray-300 bg-gray-100 pl-2 ">
+      <div className="flex items-center space-x-2 rounded-b-md border border-gray-300 bg-gray-100 pl-2">
         <button
           onClick={() => fileInputRef.current?.click()}
           className="tooltip rounded p-1 hover:bg-gray-200"
