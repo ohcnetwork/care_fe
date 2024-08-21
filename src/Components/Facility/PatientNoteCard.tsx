@@ -290,7 +290,10 @@ const PatientNoteCard = ({
                 }}
                 className={`pl-11 text-sm text-gray-700 ${allowThreadView && "cursor-pointer"}`}
               >
-                <MarkdownPreview markdown={noteField} />
+                <MarkdownPreview
+                  markdown={noteField}
+                  mentioned_users={note.mentioned_users}
+                />
                 <div className="flex gap-2">
                   {/* temporaryly marked as any due to external_id */}
                   {note?.files?.map((file: any) => (

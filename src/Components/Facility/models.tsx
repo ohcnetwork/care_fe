@@ -546,6 +546,7 @@ export interface PatientNotesModel {
   replies: PaitentNotesReplyModel[];
   files: FileUploadModel[];
   parent_note_object?: PaitentNotesReplyModel;
+  mentioned_users: UserBareMinimum[];
 }
 
 export interface PatientNoteStateType {
