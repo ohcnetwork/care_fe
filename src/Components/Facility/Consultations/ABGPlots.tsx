@@ -26,7 +26,7 @@ export const ABGPlots = (props: any) => {
             "lactate",
             "sodium",
             "potassium",
-            "ventilator_fi02",
+            "ventilator_fio2",
           ],
         },
         pathParams: {
@@ -144,7 +144,7 @@ export const ABGPlots = (props: any) => {
             title="FIO2(Ventilator)(%)"
             name="fio2"
             xData={dates}
-            yData={yAxisData("ventilator_fi02")}
+            yData={yAxisData("ventilator_fio2")}
             low={21}
             high={60}
           />
