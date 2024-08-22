@@ -28,10 +28,6 @@ class PatientLogupdate {
     cy.get("#other_details").click().type(details);
   }
 
-  typeAdditionalSymptoms(symptoms: string) {
-    cy.searchAndSelectOption("#additional_symptoms", symptoms);
-  }
-
   typeAndMultiSelectSymptoms(input, symptoms) {
     cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
   }
