@@ -15,7 +15,7 @@ import PainChart from "../components/PainChart";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
-  const handleBloodPressureChange = (event: FieldChangeEvent<number>) => {
+  const handleBloodPressureChange = (event: FieldChangeEvent) => {
     const bp = {
       ...(log.bp ?? {}),
       [event.name]: event.value,
@@ -146,9 +146,10 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         optionDisplay={(c) => c.label}
         optionValue={(c) => c.value || ""}
         value={log.rhythm}
-        onChange={(c) =>
-          onChange({ rhythm: c.value as DailyRoundsModel["rhythm"] })
-        }
+        onChange={(c) => {
+          const newValue = c.value === null ? undefined : c.value;
+          onChange({ rhythm: newValue as DailyRoundsModel["rhythm"] });
+        }}
       />
       <TextAreaFormField
         label="Heartbeat Description"
