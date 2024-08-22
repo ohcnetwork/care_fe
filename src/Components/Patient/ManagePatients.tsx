@@ -112,19 +112,22 @@ export const PatientManager = () => {
 
   const setPhoneNum = (phone_number: string) => {
     setPhoneNumber(phone_number);
+
     if (phone_number.length >= 13) {
+      if (isValidPhoneNumber(phone_number)) {
+        setPhoneNumberError("");
+        updateQuery({ phone_number });
+      } else {
+        setPhoneNumberError("Enter a valid number");
+      }
+    } else {
       setPhoneNumberError("");
-      updateQuery({ phone_number });
-      return;
     }
+  };
 
-    if (phone_number === "+91" || phone_number === "") {
-      setPhoneNumberError("");
-      qParams.phone_number && updateQuery({ phone_number: null });
-      return;
-    }
-
-    setPhoneNumberError("Enter a valid number");
+  const isValidPhoneNumber = (phoneNumber: string) => {
+    const phoneNumberRegex = /^\+91[0-9]{10}$/;
+    return phoneNumberRegex.test(phoneNumber);
   };
 
   const setEmergencyPhoneNum = (emergency_phone_number: string) => {
