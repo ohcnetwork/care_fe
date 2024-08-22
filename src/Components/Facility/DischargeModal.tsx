@@ -105,7 +105,7 @@ const DischargeModal = ({
     },
   });
 
-  const ConsultationDiagnosisList: ConsultationDiagnosis[] =
+  const diagnoses =
     data?.diagnoses?.map((diagnosis) => diagnosis) || [];
 
   const discharge_reason =
