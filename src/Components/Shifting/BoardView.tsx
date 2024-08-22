@@ -156,7 +156,7 @@ export default function BoardView() {
           <Tabs
             tabs={[
               { text: t("active"), value: 0 },
-              { text: t("completed"), value: 1 },
+              { text: t("archived"), value: 1 },
             ]}
             onTabChange={(tab) =>
               setBoardFilter(tab ? completedBoards : activeBoards)

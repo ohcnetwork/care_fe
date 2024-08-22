@@ -143,8 +143,8 @@ export default function PatientConsentRecords(props: {
       />
       <Tabs
         tabs={[
-          { text: "Active", value: 0 },
-          { text: "Archived", value: 1 },
+          { text: t("active"), value: 0 },
+          { text: t("archived"), value: 1 },
         ]}
         className="my-4"
         onTabChange={(v) => setShowArchived(!!v)}

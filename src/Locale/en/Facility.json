@@ -54,5 +54,6 @@
   "create_add_more": "Create & Add More",
   "discharged_patients": "Discharged Patients",
   "discharged_patients_empty": "No discharged patients present in this facility",
-  "update_facility_middleware_success": "Facility middleware updated successfully"
+  "update_facility_middleware_success": "Facility middleware updated successfully",
+  "select_facility_for_discharged_patients_warning": "Facility needs to be selected to view discharged patients."
 }

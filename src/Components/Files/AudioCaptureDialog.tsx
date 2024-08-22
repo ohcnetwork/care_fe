@@ -102,25 +102,25 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       {status === "PERMISSION_DENIED" && (
         <div>
           <h2 className="font-bold text-white">
-            {t("audio.allow_permission")}
+            {t("audio__allow_permission")}
           </h2>
           <div className="text-secondary-200">
-            {t("audio.allow_permission_helper")}{" "}
+            {t("audio__allow_permission_helper")}{" "}
             {/* TODO: find a better link that supports all browsers */}
             <Link
               href="https://support.google.com/chrome/answer/2693767?hl=en&co=GENIE.Platform%3DAndroid"
               target="_blank"
               className="text-blue-400 underline"
             >
-              {t("audio.allow_permission_button")}
+              {t("audio__allow_permission_button")}
             </Link>
           </div>
         </div>
       )}
       {status === "WAITING_TO_RECORD" && (
         <div>
-          <h2 className="font-bold text-white">{t("audio.record")}</h2>
-          <div className="text-secondary-200">{t("audio.record_helper")}</div>
+          <h2 className="font-bold text-white">{t("audio__record")}</h2>
+          <div className="text-secondary-200">{t("audio__record_helper")}</div>
           <div className="mt-4">
             <button
               onClick={handleStartRecording}
@@ -135,12 +135,12 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
         <div>
           <h2 className="inline-flex animate-pulse items-center gap-2 font-bold text-red-500">
             <div className="aspect-square w-5 rounded-full bg-red-500" />
-            {t("audio.recording")}
+            {t("audio__recording")}
           </h2>
           <div className="text-secondary-200">
-            {t("audio.recording_helper")}
+            {t("audio__recording_helper")}
             <br />
-            {t("audio.recording_helper_2")}
+            {t("audio__recording_helper_2")}
           </div>
           <div className="mt-4">
             <button
@@ -155,7 +155,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       )}
       {status === "RECORDED" && (
         <div>
-          <h2 className="font-bold text-white">{t("audio.recorded")}</h2>
+          <h2 className="font-bold text-white">{t("audio__recorded")}</h2>
           <div className="text-secondary-200">
             {audioURL && (
               <div className="my-4">
@@ -182,7 +182,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
               className="rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
             >
               <CareIcon icon="l-history" className="mr-2 text-lg" />
-              {t("audio.start_again")}
+              {t("audio__start_again")}
             </button>
           </div>
         </div>

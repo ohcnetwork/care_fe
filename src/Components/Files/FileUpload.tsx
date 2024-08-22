@@ -90,16 +90,16 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
-    PATIENT: t("upload_headings.patient"),
-    CONSULTATION: t("upload_headings.consultation"),
-    SAMPLE_MANAGEMENT: t("upload_headings.sample_report"),
-    CLAIM: t("upload_headings.supporting_info"),
+    PATIENT: t("upload_headings__patient"),
+    CONSULTATION: t("upload_headings__consultation"),
+    SAMPLE_MANAGEMENT: t("upload_headings__sample_report"),
+    CLAIM: t("upload_headings__supporting_info"),
   };
   const VIEW_HEADING: { [index: string]: string } = {
-    PATIENT: t("file_list_headings.patient"),
-    CONSULTATION: t("file_list_headings.consultation"),
-    SAMPLE_MANAGEMENT: t("file_list_headings.sample_report"),
-    CLAIM: t("file_list_headings.supporting_info"),
+    PATIENT: t("file_list_headings__patient"),
+    CONSULTATION: t("file_list_headings__consultation"),
+    SAMPLE_MANAGEMENT: t("file_list_headings__sample_report"),
+    CLAIM: t("file_list_headings__supporting_info"),
   };
 
   const associatedId =

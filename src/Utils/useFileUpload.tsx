@@ -17,6 +17,7 @@ import imageCompression from "browser-image-compression";
 import { DEFAULT_ALLOWED_EXTENSIONS } from "../Common/constants";
 import CameraCaptureDialog from "../Components/Files/CameraCaptureDialog";
 import AudioCaptureDialog from "../Components/Files/AudioCaptureDialog";
+import { t } from "i18next";
 
 export type FileUploadOptions = {
   type: string;
@@ -108,15 +109,15 @@ export default function useFileUpload(
     const filenameLength = uploadFileName.trim().length;
     const f = file;
     if (f === undefined || f === null) {
-      setError("Please choose a file to upload");
+      setError(t("file_error__choose_file"));
       return false;
     }
     if (filenameLength === 0) {
-      setError("Please enter file name");
+      setError(t("file_error__file_name"));
       return false;
     }
     if (f.size > 10e7) {
-      setError("Maximum size of files is 100 MB");
+      setError(t("file_error__file_size"));
       return false;
     }
     const extension = f.name.split(".").pop();
@@ -125,7 +126,10 @@ export default function useFileUpload(
       !options.allowedExtensions?.includes(extension || "")
     ) {
       setError(
-        `Invalid file type ".${extension}" Allowed types: ${options.allowedExtensions?.join(", ")}`,
+        t("file_error__file_type", {
+          extension,
+          allowedExtensions: options.allowedExtensions?.join(", "),
+        }),
       );
       return false;
     }
@@ -151,7 +155,6 @@ export default function useFileUpload(
     const f = file;
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
-    console.log("filetype: ", newFile.type);
     return new Promise<void>((resolve, reject) => {
       uploadFile(
         url,
@@ -164,14 +167,14 @@ export default function useFileUpload(
             setFile(null);
             setUploadFileName("");
             Notification.Success({
-              msg: "File Uploaded Successfully",
+              msg: t("file_uploaded"),
             });
             setError(null);
             onUpload && onUpload(data);
             resolve();
           } else {
             Notification.Error({
-              msg: "Error Uploading File: " + xhr.statusText,
+              msg: t("file_error__dynamic", { statusText: xhr.statusText }),
             });
             setProgress(null);
             reject();
@@ -180,7 +183,7 @@ export default function useFileUpload(
         setProgress as any,
         () => {
           Notification.Error({
-            msg: "Error Uploading File: Network Error",
+            msg: t("file_error__network"),
           });
           setProgress(null);
           reject();

@@ -848,8 +848,8 @@ export const PatientManager = () => {
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
             <Tabs
               tabs={[
-                { text: "Live", value: 0 },
-                { text: "Discharged", value: 1 },
+                { text: t("live"), value: 0 },
+                { text: t("discharged"), value: 1 },
               ]}
               onTabChange={(tab) => {
                 if (tab === "LIVE") {
@@ -870,7 +870,7 @@ export const PatientManager = () => {
                   }
 
                   Notification.Warn({
-                    msg: "Facility needs to be selected to view discharged patients.",
+                    msg: t("select_facility_for_discharged_patients_warning"),
                   });
                   setShowDialog("list-discharged");
                 }
