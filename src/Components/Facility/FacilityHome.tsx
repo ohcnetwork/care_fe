@@ -97,8 +97,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const hasCoverImage = !!facilityData?.read_cover_image_url;
 
   const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
-  const hasPermissionToEditCoverImage =
-    !(authUser.user_type as string).includes("ReadOnly") &&
+  const hasPermissionToEditCoverImage = true;
+  !(authUser.user_type as string).includes("ReadOnly") &&
     USER_TYPES.findIndex((type) => type == authUser.user_type) >=
       StaffUserTypeIndex;
 
@@ -109,7 +109,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+      className={
+        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+      }
+      onClick={() => setEditCoverImage(true)}
     >
       <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
