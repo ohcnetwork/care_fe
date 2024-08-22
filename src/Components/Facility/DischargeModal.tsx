@@ -85,7 +85,6 @@ const DischargeModal = ({
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
   const [facility, setFacility] = useState<FacilityModel | null>(referred_to);
   const [errors, setErrors] = useState<any>({});
-  console.log(preDischargeForm);
 
   useEffect(() => {
     setPreDischargeForm((prev) => ({
