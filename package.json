@@ -51,7 +51,7 @@
     "@headlessui/react": "^2.1.2",
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
-    "@sentry/browser": "^8.12.0",
+    "@sentry/browser": "^8.26.0",
     "@yudiel/react-qr-scanner": "^2.0.0-beta.3",
     "axios": "^1.6.8",
     "browser-image-compression": "^2.0.2",
