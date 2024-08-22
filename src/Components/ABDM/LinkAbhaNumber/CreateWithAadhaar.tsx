@@ -7,7 +7,7 @@ import ButtonV2 from "../../Common/components/ButtonV2";
 import OtpFormField from "../../Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "../../Form/FormFields/PhoneNumberFormField";
 import { AbhaNumberModel } from "../types/abha";
-import { validateRule } from "../LinkABHANumberModal";
+import { validateRule } from "../../Users/UserAdd";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import * as Notify from "../../../Utils/Notifications";
