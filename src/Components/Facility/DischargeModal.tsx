@@ -28,6 +28,10 @@ import { FieldError } from "../Form/FieldValidators";
 import { useTranslation } from "react-i18next";
 import useConfirmedAction from "../../Common/hooks/useConfirmedAction";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
+import { ConsultationDiagnosis } from "../Diagnosis/types";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -81,6 +85,7 @@ const DischargeModal = ({
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
   const [facility, setFacility] = useState<FacilityModel | null>(referred_to);
   const [errors, setErrors] = useState<any>({});
+  console.log(preDischargeForm);
 
   useEffect(() => {
     setPreDischargeForm((prev) => ({
@@ -94,6 +99,15 @@ const DischargeModal = ({
 
     setFacility(referred_to);
   }, [referred_to]);
+
+  const { data } = useQuery(routes.getConsultation, {
+    pathParams: {
+      id: consultationData.id,
+    },
+  });
+
+  const ConsultationDiagnosisList: ConsultationDiagnosis[] =
+    data?.diagnoses?.map((diagnosis) => diagnosis) || [];
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
@@ -288,27 +302,6 @@ const DischargeModal = ({
               />
             </div>
           )}
-          <TextAreaFormField
-            required={
-              discharge_reason ==
-              DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
-            }
-            label={
-              {
-                "3": "Cause of death",
-                "1": "Discharged Advice",
-              }[discharge_reason ?? 0] ?? "Notes"
-            }
-            name="discharge_notes"
-            value={preDischargeForm.discharge_notes}
-            onChange={(e) =>
-              setPreDischargeForm((prev) => ({
-                ...prev,
-                discharge_notes: e.value,
-              }))
-            }
-            error={errors?.discharge_notes}
-          />
           <TextFormField
             name={
               discharge_reason ===
@@ -351,6 +344,15 @@ const DischargeModal = ({
                 : errors?.discharge_date
             }
           />
+
+          {discharge_reason !==
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
+            <div id="diagnosis_at_discharge">
+              <FieldLabel>Diagnosis at discharge</FieldLabel>
+              <EditDiagnosesBuilder value={ConsultationDiagnosisList} />
+            </div>
+          )}
+
           {discharge_reason ===
             DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id && (
             <>
@@ -384,6 +386,27 @@ const DischargeModal = ({
             />
           )}
         </div>
+        <TextAreaFormField
+          required={
+            discharge_reason ==
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+          }
+          label={
+            {
+              "3": "Cause of death",
+              "1": "Discharged Advice",
+            }[discharge_reason ?? 0] ?? "Notes"
+          }
+          name="discharge_notes"
+          value={preDischargeForm.discharge_notes}
+          onChange={(e) =>
+            setPreDischargeForm((prev) => ({
+              ...prev,
+              discharge_notes: e.value,
+            }))
+          }
+          error={errors?.discharge_notes}
+        />
 
         {enable_hcx && (
           // TODO: if policy and approved pre-auth exists
