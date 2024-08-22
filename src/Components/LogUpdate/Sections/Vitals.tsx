@@ -15,7 +15,7 @@ import PainChart from "../components/PainChart";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
-  const handleBloodPressureChange = (event: FieldChangeEvent) => {
+  const handleBloodPressureChange = (event: FieldChangeEvent<number>) => {
     const bp = {
       ...(log.bp ?? {}),
       [event.name]: event.value,
