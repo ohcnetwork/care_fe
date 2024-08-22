@@ -165,6 +165,7 @@ Cypress.Commands.add(
       .click()
       .then(() => {
         cy.get("[role='option']").contains(reference).click();
+        cy.get(element).get("#dropdown-toggle").click({ force: true });
       });
   },
 );
