@@ -48,7 +48,7 @@
     "@fontsource/inter": "^5.0.18",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.3",
-    "@headlessui/react": "^1.7.15",
+    "@headlessui/react": "^2.1.2",
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
     "@sentry/browser": "^8.12.0",

@@ -47,7 +47,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectRoundType("Telemedicine");
     patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
+    patientLogupdate.selectSymptomsDate("01012024");
+    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
@@ -72,7 +73,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
+    patientLogupdate.selectSymptomsDate("01012024");
+    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);

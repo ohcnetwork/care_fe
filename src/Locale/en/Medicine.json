@@ -39,6 +39,7 @@
   "prescription_logs": "Prescription Logs",
   "modification_caution_note": "No modifications possible once added",
   "discontinue_caution_note": "Are you sure you want to discontinue this prescription?",
+  "confirm_discontinue": "Confirm Discontinue",
   "edit_caution_note": "A new prescription will be added to the consultation with the edited details and the current prescription will be discontinued.",
   "reason_for_discontinuation": "Reason for discontinuation",
   "reason_for_edit": "Reason for edit",
