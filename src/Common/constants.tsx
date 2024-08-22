@@ -716,27 +716,27 @@ export const NURSING_CARE_PROCEDURES = [
 ] as const;
 
 export const EYE_OPEN_SCALE = [
-  { value: 4, text: "Spontaneous" },
-  { value: 3, text: "To Speech" },
-  { value: 2, text: "To Pain" },
   { value: 1, text: "No Response" },
+  { value: 2, text: "To Pain" },
+  { value: 3, text: "To Speech" },
+  { value: 4, text: "Spontaneous" },
 ];
 
 export const VERBAL_RESPONSE_SCALE = [
-  { value: 5, text: "Oriented to Time, Place and Person" },
-  { value: 4, text: "Confused/Irritable" },
-  { value: 3, text: "Inappropriate words/Cry to Pain" },
-  { value: 2, text: "Incomprehensible words/Moans to pain" },
   { value: 1, text: "No Response" },
+  { value: 2, text: "Incomprehensible words/Moans to pain" },
+  { value: 3, text: "Inappropriate words/Cry to Pain" },
+  { value: 4, text: "Confused/Irritable" },
+  { value: 5, text: "Oriented to Time, Place and Person" },
 ];
 
 export const MOTOR_RESPONSE_SCALE = [
-  { value: 6, text: "Obeying commands/Normal acrivity" },
-  { value: 5, text: "Moves to localized pain" },
-  { value: 4, text: "Flexion/Withdrawal from pain" },
-  { value: 3, text: "Abnormal Flexion(decorticate)" },
-  { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
+  { value: 2, text: "Abnormal Extension(decerebrate)" },
+  { value: 3, text: "Abnormal Flexion(decorticate)" },
+  { value: 4, text: "Flexion/Withdrawal from pain" },
+  { value: 5, text: "Moves to localized pain" },
+  { value: 6, text: "Obeying commands/Normal acrivity" },
 ];
 export const CONSULTATION_TABS = [
   { text: "UPDATES", desc: "Overview" },
