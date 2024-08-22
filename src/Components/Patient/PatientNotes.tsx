@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
