@@ -15,6 +15,7 @@ import { classNames, isAppleDevice } from "../../../Utils/utils.js";
 import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
 import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
+import { t } from "i18next";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -161,7 +162,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             className="w-full grow"
             innerClassName="pr-10"
             errorClassName="hidden"
-            placeholder="Type your Note"
+            placeholder={t("notes_placeholder")}
             disabled={!patientActive}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
