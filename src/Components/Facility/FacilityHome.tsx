@@ -97,8 +97,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const hasCoverImage = !!facilityData?.read_cover_image_url;
 
   const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
-  const hasPermissionToEditCoverImage = true;
-  !(authUser.user_type as string).includes("ReadOnly") &&
+  const hasPermissionToEditCoverImage = 
+    !(authUser.user_type as string).includes("ReadOnly") &&
     USER_TYPES.findIndex((type) => type == authUser.user_type) >=
       StaffUserTypeIndex;
 
