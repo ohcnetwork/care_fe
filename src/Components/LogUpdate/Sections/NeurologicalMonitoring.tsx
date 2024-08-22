@@ -97,7 +97,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
       <div className="p-2">
         <RadioFormField
           label={<b>Eye Opening Response</b>}
-          options={EYE_OPEN_SCALE.toReversed()}
+          options={EYE_OPEN_SCALE}
           optionDisplay={(c) => c.value + " - " + c.text}
           optionValue={(c) => `${c.value}`}
           name="eye_opening_response"
@@ -109,7 +109,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
         />
         <RadioFormField
           label={<b>Verbal Response</b>}
-          options={VERBAL_RESPONSE_SCALE.toReversed()}
+          options={VERBAL_RESPONSE_SCALE}
           optionDisplay={(c) => c.value + " - " + c.text}
           optionValue={(c) => `${c.value}`}
           name="verbal_response"
@@ -123,7 +123,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
         />
         <RadioFormField
           label={<b>Motor Response</b>}
-          options={MOTOR_RESPONSE_SCALE.toReversed()}
+          options={MOTOR_RESPONSE_SCALE}
           optionDisplay={(c) => c.value + " - " + c.text}
           optionValue={(c) => `${c.value}`}
           name="motor_response"
