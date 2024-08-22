@@ -9,6 +9,7 @@ type Props = {
   show: boolean;
   onHide: () => void;
   children: ReactNode;
+  anchorRef: React.RefObject<HTMLElement>;
   className?: string;
   onSubmit?: () => void;
 };
@@ -74,39 +75,30 @@ const DesktopView = (props: Props) => {
       const currentMousePosition = mousePosition;
       const modalHeight = modal.current?.clientHeight || 0;
       const modalWidth = modal.current?.clientWidth || 0;
-      const xRelative = currentMousePosition.x;
-      const yRelative = currentMousePosition.y;
-      const containerHeight = window.innerHeight;
-      const containerWidth = window.innerWidth;
-      const verticalCenter = containerHeight / 2;
-      const horizontalCenter = containerWidth / 2;
-      // place the modal on the bottom right of the mouse
-      // if the modal is going out of the screen, place it on the top left of the mouse
-      // if the modal is still going out of the screen, place it on the bottom left of the mouse
-      // if the modal is still going out of the screen, place it on the top right of the mouse
-      console.log(
-        xRelative,
-        xRelative + modalWidth,
-        yRelative,
-        yRelative + modalHeight,
-        containerWidth,
-        containerHeight,
-      );
+      const clickX = currentMousePosition.x;
+      const clickY = currentMousePosition.y;
+      const windowHeight = window.innerHeight;
+      const windowWidth = window.innerWidth;
+
+      const anchorPosition = props.anchorRef.current?.getBoundingClientRect();
+      const anchorX = anchorPosition?.x || 0;
+      const anchorY = anchorPosition?.y || 0;
+      const verticalCenter = windowHeight / 2;
+      const horizontalCenter = windowWidth / 2;
+      const mountLeft = clickX - anchorX;
+      const mountTop = clickY - anchorY;
+
       let position;
-      if (xRelative > horizontalCenter) {
-        position = { right: containerWidth - xRelative };
+      if (clickX > horizontalCenter) {
+        position = { left: mountLeft - modalWidth };
       } else {
-        position = { left: xRelative };
+        position = { left: mountLeft };
       }
-      if (yRelative > verticalCenter) {
-        position = { ...position, bottom: containerHeight - yRelative };
+      if (clickY > verticalCenter) {
+        position = { ...position, top: mountTop - modalHeight };
       } else {
-        position = { ...position, top: yRelative };
+        position = { ...position, top: mountTop };
       }
-      const mountingTo = Object.keys(position).reduce((acc, key) => {
-        return `${acc} ${key}`;
-      }, "");
-      console.log("mounting to ", mountingTo);
       setPosition(position);
     }
 
@@ -114,6 +106,7 @@ const DesktopView = (props: Props) => {
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.show]);
 
   useEffect(() => {
