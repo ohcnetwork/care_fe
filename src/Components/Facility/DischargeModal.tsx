@@ -106,7 +106,7 @@ const DischargeModal = ({
   });
 
   const diagnoses =
-    data?.diagnoses?.map((diagnosis) => diagnosis) || [];
+    data?.diagnoses ?? [];
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
