@@ -31,7 +31,7 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
-import { ConsultationDiagnosis } from "../Diagnosis/types";
+import Loading from "../Common/Loading";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -99,14 +99,9 @@ const DischargeModal = ({
     setFacility(referred_to);
   }, [referred_to]);
 
-  const { data } = useQuery(routes.getConsultation, {
-    pathParams: {
-      id: consultationData.id,
-    },
-  });
-
-  const diagnoses =
-    data?.diagnoses ?? [];
+  const initialDiagnoses = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationData.id },
+  }).data?.diagnoses;
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
@@ -217,6 +212,10 @@ const DischargeModal = ({
   );
 
   const confirmationRequired = encounterDuration.asDays() >= 30;
+
+  if (initialDiagnoses == null) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -346,9 +345,9 @@ const DischargeModal = ({
 
           {discharge_reason !==
             DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
-            <div id="diagnosis_at_discharge">
-              <FieldLabel>Diagnosis at Discharge</FieldLabel>
-              <EditDiagnosesBuilder value={ConsultationDiagnosisList} />
+            <div id="diagnoses">
+              <FieldLabel>Diagnoses</FieldLabel>
+              <EditDiagnosesBuilder value={initialDiagnoses} />
             </div>
           )}
 
