@@ -13,6 +13,12 @@ type Props = {
   onSubmit?: () => void;
 };
 
+type Position =
+  | { left: number; top: number }
+  | { right: number; bottom: number }
+  | { left: number; bottom: number }
+  | { right: number; top: number };
+
 export default function PopupModal(props: Props) {
   const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, lg: false });
@@ -43,7 +49,7 @@ export default function PopupModal(props: Props) {
 
 const DesktopView = (props: Props) => {
   const { t } = useTranslation();
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState<Position>({ left: 0, top: 0 });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const modal = useRef<HTMLDivElement>(null);
   const [children, setChildren] = useState(props.children);
@@ -72,15 +78,36 @@ const DesktopView = (props: Props) => {
       const yRelative = currentMousePosition.y;
       const containerHeight = window.innerHeight;
       const containerWidth = window.innerWidth;
-      const top =
-        yRelative + modalHeight > containerHeight
-          ? yRelative - modalHeight
-          : yRelative;
-      const left =
-        xRelative + modalWidth > containerWidth
-          ? xRelative - modalWidth
-          : xRelative;
-      setPosition({ x: left, y: top });
+      const verticalCenter = containerHeight / 2;
+      const horizontalCenter = containerWidth / 2;
+      // place the modal on the bottom right of the mouse
+      // if the modal is going out of the screen, place it on the top left of the mouse
+      // if the modal is still going out of the screen, place it on the bottom left of the mouse
+      // if the modal is still going out of the screen, place it on the top right of the mouse
+      console.log(
+        xRelative,
+        xRelative + modalWidth,
+        yRelative,
+        yRelative + modalHeight,
+        containerWidth,
+        containerHeight,
+      );
+      let position;
+      if (xRelative > horizontalCenter) {
+        position = { right: containerWidth - xRelative };
+      } else {
+        position = { left: xRelative };
+      }
+      if (yRelative > verticalCenter) {
+        position = { ...position, bottom: containerHeight - yRelative };
+      } else {
+        position = { ...position, top: yRelative };
+      }
+      const mountingTo = Object.keys(position).reduce((acc, key) => {
+        return `${acc} ${key}`;
+      }, "");
+      console.log("mounting to ", mountingTo);
+      setPosition(position);
     }
 
     document.addEventListener("mousedown", handleOutsideClick);
@@ -99,13 +126,17 @@ const DesktopView = (props: Props) => {
     };
   }, []);
 
+  const positionAttributes = Object.entries(position).reduce(
+    (acc, [key, value]) => {
+      return { ...acc, [key]: `${value}px` };
+    },
+    {},
+  );
+
   return (
     <div
       ref={modal}
-      style={{
-        top: position.y + "px",
-        left: position.x + "px",
-      }}
+      style={positionAttributes}
       className={classNames(
         "absolute z-10 rounded-lg border border-secondary-400 bg-white text-black shadow-lg transition-all",
         props.show ? "visible opacity-100" : "invisible opacity-0",

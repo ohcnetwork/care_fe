@@ -35,7 +35,7 @@ const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
 
   // TODO: wrap with a div with relative class so that the editor sticks on scroll.
   return (
-    <>
+    <div className="relative">
       <RegionEditor
         show={!!current}
         value={current ?? getRegionInitialData("AnteriorAbdomen")}
@@ -74,7 +74,7 @@ const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
         }
         regionText={(r) => regionPushScore(r)?.toString() ?? ""}
       />
-    </>
+    </div>
   );
 };
 
