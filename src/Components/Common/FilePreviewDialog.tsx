@@ -160,6 +160,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
           <div className="flex flex-1 items-center justify-center gap-2">
             {uploadedFiles && (
               <ButtonV2
+                className="hidden sm:block"
                 disabled={index === 0}
                 onClick={() => handleNext(index - 1)}
               >
@@ -203,6 +204,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
             {uploadedFiles && (
               <ButtonV2
+                className="hidden sm:block"
                 disabled={index === uploadedFiles!.length - 1}
                 onClick={() => handleNext(index + 1)}
               >
@@ -304,6 +306,24 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </>
               )}
             </div>
+          </div>
+          <div className="mt-2 flex items-center justify-center gap-2 sm:hidden">
+            {uploadedFiles && (
+              <ButtonV2
+                disabled={index === 0}
+                onClick={() => handleNext(index - 1)}
+              >
+                &lt;
+              </ButtonV2>
+            )}
+            {uploadedFiles && (
+              <ButtonV2
+                disabled={index === uploadedFiles!.length - 1}
+                onClick={() => handleNext(index + 1)}
+              >
+                &gt;
+              </ButtonV2>
+            )}
           </div>
         </>
       ) : (
