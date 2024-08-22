@@ -1431,9 +1431,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           name={"treating_physician"}
                           label={t("treating_doctor")}
                           placeholder="Attending Doctors Name and Designation"
-                          required={
-                            state.form.suggestion === "DC" ? false : true
-                          }
+                          required={state.form.suggestion !== "DC"}
                           value={
                             state.form.treating_physician_object ?? undefined
                           }
