@@ -113,7 +113,10 @@ Cypress.Commands.add("clearAllFilters", () => {
 
 Cypress.Commands.add("submitButton", (buttonText = "Submit") => {
   cy.get("button[type='submit']").contains(buttonText).scrollIntoView();
-  cy.get("button[type='submit']").contains(buttonText).click();
+  cy.get("button[type='submit']")
+    .filter(":visible")
+    .contains(buttonText)
+    .click();
 });
 
 Cypress.Commands.add(
