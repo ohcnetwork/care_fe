@@ -34,7 +34,6 @@ const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
     }
   };
 
-  // TODO: wrap with a div with relative class so that the editor sticks on scroll.
   return (
     <div className="relative" ref={containerRef}>
       <RegionEditor
