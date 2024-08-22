@@ -100,7 +100,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       onClose={() => {
         handleClose();
       }}
-      title="File Preview"
+      title={t("file_preview")}
       show={show}
     >
       {fileUrl ? (
@@ -147,6 +147,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
               ) : previewExtensions.includes(file_state.extension) ? (
                 <iframe
                   sandbox=""
+                  // eslint-disable-next-line i18next/no-literal-string
                   title="Source Files"
                   src={fileUrl}
                   className="h-[75vh] w-full"
@@ -157,7 +158,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     icon="l-file"
                     className="mb-4 text-5xl text-secondary-600"
                   />
-                  Can't preview this file. Try downloading it.
+                  {t("file_preview_not_supported")}
                 </div>
               )}
             </div>
