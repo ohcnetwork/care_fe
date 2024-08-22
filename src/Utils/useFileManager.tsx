@@ -347,7 +347,7 @@ export default function useFileManager(
               />
             </div>
             <div className="m-4">
-              <h1 className="text-xl text-black ">Rename File</h1>
+              <h1 className="text-xl text-black">Rename File</h1>
             </div>
           </div>
         }

@@ -218,7 +218,7 @@ export const FacilityHome = (props: any) => {
                   {editCoverImageTooltip}
                 </div>
                 <div className="mb-6 grid gap-4 md:mb-0">
-                  <div className="flex-col justify-between md:flex lg:flex-1 ">
+                  <div className="flex-col justify-between md:flex lg:flex-1">
                     <div className="mb-4" id="facility-name">
                       <h1 className="text-3xl font-bold">
                         {facilityData?.name}
@@ -413,7 +413,7 @@ export const FacilityHome = (props: any) => {
                 )}
               </DropdownMenu>
             </div>
-            <div className="sm:grid sm:grid-cols-2 sm:gap-2 md:grid md:grid-cols-2 md:gap-2 lg:flex lg:flex-col lg:justify-end lg:gap-0 ">
+            <div className="sm:grid sm:grid-cols-2 sm:gap-2 md:grid md:grid-cols-2 md:gap-2 lg:flex lg:flex-col lg:justify-end lg:gap-0">
               <ButtonV2
                 id="facility-detailspage-cns"
                 variant="primary"

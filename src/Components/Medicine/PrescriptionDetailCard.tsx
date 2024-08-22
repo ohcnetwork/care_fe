@@ -61,7 +61,7 @@ export default function PrescriptionDetailCard({
                 )}
               >
                 {isCollapsed ? (
-                  medicine?.name ?? prescription.medicine_old
+                  (medicine?.name ?? prescription.medicine_old)
                 ) : (
                   <>
                     {prescription.prescription_type === "DISCHARGE" &&
@@ -178,19 +178,19 @@ export default function PrescriptionDetailCard({
             {prescription.dosage_type === "PRN" ? (
               <>
                 <Detail
-                  className="col-span-10 md:col-span-6"
+                  className="col-span-10 md:col-span-4"
                   label={t("indicator")}
                 >
                   {prescription.indicator}
                 </Detail>
                 <Detail
-                  className="col-span-10 md:col-span-2"
+                  className="col-span-10 md:col-span-3"
                   label={t("max_dosage_24_hrs")}
                 >
                   {prescription.max_dosage}
                 </Detail>
                 <Detail
-                  className="col-span-10 md:col-span-2"
+                  className="col-span-10 md:col-span-3"
                   label={t("min_time_bw_doses")}
                 >
                   {prescription.min_hours_between_doses &&

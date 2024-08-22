@@ -29,6 +29,7 @@ type SelectMenuProps<T, V = T> = {
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;
   className?: string;
+  inputClassName?: string;
   requiredError?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -68,11 +69,11 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const showChevronIcon = props.showChevronIcon ?? true;
 
   const placeholder =
-    valueOptions?.length > 0 ? props.placeholder ?? "Select" : "No options";
+    valueOptions?.length > 0 ? (props.placeholder ?? "Select") : "No options";
   const defaultOption = {
     label: placeholder,
     selectedLabel: (
-      <p className="font-normal text-secondary-600">{placeholder}</p>
+      <span className="font-normal text-secondary-600">{placeholder}</span>
     ),
     description: undefined,
     icon: undefined,
@@ -98,9 +99,11 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
             <Label className="sr-only !relative">{props.placeholder}</Label>
             <div className="relative">
               <ListboxButton
-                className={`${
-                  props?.requiredError ? "border-red-500" : ""
-                } cui-input-base flex w-full rounded`}
+               className={classNames(
+                  "cui-input-base flex w-full rounded",
+                  props?.requiredError && "border-red-500",
+                  props.inputClassName,
+                )}
                 onFocus={props.onFocus}
                 onBlur={props.onBlur}
               >
@@ -154,7 +157,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                                   )}
                             </div>
                             {option.description && (
-                              <p
+                              <span
                                 className={classNames(
                                   "text-sm font-normal",
                                   option.disabled
@@ -165,7 +168,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                                 )}
                               >
                                 {option.description}
-                              </p>
+                              </span>
                             )}
                           </div>
                         )}

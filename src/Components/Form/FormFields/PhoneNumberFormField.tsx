@@ -128,7 +128,7 @@ export default function PhoneNumberFormField(props: Props) {
                   name={field.name}
                   autoComplete={props.autoComplete ?? "tel"}
                   className={classNames(
-                    "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
+                    "cui-input-base h-full pl-20 tracking-widest sm:leading-6",
                     field.error && "border-danger-500",
                     field.className,
                   )}

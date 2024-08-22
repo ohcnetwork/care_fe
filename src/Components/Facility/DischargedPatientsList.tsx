@@ -371,7 +371,7 @@ const DischargedPatientsList = ({
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
+                t(`RESPIRATORY_SUPPORT_SHORT__${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",

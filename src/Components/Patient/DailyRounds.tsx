@@ -29,7 +29,7 @@ import RadioFormField from "../Form/FormFields/RadioFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
-import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
+import { SCRIBE_FORMS } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
@@ -45,6 +45,10 @@ import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import SymptomsApi from "../Symptoms/api";
+import DiagnosesRoutes from "../Diagnosis/routes";
+import MedicineRoutes from "../Medicine/routes";
+import { scrollTo } from "../../Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -53,6 +57,8 @@ export const DailyRounds = (props: any) => {
   const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
+  const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
+  const [prescriptionSeed, setPrescriptionSeed] = useState(1);
 
   const initForm: any = {
     physical_examination_info: "",
@@ -135,7 +141,11 @@ export const DailyRounds = (props: any) => {
   const [showDiscontinuedPrescriptions, setShowDiscontinuedPrescriptions] =
     useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
-  const buttonText = !id ? "Save" : "Continue";
+  const buttonText = !id
+    ? !["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)
+      ? t("save")
+      : t("save_and_continue")
+    : t("continue");
 
   const formFields = [
     "physical_examination_info",
@@ -166,8 +176,8 @@ export const DailyRounds = (props: any) => {
           ...formData,
           ...data,
           patient_category: data.patient_category
-            ? PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
-                ?.id ?? ""
+            ? (PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
+                ?.id ?? "")
             : "",
           rhythm:
             (data.rhythm &&
@@ -231,6 +241,7 @@ export const DailyRounds = (props: any) => {
           if (!state.form[field]) {
             errors[field] = "Please select a category";
             invalidForm = true;
+            scrollTo("patientCategory");
           }
           return;
         case "bp": {
@@ -238,6 +249,7 @@ export const DailyRounds = (props: any) => {
           if (error) {
             errors.bp = error;
             invalidForm = true;
+            scrollTo("bloodPressure");
           }
           return;
         }
@@ -415,7 +427,7 @@ export const DailyRounds = (props: any) => {
     return <Loading />;
   }
 
-  const roundTypes = [];
+  const roundTypes: { id: string; text: string }[] = [];
 
   if (
     ["Doctor", "Staff", "DistrictAdmin", "StateAdmin"].includes(
@@ -475,11 +487,129 @@ export const DailyRounds = (props: any) => {
     >
       <div className="flex w-full justify-end md:m-4">
         <Scribe
-          fields={DAILY_ROUND_FORM_SCRIBE_DATA}
-          onFormUpdate={(fields) => {
+          form={SCRIBE_FORMS.daily_round}
+          onFormUpdate={async (fields) => {
+            // Symptoms
+            let rounds_type = fields.rounds_type || state.form.rounds_type;
+            if (fields.additional_symptoms) {
+              for (const symptom of fields.additional_symptoms) {
+                const { res } = await request(SymptomsApi.add, {
+                  pathParams: { consultationId },
+                  body: {
+                    ...symptom,
+                  },
+                });
+                if (res?.ok) setSymptomsSeed((s) => s + 1);
+              }
+            }
+
+            // ICD11 Diagnosis
+            if (fields.icd11_diagnosis) {
+              for (const diagnosis of fields.icd11_diagnosis) {
+                // Fetch available diagnoses
+
+                const { res: icdRes, data: icdData } = await request(
+                  routes.listICD11Diagnosis,
+                  {
+                    query: { query: diagnosis.diagnosis },
+                  },
+                );
+
+                if (!icdRes?.ok) {
+                  error({
+                    text: "Failed to fetch ICD11 Diagnosis",
+                  });
+                  continue;
+                }
+
+                const availableDiagnosis = icdData?.[0]?.id;
+
+                if (!availableDiagnosis) {
+                  error({
+                    text: "Could not find the requested diagnosis. Please enter manually.",
+                  });
+                  continue;
+                }
+
+                const { res, data } = await request(
+                  DiagnosesRoutes.createConsultationDiagnosis,
+                  {
+                    pathParams: { consultation: consultationId },
+                    body: {
+                      ...diagnosis,
+                      diagnosis: availableDiagnosis,
+                    },
+                  },
+                );
+
+                if (res?.ok && data)
+                  setDiagnoses((diagnoses) => [...(diagnoses || []), data]);
+              }
+            }
+
+            // Prescriptions
+            if (fields.prescriptions || fields.prn_prescriptions) {
+              const combined_prescriptions = [
+                ...(fields.prescriptions || []),
+                ...(fields.prn_prescriptions || []),
+              ];
+              for (const prescription of combined_prescriptions) {
+                // fetch medicine
+                const { res: medicineRes, data: medicineData } = await request(
+                  routes.listMedibaseMedicines,
+                  {
+                    query: { query: prescription.medicine },
+                  },
+                );
+
+                if (!medicineRes?.ok) {
+                  error({
+                    text: "Failed to fetch medicine",
+                  });
+                  continue;
+                }
+
+                const availableMedicine = medicineData?.[0]?.id;
+
+                if (!availableMedicine) {
+                  error({
+                    text: "Could not find the requested medicine. Please enter manually.",
+                  });
+                  continue;
+                }
+
+                const { res } = await request(
+                  MedicineRoutes.createPrescription,
+                  {
+                    pathParams: { consultation: consultationId },
+                    body: {
+                      ...prescription,
+                      medicine: availableMedicine,
+                    },
+                  },
+                );
+
+                if (res?.ok) setPrescriptionSeed((s) => s + 1);
+              }
+            }
+
+            if (
+              Object.keys(fields).some((f) =>
+                [
+                  "investigations",
+                  "icd11_diagnosis",
+                  "prescriptions",
+                  "prn_prescriptions",
+                ].includes(f),
+              ) &&
+              roundTypes.some((t) => t.id === "DOCTORS_LOG")
+            ) {
+              rounds_type = "DOCTORS_LOG";
+            }
+
             dispatch({
               type: "set_form",
-              form: { ...state.form, ...fields },
+              form: { ...state.form, ...fields, rounds_type },
             });
             fields.action !== undefined && setPreviousAction(fields.action);
             fields.review_interval !== undefined &&
@@ -524,6 +654,7 @@ export const DailyRounds = (props: any) => {
               {...field("patient_category")}
               required
               label="Category"
+              id="patientCategory"
             />
           </div>
         </div>
@@ -532,6 +663,7 @@ export const DailyRounds = (props: any) => {
           <div className="pb-6 md:col-span-2">
             <FieldLabel>Symptoms</FieldLabel>
             <EncounterSymptomsBuilder
+              key={symptomsSeed}
               onChange={() => {
                 handleFormFieldChange({
                   name: "symptoms_dirty",
@@ -589,7 +721,11 @@ export const DailyRounds = (props: any) => {
             <>
               <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
-              <BloodPressureFormField {...field("bp")} label="Blood Pressure" />
+              <BloodPressureFormField
+                {...field("bp")}
+                label="Blood Pressure"
+                id="bloodPressure"
+              />
 
               <RangeAutocompleteFormField
                 {...field("pulse")}
@@ -694,13 +830,13 @@ export const DailyRounds = (props: any) => {
                 label="Level Of Consciousness"
                 {...field("consciousness_level")}
                 options={CONSCIOUSNESS_LEVEL.map((level) => ({
-                  label: level.text,
-                  value: level.id,
+                  label: t(`CONSCIOUSNESS_LEVEL__${level.value}`),
+                  value: level.value,
                 }))}
                 optionDisplay={(option) => option.label}
                 optionValue={(option) => option.value}
                 unselectLabel="Unknown"
-                containerClassName="grid gap-1 grid-cols-1"
+                layout="vertical"
               />
             </>
           )}
@@ -737,7 +873,7 @@ export const DailyRounds = (props: any) => {
                   <FieldErrorText error={state.errors.investigation} />
                 </div>
                 <div>
-                  <div className="mb-4 mt-8 flex items-center justify-between ">
+                  <div className="mb-4 mt-8 flex items-center justify-between">
                     <h3 className="text-lg font-semibold">
                       {t("prescription_medications")}
                     </h3>
@@ -755,11 +891,12 @@ export const DailyRounds = (props: any) => {
                     discontinued={
                       showDiscontinuedPrescriptions ? undefined : false
                     }
+                    key={prescriptionSeed}
                     actions={["discontinue"]}
                   />
                 </div>
                 <div>
-                  <div className="mb-4 mt-8 flex items-center justify-between ">
+                  <div className="mb-4 mt-8 flex items-center justify-between">
                     <h3 className="text-lg font-semibold">
                       {t("prn_prescriptions")}
                     </h3>
@@ -779,6 +916,7 @@ export const DailyRounds = (props: any) => {
                       showDiscontinuedPrescriptions ? undefined : false
                     }
                     actions={["discontinue"]}
+                    key={prescriptionSeed}
                   />
                 </div>
               </div>

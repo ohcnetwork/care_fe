@@ -51,7 +51,7 @@ function UptimeInfo({
       <div className="rounded-lg bg-white px-6 py-4">
         <div className="flow-root rounded-md">
           <div className="block text-center text-sm text-secondary-800">
-            <span className="font-bold ">{date}</span>
+            <span className="font-bold">{date}</span>
             <div className="my-2 border-t border-secondary-200"></div>
             {incidents.length === 0 ? (
               <>

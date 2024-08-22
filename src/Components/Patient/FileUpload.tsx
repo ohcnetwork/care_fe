@@ -594,7 +594,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const isPreviewSupported = previewExtensions.includes(item.extension ?? "");
     return (
       <div
-        className={"mt-4 rounded-lg border bg-white p-4 shadow "}
+        className={"mt-4 rounded-lg border bg-white p-4 shadow"}
         id="file-div"
         key={item.id}
       >
@@ -1193,7 +1193,7 @@ export const FileUpload = (props: FileUploadProps) => {
               />
             </div>
             <div className="m-4">
-              <h1 className="text-xl text-black "> Camera</h1>
+              <h1 className="text-xl text-black"> Camera</h1>
             </div>
           </div>
         }
@@ -1220,7 +1220,7 @@ export const FileUpload = (props: FileUploadProps) => {
         </div>
 
         {/* buttons for mobile screens */}
-        <div className="m-4 flex justify-evenly sm:hidden ">
+        <div className="m-4 flex justify-evenly sm:hidden">
           <div>
             {!previewImage ? (
               <ButtonV2 onClick={handleSwitchCamera} className="m-2">
@@ -1282,7 +1282,7 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         </div>
         {/* buttons for laptop screens */}
-        <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+        <div className={`${isLaptopScreen ? " " : "hidden"}`}>
           <div className="m-4 flex lg:hidden">
             <ButtonV2 onClick={handleSwitchCamera}>
               <CareIcon icon="l-camera-change" className="text-lg" />
@@ -1290,7 +1290,7 @@ export const FileUpload = (props: FileUploadProps) => {
             </ButtonV2>
           </div>
 
-          <div className="flex justify-end  gap-2 p-4">
+          <div className="flex justify-end gap-2 p-4">
             <div>
               {!previewImage ? (
                 <>
@@ -1351,7 +1351,7 @@ export const FileUpload = (props: FileUploadProps) => {
               />
             </div>
             <div className="m-4">
-              <h1 className="text-xl text-black ">Rename File</h1>
+              <h1 className="text-xl text-black">Rename File</h1>
             </div>
           </div>
         }
