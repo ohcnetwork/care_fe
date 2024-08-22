@@ -9,7 +9,7 @@ interface IProps {
  * object - array, date
  */
 const formatValue = (value: unknown, key?: string): ReactNode => {
-  if (value == null || value == "N/A") {
+  if (value == null || value === "N/A") {
     return null;
   }
 
@@ -50,8 +50,8 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
 
       return (
         <ul className="list-disc space-y-2 pl-4">
-          {value.map((v) => (
-            <li>{formatValue(v, key)}</li>
+          {value.map((v, idx) => (
+            <li key={idx}>{formatValue(v, key)}</li>
           ))}
         </ul>
       );
@@ -69,8 +69,8 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
       return `No ${key?.replaceAll(/_/g, " ")}`;
     }
 
-    return entries.map(([key, value]) => (
-      <div className="flex flex-col items-center gap-2 md:flex-row">
+    return entries.map(([key, value], idx) => (
+      <div key={idx} className="flex flex-col items-center gap-2 md:flex-row">
         <span className="text-xs uppercase text-secondary-700">
           {key.replaceAll(/_/g, " ")}
         </span>
@@ -96,7 +96,7 @@ export default function GenericEvent(props: IProps) {
             <span className="text-xs capitalize text-secondary-700">
               {t(key).replaceAll(/_/g, " ")}
             </span>
-            <span className="break-all text-sm font-semibold text-secondary-700">
+            <span className="break-words text-sm font-semibold text-secondary-700">
               {value}
             </span>
           </div>
