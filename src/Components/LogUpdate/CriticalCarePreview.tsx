@@ -407,7 +407,7 @@ export default function CriticalCarePreview(props: Props) {
                         FiO<sub>2</sub>
                       </span>
                     }
-                    value={data.ventilator_fi02}
+                    value={data.ventilator_fio2}
                     max={100}
                     unit="%"
                     valueDescriptions={rangeValueDescription({ high: 60 })}
