@@ -50,9 +50,9 @@ const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
               </span>
             }
             unit="%"
-            name="ventilator_fi02"
-            onChange={(c) => onChange({ ventilator_fi02: c.value })}
-            value={log.ventilator_fi02}
+            name="ventilator_fio2"
+            onChange={(c) => onChange({ ventilator_fio2: c.value })}
+            value={log.ventilator_fio2}
             min={21}
             max={100}
             valueDescriptions={rangeValueDescription({ high: 60 })}
