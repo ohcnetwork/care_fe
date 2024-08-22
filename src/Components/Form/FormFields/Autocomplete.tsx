@@ -200,7 +200,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   {props.isLoading ? (
                     <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
-                    <CareIcon icon="l-angle-down" />
+                    <CareIcon id="dropdown-toggle" icon="l-angle-down" />
                   )}
                 </div>
               </ComboboxButton>

@@ -127,6 +127,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                     )}
                   </div>
                   <CareIcon
+                    id="dropdown-toggle"
                     icon="l-angle-down"
                     className="-mb-0.5 text-lg text-secondary-900"
                   />

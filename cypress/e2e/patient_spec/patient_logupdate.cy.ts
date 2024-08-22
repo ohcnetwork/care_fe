@@ -49,7 +49,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.selectSymptomsDate("01012024");
     patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
-    patientLogupdate.clickAddSymptom();
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
@@ -76,7 +75,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.selectSymptomsDate("01012024");
     patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
-    patientLogupdate.clickAddSymptom();
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);

@@ -118,6 +118,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                 </div>
                 {showChevronIcon && (
                   <CareIcon
+                    id="dropdown-toggle"
                     icon="l-angle-down"
                     className="-mb-0.5 text-lg text-secondary-900"
                   />
