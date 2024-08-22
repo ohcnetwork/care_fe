@@ -2,7 +2,6 @@ import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 
 import { ButtonSize, ButtonVariant } from "./ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "./HelperComponents";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 import { classNames } from "../../../Utils/utils";
@@ -50,13 +49,12 @@ export default function DropdownMenu({
             className={size === "small" ? "text-base" : "text-lg"}
           />
         </MenuButton>
-        <DropdownTransition>
-          <MenuItems
-            className={`absolute right-0 z-10 mt-2 min-w-full origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:min-w-[250px] md:w-max ${props.itemClassName}`}
-          >
-            <>{props.children}</>
-          </MenuItems>
-        </DropdownTransition>
+
+        <MenuItems
+          className={`absolute right-0 z-10 mt-2 min-w-full origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:min-w-[250px] md:w-max ${props.itemClassName}`}
+        >
+          <>{props.children}</>
+        </MenuItems>
       </Menu>
     </div>
   );
