@@ -155,7 +155,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           <AutoExpandingTextInputFormField
             id="doctor_consultation_notes"
             maxHeight={160}
-            rows={1}
+            rows={2}
             name="note"
             value={noteField}
             onChange={(e) => setNoteField(e.value)}
