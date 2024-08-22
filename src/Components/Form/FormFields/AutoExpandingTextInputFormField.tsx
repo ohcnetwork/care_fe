@@ -17,13 +17,17 @@ const AutoExpandingTextInputFormField = (
       // Reset the height to allow shrink on deleting text
       textareaRef.current.style.height = "auto";
 
-      // Calculate new height based on scroll height, considering maxHeight if provided
-      const newHeight = Math.min(
-        textareaRef.current.scrollHeight,
-        props.maxHeight || 160,
-      );
-
-      textareaRef.current.style.height = `${newHeight}px`;
+      // Check if the text area is empty, reset to initial height if true
+      if (textareaRef.current.value.trim() === "") {
+        textareaRef.current.style.height = "initial";
+      } else {
+        // Calculate new height based on scroll height, considering maxHeight if provided
+        const newHeight = Math.min(
+          textareaRef.current.scrollHeight,
+          props.maxHeight || 160,
+        );
+        textareaRef.current.style.height = `${newHeight}px`;
+      }
     };
 
     resizeTextArea();
@@ -37,7 +41,7 @@ const AutoExpandingTextInputFormField = (
     return () => {
       currentRef?.removeEventListener("input", resizeTextArea);
     };
-  }, [props.maxHeight]);
+  }, [props.maxHeight, props.value]);
 
   return <TextAreaFormField ref={textareaRef} {...props} />;
 };
