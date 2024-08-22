@@ -5,7 +5,6 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
-import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
 import { classNames } from "../../Utils/utils";
@@ -94,92 +93,85 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
-        {({ open }) => (
-          <>
-            <Label className="sr-only !relative">{props.placeholder}</Label>
-            <div className="relative">
-              <ListboxButton
-               className={classNames(
-                  "cui-input-base flex w-full rounded",
-                  props?.requiredError && "border-red-500",
-                  props.inputClassName,
+        <>
+          <Label className="sr-only !relative">{props.placeholder}</Label>
+          <div className="relative">
+            <ListboxButton
+              className={classNames(
+                "cui-input-base flex w-full rounded",
+                props?.requiredError && "border-red-500",
+                props.inputClassName,
+              )}
+              onFocus={props.onFocus}
+              onBlur={props.onBlur}
+            >
+              <div className="relative z-0 flex w-full items-center">
+                <div className="relative flex flex-1 items-center focus:z-10">
+                  {props.showIconWhenSelected && value?.icon && (
+                    <div className="ml-2 text-sm text-secondary-700">
+                      {value.icon}
+                    </div>
+                  )}
+                  <p className="ml-2.5 whitespace-pre-wrap text-start text-sm font-medium">
+                    {value.selectedLabel}
+                  </p>
+                </div>
+                {showChevronIcon && (
+                  <CareIcon
+                    icon="l-angle-down"
+                    className="-mb-0.5 text-lg text-secondary-900"
+                  />
                 )}
-                onFocus={props.onFocus}
-                onBlur={props.onBlur}
-              >
-                <div className="relative z-0 flex w-full items-center">
-                  <div className="relative flex flex-1 items-center focus:z-10">
-                    {props.showIconWhenSelected && value?.icon && (
-                      <div className="ml-2 text-sm text-secondary-700">
-                        {value.icon}
+              </div>
+            </ListboxButton>
+            <div
+              className={classNames(
+                "absolute z-10 w-full",
+                props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12",
+              )}
+            >
+              <ListboxOptions as="ul" className="cui-dropdown-base">
+                {options.map((option, index) => (
+                  <ListboxOption
+                    as="li"
+                    id={`${props.id}-option-${option.value}`}
+                    key={index}
+                    className={dropdownOptionClassNames}
+                    value={option}
+                    disabled={option.disabled}
+                  >
+                    {({ focus, selected }) => (
+                      <div className="flex flex-col gap-2">
+                        <div className="flex justify-between">
+                          {option.label}
+                          {props.optionIcon
+                            ? option.icon
+                            : selected && (
+                                <CareIcon icon="l-check" className="text-lg" />
+                              )}
+                        </div>
+                        {option.description && (
+                          <span
+                            className={classNames(
+                              "text-sm font-normal",
+                              option.disabled
+                                ? "text-secondary-700"
+                                : focus
+                                  ? "text-primary-200"
+                                  : "text-secondary-700",
+                            )}
+                          >
+                            {option.description}
+                          </span>
+                        )}
                       </div>
                     )}
-                    <p className="ml-2.5 whitespace-pre-wrap text-start text-sm font-medium">
-                      {value.selectedLabel}
-                    </p>
-                  </div>
-                  {showChevronIcon && (
-                    <CareIcon
-                      icon="l-angle-down"
-                      className="-mb-0.5 text-lg text-secondary-900"
-                    />
-                  )}
-                </div>
-              </ListboxButton>
-              <div
-                className={classNames(
-                  "absolute z-10 w-full",
-                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12",
-                )}
-              >
-                <DropdownTransition show={open}>
-                  <ListboxOptions as="ul" className="cui-dropdown-base">
-                    {options.map((option, index) => (
-                      <ListboxOption
-                        as="li"
-                        id={`${props.id}-option-${option.value}`}
-                        key={index}
-                        className={dropdownOptionClassNames}
-                        value={option}
-                        disabled={option.disabled}
-                      >
-                        {({ focus, selected }) => (
-                          <div className="flex flex-col gap-2">
-                            <div className="flex justify-between">
-                              {option.label}
-                              {props.optionIcon
-                                ? option.icon
-                                : selected && (
-                                    <CareIcon
-                                      icon="l-check"
-                                      className="text-lg"
-                                    />
-                                  )}
-                            </div>
-                            {option.description && (
-                              <span
-                                className={classNames(
-                                  "text-sm font-normal",
-                                  option.disabled
-                                    ? "text-secondary-700"
-                                    : focus
-                                      ? "text-primary-200"
-                                      : "text-secondary-700",
-                                )}
-                              >
-                                {option.description}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </ListboxOption>
-                    ))}
-                  </ListboxOptions>
-                </DropdownTransition>
-              </div>
+                  </ListboxOption>
+                ))}
+              </ListboxOptions>
             </div>
-          </>
-        )}
+          </div>
+        </>
       </Listbox>
     </div>
   );

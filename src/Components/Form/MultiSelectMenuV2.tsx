@@ -1,5 +1,4 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "../Common/components/HelperComponents";
 import {
   Label,
   Listbox,
@@ -93,97 +92,93 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
         }
         multiple
       >
-        {({ open }) => (
-          <>
-            <Label className="sr-only !relative">{props.placeholder}</Label>
-            <div className="relative">
-              <div>
-                <ListboxButton
-                  className="cui-input-base flex w-full rounded"
-                  ref={buttonRef}
-                >
-                  <div className="relative z-0 flex w-full items-center">
-                    <div className="relative flex flex-1 items-center pr-4 focus:z-10">
-                      <p className="ml-2.5 text-sm font-normal text-secondary-600">
-                        <Placeholder />
-                      </p>
+        <>
+          <Label className="sr-only !relative">{props.placeholder}</Label>
+          <div className="relative">
+            <div>
+              <ListboxButton
+                className="cui-input-base flex w-full rounded"
+                ref={buttonRef}
+              >
+                <div className="relative z-0 flex w-full items-center">
+                  <div className="relative flex flex-1 items-center pr-4 focus:z-10">
+                    <p className="ml-2.5 text-sm font-normal text-secondary-600">
+                      <Placeholder />
+                    </p>
 
-                      {selectedOptions.length !== 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {selectedOptions.map((option, index) => (
-                            <MultiSelectOptionChip
-                              key={index}
-                              label={option.selectedLabel}
-                              onRemove={() => {
-                                const updatedOptions = selectedOptions.filter(
-                                  (selectedOption) =>
-                                    selectedOption.value !== option.value,
-                                );
-                                props.onChange(
-                                  updatedOptions.map((o) => o.value) as any,
-                                );
-                              }}
-                            />
+                    {selectedOptions.length !== 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedOptions.map((option, index) => (
+                          <MultiSelectOptionChip
+                            key={index}
+                            label={option.selectedLabel}
+                            onRemove={() => {
+                              const updatedOptions = selectedOptions.filter(
+                                (selectedOption) =>
+                                  selectedOption.value !== option.value,
+                              );
+                              props.onChange(
+                                updatedOptions.map((o) => o.value) as any,
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <CareIcon
+                    icon="l-angle-down"
+                    className="-mb-0.5 text-lg text-secondary-900"
+                  />
+                </div>
+              </ListboxButton>
+            </div>
+            <ListboxOptions
+              as="ul"
+              className="cui-dropdown-base absolute top-full"
+            >
+              {options.map((option, index) => (
+                <ListboxOption
+                  as="li"
+                  id={`${props.id}-option-${index}`}
+                  key={index}
+                  className={dropdownOptionClassNames}
+                  value={option}
+                  onClick={() => handleSingleSelect(option)}
+                  disabled={option.disabled}
+                >
+                  {({ focus }) => (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between">
+                        {option.label}
+                        {(option.icon || option.isSelected) &&
+                          (option.isSelected ? (
+                            <CareIcon icon="l-check" className="text-lg" />
+                          ) : (
+                            option.icon
                           ))}
-                        </div>
+                      </div>
+                      {option.description && (
+                        <p
+                          className={classNames(
+                            "text-sm font-normal",
+                            option.disabled
+                              ? "text-secondary-500"
+                              : focus
+                                ? "text-primary-200"
+                                : "text-secondary-500",
+                          )}
+                        >
+                          {option.description}
+                        </p>
                       )}
                     </div>
-                    <CareIcon
-                      icon="l-angle-down"
-                      className="-mb-0.5 text-lg text-secondary-900"
-                    />
-                  </div>
-                </ListboxButton>
-              </div>
-              <DropdownTransition show={open}>
-                <ListboxOptions
-                  as="ul"
-                  className="cui-dropdown-base absolute top-full"
-                >
-                  {options.map((option, index) => (
-                    <ListboxOption
-                      as="li"
-                      id={`${props.id}-option-${index}`}
-                      key={index}
-                      className={dropdownOptionClassNames}
-                      value={option}
-                      onClick={() => handleSingleSelect(option)}
-                      disabled={option.disabled}
-                    >
-                      {({ focus }) => (
-                        <div className="flex flex-col gap-2">
-                          <div className="flex justify-between">
-                            {option.label}
-                            {(option.icon || option.isSelected) &&
-                              (option.isSelected ? (
-                                <CareIcon icon="l-check" className="text-lg" />
-                              ) : (
-                                option.icon
-                              ))}
-                          </div>
-                          {option.description && (
-                            <p
-                              className={classNames(
-                                "text-sm font-normal",
-                                option.disabled
-                                  ? "text-secondary-500"
-                                  : focus
-                                    ? "text-primary-200"
-                                    : "text-secondary-500",
-                              )}
-                            >
-                              {option.description}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </ListboxOption>
-                  ))}
-                </ListboxOptions>
-              </DropdownTransition>
-            </div>
-          </>
-        )}
+                  )}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </div>
+        </>
       </Listbox>
     </div>
   );

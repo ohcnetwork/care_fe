@@ -4,7 +4,6 @@ import {
   ListboxButton,
   ListboxOption,
   ListboxOptions,
-  Transition,
 } from "@headlessui/react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
@@ -108,29 +107,23 @@ export const CameraPresetDropdown = (
             <CareIcon icon="l-angle-down" className="text-xl text-zinc-400" />
           </span>
         </ListboxButton>
-        <Transition
-          leave="transition ease-in duration-300"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+        <ListboxOptions
+          as="ul"
+          className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-secondary-500 focus:outline-none md:max-h-60"
         >
-          <ListboxOptions
-            as="ul"
-            className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-secondary-500 focus:outline-none md:max-h-60"
-          >
-            {options?.map((obj) => (
-              <ListboxOption
-                as="li"
-                key={obj.id}
-                className={(args) =>
-                  classNames(dropdownOptionClassNames(args), "px-2 py-1.5")
-                }
-                value={obj}
-              >
-                <span>{label(obj)}</span>
-              </ListboxOption>
-            ))}
-          </ListboxOptions>
-        </Transition>
+          {options?.map((obj) => (
+            <ListboxOption
+              as="li"
+              key={obj.id}
+              className={(args) =>
+                classNames(dropdownOptionClassNames(args), "px-2 py-1.5")
+              }
+              value={obj}
+            >
+              <span>{label(obj)}</span>
+            </ListboxOption>
+          ))}
+        </ListboxOptions>
       </div>
     </Listbox>
   );
