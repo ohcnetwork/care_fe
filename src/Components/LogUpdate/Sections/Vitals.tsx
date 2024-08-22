@@ -46,8 +46,8 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         name="diastolic"
         onChange={handleBloodPressureChange}
         value={log.bp?.diastolic}
-        min={30}
-        max={180}
+        min={0}
+        max={250}
         step={1}
         unit="mmHg"
         valueDescriptions={rangeValueDescription({ low: 49, high: 89 })}
