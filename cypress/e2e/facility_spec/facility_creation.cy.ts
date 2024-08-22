@@ -132,6 +132,7 @@ describe("Facility Creation", () => {
     facilityFeature.forEach((featureText) => {
       cy.get("[role='option']").contains(featureText).click();
     });
+    facilityPage.clickfacilityfeatureoption();
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
