@@ -1,0 +1,28 @@
+{
+  "audio": {
+    "allow_permission": "Please allow microphone permission in site settings",
+    "allow_permission_helper": "You might have denied microphone access in the past.",
+    "allow_permission_button": "Click here to know how to allow",
+    "record": "Record Audio",
+    "record_helper": "Click the button to start recording",
+    "recording": "Recording",
+    "recording_helper": "Please speak into your microphone.",
+    "recording_helper_2": "Click on the button to stop recording.",
+    "recorded": "Audio Recorded",
+    "start_again": "Start Again"
+  },
+  "enter_file_name": "Enter File Name",
+  "no_files_found": "No {{type}} files found",
+  "upload_headings": {
+    "patient": "Upload New Patient File",
+    "consultation": "Upload New Consultation File",
+    "sample_report": "Upload Sample Report",
+    "supporting_info": "Upload Supporting Info"
+  },
+  "file_list_headings": {
+    "patient": "Patient Files",
+    "consultation": "Consultation Files",
+    "sample_report": "Sample Report",
+    "supporting_info": "Supporting Info"
+  }
+}

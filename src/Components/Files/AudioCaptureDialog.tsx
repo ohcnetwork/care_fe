@@ -3,6 +3,7 @@ import useRecorder from "../../Utils/useRecorder";
 import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTimer } from "../../Utils/useTimer";
+import { t } from "i18next";
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -101,27 +102,25 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       {status === "PERMISSION_DENIED" && (
         <div>
           <h2 className="font-bold text-white">
-            Please allow microphone permission in site settings
+            {t("audio.allow_permission")}
           </h2>
           <div className="text-secondary-200">
-            You might have denied microphone access in the past.{" "}
+            {t("audio.allow_permission_helper")}{" "}
             {/* TODO: find a better link that supports all browsers */}
             <Link
               href="https://support.google.com/chrome/answer/2693767?hl=en&co=GENIE.Platform%3DAndroid"
               target="_blank"
               className="text-blue-400 underline"
             >
-              Click here to know how to allow
+              {t("audio.allow_permission_button")}
             </Link>
           </div>
         </div>
       )}
       {status === "WAITING_TO_RECORD" && (
         <div>
-          <h2 className="font-bold text-white">Record Audio</h2>
-          <div className="text-secondary-200">
-            Click the button to start recording
-          </div>
+          <h2 className="font-bold text-white">{t("audio.record")}</h2>
+          <div className="text-secondary-200">{t("audio.record_helper")}</div>
           <div className="mt-4">
             <button
               onClick={handleStartRecording}
@@ -136,12 +135,12 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
         <div>
           <h2 className="inline-flex animate-pulse items-center gap-2 font-bold text-red-500">
             <div className="aspect-square w-5 rounded-full bg-red-500" />
-            Recording
+            {t("audio.recording")}
           </h2>
           <div className="text-secondary-200">
-            Please speak into your microphone.
+            {t("audio.recording_helper")}
             <br />
-            Click on the button to stop recording.
+            {t("audio.recording_helper_2")}
           </div>
           <div className="mt-4">
             <button
@@ -156,7 +155,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       )}
       {status === "RECORDED" && (
         <div>
-          <h2 className="font-bold text-white">Audio Recorded</h2>
+          <h2 className="font-bold text-white">{t("audio.recorded")}</h2>
           <div className="text-secondary-200">
             {audioURL && (
               <div className="my-4">
@@ -176,14 +175,14 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
               id="save-recording"
             >
               <CareIcon icon="l-check" className="mr-2 text-lg" />
-              Done
+              {t("done")}
             </button>
             <button
               onClick={handleRestartRecording}
               className="rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
             >
               <CareIcon icon="l-history" className="mr-2 text-lg" />
-              Start Again
+              {t("audio.start_again")}
             </button>
           </div>
         </div>
@@ -197,7 +196,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
         className="rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
       >
         <CareIcon icon="l-times" className="mr-2 text-lg" />
-        Cancel
+        {t("cancel")}
       </button>
     </div>
   );

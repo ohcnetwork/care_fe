@@ -6,6 +6,7 @@ import { FileManagerResult } from "../../Utils/useFileManager";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { FILE_EXTENSIONS } from "../../Common/constants";
+import { t } from "i18next";
 
 export interface FileBlockProps {
   file: FileUploadModel;
@@ -89,7 +90,7 @@ export default function FileBlock(props: FileBlockProps) {
               className="w-full md:w-auto"
             >
               <CareIcon icon="l-eye" />
-              View
+              {t("view")}
             </ButtonV2>
           ) : (
             <ButtonV2
@@ -97,7 +98,7 @@ export default function FileBlock(props: FileBlockProps) {
               className="w-full md:w-auto"
             >
               <CareIcon icon="l-arrow-circle-down" />
-              Download
+              {t("download")}
             </ButtonV2>
           ))}
         <div className="inline-flex w-full gap-2 md:w-auto">
@@ -108,7 +109,7 @@ export default function FileBlock(props: FileBlockProps) {
               className="flex-1 md:flex-auto"
             >
               <CareIcon icon={"l-pen"} />
-              Rename
+              {t("rename")}
             </ButtonV2>
           )}
           {(file.is_archived || editable) && archivable && (
@@ -120,7 +121,7 @@ export default function FileBlock(props: FileBlockProps) {
               <CareIcon
                 icon={file.is_archived ? "l-info-circle" : "l-archive"}
               />
-              {file.is_archived ? "More Info" : "Archive"}
+              {file.is_archived ? t("more_info") : t("archive")}
             </ButtonV2>
           )}
         </div>

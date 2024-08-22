@@ -90,16 +90,16 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
-    PATIENT: "Upload New Patient File",
-    CONSULTATION: "Upload New Consultation File",
-    SAMPLE_MANAGEMENT: "Upload Sample Report",
-    CLAIM: "Upload Supporting Info",
+    PATIENT: t("upload_headings.patient"),
+    CONSULTATION: t("upload_headings.consultation"),
+    SAMPLE_MANAGEMENT: t("upload_headings.sample_report"),
+    CLAIM: t("upload_headings.supporting_info"),
   };
   const VIEW_HEADING: { [index: string]: string } = {
-    PATIENT: "Patient Files",
-    CONSULTATION: "Consultation Files",
-    SAMPLE_MANAGEMENT: "Sample Report",
-    CLAIM: "Supporting Info",
+    PATIENT: t("file_list_headings.patient"),
+    CONSULTATION: t("file_list_headings.consultation"),
+    SAMPLE_MANAGEMENT: t("file_list_headings.sample_report"),
+    CLAIM: t("file_list_headings.supporting_info"),
   };
 
   const associatedId =
@@ -268,7 +268,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <TextFormField
                       name="consultation_file"
                       type="text"
-                      label="Enter File Name"
+                      label={t("enter_file_name")}
                       id="upload-file-name"
                       required
                       value={fileUpload.fileName}
@@ -286,7 +286,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         id="upload_file_button"
                       >
                         <CareIcon icon="l-check" className="" />
-                        Upload
+                        {t("upload")}
                       </ButtonV2>
                       <ButtonV2
                         variant="danger"
@@ -294,7 +294,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         disabled={!!fileUpload.progress}
                       >
                         <CareIcon icon="l-trash-alt" className="" />
-                        Discard
+                        {t("discard")}
                       </ButtonV2>
                     </div>
                     {!!fileUpload.progress && (
@@ -359,7 +359,7 @@ export const FileUpload = (props: FileUploadProps) => {
         {!(fileQuery?.data?.results || []).length && (
           <div className="mt-4">
             <div className="text-md flex items-center justify-center font-semibold capitalize text-secondary-500">
-              No {tab.toLowerCase()} files found
+              {t("no_files_found", { type: tab.toLowerCase() })}
             </div>
           </div>
         )}
