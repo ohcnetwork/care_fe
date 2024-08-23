@@ -58,6 +58,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
+  const [coverImageEdited, setCoverImageEdited] = useState(false);
   const authUser = useAuthUser();
 
   useMessageListener((data) => console.log(data));
@@ -125,11 +126,20 @@ export const FacilityHome = ({ facilityId }: Props) => {
   );
 
   const CoverImage = () => (
-    <img
-      src={`${facilityData?.read_cover_image_url}`}
-      alt={facilityData?.name}
-      className="h-full w-full rounded-lg object-cover"
-    />
+    <>
+      <img
+        src={`${facilityData?.read_cover_image_url}`}
+        alt={facilityData?.name}
+        className="h-full w-full rounded-lg object-cover"
+      />
+      {coverImageEdited && (
+        <div className="absolute inset-x-0 bottom-0 w-full rounded-b-md bg-black/70 px-2 pb-0.5 backdrop-blur-sm">
+          <span className="text-center text-xs font-medium text-secondary-100">
+            {t("cover_image_updated_note")}
+          </span>
+        </div>
+      )}
+    </>
   );
 
   return (
@@ -155,7 +165,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       />
       <CoverImageEditModal
         open={editCoverImage}
-        onSave={() => facilityFetch()}
+        onSave={() => {
+          facilityFetch();
+          setCoverImageEdited(true);
+        }}
         onClose={() => setEditCoverImage(false)}
         onDelete={() => facilityFetch()}
         facility={facilityData ?? ({} as FacilityModel)}

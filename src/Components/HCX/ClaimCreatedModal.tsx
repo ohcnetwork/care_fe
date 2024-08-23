@@ -5,7 +5,7 @@ import { HCXActions } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
-import { FileUpload } from "../Patient/FileUpload";
+import { FileUpload } from "../Files/FileUpload";
 import { HCXClaimModel } from "./models";
 
 interface Props {
@@ -50,7 +50,7 @@ export default function ClaimCreatedModal({ claim, ...props }: Props) {
       }
     >
       <div className="p-4 pt-8">
-        <FileUpload type="CLAIM" claimId={claim.id!} hideBack unspecified />
+        <FileUpload type="CLAIM" claimId={claim.id} />
       </div>
     </DialogModal>
   );

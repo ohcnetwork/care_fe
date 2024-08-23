@@ -26,12 +26,19 @@ export default function ClaimCardCommunication({
   const [inputText, setInputText] = useState("");
   const [isSendingCommunication, setIsSendingCommunication] = useState(false);
 
-  const { UploadButton, files, removeFile, clearFiles, handleFileUpload } =
-    useFileUpload({
-      multiple: true,
-      type: "COMMUNICATION",
-      allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
-    });
+  const {
+    Input,
+    files,
+    error,
+    removeFile,
+    clearFiles,
+    handleFileUpload,
+    validateFiles,
+  } = useFileUpload({
+    multiple: true,
+    type: "COMMUNICATION",
+    allowedExtensions: [".pdf", ".jpg", ".jpeg", ".png"],
+  });
 
   const { data: communicationsResult, refetch: refetchCommunications } =
     useQuery(routes.listHCXCommunications, {
@@ -43,6 +50,8 @@ export default function ClaimCardCommunication({
 
   const handleSubmit = async () => {
     if (!claim.id) return;
+
+    if (!validateFiles()) return;
 
     setIsSendingCommunication(true);
 
@@ -148,9 +157,10 @@ export default function ClaimCardCommunication({
           />
         </div>
         <div className="w-fit">
-          <UploadButton>
+          <label className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out">
             <CareIcon icon="l-paperclip" className="h-5 w-5" />
-          </UploadButton>
+            <Input />
+          </label>
         </div>
         <ButtonV2
           disabled={!inputText}
@@ -160,6 +170,9 @@ export default function ClaimCardCommunication({
           {t("send_message")}
         </ButtonV2>
       </div>
+      {error && (
+        <p className="pt-1.5 text-xs font-medium text-danger-600">{error}</p>
+      )}
     </div>
   );
 }
