@@ -1,33 +1,84 @@
-import { useEffect, useState, useRef, LegacyRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
   listAssetBeds,
   partialUpdateAssetBed,
   deleteAssetBed,
-} from "../../../Redux/actions";
-import { getCameraPTZ } from "../../../Common/constants";
+} from "../../Redux/actions.js";
+import { CameraPTZ, getCameraPTZ } from "../../Common/constants.js";
 import {
   StreamStatus,
   useMSEMediaPlayer,
-} from "../../../Common/hooks/useMSEplayer";
-import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import * as Notification from "../../../Utils/Notifications.js";
-import { FeedCameraPTZHelpButton } from "./Feed";
+} from "../../Common/hooks/useMSEplayer.js";
+import { useFeedPTZ } from "../../Common/hooks/useFeedPTZ.js";
+import * as Notification from "../../Utils/Notifications.js";
 import { AxiosError } from "axios";
-import { BedSelect } from "../../Common/BedSelect";
-import { BedModel } from "../models";
-import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import Page from "../../Common/components/Page";
-import ConfirmDialog from "../../Common/ConfirmDialog";
-import { FieldLabel } from "../../Form/FormFields/FormField";
-import useFullscreen from "../../../Common/hooks/useFullscreen";
+import { BedSelect } from "../Common/BedSelect.js";
+import { BedModel } from "../Facility/models.js";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions.js";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon.js";
+import Page from "../Common/components/Page.js";
+import ConfirmDialog from "../Common/ConfirmDialog.js";
+import { FieldLabel } from "../Form/FormFields/FormField.js";
+import useFullscreen from "../../Common/hooks/useFullscreen.js";
 import ReactPlayer from "react-player";
-import { isIOS } from "../../../Utils/utils";
-import TextFormField from "../../Form/FormFields/TextFormField";
+import { isIOS } from "../../Utils/utils.js";
+import TextFormField from "../Form/FormFields/TextFormField.js";
 
-const LiveFeed = (props: any) => {
+export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
+  const { cameraPTZ } = props;
+  return (
+    <button
+      key="option.action"
+      className="tooltip rounded text-2xl text-secondary-600"
+    >
+      <CareIcon icon="l-question-circle" />
+
+      <ul className="tooltip-text tooltip-left -top-60 right-10 p-2 text-sm">
+        {cameraPTZ.map((option) => {
+          return (
+            <li key={option.action} className="flex items-center gap-3 py-2">
+              <span className="w-16 font-semibold">{option.label}</span>
+              <div className="flex gap-1">
+                {option.shortcutKey.map((hotkey, index) => {
+                  const isArrowKey = hotkey.includes("Arrow");
+                  hotkey = hotkey.replace("Control", "Ctrl");
+
+                  const keyElement = (
+                    <div
+                      key={index}
+                      className="rounded-md border border-secondary-500 p-1.5 font-mono shadow-md"
+                    >
+                      {isArrowKey ? (
+                        <CareIcon icon={option.icon as IconName} />
+                      ) : (
+                        hotkey
+                      )}
+                    </div>
+                  );
+
+                  // Skip wrapping with + for joining with next key
+                  if (index === option.shortcutKey.length - 1)
+                    return keyElement;
+
+                  return (
+                    <div key={index} className="flex items-center gap-1">
+                      {keyElement}
+                      <span className="p-1">+</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </button>
+  );
+};
+
+const CameraFeedOld = (props: any) => {
   const middlewareHostname = props.middlewareHostname;
   const [presetsPage, setPresetsPage] = useState(0);
   const cameraAsset = props.asset;
@@ -371,7 +422,7 @@ const LiveFeed = (props: any) => {
                 <div className="absolute inset-0">
                   <ReactPlayer
                     url={streamUrl}
-                    ref={liveFeedPlayerRef.current as LegacyRef<ReactPlayer>}
+                    ref={liveFeedPlayerRef.current}
                     controls={false}
                     playsinline
                     playing
@@ -671,4 +722,4 @@ const LiveFeed = (props: any) => {
   );
 };
 
-export default LiveFeed;
+export default CameraFeedOld;
