@@ -2,15 +2,16 @@ import { useEffect, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import {
-  NURSING_CARE_FIELDS,
+  NURSING_CARE_PROCEDURES,
   PAGINATION_LIMIT,
 } from "../../../Common/constants";
 
 import Pagination from "../../Common/Pagination";
 import { formatDateTime } from "../../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
-export const NursingPlot = (props: any) => {
-  const { consultationId } = props;
+export const NursingPlot = ({ consultationId }: any) => {
+  const { t } = useTranslation();
   const [results, setResults] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -58,19 +59,17 @@ export const NursingPlot = (props: any) => {
     )
     .reduce((accumulator, value) => accumulator.concat(value), []);
 
-  const filterEmpty = (field: any) => {
-    const filtered = dataToDisplay.filter(
-      (i: any) => i.procedure === field.text,
-    );
+  const filterEmpty = (field: (typeof NURSING_CARE_PROCEDURES)[number]) => {
+    const filtered = dataToDisplay.filter((i: any) => i.procedure === field);
     return filtered.length > 0;
   };
 
   const areFieldsEmpty = () => {
     let emptyFieldCount = 0;
-    for (const field of NURSING_CARE_FIELDS) {
+    for (const field of NURSING_CARE_PROCEDURES) {
       if (!filterEmpty(field)) emptyFieldCount++;
     }
-    if (emptyFieldCount === NURSING_CARE_FIELDS.length) return true;
+    if (emptyFieldCount === NURSING_CARE_PROCEDURES.length) return true;
     else return false;
   };
 
@@ -81,25 +80,25 @@ export const NursingPlot = (props: any) => {
           <div className="flex flex-row overflow-x-scroll">
             {areFieldsEmpty() && (
               <div className="mt-1 w-full rounded-lg border bg-white p-4 shadow">
-                <div className="flex items-center justify-center text-2xl font-bold text-gray-500">
+                <div className="flex items-center justify-center text-2xl font-bold text-secondary-500">
                   No data available
                 </div>
               </div>
             )}
-            {NURSING_CARE_FIELDS.map(
-              (f: any) =>
+            {NURSING_CARE_PROCEDURES.map(
+              (f) =>
                 filterEmpty(f) && (
-                  <div key={f.desc} className="m-2 w-3/4">
-                    <div className="sticky top-0 z-10  rounded pt-2">
-                      <div className="mx-2 flex items-center justify-between rounded border bg-gray-200 p-4">
+                  <div key={f} className="m-2 w-3/4">
+                    <div className="sticky top-0 z-10 rounded pt-2">
+                      <div className="mx-2 flex items-center justify-between rounded border bg-secondary-200 p-4">
                         <h3 className="flex h-8 items-center text-sm">
-                          {f.desc}
+                          {t(`NURSING_CARE_PROCEDURE__${f}`)}
                         </h3>
                       </div>
                     </div>
-                    <div className=" m-2">
+                    <div className="m-2">
                       {dataToDisplay
-                        .filter((i: any) => i.procedure === f.text)
+                        .filter((i: any) => i.procedure === f)
                         .map((care: any, index: number) => (
                           <div
                             key={index}

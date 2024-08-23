@@ -67,7 +67,7 @@ export const AssetServiceEditModal = (props: {
       >
         <div>
           <div className="mb-4">
-            <p className="text-md mt-1 text-gray-500">
+            <p className="text-md mt-1 text-secondary-500">
               {t("update_record_for_asset")}
               <strong> {props.asset?.name}</strong>
             </p>
@@ -81,21 +81,21 @@ export const AssetServiceEditModal = (props: {
                   onClick={() => {
                     setEditRecord(edit);
                   }}
-                  className="my-2 flex cursor-pointer justify-between rounded-lg border border-gray-300 p-4 py-2 transition-colors duration-200 hover:bg-gray-100"
+                  className="my-2 flex cursor-pointer justify-between rounded-lg border border-secondary-300 p-4 py-2 transition-colors duration-200 hover:bg-secondary-100"
                 >
                   <div className="grow">
-                    <p className="text-sm font-medium text-gray-500">
+                    <p className="text-sm font-medium text-secondary-500">
                       {isLast ? "Created" : "Edited"} On
                     </p>
-                    <p className="text-sm text-gray-900">
+                    <p className="text-sm text-secondary-900">
                       {formatDateTime(edit.edited_on)}
                     </p>
                   </div>
                   <div className="grow">
-                    <p className="text-sm font-medium text-gray-500">
+                    <p className="text-sm font-medium text-secondary-500">
                       {isLast ? "Created" : "Edited"} By
                     </p>
-                    <p className="text-sm text-gray-900">
+                    <p className="text-sm text-secondary-900">
                       {edit.edited_by.username}
                     </p>
                   </div>
@@ -109,42 +109,45 @@ export const AssetServiceEditModal = (props: {
               );
             })}
           {editRecord && (
-            <div className="mb-4 rounded-lg border border-gray-300 p-4 py-2">
+            <div className="mb-4 rounded-lg border border-secondary-300 p-4 py-2">
               <div className="my-2 flex justify-between">
                 <div className="grow">
-                  <p className="text-sm font-medium text-gray-500">
+                  <p className="text-sm font-medium text-secondary-500">
                     {t("edited_on")}
                   </p>
-                  <p className="text-gray-900">
+                  <p className="text-secondary-900">
                     {formatDateTime(editRecord.edited_on)}
                   </p>
                 </div>
                 <div className="grow">
-                  <p className="text-sm font-medium text-gray-500">
+                  <p className="text-sm font-medium text-secondary-500">
                     {t("edited_by")}
                   </p>
-                  <p className="text-gray-900">
+                  <p className="text-secondary-900">
                     {editRecord.edited_by.username}
                   </p>
                 </div>
               </div>
               <div className="mt-4 flex flex-col justify-between">
                 <div className="grow">
-                  <p className="text-sm font-medium text-gray-500">
+                  <p className="text-sm font-medium text-secondary-500">
                     {t("serviced_on")}
                   </p>
                   <p
-                    className="text-gray-900"
+                    className="text-secondary-900"
                     id="edit-history-asset-servicedon"
                   >
                     {formatDate(editRecord.serviced_on)}
                   </p>
                 </div>
                 <div className="mt-4 grow">
-                  <p className="text-sm font-medium text-gray-500">
+                  <p className="text-sm font-medium text-secondary-500">
                     {t("notes")}
                   </p>
-                  <p className="text-gray-900" id="edit-history-asset-note">
+                  <p
+                    className="text-secondary-900"
+                    id="edit-history-asset-note"
+                  >
                     {editRecord.note || "-"}
                   </p>
                 </div>
@@ -175,7 +178,7 @@ export const AssetServiceEditModal = (props: {
     >
       <div>
         <div className="mb-4">
-          <p className="text-md mt-1 text-gray-500">
+          <p className="text-md mt-1 text-secondary-500">
             {t("update_record_for_asset")}
             <strong> {props.asset?.name}</strong>
           </p>

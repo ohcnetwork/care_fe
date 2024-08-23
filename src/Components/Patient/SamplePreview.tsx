@@ -1,4 +1,4 @@
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime, humanizeStrings } from "../../Utils/utils";
 
 import { lazy } from "react";
 
@@ -25,18 +25,18 @@ interface ISampleReportSectionProps {
 function SampleReportSection({ title, fields }: ISampleReportSectionProps) {
   return (
     <>
-      <div className="flex justify-center border border-b-0 border-gray-800 bg-gray-700 py-2 font-medium text-white">
+      <div className="flex justify-center border border-b-0 border-secondary-800 bg-secondary-700 py-2 font-medium text-white">
         <h6 className="text-lg">{title}</h6>
       </div>
-      <div className="grid grid-cols-2 border-b border-gray-800">
+      <div className="grid grid-cols-2 border-b border-secondary-800">
         {fields.map((field, i) => (
           <div
             className={classNames(
-              "flex border-b border-gray-800",
+              "flex border-b border-secondary-800",
               i % 2 === 0 && "border-x",
             )}
           >
-            <div className="w-[65%] border-r border-gray-800 py-2">
+            <div className="w-[65%] border-r border-secondary-800 py-2">
               <p className="mr-2.5 pl-1 pr-2 text-right font-semibold">
                 {field.title}
               </p>
@@ -79,7 +79,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
         </div>
         <div className="block h-screen" id="section-to-print">
           <div className="flex flex-col">
-            <div className="flex items-center justify-between border border-gray-800">
+            <div className="flex items-center justify-between border border-secondary-800">
               <div className="flex justify-start p-2"></div>
               <div className="flex justify-end">
                 <div className="p-2">
@@ -91,30 +91,30 @@ export default function SampleReport(props: ISamplePreviewProps) {
                 </div>
               </div>
             </div>
-            <div className="flex justify-start border border-t-0 border-gray-800">
+            <div className="flex justify-start border border-t-0 border-secondary-800">
               <div className="w-full p-5 py-2 text-black">
                 <p className="text-lg font-bold">
                   ICMR Specimen Referral Data for COVID-19 (SARS-CoV2)
                 </p>
               </div>
             </div>
-            <div className="flex justify-center border border-t-0 border-gray-800 py-2">
+            <div className="flex justify-center border border-t-0 border-secondary-800 py-2">
               <h6 className="text-lg font-semibold text-danger-500">
                 FOR INTERNAL USE ONLY
               </h6>
             </div>
             <div className="flex flex-col">
-              <div className="flex justify-center border border-b-0 border-gray-800 bg-black py-2 font-medium text-white">
+              <div className="flex justify-center border border-b-0 border-secondary-800 bg-black py-2 font-medium text-white">
                 <h6 className="text-lg">Sample Id : {sampleId}</h6>
               </div>
-              <div className="flex justify-center border border-b-0 border-gray-800 bg-black py-2 font-medium text-white">
+              <div className="flex justify-center border border-b-0 border-secondary-800 bg-black py-2 font-medium text-white">
                 <h6 className="text-lg">Patient Id : {id}</h6>
               </div>
               <div
                 className="border-4 border-black"
                 style={{ border: "solid 5px black" }}
               >
-                <div className="flex justify-center border border-b-0 border-gray-800 bg-gray-900 py-2 font-medium text-white">
+                <div className="flex justify-center border border-b-0 border-secondary-800 bg-secondary-900 py-2 font-medium text-white">
                   <h6 className="text-lg">SECTION A - MANDATORY FIELDS</h6>
                 </div>
                 <SampleReportSection
@@ -216,7 +216,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
                   ]}
                 />
 
-                <div className="flex justify-center border border-b-0 border-gray-800 bg-gray-900 py-2 font-medium text-white">
+                <div className="flex justify-center border border-b-0 border-secondary-800 bg-secondary-900 py-2 font-medium text-white">
                   <h6 className="text-lg">
                     SECTION B - OTHER FIELDS TO BE UPDATED
                   </h6>
@@ -331,7 +331,8 @@ export default function SampleReport(props: ISamplePreviewProps) {
                     {
                       title: "Symptoms",
                       value:
-                        sampleData?.medical_conditions?.symptoms?.join(", "),
+                        sampleData?.medical_conditions?.symptoms &&
+                        humanizeStrings(sampleData.medical_conditions.symptoms),
                     },
                     { title: "First Symptom", value: "............." },
                     {

@@ -108,8 +108,8 @@ const StatelessSidebar = ({
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
-          ? " overflow-visible "
-          : " overflow-y-auto overflow-x-hidden "
+          ? "overflow-visible"
+          : "overflow-y-auto overflow-x-hidden"
       }`}
     >
       <div className="h-3" /> {/* flexible spacing */}
@@ -223,7 +223,7 @@ interface ToggleShrinkProps {
 
 const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
   <div
-    className={`flex h-10 w-10 cursor-pointer items-center justify-center self-end rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
+    className={`flex h-10 w-10 cursor-pointer items-center justify-center self-end rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
       shrinked ? "mx-auto" : "mr-4"
     } transition-all duration-200 ease-in-out`}
     onClick={toggle}

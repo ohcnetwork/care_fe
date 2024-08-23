@@ -32,10 +32,10 @@ import { validateEmailAddress } from "../../Common/validation";
 import { dateQueryString, parsePhoneNumber } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 import DateFormField from "../Form/FormFields/DateFormField.js";
-import { t } from "i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -101,6 +101,7 @@ type AssetFormSection =
 
 const AssetCreate = (props: AssetProps) => {
   const { goBack } = useAppHistory();
+  const { t } = useTranslation();
   const { facilityId, assetId } = props;
 
   let assetClassInitial: AssetClass;
@@ -212,7 +213,7 @@ const AssetCreate = (props: AssetProps) => {
           return;
         case "is_working":
           if (is_working === undefined) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -224,7 +225,7 @@ const AssetCreate = (props: AssetProps) => {
           return;
         case "support_phone": {
           if (!support_phone) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           // eslint-disable-next-line no-case-declarations
@@ -382,18 +383,18 @@ const AssetCreate = (props: AssetProps) => {
       <Page
         title={assetId ? t("update_asset") : t("create_new_asset")}
         crumbsReplacements={{
-          assets: { style: "text-gray-200 pointer-events-none" },
+          assets: { style: "text-secondary-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
         backUrl={`/facility/${facilityId}`}
       >
         <section className="text-center">
           <h1 className="flex flex-col items-center py-10 text-6xl">
-            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 p-5">
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-secondary-200 p-5">
               <CareIcon icon="l-map-marker" className="text-green-600" />
             </div>
           </h1>
-          <p className="text-gray-600">
+          <p className="text-secondary-600">
             {t("you_need_at_least_a_location_to_create_an_assest")}
           </p>
           <button
@@ -447,10 +448,10 @@ const AssetCreate = (props: AssetProps) => {
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
         <CareIcon icon={section.icon} className="mr-3 text-lg" />
-        <label className="text-lg font-bold text-gray-900">
+        <label className="text-lg font-bold text-secondary-900">
           {sectionTitle}
         </label>
-        <hr className="ml-6 flex-1 border border-gray-400" />
+        <hr className="ml-6 flex-1 border border-secondary-400" />
       </div>
     );
   };
@@ -464,7 +465,7 @@ const AssetCreate = (props: AssetProps) => {
           [facilityId]: {
             name: locationsQuery.data?.results[0].facility?.name,
           },
-          assets: { style: "text-gray-200 pointer-events-none" },
+          assets: { style: "text-secondary-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
         backUrl={
@@ -671,7 +672,7 @@ const AssetCreate = (props: AssetProps) => {
                         />
                       </div>
                       <div
-                        className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-gray-400 px-4 hover:bg-gray-200"
+                        className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-secondary-400 px-4 hover:bg-secondary-200"
                         onClick={() => setIsScannerActive(true)}
                       >
                         <CareIcon

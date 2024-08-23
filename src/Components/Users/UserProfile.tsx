@@ -26,6 +26,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { validateRule } from "./UserAdd";
+import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
@@ -110,6 +111,7 @@ const editFormReducer = (state: State, action: Action) => {
 };
 
 export default function UserProfile() {
+  const { t } = useTranslation();
   const { signOut } = useAuthContext();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const [updateStatus, setUpdateStatus] = useState({
@@ -201,7 +203,7 @@ export default function UserProfile() {
         case "lastName":
         case "gender":
           if (!states.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -254,7 +256,7 @@ export default function UserProfile() {
           return;
         case "email":
           if (!states.form[field]) {
-            errors[field] = "This field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (!validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
@@ -263,7 +265,7 @@ export default function UserProfile() {
           return;
         case "doctor_experience_commenced_on":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (
             (states.form.user_type === "Doctor" &&
@@ -278,7 +280,7 @@ export default function UserProfile() {
         case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -456,10 +458,10 @@ export default function UserProfile() {
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">
+              <h3 className="text-lg font-medium leading-6 text-secondary-900">
                 Personal Information
               </h3>
-              <p className="my-1 text-sm leading-5 text-gray-600">
+              <p className="my-1 text-sm leading-5 text-secondary-600">
                 Local Body, District and State are Non Editable Settings.
               </p>
               <div className="flex flex-col gap-2">
@@ -479,7 +481,7 @@ export default function UserProfile() {
           </div>
           <div className="mt-5 lg:col-span-2 lg:mt-0">
             {!showEdit && !isLoading && (
-              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
+              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
                 <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
                   <div
                     className="my-2 sm:col-span-1"
@@ -488,80 +490,80 @@ export default function UserProfile() {
                     <dt className="text-sm font-medium leading-5 text-black">
                       Username
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.username || "-"}
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="contactno-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Contact No
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.phone_number || "-"}
                     </dd>
                   </div>
 
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="whatsapp-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Whatsapp No
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.alt_phone_number || "-"}
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="emailid-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Email address
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.email || "-"}
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="firstname-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
                       First Name
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.first_name || "-"}
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="lastname-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Last Name
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.last_name || "-"}
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="date_of_birth-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Date of Birth
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.date_of_birth
                         ? formatDate(userData?.date_of_birth)
                         : "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Access Level
                     </dt>
@@ -571,45 +573,45 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="gender-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Gender
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.gender || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Local Body
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       District
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       State
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.state_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Skills
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       <div
                         className="flex flex-wrap gap-2"
                         id="already-linked-skills"
@@ -617,7 +619,7 @@ export default function UserProfile() {
                         {skillsView?.results?.length
                           ? skillsView.results?.map((skill: SkillModel) => {
                               return (
-                                <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
+                                <span className="flex items-center gap-2 rounded-full border-secondary-300 bg-secondary-200 px-3 text-xs text-secondary-700">
                                   <p className="py-1.5">
                                     {skill.skill_object.name}
                                   </p>
@@ -629,13 +631,13 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="averageworkinghour-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Average weekly working hours
                     </dt>
-                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.weekly_working_hours ?? "-"}
                     </dd>
                   </div>
@@ -646,7 +648,7 @@ export default function UserProfile() {
                     <dt className="text-sm font-medium leading-5 text-black">
                       Video Connect Link
                     </dt>
-                    <dd className="mt-1 break-words text-sm leading-5 text-gray-900">
+                    <dd className="mt-1 break-words text-sm leading-5 text-secondary-900">
                       {userData?.video_connect_link ? (
                         <a
                           className="text-blue-500"
@@ -770,7 +772,7 @@ export default function UserProfile() {
                         />
                       </div>
                     </div>
-                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
+                    <div className="bg-secondary-50 px-4 py-3 text-right sm:px-6">
                       <Submit onClick={handleSubmit} label="Update" />
                     </div>
                   </div>
@@ -809,7 +811,7 @@ export default function UserProfile() {
                             }}
                             required
                           />
-                          <div className="text-small mb-2 hidden pl-2 text-gray-500 peer-focus-within:block">
+                          <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
                             {validateRule(
                               changePasswordForm.new_password_1?.length >= 8,
                               "Password should be atleast 8 characters long",
@@ -845,7 +847,7 @@ export default function UserProfile() {
                             }}
                           />
                           {changePasswordForm.new_password_2.length > 0 && (
-                            <div className="text-small mb-2 hidden pl-2 text-gray-500 peer-focus-within:block">
+                            <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
                               {validateRule(
                                 changePasswordForm.new_password_1 ===
                                   changePasswordForm.new_password_2,
@@ -856,7 +858,7 @@ export default function UserProfile() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
+                    <div className="bg-secondary-50 px-4 py-3 text-right sm:px-6">
                       <Submit
                         onClick={changePassword}
                         label="Change Password"
@@ -872,10 +874,10 @@ export default function UserProfile() {
         <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">
+              <h3 className="text-lg font-medium leading-6 text-secondary-900">
                 Language Selection
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600">
+              <p className="mt-1 text-sm leading-5 text-secondary-600">
                 Set your local language
               </p>
             </div>
@@ -887,10 +889,10 @@ export default function UserProfile() {
         <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">
+              <h3 className="text-lg font-medium leading-6 text-secondary-900">
                 Software Update
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600">
+              <p className="mt-1 text-sm leading-5 text-secondary-600">
                 Check for an available update
               </p>
             </div>

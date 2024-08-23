@@ -16,7 +16,7 @@ class PatientLogupdate {
   }
 
   selectPatientCategory(category: string) {
-    cy.clickAndSelectOption("#patient_category", category);
+    cy.clickAndSelectOption("#patientCategory", category);
   }
 
   typePhysicalExamination(examination: string) {
@@ -26,10 +26,6 @@ class PatientLogupdate {
 
   typeOtherDetails(details: string) {
     cy.get("#other_details").click().type(details);
-  }
-
-  typeAdditionalSymptoms(symptoms: string) {
-    cy.searchAndSelectOption("#additional_symptoms", symptoms);
   }
 
   typeAndMultiSelectSymptoms(input, symptoms) {

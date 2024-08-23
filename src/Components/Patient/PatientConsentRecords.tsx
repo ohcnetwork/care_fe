@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
@@ -15,9 +15,10 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import useFileUpload from "../../Utils/useFileUpload";
 import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import useFileManager from "../../Utils/useFileManager";
 import { PatientConsentModel } from "../Facility/models";
+import Tabs from "../Common/components/Tabs";
+import { t } from "i18next";
 
 export default function PatientConsentRecords(props: {
   facilityId: string;
@@ -34,12 +35,6 @@ export default function PatientConsentRecords(props: {
     patient_code_status: 4,
   });
 
-  const refetchAll = () => {
-    refetch();
-    refetchFiles();
-    refetchArchivedFiles();
-  };
-
   const fileUpload = useFileUpload({
     type: "CONSENT_RECORD",
     allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
@@ -48,10 +43,10 @@ export default function PatientConsentRecords(props: {
   const fileManager = useFileManager({
     type: "CONSENT_RECORD",
     onArchive: async () => {
-      refetchAll();
+      refetch();
     },
     onEdit: async () => {
-      refetchAll();
+      refetch();
     },
   });
 
@@ -72,36 +67,6 @@ export default function PatientConsentRecords(props: {
   });
 
   const consentRecords = consentRecordsData?.results;
-
-  const { data: unarchivedFiles, refetch: refetchFiles } = useQuery(
-    routes.viewUpload,
-    {
-      query: {
-        file_type: "CONSENT_RECORD",
-        associating_id: consentRecords?.map((cr) => cr.id).join(","),
-        limit: 1000,
-        offset: 0,
-        is_archived: false,
-      },
-      prefetch: (consentRecords?.length || 0) > 0 && showArchived,
-    },
-  );
-
-  const { data: archivedFiles, refetch: refetchArchivedFiles } = useQuery(
-    routes.viewUpload,
-    {
-      query: {
-        file_type: "CONSENT_RECORD",
-        associating_id: consentRecords?.map((cr) => cr.id).join(","),
-        limit: 1000,
-        offset: 0,
-        is_archived: true,
-      },
-      prefetch: (consentRecords?.length || 0) > 0 && !showArchived,
-    },
-  );
-
-  const files = showArchived ? archivedFiles : unarchivedFiles;
 
   const selectField = (name: string) => {
     return {
@@ -134,13 +99,6 @@ export default function PatientConsentRecords(props: {
     consentId && (await fileUpload.handleFileUpload(consentId));
     refetch();
   };
-
-  useEffect(() => {
-    if (consentRecords && consentRecords.length > 0) {
-      refetchFiles();
-      refetchArchivedFiles();
-    }
-  }, [consentRecords]);
 
   return (
     <Page
@@ -183,13 +141,14 @@ export default function PatientConsentRecords(props: {
         title="Archive Previous Records"
         className="w-auto"
       />
-      <SwitchTabs
-        tab1="Active"
-        tab2="Archived"
+      <Tabs
+        tabs={[
+          { text: t("active"), value: 0 },
+          { text: t("archived"), value: 1 },
+        ]}
         className="my-4"
-        onClickTab1={() => setShowArchived(false)}
-        onClickTab2={() => setShowArchived(true)}
-        isTab2Active={showArchived}
+        onTabChange={(v) => setShowArchived(!!v)}
+        currentTab={showArchived ? 1 : 0}
       />
       <div className="mt-8 flex flex-col gap-4 lg:flex-row-reverse">
         <div className="shrink-0 lg:w-[350px]">
@@ -264,7 +223,15 @@ export default function PatientConsentRecords(props: {
               </>
             ) : (
               <>
-                <fileUpload.UploadButton />
+                <label
+                  className={
+                    "button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out"
+                  }
+                >
+                  <CareIcon icon={"l-file-upload-alt"} className="text-lg" />
+                  {t("choose_file")}
+                  <fileUpload.Input />
+                </label>
                 <button
                   type="button"
                   className="flex aspect-square h-9 shrink-0 items-center justify-center rounded text-xl transition-all hover:bg-black/10"
@@ -280,13 +247,15 @@ export default function PatientConsentRecords(props: {
         <div className="flex-1">
           {consentRecords?.filter(
             (r) =>
-              files?.results.filter((f) => f.associating_id === r.id).length,
+              r.files?.filter(
+                (f) =>
+                  f.associating_id === r.id && f.is_archived === showArchived,
+              ).length,
           ).length === 0 ? (
-            <div className="flex h-32 items-center justify-center text-gray-500">
+            <div className="flex h-32 items-center justify-center text-secondary-500">
               No consent records found
             </div>
           ) : (
-            (!unarchivedFiles || !archivedFiles) &&
             !consentRecords && (
               <div className="skeleton-animate-alpha h-32 rounded-lg" />
             )
@@ -297,12 +266,11 @@ export default function PatientConsentRecords(props: {
                 key={index}
                 consultationId={consultationId}
                 consentRecord={record}
-                previewFile={fileManager.viewFile}
-                archiveFile={fileManager.archiveFile}
-                editFile={fileManager.editFile}
-                showArchive={showArchived}
-                files={files?.results.filter(
-                  (f) => f.associating_id === record.id,
+                fileManager={fileManager}
+                files={record.files?.filter(
+                  (f) =>
+                    f.associating_id === record.id &&
+                    showArchived === f.is_archived,
                 )}
               />
             ))}

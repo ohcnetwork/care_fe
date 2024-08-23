@@ -93,5 +93,11 @@
   "treatment_summary__prescriptions__medicine": "Medicine",
   "treatment_summary__prescriptions__route": "Route",
   "treatment_summary__prescriptions__dosage_frequency": "Dosage & Frequency",
-  "treatment_summary__prescriptions__start_date": "Prescribed On"
+  "treatment_summary__prescriptions__start_date": "Prescribed On",
+  "select_facility_for_discharged_patients_warning": "Facility needs to be selected to view discharged patients.",
+  "duplicate_patient_record_confirmation": "Admit the patient record to your facility by adding the year of birth",
+  "duplicate_patient_record_rejection": "I confirm that the suspect / patient I want to create is not on the list.",
+  "duplicate_patient_record_birth_unknown": "Please contact your district care coordinator, the shifting facility or the patient themselves if you are not sure about the patient's year of birth.",
+  "patient_transfer_birth_match_note": "Note: Year of birth must match the patient to process the transfer request.",
+  "cover_image_updated_note": "It could take a while to see the updated cover image"
 }

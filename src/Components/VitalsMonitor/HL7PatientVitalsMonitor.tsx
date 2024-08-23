@@ -61,7 +61,9 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             <div className="flex w-full justify-between gap-2 font-bold text-orange-500">
               <span className="text-sm">NIBP</span>
               <span className="text-xs">
-                {bpWithinMaxPersistence ? data.bp?.systolic.unit ?? "--" : "--"}
+                {bpWithinMaxPersistence
+                  ? (data.bp?.systolic.unit ?? "--")
+                  : "--"}
               </span>
               <span className="text-xs">
                 {data.bp?.["date-time"] && minutesAgo(data.bp?.["date-time"])}
@@ -73,13 +75,13 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             <div className="flex w-full justify-center text-2xl font-black text-orange-300 md:text-4xl">
               <span>
                 {bpWithinMaxPersistence
-                  ? data.bp?.systolic.value ?? "--"
+                  ? (data.bp?.systolic.value ?? "--")
                   : "--"}
               </span>
               <span>/</span>
               <span>
                 {bpWithinMaxPersistence
-                  ? data.bp?.diastolic.value ?? "--"
+                  ? (data.bp?.diastolic.value ?? "--")
                   : "--"}
               </span>
             </div>
@@ -87,8 +89,8 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               <span className="flex-1 text-sm font-bold text-orange-500">
                 Mean
               </span>
-              <span className="flex-1 text-xl font-bold text-gray-300">
-                {bpWithinMaxPersistence ? data.bp?.map.value ?? "--" : "--"}
+              <span className="flex-1 text-xl font-bold text-secondary-300">
+                {bpWithinMaxPersistence ? (data.bp?.map.value ?? "--") : "--"}
               </span>
             </div>
           </div>
@@ -151,7 +153,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           >
             <CareIcon
               icon="l-cloud-times"
-              className="mb-2 animate-pulse text-4xl md:mr-36 "
+              className="mb-2 animate-pulse text-4xl md:mr-36"
             />
             <span className="font-bold md:mr-36">
               No incoming data from HL7 Monitor
