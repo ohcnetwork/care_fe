@@ -14,7 +14,12 @@ import routes from "../../Redux/api.js";
 import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request.js";
 import useQuery from "../../Utils/request/useQuery.js";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
+import {
+  classNames,
+  formatName,
+  isUserOnline,
+  relativeTime,
+} from "../../Utils/utils";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -94,6 +99,7 @@ export default function ManageUsers() {
       user_type: qParams.user_type,
       district_id: qParams.district,
       home_facility: qParams.home_facility,
+      last_active_days: qParams.last_active_days,
     },
   });
 
@@ -177,7 +183,7 @@ export default function ManageUsers() {
     setUserData({
       show: true,
       username: user.username,
-      name: `${user.first_name} ${user.last_name}`,
+      name: formatName(user),
     });
   };
 
@@ -192,10 +198,7 @@ export default function ManageUsers() {
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
-                <div
-                  className="flex flex-col
-                flex-wrap justify-between gap-3 @sm:flex-row"
-                >
+                <div className="flex flex-col flex-wrap justify-between gap-3 @sm:flex-row">
                   {user.username && (
                     <div
                       id="username"
@@ -204,7 +207,7 @@ export default function ManageUsers() {
                       {user.username}
                     </div>
                   )}
-                  <div className="min-width-50 shrink-0 text-sm text-gray-600">
+                  <div className="min-width-50 shrink-0 text-sm text-secondary-600">
                     {user.last_login && cur_online ? (
                       <span>
                         {" "}
@@ -221,7 +224,7 @@ export default function ManageUsers() {
                           aria-label="Online"
                           className={classNames(
                             "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-gray-300",
+                            cur_online ? "bg-primary-400" : "bg-secondary-300",
                           )}
                         ></span>
                         <span className="pl-2">
@@ -237,7 +240,7 @@ export default function ManageUsers() {
                   id="name"
                   className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
                 >
-                  {`${user.first_name} ${user.last_name}`}
+                  {formatName(user)}
 
                   {user.last_login && cur_online ? (
                     <div
@@ -258,8 +261,8 @@ export default function ManageUsers() {
                 <div
                   className={`flex ${
                     isExtremeSmallScreen
-                      ? " flex-wrap "
-                      : " flex-col justify-between md:flex-row "
+                      ? "flex-wrap"
+                      : "flex-col justify-between md:flex-row"
                   } gap-2 md:grid md:grid-cols-2`}
                 >
                   {user.user_type && (
@@ -288,7 +291,7 @@ export default function ManageUsers() {
                               {user.doctor_qualification}
                             </span>
                           ) : (
-                            <span className="text-gray-600">Unknown</span>
+                            <span className="text-secondary-600">Unknown</span>
                           )}
                         </UserDetails>
                       </div>
@@ -304,7 +307,7 @@ export default function ManageUsers() {
                               years
                             </span>
                           ) : (
-                            <span className="text-gray-600">Unknown</span>
+                            <span className="text-secondary-600">Unknown</span>
                           )}
                         </UserDetails>
                       </div>
@@ -318,7 +321,7 @@ export default function ManageUsers() {
                               {user.doctor_medical_council_registration}
                             </span>
                           ) : (
-                            <span className="text-gray-600">Unknown</span>
+                            <span className="text-secondary-600">Unknown</span>
                           )}
                         </UserDetails>
                       </div>
@@ -334,9 +337,7 @@ export default function ManageUsers() {
                 )}
                 <div
                   className={`${
-                    isExtremeSmallScreen
-                      ? "flex flex-wrap "
-                      : "grid grid-cols-2 "
+                    isExtremeSmallScreen ? "flex flex-wrap" : "grid grid-cols-2"
                   }`}
                 >
                   {user.created_by && (
@@ -374,7 +375,7 @@ export default function ManageUsers() {
                         {user.weekly_working_hours} hours
                       </span>
                     ) : (
-                      <span className="text-gray-600">-</span>
+                      <span className="text-secondary-600">-</span>
                     )}
                   </UserDetails>
                 </div>
@@ -448,7 +449,7 @@ export default function ManageUsers() {
     manageUsers = (
       <div>
         <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-          <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+          <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
             No Users Found
           </div>
         </div>
@@ -557,11 +558,20 @@ export default function ManageUsers() {
               "home_facility",
               qParams.home_facility ? homeFacilityData?.name || "" : "",
             ),
+            value(
+              "Last Active",
+              "last_active_days",
+              (() => {
+                if (!qParams.last_active_days) return "";
+                if (qParams.last_active_days === "never") return "Never";
+                return `in the last ${qParams.last_active_days} day${qParams.last_active_days > 1 ? "s" : ""}`;
+              })(),
+            ),
           ]}
         />
       </div>
 
-      <div>
+      <div className="pt-4">
         <div>{manageUsers}</div>
       </div>
       {userData.show && (
@@ -755,7 +765,7 @@ export function UserFacilities(props: { user: any }) {
           {t("add")}
         </ButtonV2>
       </div>
-      <hr className="my-2 border-gray-300" />
+      <hr className="my-2 border-secondary-300" />
 
       {isLoading || userFacilitiesLoading ? (
         <div className="flex items-center justify-center">
@@ -766,12 +776,12 @@ export function UserFacilities(props: { user: any }) {
           {/* Home Facility section */}
           {user?.home_facility_object && (
             <div className="py-2" id="home-facility">
-              <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
+              <div className="relative rounded p-2 transition hover:bg-secondary-200 focus:bg-secondary-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
                   <span>{user?.home_facility_object?.name}</span>
                   <span
                     className={
-                      "flex items-center justify-center  rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
+                      "flex items-center justify-center rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
                     }
                   >
                     <CareIcon icon="l-estate" className="mr-1 pt-px text-lg" />
@@ -820,7 +830,7 @@ export function UserFacilities(props: { user: any }) {
                         id={`facility_${i}`}
                         key={`facility_${i}`}
                         className={classNames(
-                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg",
+                          "relative rounded p-2 transition hover:bg-secondary-200 focus:bg-secondary-200 md:rounded-lg",
                         )}
                       >
                         <div className="flex items-center justify-between">

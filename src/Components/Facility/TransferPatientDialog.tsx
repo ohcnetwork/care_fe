@@ -9,6 +9,7 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -53,12 +54,18 @@ const patientFormReducer = (state = initialState, action: any) => {
 
 const TransferPatientDialog = (props: Props) => {
   const { patientList, handleOk, handleCancel, facilityId } = props;
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
       id: patient.patient_id as unknown as number,
-      text: `${patient.name} (${patient.gender})`,
+      text: [
+        patient.name,
+        `(${patient.gender})`,
+        patient.is_expired ? "(Expired)" : "",
+      ].join(" "),
+      disabled: patient.is_expired,
     };
   });
 
@@ -97,7 +104,7 @@ const TransferPatientDialog = (props: Props) => {
           return;
         case "year_of_birth":
           if (!state.form[field]) {
-            errors[field] = "This field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
 
@@ -156,8 +163,7 @@ const TransferPatientDialog = (props: Props) => {
         <div className="grid grid-cols-1 gap-4">
           <div>
             <p className="leading-relaxed">
-              Note: Date of birth must match the patient to process the transfer
-              request.
+              {t("patient_transfer_birth_match_note")}
             </p>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -171,6 +177,7 @@ const TransferPatientDialog = (props: Props) => {
               options={patientOptions}
               optionLabel={(patient) => patient.text}
               optionValue={(patient) => patient.id}
+              optionDisabled={(patient) => patient.disabled ?? false}
               value={state.form.patient}
               onChange={handleChange}
               error={state.errors.patient}

@@ -22,11 +22,21 @@ jobs:
       - name: Checkout 📥
         uses: actions/checkout@v3
 
+      - name: Set backend branch
+        id: backend-branch
+        run: |
+          if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then
+            echo "branch=staging" >> $GITHUB_OUTPUT
+          else
+            echo "branch=develop" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout care 📥
         uses: actions/checkout@v3
         with:
           repository: coronasafe/care
           path: care
+          ref: ${{ steps.backend-branch.outputs.branch }}
 
       - name: Start care docker containers 🐳
         run: |

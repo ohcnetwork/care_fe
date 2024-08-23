@@ -2,8 +2,7 @@ import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 
 import { ButtonSize, ButtonVariant } from "./ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "./HelperComponents";
-import { Menu } from "@headlessui/react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 import { classNames } from "../../../Utils/utils";
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
@@ -32,9 +31,9 @@ export default function DropdownMenu({
       className={classNames("text-right", props.containerClassName)}
     >
       <Menu as="div" className="relative inline-block w-full text-left">
-        <Menu.Button
+        <MenuButton
           disabled={props.disabled}
-          className={`button-size-${size} button-${variant}-default  button-shape-square flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 lg:justify-between ${props.className}`}
+          className={`button-size-${size} button-${variant}-default button-shape-square flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 lg:justify-between ${props.className}`}
         >
           <div
             className={classNames(
@@ -49,14 +48,13 @@ export default function DropdownMenu({
             icon="l-angle-down"
             className={size === "small" ? "text-base" : "text-lg"}
           />
-        </Menu.Button>
-        <DropdownTransition>
-          <Menu.Items
-            className={`absolute right-0 z-10 mt-2 min-w-full origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:min-w-[250px] md:w-max ${props.itemClassName}`}
-          >
-            <>{props.children}</>
-          </Menu.Items>
-        </DropdownTransition>
+        </MenuButton>
+
+        <MenuItems
+          className={`absolute right-0 z-10 mt-2 min-w-full origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:min-w-[250px] md:w-max ${props.itemClassName}`}
+        >
+          <>{props.children}</>
+        </MenuItems>
       </Menu>
     </div>
   );
@@ -85,7 +83,7 @@ export function DropdownItem({
   const isAuthorized = useIsAuthorized(authorizeFor);
 
   return (
-    <Menu.Item as="div" disabled={props.disabled}>
+    <MenuItem as="div" disabled={props.disabled}>
       <div
         {...props}
         className={classNames(
@@ -112,6 +110,6 @@ export function DropdownItem({
         </i>
         {children}
       </div>
-    </Menu.Item>
+    </MenuItem>
   );
 }
