@@ -87,7 +87,7 @@ export default function ClaimCardCommunication({
       <div className="flex justify-end">
         <CareIcon
           icon="l-info-circle"
-          className=" h-7 w-7 cursor-pointer text-gray-600 hover:text-gray-800"
+          className="h-7 w-7 cursor-pointer text-gray-600 hover:text-gray-800"
           onClick={() => setShowMessages(false)}
         />
       </div>
