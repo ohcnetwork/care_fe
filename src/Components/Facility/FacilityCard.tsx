@@ -36,6 +36,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
         Notification.Success({
           msg: "Facility Notified",
         });
+        setNotifyMessage("");
         setNotifyModalFor(undefined);
       } else {
         Notification.Error({ msg: "Something went wrong..." });
@@ -224,6 +225,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                           name="message"
                           rows={5}
                           className="pb-2 pt-4"
+                          value={notifyMessage}
                           onChange={(e) => setNotifyMessage(e.value)}
                           placeholder="Type your message..."
                           error={notifyError}

@@ -48,7 +48,7 @@ export const VentilatorPlot = (props: any) => {
             "ventilator_pressure_support",
             "ventilator_tidal_volume",
             "ventilator_peep",
-            "ventilator_fi02",
+            "ventilator_fio2",
             "ventilator_spo2",
             "etco2",
             "bilateral_air_entry",
@@ -158,7 +158,7 @@ export const VentilatorPlot = (props: any) => {
             title="FiO2"
             name="FiO2"
             xData={dates}
-            yData={yAxisData("ventilator_fi02")}
+            yData={yAxisData("ventilator_fio2")}
             low={21}
             high={60}
           />

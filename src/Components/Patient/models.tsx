@@ -360,7 +360,7 @@ export interface DailyRoundsModel {
   ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
   ventilator_oxygen_modality_flow_rate?: number;
   ventilator_oxygen_modality_oxygen_rate?: number;
-  ventilator_fi02?: number;
+  ventilator_fio2?: number;
   ventilator_mode?: (typeof VENTILATOR_MODE_OPTIONS)[number];
   ventilator_peep?: number;
   ventilator_pip?: number;
