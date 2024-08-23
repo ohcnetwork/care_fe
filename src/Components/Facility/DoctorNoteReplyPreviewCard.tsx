@@ -51,12 +51,12 @@ const DoctorNoteReplyPreviewCard = ({
           </div>
           {cancelReply && (
             <div
-              className="mr-2  cursor-pointer  p-1 text-2xl"
+              className="mr-2 cursor-pointer p-1 text-2xl"
               onClick={cancelReply}
             >
               <CareIcon
                 icon="l-times"
-                className="m-1 rounded-full  bg-gray-500 p-1 text-white hover:bg-gray-600"
+                className="m-1 rounded-full bg-gray-500 p-1 text-white hover:bg-gray-600"
               />
             </div>
           )}
