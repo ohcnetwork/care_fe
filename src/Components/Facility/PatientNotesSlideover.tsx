@@ -2,8 +2,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames, isAppleDevice } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { classNames } from "../../Utils/utils";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
@@ -16,7 +15,6 @@ import useNotificationSubscriptionState from "../../Common/hooks/useNotification
 import RichTextEditor from "../Common/RichTextEditor/RichTextEditor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
 import { Link } from "raviger";
-import { t } from "i18next";
 
 interface PatientNotesProps {
   patientId: string;
@@ -36,7 +34,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
-  // const [focused, setFocused] = useState(false);
   const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );

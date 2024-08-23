@@ -18,7 +18,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
-import { ExtImage, previewExtensions } from "./FileUpload";
+import { ExtImage } from "../../Utils/useFileUpload";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -51,6 +51,19 @@ export interface StateInterface {
   isZoomOutDisabled: boolean;
   rotation: number;
 }
+
+const previewExtensions = [
+  "html",
+  "htm",
+  "pdf",
+  "mp4",
+  "webm",
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+];
 
 export const DiscussionNotesFiles = (props: Props) => {
   const { t } = useTranslation();

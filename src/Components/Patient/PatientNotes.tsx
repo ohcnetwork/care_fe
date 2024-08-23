@@ -13,6 +13,7 @@ import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import { classNames } from "../../Utils/utils.js";
 import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
+import TextFormField from "../Form/FormFields/TextFormField.js";
 
 interface PatientNotesProps {
   patientId: string;

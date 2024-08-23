@@ -19,7 +19,8 @@ import Spinner from "../Common/Spinner";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useSlug from "../../Common/hooks/useSlug";
 import MarkdownPreview from "../Common/RichTextEditor/MarkdownPreview";
-import { ExtImage, StateInterface } from "../Patient/FileUpload";
+import { ExtImage } from "../../Utils/useFileUpload";
+import { StateInterface } from "../Files/FileUpload";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
 
 const PatientNoteCard = ({

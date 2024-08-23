@@ -12,8 +12,8 @@ import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
 import RichTextEditor from "../../Common/RichTextEditor/RichTextEditor";
-import SwitchTabs from "../../Common/components/SwitchTabs.js";
 import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
+import Tabs from "../../Common/components/Tabs.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -119,13 +119,14 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
       <div className="right-16 top-8 mx-2 md:absolute">
-        <SwitchTabs
+        <Tabs
           className="mt-3 w-full gap-8 lg:w-full"
-          tab1="Thread View"
-          tab2="Default View"
-          onClickTab1={() => setMode("thread-view")}
-          onClickTab2={() => setMode("default-view")}
-          isTab2Active={mode === "default-view"}
+          tabs={[
+            { text: "Thread View", value: "thread-view" },
+            { text: "Default View", value: "default-view" },
+          ]}
+          currentTab={mode}
+          onTabChange={(tab) => setMode(tab as "thread-view" | "default-view")}
         />
       </div>
       <div className="relative flex grow flex-col rounded-lg border border-gray-300 bg-white px-2 sm:mx-10 sm:px-5 sm:pt-8 md:mx-3">

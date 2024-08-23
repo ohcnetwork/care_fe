@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import TurndownService from "turndown";
 import MentionsDropdown from "./MentionDropdown";
-import { ExtImage } from "../../Patient/FileUpload";
+import { ExtImage } from "../../../Utils/useFileUpload";
 import imageCompression from "browser-image-compression";
 import DialogModal from "../Dialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
