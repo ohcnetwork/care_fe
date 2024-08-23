@@ -141,7 +141,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
               return false;
             }}
           />
-          {props.suggestions?.length && (
+          {!!props.suggestions?.length && (
             <div className="mb-4 flex flex-wrap gap-2">
               {props.suggestions?.map((suggestion, i) => (
                 <button
