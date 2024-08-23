@@ -110,11 +110,10 @@ function BasicDetailsSection({
     <>
       <div className="grid border-b-2 border-gray-800 sm:grid-cols-2 print:grid-cols-3 print:md:grid-cols-3">
         <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
-          <b>{t("treatment_summary__name")}</b>
-          {patientData?.name ?? ""}
+          <b>{t("patient_registration__name")} :</b> {patientData?.name ?? ""}
         </div>
         <div className="col-span-1 px-3 py-2">
-          <b>{t("treatment_summary__address")}</b>
+          <b>{t("patient_registration__address")} :</b>{" "}
           {patientData?.address ?? ""}
         </div>
       </div>
@@ -122,21 +121,21 @@ function BasicDetailsSection({
       <div className="grid border-b-2 border-gray-800 sm:grid-cols-2 print:grid-cols-3 print:md:grid-cols-3">
         <div className="col-span-1 grid sm:grid-cols-2 print:grid-cols-2">
           <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
-            <b>{t("treatment_summary__age")}</b>
+            <b>{t("patient_registration__age")} :</b>{" "}
             {patientData ? formatPatientAge(patientData, true) : ""}
           </div>
           <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
-            <b>{t("treatment_summary__op")}</b>
+            <b>{t("patient_consultation__op")} :</b>{" "}
             {consultationData?.patient_no ?? ""}
           </div>
         </div>
 
         <div className="col-span-1 px-3 py-2">
           {consultationData?.suggestion === "DC" ? (
-            <b>{t("treatment_summary__dc_admission")}</b>
+            <b>{t("patient_consultation__dc_admission")} :</b>
           ) : (
-            <b>{t("treatment_summary__admission")}</b>
-          )}
+            <b>{t("patient_consultation__admission")} :</b>
+          )}{" "}
           <span>
             {consultationData?.encounter_date
               ? formatDateTime(consultationData.encounter_date)
@@ -147,12 +146,12 @@ function BasicDetailsSection({
 
       <div className="grid border-b-2 border-gray-800 sm:grid-cols-2 print:grid-cols-3 print:md:grid-cols-3">
         <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
-          <b>{t("treatment_summary__gender")}</b>
+          <b>{t("patient_registration__gender")} :</b>{" "}
           {GENDER_TYPES.find((i) => i.id === patientData?.gender)?.text}
         </div>
 
         <div className="col-span-1 px-3 py-2">
-          <b>{t("treatment_summary__contact")}</b>
+          <b>{t("patient_registration__contact")} :</b>{" "}
           <span>{patientData?.emergency_phone_number ?? ""}</span>
         </div>
       </div>
@@ -171,16 +170,16 @@ function ComorbiditiesSection({ patientData }: IComorbiditiesSection) {
     (comorbidities) => comorbidities.disease !== "NO",
   ).length ? (
     <div className="border-b-2 border-gray-800 px-5 py-2">
-      <b>{t("treatment_summary__comorbidities")}</b>
+      <b>{t("patient_registration__comorbidities")}</b>
       <div className="mx-0 sm:mx-5 print:mx-5">
         <table className="w-full border-collapse border border-gray-800">
           <thead>
             <tr>
               <th className="border border-gray-800">
-                {t("treatment_summary__comorbidities__disease")}
+                {t("patient_registration__comorbidities__disease")}
               </th>
               <th className="border border-gray-800">
-                {t("treatment_summary__comorbidities__details")}
+                {t("patient_registration__comorbidities__details")}
               </th>
             </tr>
           </thead>
@@ -249,7 +248,7 @@ function DiagnosisSection({ consultationData }: IDiagnosisSection) {
 
   return (
     <div className="border-b-2 border-gray-800 px-5 py-2">
-      <b>{t("treatment_summary__diagnosis")}</b>
+      <b>{t("diagnosis")}</b>
       <div className="mx-5">
         {(
           [
@@ -263,7 +262,7 @@ function DiagnosisSection({ consultationData }: IDiagnosisSection) {
           (type) =>
             !!diagnoses[type].length && (
               <div>
-                <b>{t(`treatment_summary__diagnosis__${type}`)} :</b>
+                <b>{t(`diagnosis__${type}`)}</b>
                 <ol className="mx-6 list-decimal">
                   {diagnoses[type].map((d) => (
                     <li key={d.id}>{d.diagnosis_object.label}</li>
@@ -291,29 +290,29 @@ function InvestigationsSection({ consultationId }: IInvestigationsSection) {
 
   return investigations?.results.length ? (
     <div className="border-b-2 border-gray-800 px-5 py-2">
-      <b>{t("treatment_summary__investigations")}</b>
+      <b>{t("suggested_investigations")}</b>
 
       <div className="mx-0 mt-2 overflow-x-auto sm:mx-5 print:mx-5">
         <table className="w-full border-collapse border border-gray-800">
           <thead>
             <tr>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__investigations__date")}
+                {t("investigations__date")}
               </th>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__investigations__name")}
+                {t("investigations__name")}
               </th>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__investigations__result")}
+                {t("investigations__result")}
               </th>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__investigations__ideal_value")}
+                {t("investigations__ideal_value")}
               </th>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__investigations__range")}
+                {t("investigations__range")}
               </th>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__investigations__unit")}
+                {t("investigations__unit")}
               </th>
             </tr>
           </thead>
@@ -368,26 +367,28 @@ function TreatmentSection({ consultationData }: ITreatmentSection) {
     <div className="border-b-2 border-gray-800 px-5 py-2">
       {consultationData?.treatment_plan && (
         <>
-          <b>{t("treatment_summary__treatment__plan")}</b>
+          <b>{t("patient_consultation__treatment__plan")}</b>
           <p className="ml-4">{consultationData.treatment_plan}</p>
         </>
       )}
 
       {isTreatmentSummaryAvailable && (
         <>
-          <b className="mb-2">{t("treatment_summary__treatment__summary")}</b>
+          <b className="mb-2">
+            {t("patient_consultation__treatment__summary")}
+          </b>
           <div className="mx-0 overflow-x-auto sm:mx-5 print:mx-5">
             <table className="w-full border-collapse border border-gray-800">
               <thead>
                 <tr>
                   <th className="border border-gray-800">
-                    {t("treatment_summary__treatment__summary__date")}
+                    {t("patient_consultation__treatment__summary__date")}
                   </th>
                   <th className="border border-gray-800">
-                    {t("treatment_summary__treatment__summary__spo2")}
+                    {t("patient_consultation__treatment__summary__spo2")}
                   </th>
                   <th className="border border-gray-800">
-                    {t("treatment_summary__treatment__summary__temperature")}
+                    {t("patient_consultation__treatment__summary__temperature")}
                   </th>
                 </tr>
               </thead>
@@ -429,23 +430,23 @@ function PrescriptionsSection({ consultationId }: IPrescriptionsSection) {
 
   return prescriptions?.results.length ? (
     <div className="border-b-2 border-gray-800 px-5 py-2">
-      <b>{t("treatment_summary__prescriptions")}</b>
+      <b>{t("active_prescriptions")}</b>
 
       <div className="mx-0 mt-2 overflow-x-auto sm:mx-5 print:mx-5">
         <table className="w-full border-collapse border border-gray-800">
           <thead>
             <tr>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__prescriptions__medicine")}
+                {t("prescriptions__medicine")}
               </th>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__prescriptions__route")}
+                {t("prescriptions__route")}
               </th>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__prescriptions__dosage_frequency")}
+                {t("prescriptions__dosage_frequency")}
               </th>
               <th className="border border-gray-800 text-center">
-                {t("treatment_summary__prescriptions__start_date")}
+                {t("prescriptions__start_date")}
               </th>
             </tr>
           </thead>
@@ -497,7 +498,7 @@ function InstructionsSection({ consultationData }: IInstructionsSection) {
     <>
       {consultationData?.consultation_notes && (
         <div className="border-b-2 border-gray-800 px-5 py-2">
-          <b>{t("treatment_summary__consultation_notes")}</b>
+          <b>{t("patient_consultation__consultation_notes")}</b>
 
           <div className="mx-5">{consultationData.consultation_notes}</div>
         </div>
@@ -505,7 +506,7 @@ function InstructionsSection({ consultationData }: IInstructionsSection) {
 
       {consultationData?.special_instruction && (
         <div className="border-b-2 border-gray-800 px-5 py-2">
-          <b>{t("treatment_summary__special_instruction")}</b>
+          <b>{t("patient_consultation__special_instruction")}</b>
 
           <div className="mx-5">{consultationData.special_instruction}</div>
         </div>
