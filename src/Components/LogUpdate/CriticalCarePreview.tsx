@@ -388,7 +388,6 @@ export default function CriticalCarePreview(props: Props) {
                 label="Oxygen Modality"
                 value={tOption("OXYGEN_MODALITY", "ventilator_oxygen_modality")}
               />
-              {data.ventilator_oxygen_modality_flow_rate ?? "-"}
               {data.ventilator_oxygen_modality === "HIGH_FLOW_NASAL_CANNULA" ? (
                 <>
                   <RangeDetail

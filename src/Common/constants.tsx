@@ -1666,3 +1666,60 @@ export const PressureSoreTissueTypeOptions = [
   "Slough",
   "Necrotic",
 ] as const;
+
+export const FILE_EXTENSIONS = {
+  IMAGE: ["jpeg", "jpg", "png", "gif", "svg", "bmp", "webp", "jfif"],
+  AUDIO: ["mp3", "wav"],
+  VIDEO: [
+    "webm",
+    "mpg",
+    "mp2",
+    "mpeg",
+    "mpe",
+    "mpv",
+    "ogg",
+    "mp4",
+    "m4v",
+    "avi",
+    "wmv",
+    "mov",
+    "qt",
+    "flv",
+    "swf",
+  ],
+  PRESENTATION: ["pptx"],
+  DOCUMENT: ["pdf", "docx"],
+} as const;
+
+export const PREVIEWABLE_FILE_EXTENSIONS = [
+  "html",
+  "htm",
+  "pdf",
+  "mp4",
+  "webm",
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+] as const;
+
+export const HEADER_CONTENT_TYPES = {
+  pdf: "application/pdf",
+  txt: "text/plain",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  doc: "application/msword",
+  xls: "application/vnd.ms-excel",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  epub: "application/epub+zip",
+  gif: "image/gif",
+  html: "text/html",
+  htm: "text/html",
+  mp4: "video/mp4",
+  png: "image/png",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  svg: "image/svg+xml",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+} as const;
