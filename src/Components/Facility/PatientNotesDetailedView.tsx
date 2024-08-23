@@ -100,7 +100,7 @@ const PatientNotesDetailedView = (props: Props) => {
   }
 
   return (
-    <div className="flex w-[500px] flex-col overflow-hidden rounded-lg border border-gray-300 bg-white p-3">
+    <div className="flex w-[500px] flex-col overflow-hidden rounded-lg border border-gray-300 bg-white px-3 pt-2">
       {state && (
         <div className="flex flex-col">
           <div className="flex-1">
@@ -121,15 +121,17 @@ const PatientNotesDetailedView = (props: Props) => {
                 allowReply={false}
               />
             </div>
-            {state.replies.length > 0 && (
-              <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
-                {state.replies.length}{" "}
-                {state.replies.length > 1 ? "replies" : "reply"}
-              </div>
-            )}
-            <h4 className="ml-2 text-lg text-slate-600">Replies</h4>
+            <div className="flex items-center justify-between p-2">
+              <h4 className="ml-2 text-lg text-slate-600">Replies</h4>
+              {state.replies.length > 0 && (
+                <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
+                  {state.replies.length}{" "}
+                  {state.replies.length > 1 ? "replies" : "reply"}
+                </div>
+              )}
+            </div>
             {
-              <div className="flex max-h-[430px] flex-col-reverse overflow-x-hidden overflow-y-scroll">
+              <div className="flex max-h-[250px] flex-col-reverse overflow-x-hidden overflow-y-scroll pl-2">
                 {state.replies.map((reply) => (
                   <DoctorNoteReplyPreviewCard
                     key={reply.id}

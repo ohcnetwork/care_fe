@@ -81,6 +81,10 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   }, [thread]);
 
   useEffect(() => {
+    setThreadViewNote?.("");
+  }, [thread, mode]);
+
+  useEffect(() => {
     setReload?.(true);
   }, []);
 

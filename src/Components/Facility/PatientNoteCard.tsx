@@ -304,7 +304,10 @@ const PatientNoteCard = ({
                     >
                       <div
                         className="flex h-full w-full flex-col items-center justify-center p-2"
-                        onClick={() => loadFile(file.external_id, note.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          loadFile(file.external_id, note.id);
+                        }}
                       >
                         <CareIcon
                           icon="l-file"
@@ -369,7 +372,9 @@ const PatientNoteCard = ({
                       <p className="text-sm font-medium text-secondary-500">
                         Note
                       </p>
-                      <p className="text-sm text-secondary-900">{edit.note}</p>
+                      <div className="text-sm text-secondary-900">
+                        <MarkdownPreview markdown={edit.note} />
+                      </div>
                     </div>
                   </div>
                 );

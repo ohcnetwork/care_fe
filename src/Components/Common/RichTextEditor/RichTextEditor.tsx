@@ -517,7 +517,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         newFile,
         "PUT",
         { "Content-Type": file.type },
-        (xhr: XMLHttpRequest) => {
+        async (xhr: XMLHttpRequest) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             Notification.Success({
               msg: "File Uploaded Successfully",
