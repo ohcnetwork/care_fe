@@ -38,6 +38,10 @@ import { LocationSelect } from "../Common/LocationSelect.js";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
 import { FacilityStaffList } from "./FacilityStaffList.js";
 
+type Props = {
+  facilityId: string;
+};
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export const getFacilityFeatureIcon = (featureId: number) => {
@@ -50,12 +54,11 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   );
 };
 
-export const FacilityHome = (props: any) => {
+export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
-  const { facilityId } = props;
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
-  const [imageKey, setImageKey] = useState(Date.now());
+  const [coverImageEdited, setCoverImageEdited] = useState(false);
   const authUser = useAuthUser();
 
   useMessageListener((data) => console.log(data));
@@ -112,7 +115,10 @@ export const FacilityHome = (props: any) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+      className={
+        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+      }
+      onClick={() => setEditCoverImage(true)}
     >
       <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
@@ -120,11 +126,20 @@ export const FacilityHome = (props: any) => {
   );
 
   const CoverImage = () => (
-    <img
-      src={`${facilityData?.read_cover_image_url}?imgKey=${imageKey}`}
-      alt={facilityData?.name}
-      className="h-full w-full rounded-lg object-cover"
-    />
+    <>
+      <img
+        src={`${facilityData?.read_cover_image_url}`}
+        alt={facilityData?.name}
+        className="h-full w-full rounded-lg object-cover"
+      />
+      {coverImageEdited && (
+        <div className="absolute inset-x-0 bottom-0 w-full rounded-b-md bg-black/70 px-2 pb-0.5 backdrop-blur-sm">
+          <span className="text-center text-xs font-medium text-secondary-100">
+            {t("cover_image_updated_note")}
+          </span>
+        </div>
+      )}
+    </>
   );
 
   return (
@@ -150,11 +165,10 @@ export const FacilityHome = (props: any) => {
       />
       <CoverImageEditModal
         open={editCoverImage}
-        onSave={() =>
-          facilityData?.read_cover_image_url
-            ? setImageKey(Date.now())
-            : facilityFetch()
-        }
+        onSave={() => {
+          facilityFetch();
+          setCoverImageEdited(true);
+        }}
         onClose={() => setEditCoverImage(false)}
         onDelete={() => facilityFetch()}
         facility={facilityData ?? ({} as FacilityModel)}
