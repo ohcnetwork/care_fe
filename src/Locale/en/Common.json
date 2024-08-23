@@ -166,5 +166,6 @@
   "treating_doctor": "Treating Doctor",
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
-  "ration_card__APL": "APL"
+  "ration_card__APL": "APL",
+  "empty_date_time": "--:-- --; --/--/----"
 }
