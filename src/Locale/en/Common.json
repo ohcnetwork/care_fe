@@ -182,5 +182,6 @@
   "action_irreversible": "This action is irreversible",
   "GENDER__1": "Male",
   "GENDER__2": "Female",
-  "GENDER__3": "Non-binary"
+  "GENDER__3": "Non-binary",
+  "normal": "Normal"
 }

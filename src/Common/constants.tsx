@@ -699,6 +699,12 @@ export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
+export const HEARTBEAT_RHYTHM_CHOICES = [
+  "REGULAR",
+  "IRREGULAR",
+  "UNKNOWN",
+] as const;
+
 export const NURSING_CARE_PROCEDURES = [
   "personal_hygiene",
   "positioning",
@@ -760,12 +766,12 @@ export const RHYTHM_CHOICES = [
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ] as const;
 
-export const LOCATION_BED_TYPES: Array<any> = [
+export const LOCATION_BED_TYPES = [
   { id: "ISOLATION", name: "Isolation" },
   { id: "ICU", name: "ICU" },
   { id: "BED_WITH_OXYGEN_SUPPORT", name: "Bed with oxygen support" },
   { id: "REGULAR", name: "Regular" },
-];
+] as const;
 
 export const ASSET_META_TYPE = [
   { id: "CAMERA", text: "Camera(ONVIF)" },
