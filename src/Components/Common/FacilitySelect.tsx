@@ -3,6 +3,7 @@ import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { t } from "i18next";
 
 interface FacilitySelectProps {
   name: string;
@@ -69,7 +70,10 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         });
 
       if (allowNone)
-        return [{ name: "None", id: "NONE" }, ...(data?.results || [])];
+        return [
+          { name: t("no_home_facility"), id: "NONE" },
+          ...(data?.results || []),
+        ];
 
       return data?.results;
     },

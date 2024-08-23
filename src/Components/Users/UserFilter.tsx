@@ -145,7 +145,7 @@ export default function UserFilter(props: any) {
           }
           selected={
             filterState.home_facility === "NONE"
-              ? { name: "None", id: "NONE" }
+              ? { name: t("no_home_facility"), id: "NONE" }
               : filterState.home_facility_ref
           }
           errors=""
