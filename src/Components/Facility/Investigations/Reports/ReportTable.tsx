@@ -7,8 +7,8 @@ import { FC } from "react";
 
 const ReportRow = ({ data, name, min, max }: any) => {
   return (
-    <tr className="bg-white even:bg-gray-50">
-      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+    <tr className="bg-white even:bg-secondary-50">
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-secondary-900">
         {name}
       </td>
       {data.map((d: any) => {
@@ -38,10 +38,10 @@ const ReportRow = ({ data, name, min, max }: any) => {
           </td>
         );
       })}
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {min}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {max}
       </td>
     </tr>
@@ -77,8 +77,10 @@ const ReportTable: FC<ReportTableProps> = ({
         </div>
       )}
 
-      <div className=" my-4 p-4" id="section-to-print">
-        {title && <h1 className="text-xl font-bold text-gray-800">{title}</h1>}
+      <div className="my-4 p-4" id="section-to-print">
+        {title && (
+          <h1 className="text-xl font-bold text-secondary-800">{title}</h1>
+        )}
         <br />
         {patientDetails && (
           <div className="flex flex-col gap-1 p-1">
@@ -89,26 +91,26 @@ const ReportTable: FC<ReportTableProps> = ({
         )}
         <br />
         <div className="my-4">
-          <span className="m-1  inline-block rounded-full bg-yellow-200 px-6 py-1 font-medium text-yellow-900">
+          <span className="m-1 inline-block rounded-full bg-yellow-200 px-6 py-1 font-medium text-yellow-900">
             Below Ideal
           </span>
 
-          <span className="m-1  inline-block rounded-full bg-primary-200 px-6 py-1 font-medium text-primary-900">
+          <span className="m-1 inline-block rounded-full bg-primary-200 px-6 py-1 font-medium text-primary-900">
             Ideal
           </span>
 
-          <span className="m-1  inline-block rounded-full bg-red-200 px-6 py-1 font-medium text-red-900">
+          <span className="m-1 inline-block rounded-full bg-red-200 px-6 py-1 font-medium text-red-900">
             Above Ideal
           </span>
         </div>
         <br />
-        <div className="overflow-x-scroll border-b border-gray-200 shadow sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg">
+          <table className="min-w-full divide-y divide-secondary-200">
+            <thead className="bg-secondary-50">
               <tr>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
+                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800"
                 >
                   Name
                 </th>
@@ -116,7 +118,7 @@ const ReportTable: FC<ReportTableProps> = ({
                   <th
                     scope="col"
                     key={session.session_external_id}
-                    className="bg-[#4B5563] px-6 py-3 text-center text-xs  font-semibold tracking-wider text-[#F9FAFB]"
+                    className="bg-[#4B5563] px-6 py-3 text-center text-xs font-semibold tracking-wider text-[#F9FAFB]"
                   >
                     <div className="flex flex-col items-center justify-center gap-1">
                       {formatDateTime(session.session_created_date)}
@@ -131,13 +133,13 @@ const ReportTable: FC<ReportTableProps> = ({
                 ))}
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
+                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800"
                 >
                   Min
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
+                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800"
                 >
                   Max
                 </th>
@@ -157,7 +159,9 @@ const ReportTable: FC<ReportTableProps> = ({
                   );
                 })
               ) : (
-                <tr className="text-center text-gray-500">No tests taken</tr>
+                <tr className="text-center text-secondary-500">
+                  No tests taken
+                </tr>
               )}
             </tbody>
           </table>

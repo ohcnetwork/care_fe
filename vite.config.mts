@@ -1,8 +1,18 @@
+import path from "node:path";
+import { createRequire } from "node:module";
 import { VitePWA } from "vite-plugin-pwa";
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import checker from "vite-plugin-checker";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+
+const pdfWorkerPath = path.join(
+  path.dirname(
+    createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
+  ),
+  "build",
+  "pdf.worker.min.mjs",
+);
 
 const cdnUrls =
   process.env.CARE_CDN_URL ??
@@ -12,9 +22,18 @@ const cdnUrls =
     "http://localhost:4566",
   ].join(" ");
 
-export default defineConfig({
+/** @type {import('vite').UserConfig} */
+export default {
   envPrefix: "REACT_",
   plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: pdfWorkerPath,
+          dest: "",
+        },
+      ],
+    }),
     react(),
     checker({ typescript: true }),
     treeShakeCareIcons({
@@ -105,4 +124,4 @@ export default defineConfig({
       },
     },
   },
-});
+};

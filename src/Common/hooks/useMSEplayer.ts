@@ -106,6 +106,11 @@ export const useMSEMediaPlayer = ({
     if (!mseSourceBuffer.updating) {
       if (mseQueue.length > 0) {
         const packet = mseQueue.shift();
+        // Check if SourceBuffer has been removed before appending buffer
+        if (mseSourceBuffer.removed) {
+          console.error("Attempted to append to a removed SourceBuffer.");
+          return;
+        }
         mseSourceBuffer.appendBuffer(packet);
       } else {
         mseStreamingStarted = false;
@@ -122,6 +127,11 @@ export const useMSEMediaPlayer = ({
 
   const readPacket = (packet: any) => {
     if (!mseStreamingStarted) {
+      // Check if SourceBuffer has been removed before appending buffer
+      if (mseSourceBuffer.removed) {
+        console.error("Attempted to append to a removed SourceBuffer.");
+        return;
+      }
       mseSourceBuffer.appendBuffer(packet);
       mseStreamingStarted = true;
       return;
@@ -161,9 +171,14 @@ export const useMSEMediaPlayer = ({
                 } else {
                   mimeCodec = Utf8ArrayToStr(decoded_arr);
                 }
-                mseSourceBuffer = mse.addSourceBuffer(
-                  `video/mp4; codecs="${mimeCodec}"`,
-                );
+                try {
+                  mseSourceBuffer = mse.addSourceBuffer(
+                    `video/mp4; codecs="${mimeCodec}"`,
+                  );
+                } catch (error) {
+                  onError?.(error);
+                  return;
+                }
                 mseSourceBuffer.mode = "segments";
                 if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
                   mseSourceBuffer.addEventListener("updateend", pushPacket);

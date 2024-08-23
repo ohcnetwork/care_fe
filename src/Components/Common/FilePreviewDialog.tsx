@@ -1,6 +1,6 @@
 import CircularProgress from "./components/CircularProgress";
 import { useTranslation } from "react-i18next";
-import { StateInterface } from "../Patient/FileUpload";
+import { StateInterface } from "../Files/FileUpload";
 import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import ButtonV2, { Cancel } from "./components/ButtonV2";
@@ -31,6 +31,19 @@ type FilePreviewProps = {
   titleAction?: ReactNode;
   fixedWidth?: boolean;
 };
+
+const previewExtensions = [
+  ".html",
+  ".htm",
+  ".pdf",
+  ".mp4",
+  ".webm",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+];
 
 const FilePreviewDialog = (props: FilePreviewProps) => {
   const { show, onClose, file_state, setFileState, downloadURL, fileUrl } =
@@ -86,13 +99,13 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       onClose={() => {
         handleClose();
       }}
-      title="File Preview"
+      title={t("file_preview")}
       show={show}
     >
       {fileUrl ? (
         <>
           <div className="mb-2 flex flex-col items-center justify-between md:flex-row">
-            <p className="text-md font-semibold text-gray-700">
+            <p className="text-md font-semibold text-secondary-700">
               {file_state.name}.{file_state.extension}
             </p>
             <div className="flex gap-4">
@@ -112,12 +125,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center">
-            <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-gray-200">
+            <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
               {file_state.isImage ? (
                 <img
                   src={fileUrl}
                   alt="file"
-                  className={`${
+                  className={`h-full w-full object-contain ${
                     zoom_values[file_state.zoom - 1]
                   } ${getRotationClass(file_state.rotation)}`}
                 />
@@ -130,13 +143,22 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   }}
                   pageNumber={page}
                 />
-              ) : (
+              ) : previewExtensions.includes(file_state.extension) ? (
                 <iframe
                   sandbox=""
+                  // eslint-disable-next-line i18next/no-literal-string
                   title="Source Files"
                   src={fileUrl}
                   className="h-[75vh] w-full"
                 />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center">
+                  <CareIcon
+                    icon="l-file"
+                    className="mb-4 text-5xl text-secondary-600"
+                  />
+                  {t("file_preview_not_supported")}
+                </div>
               )}
             </div>
           </div>

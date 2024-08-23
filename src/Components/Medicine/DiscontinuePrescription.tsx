@@ -22,7 +22,7 @@ export default function DiscontinuePrescription(props: Props) {
 
   return (
     <ConfirmDialog
-      action={t("discontinue")}
+      action={t("confirm_discontinue")}
       title={t("discontinue_caution_note")}
       show
       onClose={() => props.onClose(false)}

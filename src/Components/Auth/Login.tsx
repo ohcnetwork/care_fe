@@ -193,13 +193,13 @@ export const Login = (props: { forgot?: boolean }) => {
               <div className="py-6">
                 <ReactMarkdown
                   rehypePlugins={[rehypeRaw]}
-                  className="max-w-xl text-gray-400"
+                  className="max-w-xl text-secondary-400"
                 >
                   {custom_description || t("goal")}
                 </ReactMarkdown>
               </div>
             ) : (
-              <div className="max-w-xl py-6 pl-1 text-base font-semibold text-gray-400 md:text-lg lg:text-xl">
+              <div className="max-w-xl py-6 pl-1 text-base font-semibold text-secondary-400 md:text-lg lg:text-xl">
                 {t("goal")}
               </div>
             )}
@@ -236,7 +236,7 @@ export const Login = (props: { forgot?: boolean }) => {
               href={coronasafe_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-500"
+              className="text-secondary-500"
             >
               {t("footer_body")}
             </a>
@@ -265,7 +265,7 @@ export const Login = (props: { forgot?: boolean }) => {
                     className="h-14 rounded-lg py-3"
                     alt="state logo"
                   />
-                  <div className="mx-4 h-8 w-px rounded-full bg-gray-600" />
+                  <div className="mx-4 h-8 w-px rounded-full bg-secondary-600" />
                 </>
               )}
               <img
@@ -282,7 +282,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   forgotPassword && "hidden",
                 )}
               >
-                <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
+                <div className="mb-8 w-64 max-w-full text-2xl font-black text-primary-600 lg:w-72 lg:text-4xl">
                   {t("auth_login_title")}
                 </div>
                 <form onSubmit={handleSubmit}>

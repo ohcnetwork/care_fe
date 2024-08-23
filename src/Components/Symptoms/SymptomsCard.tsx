@@ -18,7 +18,7 @@ const EncounterSymptomsCard = () => {
 
   if (!data) {
     return (
-      <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-gray-200 py-8 text-center font-medium text-gray-700">
+      <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-secondary-200 py-8 text-center font-medium text-secondary-700">
         <CareIcon icon="l-spinner-alt" className="animate-spin text-lg" />
         <span>Fetching symptom records...</span>
       </div>
@@ -28,12 +28,12 @@ const EncounterSymptomsCard = () => {
   const records = groupAndSortSymptoms(data.results);
 
   return (
-    <div>
-      <h3 className="mb-2 text-lg font-semibold leading-relaxed text-gray-900">
+    <div id="encounter-symptoms">
+      <h3 className="mb-2 text-lg font-semibold leading-relaxed text-secondary-900">
         Symptoms
       </h3>
 
-      <div className="grid gap-4 divide-y-2 divide-dashed divide-gray-400 md:grid-cols-2 md:divide-x-2 md:divide-y-0">
+      <div className="grid gap-4 divide-y-2 divide-dashed divide-secondary-400 md:grid-cols-2 md:divide-x-2 md:divide-y-0">
         <SymptomsSection title="Active" symptoms={records["in-progress"]} />
         <div className="pt-4 md:pl-6 md:pt-0">
           <SymptomsSection title="Cured" symptoms={records["completed"]} />
@@ -49,7 +49,7 @@ const SymptomsSection = (props: {
 }) => {
   return (
     <div>
-      <h4 className="text-base font-semibold leading-relaxed text-gray-900">
+      <h4 className="text-base font-semibold leading-relaxed text-secondary-900">
         {props.title}
       </h4>
       <ul className="flex list-disc flex-col px-4">
@@ -58,7 +58,7 @@ const SymptomsSection = (props: {
             <div>
               <SymptomText value={record} />
               <br />
-              <span className="flex text-sm text-gray-800">
+              <span className="flex text-sm text-secondary-800">
                 <span className="flex gap-1">
                   Onset <RecordMeta time={record.onset_date} />
                 </span>
@@ -73,7 +73,7 @@ const SymptomsSection = (props: {
         ))}
       </ul>
       {!props.symptoms.length && (
-        <div className="flex h-full w-full gap-2 font-medium text-gray-700">
+        <div className="flex h-full w-full gap-2 font-medium text-secondary-700">
           No symptoms
         </div>
       )}

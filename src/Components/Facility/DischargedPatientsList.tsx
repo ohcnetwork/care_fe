@@ -8,6 +8,7 @@ import useQuery from "../../Utils/request/useQuery";
 import SearchInput from "../Form/SearchInput";
 import {
   ADMITTED_TO,
+  CONSENT_TYPE_CHOICES,
   DISCHARGED_PATIENT_SORT_OPTIONS,
   DISCHARGE_REASONS,
   GENDER_TYPES,
@@ -15,9 +16,8 @@ import {
 } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatPatientAge } from "../../Utils/utils";
+import { formatPatientAge, humanizeStrings } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import SortDropdownMenu from "../Common/SortDropdown";
 import useFilters from "../../Common/hooks/useFilters";
 import PatientFilter from "../Patient/PatientFilter";
@@ -35,6 +35,7 @@ import {
 import { getDiagnosesByIds } from "../Diagnosis/utils";
 import { ICD11DiagnosisModel } from "./models";
 import FilterBadge from "../../CAREUI/display/FilterBadge";
+import Tabs from "../Common/components/Tabs";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -160,6 +161,39 @@ const DischargedPatientsList = ({
       });
   };
 
+  const HasConsentTypesBadges = () => {
+    const badge = (key: string, value: any, id: string) => {
+      return (
+        value && (
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation__consent_types
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation__consent_types: lcat,
+              });
+            }}
+          />
+        )
+      );
+    };
+
+    return qParams.last_consultation__consent_types
+      .split(",")
+      .map((id: string) => {
+        const text = [
+          ...CONSENT_TYPE_CHOICES,
+          { id: "None", text: "No Consents" },
+        ].find((obj) => obj.id == id)?.text;
+        return badge("Has Consent", text, id);
+      });
+  };
+
   const queryField = <T,>(name: string, defaultValue?: T) => {
     return {
       name,
@@ -220,12 +254,14 @@ const DischargedPatientsList = ({
       options={
         <>
           <div className="flex flex-col gap-4 lg:flex-row">
-            <SwitchTabs
-              tab1="Live"
-              tab2="Discharged"
+            <Tabs
+              tabs={[
+                { text: "Live", value: 0 },
+                { text: "Discharged", value: 1 },
+              ]}
               className="mr-4"
-              onClickTab1={() => navigate("/patients")}
-              isTab2Active
+              onTabChange={() => navigate("/patients")}
+              currentTab={1}
             />
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
@@ -337,7 +373,7 @@ const DischargedPatientsList = ({
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
+                t(`RESPIRATORY_SUPPORT_SHORT__${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",
@@ -360,7 +396,7 @@ const DischargedPatientsList = ({
               value(
                 DIAGNOSES_FILTER_LABELS[key],
                 key,
-                getDiagnosisFilterValue(key).join(", "),
+                humanizeStrings(getDiagnosisFilterValue(key)),
               ),
             ),
             badge("Declared Status", "is_declared_positive"),
@@ -385,8 +421,12 @@ const DischargedPatientsList = ({
             ),
           ]}
           children={
-            qParams.last_consultation_admitted_bed_type_list &&
-            LastAdmittedToTypeBadges()
+            <>
+              {qParams.last_consultation_admitted_bed_type_list &&
+                LastAdmittedToTypeBadges()}
+              {qParams.last_consultation__consent_types &&
+                HasConsentTypesBadges()}
+            </>
           }
         />
       </div>
@@ -402,7 +442,7 @@ const DischargedPatientsList = ({
       >
         {() => (
           <div className="flex flex-col gap-4">
-            <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+            <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
               <span>{t("discharged_patients_empty")}</span>
             </PaginatedList.WhenEmpty>
 
@@ -442,20 +482,31 @@ export default DischargedPatientsList;
 const PatientListItem = ({ patient }: { patient: PatientModel }) => {
   return (
     <div className="flex rounded-lg border bg-white p-5 shadow hover:ring-1 hover:ring-primary-400">
-      <div className="flex rounded border border-gray-300 bg-gray-50 p-6">
-        <CareIcon icon="l-user-injured" className="text-3xl text-gray-800" />
+      <div className="flex rounded border border-secondary-300 bg-secondary-50 p-6">
+        <CareIcon
+          icon="l-user-injured"
+          className="text-3xl text-secondary-800"
+        />
       </div>
       <div className="ml-5 flex flex-col">
         <h2 className="text-lg font-bold capitalize text-black">
           {patient.name}
         </h2>
-        <span className="text-sm font-medium text-gray-800">
+        <span className="text-sm font-medium text-secondary-800">
           {GENDER_TYPES.find((g) => g.id === patient.gender)?.text} -{" "}
           {formatPatientAge(patient)}
         </span>
+        {patient.last_consultation?.patient_no && (
+          <span className="text-sm font-medium text-secondary-800">
+            {patient.last_consultation?.suggestion === "A"
+              ? "IP No: "
+              : "OP No: "}
+            {patient.last_consultation?.patient_no}
+          </span>
+        )}
         <div className="flex-1" />
         <RecordMeta
-          className="text-end text-xs text-gray-600"
+          className="text-end text-xs text-secondary-600"
           prefix="last updated"
           time={patient.modified_date}
         />

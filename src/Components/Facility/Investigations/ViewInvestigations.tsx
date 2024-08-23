@@ -34,10 +34,10 @@ export default function ViewInvestigations(props: {
           <Loading />
         </div>
       ) : (
-        <div className="mt-4 space-y-2 ">
+        <div className="mt-4 space-y-2">
           {investigations.length > 0 && (
             <div>
-              <h4 className="-mb-14 text-gray-700">{t("summary")}</h4>
+              <h4 className="-mb-14 text-secondary-700">{t("summary")}</h4>
               <ReportTable
                 investigationData={investigations}
                 hidePrint={true}
@@ -45,7 +45,7 @@ export default function ViewInvestigations(props: {
             </div>
           )}
           {investigationSessions.length === 0 && (
-            <div className="text-semibold mt-5 h-full rounded-lg bg-white py-4 text-center text-lg text-gray-500 shadow">
+            <div className="text-semibold mt-5 h-full rounded-lg bg-white py-4 text-center text-lg text-secondary-500 shadow">
               {t("no_investigation")}
             </div>
           )}
@@ -53,7 +53,7 @@ export default function ViewInvestigations(props: {
             return (
               <div
                 key={investigationSession.session_external_id}
-                className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-gray-200"
+                className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-secondary-200"
               >
                 <div>
                   {formatDateTime(investigationSession.session_created_date)}

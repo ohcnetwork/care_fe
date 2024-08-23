@@ -66,6 +66,7 @@ import {
   LocalBodyModel,
   LocationModel,
   MinimumQuantityItemResponse,
+  PatientConsentModel,
   PatientNotesEditModel,
   PatientNotesModel,
   PatientStatsModel,
@@ -639,6 +640,8 @@ const routes = {
   updateDailyRound: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
     method: "PATCH",
+    TBody: Type<Partial<DailyRoundsModel>>(),
+    TRes: Type<DailyRoundsModel>(),
   },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
@@ -1033,6 +1036,30 @@ const routes = {
     TRes: Type<PaginatedResponse<PatientModel>>(),
   },
 
+  // Consents
+  listConsents: {
+    path: "/api/v1/consultation/{consultationId}/consents/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientConsentModel>>(),
+  },
+  getConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/{id}/",
+    method: "GET",
+    TRes: Type<PatientConsentModel>(),
+  },
+  createConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/",
+    method: "POST",
+    TRes: Type<PatientConsentModel>(),
+    TBody: Type<Partial<PatientConsentModel>>(),
+  },
+  partialUpdateConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/{id}/",
+    method: "PATCH",
+    TRes: Type<PatientConsentModel>(),
+    TBody: Type<Partial<PatientConsentModel>>(),
+  },
+
   //Profile
   checkUsername: {
     path: "/api/v1/users/{username}/check_availability/",
@@ -1318,6 +1345,11 @@ const routes = {
     path: "/api/v1/asset/{external_id}/availability/",
     method: "GET",
     TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
+  },
+  listAssetQR: {
+    path: "/api/v1/public/asset_qr/{qr_code_id}/",
+    method: "GET",
+    TRes: Type<AssetData>(),
   },
 
   // Asset transaction endpoints

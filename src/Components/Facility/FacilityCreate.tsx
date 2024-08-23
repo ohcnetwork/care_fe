@@ -17,8 +17,13 @@ import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import { Popover, Transition } from "@headlessui/react";
-import { Fragment, lazy, useEffect, useState } from "react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
+import { lazy, useEffect, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   getPincodeDetails,
@@ -574,7 +579,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   if (!capacityData || !capacityData.length) {
     capacityList = (
-      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
+      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         {t("no_bed_types_found")}
       </h5>
     );
@@ -638,7 +643,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
     doctorList = (
-      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
+      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         {t("no_staff")}
       </h5>
     );
@@ -751,7 +756,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             />
           </div>
           <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-            <div className="justify-between md:flex  md:border-b md:pb-2">
+            <div className="justify-between md:flex md:border-b md:pb-2">
               <div className="mb-2 text-xl font-semibold">
                 {t("bed_capacity")}
               </div>
@@ -1013,7 +1018,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <div className="flex flex-col justify-center md:block">
                     <Popover id="map-popover" className="relative">
                       <>
-                        <Popover.Button>
+                        <PopoverButton>
                           <ButtonV2
                             circle
                             type="button"
@@ -1025,10 +1030,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                               Select location from map
                             </span>
                           </ButtonV2>
-                        </Popover.Button>
+                        </PopoverButton>
 
                         <Transition
-                          as={Fragment}
                           enter="transition ease-out duration-200"
                           enterFrom="opacity-0 translate-y-1"
                           enterTo="opacity-100 translate-y-0"
@@ -1036,7 +1040,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                           leaveFrom="opacity-100 translate-y-0"
                           leaveTo="opacity-0 translate-y-1"
                         >
-                          <Popover.Panel className="absolute -right-40 bottom-10 sm:-right-48">
+                          <PopoverPanel className="absolute -right-40 bottom-10 sm:-right-48">
                             <GLocationPicker
                               lat={Number(state.form.latitude)}
                               lng={Number(state.form.longitude)}
@@ -1046,7 +1050,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                 handleSelectCurrentLocation
                               }
                             />
-                          </Popover.Panel>
+                          </PopoverPanel>
                         </Transition>
                       </>
                     </Popover>
@@ -1075,5 +1079,5 @@ export const FacilityCreate = (props: FacilityProps) => {
 };
 
 const FieldUnit = ({ unit }: { unit: string }) => {
-  return <p className="mr-8 text-xs text-gray-700">{unit}</p>;
+  return <p className="absolute right-10 text-xs text-secondary-700">{unit}</p>;
 };

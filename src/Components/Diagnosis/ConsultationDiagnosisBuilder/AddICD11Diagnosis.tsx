@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AutocompleteFormField from "../../Form/FormFields/Autocomplete";
 import {
@@ -10,6 +10,7 @@ import ConditionVerificationStatusMenu from "../ConditionVerificationStatusMenu"
 import { classNames, mergeQueryOptions } from "../../../Utils/utils";
 import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
+import { Error } from "../../../Utils/Notifications";
 
 interface AddICD11DiagnosisProps {
   className?: string;
@@ -24,7 +25,15 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   const [adding, setAdding] = useState(false);
   const hasError = !!props.disallowed.find((d) => d?.id === selected?.id);
 
-  const { data, loading, refetch } = useQuery(routes.listICD11Diagnosis);
+  const { res, data, loading, refetch } = useQuery(routes.listICD11Diagnosis, {
+    silent: true,
+  });
+
+  useEffect(() => {
+    if (res?.status === 500) {
+      Error({ msg: "ICD-11 Diagnosis functionality is facing issues." });
+    }
+  }, [res?.status]);
 
   const handleAdd = async (status: CreateDiagnosis["verification_status"]) => {
     if (!selected) return;
@@ -62,6 +71,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
         )}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
+        minQueryLength={2}
         onQuery={(query) => refetch({ query: { query } })}
         isLoading={loading}
         error={hasError ? t("diagnosis_already_added") : undefined}
