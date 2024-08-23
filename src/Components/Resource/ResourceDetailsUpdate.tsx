@@ -13,7 +13,7 @@ import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
@@ -209,7 +209,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 {assignedUserLoading ? (
                   <CircularProgress />
                 ) : (
-                  <UserAutocompleteFormField
+                  <UserAutocomplete
                     label="Assigned To"
                     value={assignedUser === null ? undefined : assignedUser}
                     onChange={handleOnSelect}

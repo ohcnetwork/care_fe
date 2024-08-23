@@ -3,7 +3,7 @@ import PatientCategoryBadge from "../../../Common/PatientCategoryBadge";
 import {
   BloodPressure,
   DailyRoundsModel,
-  DailyRoundsOutput,
+  NameQuantity,
 } from "../../../Patient/models";
 import { PatientCategory } from "../../models";
 
@@ -56,7 +56,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
         <div className="flex flex-col gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
           <span className="flex flex-wrap gap-x-2 gap-y-1 text-sm text-secondary-700">
-            {(attributeValue as DailyRoundsOutput[]).map((output) => (
+            {(attributeValue as NameQuantity[]).map((output) => (
               <span className="font-semibold" key={output.name}>
                 {output.name}: {output.quantity}
               </span>

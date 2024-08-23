@@ -1,10 +1,14 @@
-import { Popover, Transition } from "@headlessui/react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import { LocationSelect } from "../../Common/LocationSelect";
 import Pagination from "../../Common/Pagination";
 import useFilters from "../../../Common/hooks/useFilters";
-import { Fragment } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useSlug from "../../../Common/hooks/useSlug";
 import { useTranslation } from "react-i18next";
@@ -26,14 +30,13 @@ const LiveMonitoringFilters = (props: Props) => {
   return (
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
       <Popover className="relative">
-        <Popover.Button>
+        <PopoverButton>
           <ButtonV2 variant={qParams.location ? "primary" : "secondary"} border>
             <CareIcon icon="l-setting" className="text-lg" />
             {t("settings_and_filters")}
           </ButtonV2>
-        </Popover.Button>
+        </PopoverButton>
         <Transition
-          as={Fragment}
           enter="transition ease-out duration-200"
           enterFrom="opacity-0 translate-y-1"
           enterTo="opacity-100 translate-y-0"
@@ -41,12 +44,12 @@ const LiveMonitoringFilters = (props: Props) => {
           leaveFrom="opacity-100 translate-y-0"
           leaveTo="opacity-0 translate-y-1"
         >
-          <Popover.Panel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
+          <PopoverPanel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
             <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
               <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                 <div className="flow-root rounded-md">
                   <span className="block text-sm text-secondary-800">
-                    <span className="font-bold ">{props.totalCount}</span>{" "}
+                    <span className="font-bold">{props.totalCount}</span>{" "}
                     Camera(s) present
                   </span>
                 </div>
@@ -93,7 +96,7 @@ const LiveMonitoringFilters = (props: Props) => {
                 </ButtonV2>
               </div>
             </div>
-          </Popover.Panel>
+          </PopoverPanel>
         </Transition>
       </Popover>
 

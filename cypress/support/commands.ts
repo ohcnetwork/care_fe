@@ -138,7 +138,7 @@ Cypress.Commands.add(
         optionArray.forEach((options) => {
           cy.get("[role='option']").contains(options).click();
         });
-        cy.get(selector).click();
+        cy.get(selector).find("#dropdown-toggle").click();
       });
   },
 );
@@ -153,7 +153,7 @@ Cypress.Commands.add(
         optionArray.forEach((options) => {
           cy.get("[role='option']").contains(options).click();
         });
-        cy.get(selector).click();
+        cy.get(selector).find("#dropdown-toggle").click();
       });
   },
 );

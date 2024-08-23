@@ -191,7 +191,7 @@ export const NutritionPlots = (props: any) => {
         <div
           className={showIO ? "grid-row-1 grid gap-4 md:grid-cols-2" : "hidden"}
         >
-          <div className="rounded-lg border bg-white px-4 pt-4  md:col-span-2">
+          <div className="rounded-lg border bg-white px-4 pt-4 md:col-span-2">
             <LinePlot
               title="IO Balance"
               name="IO Balance"
@@ -199,7 +199,7 @@ export const NutritionPlots = (props: any) => {
               yData={IOvalues}
             />
           </div>
-          <div className="rounded-lg border bg-white px-4 pt-4 ">
+          <div className="rounded-lg border bg-white px-4 pt-4">
             <LinePlot
               title="Total Intake"
               name="Total Intake"
@@ -207,7 +207,7 @@ export const NutritionPlots = (props: any) => {
               yData={yAxisData("total_intake_calculated")}
             />
           </div>
-          <div className="rounded-lg border bg-white px-4 pt-4 ">
+          <div className="rounded-lg border bg-white px-4 pt-4">
             <LinePlot
               title="Total Output"
               name="Total Output"
@@ -238,7 +238,7 @@ export const NutritionPlots = (props: any) => {
               yData={yAxisData("total_intake_calculated")}
             />
           </div>
-          <div className="rounded-lg border bg-white px-4 pt-4 ">
+          <div className="rounded-lg border bg-white px-4 pt-4">
             <StackedLinePlot
               title="Infusions"
               xData={dates}

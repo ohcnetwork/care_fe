@@ -264,7 +264,7 @@ export default function useFileUpload(
             />
           </div>
           <div className="m-4">
-            <h1 className="text-xl text-black "> Camera</h1>
+            <h1 className="text-xl text-black"> Camera</h1>
           </div>
         </div>
       }
@@ -294,7 +294,7 @@ export default function useFileUpload(
       </div>
 
       {/* buttons for mobile screens */}
-      <div className="m-4 flex justify-evenly sm:hidden ">
+      <div className="m-4 flex justify-evenly sm:hidden">
         <div>
           {!previewImage ? (
             <ButtonV2 onClick={handleSwitchCamera} className="m-2">
@@ -356,7 +356,7 @@ export default function useFileUpload(
         </div>
       </div>
       {/* buttons for laptop screens */}
-      <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+      <div className={`${isLaptopScreen ? " " : "hidden"}`}>
         <div className="m-4 flex lg:hidden">
           <ButtonV2 onClick={handleSwitchCamera}>
             <CareIcon icon="l-camera-change" className="text-lg" />
@@ -364,7 +364,7 @@ export default function useFileUpload(
           </ButtonV2>
         </div>
 
-        <div className="flex justify-end  gap-2 p-4">
+        <div className="flex justify-end gap-2 p-4">
           <div>
             {!previewImage ? (
               <>

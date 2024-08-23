@@ -20,12 +20,14 @@ import ConfirmDialog from "../../Common/ConfirmDialog";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { Warn } from "../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
+import { GetStatusResponse } from "../../CameraFeed/routes";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const facility = useSlug("facility");
   const bed = props.consultationData.current_bed?.bed_object;
+  const feedStateSessionKey = `encounterFeedState[${props.consultationId}]`;
 
   const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<AssetBedModel>();
@@ -59,11 +61,29 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         return;
       }
 
-      const preset = data.results.find(
+      const presets = data.results.filter(
         (obj) =>
           obj.asset_object.meta?.asset_type === "CAMERA" &&
           obj.meta.type !== "boundary",
       );
+
+      const lastStateJSON = sessionStorage.getItem(feedStateSessionKey);
+      const preset =
+        (() => {
+          if (lastStateJSON) {
+            const lastState = JSON.parse(lastStateJSON) as LastFeedState;
+            if (lastState.type === "preset") {
+              return presets.find((obj) => obj.id === lastState.value);
+            }
+            if (lastState.type === "position") {
+              return {
+                ...presets[0],
+                id: "",
+                meta: { ...presets[0].meta, position: lastState.value },
+              };
+            }
+          }
+        })() ?? presets[0];
 
       if (preset) {
         setPreset(preset);
@@ -105,6 +125,18 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     }
   }, [!!bed, loading, !!asset, divRef.current]);
 
+  useEffect(() => {
+    if (preset?.id) {
+      sessionStorage.setItem(
+        feedStateSessionKey,
+        JSON.stringify({
+          type: "preset",
+          value: preset.id,
+        } satisfies LastAccessedPreset),
+      );
+    }
+  }, [feedStateSessionKey, preset]);
+
   if (loading) {
     return <Loading />;
   }
@@ -112,6 +144,8 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   if (!bed || !asset) {
     return <span>No bed/asset linked allocated</span>;
   }
+
+  const cannotSaveToPreset = !hasMoved || !preset?.id;
 
   return (
     <>
@@ -135,7 +169,21 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
           key={key}
           asset={asset}
           preset={preset?.meta.position}
-          onMove={() => setHasMoved(true)}
+          onMove={() => {
+            setHasMoved(true);
+            setTimeout(async () => {
+              const { data } = await operate({ type: "get_status" });
+              if (data) {
+                sessionStorage.setItem(
+                  feedStateSessionKey,
+                  JSON.stringify({
+                    type: "position",
+                    value: (data as GetStatusResponse).result.position,
+                  } satisfies LastAccessedPosition),
+                );
+              }
+            }, 3000);
+          }}
           operate={operate}
           onStreamError={() => {
             triggerGoal("Camera Feed Viewed", {
@@ -167,7 +215,14 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                       result: "success",
                     });
                     setHasMoved(false);
-                    setPreset(value);
+                    // Voluntarily copying to trigger change of reference of the position attribute, so that the useEffect of CameraFeed that handles the moves gets triggered.
+                    setPreset({
+                      ...value,
+                      meta: {
+                        ...value.meta,
+                        position: { ...value.meta.position },
+                      },
+                    });
                   }}
                 />
                 {isUpdatingPreset ? (
@@ -178,13 +233,13 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                 ) : (
                   <ButtonV2
                     size="small"
-                    variant={hasMoved ? "secondary" : "secondary"}
-                    disabled={!hasMoved}
+                    variant="secondary"
+                    disabled={cannotSaveToPreset}
                     border
-                    ghost={!hasMoved}
-                    shadow={hasMoved}
+                    ghost={cannotSaveToPreset}
+                    shadow={!cannotSaveToPreset}
                     tooltip={
-                      hasMoved
+                      !cannotSaveToPreset
                         ? "Save current position to selected preset"
                         : "Change camera position to update preset"
                     }
@@ -205,3 +260,15 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     </>
   );
 };
+
+type LastAccessedPreset = {
+  type: "preset";
+  value: string;
+};
+
+type LastAccessedPosition = {
+  type: "position";
+  value: PTZPayload;
+};
+
+type LastFeedState = LastAccessedPosition | LastAccessedPreset;

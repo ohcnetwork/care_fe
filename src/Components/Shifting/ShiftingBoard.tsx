@@ -9,6 +9,7 @@ import {
 import {
   classNames,
   formatDateTime,
+  formatName,
   formatPatientAge,
 } from "../../Utils/utils";
 import { downloadShiftRequests } from "../../Redux/actions";
@@ -174,8 +175,8 @@ const ShiftCard = ({ shift, filter }: any) => {
                   >
                     <CareIcon icon="l-user" className="mr-2 text-xl" />
                     <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
-                      {shift.assigned_to_object.first_name}{" "}
-                      {shift.assigned_to_object.last_name} -{" "}
+                      {formatName(shift.assigned_to_object)}
+                      {" - "}
                       {shift.assigned_to_object.user_type}
                     </dd>
                   </dt>
@@ -377,7 +378,7 @@ export default function ShiftingBoard({
         {isLoading ? (
           <div className="m-1">
             <div className="mx-auto w-full max-w-sm rounded-md border border-secondary-300 bg-white p-4 shadow">
-              <div className="flex animate-pulse space-x-4 ">
+              <div className="flex animate-pulse space-x-4">
                 <div className="flex-1 space-y-4 py-1">
                   <div className="h-4 w-3/4 rounded bg-secondary-400"></div>
                   <div className="space-y-2">
