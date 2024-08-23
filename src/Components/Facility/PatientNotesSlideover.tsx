@@ -4,7 +4,6 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
@@ -15,6 +14,8 @@ import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTex
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
+import { Link } from "raviger";
+import { t } from "i18next";
 
 interface PatientNotesProps {
   patientId: string;
@@ -186,7 +187,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           {notesActionIcons}
         </div>
       ) : (
-        <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md ">
+        <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md">
           <div className="flex w-full items-center justify-between bg-primary-800 p-2 px-4 text-white">
             <span className="font-semibold">Discussion Notes</span>
             {notesActionIcons}
@@ -224,14 +225,14 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             <AutoExpandingTextInputFormField
               id="doctor_notes_textarea"
               maxHeight={160}
-              rows={1}
+              rows={2}
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
               className="w-full grow"
               errorClassName="hidden"
               innerClassName="pr-10"
-              placeholder="Type your Note"
+              placeholder={t("notes_placeholder")}
               disabled={!patientActive}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}

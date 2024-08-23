@@ -54,7 +54,7 @@ describe("Patient Medicine Administration", () => {
     cy.verifyAndClickElement("#0", medicineNameOne);
     cy.submitButton("Discontinue");
     patientPrescription.enterDiscontinueReason("Medicine is been discontinued");
-    cy.submitButton("Discontinue");
+    cy.submitButton("Confirm Discontinue");
     cy.verifyNotification("Prescription discontinued");
     cy.closeNotification();
     // verify the discontinue medicine view

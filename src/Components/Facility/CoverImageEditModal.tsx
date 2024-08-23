@@ -127,9 +127,14 @@ const CoverImageEditModal = ({
         Authorization:
           "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
       },
-      (xhr: XMLHttpRequest) => {
+      async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           Success({ msg: "Cover image updated." });
+          setIsProcessing(false);
+          setIsCaptureImgBeingUploaded(false);
+          await sleep(1000);
+          onSave?.();
+          closeModal();
         } else {
           Notification.Error({
             msg: "Something went wrong!",
@@ -145,12 +150,6 @@ const CoverImageEditModal = ({
         setIsProcessing(false);
       },
     );
-
-    await sleep(1000);
-    setIsProcessing(false);
-    setIsCaptureImgBeingUploaded(false);
-    onSave && onSave();
-    closeModal();
   };
 
   const handleDelete = async () => {
@@ -343,7 +342,7 @@ const CoverImageEditModal = ({
               )}
             </div>
             {/* buttons for mobile screens */}
-            <div className="m-4 flex flex-col justify-evenly sm:hidden ">
+            <div className="m-4 flex flex-col justify-evenly sm:hidden">
               <div>
                 {!previewImage ? (
                   <ButtonV2
@@ -410,7 +409,7 @@ const CoverImageEditModal = ({
               </div>
             </div>
             {/* buttons for laptop screens */}
-            <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+            <div className={`${isLaptopScreen ? " " : "hidden"}`}>
               <div className="m-4 flex lg:hidden">
                 <ButtonV2 onClick={handleSwitchCamera}>
                   <CareIcon icon="l-camera-change" className="text-lg" />
@@ -418,7 +417,7 @@ const CoverImageEditModal = ({
                 </ButtonV2>
               </div>
 
-              <div className="flex justify-end  gap-2 p-4">
+              <div className="flex justify-end gap-2 p-4">
                 <div>
                   {!previewImage ? (
                     <>

@@ -9,7 +9,6 @@ import {
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
-import { make as Link } from "../../Common/components/Link.bs";
 import { PatientModel } from "../../Patient/models";
 import {
   formatDateTime,
@@ -17,7 +16,7 @@ import {
   relativeTime,
 } from "../../../Utils/utils";
 
-import { navigate, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
 import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
@@ -272,7 +271,7 @@ export const ConsultationDetails = (props: any) => {
             >
               Patient Details
             </Link>
-            <Link
+            <a
               id="patient_doctor_notes"
               onClick={() =>
                 showPatientNotesPopup
@@ -284,7 +283,7 @@ export const ConsultationDetails = (props: any) => {
               className="btn btn-primary m-1 w-full hover:text-white"
             >
               Discussion Notes
-            </Link>
+            </a>
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
@@ -369,7 +368,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
               <nav
-                className="flex space-x-6 overflow-x-auto pb-2 pl-2 "
+                className="flex space-x-6 overflow-x-auto pb-2 pl-2"
                 id="consultation_tab_nav"
               >
                 {CONSULTATION_TABS.map((p) => {

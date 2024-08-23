@@ -163,7 +163,6 @@ const PrescriptionsTable = ({
           <th className="max-w-52 p-1">Medicine</th>
           <th className="p-1">Dosage</th>
           <th className="p-1">Directions</th>
-          {/* <th className="p-1">{prn ? "Indicator" : "Freq."}</th> */}
           <th className="max-w-32 p-1">Notes / Instructions</th>
         </tr>
       </thead>

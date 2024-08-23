@@ -1,5 +1,5 @@
 import { Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { StreamStatus } from "./usePlayer";
@@ -45,7 +45,6 @@ export default function FeedAlert({ state }: Props) {
   return (
     <Transition
       show={!!state && show}
-      as={Fragment}
       enter="ease-out duration-200"
       enterFrom="opacity-0 translate-y-5"
       enterTo="opacity-100 translate-y-0"

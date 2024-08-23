@@ -10,7 +10,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
-import { formatDate, formatDateTime } from "../../Utils/utils";
+import { formatDate, formatDateTime, formatName } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -110,7 +110,7 @@ const AssetManage = (props: AssetManageProps) => {
 
   const PrintPreview = () => (
     <div className="">
-      <div className="my-4 flex justify-end ">
+      <div className="my-4 flex justify-end">
         <button
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
@@ -148,8 +148,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500">
               <span className="font-medium text-secondary-900">
-                {transaction.performed_by.first_name}{" "}
-                {transaction.performed_by.last_name}
+                {formatName(transaction.performed_by)}
               </span>
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-right text-sm leading-5 text-secondary-500">

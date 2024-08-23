@@ -570,7 +570,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   </div>
                   <div>
                     Body Surface Area {" - "}
-                    <span className="font-semibold ">
+                    <span className="font-semibold">
                       {props.consultationData.weight &&
                       props.consultationData.height ? (
                         <>

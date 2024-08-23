@@ -142,7 +142,9 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
     "Heart rate": getHeartRateScore(dailyRound.pulse),
     "Systolic BP": getSystolicBPScore(dailyRound.bp?.systolic),
     Temperature: getTempRange(
-      dailyRound.temperature ? parseFloat(dailyRound.temperature) : undefined,
+      dailyRound.temperature
+        ? parseFloat(`${dailyRound.temperature}`)
+        : undefined,
     ),
     "Level of Consciousness": getLOCRange(dailyRound.consciousness_level),
   };

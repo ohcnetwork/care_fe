@@ -14,7 +14,11 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatDateTime, formatPatientAge } from "../../Utils/utils";
+import {
+  formatDateTime,
+  formatName,
+  formatPatientAge,
+} from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 
 import { useTranslation } from "react-i18next";
@@ -299,7 +303,7 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <div id="section-to-print" className="print bg-white ">
+      <div id="section-to-print" className="print bg-white">
         <div>{data.is_kasp && <img alt="logo" src={header_logo.dark} />}</div>
         <div className="mx-2">
           <div className="mt-6">
@@ -535,9 +539,8 @@ export default function ShiftDetails(props: { id: string }) {
                 <div className="pr-16 sm:px-16 sm:text-center">
                   <p className="font-bold text-primary-800">
                     <span className="inline">
-                      {t("assigned_to")}: {data?.assigned_to_object.first_name}{" "}
-                      {data.assigned_to_object.last_name} -{" "}
-                      {data.assigned_to_object.user_type}
+                      {t("assigned_to")}: {formatName(data.assigned_to_object)}{" "}
+                      - {data.assigned_to_object.user_type}
                     </span>
                   </p>
                 </div>
