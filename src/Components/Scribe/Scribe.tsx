@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Popover } from "@headlessui/react";
+import React, { useState, useEffect, useRef } from "react";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import routes from "../../Redux/api";
@@ -21,8 +21,15 @@ export interface Field {
   description: string;
   type: string;
   example: string;
-  default: string;
+  default: any;
   options?: readonly FieldOption[];
+  validator: (value: any) => boolean;
+}
+
+export interface ScribeForm {
+  id: string;
+  name: string;
+  fields: () => Promise<Field[]> | Field[];
 }
 
 export type ScribeModel = {
@@ -45,7 +52,8 @@ export type ScribeModel = {
 };
 
 interface ScribeProps {
-  fields: Field[];
+  form: ScribeForm;
+  existingData?: { [key: string]: any };
   onFormUpdate: (fields: any) => void;
 }
 
@@ -54,12 +62,12 @@ const SCRIBE_FILE_TYPES = {
   SCRIBE: 1,
 };
 
-export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
+export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
   const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
   const [stage, setStage] = useState("start");
-  const [editableTranscript, setEditableTranscript] = useState("");
+  const [_editableTranscript, setEditableTranscript] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [formFields, setFormFields] = useState<{
@@ -70,6 +78,28 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   const [isAudioUploading, setIsAudioUploading] = useState(false);
   const [updatedTranscript, setUpdatedTranscript] = useState<string>("");
   const [scribeID, setScribeID] = useState<string>("");
+  const stageRef = useRef(stage);
+  const [fields, setFields] = useState<Field[]>([]);
+
+  useEffect(() => {
+    const loadFields = async () => {
+      const fields = await form.fields();
+      setFields(
+        fields.map((f) => ({
+          ...f,
+          validate: undefined,
+          default: JSON.stringify(f.default),
+        })),
+      );
+    };
+    loadFields();
+  }, [form]);
+
+  useEffect(() => {
+    if (stageRef.current === "cancelled") {
+      setStage("start");
+    }
+  }, [stage]);
 
   const {
     isRecording,
@@ -81,6 +111,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
   const uploadAudioData = (response: any, audioBlob: Blob) => {
     return new Promise<void>((resolve, reject) => {
+      if (stageRef.current === "cancelled") resolve();
       const url = response.data.signed_url;
       const internal_name = response.data.internal_name;
       const f = audioBlob;
@@ -109,6 +140,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
   const uploadAudio = async (audioBlob: Blob, associatingId: string) => {
     return new Promise((resolve, reject) => {
+      if (stageRef.current === "cancelled") resolve({});
       const category = "AUDIO";
       const name = "audio.mp3";
       const filename = Date.now().toString();
@@ -127,6 +159,8 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
           uploadAudioData(response, audioBlob)
             .then(() => {
               if (!response?.data?.id) throw Error("Error uploading audio");
+
+              if (stageRef.current === "cancelled") resolve({});
               markUploadComplete(response?.data.id, associatingId).then(() => {
                 resolve(response.data);
               });
@@ -145,12 +179,14 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     startRecording();
     setProgress(25);
     setStage("recording");
+    stageRef.current = "recording";
   };
 
   const handleStopRecordingClick = () => {
     stopRecording();
     setProgress(50);
     setStage("recording-review");
+    stageRef.current = "recording-end";
   };
 
   const handleEditChange = (e: {
@@ -161,6 +197,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
   const waitForTranscript = async (externalId: string): Promise<string> => {
     return new Promise((resolve, reject) => {
+      if (stageRef.current === "cancelled") resolve("");
       const interval = setInterval(async () => {
         try {
           const res = await request(routes.getScribe, {
@@ -191,9 +228,29 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     });
   };
 
+  const reProcessTranscript = async () => {
+    setErrors([]);
+    setEditableTranscript(updatedTranscript);
+    setStage("review");
+    const res = await request(routes.updateScribe, {
+      body: {
+        status: "READY",
+        transcript: updatedTranscript,
+        ai_response: null,
+      },
+      pathParams: {
+        external_id: scribeID,
+      },
+    });
+    if (res.error || !res.data) throw Error("Error updating scribe instance");
+    setStage("review");
+    await handleSubmitTranscript(res.data.external_id);
+  };
+
   const waitForFormData = async (externalId: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
+        if (stageRef.current === "cancelled") resolve("");
         try {
           const res = await request(routes.getScribe, {
             pathParams: {
@@ -270,14 +327,28 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   };
 
   const handleSubmitTranscript = async (external_id: string) => {
+    if (stageRef.current === "cancelled") return;
     setProgress(75);
     setIsGPTProcessing(true);
     try {
       const updatedFieldsResponse = await waitForFormData(external_id);
       setProgress(100);
       const parsedFormData = JSON.parse(updatedFieldsResponse ?? "{}");
-      setFormFields(parsedFormData);
-      onFormUpdate(parsedFormData);
+      if (stageRef.current === "cancelled") return;
+
+      // run type validations
+      const validated = Object.entries(parsedFormData)
+        .filter(([k, v]) => {
+          const f = fields.find((f) => f.id === k);
+          if (!f) return false;
+          if (v === f.default) return false;
+          //if (f.validator) return f.validator(f.type === "number" ? Number(v) : v);
+          return true;
+        })
+        .map(([k, v]) => ({ [k]: v }))
+        .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      setFormFields(validated as any);
+      onFormUpdate(validated);
       setStage("final-review");
     } catch (error) {
       setErrors(["Error retrieving form data"]);
@@ -286,6 +357,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   };
 
   const startTranscription = async (scribeID: string) => {
+    if (stageRef.current === "cancelled") return;
     setIsTranscribing(true);
     const errors = [];
     try {
@@ -302,6 +374,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
       //poll for transcript
       const transcriptResponse = await waitForTranscript(res.data.external_id);
+      if (stageRef.current === "cancelled") return;
       setEditableTranscript(transcriptResponse);
       setUpdatedTranscript(transcriptResponse);
       setStage("review");
@@ -329,37 +402,82 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     setFormFields({});
     setEditableTranscript("");
     setUpdatedTranscript("");
+    setIsAudioUploading(false);
+    setScribeID("");
+    setIsHoveringCancelRecord(false);
+    stageRef.current = "cancelled";
   };
 
-  const processFormField = (
+  function processFormField(
     fieldDetails: Field | undefined,
-    formFields: { [key: string]: string | string[] | number },
+    formFields: { [key: string]: any },
     field: string,
-  ) => {
-    if (fieldDetails?.options) {
-      // Check if the form field is an array (multiple selections allowed)
-      if (Array.isArray(formFields[field])) {
-        // Map each selected option ID to its corresponding text
-        return (formFields[field] as string[])
-          .map((option) => {
-            const optionDetails = fieldDetails.options?.find(
-              (o) => o.id === option,
-            );
-            return optionDetails?.text ?? option; // Use option text if found, otherwise fallback to option ID
-          })
-          .join(", ");
-      } else {
-        // Single selection scenario, find the option that matches the field value
-        return (
-          fieldDetails.options?.find((o) => o.id === formFields[field])?.text ??
-          JSON.stringify(formFields[field])
-        );
+  ): React.ReactNode {
+    const value = formFields[field];
+    if (!fieldDetails || !value) return value;
+
+    const { options } = fieldDetails;
+
+    const getHumanizedKey = (key: string): string => {
+      return key
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    };
+
+    const getOptionText = (value: string | number): string => {
+      if (!options) return value.toString();
+      const option = options.find((opt) => opt.id === value);
+      return option ? option.text : value.toString();
+    };
+
+    const renderPrimitive = (value: any): any => {
+      return options ? getOptionText(value) : value;
+    };
+
+    const renderArray = (values: any[]): React.ReactNode => {
+      return values.map((value) => renderPrimitive(value)).join(", ");
+    };
+
+    const renderObject = (obj: { [key: string]: any }): React.ReactNode => {
+      return (
+        <div className="flex flex-col gap-2 text-sm">
+          {Object.keys(obj).map((key, keyIndex) => (
+            <div key={keyIndex}>
+              <b>{getHumanizedKey(key)}</b>: {renderPrimitive(obj[key])}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const renderObjectArray = (objects: any[]): React.ReactNode => {
+      return (
+        <div className="flex flex-col gap-2 text-sm">
+          {objects.map((obj, objIndex) => (
+            <div key={objIndex}>{renderObject(obj)}</div>
+          ))}
+        </div>
+      );
+    };
+
+    if (Array.isArray(value)) {
+      if (
+        value.length > 0 &&
+        typeof value[0] === "object" &&
+        !Array.isArray(value[0])
+      ) {
+        return renderObjectArray(value);
       }
-    } else {
-      // If no options are available, return the field value in JSON string format
-      return JSON.stringify(formFields[field]);
+      return renderArray(value);
     }
-  };
+
+    if (typeof value === "object") {
+      return renderObject(value);
+    }
+
+    return renderPrimitive(value);
+  }
 
   const renderContentBasedOnStage = () => {
     switch (stage) {
@@ -368,7 +486,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
           <button
             onClick={handleStartRecordingClick}
             disabled={isRecording}
-            className="flex items-center justify-center rounded-full border border-black px-2 py-2 font-bold hover:border-red-500 hover:bg-gray-200 hover:text-red-500"
+            className="flex items-center justify-center rounded-full border border-black px-2 py-2 font-bold hover:border-red-500 hover:bg-secondary-200 hover:text-red-500"
           >
             <CareIcon
               icon="l-microphone"
@@ -383,7 +501,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
             disabled={!isRecording}
             onMouseEnter={() => setIsHoveringCancelRecord(true)}
             onMouseLeave={() => setIsHoveringCancelRecord(false)}
-            className="flex animate-pulse items-center justify-center rounded-full border border-red-500 bg-red-100 px-2 py-2 font-bold text-red-500 hover:border-black hover:bg-gray-200 hover:text-black"
+            className="flex animate-pulse items-center justify-center rounded-full border border-red-500 bg-red-100 px-2 py-2 font-bold text-red-500 hover:border-black hover:bg-secondary-200 hover:text-black"
           >
             {isHoveringCancelRecord ? (
               <CareIcon
@@ -432,7 +550,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
   return (
     <Popover>
-      <Popover.Button>
+      <PopoverButton>
         <ButtonV2
           onClick={() => setOpen(!open)}
           className="rounded py-2 font-bold"
@@ -440,17 +558,17 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
           <CareIcon icon="l-microphone" className="mr-1" />
           Voice AutoFill
         </ButtonV2>
-      </Popover.Button>
+      </PopoverButton>
       {open && (
-        <Popover.Panel className="absolute right-6 z-10 w-[370px]" static>
+        <PopoverPanel className="absolute right-6 z-10 w-[370px]" static>
           <div className="text-center">
             <span className="mt-2 inline-block align-middle" aria-hidden="true">
               &#8203;
             </span>
 
-            <div className="inline-block w-full max-w-md overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+            <div className="inline-block max-h-[75vh] w-full max-w-md overflow-hidden overflow-y-auto rounded-2xl border-2 border-secondary-300 bg-white p-6 text-left align-middle shadow-xl transition-all">
               <div className="flex justify-between">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">
+                <h3 className="text-lg font-medium leading-6 text-secondary-900">
                   Voice AutoFill
                 </h3>
 
@@ -465,7 +583,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                 >
                   <CareIcon
                     icon="l-times-circle"
-                    className=" flex -scale-x-100 justify-center text-lg"
+                    className="flex -scale-x-100 justify-center text-lg"
                   />
                 </ButtonV2>
               </div>
@@ -474,7 +592,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                 stage === "final-review" ||
                 stage === "recording-review") && (
                 <div className="flex flex-col justify-center gap-4 rounded-md p-2">
-                  <p className="text-sm font-semibold text-gray-600">
+                  <p className="text-sm font-semibold text-secondary-600">
                     Recorded Audio
                   </p>
                   {audioBlobs.length > 0 &&
@@ -485,46 +603,49 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                         src={URL.createObjectURL(blob)}
                       />
                     ))}
+                  <ButtonV2
+                    onClick={() => {
+                      handleRerecordClick();
+                    }}
+                    className="w-full"
+                  >
+                    Restart Recording
+                  </ButtonV2>
                 </div>
               )}
 
               {(stage === "review" || stage === "final-review") && (
                 <div className="my-2 w-full">
-                  <p className="mb-2 text-sm font-semibold text-gray-600">
-                    Transcript
-                  </p>
+                  <div className="flex justify-between">
+                    <p className="mb-2 text-sm font-semibold text-secondary-600">
+                      Transcript
+                    </p>
+                    <p className="mb-2 text-sm italic text-secondary-500">
+                      (Edit if needed)
+                    </p>
+                  </div>
                   <textarea
-                    className="h-32 w-full rounded-md border border-gray-300 p-2 font-mono text-sm"
+                    className="h-32 w-full rounded-md border border-secondary-300 p-2 font-mono text-sm"
                     value={updatedTranscript}
                     onChange={handleEditChange}
                   />
-                  {updatedTranscript !== editableTranscript && (
-                    <ButtonV2
-                      onClick={async () => {
-                        setErrors([]);
-                        setEditableTranscript(updatedTranscript);
-                        setStage("review");
-                        const res = await request(routes.updateScribe, {
-                          body: {
-                            status: "READY",
-                            transcript: updatedTranscript,
-                          },
-                          pathParams: {
-                            external_id: scribeID,
-                          },
-                        });
-                        if (res.error || !res.data)
-                          throw Error("Error updating scribe instance");
-                        setStage("review");
-                        await handleSubmitTranscript(res.data.external_id);
-                      }}
-                      className="my-2 w-full"
-                    >
-                      Process Transcript
-                    </ButtonV2>
-                  )}
+
+                  <ButtonV2
+                    onClick={reProcessTranscript}
+                    className="my-2 w-full"
+                  >
+                    Process Transcript
+                  </ButtonV2>
+                  <ButtonV2
+                    onClick={async () => {
+                      setStage("recording-review");
+                    }}
+                    className="mb-2 w-full"
+                  >
+                    Regenerate Transcript
+                  </ButtonV2>
                   {stage === "review" && (
-                    <p className="animate-pulse text-sm text-gray-500">
+                    <p className="animate-pulse text-sm text-secondary-500">
                       {getStageMessage(stage)}
                     </p>
                   )}
@@ -536,10 +657,10 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                   {!isGPTProcessing &&
                     Object.keys(formFields ?? {}).length > 0 && (
                       <div className="mt-4">
-                        <p className="mb-2 text-sm font-semibold text-gray-600">
+                        <p className="mb-2 text-sm font-semibold text-secondary-600">
                           Form Data
                         </p>
-                        <div className="max-h-80 divide-y divide-gray-300 overflow-scroll rounded-lg border border-gray-300 text-sm">
+                        <div className="max-h-80 divide-y divide-secondary-300 overflow-scroll rounded-lg border border-secondary-300 text-sm">
                           {Object.keys(formFields ?? {})
                             .filter((field) => formFields?.[field])
                             .map((field) => {
@@ -551,16 +672,16 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                                   key={field}
                                   className="flex flex-col bg-white px-3 py-1"
                                 >
-                                  <p className="mb-1 font-bold text-gray-600">
+                                  <p className="mb-1 font-bold text-secondary-600">
                                     {fieldDetails?.friendlyName}
                                   </p>
-                                  <p className="text-gray-800">
+                                  <div className="text-secondary-800">
                                     {processFormField(
                                       fieldDetails,
                                       formFields,
                                       field,
                                     )}
-                                  </p>
+                                  </div>
                                 </div>
                               );
                             })}
@@ -568,9 +689,17 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                       </div>
                     )}
                   {stage === "final-review" && (
-                    <p className="my-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-secondary-600">
                       {getStageMessage(stage)}
                     </p>
+                  )}
+                  {stage === "final-review" && !isGPTProcessing && (
+                    <ButtonV2
+                      onClick={reProcessTranscript}
+                      className="mt-2 w-full"
+                    >
+                      Reobtain Form Data
+                    </ButtonV2>
                   )}
                 </div>
               )}
@@ -581,7 +710,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                   </p>
                 ))}
                 {!(stage === "review" || stage === "final-review") && (
-                  <p className="animate-pulse text-sm text-gray-500">
+                  <p className="animate-pulse text-sm text-secondary-500">
                     {getStageMessage(stage)}
                   </p>
                 )}
@@ -601,7 +730,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
               </div>
             </div>
           </div>
-        </Popover.Panel>
+        </PopoverPanel>
       )}
     </Popover>
   );

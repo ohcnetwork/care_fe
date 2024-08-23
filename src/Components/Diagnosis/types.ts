@@ -3,7 +3,7 @@ import { PerformedByModel } from "../HCX/misc";
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
-  chapter: string;
+  chapter?: string;
 };
 
 export const ActiveConditionVerificationStatuses = [

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { isAppleDevice } from "../../Utils/utils";
 import FeedButton from "./FeedButton";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { PTZPayload } from "./useOperateCamera";
+import { isAppleDevice } from "../../Utils/utils";
 
 const Actions = {
   UP: 1 << 0,
@@ -13,18 +13,7 @@ const Actions = {
   ZOOM_OUT: 1 << 5,
 } as const;
 
-const Shortcuts = {
-  MoveUp: [isAppleDevice ? "Meta" : "Ctrl", "Shift", "ArrowUp"],
-  MoveLeft: [isAppleDevice ? "Meta" : "Ctrl", "Shift", "ArrowLeft"],
-  MoveDown: [isAppleDevice ? "Meta" : "Ctrl", "Shift", "ArrowDown"],
-  MoveRight: [isAppleDevice ? "Meta" : "Ctrl", "Shift", "ArrowRight"],
-  TogglePrecision: ["Shift", "P"],
-  ZoomIn: [isAppleDevice ? "Meta" : "Ctrl", "I"],
-  ZoomOut: [isAppleDevice ? "Meta" : "Ctrl", "O"],
-  Reset: ["Shift", "R"],
-  SavePreset: [isAppleDevice ? "Meta" : "Ctrl", "Shift", "S"],
-  Fullscreen: ["Shift", "F"],
-};
+const metaKey = isAppleDevice ? "Meta" : "Control";
 
 export type PTZAction = keyof typeof Actions;
 
@@ -62,6 +51,7 @@ interface Props {
   isFullscreen: boolean;
   setFullscreen: (state: boolean) => void;
   onReset: () => void;
+  inlineView: boolean;
 }
 
 export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
@@ -72,139 +62,186 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     props.onMove(payload(direction, precision));
   };
 
-  return (
-    <div className="text-white opacity-0 transition-all delay-100 duration-200 ease-in-out group-hover:opacity-100 group-hover:delay-0">
-      <div className="absolute bottom-0 right-6 transition-all delay-100 duration-200 ease-in-out group-hover:bottom-1.5 group-hover:delay-0 md:left-8 md:right-auto md:group-hover:bottom-5">
-        <ul className="grid scale-75 grid-cols-5 gap-2.5 md:scale-100 md:grid-cols-3 md:gap-1">
-          <li className="order-none hidden md:order-1 md:block">
-            <FeedButton onTrigger={move(Actions.UP | Actions.LEFT)}>
-              <CareIcon icon="l-triangle" className="-rotate-45" />
-            </FeedButton>
-          </li>
-          <li className="order-1 md:order-2">
-            <FeedButton
-              onTrigger={move(Actions.UP)}
-              helpText="Up"
-              shortcut={Shortcuts.MoveUp}
-              shortcutsDisabled={shortcutsDisabled}
-              tooltipClassName="-translate-y-20 md:translate-y-0"
-            >
-              <CareIcon icon="l-triangle" className="rotate-0" />
-            </FeedButton>
-          </li>
-          <li className="order-none hidden md:order-3 md:block">
-            <FeedButton onTrigger={move(Actions.UP | Actions.RIGHT)}>
-              <CareIcon icon="l-triangle" className="rotate-45" />
-            </FeedButton>
-          </li>
-          <li className="order-3 md:order-4">
-            <FeedButton
-              onTrigger={move(Actions.LEFT)}
-              helpText="Left"
-              shortcut={Shortcuts.MoveLeft}
-              shortcutsDisabled={shortcutsDisabled}
-              tooltipClassName="-translate-y-20 -translate-x-1 md:translate-x-0 md:translate-y-0"
-            >
-              <CareIcon icon="l-triangle" className="-rotate-90" />
-            </FeedButton>
-          </li>
+  const controls = {
+    position: (
+      <>
+        <FeedButton
+          onTrigger={move(Actions.UP | Actions.LEFT)}
+          shortcuts={[["Shift", "7"]]}
+          shortcutsDisabled={shortcutsDisabled}
+          helpText="Move Diagonally Up-Left"
+          tooltipClassName="-translate-y-20"
+        >
+          <CareIcon icon="l-triangle" className="-rotate-45" />
+        </FeedButton>
 
-          <li className="order-last md:order-5">
-            <FeedButton
-              onTrigger={togglePrecision}
-              helpText="Toggle Precision"
-              shortcut={Shortcuts.TogglePrecision}
-              className="font-bold"
-              shortcutsDisabled={shortcutsDisabled}
-              tooltipClassName="-translate-y-20 -translate-x-20 md:translate-x-0 md:translate-y-0"
-            >
-              {precision}x
-            </FeedButton>
-          </li>
+        <FeedButton
+          onTrigger={move(Actions.UP)}
+          shortcuts={[
+            [metaKey, "Shift", "8"],
+            [metaKey, "Shift", "ArrowUp"],
+          ]}
+          shortcutsDisabled={shortcutsDisabled}
+          tooltipClassName="-translate-y-20 -translate-x-11"
+          helpText="Move Up"
+        >
+          <CareIcon icon="l-triangle" className="rotate-0" />
+        </FeedButton>
 
-          <li className="order-4 md:order-6">
-            <FeedButton
-              onTrigger={move(Actions.RIGHT)}
-              helpText="Right"
-              shortcut={Shortcuts.MoveRight}
-              shortcutsDisabled={shortcutsDisabled}
-              tooltipClassName="-translate-y-20 -translate-x-2 md:translate-x-0 md:translate-y-0"
-            >
-              <CareIcon icon="l-triangle" className="rotate-90" />
-            </FeedButton>
-          </li>
+        <FeedButton
+          onTrigger={move(Actions.UP | Actions.RIGHT)}
+          shortcuts={[[metaKey, "Shift", "9"]]}
+          shortcutsDisabled={shortcutsDisabled}
+          helpText="Move Diagonally Up-Right"
+          tooltipClassName="-translate-y-20 -translate-x-24"
+        >
+          <CareIcon icon="l-triangle" className="rotate-45" />
+        </FeedButton>
 
-          <li className="order-none hidden md:order-7 md:block">
-            <FeedButton onTrigger={move(Actions.DOWN | Actions.LEFT)}>
-              <CareIcon icon="l-triangle" className="rotate-[-135deg]" />
-            </FeedButton>
-          </li>
+        <FeedButton
+          onTrigger={move(Actions.LEFT)}
+          shortcuts={[
+            [metaKey, "Shift", "4"],
+            [metaKey, "Shift", "ArrowLeft"],
+          ]}
+          shortcutsDisabled={shortcutsDisabled}
+          helpText="Move Left"
+        >
+          <CareIcon icon="l-triangle" className="-rotate-90" />
+        </FeedButton>
 
-          <li className="order-2 md:order-8">
-            <FeedButton
-              onTrigger={move(Actions.DOWN)}
-              helpText="Down"
-              shortcut={Shortcuts.MoveDown}
-              shortcutsDisabled={shortcutsDisabled}
-              tooltipClassName="-translate-y-20 -translate-x-2 md:-translate-x-14"
-            >
-              <CareIcon icon="l-triangle" className="rotate-180" />
-            </FeedButton>
-          </li>
+        <FeedButton
+          shortcuts={[["Shift", "P"]]}
+          onTrigger={togglePrecision}
+          helpText="Toggle Precision"
+          className="font-bold"
+          shortcutsDisabled={shortcutsDisabled}
+        >
+          {precision}x
+        </FeedButton>
 
-          <li className="order-none hidden md:order-9 md:block">
-            <FeedButton onTrigger={move(Actions.DOWN | Actions.RIGHT)}>
-              <CareIcon icon="l-triangle" className="rotate-[135deg]" />
-            </FeedButton>
-          </li>
-        </ul>
-      </div>
+        <FeedButton
+          onTrigger={move(Actions.RIGHT)}
+          shortcuts={[
+            [metaKey, "Shift", "6"],
+            [metaKey, "Shift", "ArrowRight"],
+          ]}
+          shortcutsDisabled={shortcutsDisabled}
+          helpText="Move Right"
+          tooltipClassName="-translate-y-9 translate-x-11"
+        >
+          <CareIcon icon="l-triangle" className="rotate-90" />
+        </FeedButton>
 
-      <div className="absolute -bottom-3 right-0 scale-75 transition-all delay-100 duration-200 ease-in-out group-hover:right-2 group-hover:delay-0 md:bottom-5 md:scale-100 md:group-hover:right-8">
-        <div className="flex flex-col items-center justify-center gap-2.5 md:gap-1">
-          <FeedButton
-            shortcut={Shortcuts.ZoomIn}
-            tooltipClassName="tooltip-left translate-y-2 translate-x-1"
-            helpText="Zoom In"
-            onTrigger={move(Actions.ZOOM_IN)}
-            shortcutsDisabled={shortcutsDisabled}
-          >
-            <CareIcon icon="l-search-plus" />
-          </FeedButton>
-          <FeedButton
-            shortcut={Shortcuts.ZoomOut}
-            tooltipClassName="tooltip-left translate-y-2 translate-x-1"
-            helpText="Zoom Out"
-            onTrigger={move(Actions.ZOOM_OUT)}
-            shortcutsDisabled={shortcutsDisabled}
-          >
-            <CareIcon icon="l-search-minus" />
-          </FeedButton>
-          <FeedButton
-            shortcut={Shortcuts.Reset}
-            tooltipClassName="tooltip-left translate-y-2 translate-x-1"
-            helpText="Reset"
-            onTrigger={props.onReset}
-            shortcutsDisabled={shortcutsDisabled}
-          >
-            <CareIcon icon="l-redo" />
-          </FeedButton>
-          <FeedButton
-            shortcut={Shortcuts.Fullscreen}
-            tooltipClassName="tooltip-left translate-y-2 translate-x-1"
-            helpText={
-              props.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"
-            }
-            onTrigger={() => props.setFullscreen(!props.isFullscreen)}
-            shortcutsDisabled={shortcutsDisabled}
-          >
-            <CareIcon
-              icon={
-                props.isFullscreen ? "l-compress-arrows" : "l-expand-arrows-alt"
-              }
-            />
-          </FeedButton>
+        <FeedButton
+          onTrigger={move(Actions.DOWN | Actions.LEFT)}
+          shortcuts={[[metaKey, "Shift", "1"]]}
+          shortcutsDisabled={shortcutsDisabled}
+          tooltipClassName="-translate-y-20"
+          helpText="Move Diagonally Down-Left"
+        >
+          <CareIcon icon="l-triangle" className="rotate-[-135deg]" />
+        </FeedButton>
+
+        <FeedButton
+          onTrigger={move(Actions.DOWN)}
+          shortcuts={[
+            [metaKey, "Shift", "2"],
+            [metaKey, "Shift", "ArrowDown"],
+          ]}
+          shortcutsDisabled={shortcutsDisabled}
+          tooltipClassName="-translate-y-20  -translate-x-14"
+          helpText="Move Down"
+        >
+          <CareIcon icon="l-triangle" className="rotate-180" />
+        </FeedButton>
+
+        <FeedButton
+          onTrigger={move(Actions.DOWN | Actions.RIGHT)}
+          shortcuts={[[metaKey, "Shift", "3"]]}
+          shortcutsDisabled={shortcutsDisabled}
+          tooltipClassName="-translate-y-9 translate-x-11"
+          helpText="Move Diagonally Down-Right"
+        >
+          <CareIcon icon="l-triangle" className="rotate-[135deg]" />
+        </FeedButton>
+      </>
+    ),
+    zoom: (
+      <>
+        <FeedButton
+          onTrigger={move(Actions.ZOOM_IN)}
+          shortcuts={[[metaKey, "I"]]}
+          shortcutsDisabled={shortcutsDisabled}
+          tooltipClassName="tooltip-left translate-y-2 translate-x-1"
+          helpText="Zoom In"
+        >
+          <CareIcon icon="l-search-plus" />
+        </FeedButton>
+        <FeedButton
+          onTrigger={move(Actions.ZOOM_OUT)}
+          shortcuts={[[metaKey, "O"]]}
+          shortcutsDisabled={shortcutsDisabled}
+          tooltipClassName="tooltip-left translate-y-2 translate-x-1"
+          helpText="Zoom Out"
+        >
+          <CareIcon icon="l-search-minus" />
+        </FeedButton>
+      </>
+    ),
+
+    reset: (
+      <FeedButton
+        onTrigger={props.onReset}
+        shortcuts={[["Shift", "R"]]}
+        shortcutsDisabled={shortcutsDisabled}
+        tooltipClassName="tooltip-left translate-y-2 translate-x-1"
+        helpText="Reset"
+      >
+        <CareIcon icon="l-redo" />
+      </FeedButton>
+    ),
+    fullscreen: (
+      <FeedButton
+        onTrigger={() => props.setFullscreen(!props.isFullscreen)}
+        shortcuts={[["Shift", "F"]]}
+        shortcutsDisabled={shortcutsDisabled}
+        helpText={props.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+        tooltipClassName="tooltip-left translate-y-2 translate-x-1"
+      >
+        <CareIcon
+          icon={
+            props.isFullscreen ? "l-compress-arrows" : "l-expand-arrows-alt"
+          }
+        />
+      </FeedButton>
+    ),
+  };
+
+  if (props.inlineView) {
+    return (
+      <div className="text-white opacity-0 transition-all delay-100 duration-200 ease-in-out group-hover:opacity-100 group-hover:delay-0">
+        <div className="absolute bottom-0 left-8 transition-all delay-100 duration-200 ease-in-out group-hover:bottom-5 group-hover:delay-0">
+          <div className="grid grid-cols-3 gap-1">{controls.position}</div>
         </div>
+        <div className="absolute bottom-5 right-0 transition-all delay-100 duration-200 ease-in-out group-hover:right-8 group-hover:delay-0">
+          <div className="flex flex-col items-center justify-center gap-1">
+            {controls.zoom}
+            {controls.reset}
+            {controls.fullscreen}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-2">{controls.zoom}</div>
+      <div className="grid grid-cols-3 gap-2">{controls.position}</div>
+      <div className="flex flex-col gap-2">
+        {controls.reset}
+        {controls.fullscreen}
       </div>
     </div>
   );

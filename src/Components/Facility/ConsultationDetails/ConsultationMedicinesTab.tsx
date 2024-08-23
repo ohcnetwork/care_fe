@@ -1,6 +1,7 @@
 import { ConsultationTabProps } from "./index";
 import PageTitle from "../../Common/PageHeadTitle";
 import MedicineAdministrationSheet from "../../Medicine/MedicineAdministrationSheet";
+import { MedicinePrescriptionSummary } from "../../Medicine/MedicinePrescriptionSummary";
 
 export const ConsultationMedicinesTab = (props: ConsultationTabProps) => {
   return (
@@ -15,6 +16,7 @@ export const ConsultationMedicinesTab = (props: ConsultationTabProps) => {
         is_prn={true}
         readonly={!!props.consultationData.discharge_date}
       />
+      <MedicinePrescriptionSummary consultation={props.consultationId} />
     </div>
   );
 };

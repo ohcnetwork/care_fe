@@ -1,5 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
-import { Fragment, ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "./components/ButtonV2";
@@ -178,7 +178,6 @@ const AlertTransition = ({ show, children }: AlertTransitionProps) => {
   return (
     <Transition
       show={show}
-      as={Fragment}
       enter="ease-out duration-300"
       enterFrom="opacity-0 scale-95 -translate-y-10"
       enterTo="opacity-100 scale-100 translate-y-0"

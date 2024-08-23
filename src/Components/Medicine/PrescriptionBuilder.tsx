@@ -12,17 +12,22 @@ import useQuery from "../../Utils/request/useQuery";
 import MedicineRoutes from "./routes";
 import useSlug from "../../Common/hooks/useSlug";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
+import { compareBy } from "../../Utils/utils";
 
 interface Props {
   prescription_type?: Prescription["prescription_type"];
   is_prn?: boolean;
   disabled?: boolean;
+  discontinued?: boolean;
+  actions?: ("discontinue" | "administer")[];
 }
 
 export default function PrescriptionBuilder({
   prescription_type,
   is_prn = false,
   disabled,
+  discontinued,
+  actions = ["administer", "discontinue"],
 }: Props) {
   const { t } = useTranslation();
   const consultation = useSlug("consultation");
@@ -35,6 +40,7 @@ export default function PrescriptionBuilder({
     query: {
       dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
       prescription_type,
+      discontinued,
       limit: 100,
     },
   });
@@ -66,22 +72,33 @@ export default function PrescriptionBuilder({
         />
       )}
       <div className="flex flex-col gap-3">
-        {data?.results.map((obj, index) => (
-          <PrescriptionDetailCard
-            key={index}
-            prescription={obj}
-            onDiscontinueClick={() => setShowDiscontinueFor(obj)}
-            onAdministerClick={() => setShowAdministerFor(obj)}
-            readonly={disabled}
-          />
-        ))}
+        {data?.results
+          .sort(compareBy("discontinued"))
+          ?.map((obj) => (
+            <PrescriptionDetailCard
+              key={obj.id}
+              prescription={obj}
+              collapsible
+              onDiscontinueClick={
+                actions.includes("discontinue")
+                  ? () => setShowDiscontinueFor(obj)
+                  : undefined
+              }
+              onAdministerClick={
+                actions.includes("administer")
+                  ? () => setShowAdministerFor(obj)
+                  : undefined
+              }
+              readonly={disabled}
+            />
+          ))}
       </div>
       <AuthorizedForConsultationRelatedActions>
         <ButtonV2
           type="button"
           onClick={() => setShowCreate(true)}
           variant="secondary"
-          className="mt-4 w-full bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900"
+          className="mt-4 w-full bg-secondary-200 text-secondary-700 hover:bg-secondary-300 hover:text-secondary-900 focus:bg-secondary-100 focus:text-secondary-900"
           disabled={disabled}
         >
           <div

@@ -36,6 +36,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
         Notification.Success({
           msg: "Facility Notified",
         });
+        setNotifyMessage("");
         setNotifyModalFor(undefined);
       } else {
         Notification.Error({ msg: "Something went wrong..." });
@@ -52,7 +53,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
           <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
-              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch bg-gray-300 min-[425px]:hidden"
+              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch bg-secondary-300 min-[425px]:hidden"
             >
               {(facility.read_cover_image_url && (
                 <img
@@ -63,7 +64,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               )) || (
                 <CareIcon
                   icon="l-hospital"
-                  className="block text-7xl text-gray-500"
+                  className="block text-7xl text-secondary-500"
                 />
               )}
             </Link>
@@ -73,7 +74,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flex gap-5">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-gray-300 min-[425px]:flex"
+                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-secondary-300 min-[425px]:flex"
                   >
                     {(facility.read_cover_image_url && (
                       <img
@@ -84,7 +85,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     )) || (
                       <CareIcon
                         icon="l-hospital"
-                        className="block text-5xl text-gray-500"
+                        className="block text-5xl text-secondary-500"
                       />
                     )}
                   </Link>
@@ -168,7 +169,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap border-t bg-gray-50 px-2 py-1 md:px-3">
+              <div className="flex flex-wrap border-t bg-secondary-50 px-2 py-1 md:px-3">
                 {/* <div className="flex justify-between py-2"> */}
                 <div className="flex w-full flex-wrap justify-between gap-2 py-2">
                   <div className="flex flex-wrap gap-2">
@@ -196,7 +197,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         className={`text-sm font-semibold ${
                           facility.patient_count / facility.bed_count > 0.85
                             ? "text-white"
-                            : "text-gray-700"
+                            : "text-secondary-700"
                         }`}
                       >
                         Occupancy: {facility.patient_count} /{" "}
@@ -224,6 +225,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                           name="message"
                           rows={5}
                           className="pb-2 pt-4"
+                          value={notifyMessage}
                           onChange={(e) => setNotifyMessage(e.value)}
                           placeholder="Type your message..."
                           error={notifyError}
