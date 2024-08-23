@@ -15,6 +15,7 @@ import useNotificationSubscriptionState from "../../Common/hooks/useNotification
 import RichTextEditor from "../Common/RichTextEditor/RichTextEditor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
 import { Link } from "raviger";
+import { t } from "i18next";
 
 interface PatientNotesProps {
   patientId: string;
