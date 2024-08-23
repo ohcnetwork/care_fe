@@ -58,6 +58,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
+  const [coverImageEdited, setCoverImageEdited] = useState(false);
   const authUser = useAuthUser();
 
   useMessageListener((data) => console.log(data));
@@ -155,7 +156,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       />
       <CoverImageEditModal
         open={editCoverImage}
-        onSave={() => facilityFetch()}
+        onSave={() => {
+          facilityFetch();
+          setCoverImageEdited(true);
+        }}
         onClose={() => setEditCoverImage(false)}
         onDelete={() => facilityFetch()}
         facility={facilityData ?? ({} as FacilityModel)}
@@ -204,7 +208,16 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   }
                 >
                   {hasCoverImage ? (
-                    <CoverImage />
+                    <div>
+                      <CoverImage />
+                      {coverImageEdited && (
+                        <div className="mt-2 rounded border border-secondary-300 bg-secondary-50 px-2 py-1">
+                          <span className="text-center text-xs font-medium text-secondary-700">
+                            {t("cover_image_updated_note")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="flex h-80 w-[88px] items-center justify-center rounded-lg bg-secondary-200 font-medium text-secondary-700 lg:h-80 lg:w-80">
                       <svg
