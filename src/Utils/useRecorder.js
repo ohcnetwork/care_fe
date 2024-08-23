@@ -1,3 +1,5 @@
+// why is this file in js? can we convert to ts?
+
 import { useEffect, useState } from "react";
 import { Error } from "./Notifications";
 

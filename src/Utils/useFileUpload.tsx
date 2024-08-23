@@ -1,22 +1,23 @@
-import { ChangeEvent, useCallback, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  DetailedHTMLProps,
+  InputHTMLAttributes,
+  useState,
+} from "react";
 import {
   CreateFileResponse,
   FileCategory,
   FileUploadModel,
 } from "../Components/Patient/models";
-import DialogModal from "../Components/Common/Dialog";
-import CareIcon, { IconName } from "../CAREUI/icons/CareIcon";
-import Webcam from "react-webcam";
-import ButtonV2, { Submit } from "../Components/Common/components/ButtonV2";
-import { t } from "i18next";
-import useWindowDimensions from "../Common/hooks/useWindowDimensions";
-import { classNames } from "./utils";
 import request from "./request/request";
 import routes from "../Redux/api";
 import uploadFile from "./request/uploadFile";
 import * as Notification from "./Notifications.js";
 import imageCompression from "browser-image-compression";
 import { DEFAULT_ALLOWED_EXTENSIONS } from "../Common/constants";
+import CameraCaptureDialog from "../Components/Files/CameraCaptureDialog";
+import AudioCaptureDialog from "../Components/Files/AudioCaptureDialog";
+import { t } from "i18next";
 
 export type FileUploadOptions = {
   type: string;
@@ -31,11 +32,11 @@ export type FileUploadOptions = {
     }
 );
 
-export type FileUploadButtonProps = {
-  icon?: IconName;
-  content?: string;
-  className?: string;
-};
+export interface FileInputProps
+  extends Omit<
+    DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
+    "id" | "title" | "type" | "accept" | "onChange"
+  > {}
 
 export type FileUploadReturn = {
   progress: null | number;
@@ -44,17 +45,11 @@ export type FileUploadReturn = {
   handleAudioCapture: () => void;
   handleFileUpload: (associating_id: string) => Promise<void>;
   Dialogues: JSX.Element;
-  UploadButton: (_: FileUploadButtonProps) => JSX.Element;
+  Input: (_: FileInputProps) => JSX.Element;
   fileName: string;
   file: File | null;
   setFileName: (name: string) => void;
   clearFile: () => void;
-};
-
-const videoConstraints = {
-  width: { ideal: 4096 },
-  height: { ideal: 2160 },
-  facingMode: "user",
 };
 
 // Array of image extensions
@@ -78,31 +73,9 @@ export default function useFileUpload(
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<null | number>(null);
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
-  const [cameraFacingFront, setCameraFacingFront] = useState(true);
-  const webRef = useRef<any>(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [audioModalOpen, setAudioModalOpen] = useState(false);
+
   const [file, setFile] = useState<File | null>(null);
-
-  const handleSwitchCamera = useCallback(() => {
-    setCameraFacingFront((prevState) => !prevState);
-  }, []);
-
-  const { width } = useWindowDimensions();
-  const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
-
-  const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const extension = blob.type.split("/").pop();
-      const myFile = new File([blob], `capture.${extension}`, {
-        type: blob.type,
-      });
-      setUploadFileName(uploadFileName || "");
-      setFile(myFile);
-    });
-  };
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (!e.target.files?.length) {
@@ -136,15 +109,15 @@ export default function useFileUpload(
     const filenameLength = uploadFileName.trim().length;
     const f = file;
     if (f === undefined || f === null) {
-      setError("Please choose a file to upload");
+      setError(t("file_error__choose_file"));
       return false;
     }
     if (filenameLength === 0) {
-      setError("Please give a name !!");
+      setError(t("file_error__file_name"));
       return false;
     }
     if (f.size > 10e7) {
-      setError("Maximum size of files is 100 MB");
+      setError(t("file_error__file_size"));
       return false;
     }
     const extension = f.name.split(".").pop();
@@ -153,7 +126,10 @@ export default function useFileUpload(
       !options.allowedExtensions?.includes(extension || "")
     ) {
       setError(
-        `Invalid file type ".${extension}" Allowed types: ${options.allowedExtensions?.join(", ")}`,
+        t("file_error__file_type", {
+          extension,
+          allowedExtensions: options.allowedExtensions?.join(", "),
+        }),
       );
       return false;
     }
@@ -179,7 +155,6 @@ export default function useFileUpload(
     const f = file;
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
-    console.log("filetype: ", newFile.type);
     return new Promise<void>((resolve, reject) => {
       uploadFile(
         url,
@@ -192,14 +167,14 @@ export default function useFileUpload(
             setFile(null);
             setUploadFileName("");
             Notification.Success({
-              msg: "File Uploaded Successfully",
+              msg: t("file_uploaded"),
             });
             setError(null);
             onUpload && onUpload(data);
             resolve();
           } else {
             Notification.Error({
-              msg: "Error Uploading File: " + xhr.statusText,
+              msg: t("file_error__dynamic", { statusText: xhr.statusText }),
             });
             setProgress(null);
             reject();
@@ -208,7 +183,7 @@ export default function useFileUpload(
         setProgress as any,
         () => {
           Notification.Error({
-            msg: "Error Uploading File: Network Error",
+            msg: t("file_error__network"),
           });
           setProgress(null);
           reject();
@@ -242,217 +217,60 @@ export default function useFileUpload(
     }
   };
 
-  const cameraFacingMode = cameraFacingFront
-    ? "user"
-    : { exact: "environment" };
-
   const Dialogues = (
-    <DialogModal
-      show={cameraModalOpen}
-      title={
-        <div className="flex flex-row">
-          <div className="rounded-full bg-primary-100 px-5 py-4">
-            <CareIcon
-              icon="l-camera-change"
-              className="text-lg text-primary-500"
-            />
-          </div>
-          <div className="m-4">
-            <h1 className="text-xl text-black"> Camera</h1>
-          </div>
-        </div>
-      }
-      className="max-w-2xl"
-      onClose={() => setCameraModalOpen(false)}
-    >
-      <div>
-        {!previewImage ? (
-          <div className="m-3">
-            <Webcam
-              forceScreenshotSourceSize
-              screenshotQuality={1}
-              audio={false}
-              screenshotFormat="image/jpeg"
-              ref={webRef}
-              videoConstraints={{
-                ...videoConstraints,
-                facingMode: cameraFacingMode,
-              }}
-            />
-          </div>
-        ) : (
-          <div className="m-3">
-            <img src={previewImage} />
-          </div>
-        )}
-      </div>
-
-      {/* buttons for mobile screens */}
-      <div className="m-4 flex justify-evenly sm:hidden">
-        <div>
-          {!previewImage ? (
-            <ButtonV2 onClick={handleSwitchCamera} className="m-2">
-              {t("switch")}
-            </ButtonV2>
-          ) : (
-            <></>
-          )}
-        </div>
-        <div>
-          {!previewImage ? (
-            <>
-              <div>
-                <ButtonV2
-                  onClick={() => {
-                    captureImage();
-                  }}
-                  className="m-2"
-                >
-                  {t("capture")}
-                </ButtonV2>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex space-x-2">
-                <ButtonV2
-                  onClick={() => {
-                    setPreviewImage(null);
-                  }}
-                  className="m-2"
-                >
-                  {t("retake")}
-                </ButtonV2>
-                <Submit
-                  onClick={() => {
-                    setPreviewImage(null);
-                    setCameraModalOpen(false);
-                  }}
-                  className="m-2"
-                >
-                  {t("submit")}
-                </Submit>
-              </div>
-            </>
-          )}
-        </div>
-        <div className="sm:flex-1">
-          <ButtonV2
-            variant="secondary"
-            onClick={() => {
-              setPreviewImage(null);
-              setCameraModalOpen(false);
-            }}
-            className="m-2"
-          >
-            {t("close")}
-          </ButtonV2>
-        </div>
-      </div>
-      {/* buttons for laptop screens */}
-      <div className={`${isLaptopScreen ? " " : "hidden"}`}>
-        <div className="m-4 flex lg:hidden">
-          <ButtonV2 onClick={handleSwitchCamera}>
-            <CareIcon icon="l-camera-change" className="text-lg" />
-            {`${t("switch")} ${t("camera")}`}
-          </ButtonV2>
-        </div>
-
-        <div className="flex justify-end gap-2 p-4">
-          <div>
-            {!previewImage ? (
-              <>
-                <div>
-                  <ButtonV2
-                    onClick={() => {
-                      captureImage();
-                    }}
-                  >
-                    <CareIcon icon="l-capture" className="text-lg" />
-                    {t("capture")}
-                  </ButtonV2>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex space-x-2">
-                  <ButtonV2
-                    onClick={() => {
-                      setPreviewImage(null);
-                    }}
-                  >
-                    {t("retake")}
-                  </ButtonV2>
-                  <Submit
-                    onClick={() => {
-                      setCameraModalOpen(false);
-                      setPreviewImage(null);
-                    }}
-                  >
-                    {t("submit")}
-                  </Submit>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="sm:flex-1" />
-          <ButtonV2
-            variant="secondary"
-            onClick={() => {
-              setPreviewImage(null);
-              setCameraModalOpen(false);
-            }}
-          >
-            {`${t("close")} ${t("camera")}`}
-          </ButtonV2>
-        </div>
-      </div>
-    </DialogModal>
+    <>
+      <CameraCaptureDialog
+        show={cameraModalOpen}
+        onHide={() => setCameraModalOpen(false)}
+        onCapture={(f) => {
+          setFile(f);
+          setUploadFileName(uploadFileName || "");
+        }}
+      />
+      <AudioCaptureDialog
+        show={audioModalOpen}
+        onHide={() => setAudioModalOpen(false)}
+        onCapture={(f) => {
+          setFile(f);
+          setUploadFileName(uploadFileName || "");
+        }}
+        autoRecord
+      />
+    </>
   );
 
-  const UploadButton = (props: FileUploadButtonProps) => (
-    <label
-      className={classNames(
-        "button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out",
-        props.className,
-      )}
-    >
-      <CareIcon icon={props.icon || "l-file-upload-alt"} className="text-lg" />
-      {props.content || t("choose_file")}
-      <input
-        id="file_upload_patient"
-        title="changeFile"
-        onChange={onFileChange}
-        type="file"
-        accept={
-          "allowedExtensions" in options
-            ? options.allowedExtensions?.join(",")
-            : "allowAllExtensions" in options
-              ? "*"
-              : DEFAULT_ALLOWED_EXTENSIONS.join(",")
-        }
-        hidden
-      />
-    </label>
+  const Input = (props: FileInputProps) => (
+    <input
+      {...props}
+      id="file_upload_patient"
+      title="changeFile"
+      onChange={onFileChange}
+      type="file"
+      accept={
+        "allowedExtensions" in options
+          ? options.allowedExtensions?.join(",")
+          : "allowAllExtensions" in options
+            ? "*"
+            : DEFAULT_ALLOWED_EXTENSIONS.join(",")
+      }
+      hidden={props.hidden || true}
+    />
   );
 
   return {
     progress,
     error,
-    handleCameraCapture: () => {
-      setCameraModalOpen(true);
-    },
-    handleAudioCapture: () => {
-      console.log("Audio capture not implemented");
-    },
+    handleCameraCapture: () => setCameraModalOpen(true),
+    handleAudioCapture: () => setAudioModalOpen(true),
     handleFileUpload: handleUpload,
     Dialogues,
-    UploadButton,
+    Input,
     fileName: uploadFileName,
     file: file,
     setFileName: setUploadFileName,
     clearFile: () => {
       setFile(null);
+      setError(null);
       setUploadFileName("");
     },
   };
