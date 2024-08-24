@@ -27,6 +27,17 @@ interface RichTextEditorProps {
   isAuthorized?: boolean;
 }
 
+const lineStyles = {
+  orderedList: /^\d+\.\s/,
+  unorderedList: /^-\s/,
+  quote: /^>\s/,
+  emptyOrderedList: /^\d+\.\s*$/,
+  emptyUnorderedList: /^-\s*$/,
+  emptyQuote: /^>\s*$/,
+  startWithNumber: /^\d+/,
+  containsNumber: /\d+/,
+};
+
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   initialMarkdown: markdown = "",
   onChange: setMarkdown,
@@ -101,6 +112,28 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     };
   }, []);
 
+  const insertMention = (user: { id: string; username: string }) => {
+    if (!editorRef.current) return;
+
+    const start = editorRef.current.selectionStart;
+    const text = editorRef.current.value;
+    const lastAtSymbolIndex = text.lastIndexOf("@", start - 1);
+
+    const beforeMention = text.substring(0, lastAtSymbolIndex);
+    const afterMention = text.substring(start);
+
+    const displayMention = `@${user.username}`;
+    const newMarkdown = `${beforeMention}${displayMention}${afterMention}`;
+    setMarkdown(newMarkdown);
+
+    editorRef.current.focus();
+    const newCursorPosition = lastAtSymbolIndex + displayMention.length;
+    editorRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+
+    setShowMentions(false);
+    setMentionFilter("");
+  };
+
   const handleInput = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newMarkdown = event.target.value;
@@ -133,74 +166,131 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
-      const text = editorRef.current?.value || "";
-      const lines = text.split("\n");
-      const currentLine = lines[lines.length - 1];
+      e.preventDefault();
+      if (!editorRef.current) return;
 
-      if (/^\d+\.\s/.test(currentLine)) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleOrderedList();
-      } else if (/^-\s/.test(currentLine)) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleUnorderedList();
-      } else if (/^>\s/.test(currentLine)) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleQuote();
+      const text = editorRef.current.value;
+      const selectionStart = editorRef.current.selectionStart || 0;
+      const currentLineStart = text.lastIndexOf("\n", selectionStart - 1) + 1;
+      const currentLine = text.slice(currentLineStart, selectionStart);
+
+      let newText = text;
+      let newCursorPos = selectionStart;
+
+      if (
+        lineStyles.emptyOrderedList.test(currentLine) ||
+        lineStyles.emptyUnorderedList.test(currentLine) ||
+        lineStyles.emptyQuote.test(currentLine)
+      ) {
+        newText = text.slice(0, currentLineStart) + text.slice(selectionStart);
+        newCursorPos = currentLineStart;
+      } else {
+        let newLine = "\n";
+
+        if (lineStyles.orderedList.test(currentLine)) {
+          const currentNumber = parseInt(
+            currentLine.match(lineStyles.startWithNumber)?.[0] || "0",
+            10,
+          );
+          newLine += `${currentNumber + 1}. `;
+        } else if (lineStyles.unorderedList.test(currentLine)) {
+          newLine += "- ";
+        } else if (lineStyles.quote.test(currentLine)) {
+          newLine += "> ";
+        }
+
+        newText =
+          text.slice(0, selectionStart) + newLine + text.slice(selectionStart);
+        newCursorPos = selectionStart + newLine.length;
       }
+
+      editorRef.current.value = newText;
+      editorRef.current.setSelectionRange(newCursorPos, newCursorPos);
+      setMarkdown(newText);
     }
-  };
-
-  const insertMention = (user: { id: string; username: string }) => {
-    if (!editorRef.current) return;
-
-    const start = editorRef.current.selectionStart;
-    const text = editorRef.current.value;
-    const lastAtSymbolIndex = text.lastIndexOf("@", start - 1);
-
-    const beforeMention = text.substring(0, lastAtSymbolIndex);
-    const afterMention = text.substring(start);
-
-    const displayMention = `@${user.username}`;
-    const newMarkdown = `${beforeMention}${displayMention}${afterMention}`;
-    setMarkdown(newMarkdown);
-
-    editorRef.current.focus();
-    const newCursorPosition = lastAtSymbolIndex + displayMention.length;
-    editorRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
-
-    setShowMentions(false);
-    setMentionFilter("");
   };
 
   const handleOrderedList = () => {
     if (!editorRef.current) return;
-    const text = editorRef.current.value;
-    const selectionStart = editorRef.current.selectionStart;
-    const lines = text.split("\n");
-    const startLineIndex =
-      text.substring(0, selectionStart).split("\n").length - 1;
-    const currentLine = lines[startLineIndex];
+    const selectionStart = editorRef.current.selectionStart || 0;
+    const lineIndex = getCurrentLineIndex(selectionStart);
+    const currentLine = getCurrentLine(lineIndex);
 
-    if (/^\d+\.\s/.test(currentLine)) {
-      insertMarkdown(
-        "\n" + (parseInt(currentLine.split(".")[0], 10) + 1) + ". ",
-      );
+    let newText = "";
+    if (lineStyles.orderedList.test(currentLine)) {
+      newText = currentLine.replace(lineStyles.orderedList, "");
     } else {
-      insertMarkdown("\n1. ");
+      const prevLine = getCurrentLine(lineIndex - 1);
+      const prevNumber = lineStyles.orderedList
+        .exec(prevLine)?.[0]
+        .match(lineStyles.containsNumber)?.[0];
+      const nextNumber = prevNumber ? parseInt(prevNumber) + 1 : 1;
+      newText = `${nextNumber}. ${currentLine}`;
     }
+
+    replaceLine(lineIndex, newText);
   };
 
   const handleUnorderedList = () => {
     if (!editorRef.current) return;
-    insertMarkdown("\n- ");
+    const selectionStart = editorRef.current.selectionStart || 0;
+    const lineIndex = getCurrentLineIndex(selectionStart);
+    const currentLine = getCurrentLine(lineIndex);
+
+    let newText = "";
+    if (lineStyles.unorderedList.test(currentLine)) {
+      newText = currentLine.replace(lineStyles.unorderedList, "");
+    } else {
+      newText = `- ${currentLine}`;
+    }
+
+    replaceLine(lineIndex, newText);
   };
 
   const handleQuote = () => {
     if (!editorRef.current) return;
-    insertMarkdown("\n> ");
+    const selectionStart = editorRef.current.selectionStart || 0;
+    const lineIndex = getCurrentLineIndex(selectionStart);
+    const currentLine = getCurrentLine(lineIndex);
+
+    let newText = "";
+    if (lineStyles.quote.test(currentLine)) {
+      newText = currentLine.replace(lineStyles.quote, "");
+    } else {
+      newText = `> ${currentLine}`;
+    }
+
+    replaceLine(lineIndex, newText);
+  };
+
+  const getCurrentLine = (lineIndex: number): string => {
+    if (!editorRef.current) return "";
+    const lines = editorRef.current.value.split("\n");
+    return lines[lineIndex] || "";
+  };
+
+  const replaceLine = (lineIndex: number, newText: string) => {
+    if (!editorRef.current) return;
+    const text = editorRef.current.value;
+    const lines = text.split("\n");
+
+    if (lineIndex < 0 || lineIndex >= lines.length) return;
+
+    lines[lineIndex] = newText;
+    const newValue = lines.join("\n");
+    editorRef.current.value = newValue;
+    setMarkdown(newValue);
+
+    const newLineStart =
+      lines.slice(0, lineIndex).join("\n").length + (lineIndex > 0 ? 1 : 0);
+    const newCursorPosition = newLineStart + newText.length;
+    editorRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+    editorRef.current.focus();
+  };
+
+  const getCurrentLineIndex = (cursorPosition: number) => {
+    const text = editorRef.current?.value || "";
+    return text.substring(0, cursorPosition).split("\n").length - 1;
   };
 
   const formatUrl = (url: string) => {
