@@ -10,7 +10,11 @@ import Intergrations from "./Integrations";
 import Loading from "./Components/Common/Loading";
 import BrowserWarning from "./BrowserWarning";
 const App = () => {
+  // console.log(packageJson.browserslist.production);
+  
   return (
+    <>
+    <BrowserWarning/>
     <Suspense fallback={<Loading />}>
       <BrowserWarning/>
       <ThemedFavicon />
@@ -19,13 +23,13 @@ const App = () => {
           <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
             <Routers.AppRouter />
           </AuthUserProvider>
-
           {/* Integrations */}
           <Intergrations.Sentry disabled={!import.meta.env.PROD} />
           <Intergrations.Plausible />
         </AppConfigProvider>
       </HistoryAPIProvider>
     </Suspense>
+    </>
   );
 };
 
