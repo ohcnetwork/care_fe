@@ -41,6 +41,7 @@ import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
 import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 import Error404 from "../../ErrorPages/404";
+import { DiscussionNotesFiles } from "../../Patient/DiscussionNotesFiles";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -59,6 +60,7 @@ const TABS = {
   SUMMARY: ConsultationSummaryTab,
   MEDICINES: ConsultationMedicinesTab,
   FILES: ConsultationFilesTab,
+  DISCUSSION_NOTES_FILES: DiscussionNotesFiles,
   INVESTIGATIONS: ConsultationInvestigationsTab,
   ABG: ConsultationABGTab,
   NURSING: ConsultationNursingTab,

@@ -46,8 +46,16 @@ export default {
       type="CONSULTATION"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/discussion_notes_files":
-    ({ facilityId, patientId, id }: any) => (
+  "/facility/:facilityId/patient/:patientId/consultation/:id/discussion_notes_files/":
+    ({
+      facilityId,
+      patientId,
+      id,
+    }: {
+      facilityId: string;
+      patientId: string;
+      id: string;
+    }) => (
       <DiscussionNotesFiles
         facilityId={facilityId}
         patientId={patientId}
