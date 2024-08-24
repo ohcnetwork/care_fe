@@ -22,6 +22,7 @@ import MarkdownPreview from "../Common/RichTextEditor/MarkdownPreview";
 import { ExtImage } from "../../Utils/useFileUpload";
 import { StateInterface } from "../Files/FileUpload";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
+import { FileUploadModel } from "../Patient/models";
 
 const PatientNoteCard = ({
   note,
@@ -296,8 +297,7 @@ const PatientNoteCard = ({
                   mentioned_users={note.mentioned_users}
                 />
                 <div className="flex gap-2">
-                  {/* temporaryly marked as any due to external_id */}
-                  {note?.files?.map((file: any) => (
+                  {note?.files?.map((file: FileUploadModel) => (
                     <div
                       key={file.id}
                       className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
@@ -306,7 +306,7 @@ const PatientNoteCard = ({
                         className="flex h-full w-full flex-col items-center justify-center p-2"
                         onClick={(e) => {
                           e.stopPropagation();
-                          loadFile(file.external_id, note.id);
+                          if (file.id) loadFile(file.id, note.id);
                         }}
                       >
                         <CareIcon

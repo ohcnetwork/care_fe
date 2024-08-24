@@ -1148,7 +1148,7 @@ const routes = {
     Tbody: Type<IFacilityNotificationRequest>(),
   },
 
-  // FileUpload Create
+  // FileUploads
   createUpload: {
     path: "/api/v1/files/",
     method: "POST",
@@ -1171,10 +1171,12 @@ const routes = {
     TBody: Type<Partial<FileUploadModel>>(),
     TRes: Type<FileUploadModel>(),
   },
-  deleteUpload: {
-    path: "/api/v1/files/{id}/?file_type={fileType}&associating_id={associatingId}",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
+
+  // Consultation FileUploads
+  listConsultationFileUploads: {
+    path: "/api/v1/consultation/{consultation_external_id}/files/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FileUploadModel>>(),
   },
 
   // Investigation

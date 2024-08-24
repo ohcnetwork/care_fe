@@ -50,27 +50,23 @@ export const DiscussionNotesFiles = (props: DiscussionNotesProps) => {
     setOffset(offset);
   };
 
-  // TODO : Change this
-  const associatedId = "ea85f2dd-0f2c-4079-8e38-f41bc8fe64a5";
   const type = "NOTES";
-  const activeFilesQuery = useQuery(routes.viewUpload, {
+  const activeFilesQuery = useQuery(routes.listConsultationFileUploads, {
     query: {
-      file_type: type,
-      associating_id: associatedId,
       is_archived: false,
       limit: RESULTS_PER_PAGE_LIMIT,
       offset: offset,
     },
+    pathParams: { consultation_external_id: props.consultationId },
   });
 
-  const archivedFilesQuery = useQuery(routes.viewUpload, {
+  const archivedFilesQuery = useQuery(routes.listConsultationFileUploads, {
     query: {
-      file_type: type,
-      associating_id: associatedId,
       is_archived: true,
       limit: RESULTS_PER_PAGE_LIMIT,
       offset: offset,
     },
+    pathParams: { consultation_external_id: props.consultationId },
   });
 
   const queries = {
@@ -110,20 +106,23 @@ export const DiscussionNotesFiles = (props: DiscussionNotesProps) => {
         {!(fileQuery?.data?.results || []).length && loading && (
           <div className="skeleton-animate-alpha h-32 rounded-lg" />
         )}
-        {fileQuery?.data?.results.map((item: FileUploadModel) => (
-          <FileBlock
-            file={item}
-            key={item.id}
-            fileManager={fileManager}
-            associating_id={associatedId}
-            editable={
-              item?.uploaded_by?.username === authUser.username ||
-              authUser.user_type === "DistrictAdmin" ||
-              authUser.user_type === "StateAdmin"
-            }
-            archivable={true}
-          />
-        ))}
+        {fileQuery?.data?.results.map((item: FileUploadModel) => {
+          if (!item.associating_id) return null;
+          return (
+            <FileBlock
+              file={item}
+              key={item.id}
+              fileManager={fileManager}
+              associating_id={item.associating_id}
+              editable={
+                item?.uploaded_by?.username === authUser.username ||
+                authUser.user_type === "DistrictAdmin" ||
+                authUser.user_type === "StateAdmin"
+              }
+              archivable={true}
+            />
+          );
+        })}
         {!(fileQuery?.data?.results || []).length && (
           <div className="mt-4">
             <div className="text-md flex items-center justify-center font-semibold capitalize text-secondary-500">

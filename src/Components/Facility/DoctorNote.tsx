@@ -56,7 +56,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
                     setReplyTo={setReplyTo}
                     mode={mode}
                     allowThreadView
-                    // allowReply={false}
+                    allowReply={false}
                     setThreadViewNote={setThreadViewNote}
                   />
                 </div>
