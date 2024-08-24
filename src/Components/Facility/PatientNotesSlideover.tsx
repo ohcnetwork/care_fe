@@ -15,7 +15,6 @@ import useNotificationSubscriptionState from "../../Common/hooks/useNotification
 import RichTextEditor from "../Common/RichTextEditor/RichTextEditor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
 import { Link } from "raviger";
-import { t } from "i18next";
 
 interface PatientNotesProps {
   patientId: string;
@@ -88,7 +87,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setState({ ...state, cPage: 1 });
-      setReload(true);
       setReplyTo(undefined);
     }
     return data?.id;
@@ -227,6 +225,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                     onChange={setNoteField}
                     onAddNote={onAddNote}
                     isAuthorized={isAuthorized}
+                    onRefetch={() => setReload(true)}
                   />
                 </DoctorNoteReplyPreviewCard>
               )}

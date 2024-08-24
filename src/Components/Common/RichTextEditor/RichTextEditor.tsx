@@ -25,6 +25,7 @@ interface RichTextEditorProps {
   onChange: (markdown: string) => void;
   onAddNote: () => Promise<string | undefined>;
   isAuthorized?: boolean;
+  onRefetch?: () => void;
 }
 
 const lineStyles = {
@@ -43,6 +44,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange: setMarkdown,
   onAddNote,
   isAuthorized = true,
+  onRefetch,
 }) => {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const [showMentions, setShowMentions] = useState(false);
@@ -660,6 +662,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               for (const file of tempFiles) {
                 await handleFileUpload(file, id);
               }
+              onRefetch?.();
               setTempFiles([]);
               editorRef.current.innerHTML = "";
             }}
