@@ -466,7 +466,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="flex items-center space-x-2 rounded-t-md border border-gray-300 bg-gray-100 p-1">
         <button
           onClick={() => insertMarkdown("**")}
-          className="tooltip roundedbg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <CareIcon icon="l-bold" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -475,7 +475,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </button>
         <button
           onClick={() => insertMarkdown("_")}
-          className="tooltip roundedbg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <CareIcon icon="l-italic" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -484,7 +484,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </button>
         <button
           onClick={() => insertMarkdown("~~")}
-          className="tooltip roundedbg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <CareIcon icon="l-text-strike-through" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -495,7 +495,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
         <button
           onClick={handleUnorderedList}
-          className="tooltip roundedbg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <CareIcon icon="l-list-ul" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -504,7 +504,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </button>
         <button
           onClick={handleOrderedList}
-          className="tooltip roundedbg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <CareIcon icon="l-list-ol" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -512,7 +512,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </span>
         </button>
         <div className="mx-2 h-6 border-l border-gray-400"></div>
-        <button onClick={handleQuote} className="tooltip rounded p-1">
+        <button
+          onClick={handleQuote}
+          className="tooltip rounded bg-gray-200 p-1"
+        >
           <CareIcon icon="l-paragraph" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
             Quote
@@ -540,11 +543,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       </div>
 
       {/* editor */}
-      <div className="overflow-y-scroll border border-x-gray-300 bg-white p-2 focus:outline-none focus:ring-1 focus:ring-primary-500">
+      <div className="overflow-y-auto border border-x-gray-300 bg-white focus:outline-none">
         <textarea
           id="doctor_notes_textarea"
           ref={editorRef}
-          className="h-16 w-full border border-gray-300 text-sm outline-none ring-0"
+          className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 m-0 max-h-36 min-h-10 w-full resize-y overflow-auto border-none p-2 text-sm outline-none focus:border-none focus:ring-0"
           value={markdown}
           onChange={(e) => {
             setMarkdown(e.target.value);
@@ -552,45 +555,47 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onInput={handleInput}
           onKeyDown={onKeyDown}
         />
-        <div className="flex gap-2">
-          {tempFiles.map((file, index) => (
-            <div
-              key={index}
-              className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setTempFiles((prevFiles) =>
-                    prevFiles.filter((f, i) => i !== index),
-                  );
-                }}
-                className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 hover:bg-gray-400"
+        {tempFiles.length > 0 && (
+          <div className="flex gap-2 px-2 pb-1">
+            {tempFiles.map((file, index) => (
+              <div
+                key={index}
+                className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
               >
-                <CareIcon
-                  icon="l-times-circle"
-                  className="text-md absolute right-0.5 top-0.5 text-gray-600"
-                />
-              </button>
-              <div className="flex h-full w-full flex-col items-center justify-center p-2">
-                <CareIcon
-                  icon="l-file"
-                  className="shrink-0 text-2xl text-gray-600"
-                />
-                <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
-                  {file?.name || "file"}
-                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTempFiles((prevFiles) =>
+                      prevFiles.filter((f, i) => i !== index),
+                    );
+                  }}
+                  className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 hover:bg-gray-400"
+                >
+                  <CareIcon
+                    icon="l-times-circle"
+                    className="text-md absolute right-0.5 top-0.5 text-gray-600"
+                  />
+                </button>
+                <div className="flex h-full w-full flex-col items-center justify-center p-2">
+                  <CareIcon
+                    icon="l-file"
+                    className="shrink-0 text-2xl text-gray-600"
+                  />
+                  <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
+                    {file?.name || "file"}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* toolbar-2 */}
       <div className="flex items-center space-x-2 rounded-b-md border border-gray-300 bg-gray-100 pl-2">
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="tooltip rounded p-1 hover:bg-gray-200"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <CareIcon icon="l-paperclip" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -600,7 +605,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <div className="mx-2 h-6 border-l border-gray-400"></div>
         <button
           onClick={() => setModalOpenForCamera(true)}
-          className="tooltip rounded p-1 hover:bg-gray-200"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <CareIcon icon="l-camera" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -609,7 +614,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </button>
         <button
           onClick={() => setModalOpenForAudio(true)}
-          className="tooltip rounded p-1 hover:bg-gray-200"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <CareIcon icon="l-microphone" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">

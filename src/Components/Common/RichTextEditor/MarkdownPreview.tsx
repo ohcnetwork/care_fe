@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { UserBareMinimum } from "../../Users/models";
-import rehypeSanitize from "rehype-sanitize";
 
 interface CustomLinkProps {
   className?: string;
@@ -90,7 +89,11 @@ const MarkdownPreview = ({
   return (
     <ReactMarkdown
       className="prose text-sm prose-p:m-0"
-      rehypePlugins={[rehypeRaw, rehypeSanitize]}
+      rehypePlugins={[
+        rehypeRaw,
+        // Todo: Sanitize but keep custom styles
+        // rehypeSanitize
+      ]}
       components={{
         a: CustomLink,
       }}
