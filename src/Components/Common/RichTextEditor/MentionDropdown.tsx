@@ -6,7 +6,7 @@ import useSlug from "../../../Common/hooks/useSlug";
 interface MentionsDropdownProps {
   onSelect: (user: { id: string; username: string }) => void;
   position: { top: number; left: number };
-  editorRef: React.RefObject<HTMLDivElement>;
+  editorRef: React.RefObject<HTMLTextAreaElement>;
   filter: string;
 }
 
@@ -28,10 +28,9 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
 
   useEffect(() => {
     if (editorRef.current) {
-      const editorRect = editorRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: position.top - editorRect.top + editorRef.current.scrollTop,
-        left: position.left - editorRect.left,
+        top: position.top,
+        left: position.left,
       });
     }
   }, [position, editorRef]);
@@ -83,7 +82,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
 
   return (
     <div
-      className="absolute z-10 max-h-36 w-64 overflow-y-scroll rounded-md bg-white text-sm shadow-lg"
+      className="absolute z-10 max-h-36 w-64 overflow-y-auto rounded-md bg-white text-sm shadow-lg"
       style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
     >
       {loading && <div className="p-2 text-gray-500">Loading...</div>}

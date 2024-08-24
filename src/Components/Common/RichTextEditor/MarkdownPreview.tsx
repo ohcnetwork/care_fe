@@ -38,17 +38,20 @@ const MarkdownPreview = ({
   }
 
   const processedMarkdown = markdown
-    .replace(
-      /!\[mention_user\]\(user_id:(\d+), username:([^)]+)\)/g,
-      (_, userId, username) =>
-        `<a class="user-mention" href="/user/profile/${username}" data-user-id="${userId}" data-username="${username}">@${username}</a>`,
-    )
+    .replace(/@(\w+)/g, (_, username) => {
+      const user = MentionedUsers[username];
+      if (user) {
+        return `<a href="/user/profile/${username}" data-username="${username}">@${username}</a>`;
+      } else {
+        return `@${username}`;
+      }
+    })
     .replace(/~~(.*?)~~/g, (_, text) => `<del>${text}</del>`);
 
   const CustomLink: React.FC<CustomLinkProps> = (props) => {
     const [isHovered, setIsHovered] = useState(false);
 
-    if (props.className?.includes("user-mention") && props["data-username"]) {
+    if (props["data-username"]) {
       const username = props["data-username"];
       return (
         <span
