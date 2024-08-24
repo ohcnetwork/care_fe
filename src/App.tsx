@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Routers from "./Routers";
+import BrowserWarning from "./BrowserWarning";
 import {
   AppConfigProvider,
   AuthUserProvider,
@@ -9,8 +10,13 @@ import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
 import Intergrations from "./Integrations";
 import Loading from "./Components/Common/Loading";
 
+
 const App = () => {
+  // console.log(packageJson.browserslist.production);
+  
   return (
+    <>
+    <BrowserWarning/>
     <Suspense fallback={<Loading />}>
       <ThemedFavicon />
       <HistoryAPIProvider>
@@ -18,13 +24,13 @@ const App = () => {
           <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
             <Routers.AppRouter />
           </AuthUserProvider>
-
           {/* Integrations */}
           <Intergrations.Sentry disabled={!import.meta.env.PROD} />
           <Intergrations.Plausible />
         </AppConfigProvider>
       </HistoryAPIProvider>
     </Suspense>
+    </>
   );
 };
 
