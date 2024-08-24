@@ -8,7 +8,7 @@ import {
 import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
 import Intergrations from "./Integrations";
 import Loading from "./Components/Common/Loading";
-import BrowserWarning from "./BrowserWarning";
+import BrowserWarning from "./Components/ErrorPages/BrowserWarning";
 const App = () => {
 
   return (

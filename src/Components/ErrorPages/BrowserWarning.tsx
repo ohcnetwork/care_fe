@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import browserslist from "browserslist";
 import { getUserAgentRegex } from "browserslist-useragent-regexp";
-import packageJson from "../package.json";
+import packageJson from "../../../package.json";
 
 const BrowserWarning = () => {
   const [isSupported, setIsSupported] = useState(true);
@@ -14,8 +14,8 @@ const BrowserWarning = () => {
     const regex = getUserAgentRegex({
       browsers: supportedBrowsers,
       allowHigherVersions: true,
-      ignorePatch: true, 
-      ignoreMinor: true, 
+      ignorePatch: true,
+      ignoreMinor: true,
     });
 
     if (!regex.test(userAgent)) {
@@ -28,7 +28,7 @@ const BrowserWarning = () => {
   }
 
   return (
-    <div style={warningStyle}>
+    <div className="fixed left-0 top-0 z-50 w-full bg-red-500 p-2 text-center text-white">
       <h2>Unsupported Browser</h2>
       <p>
         You are using an unsupported browser. Please switch to a supported
@@ -38,16 +38,5 @@ const BrowserWarning = () => {
   );
 };
 
-const warningStyle: React.CSSProperties = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100%",
-  backgroundColor: "red",
-  color: "white",
-  textAlign: "center",
-  padding: "10px",
-  zIndex: 1000,
-};
 
 export default BrowserWarning;
