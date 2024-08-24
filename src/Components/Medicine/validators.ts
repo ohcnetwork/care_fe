@@ -18,8 +18,8 @@ export const PrescriptionFormValidator = () => {
         form.target_dosage &&
         form.base_dosage.split(" ")[1] !== form.target_dosage.split(" ")[1]
       ) {
-        errors.base_dosage = "Unit must be the same as target dosage's unit";
-        errors.target_dosage = "Unit must be the same as base dosage's unit";
+        errors.base_dosage = t("unit_must_be_same_as_target_dosage_unit");
+        errors.target_dosage = t("unit_must_be_same_as_base_dosage_unit");
       }
     } else {
       errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
