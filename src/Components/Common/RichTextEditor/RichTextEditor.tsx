@@ -1,4 +1,10 @@
-import React, { useRef, useState, useCallback, ChangeEvent } from "react";
+import React, {
+  useRef,
+  useState,
+  useCallback,
+  ChangeEvent,
+  useEffect,
+} from "react";
 import MentionsDropdown from "./MentionDropdown";
 import { ExtImage } from "../../../Utils/useFileUpload";
 import imageCompression from "browser-image-compression";
@@ -56,15 +62,44 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const selection = text.substring(start, end);
     const afterSelection = text.substring(end);
 
-    const newText = `${beforeSelection}${prefix}${selection}${suffix}${afterSelection}`;
+    let newText = "";
+    let newCursorPosition = 0;
+
+    if (selection) {
+      newText = `${beforeSelection}${prefix}${selection}${suffix}${afterSelection}`;
+      newCursorPosition = start + prefix.length + selection.length;
+    } else {
+      newText = `${beforeSelection}${prefix}${suffix}${afterSelection}`;
+      newCursorPosition = start + prefix.length;
+    }
 
     setMarkdown(newText);
-    editorRef.current.focus();
-    editorRef.current.setSelectionRange(
-      start + prefix.length,
-      end + prefix.length,
-    );
+
+    // Using setTimeout to ensure the new text is set before we try to move the cursor
+    setTimeout(() => {
+      if (editorRef.current) {
+        editorRef.current.focus();
+        editorRef.current.setSelectionRange(
+          newCursorPosition,
+          newCursorPosition,
+        );
+      }
+    }, 0);
   };
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowMentions(false);
+        setMentionFilter("");
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   const handleInput = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -78,17 +113,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       if (lastAtSymbolIndex !== -1) {
         const mentionText = textBeforeCaret.substring(lastAtSymbolIndex + 1);
-        if (mentionText.trim() !== "") {
-          setMentionFilter(mentionText);
+        if (mentionText.includes(" ")) return;
+        setMentionFilter(mentionText);
 
-          if (editorRef.current) {
-            const { top, left } = getCaretCoordinates(
-              editorRef.current,
-              caretPosition,
-            );
-            setMentionPosition({ top: top + 40, left });
-            setShowMentions(true);
-          }
+        if (editorRef.current) {
+          const { top, left } = getCaretCoordinates(
+            editorRef.current,
+            caretPosition,
+          );
+          setMentionPosition({ top: top + 50, left: left + 10 });
+          setShowMentions(true);
         }
       } else {
         setShowMentions(false);
@@ -104,14 +138,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const currentLine = lines[lines.length - 1];
 
       if (/^\d+\.\s/.test(currentLine)) {
+        e.preventDefault();
+        e.stopPropagation();
         handleOrderedList();
-        e.preventDefault();
       } else if (/^-\s/.test(currentLine)) {
+        e.preventDefault();
+        e.stopPropagation();
         handleUnorderedList();
-        e.preventDefault();
       } else if (/^>\s/.test(currentLine)) {
-        handleQuote();
         e.preventDefault();
+        e.stopPropagation();
+        handleQuote();
       }
     }
   };
@@ -122,8 +159,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const start = editorRef.current.selectionStart;
     const text = editorRef.current.value;
     const lastAtSymbolIndex = text.lastIndexOf("@", start - 1);
-
-    if (lastAtSymbolIndex === -1) return;
 
     const beforeMention = text.substring(0, lastAtSymbolIndex);
     const afterMention = text.substring(start);
@@ -137,6 +172,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     editorRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
 
     setShowMentions(false);
+    setMentionFilter("");
   };
 
   const handleOrderedList = () => {

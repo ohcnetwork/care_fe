@@ -43,7 +43,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     "default-view",
   );
   const [threadViewNote, setThreadViewNote] = useState("");
-  console.log("ConsultationDoctorNotes -> threadViewNote", threadViewNote);
 
   const initialData: PatientNoteStateType = {
     notes: [],
