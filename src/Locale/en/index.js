@@ -12,7 +12,7 @@ import Facility from "./Facility.json";
 import Hub from "./Hub.json";
 import LogUpdate from "./LogUpdate.json";
 import Medicine from "./Medicine.json";
-import Notifications from "./Notificationson";
+import Notifications from "./Notifications.json";
 import Resource from "./Resource.json";
 import Shifting from "./Shifting.json";
 import SortOptions from "./SortOptions.json";

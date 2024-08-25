@@ -8,6 +8,7 @@ import {
 import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
 import Intergrations from "./Integrations";
 import Loading from "./Components/Common/Loading";
+import "./i18n";
 
 const App = () => {
   return (
@@ -20,7 +21,9 @@ const App = () => {
           </AuthUserProvider>
 
           {/* Integrations */}
-          <Intergrations.Sentry disabled={process.env.NODE_ENV !== 'production'} />
+          <Intergrations.Sentry
+            disabled={process.env.NODE_ENV !== "production"}
+          />
           <Intergrations.Plausible />
         </AppConfigProvider>
       </HistoryAPIProvider>
