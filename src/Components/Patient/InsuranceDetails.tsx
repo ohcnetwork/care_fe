@@ -14,7 +14,7 @@ interface IProps {
   id: string;
 }
 
-export const InsuranceDetails = (props: IProps) => {
+const InsuranceDetails = (props: IProps) => {
   const { facilityId, id } = props;
 
   const { data: insuranceDetials, loading } = useQuery(routes.listHCXPolicies, {
@@ -60,3 +60,5 @@ export const InsuranceDetails = (props: IProps) => {
     </Page>
   );
 };
+
+export default InsuranceDetails;

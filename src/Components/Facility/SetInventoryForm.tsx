@@ -44,7 +44,7 @@ const inventoryFormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const SetInventoryForm = (props: any) => {
+const SetInventoryForm = (props: any) => {
   const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
@@ -209,3 +209,5 @@ export const SetInventoryForm = (props: any) => {
     </Page>
   );
 };
+
+export default SetInventoryForm;

@@ -176,7 +176,7 @@ export const parseOccupationFromExt = (occupation: Occupation) => {
   return occupationObject?.id;
 };
 
-export const PatientRegister = (props: PatientRegisterProps) => {
+const PatientRegister = (props: PatientRegisterProps) => {
   const submitController = useRef<AbortController>();
   const authUser = useAuthUser();
   const { t } = useTranslation();
@@ -1991,3 +1991,5 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     </div>
   );
 };
+
+export default PatientRegister;

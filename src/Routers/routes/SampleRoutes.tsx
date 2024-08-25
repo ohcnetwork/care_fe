@@ -1,6 +1,6 @@
-import { SampleDetails } from "../../Components/Patient/SampleDetails";
+import SampleDetails from "../../Components/Patient/SampleDetails";
 import SampleReport from "../../Components/Patient/SamplePreview";
-import { SampleTest } from "../../Components/Patient/SampleTest";
+import SampleTest from "../../Components/Patient/SampleTest";
 import SampleViewAdmin from "../../Components/Patient/SampleViewAdmin";
 import DetailRoute from "../types/DetailRoute";
 import RouteParams from "../types/RouteParams";

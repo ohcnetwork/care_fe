@@ -54,7 +54,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   );
 };
 
-export const FacilityHome = ({ facilityId }: Props) => {
+const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
@@ -576,3 +576,5 @@ const LiveMonitoringButton = () => {
     </Popover>
   );
 };
+
+export default FacilityHome;

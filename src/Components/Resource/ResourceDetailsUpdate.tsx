@@ -59,7 +59,7 @@ const initialState = {
   errors: { ...initError },
 };
 
-export const ResourceDetailsUpdate = (props: resourceProps) => {
+const ResourceDetailsUpdate = (props: resourceProps) => {
   const { goBack } = useAppHistory();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -315,3 +315,5 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     </Page>
   );
 };
+
+export default ResourceDetailsUpdate;

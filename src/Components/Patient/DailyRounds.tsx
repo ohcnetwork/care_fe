@@ -52,7 +52,7 @@ import { scrollTo } from "../../Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-export const DailyRounds = (props: any) => {
+const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { goBack } = useAppHistory();
@@ -939,3 +939,5 @@ export const DailyRounds = (props: any) => {
     </Page>
   );
 };
+
+export default DailyRounds;

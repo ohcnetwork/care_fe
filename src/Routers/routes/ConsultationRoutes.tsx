@@ -1,10 +1,10 @@
-import { ConsultationForm } from "../../Components/Facility/ConsultationForm";
+import ConsultationForm from "../../Components/Facility/ConsultationForm";
 import Investigation from "../../Components/Facility/Investigations";
 import ShowInvestigation from "../../Components/Facility/Investigations/ShowInvestigation";
 import ManagePrescriptions from "../../Components/Medicine/ManagePrescriptions";
-import { DailyRoundListDetails } from "../../Components/Patient/DailyRoundListDetails";
-import { DailyRounds } from "../../Components/Patient/DailyRounds";
-import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
+import DailyRoundListDetails from "../../Components/Patient/DailyRoundListDetails";
+import DailyRounds from "../../Components/Patient/DailyRounds";
+import ConsultationDetails from "../../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
 import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
 import PatientConsentRecords from "../../Components/Patient/PatientConsentRecords";

@@ -5,7 +5,6 @@ import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   SAMPLE_TEST_STATUS,
-  OCCUPATION_TYPES,
 } from "../../Common/constants";
 
 import * as Notification from "../../Utils/Notifications";
@@ -40,14 +39,11 @@ import routes from "../../Redux/api";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import request from "../../Utils/request/request";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import { parseOccupation } from "./PatientHomeComponents";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-export const parseOccupation = (occupation: string | undefined) => {
-  return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
-};
-
-export const PatientHome = (props: any) => {
+const PatientHome = (props: any) => {
   const { facilityId, id } = props;
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
@@ -1486,3 +1482,5 @@ export const PatientHome = (props: any) => {
     </Page>
   );
 };
+
+export default PatientHome;

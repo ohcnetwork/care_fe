@@ -154,7 +154,7 @@ const BedRow = (props: BedRowProps) => {
   );
 };
 
-export const BedManagement = (props: BedManagementProps) => {
+const BedManagement = (props: BedManagementProps) => {
   const { facilityId, locationId } = props;
   let bed: ReactElement | null = null;
   let BedList: ReactElement[] | ReactElement = [];
@@ -241,3 +241,5 @@ export const BedManagement = (props: BedManagementProps) => {
     </Page>
   );
 };
+
+export default BedManagement;

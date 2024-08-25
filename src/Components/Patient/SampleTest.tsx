@@ -67,7 +67,7 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const SampleTest = ({ facilityId, patientId }: any) => {
+const SampleTest = ({ facilityId, patientId }: any) => {
   const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
@@ -320,3 +320,5 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
     </Page>
   );
 };
+
+export default SampleTest;

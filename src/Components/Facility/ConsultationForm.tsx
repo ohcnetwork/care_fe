@@ -227,7 +227,7 @@ type Props = {
   id?: string;
 };
 
-export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
+const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
   const submitController = useRef<AbortController>();
@@ -1522,3 +1522,5 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     </div>
   );
 };
+
+export default ConsultationForm;

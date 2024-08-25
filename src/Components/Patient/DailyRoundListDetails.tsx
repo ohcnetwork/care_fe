@@ -8,7 +8,7 @@ import routes from "../../Redux/api";
 import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../Common/Loading"));
 
-export const DailyRoundListDetails = (props: any) => {
+const DailyRoundListDetails = (props: any) => {
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId, id } = props;
   const [dailyRoundListDetailsData, setDailyRoundListDetails] =
@@ -159,3 +159,5 @@ export const DailyRoundListDetails = (props: any) => {
     </Page>
   );
 };
+
+export default DailyRoundListDetails;

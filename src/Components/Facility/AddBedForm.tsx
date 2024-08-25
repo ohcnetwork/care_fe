@@ -23,7 +23,7 @@ interface Props {
   bedId?: string;
 }
 
-export const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
+const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const [state, setState] = useState({
@@ -237,3 +237,5 @@ export const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
     </div>
   );
 };
+
+export default AddBedForm;

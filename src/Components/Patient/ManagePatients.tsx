@@ -79,7 +79,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export const PatientManager = () => {
+const PatientManager = () => {
   const { t } = useTranslation();
   const {
     qParams,
@@ -1173,3 +1173,5 @@ export const PatientManager = () => {
     </Page>
   );
 };
+
+export default PatientManager;

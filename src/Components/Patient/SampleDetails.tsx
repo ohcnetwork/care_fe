@@ -16,7 +16,7 @@ import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-export const SampleDetails = ({ id }: DetailRoute) => {
+const SampleDetails = ({ id }: DetailRoute) => {
   const { loading: isLoading, data: sampleDetails } = useQuery(
     routes.getTestSample,
     {
@@ -444,3 +444,5 @@ export const SampleDetails = ({ id }: DetailRoute) => {
     </Page>
   );
 };
+
+export default SampleDetails;
