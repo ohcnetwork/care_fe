@@ -1,6 +1,6 @@
 import CircularProgress from "./components/CircularProgress";
 import { useTranslation } from "react-i18next";
-import { StateInterface } from "../Patient/FileUpload";
+import { StateInterface } from "../Files/FileUpload";
 import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import ButtonV2, { Cancel } from "./components/ButtonV2";

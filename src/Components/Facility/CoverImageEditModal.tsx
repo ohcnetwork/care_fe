@@ -127,9 +127,14 @@ const CoverImageEditModal = ({
         Authorization:
           "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
       },
-      (xhr: XMLHttpRequest) => {
+      async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           Success({ msg: "Cover image updated." });
+          setIsProcessing(false);
+          setIsCaptureImgBeingUploaded(false);
+          await sleep(1000);
+          onSave?.();
+          closeModal();
         } else {
           Notification.Error({
             msg: "Something went wrong!",
@@ -145,12 +150,6 @@ const CoverImageEditModal = ({
         setIsProcessing(false);
       },
     );
-
-    await sleep(1000);
-    setIsProcessing(false);
-    setIsCaptureImgBeingUploaded(false);
-    onSave && onSave();
-    closeModal();
   };
 
   const handleDelete = async () => {

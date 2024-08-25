@@ -70,7 +70,7 @@ const TABS = {
   ABDM: ABDMRecordsTab,
 };
 
-export const ConsultationDetails = (props: any) => {
+export default function ConsultationDetails(props: any) {
   const { facilityId, patientId, consultationId } = props;
   let tab = undefined;
   if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
@@ -419,4 +419,4 @@ export const ConsultationDetails = (props: any) => {
       )}
     </div>
   );
-};
+}

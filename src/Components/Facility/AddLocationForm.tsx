@@ -18,7 +18,7 @@ interface Props {
   locationId?: string;
 }
 
-export const AddLocationForm = ({ facilityId, locationId }: Props) => {
+const AddLocationForm = ({ facilityId, locationId }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState("");
   const [middlewareAddress, setMiddlewareAddress] = useState("");
@@ -229,3 +229,5 @@ export const AddLocationForm = ({ facilityId, locationId }: Props) => {
     </Page>
   );
 };
+
+export default AddLocationForm;

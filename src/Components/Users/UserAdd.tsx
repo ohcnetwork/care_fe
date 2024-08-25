@@ -163,7 +163,7 @@ export const validateRule = (
   );
 };
 
-export const UserAdd = (props: UserProps) => {
+const UserAdd = (props: UserProps) => {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { userId } = props;
@@ -940,3 +940,5 @@ export const UserAdd = (props: UserProps) => {
     </Page>
   );
 };
+
+export default UserAdd;

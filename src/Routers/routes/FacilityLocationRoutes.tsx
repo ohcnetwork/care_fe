@@ -1,11 +1,9 @@
-import { AddBedForm } from "../../Components/Facility/AddBedForm";
-import { AddInventoryForm } from "../../Components/Facility/AddInventoryForm";
-import { AddLocationForm } from "../../Components/Facility/AddLocationForm";
-import { BedManagement } from "../../Components/Facility/BedManagement";
+import AddBedForm from "../../Components/Facility/AddBedForm";
+import AddInventoryForm from "../../Components/Facility/AddInventoryForm";
+import AddLocationForm from "../../Components/Facility/AddLocationForm";
+import BedManagement from "../../Components/Facility/BedManagement";
 import LocationManagement from "../../Components/Facility/LocationManagement";
 import CentralLiveMonitoring from "../../Components/CameraFeed/CentralLiveMonitoring";
-import { AuthorizeUserRoute } from "../../Utils/AuthorizeFor";
-import { CameraFeedPermittedUserTypes } from "../../Utils/permissions";
 
 export default {
   "/facility/:facilityId/location": ({ facilityId }: any) => (
@@ -39,8 +37,12 @@ export default {
     <AddBedForm facilityId={facilityId} locationId={locationId} bedId={bedId} />
   ),
   "/facility/:facilityId/live-monitoring": (props: any) => (
-    <AuthorizeUserRoute userTypes={CameraFeedPermittedUserTypes}>
-      <CentralLiveMonitoring {...props} />
-    </AuthorizeUserRoute>
+    <CentralLiveMonitoring {...props} />
   ),
 };
+// NEXT TODO
+// "/facility/:facilityId/live-monitoring": (props: any) => (
+//   <AuthorizeUserRoute userTypes={CameraFeedPermittedUserTypes}>
+//     <CentralLiveMonitoring {...props} />
+//   </AuthorizeUserRoute>
+// ),

@@ -1,12 +1,12 @@
 import InvestigationReports from "../../Components/Facility/Investigations/Reports";
-import { FileUpload } from "../../Components/Patient/FileUpload";
-import { PatientManager } from "../../Components/Patient/ManagePatients";
-import { PatientHome } from "../../Components/Patient/PatientHome";
+import PatientManager from "../../Components/Patient/ManagePatients";
+import PatientHome from "../../Components/Patient/PatientHome";
 import PatientNotes from "../../Components/Patient/PatientNotes";
-import { PatientRegister } from "../../Components/Patient/PatientRegister";
-import { DetailRoute } from "../types";
+import PatientRegister from "../../Components/Patient/PatientRegister";
+import DetailRoute from "../types/DetailRoute";
 import DeathReport from "../../Components/DeathReport/DeathReport";
-import { InsuranceDetails } from "../../Components/Patient/InsuranceDetails";
+import InsuranceDetails from "../../Components/Patient/InsuranceDetails";
+import FileUploadPage from "../../Components/Patient/FileUploadPage";
 
 export default {
   "/patients": () => <PatientManager />,
@@ -36,14 +36,10 @@ export default {
     facilityId,
     patientId,
   }: any) => (
-    <FileUpload
-      patientId={patientId}
+    <FileUploadPage
       facilityId={facilityId}
-      consultationId=""
+      patientId={patientId}
       type="PATIENT"
-      hideBack={false}
-      audio={true}
-      unspecified={true}
     />
   ),
   "/death_report/:id": ({ id }: any) => <DeathReport id={id} />,

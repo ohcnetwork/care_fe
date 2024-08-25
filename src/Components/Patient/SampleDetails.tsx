@@ -4,19 +4,19 @@ import { lazy } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
-import { FileUpload } from "./FileUpload";
+import { FileUpload } from "../Files/FileUpload";
 import Page from "../Common/components/Page";
 import _ from "lodash-es";
 import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 
 import { navigate } from "raviger";
-import { DetailRoute } from "../../Routers/types";
+import DetailRoute from "../../Routers/types/DetailRoute";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-export const SampleDetails = ({ id }: DetailRoute) => {
+const SampleDetails = ({ id }: DetailRoute) => {
   const { loading: isLoading, data: sampleDetails } = useQuery(
     routes.getTestSample,
     {
@@ -428,7 +428,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         {showPatientCard(sampleDetails?.patient_object)}
       </div>
 
-      <div>
+      <div className="mb-4">
         <h4 className="mt-8">Sample Test History</h4>
         {sampleDetails?.flow &&
           sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
@@ -437,13 +437,12 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       <FileUpload
         sampleId={id}
         patientId=""
-        facilityId=""
         consultationId=""
         type="SAMPLE_MANAGEMENT"
-        hideBack={true}
-        unspecified={true}
-        audio={true}
+        allowAudio={true}
       />
     </Page>
   );
 };
+
+export default SampleDetails;

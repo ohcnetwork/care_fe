@@ -3,10 +3,11 @@ import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
+  HEADER_CONTENT_TYPES,
 } from "../../Common/constants";
 import { CreateFileResponse, SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications";
-import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
+import { LinearProgressWithLabel } from "../Files/FileUpload";
 import { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ConfirmDialog from "../Common/ConfirmDialog";
@@ -143,7 +144,9 @@ const UpdateStatusDialog = (props: Props) => {
     setfile(e.target.files[0]);
     const fileName = e.target.files[0].name;
     const ext: string = fileName.split(".")[1];
-    setcontentType(header_content_type[ext]);
+    setcontentType(
+      HEADER_CONTENT_TYPES[ext as keyof typeof HEADER_CONTENT_TYPES],
+    );
     return e.target.files[0];
   };
   const handleUpload = async () => {
