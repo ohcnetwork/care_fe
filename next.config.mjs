@@ -8,7 +8,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `https://careapi.ohc.network/api/:path*/`,
+        destination: `${CARE_API}/api/:path*/`,
       },
     ];
   },
