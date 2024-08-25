@@ -9,6 +9,7 @@ import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
 import Intergrations from "./Integrations";
 import Loading from "./Components/Common/Loading";
 import "./i18n";
+import "../../style/index.css";
 
 const App = () => {
   return (

@@ -1,3 +1,5 @@
+"use client";
+
 import { downloadShiftRequests } from "../../Redux/actions";
 import { lazy, useState } from "react";
 

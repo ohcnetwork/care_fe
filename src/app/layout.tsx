@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import * as Sentry from "@sentry/browser";
+import { ReduxProvider } from "../ReduxProvider";
+import App from "./App";
 
 export const metadata: Metadata = {
   title: "My App",
@@ -53,7 +55,13 @@ export default function RootLayout({
           href="/images/icons/apple-touch-icon-180x180.png"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {
+          <ReduxProvider>
+            <App>{children}</App>
+          </ReduxProvider>
+        }
+      </body>
     </html>
   );
 }
