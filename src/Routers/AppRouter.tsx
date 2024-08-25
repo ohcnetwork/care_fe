@@ -7,30 +7,11 @@ import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import HealthInformation from "../Components/ABDM/HealthInformation";
 import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
 
-import UserRoutes from "./routes/UserRoutes";
-import PatientRoutes from "./routes/PatientRoutes";
-import SampleRoutes from "./routes/SampleRoutes";
-import FacilityRoutes from "./routes/FacilityRoutes";
-import ConsultationRoutes from "./routes/ConsultationRoutes";
-import HCXRoutes from "./routes/HCXRoutes";
-import ShiftingRoutes from "./routes/ShiftingRoutes";
-import AssetRoutes from "./routes/AssetRoutes";
-import ResourceRoutes from "./routes/ResourceRoutes";
-import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import DetailRoute from "./types/DetailRoute";
 import useAuthUser from "../Common/hooks/useAuthUser";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
-
-  ...AssetRoutes,
-  ...ConsultationRoutes,
-  ...FacilityRoutes,
-  ...PatientRoutes,
-  ...ResourceRoutes,
-  ...SampleRoutes,
-  ...ShiftingRoutes,
-  ...UserRoutes,
 
   "/notifications/:id": ({ id }: DetailRoute) => (
     <ShowPushNotification id={id} />
@@ -40,7 +21,7 @@ const Routes = {
   "/abdm/health-information/:id": ({ id }: { id: string }) => (
     <HealthInformation artefactId={id} />
   ),
-  "/facility/:facilityId/abdm": ({ facilityId }: any) => (
+  "/facility/:facilityId/abdm": ({ facilityId }: { facilityId: string }) => (
     <ABDMFacilityRecords facilityId={facilityId} />
   ),
 
@@ -55,7 +36,7 @@ export default function AppRouter() {
   let routes = Routes;
 
   if (enable_hcx) {
-    routes = { ...routes, ...HCXRoutes };
+    routes = { ...routes };
   }
 
   if (
@@ -63,7 +44,7 @@ export default function AppRouter() {
       authUser.user_type,
     )
   ) {
-    routes = { ...routes, ...ExternalResultRoutes };
+    routes = { ...routes };
   }
 
   useRedirect("/user", "/users");

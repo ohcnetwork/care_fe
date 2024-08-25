@@ -1,20 +1,20 @@
 import { useState, ReactNode } from "react";
-import { FileUploadModel } from "../Patient/models.js";
-import Pagination from "../Common/Pagination.js";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants.js";
+import { FileUploadModel } from "../Patient/models";
+import Pagination from "../Common/Pagination";
+import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { useTranslation } from "react-i18next";
-import ButtonV2 from "../Common/components/ButtonV2.js";
-import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon.js";
-import TextFormField from "../Form/FormFields/TextFormField.js";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor.js";
-import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import useFileUpload from "../../Utils/useFileUpload.js";
-import useFileManager from "../../Utils/useFileManager.js";
-import Tabs from "../Common/components/Tabs.js";
-import FileBlock from "./FileBlock.js";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import useFileUpload from "../../Utils/useFileUpload";
+import useFileManager from "../../Utils/useFileManager";
+import Tabs from "../Common/components/Tabs";
+import FileBlock from "./FileBlock";
 
 export const LinearProgressWithLabel = (props: { value: number }) => {
   return (

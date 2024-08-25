@@ -64,3 +64,6 @@ cypress/fixtures/token.json
 .next
 next-env.d.ts
 dist
+
+# Next Transition Files
+nextEngine/*
