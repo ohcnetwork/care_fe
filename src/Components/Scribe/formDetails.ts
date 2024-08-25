@@ -16,7 +16,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     type: "{symptom: number, other_symptom?: string, onset_date: string, cure_date?: string}[]",
     example:
       "[{symptom: 1, onset_date: '2024-12-03'}, {symptom: 2, onset_date: '2024-12-03', cure_date: '2024-12-05'}, {symptom: 9, other_symptom: 'Other symptom', onset_date: '2024-12-03'}]",
-    default: [],
+    current: [],
     description: `An array of objects to store the patient's symptoms along with their date of onset and date of cure (if any). The symptom field should be an integer corresponding to the symptom's ID. The onset_date and cure_date fields should be date strings (e.g., '2022-01-01'). If no onset_date has been specified, use todays date which is '${new Date().toISOString().slice(0, 10)}'. If the symptom is ongoing, the cure_date field should not be included. If the user has 'Other Symptom', only then the other_symptom field should be included with a string value describing the symptom.`,
     options: SYMPTOM_CHOICES,
     validator: (value) => {
@@ -28,23 +28,12 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     },
   },
   {
-    friendlyName: "Other Symptoms",
-    id: "other_symptoms",
-    type: "string",
-    example: "",
-    default: "",
-    description: "Just leave it blank",
-    validator: () => {
-      return true;
-    },
-  },
-  {
     friendlyName: "Physical Examination Info",
     id: "physical_examination_info",
     type: "string",
     example:
       "Patient presents with red burn marks over the chest and swollen arms. Examination reveals no additional external injuries or abnormalities.",
-    default: "",
+    current: "",
     description:
       "This field is designated for storing detailed findings from the physical examination of the patient. It should include all observable physical attributes, conditions, or symptoms noted during the examination. When processing a doctor's transcript, identify and extract descriptions that pertain directly to the patient's physical state, such as visible conditions, physical symptoms, or any abnormalities noted by touch, sight, or measurement. This can include, but is not limited to, descriptions of skin conditions, swellings, lacerations, posture, mobility issues, and any other physically observable traits.",
     validator: (value) => {
@@ -55,7 +44,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Other Details",
     id: "other_details",
     type: "string",
-    default: "",
+    current: "",
     example:
       "Patient reports trouble sleeping and a decreased appetite. Additionally, the patient is allergic to penicillin and has a history of asthma.",
     description:
@@ -69,7 +58,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     id: "patient_category",
     type: "string",
     example: "Comfort Care",
-    default: "",
+    current: "",
     description: "A string to categorize the patient.",
     options: PATIENT_CATEGORIES.map((category) => ({
       id: category.id,
@@ -80,21 +69,10 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     },
   },
   {
-    friendlyName: "Actions",
-    id: "actions",
-    type: "null",
-    example: "null",
-    default: null,
-    description: "Leave blank.",
-    validator: (value) => {
-      return value === null;
-    },
-  },
-  {
     friendlyName: "Action",
     id: "action",
     type: "string",
-    default: "",
+    current: "",
     example: "40",
     description: "An option to store the last action taken for the patient.",
     options: TELEMEDICINE_ACTIONS.map((action) => ({
@@ -107,7 +85,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Review Interval",
     id: "review_interval",
     type: "number",
-    default: 0,
+    current: 0,
     example: "15",
     description:
       "An integer to represent the interval at which the patient's condition is reviewed.",
@@ -118,7 +96,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Admitted To",
     id: "admitted_to",
     type: "string",
-    default: "",
+    current: "",
     example: "General Ward",
     description:
       "A string to store the department or ward where the patient is admitted.",
@@ -127,7 +105,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
   {
     friendlyName: "bp",
     id: "bp",
-    default: { systolic: null, diastolic: null, mean: null },
+    current: { systolic: null, diastolic: null, mean: null },
     type: "{ systolic?: number, diastolic?: number }",
     example: "{ systolic: 120 }",
     description:
@@ -143,7 +121,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Pulse",
     id: "pulse",
     type: "number",
-    default: null,
+    current: null,
     example: "72",
     description:
       "An integer to store the pulse rate of the patient. It can be null if the pulse rate is not taken.",
@@ -153,7 +131,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Respiratory Rate",
     id: "resp",
     type: "number",
-    default: null,
+    current: null,
     example: "16",
     description:
       "An integer to store the respiratory rate of the patient. It can be null if the respiratory rate is not taken.",
@@ -163,7 +141,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Temperature",
     id: "temperature",
     type: "number",
-    default: null,
+    current: null,
     example: "98.6",
     description:
       "A float to store the temperature of the patient. It can be null if the temperature is not taken.",
@@ -173,7 +151,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "SPO2",
     id: "ventilator_spo2",
     type: "number",
-    default: null,
+    current: null,
     example: "98",
     description:
       "An integer to store the SPO2 level of the patient. It can be null if the SPO2 level is not taken.",
@@ -184,7 +162,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     id: "rhythm",
     type: "number",
     example: "5",
-    default: 0,
+    current: 0,
     description: "An option to store the rhythm of the patient.",
     options: RHYTHM_CHOICES.map((rhythm) => ({
       id: rhythm.id,
@@ -196,7 +174,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Rhythm Detail",
     id: "rhythm_detail",
     type: "string",
-    default: "",
+    current: "",
     example: "Just minor irregularities.",
     description:
       "A string to store the details about the rhythm of the patient.",
@@ -206,7 +184,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Level Of Consciousness",
     id: "consciousness_level",
     type: "string",
-    default: "UNKNOWN",
+    current: "UNKNOWN",
     example: "ALERT",
     description:
       "An option to store the level of consciousness of the patient.",
@@ -220,7 +198,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Diagnosis",
     id: "icd11_diagnosis",
     type: '{diagnosis: string, verification_status: "unconfirmed" | "provisional" | "differential" | "confirmed", is_principal: boolean}[]',
-    default: [],
+    current: [],
     example:
       "[{diagnosis: '4A42.0 Paediatric onset systemic sclerosis', verification_status: 'confirmed', is_principal: true}, {diagnosis: 2, verification_status: 'provisional', is_principal: false}]",
     description:
@@ -243,7 +221,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       frequency?: '15 min' | '30 min' | '1 hr' | '6 hrs' | '12 hrs' | '24 hrs' | '48 hrs', 
       notes?: string
     }[]`,
-    default: [],
+    current: [],
     example: `[
       {
         type: ["Haemotology (GROUP)"],
@@ -283,7 +261,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       instruction_on_titration: string,
       target_dosage: number + " " + ("mg" | "g" | "ml" | "drop(s)" | "ampule(s)" | "tsp" | "mcg" | "unit(s)"),
     }[]`,
-    default: [],
+    current: [],
     example: `[
       {base_dosage: "5 ampule(s)", days: 7, dosage_type: "REGULAR", frequency: "STAT", medicine: "DOLO", notes: "Give with water", route: "ORAL"},
       {base_dosage: "7 ml", days: 3, dosage_type: "TITRATED", frequency: "Q4H", medicine: "Albumin", route: "INHALATION", instruction_on_titration: "Example", target_dosage: "40 ml"},
@@ -318,7 +296,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       min_hours_between_doses: number,
       max_dosage: number + " " + ("mg" | "g" | "ml" | "drop(s)" | "ampule(s)" | "tsp" | "mcg" | "unit(s)"),
     }[]`,
-    default: [],
+    current: [],
     example: `[
       {base_dosage: "3 drop(s)", dosage_type:"PRN", indicator: "If patient gets fever", max_dosage: "5 drops(s)", min_hours_between_doses: 12, route: "IV", medicine: "Glentona", notes: "Example"}
     ]`,
@@ -332,7 +310,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Round Type",
     id: "rounds_type",
     type: "string",
-    default: "NORMAL",
+    current: "NORMAL",
     example: "TELEMEDICINE",
     description: "A string to store the type of round.",
     options: [
@@ -347,7 +325,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Measured At",
     id: "taken_at",
     type: "string",
-    default: "",
+    current: "",
     example: "2024-07-31T18:10",
     description:
       "A string to store the date and time at which the round was taken or measured. 'The round was taken yesterday/today' would amount to yesterday/today's date.",
@@ -360,21 +338,24 @@ export const SCRIBE_FORMS: { [key: string]: ScribeForm } = {
   daily_round: {
     id: "daily_round",
     name: "Daily Round",
-    fields: async () => {
+    dehydratedFields: (currentForm) =>
+      DAILY_ROUND_FORM_SCRIBE_DATA.map((field) => ({
+        ...field,
+        current: currentForm?.[field.id] || field.current,
+      })),
+    fields: async (dehydratedFields) => {
       const investigations = await loadInvestigations();
-
-      return DAILY_ROUND_FORM_SCRIBE_DATA.map((field) => {
-        if (field.id === "investigations") {
-          return {
-            ...field,
-            options: investigations.map((investigation, i) => ({
-              id: i,
-              text: investigation,
-              currentData: undefined,
-            })),
-          };
-        }
-        return field;
+      return dehydratedFields.map((field) => {
+        return {
+          ...field,
+          options:
+            field.id === "investigations"
+              ? investigations?.map((investigation, i) => ({
+                  id: i,
+                  text: investigation,
+                }))
+              : field.options,
+        };
       });
     },
   },

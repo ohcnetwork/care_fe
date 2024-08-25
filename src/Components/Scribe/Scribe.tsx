@@ -21,7 +21,7 @@ export interface Field {
   description: string;
   type: string;
   example: string;
-  default: any;
+  current: any;
   options?: readonly FieldOption[];
   validator: (value: any) => boolean;
 }
@@ -29,7 +29,8 @@ export interface Field {
 export interface ScribeForm {
   id: string;
   name: string;
-  fields: () => Promise<Field[]> | Field[];
+  fields: (dehydratedFields: Field[]) => Promise<Field[]>;
+  dehydratedFields: (current: any) => Field[];
 }
 
 export type ScribeModel = {
@@ -62,7 +63,11 @@ const SCRIBE_FILE_TYPES = {
   SCRIBE: 1,
 };
 
-export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
+export const Scribe: React.FC<ScribeProps> = ({
+  form,
+  onFormUpdate,
+  existingData,
+}) => {
   const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
@@ -79,21 +84,6 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
   const [updatedTranscript, setUpdatedTranscript] = useState<string>("");
   const [scribeID, setScribeID] = useState<string>("");
   const stageRef = useRef(stage);
-  const [fields, setFields] = useState<Field[]>([]);
-
-  useEffect(() => {
-    const loadFields = async () => {
-      const fields = await form.fields();
-      setFields(
-        fields.map((f) => ({
-          ...f,
-          validate: undefined,
-          default: JSON.stringify(f.default),
-        })),
-      );
-    };
-    loadFields();
-  }, [form]);
 
   useEffect(() => {
     if (stageRef.current === "cancelled") {
@@ -294,9 +284,14 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
     });
   };
 
+  const getHydratedFields = async () => {
+    return form.fields(form.dehydratedFields(existingData));
+  };
+
   const handleAudioUploads = async () => {
     if (isAudioUploading) return;
     setIsAudioUploading(true);
+    const fields = await getHydratedFields();
     request(routes.createScribe, {
       body: {
         status: "CREATED",
@@ -330,6 +325,7 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
     if (stageRef.current === "cancelled") return;
     setProgress(75);
     setIsGPTProcessing(true);
+    const fields = await getHydratedFields();
     try {
       const updatedFieldsResponse = await waitForFormData(external_id);
       setProgress(100);
@@ -341,7 +337,7 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
         .filter(([k, v]) => {
           const f = fields.find((f) => f.id === k);
           if (!f) return false;
-          if (v === f.default) return false;
+          if (v === f.current) return false;
           //if (f.validator) return f.validator(f.type === "number" ? Number(v) : v);
           return true;
         })
@@ -664,9 +660,9 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
                           {Object.keys(formFields ?? {})
                             .filter((field) => formFields?.[field])
                             .map((field) => {
-                              const fieldDetails = fields.find(
-                                (f) => f?.id === field,
-                              );
+                              const fieldDetails = form
+                                .dehydratedFields(existingData)
+                                .find((f) => f?.id === field);
                               return (
                                 <div
                                   key={field}
