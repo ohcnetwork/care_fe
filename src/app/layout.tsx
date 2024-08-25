@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ReduxProvider } from "./ReduxProvider";
 import * as Sentry from "@sentry/browser";
 
 export const metadata: Metadata = {
