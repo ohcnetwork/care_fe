@@ -9,6 +9,7 @@ import {
 } from "../Providers";
 import ThemedFavicon from "../CAREUI/misc/ThemedFavicon";
 import Loading from "../Components/Common/Loading";
+import AppRouter from "./AppRouter";
 import "../i18n";
 import "../style/index.css";
 
@@ -19,7 +20,7 @@ const App = ({ children }: { children: React.ReactNode }) => {
       <HistoryAPIProvider>
         <AppConfigProvider>
           <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
-            {children}
+            <AppRouter>{children}</AppRouter>
           </AuthUserProvider>
         </AppConfigProvider>
       </HistoryAPIProvider>
