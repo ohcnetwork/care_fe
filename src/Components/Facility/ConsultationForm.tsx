@@ -1126,22 +1126,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       />
                     </div>
                   </div>
-
-                  <div className="col-span-6" ref={fieldRef["category"]}>
-                    <PatientCategorySelect
-                      labelSuffix={
-                        disabledFields.includes("category") && (
-                          <p className="text-xs font-medium text-warning-500">
-                            A daily round already exists.
-                          </p>
-                        )
-                      }
-                      required
-                      label="Category"
-                      {...field("category")}
-                    />
-                  </div>
-
                   <div className="col-span-6" ref={fieldRef["suggestion"]}>
                     <SelectFormField
                       required
@@ -1303,7 +1287,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </div>
                   )}
 
-                  <div className="col-span-6 mb-6" ref={fieldRef["patient_no"]}>
+                  <div className="col-span-6" ref={fieldRef["patient_no"]}>
                     <TextFormField
                       {...field("patient_no")}
                       label={
@@ -1312,6 +1296,20 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           : "OP Number"
                       }
                       required={state.form.suggestion === "A"}
+                    />
+                  </div>
+                  <div className="col-span-6 mb-6" ref={fieldRef["category"]}>
+                    <PatientCategorySelect
+                      labelSuffix={
+                        disabledFields.includes("category") && (
+                          <p className="text-xs font-medium text-warning-500">
+                            A daily round already exists.
+                          </p>
+                        )
+                      }
+                      required
+                      label="Category"
+                      {...field("category")}
                     />
                   </div>
                 </div>
