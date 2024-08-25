@@ -1,6 +1,6 @@
-import { debounce } from "lodash-es";
 import { useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
+
+import { debounce } from "lodash-es";
 import { mergeQueryOptions } from "../../Utils/utils";
 
 interface IUseAsyncOptionsArgs {
@@ -25,7 +25,7 @@ interface IUseAsyncOptionsArgs {
  *     ...
  *     options={options(props.value)}
  *     isLoading={isLoading}
- *     onQuery={(query) => fetchOptions(action({ query }))}
+ *     onQuery={(query) => fetchOptions(async () => { ... })}
  *     optionValue={(option) => option}
  *     ...
  *   />
@@ -36,22 +36,18 @@ export function useAsyncOptions<T extends Record<string, unknown>>(
   uniqueKey: keyof T,
   args?: IUseAsyncOptionsArgs,
 ) {
-  const dispatch = useDispatch<any>();
   const [queryOptions, setQueryOptions] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchOptions = useMemo(
     () =>
-      debounce(async (action: any) => {
+      debounce(async (fetchFn: () => Promise<T[]>) => {
         setIsLoading(true);
-        const res = await dispatch(action);
-        if (res?.data)
-          setQueryOptions(
-            args?.queryResponseExtractor?.(res.data) ?? (res.data as T[]),
-          );
+        const data = await fetchFn();
+        if (data) setQueryOptions(args?.queryResponseExtractor?.(data) ?? data);
         setIsLoading(false);
       }, args?.debounceInterval ?? 300),
-    [dispatch, args?.debounceInterval],
+    [args?.debounceInterval],
   );
 
   const mergeValueWithQueryOptions = (selected?: T[]) => {

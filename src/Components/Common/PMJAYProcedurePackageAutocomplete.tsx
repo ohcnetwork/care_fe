@@ -1,13 +1,15 @@
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { listPMJYPackages } from "../../Redux/actions";
-import { Autocomplete } from "../Form/FormFields/Autocomplete";
-import FormField from "../Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 
-type PMJAYPackageItem = {
+import { Autocomplete } from "../Form/FormFields/Autocomplete";
+import FormField from "../Form/FormFields/FormField";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
+
+export type PMJAYPackageItem = {
   name?: string;
   code?: string;
   price?: number;
@@ -41,7 +43,20 @@ export default function PMJAYProcedurePackageAutocomplete(props: Props) {
         optionLabel={optionLabel}
         optionDescription={optionDescription}
         optionValue={(option) => option}
-        onQuery={(query) => fetchOptions(listPMJYPackages(query))}
+        onQuery={(query) =>
+          fetchOptions(async () => {
+            const { res, data } = await request(
+              routes.hcx.claims.listPMJYPackages,
+              { query: { query, limit: 10 } },
+            );
+
+            if (res?.ok && data) {
+              return data;
+            }
+
+            return [];
+          })
+        }
         isLoading={isLoading}
       />
     </FormField>

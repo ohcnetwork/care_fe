@@ -119,6 +119,8 @@ import {
 } from "../Components/Facility/ConsultationDetails/Events/types";
 import { InvestigationSessionType } from "../Components/Facility/Investigations/investigationsTab";
 import { ScribeModel } from "../Components/Scribe/Scribe";
+import { InsurerOptionModel } from "../Components/HCX/InsurerAutocomplete";
+import { PMJAYPackageItem } from "../Components/Common/PMJAYProcedurePackageAutocomplete";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1613,16 +1615,19 @@ const routes = {
       delete: {
         path: "/api/hcx/policy/{external_id}/",
         method: "DELETE",
+        TRes: Type<Record<string, never>>(),
       },
 
       listPayors: {
         path: "/api/hcx/payors/",
         method: "GET",
+        TRes: Type<InsurerOptionModel[]>(),
       },
 
       checkEligibility: {
         path: "/api/hcx/check_eligibility/",
         method: "POST",
+        TBody: Type<{ policy: string }>(),
         TRes: Type<HCXPolicyModel>(),
       },
     },
@@ -1637,6 +1642,18 @@ const routes = {
       create: {
         path: "/api/hcx/claim/",
         method: "POST",
+        TBody: Type<{
+          policy: string;
+          items: {
+            id: string;
+            price: number;
+            category?: string;
+            name: string;
+          }[];
+          consultation: string;
+          use: "preauthorization" | "claim";
+        }>(),
+        TRes: Type<HCXClaimModel>(),
       },
 
       get: {
@@ -1662,11 +1679,14 @@ const routes = {
       listPMJYPackages: {
         path: "/api/hcx/pmjy_packages/",
         method: "GET",
+        TRes: Type<PMJAYPackageItem[]>(),
       },
 
       makeClaim: {
         path: "/api/hcx/make_claim/",
         method: "POST",
+        TBody: Type<{ claim: string }>(),
+        TRes: Type<unknown>(),
       },
     },
 

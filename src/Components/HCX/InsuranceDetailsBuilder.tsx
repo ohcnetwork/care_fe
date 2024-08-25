@@ -4,21 +4,21 @@ import {
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 import FormField, { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXPolicyModel } from "./models";
+
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { useDispatch } from "react-redux";
-import { HCXActions } from "../../Redux/actions";
-import { classNames } from "../../Utils/utils";
+import { HCXPolicyModel } from "./models";
 import InsurerAutocomplete from "./InsurerAutocomplete";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { classNames } from "../../Utils/utils";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 import useConfig from "../../Common/hooks/useConfig";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
 export default function InsuranceDetailsBuilder(props: Props) {
   const field = useFormFieldPropsResolver(props);
-  const dispatch = useDispatch<any>();
 
   const handleUpdate = (index: number) => {
     return (event: FieldChangeEvent<unknown>) => {
@@ -43,9 +43,11 @@ export default function InsuranceDetailsBuilder(props: Props) {
   const handleRemove = (index: number) => {
     return () => {
       field.handleChange(
-        (props.value || [])?.filter((obj, i) => {
+        (props.value || [])?.filter(async (obj, i) => {
           if (obj.id && i === index) {
-            dispatch(HCXActions.policies.delete(obj.id));
+            await request(routes.hcx.policies.delete, {
+              pathParams: { external_id: obj.id },
+            });
           }
           return i !== index;
         }),

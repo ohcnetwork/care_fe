@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXActions } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { Submit } from "../Common/components/ButtonV2";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import { FileUpload } from "../Files/FileUpload";
 import { HCXClaimModel } from "./models";
+import { Submit } from "../Common/components/ButtonV2";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import { useState } from "react";
 
 interface Props {
   claim: HCXClaimModel;
@@ -15,7 +16,6 @@ interface Props {
 }
 
 export default function ClaimCreatedModal({ claim, ...props }: Props) {
-  const dispatch = useDispatch<any>();
   const [isMakingClaim, setIsMakingClaim] = useState(false);
 
   const { use } = claim;
@@ -23,8 +23,11 @@ export default function ClaimCreatedModal({ claim, ...props }: Props) {
   const handleSubmit = async () => {
     setIsMakingClaim(true);
 
-    const res = await dispatch(HCXActions.makeClaim(claim.id ?? ""));
-    if (res.data) {
+    const { res } = await request(routes.hcx.claims.makeClaim, {
+      body: { claim: claim.id },
+    });
+
+    if (res?.ok) {
       Notification.Success({ msg: `${use} requested` });
       props.onClose();
     }

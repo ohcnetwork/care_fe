@@ -21,7 +21,7 @@ export type HCXPolicyOutcome =
   | "Partial Processing";
 
 export interface HCXPolicyModel {
-  id?: string;
+  id: string;
   patient?: string;
   patient_object?: PatientModel;
   subscriber_id: string;

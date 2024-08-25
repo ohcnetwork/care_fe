@@ -1,18 +1,20 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { getConsultation, HCXActions } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { classNames, formatCurrency } from "../../Utils/utils";
+
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import ClaimsItemsBuilder from "./ClaimsItemsBuilder";
-import { HCXClaimModel, HCXPolicyModel, HCXItemModel } from "./models";
-import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
-import DialogModal from "../Common/Dialog";
-import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
+import { HCXClaimModel, HCXItemModel, HCXPolicyModel } from "./models";
+import { classNames, formatCurrency } from "../../Utils/utils";
+import { useEffect, useState } from "react";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import ClaimCreatedModal from "./ClaimCreatedModal";
+import ClaimsItemsBuilder from "./ClaimsItemsBuilder";
+import DialogModal from "../Common/Dialog";
+import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
+import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface Props {
   consultationId: string;
@@ -29,7 +31,6 @@ export default function CreateClaimCard({
   isCreating,
   use = "preauthorization",
 }: Props) {
-  const dispatch = useDispatch<any>();
   const [showAddPolicy, setShowAddPolicy] = useState(false);
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [items, setItems] = useState<HCXItemModel[]>();
@@ -39,30 +40,36 @@ export default function CreateClaimCard({
 
   useEffect(() => {
     async function autoFill() {
-      const latestApprovedPreAuthsRes = await dispatch(
-        HCXActions.preauths.list(consultationId),
+      const { res, data: latestApprovedPreAuth } = await request(
+        routes.hcx.claims.list,
+        {
+          query: {
+            consultation: consultationId,
+            ordering: "-modified_date",
+            use: "preauthorization",
+            outcome: "complete",
+            limit: 1,
+          },
+        },
       );
 
-      if (latestApprovedPreAuthsRes.data?.results?.length) {
-        // TODO: offload outcome filter to server side once payer server is back
-        const latestApprovedPreAuth = (
-          latestApprovedPreAuthsRes.data.results as HCXClaimModel[]
-        ).find((o) => o.outcome === "Processing Complete");
-        if (latestApprovedPreAuth) {
-          setPolicy(latestApprovedPreAuth.policy_object);
-          setItems(latestApprovedPreAuth.items ?? []);
-          return;
-        }
+      if (res?.ok && latestApprovedPreAuth?.results.length !== 0) {
+        setPolicy(latestApprovedPreAuth?.results[0].policy_object);
+        setItems(latestApprovedPreAuth?.results[0].items ?? []);
+        return;
       }
 
-      const res = await dispatch(getConsultation(consultationId as any));
+      const { res: consultationRes, data: consultationData } = await request(
+        routes.getConsultation,
+        { pathParams: { id: consultationId } },
+      );
 
-      if (res.data && Array.isArray(res.data.procedure)) {
+      if (consultationRes?.ok && Array.isArray(consultationData?.procedure)) {
         setItems(
-          res.data.procedure.map((obj: ProcedureType) => {
+          consultationData.procedure.map((obj: ProcedureType) => {
             return {
-              id: obj.procedure,
-              name: obj.procedure,
+              id: obj.procedure ?? "",
+              name: obj.procedure ?? "",
               price: 0.0,
               category: "900000", // provider's packages
             };
@@ -74,7 +81,7 @@ export default function CreateClaimCard({
     }
 
     autoFill();
-  }, [consultationId, dispatch]);
+  }, [consultationId]);
 
   const validate = () => {
     if (!policy) {
@@ -102,20 +109,20 @@ export default function CreateClaimCard({
 
     setIsCreating(true);
 
-    const res = await dispatch(
-      HCXActions.claims.create({
+    const { res, data } = await request(routes.hcx.claims.create, {
+      body: {
         policy: policy?.id,
         items,
         consultation: consultationId,
-        use,
-      }),
-    );
+        use: use_,
+      },
+    });
 
-    if (res.data) {
+    if (res?.ok && data) {
       setItems([]);
       setItemsError(undefined);
       setPolicy(undefined);
-      setCreatedClaim(res.data);
+      setCreatedClaim(data);
     } else {
       Notification.Error({ msg: "Failed to create pre-authorization" });
     }
