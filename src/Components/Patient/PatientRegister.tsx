@@ -8,16 +8,22 @@ import {
   RATION_CARD_CATEGORY,
   VACCINES,
 } from "../../Common/constants";
+import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
 import {
+  FieldError,
+  PhoneNumberValidator,
+  RequiredFieldValidator,
+} from "../Form/FieldValidators";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import { Occupation, PatientModel } from "./models";
+import {
+  compareBy,
   dateQueryString,
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
   scrollTo,
-  compareBy,
 } from "../../Utils/utils";
-import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   lazy,
   useCallback,
@@ -26,8 +32,11 @@ import {
   useRef,
   useState,
 } from "react";
+import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import AccordionV2 from "../Common/components/AccordionV2";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
@@ -35,44 +44,34 @@ import CollapseV2 from "../Common/components/CollapseV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
-import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import {
-  FieldError,
-  PhoneNumberValidator,
-  RequiredFieldValidator,
-} from "../Form/FieldValidators";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import Error404 from "../ErrorPages/404";
 import Form from "../Form/Form";
+import { FormContextValue } from "../Form/FormContext.js";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
+import { ILocalBodies } from "../ExternalResult/models.js";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
-import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
+import SelectMenuV2 from "../Form/SelectMenuV2.js";
 import Spinner from "../Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
+import _ from "lodash";
 import countryList from "../../Common/static/countries.json";
 import { debounce } from "lodash-es";
-
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
-import { validatePincode } from "../../Common/validation";
-import { FormContextValue } from "../Form/FormContext.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
-import Error404 from "../ErrorPages/404";
-import SelectMenuV2 from "../Form/SelectMenuV2.js";
-import _ from "lodash";
-import { ILocalBodies } from "../ExternalResult/models.js";
+import routes from "../../Redux/api.js";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import useConfig from "../../Common/hooks/useConfig";
+import useQuery from "../../Utils/request/useQuery.js";
 import { useTranslation } from "react-i18next";
+import { validatePincode } from "../../Common/validation";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -468,7 +467,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [id],
   );
 
-  useQuery(routes.listHCXPolicies, {
+  useQuery(routes.hcx.policies.list, {
     query: {
       patient: id,
     },
@@ -784,16 +783,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             insurer_name: obj.insurer_name || undefined,
           };
           const { data: policyData } = policy.id
-            ? await request(routes.updateHCXPolicy, {
+            ? await request(routes.hcx.policies.update, {
                 pathParams: { external_id: policy.id },
                 body: policy,
               })
-            : await request(routes.createHCXPolicy, {
+            : await request(routes.hcx.policies.create, {
                 body: policy,
               });
 
           if (enable_hcx && policyData?.id) {
-            await request(routes.hcxCheckEligibility, {
+            await request(routes.hcx.policies.checkEligibility, {
               body: { policy: policyData?.id },
               onResponse: ({ res }) => {
                 if (res?.ok) {

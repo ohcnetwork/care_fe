@@ -1,14 +1,13 @@
 import * as Notification from "../../Utils/Notifications";
 
-import { useState } from "react";
-
 import ClaimCard from "../HCX/ClaimCard";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import PageTitle from "../Common/PageTitle";
 import { navigate } from "raviger";
+import routes from "../../Redux/api";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import { useState } from "react";
 
 interface Props {
   facilityId: string;
@@ -24,7 +23,7 @@ export default function ConsultationClaims({
   const [isCreateLoading, setIsCreateLoading] = useState(false);
 
   const { data: claimsResult, refetch: refetchClaims } = useQuery(
-    routes.listHCXClaims,
+    routes.hcx.claims.list,
     {
       query: {
         ordering: "-modified_date",

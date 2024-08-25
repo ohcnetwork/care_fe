@@ -1580,141 +1580,148 @@ const routes = {
   },
 
   // HCX Endpoints
+  hcx: {
+    policies: {
+      list: {
+        path: "/api/hcx/policy/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<HCXPolicyModel>>(),
+      },
 
-  listPMJYPackages: {
-    path: "/api/v1/hcx/pmjy_packages/",
-    method: "GET",
-  },
+      create: {
+        path: "/api/hcx/policy/",
+        method: "POST",
+        TRes: Type<HCXPolicyModel>(),
+      },
 
-  hcxListPayors: {
-    path: "/api/v1/hcx/payors/",
-    method: "GET",
-  },
+      get: {
+        path: "/api/hcx/policy/{external_id}/",
+        method: "GET",
+      },
 
-  hcxCheckEligibility: {
-    path: "/api/v1/hcx/check_eligibility/",
-    method: "POST",
-    TRes: Type<HCXPolicyModel>(),
-  },
+      update: {
+        path: "/api/hcx/policy/{external_id}/",
+        method: "PUT",
+        TRes: Type<HCXPolicyModel>(),
+      },
 
-  listHCXPolicies: {
-    path: "/api/v1/hcx/policy/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<HCXPolicyModel>>(),
-  },
+      partialUpdate: {
+        path: "/api/hcx/policy/{external_id}/",
+        method: "PATCH",
+      },
 
-  createHCXPolicy: {
-    path: "/api/v1/hcx/policy/",
-    method: "POST",
-    TRes: Type<HCXPolicyModel>(),
-  },
+      delete: {
+        path: "/api/hcx/policy/{external_id}/",
+        method: "DELETE",
+      },
 
-  getHCXPolicy: {
-    path: "/api/v1/hcx/policy/{external_id}/",
-    method: "GET",
-  },
+      listPayors: {
+        path: "/api/hcx/payors/",
+        method: "GET",
+      },
 
-  updateHCXPolicy: {
-    path: "/api/v1/hcx/policy/{external_id}/",
-    method: "PUT",
-    TRes: Type<HCXPolicyModel>(),
-  },
+      checkEligibility: {
+        path: "/api/hcx/check_eligibility/",
+        method: "POST",
+        TRes: Type<HCXPolicyModel>(),
+      },
+    },
 
-  partialUpdateHCXPolicy: {
-    path: "/api/v1/hcx/policy/{external_id}/",
-    method: "PATCH",
-  },
+    claims: {
+      list: {
+        path: "/api/hcx/claim/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<HCXClaimModel>>(),
+      },
 
-  deleteHCXPolicy: {
-    path: "/api/v1/hcx/policy/{external_id}/",
-    method: "DELETE",
-  },
+      create: {
+        path: "/api/hcx/claim/",
+        method: "POST",
+      },
 
-  listHCXClaims: {
-    path: "/api/v1/hcx/claim/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<HCXClaimModel>>(),
-  },
+      get: {
+        path: "/api/hcx/claim/{external_id}/",
+        method: "GET",
+      },
 
-  createHCXClaim: {
-    path: "/api/v1/hcx/claim/",
-    method: "POST",
-  },
+      update: {
+        path: "/api/hcx/claim/{external_id}/",
+        method: "PUT",
+      },
 
-  getHCXClaim: {
-    path: "/api/v1/hcx/claim/{external_id}/",
-    method: "GET",
-  },
+      partialUpdate: {
+        path: "/api/hcx/claim/{external_id}/",
+        method: "PATCH",
+      },
 
-  updateHCXClaim: {
-    path: "/api/v1/hcx/claim/{external_id}/",
-    method: "PUT",
-  },
+      delete: {
+        path: "/api/hcx/claim/{external_id}/",
+        method: "DELETE",
+      },
 
-  partialUpdateHCXClaim: {
-    path: "/api/v1/hcx/claim/{external_id}/",
-    method: "PATCH",
-  },
+      listPMJYPackages: {
+        path: "/api/hcx/pmjy_packages/",
+        method: "GET",
+      },
 
-  deleteHCXClaim: {
-    path: "/api/v1/hcx/claim/{external_id}/",
-    method: "DELETE",
-  },
+      makeClaim: {
+        path: "/api/hcx/make_claim/",
+        method: "POST",
+      },
+    },
 
-  hcxMakeClaim: {
-    path: "/api/v1/hcx/make_claim/",
-    method: "POST",
-  },
+    communications: {
+      list: {
+        path: "/api/hcx/communication/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<HCXCommunicationModel>>(),
+      },
 
-  listHCXCommunications: {
-    path: "/api/v1/hcx/communication/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<HCXCommunicationModel>>(),
-  },
+      create: {
+        path: "/api/hcx/communication/",
+        method: "POST",
+        TRes: Type<HCXCommunicationModel>(),
+        TBody: Type<{
+          claim: string;
+          content: {
+            type: string;
+            data: string;
+          }[];
+        }>(),
+      },
 
-  createHCXCommunication: {
-    path: "/api/v1/hcx/communication/",
-    method: "POST",
-    TRes: Type<HCXCommunicationModel>(),
-    TBody: Type<{
-      claim: string;
-      content: {
-        type: string;
-        data: string;
-      }[];
-    }>(),
-  },
+      get: {
+        path: "/api/hcx/communication/{external_id}/",
+        method: "GET",
+        TRes: Type<HCXCommunicationModel>(),
+      },
 
-  getHCXCommunication: {
-    path: "/api/v1/hcx/communication/{external_id}/",
-    method: "GET",
-    TRes: Type<HCXCommunicationModel>(),
-  },
+      update: {
+        path: "/api/hcx/communication/{external_id}/",
+        method: "PUT",
+        TRes: Type<HCXCommunicationModel>(),
+      },
 
-  updateHCXCommunication: {
-    path: "/api/v1/hcx/communication/{external_id}/",
-    method: "PUT",
-    TRes: Type<HCXCommunicationModel>(),
-  },
+      partialUpdate: {
+        path: "/api/hcx/communication/{external_id}/",
+        method: "PATCH",
+        TRes: Type<HCXCommunicationModel>(),
+      },
 
-  partialUpdateHCXCommunication: {
-    path: "/api/v1/hcx/communication/{external_id}/",
-    method: "PATCH",
-    TRes: Type<HCXCommunicationModel>(),
-  },
+      delete: {
+        path: "/api/hcx/communication/{external_id}/",
+        method: "DELETE",
+      },
 
-  deleteHCXCommunication: {
-    path: "/api/v1/hcx/communication/{external_id}/",
-    method: "DELETE",
-  },
-
-  hcxSendCommunication: {
-    path: "/api/v1/hcx/send_communication/",
-    method: "POST",
-    TRes: Type<void>(),
-    TBody: Type<{
-      communication: string;
-    }>(),
+      send: {
+        path: "/api/hcx/send_communication/",
+        method: "POST",
+        TRes: Type<void>(),
+        TBody: Type<{
+          communication: string;
+        }>(),
+      },
+    },
   },
 } as const;
 

@@ -1,17 +1,18 @@
-import { HCXClaimModel, HCXCommunicationModel } from "./models";
-import { useState } from "react";
 import * as Notification from "../../Utils/Notifications";
+
+import { HCXClaimModel, HCXCommunicationModel } from "./models";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { FileUploadModel } from "../Patient/models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { classNames } from "../../Utils/utils";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { useTranslation } from "react-i18next";
-import useFileUpload from "../../Utils/useFileUpload";
 import request from "../../Utils/request/request";
-import { FileUploadModel } from "../Patient/models";
+import routes from "../../Redux/api";
+import useFileUpload from "../../Utils/useFileUpload";
+import useQuery from "../../Utils/request/useQuery";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   claim: HCXClaimModel;
@@ -41,7 +42,7 @@ export default function ClaimCardCommunication({
   });
 
   const { data: communicationsResult, refetch: refetchCommunications } =
-    useQuery(routes.listHCXCommunications, {
+    useQuery(routes.hcx.communications.list, {
       query: {
         claim: claim.id,
         ordering: "-created_date",
@@ -55,7 +56,7 @@ export default function ClaimCardCommunication({
 
     setIsSendingCommunication(true);
 
-    const { res, data } = await request(routes.createHCXCommunication, {
+    const { res, data } = await request(routes.hcx.communications.create, {
       body: {
         claim: claim.id,
         content: [
@@ -70,7 +71,7 @@ export default function ClaimCardCommunication({
     if (res?.status === 201 && data) {
       await handleFileUpload(data.id as string);
 
-      const { res } = await request(routes.hcxSendCommunication, {
+      const { res } = await request(routes.hcx.communications.send, {
         body: {
           communication: data.id,
         },
