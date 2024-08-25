@@ -10,7 +10,7 @@ import _ from "lodash-es";
 import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 
 import { navigate } from "raviger";
-import { DetailRoute } from "../../Routers/types";
+import DetailRoute from "../../Routers/types/DetailRoute";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 

@@ -1,7 +1,7 @@
 import ResultItem from "../../Components/ExternalResult/ResultItem";
 import ResultList from "../../Components/ExternalResult/ResultList";
 import ResultUpdate from "../../Components/ExternalResult/ResultUpdate";
-import { DetailRoute } from "../types";
+import DetailRoute from "../types/DetailRoute";
 
 export default {
   "/external_results": () => <ResultList />,

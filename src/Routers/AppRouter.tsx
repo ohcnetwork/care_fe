@@ -26,7 +26,7 @@ import ShiftingRoutes from "./routes/ShiftingRoutes";
 import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
 import ExternalResultRoutes from "./routes/ExternalResultRoutes";
-import { DetailRoute } from "./types";
+import DetailRoute from "./types/DetailRoute";
 import useAuthUser from "../Common/hooks/useAuthUser";
 
 const Routes = {
