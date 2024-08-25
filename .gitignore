@@ -59,3 +59,8 @@ bun.lockb
 # Cypress
 cypress/downloads
 cypress/fixtures/token.json
+
+# NextJs
+.next
+next-env.d.ts
+dist

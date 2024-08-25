@@ -20,7 +20,7 @@ const App = () => {
           </AuthUserProvider>
 
           {/* Integrations */}
-          <Intergrations.Sentry disabled={!import.meta.env.PROD} />
+          <Intergrations.Sentry disabled={process.env.NODE_ENV !== 'production'} />
           <Intergrations.Plausible />
         </AppConfigProvider>
       </HistoryAPIProvider>

@@ -133,7 +133,7 @@ export interface LoginCredentials {
 
 const routes = {
   config: {
-    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
+    path: process.env.REACT_APP_CONFIG ?? "/config.json",
     method: "GET",
     noAuth: true,
     TRes: Type<IConfig>(),

@@ -29,7 +29,8 @@
   "scripts": {
     "build:react": "cross-env NODE_ENV=production vite build",
     "build": "npm run generate-build-meta && npm run build:react",
-    "dev": "vite",
+    "_dev": "vite",
+    "dev": "next dev",
     "preview": "cross-env NODE_ENV=production vite preview",
     "generate-build-meta": "node ./scripts/generate-build-version.js",
     "test": "snyk test",
@@ -64,6 +65,7 @@
     "i18next": "^23.11.4",
     "i18next-browser-languagedetector": "^7.2.1",
     "lodash-es": "^4.17.21",
+    "next": "^14.2.6",
     "postcss-loader": "^7.3.3",
     "qrcode.react": "^3.1.0",
     "raviger": "^4.1.2",
