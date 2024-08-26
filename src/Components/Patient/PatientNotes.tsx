@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
@@ -13,6 +12,8 @@ import routes from "../../Redux/api";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import { classNames } from "../../Utils/utils.js";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
+import { t } from "i18next";
 
 interface PatientNotesProps {
   patientId: any;
@@ -136,14 +137,16 @@ const PatientNotes = (props: PatientNotesProps) => {
         />
 
         <div className="relative mx-4 flex items-center">
-          <TextFormField
+          <AutoExpandingTextInputFormField
+            maxHeight={160}
+            rows={2}
             name="note"
             value={noteField}
             onChange={(e) => setNoteField(e.value)}
-            className="grow"
-            type="text"
+            className="w-full grow"
             errorClassName="hidden"
-            placeholder="Type your Note"
+            innerClassName="pr-10"
+            placeholder={t("notes_placeholder")}
             disabled={!patientActive}
           />
           <ButtonV2

@@ -4,7 +4,7 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
 import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import { Fragment, lazy, useState } from "react";
+import { lazy, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -27,11 +27,20 @@ import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
 import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
 import useSlug from "../../Common/hooks/useSlug.js";
-import { Popover, Transition } from "@headlessui/react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
 import { FacilityStaffList } from "./FacilityStaffList.js";
+
+type Props = {
+  facilityId: string;
+};
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -45,12 +54,10 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   );
 };
 
-export const FacilityHome = (props: any) => {
+export const FacilityHome = ({ facilityId }: Props) => {
   const { t } = useTranslation();
-  const { facilityId } = props;
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
-  const [imageKey, setImageKey] = useState(Date.now());
   const authUser = useAuthUser();
 
   useMessageListener((data) => console.log(data));
@@ -107,7 +114,10 @@ export const FacilityHome = (props: any) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+      className={
+        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+      }
+      onClick={() => setEditCoverImage(true)}
     >
       <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
@@ -116,7 +126,7 @@ export const FacilityHome = (props: any) => {
 
   const CoverImage = () => (
     <img
-      src={`${facilityData?.read_cover_image_url}?imgKey=${imageKey}`}
+      src={`${facilityData?.read_cover_image_url}`}
       alt={facilityData?.name}
       className="h-full w-full rounded-lg object-cover"
     />
@@ -145,11 +155,7 @@ export const FacilityHome = (props: any) => {
       />
       <CoverImageEditModal
         open={editCoverImage}
-        onSave={() =>
-          facilityData?.read_cover_image_url
-            ? setImageKey(Date.now())
-            : facilityFetch()
-        }
+        onSave={() => facilityFetch()}
         onClose={() => setEditCoverImage(false)}
         onDelete={() => facilityFetch()}
         facility={facilityData ?? ({} as FacilityModel)}
@@ -500,7 +506,7 @@ const LiveMonitoringButton = () => {
 
   return (
     <Popover className="relative">
-      <Popover.Button className="mt-2 w-full">
+      <PopoverButton className="mt-2 w-full">
         <ButtonV2
           variant="primary"
           ghost
@@ -511,10 +517,9 @@ const LiveMonitoringButton = () => {
           <CareIcon icon="l-video" className="text-lg" />
           <span>Live Monitoring</span>
         </ButtonV2>
-      </Popover.Button>
+      </PopoverButton>
 
       <Transition
-        as={Fragment}
         enter="transition ease-out duration-200"
         enterFrom="opacity-0 translate-y-1"
         enterTo="opacity-100 translate-y-0"
@@ -522,7 +527,7 @@ const LiveMonitoringButton = () => {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <Popover.Panel className="absolute z-30 mt-1 w-full px-4 sm:px-0 md:w-96 lg:max-w-3xl lg:translate-x-[-168px]">
+        <PopoverPanel className="absolute z-30 mt-1 w-full px-4 sm:px-0 md:w-96 lg:max-w-3xl lg:translate-x-[-168px]">
           <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
             <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
               <div>
@@ -553,7 +558,7 @@ const LiveMonitoringButton = () => {
               </ButtonV2>
             </div>
           </div>
-        </Popover.Panel>
+        </PopoverPanel>
       </Transition>
     </Popover>
   );

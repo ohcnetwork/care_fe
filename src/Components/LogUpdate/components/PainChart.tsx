@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IPainScale } from "../../Patient/models";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import HumanBodyChart from "../../../CAREUI/interactive/HumanChart";
@@ -15,6 +15,7 @@ type Props = {
 
 export default function PainChart({ pain, onChange }: Props) {
   const [current, setCurrent] = useState<IPainScale>();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const valueDescription = (region: IPainScale["region"]) => {
     const scale = pain.find((obj) => obj.region === region)?.scale;
@@ -24,10 +25,11 @@ export default function PainChart({ pain, onChange }: Props) {
   };
 
   return (
-    <>
+    <div className="relative" ref={containerRef}>
       <RegionEditor
         show={!!current}
         value={current ?? getInitialData("AnteriorAbdomen")}
+        anchorRef={containerRef}
         onCancel={() => setCurrent(undefined)}
         onSave={
           onChange
@@ -60,13 +62,14 @@ export default function PainChart({ pain, onChange }: Props) {
           pain.find((p) => p.region === region)?.scale.toString() ?? ""
         }
       />
-    </>
+    </div>
   );
 }
 
 type RegionEditorProps = {
   show: boolean;
   value: IPainScale;
+  anchorRef: React.RefObject<HTMLElement>;
   onCancel: () => void;
   onSave?: (value: IPainScale) => void;
 };
@@ -85,6 +88,7 @@ const RegionEditor = (props: RegionEditorProps) => {
     <PopupModal
       show={props.show}
       onHide={props.onCancel}
+      anchorRef={props.anchorRef}
       className="flex flex-col items-center gap-4"
       onSubmit={
         props.onSave

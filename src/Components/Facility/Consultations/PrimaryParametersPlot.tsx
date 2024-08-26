@@ -52,7 +52,7 @@ export const PrimaryParametersPlot = ({
             "insulin_intake_frequency",
             "insulin_intake_dose",
             "ventilator_spo2",
-            "ventilator_fi02",
+            "ventilator_fio2",
             "rhythm",
             "rhythm_detail",
           ],
@@ -195,7 +195,7 @@ export const PrimaryParametersPlot = ({
             title="Ventilator FIO2 (%)"
             name="fio2"
             xData={dates}
-            yData={yAxisData("ventilator_fi02")}
+            yData={yAxisData("ventilator_fio2")}
             low={21}
             high={60}
           />

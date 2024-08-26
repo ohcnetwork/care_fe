@@ -9,8 +9,8 @@ interface IProps {
  * object - array, date
  */
 const formatValue = (value: unknown, key?: string): ReactNode => {
-  if (value == null) {
-    return "N/A";
+  if (value == null || value === "N/A") {
+    return null;
   }
 
   if (typeof value === "boolean") {
@@ -25,7 +25,7 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
     const trimmed = value.trim().replaceAll(/_/g, " ");
 
     if (trimmed === "") {
-      return "Empty";
+      return null;
     }
 
     if (!isNaN(Number(trimmed))) {
@@ -50,8 +50,8 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
 
       return (
         <ul className="list-disc space-y-2 pl-4">
-          {value.map((v) => (
-            <li>{formatValue(v, key)}</li>
+          {value.map((v, idx) => (
+            <li key={idx}>{formatValue(v, key)}</li>
           ))}
         </ul>
       );
@@ -69,8 +69,8 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
       return `No ${key?.replaceAll(/_/g, " ")}`;
     }
 
-    return entries.map(([key, value]) => (
-      <div className="flex flex-col items-center gap-2 md:flex-row">
+    return entries.map(([key, value], idx) => (
+      <div key={idx} className="flex flex-col items-center gap-2 md:flex-row">
         <span className="text-xs uppercase text-secondary-700">
           {key.replaceAll(/_/g, " ")}
         </span>
@@ -88,16 +88,19 @@ export default function GenericEvent(props: IProps) {
   const { t } = useTranslation();
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-secondary-400 p-4 @container">
-      {Object.entries(props.values).map(([key, value]) => (
-        <div className="flex w-full flex-col items-start gap-2">
-          <span className="text-xs capitalize text-secondary-700">
-            {t(key).replaceAll(/_/g, " ")}
-          </span>
-          <span className="break-all text-sm font-semibold text-secondary-700">
-            {formatValue(value, key)}
-          </span>
-        </div>
-      ))}
+      {Object.entries(props.values)
+        .map(([key, value]) => ({ key, value: formatValue(value, key) }))
+        .filter(({ value }) => value != null)
+        .map(({ key, value }) => (
+          <div key={key} className="flex w-full flex-col items-start gap-2">
+            <span className="text-xs capitalize text-secondary-700">
+              {t(key).replaceAll(/_/g, " ")}
+            </span>
+            <span className="break-words text-sm font-semibold text-secondary-700">
+              {value}
+            </span>
+          </div>
+        ))}
     </div>
   );
 }

@@ -9,9 +9,16 @@ type Props = {
   show: boolean;
   onHide: () => void;
   children: ReactNode;
+  anchorRef: React.RefObject<HTMLElement>;
   className?: string;
   onSubmit?: () => void;
 };
+
+type Position =
+  | { left: number; top: number }
+  | { right: number; bottom: number }
+  | { left: number; bottom: number }
+  | { right: number; top: number };
 
 export default function PopupModal(props: Props) {
   const { t } = useTranslation();
@@ -43,7 +50,7 @@ export default function PopupModal(props: Props) {
 
 const DesktopView = (props: Props) => {
   const { t } = useTranslation();
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState<Position>({ left: 0, top: 0 });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const modal = useRef<HTMLDivElement>(null);
   const [children, setChildren] = useState(props.children);
@@ -68,25 +75,38 @@ const DesktopView = (props: Props) => {
       const currentMousePosition = mousePosition;
       const modalHeight = modal.current?.clientHeight || 0;
       const modalWidth = modal.current?.clientWidth || 0;
-      const xRelative = currentMousePosition.x;
-      const yRelative = currentMousePosition.y;
-      const containerHeight = window.innerHeight;
-      const containerWidth = window.innerWidth;
-      const top =
-        yRelative + modalHeight > containerHeight
-          ? yRelative - modalHeight
-          : yRelative;
-      const left =
-        xRelative + modalWidth > containerWidth
-          ? xRelative - modalWidth
-          : xRelative;
-      setPosition({ x: left, y: top });
+      const clickX = currentMousePosition.x;
+      const clickY = currentMousePosition.y;
+      const windowHeight = window.innerHeight;
+      const windowWidth = window.innerWidth;
+
+      const anchorPosition = props.anchorRef.current?.getBoundingClientRect();
+      const anchorX = anchorPosition?.x || 0;
+      const anchorY = anchorPosition?.y || 0;
+      const verticalCenter = windowHeight / 2;
+      const horizontalCenter = windowWidth / 2;
+      const mountLeft = clickX - anchorX;
+      const mountTop = clickY - anchorY;
+
+      let position;
+      if (clickX > horizontalCenter) {
+        position = { left: mountLeft - modalWidth };
+      } else {
+        position = { left: mountLeft };
+      }
+      if (clickY > verticalCenter) {
+        position = { ...position, top: mountTop - modalHeight };
+      } else {
+        position = { ...position, top: mountTop };
+      }
+      setPosition(position);
     }
 
     document.addEventListener("mousedown", handleOutsideClick);
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.show]);
 
   useEffect(() => {
@@ -99,13 +119,17 @@ const DesktopView = (props: Props) => {
     };
   }, []);
 
+  const positionAttributes = Object.entries(position).reduce(
+    (acc, [key, value]) => {
+      return { ...acc, [key]: `${value}px` };
+    },
+    {},
+  );
+
   return (
     <div
       ref={modal}
-      style={{
-        top: position.y + "px",
-        left: position.x + "px",
-      }}
+      style={positionAttributes}
       className={classNames(
         "absolute z-10 rounded-lg border border-secondary-400 bg-white text-black shadow-lg transition-all",
         props.show ? "visible opacity-100" : "invisible opacity-0",
