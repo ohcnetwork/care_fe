@@ -9,7 +9,6 @@ const BrowserWarning = () => {
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
     const supportedBrowsers = browserslist(packageJson.browserslist.production);
-    console.log("Supported Browsers List:", supportedBrowsers);
 
     const regex = getUserAgentRegex({
       browsers: supportedBrowsers,
