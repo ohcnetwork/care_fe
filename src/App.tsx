@@ -8,14 +8,11 @@ import {
 import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
 import Intergrations from "./Integrations";
 import Loading from "./Components/Common/Loading";
-import BrowserWarning from "./Components/ErrorPages/BrowserWarning";
+
 const App = () => {
 
   return (
-    <>
-    <BrowserWarning/>
     <Suspense fallback={<Loading />}>
-      <BrowserWarning/>
       <ThemedFavicon />
       <HistoryAPIProvider>
         <AppConfigProvider>
@@ -28,7 +25,6 @@ const App = () => {
         </AppConfigProvider>
       </HistoryAPIProvider>
     </Suspense>
-    </>
   );
 };
 

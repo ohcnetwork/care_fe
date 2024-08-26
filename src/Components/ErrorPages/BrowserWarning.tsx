@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import browserslist from "browserslist";
 import { getUserAgentRegex } from "browserslist-useragent-regexp";
 import packageJson from "../../../package.json";
 
 const BrowserWarning = () => {
-  const [isSupported, setIsSupported] = useState(true);
+  const [isSupported, setIsSupported] = useState<boolean>(true);
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent;
@@ -28,15 +28,15 @@ const BrowserWarning = () => {
   }
 
   return (
-    <div className="fixed left-0 top-0 z-50 w-full bg-red-500 p-2 text-center text-white">
-      <h2>Unsupported Browser</h2>
-      <p>
-        You are using an unsupported browser. Please switch to a supported
-        browser for the best experience.
+    <div className="fixed left-0 top-0 z-50 w-full h-20 bg-gray-800 bg-opacity-60 flex items-center justify-center text-center text-gray-300">
+    <div>
+      <h2 className="text-lg font-medium">Unsupported Browser</h2>
+      <p className="text-sm">
+        You are using an unsupported browser. Please switch to a supported browser for the best experience.
       </p>
     </div>
+  </div>
   );
 };
-
 
 export default BrowserWarning;
