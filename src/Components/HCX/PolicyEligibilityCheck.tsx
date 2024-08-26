@@ -10,6 +10,7 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import useQuery from "../../Utils/request/useQuery";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   className?: string;
@@ -22,6 +23,8 @@ export default function HCXPolicyEligibilityCheck({
   patient,
   onEligiblePolicySelected,
 }: Props) {
+  const { t } = useTranslation();
+
   const [selectedPolicy, setSelectedPolicy] = useState<HCXPolicyModel>();
   const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
 
@@ -56,9 +59,7 @@ export default function HCXPolicyEligibilityCheck({
     });
 
     if (res?.ok) {
-      Notification.Success({ msg: "Checking Policy Eligibility..." });
-    } else {
-      Notification.Error({ msg: "Something Went Wrong..." });
+      Notification.Success({ msg: t("checking_policy_eligibility") });
     }
 
     setIsCheckingEligibility(false);
@@ -66,7 +67,7 @@ export default function HCXPolicyEligibilityCheck({
 
   return (
     <div className={className}>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 max-sm:flex-col">
         <SelectFormField
           required
           name="policy"
@@ -95,30 +96,30 @@ export default function HCXPolicyEligibilityCheck({
           value={selectedPolicy}
           placeholder={
             loading
-              ? "Loading..."
+              ? t("loading")
               : policiesResponse?.results.length
-                ? "Select a policy to check eligibility"
-                : "No policies for the patient"
+                ? t("select_policy")
+                : t("no_policy_found")
           }
           disabled={!policiesResponse?.results.length}
           optionDescription={(option) => (
             <div>
               <div className="flex flex-col">
-                <span className="flex w-full gap-2">
-                  <span className="w-24">Member ID</span>
-                  <span className="font-medium tracking-wide">
+                <span className="grid grid-cols-[100px_auto] gap-2">
+                  <span>{t("policy__subscriber_id")}</span>
+                  <span className="truncate font-medium">
                     {option.subscriber_id}
                   </span>
                 </span>
-                <span className="flex w-full gap-2">
-                  <span className="w-24">Insurer ID</span>
-                  <span className="font-medium tracking-wide">
+                <span className="grid grid-cols-[100px_auto] gap-2">
+                  <span>{t("policy__insurer_id")}</span>
+                  <span className="truncate font-medium">
                     {option.insurer_id}
                   </span>
                 </span>
-                <span className="flex w-full gap-2">
-                  <span className="w-24">Insurer Name</span>
-                  <span className="font-medium tracking-wide">
+                <span className="grid grid-cols-[100px_auto] gap-2">
+                  <span>{t("policy__insurer_name")}</span>
+                  <span className="truncate font-medium">
                     {option.insurer_name}
                   </span>
                 </span>
@@ -132,17 +133,17 @@ export default function HCXPolicyEligibilityCheck({
           )}
         />
         <ButtonV2
-          className="whitespace-nowrap py-3"
+          className="whitespace-nowrap py-3 max-sm:w-full"
           onClick={checkEligibility}
           disabled={isPolicyEligible(selectedPolicy) || isCheckingEligibility}
         >
           {isCheckingEligibility ? (
             <>
               <CareIcon icon="l-spinner" className="animate-spin text-lg" />
-              <span>Checking ...</span>
+              <span>{t("checking_eligibility")}</span>
             </>
           ) : (
-            "Check Eligibility"
+            t("check_eligibility")
           )}
         </ButtonV2>
       </div>
@@ -151,6 +152,8 @@ export default function HCXPolicyEligibilityCheck({
 }
 
 const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
+  const { t } = useTranslation();
+
   return (
     <div
       className={`flex items-center gap-1 rounded-full px-1.5 py-0.5 tracking-wider ${
@@ -159,7 +162,7 @@ const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
     >
       <CareIcon icon={eligible ? "l-check" : "l-times"} className="text-base" />
       <span className="text-xs uppercase">
-        {eligible ? "Eligible" : "Not Eligible"}
+        {eligible ? t("eligible") : t("not_eligible")}
       </span>
     </div>
   );

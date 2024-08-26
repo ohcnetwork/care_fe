@@ -10,6 +10,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   patient: string;
@@ -22,6 +23,8 @@ export default function PatientInsuranceDetailsEditor({
   onSubmitted,
   onCancel,
 }: Props) {
+  const { t } = useTranslation();
+
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
     [],
   );
@@ -68,10 +71,8 @@ export default function PatientInsuranceDetailsEditor({
             onResponse: ({ res }) => {
               if (res?.ok) {
                 Notification.Success({
-                  msg: "Checking Policy Eligibility...",
+                  msg: t("checking_policy_eligibility"),
                 });
-              } else {
-                Notification.Error({ msg: "Something Went Wrong..." });
               }
             },
           });
@@ -114,7 +115,7 @@ export default function PatientInsuranceDetailsEditor({
           }
         >
           <CareIcon icon="l-plus" className="text-lg" />
-          <span>Add Insurance Details</span>
+          <span>{t("add_policy")}</span>
         </ButtonV2>
         <div className="md:flex-1" />
         <Cancel border disabled={isUpdating} onClick={onCancel} />
@@ -122,10 +123,10 @@ export default function PatientInsuranceDetailsEditor({
           {isUpdating ? (
             <>
               <CareIcon icon="l-spinner" className="animate-spin text-lg" />
-              <span>Updating...</span>
+              <span>{t("updating")}</span>
             </>
           ) : (
-            "Update"
+            <span>{t("update")}</span>
           )}
         </Submit>
       </div>

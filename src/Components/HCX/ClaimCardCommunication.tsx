@@ -16,13 +16,9 @@ import { useTranslation } from "react-i18next";
 
 interface IProps {
   claim: HCXClaimModel;
-  setShowMessages: (show: boolean) => void;
 }
 
-export default function ClaimCardCommunication({
-  claim,
-  setShowMessages,
-}: IProps) {
+export default function ClaimCardCommunication({ claim }: IProps) {
   const { t } = useTranslation();
   const [inputText, setInputText] = useState("");
   const [isSendingCommunication, setIsSendingCommunication] = useState(false);
@@ -78,14 +74,12 @@ export default function ClaimCardCommunication({
       });
 
       if (res?.ok) {
-        Notification.Success({ msg: "Sent communication to HCX" });
+        Notification.Success({ msg: t("communication__sent_to_hcx") });
 
         await refetchCommunications();
 
         setInputText("");
         clearFiles();
-      } else {
-        Notification.Error({ msg: "Error sending communication to HCX" });
       }
     }
 
@@ -93,21 +87,13 @@ export default function ClaimCardCommunication({
   };
 
   return (
-    <div className="flex h-full flex-col justify-end">
-      <div className="flex justify-end">
-        <CareIcon
-          icon="l-info-circle"
-          className="h-7 w-7 cursor-pointer text-gray-600 hover:text-gray-800"
-          onClick={() => setShowMessages(false)}
-        />
-      </div>
-
+    <div className="flex h-full !w-full flex-col justify-end">
       <CommunicationChatInterface
         communications={communicationsResult?.results ?? []}
       />
 
-      <div className="m-auto flex w-full items-center gap-3">
-        <div className="relative w-full">
+      <div className="flex w-full items-center gap-3 max-md:flex-col">
+        <div className="relative w-full flex-1">
           <div className="absolute bottom-full flex max-w-full items-center gap-2 overflow-x-auto rounded-md bg-white p-2">
             {files.map((file, i) => (
               <div
@@ -154,12 +140,13 @@ export default function ClaimCardCommunication({
             onChange={(e) => setInputText(e.value)}
             placeholder={t("enter_message")}
             rows={1}
-            className="-mb-3"
+            className="-mb-3 flex-1"
           />
         </div>
-        <div className="w-fit">
+        <div className="flex items-center justify-center max-md:w-full">
           <label className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out">
             <CareIcon icon="l-paperclip" className="h-5 w-5" />
+            <span className="md:hidden">{t("add_attachments")}</span>
             <Input />
           </label>
         </div>
@@ -167,6 +154,7 @@ export default function ClaimCardCommunication({
           disabled={!inputText}
           loading={isSendingCommunication}
           onClick={handleSubmit}
+          className="max-md:w-full"
         >
           {t("send_message")}
         </ButtonV2>
@@ -267,10 +255,6 @@ function CommunicationChatMessage({
                       if (res?.ok) {
                         const url = data?.read_signed_url;
                         window.open(url, "_blank");
-                      } else {
-                        Notification.Error({
-                          msg: "Error downloading attachment",
-                        });
                       }
 
                       setIsDownloadingAttachment(false);
@@ -298,10 +282,10 @@ function CommunicationChatMessage({
             });
 
             if (res?.ok) {
-              Notification.Success({ msg: "Fetched attachments successfully" });
+              Notification.Success({
+                msg: t("fetched_attachments_successfully"),
+              });
               setAttachments(data?.results ?? []);
-            } else {
-              Notification.Error({ msg: "Error fetching attachments" });
             }
 
             setIsFetchingAttachments(false);

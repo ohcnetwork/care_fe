@@ -9,6 +9,8 @@ import Entities from "./Entities.json";
 import ErrorPages from "./ErrorPages.json";
 import ExternalResult from "./ExternalResult.json";
 import Facility from "./Facility.json";
+import FileUpload from "./FileUpload.json";
+import HCX from "./HCX.json";
 import Hub from "./Hub.json";
 import LogUpdate from "./LogUpdate.json";
 import Medicine from "./Medicine.json";
@@ -17,7 +19,6 @@ import Resource from "./Resource.json";
 import Shifting from "./Shifting.json";
 import SortOptions from "./SortOptions.json";
 import Users from "./Users.json";
-import FileUpload from "./FileUpload.json";
 
 export default {
   ...Auth,
@@ -39,5 +40,6 @@ export default {
   ...Users,
   ...LogUpdate,
   ...FileUpload,
-  SortOptions,
+  ...HCX,
+  ...SortOptions,
 };

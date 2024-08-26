@@ -8,8 +8,9 @@ import routes from "../../Redux/api";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import useQuery from "../../Utils/request/useQuery";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-interface Props {
+export interface IConsultationClaimsProps {
   facilityId: string;
   patientId: string;
   consultationId: string;
@@ -19,7 +20,9 @@ export default function ConsultationClaims({
   facilityId,
   consultationId,
   patientId,
-}: Props) {
+}: IConsultationClaimsProps) {
+  const { t } = useTranslation();
+
   const [isCreateLoading, setIsCreateLoading] = useState(false);
 
   const { data: claimsResult, refetch: refetchClaims } = useQuery(
@@ -56,7 +59,7 @@ export default function ConsultationClaims({
   return (
     <div className="relative flex flex-col pb-2">
       <PageTitle
-        title="Claims"
+        title={t("Claims")}
         className="grow-0 pl-6"
         onBackClick={() => {
           navigate(

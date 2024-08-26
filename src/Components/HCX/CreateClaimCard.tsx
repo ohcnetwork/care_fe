@@ -15,6 +15,7 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   consultationId: string;
@@ -31,6 +32,8 @@ export default function CreateClaimCard({
   isCreating,
   use = "preauthorization",
 }: Props) {
+  const { t } = useTranslation();
+
   const [showAddPolicy, setShowAddPolicy] = useState(false);
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [items, setItems] = useState<HCXItemModel[]>();
@@ -85,19 +88,19 @@ export default function CreateClaimCard({
 
   const validate = () => {
     if (!policy) {
-      Notification.Error({ msg: "Please select a policy" });
+      Notification.Error({ msg: t("select_policy") });
       return false;
     }
     if (policy?.outcome !== "Processing Complete") {
-      Notification.Error({ msg: "Please select an eligible policy" });
+      Notification.Error({ msg: t("select_eligible_policy") });
       return false;
     }
     if (!items || items.length === 0) {
-      setItemsError("Please add at least one item");
+      setItemsError(t("claim__item__add_at_least_one"));
       return false;
     }
     if (items?.some((p) => !p.id || !p.name || p.price === 0 || !p.category)) {
-      setItemsError("Please fill all the item details");
+      setItemsError(t("claim__item__fill_all_details"));
       return false;
     }
 
@@ -116,6 +119,7 @@ export default function CreateClaimCard({
         consultation: consultationId,
         use: use_,
       },
+      silent: true,
     });
 
     if (res?.ok && data) {
@@ -124,7 +128,7 @@ export default function CreateClaimCard({
       setPolicy(undefined);
       setCreatedClaim(data);
     } else {
-      Notification.Error({ msg: "Failed to create pre-authorization" });
+      Notification.Error({ msg: t(`claim__failed_to_create_${use_}`) });
     }
 
     setIsCreating(false);
@@ -140,10 +144,10 @@ export default function CreateClaimCard({
         />
       )}
       <DialogModal
-        title="Edit Patient Insurance Details"
+        title={t("edit_policy")}
         show={showAddPolicy}
         onClose={() => setShowAddPolicy(false)}
-        description="Add or edit patient's insurance details"
+        description={t("edit_policy_description")}
         className="w-full max-w-screen-md"
       >
         <PatientInsuranceDetailsEditor
@@ -151,15 +155,19 @@ export default function CreateClaimCard({
           onCancel={() => setShowAddPolicy(false)}
         />
       </DialogModal>
+
       {/* Check Insurance Policy Eligibility */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between pb-4">
-          <h1 className="text-lg font-bold">
-            Check Insurance Policy Eligibility
-          </h1>
-          <ButtonV2 onClick={() => setShowAddPolicy(true)} ghost border>
+        <div className="flex items-center justify-between gap-2 pb-4 max-sm:flex-col max-sm:items-start">
+          <h1 className="text-lg font-bold">{t("check_policy_eligibility")}</h1>
+          <ButtonV2
+            className="w-fit"
+            onClick={() => setShowAddPolicy(true)}
+            ghost
+            border
+          >
             <CareIcon icon="l-edit-alt" className="text-lg" />
-            Edit Patient Insurance Details
+            {t("edit_policy")}
           </ButtonV2>
         </div>
         <HCXPolicyEligibilityCheck
@@ -171,7 +179,7 @@ export default function CreateClaimCard({
       {/* Procedures */}
       <div className="flex flex-col gap-4">
         <div className="flex w-full items-center justify-between">
-          <h1 className="text-left text-lg font-bold">Items</h1>
+          <h1 className="text-left text-lg font-bold">{t("claim__items")}</h1>
           <ButtonV2
             type="button"
             variant="alert"
@@ -183,7 +191,7 @@ export default function CreateClaimCard({
             }
           >
             <CareIcon icon="l-plus" className="text-lg" />
-            <span>Add Item</span>
+            <span>{t("claim__add_item")}</span>
           </ButtonV2>
         </div>
         <span
@@ -192,7 +200,7 @@ export default function CreateClaimCard({
             "text-secondary-700 transition-opacity duration-300 ease-in-out",
           )}
         >
-          Select a policy to add items
+          {t("select_policy_to_add_items")}
         </span>
         <ClaimsItemsBuilder
           disabled={items === undefined || !policy}
@@ -201,8 +209,8 @@ export default function CreateClaimCard({
           onChange={({ value }) => setItems(value)}
           error={itemsError}
         />
-        <div className="place-self-end pr-8">
-          {"Total Amount: "}
+        <div className="text-right sm:pr-8">
+          {t("total_amount")} :{" "}
           {items ? (
             <span className="font-bold tracking-wider">
               {formatCurrency(
@@ -215,29 +223,34 @@ export default function CreateClaimCard({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-4">
+      <div className="mt-4 flex items-center justify-between max-sm:flex-col">
         <SelectFormField
           name="use"
-          label="Use"
+          label={t("claim__use")}
+          labelClassName="max-sm:hidden"
           options={[
-            { id: "preauthorization", label: "Pre-Authorization" },
-            { id: "claim", label: "Claim" },
+            {
+              id: "preauthorization",
+              label: t("claim__use__preauthorization"),
+            },
+            { id: "claim", label: t("claim__use__claim") },
           ]}
           value={use_}
           onChange={({ value }) => setUse_(value)}
           position="below"
+          className="w-52 max-sm:w-full"
           optionLabel={(value) => value.label}
           optionValue={(value) => value.id as "preauthorization" | "claim"}
         />
         <Submit
           disabled={items?.length === 0 || !policy || isCreating}
           onClick={handleSubmit}
-          className="min-w-[200px]"
+          className="w-52 max-sm:w-full"
         >
           {isCreating && <CareIcon icon="l-spinner" className="animate-spin" />}
           {isCreating
-            ? `Creating ${use === "claim" ? "Claim" : "Pre-Authorization"}...`
-            : "Proceed"}
+            ? t(`claim__creating_${use_}`)
+            : t(`claim__create_${use_}`)}
         </Submit>
       </div>
     </div>

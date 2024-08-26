@@ -8,6 +8,7 @@ import { Submit } from "../Common/components/ButtonV2";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   claim: HCXClaimModel;
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export default function ClaimCreatedModal({ claim, ...props }: Props) {
+  const { t } = useTranslation();
+
   const [isMakingClaim, setIsMakingClaim] = useState(false);
 
   const { use } = claim;
@@ -38,8 +41,8 @@ export default function ClaimCreatedModal({ claim, ...props }: Props) {
     <DialogModal
       show={props.show}
       onClose={props.onClose}
-      title="Add supporting documents"
-      description={`${claim.use} ID: #${claim.id?.slice(0, 5)}`}
+      title={t("add_attachments")}
+      description={`${t("claim__use__claim")}: #${claim.id?.slice(0, 5)}`}
       className="w-full max-w-screen-lg"
       titleAction={
         <Submit disabled={isMakingClaim} onClick={handleSubmit}>
@@ -47,8 +50,8 @@ export default function ClaimCreatedModal({ claim, ...props }: Props) {
             <CareIcon icon="l-spinner" className="animate-spin" />
           )}
           {isMakingClaim
-            ? `Requesting ${use === "Claim" ? "Claim" : "Pre-Authorization"}...`
-            : `Request ${use === "Claim" ? "Claim" : "Pre-Authorization"}`}
+            ? t("claim__requesting_claim")
+            : t("claim__request_claim")}
         </Submit>
       }
     >

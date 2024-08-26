@@ -197,5 +197,6 @@
   "discard": "Discard",
   "live": "Live",
   "discharged": "Discharged",
-  "archived": "Archived"
+  "archived": "Archived",
+  "created_on": "Created On"
 }
