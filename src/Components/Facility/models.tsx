@@ -83,7 +83,8 @@ export interface FacilityModel {
 }
 
 export enum HubRelationship {
-  TELE_ICU_HUB = 1,
+  REGULAR_HUB = 1,
+  TELE_ICU_HUB = 2,
 }
 
 export interface FacilityHubModel {
