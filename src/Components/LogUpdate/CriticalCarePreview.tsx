@@ -16,6 +16,7 @@ import { VentilatorFields } from "./Sections/RespiratorySupport/Ventilator";
 import PressureSore from "./Sections/PressureSore/PressureSore";
 import { IOBalanceSections } from "./Sections/IOBalance";
 import PainChart from "./components/PainChart";
+import { meanArterialPressure } from "../Common/BloodPressureFormField";
 
 type Props = {
   facilityId: string;
@@ -201,7 +202,7 @@ export default function CriticalCarePreview(props: Props) {
               <RangeDetail
                 label="Systolic"
                 value={data.bp.systolic}
-                max={250}
+                max={400}
                 unit="mmHg"
                 valueDescriptions={rangeValueDescription({
                   low: 99,
@@ -211,13 +212,13 @@ export default function CriticalCarePreview(props: Props) {
               <RangeDetail
                 label="Diastolic"
                 value={data.bp.diastolic}
-                max={180}
+                max={400}
                 unit="mmHg"
                 valueDescriptions={rangeValueDescription({ low: 49, high: 89 })}
               />
               <Detail
                 label="Mean"
-                value={data.bp.mean && properRoundOf(data.bp.mean)}
+                value={data.bp && meanArterialPressure(data.bp)}
               />
             </div>
           )}

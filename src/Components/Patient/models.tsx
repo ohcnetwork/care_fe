@@ -288,7 +288,6 @@ export const DailyRoundTypes = [
 
 export interface BloodPressure {
   diastolic?: number;
-  mean?: number;
   systolic?: number;
 }
 

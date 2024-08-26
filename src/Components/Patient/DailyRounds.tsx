@@ -85,9 +85,7 @@ export const DailyRounds = (props: any) => {
     bp: {
       systolic: undefined,
       diastolic: undefined,
-      mean: undefined,
     },
-    // bed: null,
   };
 
   const initError = Object.assign(
@@ -247,7 +245,7 @@ export const DailyRounds = (props: any) => {
         case "bp": {
           const error = BloodPressureValidator(state.form.bp);
           if (error) {
-            errors.bp = error;
+            errors.bp = t(error);
             invalidForm = true;
             scrollTo("bloodPressure");
           }

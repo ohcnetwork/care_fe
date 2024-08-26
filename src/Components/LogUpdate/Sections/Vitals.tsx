@@ -1,11 +1,10 @@
+import { useTranslation } from "react-i18next";
 import {
   celsiusToFahrenheit,
   fahrenheitToCelsius,
-  properRoundOf,
   rangeValueDescription,
 } from "../../../Utils/utils";
 import { meanArterialPressure } from "../../Common/BloodPressureFormField";
-
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
@@ -15,12 +14,13 @@ import PainChart from "../components/PainChart";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
+  const { t } = useTranslation();
+
   const handleBloodPressureChange = (event: FieldChangeEvent<number>) => {
     const bp = {
       ...(log.bp ?? {}),
       [event.name]: event.value,
     };
-    bp.mean = meanArterialPressure(bp);
     onChange({ bp });
   };
 
@@ -28,26 +28,26 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
     <div className="space-y-8">
       <div className="flex items-end justify-between">
         <h2 className="text-lg">Blood Pressure</h2>
-        <span>MAP: {(log.bp?.mean && properRoundOf(log.bp.mean)) || "--"}</span>
+        <span>MAP: {(log.bp && meanArterialPressure(log.bp)) || "--"}</span>
       </div>
       <RangeFormField
-        label="Systolic"
+        label={t("systolic")}
         name="systolic"
         onChange={handleBloodPressureChange}
         value={log.bp?.systolic}
         min={0}
-        max={250}
+        max={400}
         step={1}
         unit="mmHg"
         valueDescriptions={rangeValueDescription({ low: 99, high: 139 })}
       />
       <RangeFormField
-        label="Diastolic"
+        label={t("diastolic")}
         name="diastolic"
         onChange={handleBloodPressureChange}
         value={log.bp?.diastolic}
-        min={30}
-        max={180}
+        min={0}
+        max={400}
         step={1}
         unit="mmHg"
         valueDescriptions={rangeValueDescription({ low: 49, high: 89 })}

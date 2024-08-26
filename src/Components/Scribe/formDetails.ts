@@ -129,7 +129,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
   {
     friendlyName: "bp",
     id: "bp",
-    default: { systolic: null, diastolic: null, mean: null },
+    default: { systolic: null, diastolic: null },
     type: "{ systolic?: number, diastolic?: number }",
     example: "{ systolic: 120 }",
     description:

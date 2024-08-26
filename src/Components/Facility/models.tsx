@@ -403,9 +403,8 @@ export type PrimaryParametersPlotFields =
 
 export type PrimaryParametersPlotRes = {
   bp: {
-    mean?: number;
-    systolic?: number;
-    diastolic?: number;
+    systolic: number;
+    diastolic: number;
   };
   pulse: number;
   temperature: string;

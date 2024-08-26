@@ -192,5 +192,8 @@
   "discard": "Discard",
   "live": "Live",
   "discharged": "Discharged",
-  "archived": "Archived"
+  "archived": "Archived",
+  "normal": "Normal",
+  "low": "Low",
+  "high": "High"
 }
