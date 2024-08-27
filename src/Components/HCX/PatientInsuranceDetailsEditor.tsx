@@ -1,5 +1,3 @@
-import * as Notification from "../../Utils/Notifications";
-
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -56,7 +54,7 @@ export default function PatientInsuranceDetailsEditor({
     await Promise.all(
       insuranceDetails.map(async (obj) => {
         const policy: HCXPolicyModel = { ...obj, patient };
-        const { data: policyData } = policy.id
+        policy.id
           ? await request(routes.hcx.policies.update, {
               pathParams: { external_id: policy.id },
               body: policy,
@@ -64,23 +62,11 @@ export default function PatientInsuranceDetailsEditor({
           : await request(routes.hcx.policies.create, {
               body: policy,
             });
-
-        if (policyData?.id) {
-          await request(routes.hcx.policies.checkEligibility, {
-            body: { policy: policyData?.id },
-            onResponse: ({ res }) => {
-              if (res?.ok) {
-                Notification.Success({
-                  msg: t("checking_policy_eligibility"),
-                });
-              }
-            },
-          });
-        }
       }),
     );
     setIsUpdating(false);
     onSubmitted?.();
+    onCancel?.();
   };
 
   return (

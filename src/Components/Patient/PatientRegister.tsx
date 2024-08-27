@@ -782,7 +782,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             insurer_id: obj.insurer_id || undefined,
             insurer_name: obj.insurer_name || undefined,
           };
-          const { data: policyData } = policy.id
+          policy.id
             ? await request(routes.hcx.policies.update, {
                 pathParams: { external_id: policy.id },
                 body: policy,
@@ -790,21 +790,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             : await request(routes.hcx.policies.create, {
                 body: policy,
               });
-
-          if (enable_hcx && policyData?.id) {
-            await request(routes.hcx.policies.checkEligibility, {
-              body: { policy: policyData?.id },
-              onResponse: ({ res }) => {
-                if (res?.ok) {
-                  Notification.Success({
-                    msg: "Checking Policy Eligibility...",
-                  });
-                } else {
-                  Notification.Error({ msg: "Something Went Wrong..." });
-                }
-              },
-            });
-          }
         }),
       );
 

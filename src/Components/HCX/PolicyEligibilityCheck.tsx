@@ -47,7 +47,7 @@ export default function HCXPolicyEligibilityCheck({
     onEligiblePolicySelected(
       isPolicyEligible(selectedPolicy) ? selectedPolicy : undefined,
     );
-  }, [selectedPolicy, onEligiblePolicySelected]);
+  }, [selectedPolicy]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkEligibility = async () => {
     if (!selectedPolicy || isPolicyEligible()) return;
@@ -75,7 +75,7 @@ export default function HCXPolicyEligibilityCheck({
           errorClassName="hidden"
           className="w-full"
           options={policiesResponse?.results ?? []}
-          optionValue={(option) => option}
+          optionValue={(option) => option.id}
           optionLabel={(option) => option.policy_id}
           optionSelectedLabel={(option) =>
             option.outcome ? (
@@ -92,8 +92,12 @@ export default function HCXPolicyEligibilityCheck({
               <EligibilityChip eligible={isPolicyEligible(option) ?? false} />
             )
           }
-          onChange={({ value }) => setSelectedPolicy(value)}
-          value={selectedPolicy}
+          onChange={({ value }) => {
+            setSelectedPolicy(
+              policiesResponse?.results.find((policy) => policy.id === value),
+            );
+          }}
+          value={selectedPolicy?.id}
           placeholder={
             loading
               ? t("loading")
@@ -135,7 +139,11 @@ export default function HCXPolicyEligibilityCheck({
         <ButtonV2
           className="whitespace-nowrap py-3 max-sm:w-full"
           onClick={checkEligibility}
-          disabled={isPolicyEligible(selectedPolicy) || isCheckingEligibility}
+          disabled={
+            !selectedPolicy ||
+            isPolicyEligible(selectedPolicy) ||
+            isCheckingEligibility
+          }
         >
           {isCheckingEligibility ? (
             <>

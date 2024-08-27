@@ -3,7 +3,6 @@ import * as Notification from "../../Utils/Notifications";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import { HCXClaimModel, HCXItemModel, HCXPolicyModel } from "./models";
 import { classNames, formatCurrency } from "../../Utils/utils";
-import { useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ClaimCreatedModal from "./ClaimCreatedModal";
@@ -15,6 +14,8 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -41,50 +42,50 @@ export default function CreateClaimCard({
   const [createdClaim, setCreatedClaim] = useState<HCXClaimModel>();
   const [use_, setUse_] = useState(use);
 
-  useEffect(() => {
-    async function autoFill() {
-      const { res, data: latestApprovedPreAuth } = await request(
-        routes.hcx.claims.list,
-        {
-          query: {
-            consultation: consultationId,
-            ordering: "-modified_date",
-            use: "preauthorization",
-            outcome: "complete",
-            limit: 1,
-          },
-        },
-      );
+  const { res: consultationRes, data: consultationData } = useQuery(
+    routes.getConsultation,
+    { pathParams: { id: consultationId }, prefetch: !!consultationId },
+  );
 
-      if (res?.ok && latestApprovedPreAuth?.results.length !== 0) {
-        setPolicy(latestApprovedPreAuth?.results[0].policy_object);
-        setItems(latestApprovedPreAuth?.results[0].items ?? []);
-        return;
-      }
-
-      const { res: consultationRes, data: consultationData } = await request(
-        routes.getConsultation,
-        { pathParams: { id: consultationId } },
-      );
-
-      if (consultationRes?.ok && Array.isArray(consultationData?.procedure)) {
-        setItems(
-          consultationData.procedure.map((obj: ProcedureType) => {
-            return {
-              id: obj.procedure ?? "",
-              name: obj.procedure ?? "",
-              price: 0.0,
-              category: "900000", // provider's packages
-            };
-          }),
-        );
-      } else {
-        setItems([]);
-      }
+  const autoFill = async (policy?: HCXPolicyModel) => {
+    if (!policy) {
+      setItems([]);
+      return;
     }
 
-    autoFill();
-  }, [consultationId]);
+    const { res, data: latestApprovedPreAuth } = await request(
+      routes.hcx.claims.list,
+      {
+        query: {
+          consultation: consultationId,
+          policy: policy.id,
+          ordering: "-modified_date",
+          use: "preauthorization",
+          outcome: "complete",
+          limit: 1,
+        },
+      },
+    );
+
+    if (res?.ok && latestApprovedPreAuth?.results.length !== 0) {
+      setItems(latestApprovedPreAuth?.results[0].items ?? []);
+      return;
+    }
+    if (consultationRes?.ok && Array.isArray(consultationData?.procedure)) {
+      setItems(
+        consultationData.procedure.map((obj: ProcedureType) => {
+          return {
+            id: obj.procedure ?? "",
+            name: obj.procedure ?? "",
+            price: 0.0,
+            category: "900000", // provider's packages
+          };
+        }),
+      );
+    } else {
+      setItems([]);
+    }
+  };
 
   const validate = () => {
     if (!policy) {
@@ -172,7 +173,10 @@ export default function CreateClaimCard({
         </div>
         <HCXPolicyEligibilityCheck
           patient={patientId}
-          onEligiblePolicySelected={setPolicy}
+          onEligiblePolicySelected={(policy) => {
+            setPolicy(policy);
+            autoFill(policy);
+          }}
         />
       </div>
 
