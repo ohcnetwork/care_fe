@@ -177,4 +177,4 @@ const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
 };
 
 const isPolicyEligible = (policy?: HCXPolicyModel) =>
-  policy && !policy.error_text && policy.outcome === "Processing Complete";
+  policy && !policy.error_text && policy.outcome === "Complete";

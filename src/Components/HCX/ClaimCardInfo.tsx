@@ -11,7 +11,7 @@ export default function ClaimCardInfo({ claim }: IProps) {
   const { t } = useTranslation();
 
   const status =
-    claim.outcome === "Processing Complete"
+    claim.outcome === "Complete"
       ? claim.error_text
         ? t("claim__status__rejected")
         : t("claim__status__approved")

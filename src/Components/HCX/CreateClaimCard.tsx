@@ -92,7 +92,7 @@ export default function CreateClaimCard({
       Notification.Error({ msg: t("select_policy") });
       return false;
     }
-    if (policy?.outcome !== "Processing Complete") {
+    if (policy?.outcome !== "Complete") {
       Notification.Error({ msg: t("select_eligible_policy") });
       return false;
     }
