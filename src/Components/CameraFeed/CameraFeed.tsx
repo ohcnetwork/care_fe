@@ -234,7 +234,7 @@ export default function CameraFeed(props: Props) {
             playsInline
             onPlay={player.onPlayCB}
             onEnded={() => player.setStatus("stop")}
-              ref={playerRef as LegacyRef<HTMLVideoElement>}
+            ref={playerRef as LegacyRef<HTMLVideoElement>}
           />
 
           {inlineControls && player.status === "playing" && controls}

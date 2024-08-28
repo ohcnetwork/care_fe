@@ -33,7 +33,7 @@ export default function usePlayer(
         },
       });
     },
-    [ref.current, streamUrl,],
+    [ref.current, streamUrl],
   );
 
   const onPlayCB = () => {

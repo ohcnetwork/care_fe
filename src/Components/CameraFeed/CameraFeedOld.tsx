@@ -7,10 +7,7 @@ import {
   deleteAssetBed,
 } from "../../Redux/actions.js";
 import { CameraPTZ, getCameraPTZ } from "../../Common/constants.js";
-import {
-  StreamStatus,
-  useMSEMediaPlayer,
-} from "./useMSEplayer.js";
+import { StreamStatus, useMSEMediaPlayer } from "./useMSEplayer.js";
 import { useFeedPTZ } from "./useFeedPTZ.js";
 import * as Notification from "../../Utils/Notifications.js";
 import { AxiosError } from "axios";
@@ -22,7 +19,6 @@ import Page from "../Common/components/Page.js";
 import ConfirmDialog from "../Common/ConfirmDialog.js";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import useFullscreen from "../../Common/hooks/useFullscreen.js";
-import { isIOS } from "../../Utils/utils.js";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 
 export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
