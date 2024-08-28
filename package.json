@@ -24,7 +24,7 @@
     "typescript",
     "vite"
   ],
-  "author": "Open Healthcare Network Contributors Care Contributors",
+  "author": "Open Healthcare Network Contributors",
   "license": "MIT",
   "scripts": {
     "build:react": "cross-env NODE_ENV=production vite build",
