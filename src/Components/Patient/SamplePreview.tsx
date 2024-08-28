@@ -84,7 +84,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
               <div className="flex justify-end">
                 <div className="p-2">
                   <img
-                    src="https://cdn.coronasafe.network/ohc_logo_green.png"
+                    src="https://cdn.ohc.network/ohc_logo_green.png"
                     className="h-[50px] max-w-[400px] object-contain"
                     alt="Open HealthCare Network"
                   />

@@ -606,7 +606,7 @@ export const UserAdd = (props: UserProps) => {
       title={headerText}
       options={
         <Link
-          href="https://school.coronasafe.network/targets/12953"
+          href="https://school.ohc.network/targets/12953"
           className="inline-block rounded border border-secondary-600 bg-secondary-50 px-4 py-2 text-secondary-600 transition hover:bg-secondary-100"
           target="_blank"
         >
