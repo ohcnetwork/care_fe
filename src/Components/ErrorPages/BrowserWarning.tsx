@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import supportedBrowsers from "../../Common/supportedBrowsers";
+import bowser from "bowser";
 
 const BrowserWarning = () => {
   const [isSupported, setIsSupported] = useState<boolean>(true);
@@ -25,15 +26,14 @@ const BrowserWarning = () => {
   }
 
   return (
-    <div className="fixed left-0 top-0 z-50 flex h-20 w-full items-center justify-center bg-gray-800 bg-opacity-60 text-center text-gray-300">
-      <div>
-        <h2 className="text-lg font-medium">Unsupported Browser</h2>
-        <p className="text-sm">
-          You are using an unsupported browser. Please switch to a supported
-          browser for the best experience.
-        </p>
-      </div>
+    <div className="fixed left-0 top-0 z-50 w-full h-20 bg-gray-800 bg-opacity-60 flex items-center justify-center text-center text-gray-300">
+    <div>
+      <h2 className="text-lg font-medium">Unsupported Browser</h2>
+      <p className="text-sm">
+        Your browser ({browserInfo.name} version {browserInfo.version}) is not supported. Please update your browser to the latest version or switch to a supported browser for the best experience.
+      </p>
     </div>
+  </div>
   );
 };
 
