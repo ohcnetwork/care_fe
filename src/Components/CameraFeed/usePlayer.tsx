@@ -1,5 +1,5 @@
 import { MutableRefObject, useCallback, useState } from "react";
-import { IOptions, useMSEMediaPlayer } from "../../Common/hooks/useMSEplayer";
+import { IOptions, useMSEMediaPlayer } from "./useMSEplayer";
 
 export type StreamStatus = "playing" | "stop" | "loading" | "offline";
 

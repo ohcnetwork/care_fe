@@ -10,8 +10,8 @@ import { CameraPTZ, getCameraPTZ } from "../../Common/constants.js";
 import {
   StreamStatus,
   useMSEMediaPlayer,
-} from "../../Common/hooks/useMSEplayer.js";
-import { useFeedPTZ } from "../../Common/hooks/useFeedPTZ.js";
+} from "./useMSEplayer.js";
+import { useFeedPTZ } from "./useFeedPTZ.js";
 import * as Notification from "../../Utils/Notifications.js";
 import { AxiosError } from "axios";
 import { BedSelect } from "../Common/BedSelect.js";
