@@ -3,7 +3,6 @@ import { AssetData } from "../Assets/AssetTypes";
 import useOperateCamera, { PTZPayload } from "./useOperateCamera";
 import usePlayer from "./usePlayer";
 import { getStreamUrl } from "./utils";
-import ReactPlayer from "react-player";
 import { classNames, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
@@ -31,7 +30,7 @@ interface Props {
 }
 
 export default function CameraFeed(props: Props) {
-  const playerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
+  const playerRef = useRef<HTMLVideoElement | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const streamUrl = getStreamUrl(props.asset);
   const inlineControls = useBreakpoints({ default: false, sm: true });
@@ -225,42 +224,18 @@ export default function CameraFeed(props: Props) {
           )}
 
           {/* Video Player */}
-          {isIOS ? (
-            <div className="absolute inset-0">
-              <ReactPlayer
-                url={streamUrl}
-                ref={playerRef.current as LegacyRef<ReactPlayer>}
-                controls={false}
-                pip={false}
-                playsinline
-                playing
-                muted
-                width="100%"
-                height="100%"
-                onPlay={player.onPlayCB}
-                onEnded={() => player.setStatus("stop")}
-                onError={(e, _, hlsInstance) => {
-                  if (e === "hlsError") {
-                    const recovered = hlsInstance.recoverMediaError();
-                    console.info(recovered);
-                  }
-                }}
-              />
-            </div>
-          ) : (
-            <video
-              onContextMenu={(e) => e.preventDefault()}
-              className="absolute inset-x-0 mx-auto aspect-video max-h-full w-full"
-              id="mse-video"
-              autoPlay
-              muted
-              disablePictureInPicture
-              playsInline
-              onPlay={player.onPlayCB}
-              onEnded={() => player.setStatus("stop")}
+          <video
+            onContextMenu={(e) => e.preventDefault()}
+            className="absolute inset-x-0 mx-auto aspect-video max-h-full w-full"
+            id="mse-video"
+            autoPlay
+            muted
+            disablePictureInPicture
+            playsInline
+            onPlay={player.onPlayCB}
+            onEnded={() => player.setStatus("stop")}
               ref={playerRef as LegacyRef<HTMLVideoElement>}
-            />
-          )}
+          />
 
           {inlineControls && player.status === "playing" && controls}
         </div>

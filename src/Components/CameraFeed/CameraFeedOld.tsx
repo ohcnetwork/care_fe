@@ -22,7 +22,6 @@ import Page from "../Common/components/Page.js";
 import ConfirmDialog from "../Common/ConfirmDialog.js";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import useFullscreen from "../../Common/hooks/useFullscreen.js";
-import ReactPlayer from "react-player";
 import { isIOS } from "../../Utils/utils.js";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 
@@ -111,9 +110,7 @@ const CameraFeedOld = (props: any) => {
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
 
-  const streamUrl = isIOS
-    ? `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+  const streamUrl = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const { startStream } = useMSEMediaPlayer({
     config: {
@@ -416,56 +413,24 @@ const CameraFeedOld = (props: any) => {
       <div className="mt-4 flex flex-col">
         <div className="relative mt-4 flex flex-col gap-4 lg:flex-row">
           <div className="flex-1">
-            {/* ADD VIDEO PLAYER HERE */}
             <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
-              {isIOS ? (
-                <div className="absolute inset-0">
-                  <ReactPlayer
-                    url={streamUrl}
-                    ref={liveFeedPlayerRef.current}
-                    controls={false}
-                    playsinline
-                    playing
-                    muted
-                    width="100%"
-                    height="100%"
-                    onPlay={() => {
-                      setVideoStartTime(() => new Date());
-                      setStreamStatus(StreamStatus.Playing);
-                    }}
-                    onWaiting={() => {
-                      const delay = calculateVideoLiveDelay();
-                      if (delay > 5) {
-                        setStreamStatus(StreamStatus.Loading);
-                      }
-                    }}
-                    onError={(e, _, hlsInstance) => {
-                      if (e === "hlsError") {
-                        const recovered = hlsInstance.recoverMediaError();
-                        console.info(recovered);
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <video
-                  id="mse-video"
-                  autoPlay
-                  muted
-                  playsInline
-                  className="z-10 h-full w-full"
-                  ref={liveFeedPlayerRef}
-                  onPlay={() => {
-                    setVideoStartTime(() => new Date());
-                  }}
-                  onWaiting={() => {
-                    const delay = calculateVideoLiveDelay();
-                    if (delay > 5) {
-                      setStreamStatus(StreamStatus.Loading);
-                    }
-                  }}
-                ></video>
-              )}
+              <video
+                id="mse-video"
+                autoPlay
+                muted
+                playsInline
+                className="z-10 h-full w-full"
+                ref={liveFeedPlayerRef}
+                onPlay={() => {
+                  setVideoStartTime(() => new Date());
+                }}
+                onWaiting={() => {
+                  const delay = calculateVideoLiveDelay();
+                  if (delay > 5) {
+                    setStreamStatus(StreamStatus.Loading);
+                  }
+                }}
+              ></video>
 
               {streamStatus === StreamStatus.Playing &&
                 calculateVideoLiveDelay() > 3 && (

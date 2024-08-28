@@ -1,7 +1,6 @@
 import { MutableRefObject } from "react";
 import { AssetClass, AssetData } from "../Assets/AssetTypes";
 import { getCameraConfig } from "../../Utils/transformUtils";
-import { isIOS } from "../../Utils/utils";
 
 export const calculateVideoDelay = (
   ref: MutableRefObject<HTMLVideoElement | null>,
@@ -26,7 +25,5 @@ export const getStreamUrl = (asset: AssetData) => {
   const host = asset.resolved_middleware?.hostname;
   const uuid = config.accessKey;
 
-  return isIOS
-    ? `https://${host}/stream/${uuid}/channel/0/hls/live/index.m3u8?uuid=${uuid}&channel=0`
-    : `wss://${host}/stream/${uuid}/channel/0/mse?uuid=${uuid}&channel=0`;
+  return `wss://${host}/stream/${uuid}/channel/0/mse?uuid=${uuid}&channel=0`;
 };

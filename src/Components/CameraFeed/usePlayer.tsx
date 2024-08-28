@@ -1,31 +1,25 @@
 import { MutableRefObject, useCallback, useState } from "react";
-import ReactPlayer from "react-player";
-import { isIOS } from "../../Utils/utils";
-import { useHLSPLayer } from "../../Common/hooks/useHLSPlayer";
 import { IOptions, useMSEMediaPlayer } from "../../Common/hooks/useMSEplayer";
 
 export type StreamStatus = "playing" | "stop" | "loading" | "offline";
 
 export default function usePlayer(
   streamUrl: string,
-  ref: MutableRefObject<HTMLVideoElement | ReactPlayer | null>,
+  ref: MutableRefObject<HTMLVideoElement | null>,
 ) {
   const [playedOn, setPlayedOn] = useState<Date>();
   const [status, setStatus] = useState<StreamStatus>("stop");
 
   // Voluntarily disabling react-hooks/rules-of-hooks for this line as order of
   // hooks is maintained (since platform won't change in runtime)
-  const _start = isIOS
-    ? // eslint-disable-next-line react-hooks/rules-of-hooks
-      useHLSPLayer(ref.current as ReactPlayer).startStream
-    : // eslint-disable-next-line react-hooks/rules-of-hooks
-      useMSEMediaPlayer({
-        // Voluntarily set to "" as it's used by `stopStream` only (which is not
-        // used by this hook)
-        config: { middlewareHostname: "" },
-        url: streamUrl,
-        videoEl: ref.current as HTMLVideoElement,
-      }).startStream;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const _start = useMSEMediaPlayer({
+    // Voluntarily set to "" as it's used by `stopStream` only (which is not
+    // used by this hook)
+    config: { middlewareHostname: "" },
+    url: streamUrl,
+    videoEl: ref.current as HTMLVideoElement,
+  }).startStream;
 
   const initializeStream = useCallback(
     ({ onSuccess, onError }: IOptions) => {
@@ -39,7 +33,7 @@ export default function usePlayer(
         },
       });
     },
-    [ref.current, streamUrl],
+    [ref.current, streamUrl,],
   );
 
   const onPlayCB = () => {

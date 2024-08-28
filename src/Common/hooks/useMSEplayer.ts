@@ -107,7 +107,7 @@ export const useMSEMediaPlayer = ({
       if (mseQueue.length > 0) {
         const packet = mseQueue.shift();
         // Check if SourceBuffer has been removed before appending buffer
-        if (mseSourceBuffer.removed) {
+        if ("removed" in mseSourceBuffer && mseSourceBuffer.removed) {
           console.error("Attempted to append to a removed SourceBuffer.");
           return;
         }
@@ -128,7 +128,7 @@ export const useMSEMediaPlayer = ({
   const readPacket = (packet: any) => {
     if (!mseStreamingStarted) {
       // Check if SourceBuffer has been removed before appending buffer
-      if (mseSourceBuffer.removed) {
+      if ("removed" in mseSourceBuffer && mseSourceBuffer.removed) {
         console.error("Attempted to append to a removed SourceBuffer.");
         return;
       }
@@ -146,8 +146,16 @@ export const useMSEMediaPlayer = ({
     // location.protocol == 'https:' ? protocol = 'wss' : protocol = 'ws';
     try {
       wsRef.current?.close();
-      const mse = new MediaSource();
-      if (videoEl) {
+      if (!videoEl) return;
+
+      let mse: MediaSource;
+      if ("ManagedMediaSource" in window) {
+        mse = new (window.ManagedMediaSource as typeof MediaSource)();
+        console.log(mse);
+        videoEl.disableRemotePlayback = true;
+        videoEl.srcObject = mse;
+      } else {
+        mse = new MediaSource();
         videoEl.src = window.URL.createObjectURL(mse);
       }
 
