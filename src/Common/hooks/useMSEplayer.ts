@@ -151,7 +151,6 @@ export const useMSEMediaPlayer = ({
       let mse: MediaSource;
       if ("ManagedMediaSource" in window) {
         mse = new (window.ManagedMediaSource as typeof MediaSource)();
-        console.log(mse);
         videoEl.disableRemotePlayback = true;
         videoEl.srcObject = mse;
       } else {
