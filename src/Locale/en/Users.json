@@ -4,6 +4,7 @@
   "add_new_user": "Add New User",
   "no_users_found": "No Users Found",
   "home_facility": "Home Facility",
+  "no_home_facility" : "No home facility assigned",
   "clear_home_facility": "Clear Home Facility",
   "linked_facilities": "Linked Facilities",
   "no_linked_facilities": "No Linked Facilities",

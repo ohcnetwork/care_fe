@@ -1,22 +1,22 @@
 {
   "name": "care_fe",
   "version": "2.5.4",
-  "description": "Care is a single point to link Hospitals,Corona Care Centers and Volunteers to the unified Corona Safe Network",
+  "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git@github.com:coronasafe/care_fe.git"
+    "url": "git@github.com:ohcnetwork/care_fe.git"
   },
   "bugs": {
-    "url": "https://support.coronasafe.network",
-    "email": "info@coronasafe.network"
+    "url": "https://github.com/ohcnetwork/care_fe/issues",
+    "email": "info@ohc.network"
   },
   "contributors": [
-    "coronasafe Contributors"
+    "Open Healthcare Network Contributors"
   ],
-  "homepage": "https://care.coronasafe.in",
+  "homepage": "https://care.ohc.network",
   "keywords": [
-    "Coronasafe",
+    "ohcnetwork",
     "care",
     "react",
     "tailwind",
@@ -24,7 +24,7 @@
     "typescript",
     "vite"
   ],
-  "author": "Coronsafe Care Contributors",
+  "author": "Open Healthcare Network Contributors",
   "license": "MIT",
   "scripts": {
     "build:react": "cross-env NODE_ENV=production vite build",

@@ -10,7 +10,7 @@ interface ILogo {
 export interface IConfig {
   dashboard_url?: string;
   github_url: string;
-  coronasafe_url: string;
+  ohcn_url: string;
   site_url: string;
   analytics_server_url: string;
 
