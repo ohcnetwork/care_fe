@@ -5,7 +5,7 @@
 - Change 2
 - More?
 
-@ohcnetwork/care-fe-code-reviewers @ohcnetwork/code-reviewers
+@ohcnetwork/code-reviewers
 
 ## Merge Checklist
 

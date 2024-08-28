@@ -28,7 +28,7 @@
 ## Getting started
 
 - 💬 Comment on the issue if you are willing to take it up, and link the pull request with the issue.
-- 🏷️ Tag `@ohcnetwork/code-reviewers` for faster resolution.
+- 🏷️ Tag `@ohcnetwork/care-fe-code-reviewers` for faster resolution.
 - 📸 Attach screenshots in the pull requests showing the changes made in the UI.
 
 #### Install the required dependencies
