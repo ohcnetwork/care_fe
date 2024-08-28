@@ -12,7 +12,6 @@ const BrowserWarning = () => {
     if (!supportedBrowsers.test(userAgent)) {
       setIsSupported(false);
 
-      // Use bowser to detect browser name and version
       const browser = bowser.getParser(userAgent).getBrowser();
       const name = browser.name || "Unknown";
       const version = browser.version || "Unknown";
