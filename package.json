@@ -42,7 +42,8 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "supported-browsers": "echo \"export default $(browserslist-useragent-regexp --allowHigherVersions --ignorePatch --ignoreMinor);\" > src/Common/supportedBrowsers.ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.18",
