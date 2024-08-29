@@ -70,7 +70,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
           <span className="text-sm font-semibold text-secondary-700">
-            {t(attributeValue)}
+            {t(attributeValue as string)}
           </span>
         </div>
       );
