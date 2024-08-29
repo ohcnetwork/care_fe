@@ -5,7 +5,7 @@ import { isLatLngLiteral } from "@googlemaps/typescript-guards";
 import Spinner from "./Spinner";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
-import { Popover } from "@headlessui/react";
+import { PopoverButton } from "@headlessui/react";
 
 interface GLocationPickerProps {
   lat: number;
@@ -213,7 +213,7 @@ const Map: React.FC<MapProps> = ({
           placeholder="Start typing to search"
         />
         {handleOnClose && (
-          <Popover.Button>
+          <PopoverButton>
             <div
               id="map-close"
               className="m-[10px] cursor-pointer rounded bg-white p-2"
@@ -225,7 +225,7 @@ const Map: React.FC<MapProps> = ({
                 className="text-2xl text-secondary-800"
               />
             </div>
-          </Popover.Button>
+          </PopoverButton>
         )}
         {handleOnSelectCurrentLocation && (
           <div

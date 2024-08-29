@@ -3,6 +3,7 @@ import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { t } from "i18next";
 
 interface FacilitySelectProps {
   name: string;
@@ -21,6 +22,7 @@ interface FacilitySelectProps {
   freeText?: boolean;
   selected?: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
+  allowNone?: boolean;
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
@@ -39,6 +41,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     facilityType,
     district,
     state,
+    allowNone = false,
     freeText = false,
     errors = "",
   } = props;
@@ -65,6 +68,12 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         data?.results?.push({
           name: text,
         });
+
+      if (allowNone)
+        return [
+          { name: t("no_home_facility"), id: "NONE" },
+          ...(data?.results || []),
+        ];
 
       return data?.results;
     },

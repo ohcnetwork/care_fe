@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PopupModal from "../../../../CAREUI/display/PopupModal";
 import HumanBodyChart from "../../../../CAREUI/interactive/HumanChart";
 import { SelectFormField } from "../../../Form/FormFields/SelectFormField";
@@ -17,6 +17,7 @@ import { calculatePushScore } from "./utils";
 
 const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
   const value = log.pressure_sore ?? [];
+  const containerRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState<IPressureSore>();
 
   const regionPushScore = (region: IPressureSore["region"]) => {
@@ -33,11 +34,11 @@ const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
     }
   };
 
-  // TODO: wrap with a div with relative class so that the editor sticks on scroll.
   return (
-    <>
+    <div className="relative" ref={containerRef}>
       <RegionEditor
         show={!!current}
+        anchorRef={containerRef}
         value={current ?? getRegionInitialData("AnteriorAbdomen")}
         onCancel={() => setCurrent(undefined)}
         onSave={
@@ -74,7 +75,7 @@ const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
         }
         regionText={(r) => regionPushScore(r)?.toString() ?? ""}
       />
-    </>
+    </div>
   );
 };
 
@@ -88,6 +89,7 @@ export default PressureSore;
 type RegionEditorProps = {
   show: boolean;
   value: IPressureSore;
+  anchorRef: React.RefObject<HTMLElement>;
   onCancel: () => void;
   onSave?: (value: IPressureSore) => void;
 };
@@ -106,6 +108,7 @@ const RegionEditor = (props: RegionEditorProps) => {
     <PopupModal
       show={props.show}
       onHide={props.onCancel}
+      anchorRef={props.anchorRef}
       className="flex w-72 flex-col items-center gap-4"
       onSubmit={
         props.onSave

@@ -12,7 +12,7 @@ on:
 jobs:
   cypress-run:
     permissions: write-all
-    if: github.repository == 'coronasafe/care_fe'
+    if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -34,7 +34,7 @@ jobs:
       - name: Checkout care 📥
         uses: actions/checkout@v3
         with:
-          repository: coronasafe/care
+          repository: ohcnetwork/care
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
 
