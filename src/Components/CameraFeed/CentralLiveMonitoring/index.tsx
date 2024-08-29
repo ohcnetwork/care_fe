@@ -8,6 +8,7 @@ import Fullscreen from "../../../CAREUI/misc/Fullscreen";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { useQueryParams } from "raviger";
 import LiveMonitoringFilters from "./LiveMonitoringFilters";
+import StillWatching from "../StillWatching";
 
 export default function CentralLiveMonitoring(props: { facilityId: string }) {
   const [isFullscreen, setFullscreen] = useState(false);
@@ -59,19 +60,21 @@ export default function CentralLiveMonitoring(props: { facilityId: string }) {
           No Camera present in this location or facility.
         </div>
       ) : (
-        <Fullscreen
-          fullscreenClassName="h-screen overflow-auto"
-          fullscreen={isFullscreen}
-          onExit={() => setFullscreen(false)}
-        >
-          <div className="mt-1 grid grid-cols-1 place-content-center gap-1 lg:grid-cols-2 3xl:grid-cols-3">
-            {data.results.map((asset) => (
-              <div className="text-clip" key={asset.id}>
-                <LocationFeedTile asset={asset} />
-              </div>
-            ))}
-          </div>
-        </Fullscreen>
+        <StillWatching>
+          <Fullscreen
+            fullscreenClassName="h-screen overflow-auto"
+            fullscreen={isFullscreen}
+            onExit={() => setFullscreen(false)}
+          >
+            <div className="mt-1 grid grid-cols-1 place-content-center gap-1 lg:grid-cols-2 3xl:grid-cols-3">
+              {data.results.map((asset) => (
+                <div className="text-clip" key={asset.id}>
+                  <LocationFeedTile asset={asset} />
+                </div>
+              ))}
+            </div>
+          </Fullscreen>
+        </StillWatching>
       )}
     </Page>
   );
