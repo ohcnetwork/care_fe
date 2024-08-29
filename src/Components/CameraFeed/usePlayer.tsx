@@ -4,7 +4,6 @@ import { IOptions, useMSEMediaPlayer } from "./useMSEplayer";
 export type StreamStatus = "playing" | "stop" | "loading" | "offline";
 
 export default function usePlayer(
-  streamUrl: string,
   ref: MutableRefObject<HTMLVideoElement | null>,
 ) {
   const [playedOn, setPlayedOn] = useState<Date>();
@@ -13,19 +12,19 @@ export default function usePlayer(
   // Voluntarily disabling react-hooks/rules-of-hooks for this line as order of
   // hooks is maintained (since platform won't change in runtime)
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const _start = useMSEMediaPlayer({
+  const { startStream } = useMSEMediaPlayer({
     // Voluntarily set to "" as it's used by `stopStream` only (which is not
     // used by this hook)
     config: { middlewareHostname: "" },
-    url: streamUrl,
     videoEl: ref.current as HTMLVideoElement,
-  }).startStream;
+  });
 
   const initializeStream = useCallback(
-    ({ onSuccess, onError }: IOptions) => {
+    ({ url, onSuccess, onError }: IOptions) => {
       setPlayedOn(undefined);
       setStatus("loading");
-      _start({
+      startStream({
+        url,
         onSuccess,
         onError: (args) => {
           setStatus("offline");
@@ -33,7 +32,7 @@ export default function usePlayer(
         },
       });
     },
-    [ref.current, streamUrl],
+    [ref.current],
   );
 
   const onPlayCB = () => {

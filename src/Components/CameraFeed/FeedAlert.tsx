@@ -9,7 +9,8 @@ export type FeedAlertState =
   | "moving"
   | "zooming"
   | "saving_preset"
-  | "host_unreachable";
+  | "host_unreachable"
+  | "authentication_error";
 
 interface Props {
   state?: FeedAlertState;
@@ -24,6 +25,7 @@ const ALERT_ICON_MAP: Partial<Record<FeedAlertState, IconName>> = {
   zooming: "l-search",
   saving_preset: "l-save",
   host_unreachable: "l-exclamation-triangle",
+  authentication_error: "l-exclamation-triangle",
 };
 
 export default function FeedAlert({ state }: Props) {

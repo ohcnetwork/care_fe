@@ -35,7 +35,7 @@ export default function CameraFeed(props: Props) {
   const streamUrl = getStreamUrl(props.asset);
   const inlineControls = useBreakpoints({ default: false, sm: true });
 
-  const player = usePlayer(streamUrl, playerRef);
+  const player = usePlayer(playerRef);
 
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [state, setState] = useState<FeedAlertState>();
@@ -72,8 +72,27 @@ export default function CameraFeed(props: Props) {
     getPresets(props.onCameraPresetsObtained);
   }, [props.operate, props.onCameraPresetsObtained]);
 
-  const initializeStream = useCallback(() => {
+  const initializeStream = useCallback(async () => {
+    if (!playerRef.current) return;
+
+    const _streamUrl = await props
+      .operate({ type: "get_stream_token" })
+      .then(({ res, data }) => {
+        if (res?.status != 200) {
+          setState("authentication_error");
+          return props.onStreamError?.();
+        }
+        const result = data?.result as { token: string };
+        return getStreamUrl(props.asset, result.token);
+      })
+      .catch(() => {
+        setState("host_unreachable");
+        return props.onStreamError?.();
+      });
+
+    if (!_streamUrl) return;
     player.initializeStream({
+      url: _streamUrl,
       onSuccess: async () => {
         props.onStreamSuccess?.();
         const { res } = await props.operate({ type: "get_status" });
@@ -83,10 +102,12 @@ export default function CameraFeed(props: Props) {
       },
       onError: props.onStreamError,
     });
-  }, [player.initializeStream]);
+  }, [playerRef.current]);
 
   // Start stream on mount
-  useEffect(() => initializeStream(), [initializeStream]);
+  useEffect(() => {
+    initializeStream();
+  }, [initializeStream]);
 
   const resetStream = () => {
     setState("loading");
@@ -202,26 +223,43 @@ export default function CameraFeed(props: Props) {
           {player.status === "playing" && <FeedWatermark />}
 
           {/* No Feed informations */}
-          {state === "host_unreachable" && (
-            <NoFeedAvailable
-              message="Host Unreachable"
-              className="text-warning-500"
-              icon="l-exclamation-triangle"
-              streamUrl={streamUrl}
-              asset={props.asset}
-              onResetClick={resetStream}
-            />
-          )}
-          {player.status === "offline" && (
-            <NoFeedAvailable
-              message="Offline"
-              className="text-secondary-500"
-              icon="l-exclamation-triangle"
-              streamUrl={streamUrl}
-              asset={props.asset}
-              onResetClick={resetStream}
-            />
-          )}
+          {(() => {
+            switch (state) {
+              case "host_unreachable":
+                return (
+                  <NoFeedAvailable
+                    message="Host Unreachable"
+                    className="text-warning-500"
+                    icon="l-exclamation-triangle"
+                    streamUrl={streamUrl}
+                    asset={props.asset}
+                    onResetClick={resetStream}
+                  />
+                );
+              case "authentication_error":
+                return (
+                  <NoFeedAvailable
+                    message="Authentication Error"
+                    className="text-warning-500"
+                    icon="l-exclamation-triangle"
+                    streamUrl={streamUrl}
+                    asset={props.asset}
+                    onResetClick={resetStream}
+                  />
+                );
+              case "offline":
+                return (
+                  <NoFeedAvailable
+                    message="Offline"
+                    className="text-secondary-500"
+                    icon="l-exclamation-triangle"
+                    streamUrl={streamUrl}
+                    asset={props.asset}
+                    onResetClick={resetStream}
+                  />
+                );
+            }
+          })()}
 
           {/* Video Player */}
           <video

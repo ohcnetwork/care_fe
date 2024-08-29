@@ -8,7 +8,6 @@ export interface IAsset {
 
 interface UseMSEMediaPlayerOption {
   config: IAsset;
-  url?: string;
   videoEl: HTMLVideoElement | null;
 }
 
@@ -32,6 +31,7 @@ interface UseMSEMediaPlayerReturnType {
 }
 
 export interface IOptions {
+  url?: string;
   onSuccess?: (resp: any) => void;
   onError?: (err: any) => void;
 }
@@ -65,7 +65,6 @@ const stopStream =
 
 export const useMSEMediaPlayer = ({
   config,
-  url,
   videoEl,
 }: UseMSEMediaPlayerOption): UseMSEMediaPlayerReturnType => {
   const mseQueue: any[] = [];
@@ -103,10 +102,10 @@ export const useMSEMediaPlayer = ({
     }
   }
 
-  const startStream = ({ onError, onSuccess }: IOptions = {}) => {
+  const startStream = ({ url, onError, onSuccess }: IOptions = {}) => {
     try {
       wsRef.current?.close();
-      if (!videoEl) return;
+      if (!videoEl || !url) return;
 
       let mse: MediaSource;
       if (typeof ManagedMediaSource !== "undefined") {
@@ -118,38 +117,36 @@ export const useMSEMediaPlayer = ({
         videoEl.src = URL.createObjectURL(mse);
       }
 
-      if (url) {
-        mse.onsourceopen = function () {
-          wsRef.current = new WebSocket(url);
-          const ws = wsRef.current;
-          ws.binaryType = "arraybuffer";
-          ws.onopen = (_) => onSuccess && onSuccess(undefined);
-          ws.onerror = (event) => onError && onError(event);
-          ws.onmessage = function (event) {
-            const data = new Uint8Array(event.data);
-            if (+data[0] === 9) {
-              const mimeCodec = new TextDecoder("utf-8").decode(data.slice(1));
-              try {
-                //https://developer.mozilla.org/en-US/docs/Web/API/MediaSource
-                mseSourceBuffer = mse.addSourceBuffer(
-                  `video/mp4; codecs="${mimeCodec}"`,
-                );
-              } catch (error) {
-                onError?.(error);
-                return;
-              }
-              mseSourceBuffer.mode = "segments";
-              if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
-                mseSourceBuffer.onupdateend = pushPacket;
-              }
-              // switch to readPacket after creating SourceBuffer
-              ws.onmessage = readPacket;
-            } else {
-              readPacket(event);
+      mse.onsourceopen = function () {
+        wsRef.current = new WebSocket(url);
+        const ws = wsRef.current;
+        ws.binaryType = "arraybuffer";
+        ws.onopen = (_) => onSuccess && onSuccess(undefined);
+        ws.onerror = (event) => onError && onError(event);
+        ws.onmessage = function (event) {
+          const data = new Uint8Array(event.data);
+          if (+data[0] === 9) {
+            const mimeCodec = new TextDecoder("utf-8").decode(data.slice(1));
+            try {
+              //https://developer.mozilla.org/en-US/docs/Web/API/MediaSource
+              mseSourceBuffer = mse.addSourceBuffer(
+                `video/mp4; codecs="${mimeCodec}"`,
+              );
+            } catch (error) {
+              onError?.(error);
+              return;
             }
-          };
+            mseSourceBuffer.mode = "segments";
+            if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
+              mseSourceBuffer.onupdateend = pushPacket;
+            }
+            // switch to readPacket after creating SourceBuffer
+            ws.onmessage = readPacket;
+          } else {
+            readPacket(event);
+          }
         };
-      }
+      };
     } catch (e) {
       onError && onError(e);
     }

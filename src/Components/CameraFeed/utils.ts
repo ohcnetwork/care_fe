@@ -16,7 +16,7 @@ export const calculateVideoDelay = (
   return playedDuration - video.currentTime;
 };
 
-export const getStreamUrl = (asset: AssetData) => {
+export const getStreamUrl = (asset: AssetData, token?: string) => {
   if (asset.asset_class !== AssetClass.ONVIF) {
     throw "getStreamUrl can be invoked only for ONVIF Assets";
   }
@@ -25,5 +25,5 @@ export const getStreamUrl = (asset: AssetData) => {
   const host = asset.resolved_middleware?.hostname;
   const uuid = config.accessKey;
 
-  return `wss://${host}/stream/${uuid}/channel/0/mse?uuid=${uuid}&channel=0`;
+  return `wss://${host}/stream/${uuid}/channel/0/mse?uuid=${uuid}&channel=0${token ? `&token=${token}` : ""}`;
 };

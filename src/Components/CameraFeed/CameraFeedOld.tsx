@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
@@ -106,14 +106,11 @@ const CameraFeedOld = (props: any) => {
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
 
-  const streamUrl = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
-
   const { startStream } = useMSEMediaPlayer({
     config: {
       middlewareHostname,
       ...cameraAsset,
     },
-    url: streamUrl,
     videoEl,
   });
 
@@ -124,6 +121,7 @@ const CameraFeedOld = (props: any) => {
   const {
     absoluteMove,
     getCameraStatus,
+    getStreamToken,
     getPTZPayload,
     getPresets,
     gotoPreset,
@@ -243,12 +241,25 @@ const CameraFeedOld = (props: any) => {
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
-  const startStreamFeed = () => {
+  const startStreamFeed = useCallback(async () => {
+    if (!liveFeedPlayerRef.current) return;
+
+    let _streamUrl = "";
+    await getStreamToken({
+      onSuccess: (data) => {
+        _streamUrl = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0&token=${data.token}`;
+      },
+      onError: () => {
+        setStreamStatus(StreamStatus.Offline);
+      },
+    });
+    if (!_streamUrl) return;
     startStream({
+      url: _streamUrl,
       onSuccess: () => setStreamStatus(StreamStatus.Playing),
       onError: () => setStreamStatus(StreamStatus.Offline),
     });
-  };
+  }, [liveFeedPlayerRef.current]);
 
   const viewOptions = (page: number) => {
     return presets
@@ -272,7 +283,7 @@ const CameraFeedOld = (props: any) => {
     return () => {
       clearTimeout(tId);
     };
-  }, [startStream, streamStatus]);
+  }, [startStreamFeed, streamStatus]);
 
   const handlePagination = (cOffset: number) => {
     setPage({
@@ -287,13 +298,10 @@ const CameraFeedOld = (props: any) => {
         precision === 16 ? 1 : precision * 2,
       );
     },
-    reset: () => {
+    reset: async () => {
       setStreamStatus(StreamStatus.Loading);
       setVideoStartTime(null);
-      startStream({
-        onSuccess: () => setStreamStatus(StreamStatus.Playing),
-        onError: () => setStreamStatus(StreamStatus.Offline),
-      });
+      await startStreamFeed();
     },
     fullScreen: () => {
       if (!liveFeedPlayerRef.current) return;
