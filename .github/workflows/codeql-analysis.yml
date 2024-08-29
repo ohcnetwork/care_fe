@@ -9,7 +9,7 @@ on:
 jobs:
   CodeQL-Build:
     runs-on: ubuntu-latest
-    if: github.repository == 'coronasafe/care_fe'
+    if: github.repository == 'ohcnetwork/care_fe'
     permissions:
       security-events: write
       actions: read

@@ -38,7 +38,7 @@ export const IOBalanceSections = [
     fields: [
       {
         name: "Output",
-        options: ["Urine", "Rules Tube Aspiration", "ICD"],
+        options: ["Urine", "Ryles Tube Aspiration", "ICD", "Abdominal Drain"],
         key: "output",
       },
     ],

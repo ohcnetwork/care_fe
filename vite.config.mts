@@ -113,7 +113,7 @@ export default {
       script-src 'self' blob: 'nonce-f51b9742' https://plausible.10bedicu.in;\
       style-src 'self' 'unsafe-inline';\
       connect-src 'self' https://plausible.10bedicu.in;\
-      img-src 'self' https://cdn.coronasafe.network ${cdnUrls};\
+      img-src 'self' https://cdn.ohc.network ${cdnUrls};\
       object-src 'self' ${cdnUrls};`,
     },
     port: 4000,
