@@ -1307,3 +1307,38 @@ input[type="number"] {
     color: #2856ff;
     font-size: 1rem;
 }
+
+
+
+@media print {
+    body {
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+  
+    .print-preview {
+      padding: 10px;
+      margin: 0;
+    }
+  
+    .print-preview .header,
+    .print-preview .footer {
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+    }
+  
+    .header {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+  }
+  
