@@ -14,7 +14,12 @@ import routes from "../../Redux/api.js";
 import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request.js";
 import useQuery from "../../Utils/request/useQuery.js";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
+import {
+  classNames,
+  formatName,
+  isUserOnline,
+  relativeTime,
+} from "../../Utils/utils";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -73,7 +78,7 @@ export default function ManageUsers() {
 
   const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.home_facility },
-    prefetch: !!qParams.home_facility,
+    prefetch: !!qParams.home_facility && qParams.home_facility !== "NONE",
   });
 
   const {
@@ -178,7 +183,7 @@ export default function ManageUsers() {
     setUserData({
       show: true,
       username: user.username,
-      name: `${user.first_name} ${user.last_name}`,
+      name: formatName(user),
     });
   };
 
@@ -193,10 +198,7 @@ export default function ManageUsers() {
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
-                <div
-                  className="flex flex-col
-                flex-wrap justify-between gap-3 @sm:flex-row"
-                >
+                <div className="flex flex-col flex-wrap justify-between gap-3 @sm:flex-row">
                   {user.username && (
                     <div
                       id="username"
@@ -238,7 +240,7 @@ export default function ManageUsers() {
                   id="name"
                   className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
                 >
-                  {`${user.first_name} ${user.last_name}`}
+                  {formatName(user)}
 
                   {user.last_login && cur_online ? (
                     <div
@@ -259,8 +261,8 @@ export default function ManageUsers() {
                 <div
                   className={`flex ${
                     isExtremeSmallScreen
-                      ? " flex-wrap "
-                      : " flex-col justify-between md:flex-row "
+                      ? "flex-wrap"
+                      : "flex-col justify-between md:flex-row"
                   } gap-2 md:grid md:grid-cols-2`}
                 >
                   {user.user_type && (
@@ -335,9 +337,7 @@ export default function ManageUsers() {
                 )}
                 <div
                   className={`${
-                    isExtremeSmallScreen
-                      ? "flex flex-wrap "
-                      : "grid grid-cols-2 "
+                    isExtremeSmallScreen ? "flex flex-wrap" : "grid grid-cols-2"
                   }`}
                 >
                   {user.created_by && (
@@ -556,7 +556,11 @@ export default function ManageUsers() {
             value(
               "Home Facility",
               "home_facility",
-              qParams.home_facility ? homeFacilityData?.name || "" : "",
+              qParams.home_facility
+                ? qParams.home_facility === "NONE"
+                  ? t("no_home_facility")
+                  : homeFacilityData?.name || ""
+                : "",
             ),
             value(
               "Last Active",
@@ -781,7 +785,7 @@ export function UserFacilities(props: { user: any }) {
                   <span>{user?.home_facility_object?.name}</span>
                   <span
                     className={
-                      "flex items-center justify-center  rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
+                      "flex items-center justify-center rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
                     }
                   >
                     <CareIcon icon="l-estate" className="mr-1 pt-px text-lg" />

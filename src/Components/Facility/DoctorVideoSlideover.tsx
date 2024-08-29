@@ -3,7 +3,12 @@ import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
+import {
+  classNames,
+  formatName,
+  isUserOnline,
+  relativeTime,
+} from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
 import { Warn } from "../../Utils/Notifications";
@@ -173,7 +178,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
     e.stopPropagation();
     if (!user.alt_phone_number) return;
     const phoneNumber = user.alt_phone_number?.replace(/\D+/g, "");
-    const message = `${courtesyTitle(user)} ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
+    const message = `${courtesyTitle(user)} ${formatName(user)}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappAppURL = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
     const whatsappWebURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
@@ -257,9 +262,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
         <div className="ml-4 flex flex-auto flex-col gap-1">
           <div className="flex justify-between gap-2 text-sm text-secondary-700">
             <span>
-              <strong>
-                {user.first_name} {user.last_name}
-              </strong>
+              <strong>{formatName(user)}</strong>
             </span>
             <DoctorConnectButtons
               user={user}

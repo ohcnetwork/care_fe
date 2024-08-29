@@ -17,7 +17,6 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatPatientAge, humanizeStrings } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import SortDropdownMenu from "../Common/SortDropdown";
 import useFilters from "../../Common/hooks/useFilters";
 import PatientFilter from "../Patient/PatientFilter";
@@ -34,6 +33,8 @@ import {
 } from "../Patient/DiagnosesFilter";
 import { getDiagnosesByIds } from "../Diagnosis/utils";
 import { ICD11DiagnosisModel } from "./models";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
+import Tabs from "../Common/components/Tabs";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -190,12 +191,14 @@ const DischargedPatientsList = ({
       options={
         <>
           <div className="flex flex-col gap-4 lg:flex-row">
-            <SwitchTabs
-              tab1="Live"
-              tab2="Discharged"
+            <Tabs
+              tabs={[
+                { text: "Live", value: 0 },
+                { text: "Discharged", value: 1 },
+              ]}
               className="mr-4"
-              onClickTab1={() => navigate("/patients")}
-              isTab2Active
+              onTabChange={() => navigate("/patients")}
+              currentTab={1}
             />
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
@@ -307,7 +310,7 @@ const DischargedPatientsList = ({
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
+                t(`RESPIRATORY_SUPPORT_SHORT__${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",

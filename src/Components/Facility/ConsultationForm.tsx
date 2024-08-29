@@ -15,7 +15,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import { LegacyRef, createRef, lazy, useEffect, useState } from "react";
+import { LegacyRef, createRef, lazy, useEffect, useRef, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
@@ -33,8 +33,8 @@ import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import { UserModel } from "../Users/models";
+import UserAutocomplete from "../Common/UserAutocompleteFormField";
+import { UserBareMinimum } from "../Users/models";
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -90,7 +90,7 @@ type FormDetails = {
   referred_by_external?: string;
   transferred_from_location?: string;
   treating_physician: string;
-  treating_physician_object: UserModel | null;
+  treating_physician_object: UserBareMinimum | null;
   create_diagnoses: CreateDiagnosis[];
   diagnoses: ConsultationDiagnosis[];
   symptoms: EncounterSymptom[];
@@ -107,7 +107,7 @@ type FormDetails = {
   is_telemedicine: BooleanStrings;
   action?: number;
   assigned_to: string;
-  assigned_to_object: UserModel | null;
+  assigned_to_object: UserBareMinimum | null;
   special_instruction: string;
   review_interval: number;
   weight: string;
@@ -230,6 +230,7 @@ type Props = {
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
+  const submitController = useRef<AbortController>();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState,
@@ -386,8 +387,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             admitted: data.admitted ? String(data.admitted) : "false",
             admitted_to: data.admitted_to ? data.admitted_to : "",
             category: data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
-                ""
+              ? (PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
+                "")
               : "",
             patient_no: data.patient_no ?? "",
             OPconsultation: data.consultation_notes,
@@ -538,15 +539,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           return;
-        case "consultation_notes":
-          if (!state.form[field]) {
-            errors[field] = t("field_required");
-            invalidForm = true;
-          } else if (!state.form[field].replace(/\s/g, "").length) {
-            errors[field] = "Consultation notes can not be empty";
-            invalidForm = true;
-          }
-          return;
         case "is_telemedicine":
           if (
             state.form.admitted_to === "Home Isolation" &&
@@ -607,6 +599,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         }
 
         case "treating_physician": {
+          if (state.form.suggestion === "DC") {
+            break;
+          }
           if (state.form.suggestion !== "DD" && !state.form[field]) {
             errors[field] = t("field_required");
             invalidForm = true;
@@ -744,6 +739,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         {
           pathParams: id ? { id } : undefined,
           body: data,
+          controllerRef: submitController,
         },
       );
 
@@ -782,7 +778,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     }
   };
 
-  const handleDoctorSelect = (event: FieldChangeEvent<UserModel | null>) => {
+  const handleDoctorSelect = (
+    event: FieldChangeEvent<UserBareMinimum | null>,
+  ) => {
     if (event.value?.id) {
       dispatch({
         type: "set_form",
@@ -932,11 +930,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             );
           })}
         </div>
-        <div className="flex h-full w-full overflow-auto xl:ml-64 2xl:ml-72 ">
+        <div className="flex h-full w-full overflow-auto xl:ml-64 2xl:ml-72">
           <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
-              className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-8 "
+              className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-8"
             >
               <DraftSection
                 handleDraftSelect={(newState: any) => {
@@ -1128,22 +1126,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       />
                     </div>
                   </div>
-
-                  <div className="col-span-6" ref={fieldRef["category"]}>
-                    <PatientCategorySelect
-                      labelSuffix={
-                        disabledFields.includes("category") && (
-                          <p className="text-xs font-medium text-warning-500">
-                            A daily round already exists.
-                          </p>
-                        )
-                      }
-                      required
-                      label="Category"
-                      {...field("category")}
-                    />
-                  </div>
-
                   <div className="col-span-6" ref={fieldRef["suggestion"]}>
                     <SelectFormField
                       required
@@ -1305,7 +1287,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </div>
                   )}
 
-                  <div className="col-span-6 mb-6" ref={fieldRef["patient_no"]}>
+                  <div className="col-span-6" ref={fieldRef["patient_no"]}>
                     <TextFormField
                       {...field("patient_no")}
                       label={
@@ -1314,6 +1296,20 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           : "OP Number"
                       }
                       required={state.form.suggestion === "A"}
+                    />
+                  </div>
+                  <div className="col-span-6 mb-6" ref={fieldRef["category"]}>
+                    <PatientCategorySelect
+                      labelSuffix={
+                        disabledFields.includes("category") && (
+                          <p className="text-xs font-medium text-warning-500">
+                            A daily round already exists.
+                          </p>
+                        )
+                      }
+                      required
+                      label="Category"
+                      {...field("category")}
                     />
                   </div>
                 </div>
@@ -1401,7 +1397,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <TextAreaFormField
                           label="General Instructions (Advice)"
-                          required
                           placeholder="Consultation Notes"
                           {...field("consultation_notes")}
                         />
@@ -1430,16 +1425,15 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         ref={fieldRef["treating_physician"]}
                       >
-                        <UserAutocompleteFormField
+                        <UserAutocomplete
                           name={"treating_physician"}
                           label={t("treating_doctor")}
                           placeholder="Attending Doctors Name and Designation"
-                          required
+                          required={state.form.suggestion !== "DC"}
                           value={
                             state.form.treating_physician_object ?? undefined
                           }
                           onChange={handleDoctorSelect}
-                          showActiveStatus
                           userType={"Doctor"}
                           homeFacility={facilityId}
                           error={state.errors.treating_physician}
@@ -1483,8 +1477,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           className="col-span-6 flex-[2]"
                           ref={fieldRef["assigned_to"]}
                         >
-                          <UserAutocompleteFormField
-                            showActiveStatus
+                          <UserAutocomplete
                             value={state.form.assigned_to_object ?? undefined}
                             onChange={handleDoctorSelect}
                             userType={"Doctor"}
@@ -1517,7 +1510,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   {sectionTitle("Bed Status")}
                   <Beds
                     facilityId={facilityId}
-                    patientId={patientId}
                     consultationId={id}
                     fetchPatientData={() => refetch()}
                   />

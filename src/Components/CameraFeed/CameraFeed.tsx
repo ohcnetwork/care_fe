@@ -12,6 +12,7 @@ import FeedControls from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
 import useFullscreen from "../../Common/hooks/useFullscreen";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import { GetPresetsResponse } from "./routes";
 
 interface Props {
   children?: React.ReactNode;
@@ -66,7 +67,7 @@ export default function CameraFeed(props: Props) {
     async function getPresets(cb: (presets: Record<string, number>) => void) {
       const { res, data } = await props.operate({ type: "get_presets" });
       if (res?.ok && data) {
-        cb((data as { result: Record<string, number> }).result);
+        cb((data as GetPresetsResponse).result);
       }
     }
     getPresets(props.onCameraPresetsObtained);
@@ -125,9 +126,9 @@ export default function CameraFeed(props: Props) {
       }}
       onReset={resetStream}
       onMove={async (data) => {
-        props.onMove?.();
         setState("moving");
         const { res } = await props.operate({ type: "relative_move", data });
+        props.onMove?.();
         setTimeout(() => {
           setState((state) => (state === "moving" ? undefined : state));
         }, 4000);

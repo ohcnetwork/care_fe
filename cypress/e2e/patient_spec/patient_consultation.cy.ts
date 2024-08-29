@@ -95,6 +95,7 @@ describe("Patient Consultation in multiple combination", () => {
     cy.submitButton("Create Consultation");
     // the above submit should fail as IP number is missing
     patientConsultationPage.typePatientNumber(patientIpNumber);
+    patientConsultationPage.selectBed("Dummy Bed 1");
     cy.submitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // Below code for the prescription module only present while creating a new consultation
@@ -344,8 +345,8 @@ describe("Patient Consultation in multiple combination", () => {
       "Bleeding",
     ]);
     patientConsultationPage.clickAddSymptom();
-    // Comfort Care category
-    patientConsultationPage.selectPatientCategory("Comfort Care");
+    // Mild category
+    patientConsultationPage.selectPatientCategory("Mild");
     // Date of symptoms
     // Decision after consultation - Referred to Facility
     patientConsultationPage.selectPatientSuggestion(

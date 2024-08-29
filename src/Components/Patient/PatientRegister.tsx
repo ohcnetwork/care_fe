@@ -18,7 +18,14 @@ import {
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useEffect, useReducer, useState } from "react";
+import {
+  lazy,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import AccordionV2 from "../Common/components/AccordionV2";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -63,7 +70,6 @@ import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import Error404 from "../ErrorPages/404";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
-import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import { useTranslation } from "react-i18next";
@@ -171,6 +177,7 @@ export const parseOccupationFromExt = (occupation: Occupation) => {
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const submitController = useRef<AbortController>();
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
@@ -761,9 +768,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       ? await request(routes.updatePatient, {
           pathParams: { id },
           body: data,
+          controllerRef: submitController,
         })
       : await request(routes.addPatient, {
           body: { ...data, facility: facilityId },
+          controllerRef: submitController,
         });
     if (res?.ok && requestData) {
       await Promise.all(
@@ -1262,14 +1271,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               }}
                               types={["mobile", "landline"]}
                             />
-                            <Checkbox
+                            <CheckBoxFormField
                               label="Is the phone number an emergency number?"
                               className="font-bold"
                               id="emergency_contact_checkbox"
-                              checked={isEmergencyNumberEnabled}
-                              onCheck={(checked) => {
-                                setIsEmergencyNumberEnabled(checked);
-                                checked
+                              name="emergency_contact_checkbox"
+                              value={isEmergencyNumberEnabled}
+                              onChange={({ value }) => {
+                                setIsEmergencyNumberEnabled(value);
+                                value
                                   ? field("emergency_phone_number").onChange({
                                       name: field("emergency_phone_number")
                                         .name,

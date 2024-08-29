@@ -3,6 +3,7 @@ import { FormFieldBaseProps } from "../Form/FormFields/Utils";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "./components/ButtonV2";
+import { fahrenheitToCelsius } from "../../Utils/utils";
 
 type TemperatureUnit = "celsius" | "fahrenheit";
 
@@ -74,11 +75,3 @@ export default function TemperatureFormField(props: Props) {
     />
   );
 }
-
-export const celsiusToFahrenheit = (celsius: number) => {
-  return (celsius * 9) / 5 + 32;
-};
-
-export const fahrenheitToCelsius = (fahrenheit: number) => {
-  return ((fahrenheit - 32) * 5) / 9;
-};

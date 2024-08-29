@@ -47,7 +47,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectRoundType("Telemedicine");
     patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
+    patientLogupdate.selectSymptomsDate("01012024");
+    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
@@ -57,7 +58,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.verifyNotification("Telemedicine log created successfully");
   });
@@ -72,7 +73,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
+    patientLogupdate.selectSymptomsDate("01012024");
+    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
@@ -82,12 +84,12 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.verifyNotification("Brief Update log created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
-    cy.contains("Daily Rounds").click();
+    cy.contains("button", "Daily Rounds").click();
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
       patientCategory,
@@ -108,7 +110,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
     cy.verifyNotification("Brief Update log updated successfully");
-    cy.contains("Daily Rounds").click();
+    cy.contains("button", "Daily Rounds").click();
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
       patientModifiedDiastolic,
@@ -137,7 +139,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSpo2(patientSpo2);
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.wait(2000);
     cy.verifyNotification("Brief Update log created successfully");
@@ -161,7 +163,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typePulse(patientPulse);
     patientLogupdate.typeTemperature(patientTemperature);
     patientLogupdate.typeRespiratory(patientRespiratory);
-    cy.get("#consciousness_level-2").click();
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
     cy.verifyNotification("Brief Update log created successfully");
     cy.closeNotification();
