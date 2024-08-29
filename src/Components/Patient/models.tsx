@@ -320,7 +320,6 @@ export interface DailyRoundsModel {
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;
-  medication_given?: Array<any>;
   action?: string;
   review_interval?: number;
   id?: string;

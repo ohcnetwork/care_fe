@@ -20,7 +20,6 @@ export const DailyRoundListDetails = (props: any) => {
       if (res && data) {
         const tdata: DailyRoundsModel = {
           ...data,
-          medication_given: data.medication_given ?? [],
         };
         setDailyRoundListDetails(tdata);
       }
