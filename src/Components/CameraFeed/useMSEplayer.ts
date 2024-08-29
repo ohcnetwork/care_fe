@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+declare const ManagedMediaSource: typeof MediaSource;
+
 export interface IAsset {
   middlewareHostname: string;
 }
@@ -61,37 +63,6 @@ const stopStream =
       .catch((err) => options.onError && options.onError(err));
   };
 
-/**
- * MSE player utility
- */
-const Utf8ArrayToStr = (array: string | any[] | Uint8Array) => {
-  let out, i, c;
-  let char2, char3;
-  out = "";
-  const len = array.length;
-  i = 0;
-  while (i < len) {
-    c = array[i++];
-    switch (c >> 4) {
-      case 7:
-        out += String.fromCharCode(c);
-        break;
-      case 13:
-        char2 = array[i++];
-        out += String.fromCharCode(((c & 0x1f) << 6) | (char2 & 0x3f));
-        break;
-      case 14:
-        char2 = array[i++];
-        char3 = array[i++];
-        out += String.fromCharCode(
-          ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0),
-        );
-        break;
-    }
-  }
-  return out;
-};
-
 export const useMSEMediaPlayer = ({
   config,
   url,
@@ -100,17 +71,12 @@ export const useMSEMediaPlayer = ({
   const mseQueue: any[] = [];
   let mseStreamingStarted = false;
   const wsRef = useRef<WebSocket>();
-  let mseSourceBuffer: any;
+  let mseSourceBuffer: SourceBuffer;
 
   const pushPacket = () => {
     if (!mseSourceBuffer.updating) {
       if (mseQueue.length > 0) {
         const packet = mseQueue.shift();
-        // Check if SourceBuffer has been removed before appending buffer
-        if ("removed" in mseSourceBuffer && mseSourceBuffer.removed) {
-          console.error("Attempted to append to a removed SourceBuffer.");
-          return;
-        }
         mseSourceBuffer.appendBuffer(packet);
       } else {
         mseStreamingStarted = false;
@@ -125,81 +91,64 @@ export const useMSEMediaPlayer = ({
     }
   };
 
-  const readPacket = (packet: any) => {
+  function readPacket(event: MessageEvent<any>): any {
     if (!mseStreamingStarted) {
-      // Check if SourceBuffer has been removed before appending buffer
-      if ("removed" in mseSourceBuffer && mseSourceBuffer.removed) {
-        console.error("Attempted to append to a removed SourceBuffer.");
-        return;
-      }
-      mseSourceBuffer.appendBuffer(packet);
+      mseSourceBuffer.appendBuffer(event.data);
       mseStreamingStarted = true;
       return;
     }
-    mseQueue.push(packet);
+    mseQueue.push(event.data);
     if (!mseSourceBuffer.updating) {
       pushPacket();
     }
-  };
+  }
 
   const startStream = ({ onError, onSuccess }: IOptions = {}) => {
-    // location.protocol == 'https:' ? protocol = 'wss' : protocol = 'ws';
     try {
       wsRef.current?.close();
       if (!videoEl) return;
 
       let mse: MediaSource;
-      if ("ManagedMediaSource" in window) {
-        mse = new (window.ManagedMediaSource as typeof MediaSource)();
+      if (typeof ManagedMediaSource !== "undefined") {
+        mse = new ManagedMediaSource();
         videoEl.disableRemotePlayback = true;
         videoEl.srcObject = mse;
       } else {
         mse = new MediaSource();
-        videoEl.src = window.URL.createObjectURL(mse);
+        videoEl.src = URL.createObjectURL(mse);
       }
 
       if (url) {
-        mse.addEventListener(
-          "sourceopen",
-          function () {
-            wsRef.current = new WebSocket(url);
-            const ws = wsRef.current;
-            ws.binaryType = "arraybuffer";
-            ws.onopen = function (_event) {
-              onSuccess && onSuccess(undefined);
-            };
-            ws.onmessage = function (event) {
-              const data = new Uint8Array(event.data);
-              if (+data[0] === 9) {
-                const decoded_arr = data.slice(1);
-                let mimeCodec;
-                if (window.TextDecoder) {
-                  mimeCodec = new TextDecoder("utf-8").decode(decoded_arr);
-                } else {
-                  mimeCodec = Utf8ArrayToStr(decoded_arr);
-                }
-                try {
-                  mseSourceBuffer = mse.addSourceBuffer(
-                    `video/mp4; codecs="${mimeCodec}"`,
-                  );
-                } catch (error) {
-                  onError?.(error);
-                  return;
-                }
-                mseSourceBuffer.mode = "segments";
-                if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
-                  mseSourceBuffer.addEventListener("updateend", pushPacket);
-                }
-              } else {
-                readPacket(event.data);
+        mse.onsourceopen = function () {
+          wsRef.current = new WebSocket(url);
+          const ws = wsRef.current;
+          ws.binaryType = "arraybuffer";
+          ws.onopen = (_) => onSuccess && onSuccess(undefined);
+          ws.onerror = (event) => onError && onError(event);
+          ws.onmessage = function (event) {
+            const data = new Uint8Array(event.data);
+            if (+data[0] === 9) {
+              const mimeCodec = new TextDecoder("utf-8").decode(data.slice(1));
+              try {
+                //https://developer.mozilla.org/en-US/docs/Web/API/MediaSource
+                mseSourceBuffer = mse.addSourceBuffer(
+                  `video/mp4; codecs="${mimeCodec}"`,
+                );
+              } catch (error) {
+                onError?.(error);
+                return;
               }
-            };
-            ws.onerror = function (event) {
-              onError && onError(event);
-            };
-          },
-          false,
-        );
+              mseSourceBuffer.mode = "segments";
+              if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
+                mseSourceBuffer.onupdateend = pushPacket;
+              }
+              // switch to readPacket after creating SourceBuffer
+              ws.onmessage = readPacket;
+            } else {
+              readPacket(event);
+            }
+          };
+        };
       }
     } catch (e) {
       onError && onError(e);
@@ -208,12 +157,11 @@ export const useMSEMediaPlayer = ({
 
   document.addEventListener("DOMContentLoaded", function () {
     if (videoEl) {
-      videoEl.addEventListener("loadeddata", () => {
-        videoEl.play();
-      });
+      videoEl.onloadeddata = () => videoEl.play();
+      videoEl.onerror = (e) => console.log("video_error", e);
 
       //fix stalled video in safari
-      videoEl.addEventListener("pause", () => {
+      videoEl.onpause = () => {
         if (
           videoEl.currentTime >
           videoEl.buffered.end(videoEl.buffered.length - 1)
@@ -222,11 +170,7 @@ export const useMSEMediaPlayer = ({
             videoEl.buffered.end(videoEl.buffered.length - 1) - 0.1;
           videoEl.play();
         }
-      });
-
-      videoEl.addEventListener("error", (e) => {
-        console.log("video_error", e);
-      });
+      };
     }
   });
 
