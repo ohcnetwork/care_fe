@@ -9,9 +9,6 @@ export default function usePlayer(
   const [playedOn, setPlayedOn] = useState<Date>();
   const [status, setStatus] = useState<StreamStatus>("stop");
 
-  // Voluntarily disabling react-hooks/rules-of-hooks for this line as order of
-  // hooks is maintained (since platform won't change in runtime)
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { startStream } = useMSEMediaPlayer({
     // Voluntarily set to "" as it's used by `stopStream` only (which is not
     // used by this hook)
