@@ -67,6 +67,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
   type FormProps =
     | {
         type: "creating";
+        item: TReq;
       }
     | {
         type: "updating";
@@ -74,9 +75,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
       };
 
   const Form = (props: FormProps) => {
-    const [item, setItem] = useState(
-      props.type === "creating" ? empty : props.item,
-    );
+    const [item, setItem] = useState(props.item);
     const processing =
       props.type === "creating" ? creating : props.item.id === updating;
 
@@ -140,7 +139,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
         )}
       </ul>
       <div className="flex w-full items-center gap-4 rounded-b-lg border-t-2 border-dashed border-secondary-400 bg-secondary-100 p-4">
-        <Form type="creating" />
+        <Form type="creating" item={empty} />
       </div>
     </div>
   );
