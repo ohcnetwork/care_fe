@@ -16,7 +16,7 @@ export default function RemainingTime({ time }: { time: number }) {
   const seconds = remaining / 1e3;
 
   if (seconds < 0) {
-    return "0 sec.";
+    return "0s.";
   }
 
   return `${seconds.toFixed(0)}s.`;
