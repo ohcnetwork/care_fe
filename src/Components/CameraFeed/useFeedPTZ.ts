@@ -17,31 +17,9 @@ interface PTZPayload {
   zoom: number;
 }
 
-export interface PTZState {
-  x: number;
-  y: number;
-  zoom: number;
-  precision: number;
-}
-
 interface UseMSEMediaPlayerOption {
   config: IAsset;
   dispatch: any;
-}
-
-export interface ICameraAssetState {
-  id: string;
-  username: string;
-  password: string;
-  hostname: string;
-  port: number;
-}
-
-export enum StreamStatus {
-  Playing,
-  Stop,
-  Loading,
-  Offline,
 }
 
 interface UseMSEMediaPlayerReturnType {

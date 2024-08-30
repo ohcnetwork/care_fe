@@ -9,12 +9,7 @@ export default function usePlayer(
   const [playedOn, setPlayedOn] = useState<Date>();
   const [status, setStatus] = useState<StreamStatus>("stop");
 
-  const { startStream } = useMSEMediaPlayer({
-    // Voluntarily set to "" as it's used by `stopStream` only (which is not
-    // used by this hook)
-    config: { middlewareHostname: "" },
-    videoEl: ref.current as HTMLVideoElement,
-  });
+  const { startStream } = useMSEMediaPlayer({ videoEl: ref.current });
 
   const initializeStream = useCallback(
     ({ url, onSuccess, onError }: IOptions) => {

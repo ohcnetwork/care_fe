@@ -106,13 +106,7 @@ const CameraFeedOld = (props: any) => {
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
 
-  const { startStream } = useMSEMediaPlayer({
-    config: {
-      middlewareHostname,
-      ...cameraAsset,
-    },
-    videoEl,
-  });
+  const { startStream } = useMSEMediaPlayer({ videoEl });
 
   const refreshPresetsHash = props.refreshPresetsHash;
 

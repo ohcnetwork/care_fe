@@ -2,20 +2,8 @@ import { useEffect, useRef } from "react";
 
 declare const ManagedMediaSource: typeof MediaSource;
 
-export interface IAsset {
-  middlewareHostname: string;
-}
-
 interface UseMSEMediaPlayerOption {
-  config: IAsset;
   videoEl: HTMLVideoElement | null;
-}
-
-export interface ICameraAssetState {
-  id: string;
-  accessKey: string;
-  middleware_address: string;
-  location_middleware: string;
 }
 
 export enum StreamStatus {
@@ -24,49 +12,13 @@ export enum StreamStatus {
   Loading,
   Offline,
 }
-
-interface UseMSEMediaPlayerReturnType {
-  stopStream: (config: { id: string }, options: IOptions) => void;
-  startStream: (options?: IOptions) => void;
-}
-
 export interface IOptions {
   url?: string;
   onSuccess?: (resp: any) => void;
   onError?: (err: any) => void;
 }
-const stopStream =
-  ({
-    middlewareHostname,
-    ws,
-  }: {
-    middlewareHostname: string;
-    ws?: WebSocket;
-  }) =>
-  (payload: { id: string }, options: IOptions) => {
-    const { id } = payload;
-    ws?.close();
-    fetch(`https://${middlewareHostname}/stop`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id }),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("network response was not ok");
-        }
-        return res.json();
-      })
-      .then((res) => options?.onSuccess && options.onSuccess(res))
-      .catch((err) => options.onError && options.onError(err));
-  };
 
-export const useMSEMediaPlayer = ({
-  config,
-  videoEl,
-}: UseMSEMediaPlayerOption): UseMSEMediaPlayerReturnType => {
+export const useMSEMediaPlayer = ({ videoEl }: UseMSEMediaPlayerOption) => {
   const mseQueue: any[] = [];
   let mseStreamingStarted = false;
   const wsRef = useRef<WebSocket>();
@@ -177,8 +129,5 @@ export const useMSEMediaPlayer = ({
     };
   }, []);
 
-  return {
-    startStream: startStream,
-    stopStream: stopStream({ ...config, ws: wsRef.current }),
-  };
+  return { startStream };
 };
