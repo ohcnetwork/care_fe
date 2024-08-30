@@ -34,7 +34,7 @@ export interface CareConfig {
 }
 
 export const careConfig: CareConfig = {
-  dashboard_url: import.meta.env.REACT_DASHBOARD_URL || "foo",
+  dashboard_url: import.meta.env.REACT_DASHBOARD_URL,
   github_url:
     import.meta.env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
   ohcn_url: import.meta.env.REACT_OHCN_URL || "https://ohc.network?ref=care",
