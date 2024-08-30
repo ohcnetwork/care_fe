@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
 export type ProcedureType = {
   procedure?: string;
@@ -33,6 +34,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
       procedures.map((procedure, index) => (index === i ? object : procedure)),
     );
   };
+  const { t } = useTranslation();
 
   return (
     <div className="mt-2">
@@ -64,7 +66,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   </button>
                 </div>
                 <div className="w-full">
-                  Procedure Suggestions
+                  {t("Procedure Suggestions")}
                   <span className="text-danger-500">{" *"}</span>
                   <input
                     id="procedure-name"
