@@ -64,7 +64,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   </button>
                 </div>
                 <div className="w-full">
-                  Procedure
+                  Procedure Suggestions
                   <span className="text-danger-500">{" *"}</span>
                   <input
                     id="procedure-name"
