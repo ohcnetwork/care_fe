@@ -13,11 +13,5 @@ export default function RemainingTime({ time }: { time: number }) {
     };
   }, [time]);
 
-  const seconds = remaining / 1e3;
-
-  if (seconds < 0) {
-    return "0s.";
-  }
-
-  return `${seconds.toFixed(0)}s.`;
+  return `${Math.max(remaining / 1e3, 0).toFixed(0)}s.`;
 }
