@@ -16,6 +16,8 @@ export const actions = {
 
 const isRunning: any = {};
 
+const CARE_API_URL = import.meta.env.REACT_CARE_API_URL;
+
 export const setStoreData = (key: string, value: any) => {
   return {
     type: actions.SET_DATA,
@@ -92,6 +94,7 @@ export const fireRequest = (
     // set authorization header in the request header
     const config: any = {
       headers: {},
+      baseURL: CARE_API_URL,
     };
     if (!request.noAuth) {
       const access_token = localStorage.getItem(LocalStorageKeys.accessToken);
@@ -210,6 +213,7 @@ export const fireRequestV2 = (
   // set authorization header in the request header
   const config: any = {
     headers: {},
+    baseURL: CARE_API_URL,
   };
   if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
     config.headers["Authorization"] =

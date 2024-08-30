@@ -1,4 +1,4 @@
-import { IConfig } from "./hooks/useConfig";
+import { CareConfig } from "../../care.config";
 import { PatientCategory } from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
 import { dateQueryString } from "../Utils/utils";
@@ -220,7 +220,7 @@ export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
 export const getBedTypes = ({
   kasp_enabled,
   kasp_string,
-}: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
+}: Pick<CareConfig, "kasp_enabled" | "kasp_string">) => {
   const kaspBedTypes = kasp_enabled
     ? [
         { id: 40, text: kasp_string + " Ordinary Beds" },
