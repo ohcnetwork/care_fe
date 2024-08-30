@@ -35,6 +35,7 @@ interface Props {
   required?: boolean;
   onBlur?: () => void;
   onFocus?: () => void;
+  filter?: (data: any) => boolean;
 }
 
 const AutoCompleteAsync = (props: Props) => {
@@ -55,6 +56,7 @@ const AutoCompleteAsync = (props: Props) => {
     disabled = false,
     required = false,
     error,
+    filter,
   } = props;
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
@@ -68,7 +70,9 @@ const AutoCompleteAsync = (props: Props) => {
     () =>
       debounce(async (query: string) => {
         setLoading(true);
-        const data = (await fetchData(query)) || [];
+        const data = ((await fetchData(query)) || [])?.filter((d: any) =>
+          filter ? filter(d) : true,
+        );
 
         if (showNOptions !== undefined) {
           setData(data.slice(0, showNOptions));

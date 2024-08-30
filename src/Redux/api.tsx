@@ -54,9 +54,10 @@ import {
   DistrictModel,
   DoctorModal,
   DupPatientModel,
-  FacilityHubModel,
   FacilityModel,
   FacilityRequest,
+  FacilitySpokeModel,
+  FacilitySpokeRequest,
   IFacilityNotificationRequest,
   IFacilityNotificationResponse,
   InventoryItemsModel,
@@ -365,7 +366,7 @@ const routes = {
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
-    TRes: Type<FacilityRequest>(),
+    TRes: Type<FacilityModel>(),
   },
 
   getAnyFacility: {
@@ -388,34 +389,34 @@ const routes = {
     TBody: Type<Partial<FacilityModel>>(),
   },
 
-  getFacilityHubs: {
-    path: "/api/v1/facility/{id}/hubs/",
+  getFacilitySpokes: {
+    path: "/api/v1/facility/{id}/spokes/",
     method: "GET",
-    TRes: Type<PaginatedResponse<FacilityHubModel>>(),
+    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
   },
 
-  updateFacilityHubs: {
-    path: "/api/v1/facility/{id}/hubs/{hub_id}/",
+  updateFacilitySpokes: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
     method: "PATCH",
-    TRes: Type<FacilityHubModel>(),
-    TBody: Type<FacilityHubModel>(),
+    TRes: Type<FacilitySpokeModel>(),
+    TBody: Type<FacilitySpokeRequest>(),
   },
 
-  getFacilityHub: {
-    path: "/api/v1/facility/{id}/hubs/{hub_id}/",
+  getFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
     method: "GET",
-    TRes: Type<FacilityHubModel>(),
+    TRes: Type<FacilitySpokeModel>(),
   },
 
-  createFacilityHub: {
-    path: "/api/v1/facility/{id}/hubs/",
+  createFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/",
     method: "POST",
-    TRes: Type<FacilityHubModel>(),
-    TBody: Type<Partial<FacilityHubModel>>(),
+    TRes: Type<FacilitySpokeModel>(),
+    TBody: Type<Partial<FacilitySpokeRequest>>(),
   },
 
-  deleteFacilityHub: {
-    path: "/api/v1/facility/{id}/hubs/{hub_id}/",
+  deleteFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
   },

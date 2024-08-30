@@ -63,6 +63,7 @@ import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { RequestResult } from "../../Utils/request/types.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -161,7 +162,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [stateId, setStateId] = useState<number>();
   const [districtId, setDistrictId] = useState<number>();
   const [localBodyId, setLocalBodyId] = useState<number>();
-  const [hubFacilities, setHubFacilities] = useState<string[]>([]);
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
@@ -249,48 +249,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
   );
 
-  const facilitiesQuery = useQuery(routes.getAllFacilities);
-  const hubsQuery = useQuery(routes.getFacilityHubs, {
-    pathParams: {
-      id: facilityId!,
-    },
-    prefetch: !!facilityId,
-    onResponse: (res) => {
-      setHubFacilities(
-        res.data?.results.map((d) => d.hub_object.id) as string[],
-      );
-    },
-  });
-  const createHub = async (hubFacilityId: string) =>
-    await request(routes.createFacilityHub, {
-      body: {
-        hub: hubFacilityId,
-      },
-      pathParams: {
-        id: facilityId || "",
-      },
-      onResponse: ({ res }) => {
-        if (res?.ok) {
-          hubsQuery.refetch();
-        }
-      },
-    });
-  const deleteHub = async (hubFacilityId: string) =>
-    await request(routes.deleteFacilityHub, {
-      pathParams: {
-        id: facilityId || "",
-        hub_id: hubFacilityId,
-      },
-      onResponse: ({ res }) => {
-        if (res?.ok) {
-          hubsQuery.refetch();
-        }
-      },
-    });
-
-  const { data: facilities } = facilitiesQuery;
-
-  useQuery(routes.getPermittedFacility, {
+  const facilityQuery = useQuery(routes.getPermittedFacility, {
     pathParams: {
       id: facilityId!,
     },
@@ -891,38 +850,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
-                  {facilityId && (
-                    <MultiSelectFormField
-                      {...field("hubs")}
-                      placeholder={t("hubs")}
-                      className={facilitiesQuery.loading ? "animate-pulse" : ""}
-                      disabled={facilitiesQuery.loading || hubsQuery.loading}
-                      options={
-                        facilities?.results.filter(
-                          (f) => f.id !== facilityId,
-                        ) || []
-                      }
-                      optionLabel={(o) => o.name}
-                      optionValue={(o) => o.id}
-                      value={hubFacilities}
-                      onChange={async (event) => {
-                        if (event.value.length > hubFacilities.length) {
-                          createHub(event.value[event.value.length - 1] || "");
-                        } else if (event.value.length < hubFacilities.length) {
-                          deleteHub(
-                            hubsQuery.data?.results.find(
-                              (r) =>
-                                r.hub_object.id ===
-                                (hubFacilities.find(
-                                  (x) => !event.value.includes(x),
-                                ) || ""),
-                            )?.id || "",
-                          );
-                        }
-                        setHubFacilities(event.value as string[]);
-                      }}
-                    />
-                  )}
+                  <div className="py-4 md:col-span-2">
+                    <h4 className="mb-4">Spoke Facilities</h4>
+                    {facilityId && (
+                      <SpokeFacilityEditor
+                        facility={{ ...facilityQuery.data, id: facilityId }}
+                      />
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}
