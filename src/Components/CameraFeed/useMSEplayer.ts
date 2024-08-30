@@ -56,8 +56,11 @@ export const useMSEMediaPlayer = ({ videoEl }: UseMSEMediaPlayerOption) => {
 
   const startStream = ({ url, onError, onSuccess }: IOptions = {}) => {
     try {
-      wsRef.current?.close();
       if (!videoEl || !url) return;
+
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
 
       let mse: MediaSource;
       if (typeof ManagedMediaSource !== "undefined") {
