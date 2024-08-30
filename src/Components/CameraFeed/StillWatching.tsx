@@ -2,41 +2,34 @@ import { useCallback, useEffect, useState } from "react";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
+import useConfig from "../../Common/hooks/useConfig";
+import RemainingTime from "../../CAREUI/misc/RemainingTime";
 
-/**
- * Calculates the linear backoff duration with saturation after a specified number of attempts.
- *
- * The function multiplies the `retryCount` by a `baseDelay` to calculate the backoff duration.
- * If the `retryCount` exceeds `maxRetries`, the delay saturates at `baseDelay * maxRetries`.
- *
- * @param {number} retryCount - The current attempt number (should be non-negative).
- * @param {number} [baseDelay=300000] - The base delay in milliseconds for each retry. Defaults to 5 minutes (300,000 ms).
- * @param {number} [maxRetries=3] - The number of retries after which the delay saturates. Defaults to 3.
- * @returns {number} The calculated delay duration in milliseconds.
- */
-const calculateLinearBackoffWithSaturation = (
-  retryCount: number,
-  baseDelay = 3 * 60e3,
-  maxRetries = 3,
-) => {
-  return baseDelay * Math.min(retryCount, maxRetries);
+export type StillWatchingConfig = {
+  idleTimeout?: number;
+  promptDuration?: number;
 };
 
-type Props = {
-  children: React.ReactNode;
-};
+const DEFAULT_CONFIG = {
+  idleTimeout: 3 * 60e3,
+  promptDuration: 30e3,
+} satisfies StillWatchingConfig;
 
-export default function StillWatching(props: Props) {
-  const [state, setState] = useState<"watching" | "prompted" | "timed-out">(
-    "watching",
-  );
+type State = "watching" | "prompted" | "timed-out";
+
+const useStillWatching = (config: StillWatchingConfig) => {
+  const { idleTimeout, promptDuration } = { ...DEFAULT_CONFIG, ...config };
+
+  const [state, setState] = useState<State>("watching");
   const [sequence, setSequence] = useState(1);
 
   const getNextTimeout = useCallback(() => {
     return (
-      new Date().getTime() + calculateLinearBackoffWithSaturation(sequence)
+      new Date().getTime() +
+      (idleTimeout + promptDuration) * Math.min(sequence, 3)
     );
-  }, [sequence]);
+  }, [sequence, idleTimeout, promptDuration]);
 
   const [timeoutOn, setTimeoutOn] = useState(getNextTimeout);
 
@@ -53,7 +46,7 @@ export default function StillWatching(props: Props) {
         clearInterval(interval);
         return;
       }
-      if (remainingTime < 30e3) {
+      if (remainingTime < promptDuration) {
         setState("prompted");
         return;
       }
@@ -64,65 +57,57 @@ export default function StillWatching(props: Props) {
     return () => {
       clearInterval(interval);
     };
-  }, [timeoutOn, state]);
+  }, [timeoutOn, state, promptDuration]);
+
+  return {
+    state,
+    timeoutOn,
+    reset: (hardReset?: boolean) => {
+      if (hardReset) {
+        setSequence((seq) => seq + 1);
+        return;
+      }
+
+      if (state === "watching") {
+        setTimeoutOn(getNextTimeout());
+      }
+    },
+  };
+};
+
+export default function StillWatching(props: { children: React.ReactNode }) {
+  const { t } = useTranslation();
+  const { still_watching: config = {} } = useConfig();
+  const { state, timeoutOn, reset } = useStillWatching(config);
 
   return (
-    <div
-      onClick={() => {
-        if (state === "watching") {
-          setTimeoutOn(getNextTimeout());
-        }
-      }}
-    >
+    <div onClick={() => reset()}>
       <ConfirmDialog
         show={state === "prompted"}
-        title="Are you still watching?"
-        description="The stream will stop playing due to inactivity"
+        title={t("are_you_still_watching")}
+        description={t("stream_stop_due_to_inativity")}
         action={
           <>
             <CareIcon icon="l-play-circle" className="text-lg" />
-            Continue watching (<RemainingTime timeoutOn={timeoutOn} />
-            s)
+            {t("continue_watching")} (<RemainingTime time={timeoutOn} />)
           </>
         }
-        onConfirm={() => setSequence((seq) => seq + 1)}
-        onClose={() => setSequence((seq) => seq + 1)}
+        onConfirm={() => reset(true)}
+        onClose={() => reset(true)}
       />
       {state === "timed-out" ? (
-        <TimedOut onResume={() => setSequence((seq) => seq + 1)} />
+        <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 rounded-lg border-4 border-dashed border-secondary-400">
+          <span className="text-xl font-bold text-secondary-700">
+            {t("stream_stopped_due_to_inativity")}
+          </span>
+          <ButtonV2 onClick={() => reset(true)}>
+            <CareIcon icon="l-play-circle" className="text-lg" />
+            {t("resume")}
+          </ButtonV2>
+        </div>
       ) : (
         props.children
       )}
     </div>
   );
 }
-
-const RemainingTime = (props: { timeoutOn: number }) => {
-  const [diff, setDiff] = useState(props.timeoutOn - new Date().getTime());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDiff(props.timeoutOn - new Date().getTime());
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [props.timeoutOn]);
-
-  return (diff / 1e3).toFixed(0);
-};
-
-const TimedOut = (props: { onResume: () => void }) => {
-  return (
-    <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 rounded-lg border-4 border-dashed border-secondary-400">
-      <span className="text-xl font-bold text-secondary-700">
-        Live feed has stopped streaming due to inactivity.
-      </span>
-      <ButtonV2 onClick={props.onResume}>
-        <CareIcon icon="l-play-circle" className="text-lg" />
-        Resume
-      </ButtonV2>
-    </div>
-  );
-};

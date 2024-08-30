@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import { StillWatchingConfig } from "../../Components/CameraFeed/StillWatching";
 
 export const AppConfigContext = createContext<IConfig | null>(null);
 
@@ -83,7 +84,16 @@ export interface IConfig {
    * Env to toggle peacetime and wartime shifting
    */
   wartime_shifting: boolean;
+
+  /**
+   * The interval at which the JWT access token is refreshed in milliseconds.
+   */
   jwt_token_refresh_interval?: number;
+
+  /**
+   * Configurations related to the `StillWatching` component.
+   */
+  still_watching?: StillWatchingConfig;
 
   /*
    * Minimum date for a possible consultation encounter.
