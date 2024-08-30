@@ -58,10 +58,7 @@ export const useMSEMediaPlayer = ({ videoEl }: UseMSEMediaPlayerOption) => {
     try {
       if (!videoEl || !url) return;
 
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-
+      //https://developer.mozilla.org/en-US/docs/Web/API/MediaSource
       let mse: MediaSource;
       if (typeof ManagedMediaSource !== "undefined") {
         mse = new ManagedMediaSource();
@@ -71,10 +68,10 @@ export const useMSEMediaPlayer = ({ videoEl }: UseMSEMediaPlayerOption) => {
         mse = new MediaSource();
         videoEl.src = URL.createObjectURL(mse);
       }
-
+      let ws: WebSocket | null = null;
       mse.onsourceopen = function () {
-        wsRef.current = new WebSocket(url);
-        const ws = wsRef.current;
+        ws = new WebSocket(url);
+        wsRef.current = ws;
         ws.binaryType = "arraybuffer";
         ws.onopen = (_) => onSuccess && onSuccess(undefined);
         ws.onerror = (event) => onError && onError(event);
@@ -83,7 +80,7 @@ export const useMSEMediaPlayer = ({ videoEl }: UseMSEMediaPlayerOption) => {
           if (+data[0] === 9) {
             const mimeCodec = new TextDecoder("utf-8").decode(data.slice(1));
             try {
-              //https://developer.mozilla.org/en-US/docs/Web/API/MediaSource
+              //https://developer.mozilla.org/en-US/docs/Web/API/SourceBuffer
               mseSourceBuffer = mse.addSourceBuffer(
                 `video/mp4; codecs="${mimeCodec}"`,
               );
@@ -96,12 +93,14 @@ export const useMSEMediaPlayer = ({ videoEl }: UseMSEMediaPlayerOption) => {
               mseSourceBuffer.onupdateend = pushPacket;
             }
             // switch to readPacket after creating SourceBuffer
-            ws.onmessage = readPacket;
+            ws!.onmessage = readPacket;
           } else {
             readPacket(event);
           }
         };
       };
+      mse.onsourceended = () => ws?.close();
+      mse.onsourceclose = () => ws?.close();
     } catch (e) {
       onError && onError(e);
     }
