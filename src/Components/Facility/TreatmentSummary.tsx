@@ -8,7 +8,7 @@ import useSlug from "../../Common/hooks/useSlug";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import PrintPreview from "../../CAREUI/misc/PrintPreview"; // Import the PrintPreview component
+import PrintPreview from "../../CAREUI/misc/PrintPreview"; 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const TreatmentSummary = (props: any) => {
