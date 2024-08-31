@@ -42,8 +42,6 @@ const useStillWatching = (config: StillWatchingConfig) => {
     }
   }, [promptDuration, remainingTime]);
 
-  console.log({ remainingTime, state });
-
   return {
     state,
     remainingTime,
