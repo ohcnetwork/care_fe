@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
 import useConfig from "../../Common/hooks/useConfig";
-import RemainingTime from "../../CAREUI/misc/RemainingTime";
+import { useTimer } from "../../Utils/useTimer";
 
 export type StillWatchingConfig = {
   idleTimeout?: number;
@@ -12,8 +12,8 @@ export type StillWatchingConfig = {
 };
 
 const DEFAULT_CONFIG = {
-  idleTimeout: 3 * 60e3,
-  promptDuration: 30e3,
+  idleTimeout: 3 * 60,
+  promptDuration: 30,
 } satisfies StillWatchingConfig;
 
 type State = "watching" | "prompted" | "timed-out";
@@ -24,53 +24,36 @@ const useStillWatching = (config: StillWatchingConfig) => {
   const [state, setState] = useState<State>("watching");
   const [sequence, setSequence] = useState(1);
 
-  const getNextTimeout = useCallback(() => {
-    return (
-      new Date().getTime() +
-      (idleTimeout + promptDuration) * Math.min(sequence, 3)
-    );
-  }, [sequence, idleTimeout, promptDuration]);
+  const timer = useTimer(true);
 
-  const [timeoutOn, setTimeoutOn] = useState(getNextTimeout);
+  const remainingTime = Math.ceil(
+    (idleTimeout + promptDuration) * Math.min(sequence, 3) - timer.seconds,
+  );
 
   useEffect(() => {
-    setTimeoutOn(getNextTimeout());
-  }, [getNextTimeout]);
+    if (remainingTime < 0) {
+      setState("timed-out");
+      timer.stop();
+      return;
+    }
+    if (remainingTime < promptDuration) {
+      setState("prompted");
+      return;
+    }
+  }, [promptDuration, remainingTime]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const remainingTime = timeoutOn - new Date().getTime();
-
-      if (remainingTime < 0) {
-        setState("timed-out");
-        clearInterval(interval);
-        return;
-      }
-      if (remainingTime < promptDuration) {
-        setState("prompted");
-        return;
-      }
-
-      setState("watching");
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [timeoutOn, state, promptDuration]);
+  console.log({ remainingTime, state });
 
   return {
     state,
-    timeoutOn,
+    remainingTime,
     reset: (hardReset?: boolean) => {
       if (hardReset) {
         setSequence((seq) => seq + 1);
-        return;
       }
-
-      if (state === "watching") {
-        setTimeoutOn(getNextTimeout());
-      }
+      timer.reset();
+      setState("watching");
+      timer.start();
     },
   };
 };
@@ -78,7 +61,7 @@ const useStillWatching = (config: StillWatchingConfig) => {
 export default function StillWatching(props: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const { still_watching: config = {} } = useConfig();
-  const { state, timeoutOn, reset } = useStillWatching(config);
+  const { state, remainingTime, reset } = useStillWatching(config);
 
   return (
     <div onClick={() => reset()}>
@@ -89,7 +72,7 @@ export default function StillWatching(props: { children: React.ReactNode }) {
         action={
           <>
             <CareIcon icon="l-play-circle" className="text-lg" />
-            {t("continue_watching")} (<RemainingTime time={timeoutOn} />)
+            {t("continue_watching")} ({remainingTime}s.)
           </>
         }
         onConfirm={() => reset(true)}
