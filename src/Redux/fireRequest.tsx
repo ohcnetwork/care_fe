@@ -3,6 +3,7 @@ import * as Notification from "../Utils/Notifications.js";
 import { LocalStorageKeys } from "../Common/constants";
 import api from "./api";
 import axios from "axios";
+import careConfig from "@careConfig";
 
 const requestMap: any = api;
 export const actions = {
@@ -13,8 +14,6 @@ export const actions = {
 };
 
 const isRunning: any = {};
-
-const CARE_API_URL = import.meta.env.REACT_CARE_API_URL;
 
 export const setStoreData = (key: string, value: any) => {
   return {
@@ -92,7 +91,7 @@ export const fireRequest = (
     // set authorization header in the request header
     const config: any = {
       headers: {},
-      baseURL: CARE_API_URL,
+      baseURL: careConfig.apiUrl,
     };
     if (!request.noAuth) {
       const access_token = localStorage.getItem(LocalStorageKeys.accessToken);

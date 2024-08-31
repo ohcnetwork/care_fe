@@ -6,11 +6,11 @@ import * as Notification from "../../Utils/Notifications.js";
 import { Cancel } from "../Common/components/ButtonV2";
 import { Link } from "raviger";
 import { LocalStorageKeys, AssetImportSchema } from "../../Common/constants";
-import useConfig from "../../Common/hooks/useConfig";
 import DialogModal from "../Common/Dialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import careConfig from "@careConfig";
 const ExcelFileDragAndDrop = lazy(
   () => import("../Common/ExcelFIleDragAndDrop"),
 );
@@ -29,7 +29,6 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
   const [errors, setErrors] = useState<any>({
     location: "",
   });
-  const { sample_format_asset_import } = useConfig();
 
   const closeModal = () => {
     onClose && onClose();
@@ -176,7 +175,7 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
             handleSubmit={handleUpload}
             loading={isImporting}
             schema={AssetImportSchema}
-            sampleLink={sample_format_asset_import}
+            sampleLink={careConfig.sampleFormats.assetImport}
             setIsValid={setIsValid}
           />
         </>

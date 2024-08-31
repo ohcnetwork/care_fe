@@ -10,7 +10,6 @@ import {
   PATIENT_FILTER_CATEGORIES,
   RATION_CARD_CATEGORY,
 } from "../../Common/constants";
-import useConfig from "../../Common/hooks/useConfig";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
@@ -35,6 +34,7 @@ import request from "../../Utils/request/request";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { useTranslation } from "react-i18next";
+import careConfig from "@careConfig";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -42,7 +42,6 @@ const getDate = (value: any) =>
 export default function PatientFilter(props: any) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter, removeFilters } = props;
 
   const [filterState, setFilterState] = useMergeState({
@@ -702,14 +701,18 @@ export default function PatientFilter(props: any) {
         className="w-full rounded-md"
       >
         <div className="grid w-full grid-cols-1 gap-4">
-          {kasp_enabled && (
+          {careConfig.kasp.enabled && (
             <div className="w-full flex-none">
-              <FieldLabel className="text-sm">{kasp_string}</FieldLabel>
+              <FieldLabel className="text-sm">
+                {careConfig.kasp.string}
+              </FieldLabel>
               <SelectMenuV2
                 placeholder="Show all"
                 options={[true, false]}
                 optionLabel={(o) =>
-                  o ? `Show ${kasp_string}` : `Show Non ${kasp_string}`
+                  o
+                    ? `Show ${careConfig.kasp.string}`
+                    : `Show Non ${careConfig.kasp.string}`
                 }
                 value={filterState.is_kasp}
                 onChange={(v) => setFilterState({ ...filterState, is_kasp: v })}
