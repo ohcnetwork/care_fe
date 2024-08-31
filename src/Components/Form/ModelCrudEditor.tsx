@@ -23,6 +23,7 @@ export interface ModelCrudEditorProps<TRes extends Identifier, TReq, TErr> {
   emptyText?: React.ReactNode;
   empty: TReq;
   createText?: React.ReactNode;
+  allowCreate?: (item: TReq) => boolean;
 }
 
 export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
@@ -39,6 +40,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
     emptyText,
     empty,
     createText,
+    allowCreate,
   } = props;
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -100,6 +102,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
             type="button"
             className="w-full py-3 md:w-auto"
             loading={creating}
+            disabled={allowCreate?.(item as TReq)}
             onClick={() => handleCreate(item as TReq)}
           >
             {createText || "Create"}

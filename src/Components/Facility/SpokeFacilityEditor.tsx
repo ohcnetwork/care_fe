@@ -106,6 +106,7 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
             disabled={processing}
             filter={(f) =>
               !!f.id &&
+              facility.id !== f.id &&
               !spokes?.flatMap((s) => s.spoke_object.id).includes(f.id)
             }
           />
@@ -144,6 +145,7 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
           relationship: SpokeRelationship.REGULAR,
         }}
         createText="Add Spoke"
+        allowCreate={(item) => !item.relationship || !item.spoke}
       >
         {FormRender}
       </ModelCrudEditor>
