@@ -184,7 +184,7 @@ export default function useFilters({
       return acc;
     }, [] as string[]);
 
-    const show = activeFilters.length > 0 || children;
+    const show = activeFilters.length > 0 && children;
 
     return (
       <div
