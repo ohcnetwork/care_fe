@@ -70,7 +70,7 @@ export default function PageTitle({
             >
               <CareIcon
                 icon="l-angle-left"
-                className="border-box mr-1 rounded-md text-5xl hover:bg-secondary-200"
+                className="border-box mr-1 rounded-md text-5xl hover:bg-secondary-200 print:hidden"
               />{" "}
             </button>
           )}
@@ -78,7 +78,7 @@ export default function PageTitle({
         </div>
         {componentRight}
       </div>
-      <div className={hideBack ? "my-2" : "my-2 ml-8"}>
+      <div className={hideBack ? "my-2" : "my-2 ml-8 print:hidden"}>
         {breadcrumbs && <Breadcrumbs replacements={crumbsReplacements} />}
       </div>
     </div>

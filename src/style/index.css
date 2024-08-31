@@ -435,23 +435,6 @@ button:disabled,
     background-size: 1000px 100%;
 }
 
-
-@media print {
-    body * {
-        visibility: hidden;
-    }
-    #section-to-print,
-    #section-to-print * {
-        visibility: visible;
-        -webkit-print-color-adjust: exact;
-    }
-    #section-to-print {
-        position: absolute;
-        left: 0;
-        top: 0;
-    }
-}
-
 .header-section .appBar {
     z-index: 1201;
 }
