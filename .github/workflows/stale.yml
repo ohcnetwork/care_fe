@@ -6,7 +6,7 @@ on:
 jobs:
   stale:
     runs-on: ubuntu-latest
-    if: github.repository == 'coronasafe/care_fe'
+    if: github.repository == 'ohcnetwork/care_fe'
     steps:
       - uses: actions/stale@v6
         with:
