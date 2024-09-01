@@ -7,6 +7,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { AbhaNumberModel } from "./types/abha";
 import { useTranslation } from "react-i18next";
+import * as Notify from "../../Utils/Notifications";
 
 interface IProps {
   patientId?: string;
@@ -21,9 +22,9 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
   const printRef = useRef(null);
 
   const downloadAbhaCard = async (type: "pdf" | "png") => {
-    console.log("downloadAbhaCard", type, patientId, abha);
     if (!patientId || !abha?.abha_number) return;
-    console.log("downloadAbhaCard", type, patientId, abha);
+
+    Notify.Success({ msg: t("downloading_abha_card") });
 
     const { res, data } = await request(routes.abdm.healthId.getAbhaCard, {
       query: { abha_id: abha?.abha_number },

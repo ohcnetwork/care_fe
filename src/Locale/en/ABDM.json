@@ -123,5 +123,9 @@
   "health_facility__not_registered_1.1": "The ABDM health facility is successfully linked with care",
   "health_facility__not_registered_1.2": "but not registered as a service in bridge",
   "health_facility__not_registered_2": "Click on Link Health Facility to register the service",
-  "health_facility__not_registered_3": "Not Registered"
+  "health_facility__not_registered_3": "Not Registered",
+  "downloading_abha_card": "Generating ABHA Card, Please hold on",
+  "abha_profile": "ABHA Profile",
+  "show_abha_profile": "Show ABHA Profile",
+  "link_abha_profile": "Link ABHA Profile"
 }

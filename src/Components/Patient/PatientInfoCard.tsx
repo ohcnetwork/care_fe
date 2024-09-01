@@ -747,7 +747,7 @@ export default function PatientInfoCard(props: {
                                 close();
                                 setShowABHAProfile(true);
                                 triggerGoal("Patient Card Button Clicked", {
-                                  buttonName: "Show ABHA Profile",
+                                  buttonName: t("show_abha_profile"),
                                   consultationId: consultation?.id,
                                   userId: authUser?.id,
                                 });
@@ -757,7 +757,7 @@ export default function PatientInfoCard(props: {
                                 icon="l-user-square"
                                 className="text-lg text-primary-500"
                               />
-                              <span>Show ABHA Profile</span>
+                              <span>{t("show_abha_profile")}</span>
                             </div>
                             <div
                               className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -765,17 +765,17 @@ export default function PatientInfoCard(props: {
                                 close();
                                 setShowFetchABDMRecords(true);
                                 triggerGoal("Patient Card Button Clicked", {
-                                  buttonName: "Fetch Records over ABDM",
+                                  buttonName: t("hi__fetch_records"),
                                   consultationId: consultation?.id,
                                   userId: authUser?.id,
                                 });
                               }}
                             >
                               <CareIcon
-                                icon="l-user-square"
+                                icon="l-file-network"
                                 className="text-lg text-primary-500"
                               />
-                              <span>Fetch Records over ABDM</span>
+                              <span>{t("hi__fetch_records")}</span>
                             </div>
                           </>
                         )}
@@ -796,7 +796,7 @@ export default function PatientInfoCard(props: {
                               icon="l-link"
                               className="text-lg text-primary-500"
                             />
-                            <p>Link ABHA Number</p>
+                            <p>{t("link_abha_profile")}</p>
                           </span>
                         </div>
                       )}
