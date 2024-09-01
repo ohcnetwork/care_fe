@@ -149,7 +149,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
         <TextFormField
           name="id"
           label={t("any_id")}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
+          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
           placeholder={t("enter_any_id")}
           disabled={memory?.isLoading}
           value={memory?.id}
@@ -248,7 +248,7 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
         <TextFormField
           name="id"
           label={t("any_id")}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
+          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
           placeholder={t("enter_any_id")}
           disabled={true}
           value={memory?.id}

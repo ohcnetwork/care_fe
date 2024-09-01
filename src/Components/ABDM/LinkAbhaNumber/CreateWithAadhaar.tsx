@@ -118,7 +118,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           label={t("aadhaar_number")}
           minLength={12}
           maxLength={16}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
+          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
           placeholder={t("enter_aadhaar_number")}
           disabled={memory?.isLoading}
           value={memory?.aadhaarNumber}
@@ -268,7 +268,7 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
           label={t("aadhaar_number")}
           min={12}
           max={16}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
+          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
           placeholder={t("enter_aadhaar_number")}
           disabled={true}
           value={memory?.aadhaarNumber}
