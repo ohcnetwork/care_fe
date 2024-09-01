@@ -297,13 +297,8 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
       </div>
 
       <div className="mt-0">
-        <label
-          htmlFor="mobile_number"
-          className="block text-base font-normal text-secondary-900"
-        >
-          {t("enter_mobile_number")}
-        </label>
         <PhoneNumberFormField
+          label={t("enter_mobile_number")}
           labelSuffix={<></>}
           name="mobile_number"
           value={memory?.mobileNumber}
@@ -373,13 +368,8 @@ function LinkMobileNumber({ memory, setMemory, next }: ILinkMobileNumberProps) {
   return (
     <div>
       <div className="mt-0">
-        <label
-          htmlFor="mobile_number"
-          className="block text-base font-normal text-secondary-900"
-        >
-          {t("enter_mobile_number")}
-        </label>
         <PhoneNumberFormField
+          label={t("enter_mobile_number")}
           labelSuffix={<></>}
           name="mobile_number"
           value={memory?.mobileNumber}
@@ -446,13 +436,8 @@ function VerifyMobileNumber({
   return (
     <div>
       <div className="mt-0">
-        <label
-          htmlFor="mobile_number"
-          className="block text-base font-normal text-secondary-900"
-        >
-          {t("enter_mobile_number")}
-        </label>
         <PhoneNumberFormField
+          label={t("enter_mobile_number")}
           labelSuffix={<></>}
           name="mobile_number"
           value={memory?.mobileNumber}
