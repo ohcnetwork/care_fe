@@ -144,19 +144,19 @@ export default function ShowInvestigation(props: any) {
   }
 
   return (
-    <PrintPreview title={`Report of Investigation : ${patientData?.name}`}>
-      <div className="mx-auto max-w-7xl px-4">
-        <PageTitle
-          title={t("investigations")}
-          className="mx-3 md:mx-4 print:hidden"
-          breadcrumbs={false}
-          hideBack={true}
-          crumbsReplacements={{
-            [facilityId]: { name: patientData?.facility_object?.name },
-            [patientId]: { name: patientData?.name },
-          }}
-          backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
-        />
+    <>
+      <PageTitle
+        title={t("investigations")}
+        className="mx-3 md:mx-4 print:hidden"
+        breadcrumbs={false}
+        hideBack={true}
+        crumbsReplacements={{
+          [facilityId]: { name: patientData?.facility_object?.name },
+          [patientId]: { name: patientData?.name },
+        }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
+      />
+      <PrintPreview title={`Report of Investigation : ${patientData?.name}`}>
         <InvestigationTable
           title={`ID: ${sessionId}`}
           data={state.initialValues}
@@ -166,7 +166,7 @@ export default function ShowInvestigation(props: any) {
           handleUpdateCancel={handleUpdateCancel}
           handleSave={handleSubmit}
         />
-      </div>
-    </PrintPreview>
+      </PrintPreview>
+    </>
   );
 }

@@ -23,7 +23,6 @@ module.exports = {
       vs: "348px",
       ...defaultTheme.screens,
       "3xl": "1920px",
-      print: { raw: "print" },
     },
     extend: {
       fontFamily: {
