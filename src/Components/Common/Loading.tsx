@@ -1,4 +1,4 @@
-const img = "https://cdn.coronasafe.network/light-logo.svg";
+const img = "https://cdn.ohc.network/light-logo.svg";
 
 const Loading = () => {
   return (

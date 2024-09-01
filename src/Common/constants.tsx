@@ -441,17 +441,49 @@ export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
   "TD",
 ] as const;
 
-export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
+export type PatientCategoryID =
+  | "Comfort"
+  | "Stable"
+  | "Moderate"
+  | "Critical"
+  | "ActivelyDying";
 
 export const PATIENT_CATEGORIES: {
   id: PatientCategoryID;
   text: PatientCategory;
+  description: string;
   twClass: string;
 }[] = [
-  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Mild", twClass: "patient-stable" },
-  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
-  { id: "Critical", text: "Critical", twClass: "patient-critical" },
+  {
+    id: "Comfort", // Comfort Care is discontinued
+    text: "Comfort Care",
+    twClass: "patient-comfort",
+    description: "End of life care",
+  },
+  {
+    id: "Stable",
+    text: "Mild",
+    twClass: "patient-stable",
+    description: "Urgent: not life-threatening",
+  },
+  {
+    id: "Moderate",
+    text: "Moderate",
+    twClass: "patient-abnormal",
+    description: "Emergency: could be life-threatening",
+  },
+  {
+    id: "Critical",
+    text: "Critical",
+    twClass: "patient-critical",
+    description: "Immediate: life-threatening",
+  },
+  {
+    id: "ActivelyDying",
+    text: "Actively Dying",
+    twClass: "patient-activelydying",
+    description: "",
+  },
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;

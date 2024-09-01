@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -23,7 +23,10 @@
     <meta name="apple-mobile-web-app-title" content="Care" />
     <meta name="theme-color" content="#0e9f6e" />
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-    <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon-180x180.png">
+    <link
+      rel="apple-touch-icon"
+      href="/images/icons/apple-touch-icon-180x180.png"
+    />
   </head>
 
   <body>
@@ -35,17 +38,27 @@
           pointer-events: none;
           filter: brightness(80%);
         }
-       @media (prefers-reduced-motion: no-preference) {
+        @media (prefers-reduced-motion: no-preference) {
           .App-logo {
             animation: App-logo-blink 1s linear infinite;
           }
         }
         @keyframes App-logo-blink {
-          0% { opacity: 0;}
-          25% { opacity: 0.5;}
-          50% {opacity: 1;}
-          75% {opacity: 0.5;}
-          100% {opacity: 0;}
+          0% {
+            opacity: 0;
+          }
+          25% {
+            opacity: 0.5;
+          }
+          50% {
+            opacity: 1;
+          }
+          75% {
+            opacity: 0.5;
+          }
+          100% {
+            opacity: 0;
+          }
         }
         .temp-loading {
           display: grid;
@@ -55,10 +68,10 @@
         }
       </style>
       <div class="temp-loading">
-        <img 
-        class="App-logo"
-        src="https://cdn.coronasafe.network/light-logo.svg"
-        alt="Care is loading"
+        <img
+          class="App-logo"
+          src="https://cdn.ohc.network/light-logo.svg"
+          alt="Care is loading"
         />
       </div>
     </div>
