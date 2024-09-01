@@ -90,7 +90,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
         <div className="flex flex-col items-center">
           <ButtonV2
             onClick={async () => {
-              const { res, data, error } = await request(
+              const { res, data } = await request(
                 routes.abdm.consent.checkStatus,
                 {
                   body: {
@@ -106,10 +106,6 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
                 });
                 Notification.Warn({
                   msg: "This is an asynchronous operation, please check back after some time!",
-                });
-              } else {
-                Notification.Error({
-                  msg: error?.message ?? "Error while checking status!",
                 });
               }
             }}

@@ -89,7 +89,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
 
     setMemory((prev) => ({ ...prev, isLoading: true }));
 
-    const { res, data, error } = await request(
+    const { res, data } = await request(
       routes.abdm.healthId.abhaCreateSendAadhaarOtp,
       {
         body: {
@@ -104,10 +104,6 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
         msg: data.detail ?? t("aadhaar_otp_send_success"),
       });
       next();
-    } else {
-      Notify.Error({
-        msg: data?.detail ?? error?.message ?? t("aadhaar_otp_send_error"),
-      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -222,7 +218,7 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
 
     setMemory((prev) => ({ ...prev, isLoading: true }));
 
-    const { res, data, error } = await request(
+    const { res, data } = await request(
       routes.abdm.healthId.abhaCreateVerifyAadhaarOtp,
       {
         body: {
@@ -250,10 +246,6 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
       } else {
         next();
       }
-    } else {
-      Notify.Error({
-        msg: data?.detail ?? error?.message ?? t("otp_verification_error"),
-      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -345,7 +337,7 @@ function LinkMobileNumber({ memory, setMemory, next }: ILinkMobileNumberProps) {
   const handleSubmit = async () => {
     setMemory((prev) => ({ ...prev, isLoading: true }));
 
-    const { res, data, error } = await request(
+    const { res, data } = await request(
       routes.abdm.healthId.abhaCreateLinkMobileNumber,
       {
         body: {
@@ -364,10 +356,6 @@ function LinkMobileNumber({ memory, setMemory, next }: ILinkMobileNumberProps) {
         msg: data.detail ?? t("mobile_otp_send_success"),
       });
       next();
-    } else {
-      Notify.Error({
-        msg: data?.detail ?? error?.message ?? t("mobile_otp_send_error"),
-      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -422,7 +410,7 @@ function VerifyMobileNumber({
   const handleSubmit = async () => {
     setMemory((prev) => ({ ...prev, isLoading: true }));
 
-    const { res, data, error } = await request(
+    const { res, data } = await request(
       routes.abdm.healthId.abhaCreateVerifyMobileNumber,
       {
         body: {
@@ -441,10 +429,6 @@ function VerifyMobileNumber({
         msg: data.detail ?? t("mobile_otp_verify_success"),
       });
       next();
-    } else {
-      Notify.Error({
-        msg: data?.detail ?? error?.message ?? t("mobile_otp_verify_error"),
-      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -528,7 +512,7 @@ function ChooseAbhaAddress({
   const handleSubmit = async () => {
     setMemory((prev) => ({ ...prev, isLoading: true }));
 
-    const { res, data, error } = await request(
+    const { res, data } = await request(
       routes.abdm.healthId.abhaCreateEnrolAbhaAddress,
       {
         body: {
@@ -548,10 +532,6 @@ function ChooseAbhaAddress({
         msg: data.detail ?? t("abha_address_created_success"),
       });
       onSuccess(data.abha_number);
-    } else {
-      Notify.Error({
-        msg: data?.detail ?? error?.message ?? t("abha_address_created_error"),
-      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));

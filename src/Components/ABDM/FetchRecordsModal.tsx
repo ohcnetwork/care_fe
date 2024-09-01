@@ -226,10 +226,6 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
                 `/facility/${abha?.patient_object?.facility}/abdm` ??
                   `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`,
               );
-            } else {
-              Notification.Error({
-                msg: "Error while requesting consent!",
-              });
             }
             setIsMakingConsentRequest(false);
             onClose();

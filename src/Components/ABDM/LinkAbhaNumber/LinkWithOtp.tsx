@@ -86,6 +86,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
           body: {
             abha_address: memory?.id.replace(/-/g, "").replace(/ /g, ""),
           },
+          silent: true,
         },
       );
 
@@ -121,16 +122,13 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
       otp_system,
     }));
 
-    const { res, data, error } = await request(
-      routes.abdm.healthId.abhaLoginSendOtp,
-      {
-        body: {
-          value: memory?.id,
-          type: valueType,
-          otp_system,
-        },
+    const { res, data } = await request(routes.abdm.healthId.abhaLoginSendOtp, {
+      body: {
+        value: memory?.id,
+        type: valueType,
+        otp_system,
       },
-    );
+    });
 
     if (res?.status === 200 && data) {
       setMemory((prev) => ({
@@ -139,10 +137,6 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
       }));
       Notify.Success({ msg: data.detail ?? t("send_otp_success") });
       next();
-    } else {
-      Notify.Error({
-        msg: data?.detail ?? error?.message ?? t("send_otp_error"),
-      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -242,8 +236,6 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
     if (res?.status === 200 && data) {
       Notify.Success({ msg: t("verify_otp_success") });
       onSuccess(data.abha_number);
-    } else {
-      Notify.Error({ msg: t("verify_otp_error") });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));

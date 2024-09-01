@@ -53,7 +53,7 @@
   "get_auth_methods": "Get Available Authentication Methods",
   "verify_using": "Verify Using",
   "auth_method_unsupported": "This authentication method is not supported, please try a different method",
-  "get_auth_mode_error": "Could not find any supported authentication modes, Please try again with a different authentication method",
+  "get_auth_mode_error": "Could not find any supported authentication methods, Please try again with a different authentication method",
   "send_otp_success": "OTP has been sent to the respective mobile number",
   "send_otp_error": "Failed to send OTP. Please try again later.",
   "verify_otp_success": "OTP has been verified successfully.",
