@@ -116,8 +116,8 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
         <TextFormField
           name="aadhaar-number"
           label={t("aadhaar_number")}
-          min={12}
-          max={16}
+          minLength={12}
+          maxLength={16}
           inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal text-center"
           placeholder={t("enter_aadhaar_number")}
           disabled={memory?.isLoading}
