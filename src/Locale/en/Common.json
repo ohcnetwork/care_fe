@@ -192,5 +192,15 @@
   "discard": "Discard",
   "live": "Live",
   "discharged": "Discharged",
-  "archived": "Archived"
+  "archived": "Archived",
+  "refresh": "Refresh",
+  "check_status": "Check Status",
+  "async_operation_warning": "This operation may take some time. Please check back later.",
+  "no_records_found": "No records found",
+  "created_on": "Created On",
+  "modified_on": "Modified On",
+  "expires_on": "Expires On",
+  "granted_on": "Granted On",
+  "full_name": "Full Name",
+  "select_all": "Select All"
 }

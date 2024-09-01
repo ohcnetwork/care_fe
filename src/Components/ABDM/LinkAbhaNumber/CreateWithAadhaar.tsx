@@ -302,7 +302,7 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
             if (!memory?.mobileNumber.startsWith("+91")) {
               setMemory((prev) => ({
                 ...prev,
-                validationError: "Currently only Indian numbers are supported",
+                validationError: t("only_indian_mobile_numbers_supported"),
               }));
               return;
             }

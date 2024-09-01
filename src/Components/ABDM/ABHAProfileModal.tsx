@@ -1,5 +1,3 @@
-import * as Notify from "../../Utils/Notifications";
-
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
@@ -8,6 +6,7 @@ import { useRef } from "react";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { AbhaNumberModel } from "./types/abha";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   patientId?: string;
@@ -17,15 +16,14 @@ interface IProps {
 }
 
 const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
+  const { t } = useTranslation();
+
   const printRef = useRef(null);
 
   const downloadAbhaCard = async (type: "pdf" | "png") => {
     if (!patientId) return;
-    const { res, data } = await request(routes.abha.getAbhaCard, {
-      body: {
-        patient: patientId,
-        type: type,
-      },
+    const { res, data } = await request(routes.abdm.healthId.getAbhaCard, {
+      body: {},
     });
 
     if (res?.status === 200 && data) {
@@ -41,8 +39,6 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         printWindow?.document.write(htmlPopup);
         printWindow?.print();
       }
-    } else {
-      Notify.Error({ msg: "Download Failed..." });
     }
   };
 
@@ -50,7 +46,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
     <DialogModal
       title={
         <div className="flex items-center justify-between">
-          <h4>ABHA Profile</h4>
+          <h4>{t("abha_profile")}</h4>
           <div className="flex items-center gap-2">
             <CareIcon
               onClick={() => downloadAbhaCard("pdf")}
@@ -93,16 +89,19 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         <div className="flex flex-wrap gap-4">
           {[
             {
-              label: "Name",
+              label: t("full_name"),
               value:
                 abha?.name ||
                 `${abha?.first_name} ${abha?.middle_name} ${abha?.last_name}`,
             },
-            { label: "DOB", value: abha?.date_of_birth },
-            { label: "Gender", value: abha?.gender },
-            { label: "ABHA Number", value: abha?.abha_number },
-            { label: "ABHA ID", value: abha?.health_id?.split("@")[0] },
-            { label: "Email", value: abha?.email },
+            { label: t("date_of_birth"), value: abha?.date_of_birth },
+            { label: t("gender"), value: abha?.gender },
+            { label: t("abha_number"), value: abha?.abha_number },
+            {
+              label: t("abha_address"),
+              value: abha?.health_id?.split("@")[0],
+            },
+            { label: t("email"), value: abha?.email },
           ].map((item, index) =>
             item.value ? (
               <div key={index}>
@@ -117,13 +116,13 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
       <div className="mt-4 flex flex-col text-xs text-secondary-700">
         {abha?.created_date && (
           <div className="flex items-center gap-1">
-            <span className="">Created On: </span>
+            <span>{t("created_on")}: </span>
             <span>{formatDateTime(abha.created_date)}</span>
           </div>
         )}
         {abha?.modified_date && (
           <div className="flex items-center gap-1">
-            <span className="">Last Modified On: </span>
+            <span>{t("modified_on")}: </span>
             <span>{formatDateTime(abha.modified_date)}</span>
           </div>
         )}

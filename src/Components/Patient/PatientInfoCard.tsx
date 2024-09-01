@@ -23,7 +23,6 @@ import {
   humanizeStrings,
 } from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
-import LinkCareContextModal from "../ABDM/LinkCareContextModal.js";
 import DialogModal from "../Common/Dialog.js";
 import ButtonV2 from "../Common/components/ButtonV2.js";
 import Beds from "../Facility/Consultations/Beds.js";
@@ -77,7 +76,6 @@ export default function PatientInfoCard(props: {
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
 
   const { enable_hcx, enable_abdm } = useConfig();
-  const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
   const consultation = props.consultation;
@@ -974,12 +972,6 @@ export default function PatientInfoCard(props: {
         abha={props.abhaNumber}
         show={showABHAProfile}
         onClose={() => setShowABHAProfile(false)}
-      />
-      <LinkCareContextModal
-        consultationId={props.consultationId}
-        abha={props.abhaNumber}
-        show={showLinkCareContext}
-        onClose={() => setShowLinkCareContext(false)}
       />
       <FetchRecordsModal
         abha={props.abhaNumber}

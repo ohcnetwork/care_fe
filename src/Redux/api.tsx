@@ -5,25 +5,6 @@ import {
 } from "../Components/ABDM/types/consent";
 import { HealthInformationModel } from "../Components/ABDM/types/health-information";
 import {
-  IAadhaarOtp,
-  IAadhaarOtpTBody,
-  ICheckAndGenerateMobileOtp,
-  IConfirmMobileOtp,
-  IcreateHealthFacilityTBody,
-  ICreateHealthIdRequest,
-  ICreateHealthIdResponse,
-  IGenerateMobileOtpTBody,
-  IgetAbhaCardTBody,
-  IHealthFacility,
-  IHealthId,
-  IinitiateAbdmAuthenticationTBody,
-  ILinkABHANumber,
-  ILinkViaQRBody,
-  IpartialUpdateHealthFacilityTBody,
-  ISearchByHealthIdTBody,
-  IVerifyAadhaarOtpTBody,
-} from "../Components/ABDM/models";
-import {
   AssetBedBody,
   AssetBedModel,
   AssetData,
@@ -113,6 +94,11 @@ import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
 import { AbhaNumberModel } from "../Components/ABDM/types/abha";
 import { ScribeModel } from "../Components/Scribe/Scribe";
+import {
+  IcreateHealthFacilityTBody,
+  IHealthFacility,
+  IpartialUpdateHealthFacilityTBody,
+} from "../Components/ABDM/types/health-facility";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1574,192 +1560,12 @@ const routes = {
           created: boolean;
         }>(),
       },
-    },
-  },
 
-  abha: {
-    getAbhaNumber: {
-      path: "/api/v1/abdm/abha_numbers/{abhaNumberId}/",
-      method: "GET",
-      TRes: Type<AbhaNumberModel>(),
-    },
-
-    // ABDM HealthID endpoints
-    generateAadhaarOtp: {
-      path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
-      method: "POST",
-      TRes: Type<IAadhaarOtp>(),
-      TBody: Type<IAadhaarOtpTBody>(),
-    },
-
-    resendAadhaarOtp: {
-      path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
-      method: "POST",
-      TRes: Type<IAadhaarOtp>(),
-      TBody: Type<IAadhaarOtp>(),
-    },
-
-    verifyAadhaarOtp: {
-      path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
-      method: "POST",
-      TRes: Type<IAadhaarOtp>(),
-      TBody: Type<IVerifyAadhaarOtpTBody>(),
-    },
-
-    generateMobileOtp: {
-      path: "/api/v1/abdm/healthid/generate_mobile_otp/",
-      method: "POST",
-      TRes: Type<unknown>(),
-      TBody: Type<unknown>(),
-    },
-
-    checkAndGenerateMobileOtp: {
-      path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
-      method: "POST",
-      TRes: Type<ICheckAndGenerateMobileOtp>(),
-      TBody: Type<IGenerateMobileOtpTBody>(),
-    },
-
-    // TODO: resend mobile otp
-    verifyMobileOtp: {
-      path: "/api/v1/abdm/healthid/verify_mobile_otp/",
-      method: "POST",
-      TRes: Type<IAadhaarOtp>(),
-      TBody: Type<IVerifyAadhaarOtpTBody>(),
-    },
-
-    createHealthId: {
-      path: "/api/v1/abdm/healthid/create_health_id/",
-      method: "POST",
-      TRes: Type<ICreateHealthIdResponse>(),
-      TBody: Type<ICreateHealthIdRequest>(),
-    },
-
-    searchByHealthId: {
-      path: "/api/v1/abdm/healthid/search_by_health_id/",
-      method: "POST",
-      TRes: Type<IHealthId>(),
-      TBody: Type<ISearchByHealthIdTBody>(),
-    },
-
-    initiateAbdmAuthentication: {
-      path: "/api/v1/abdm/healthid/auth_init/",
-      method: "POST",
-      TRes: Type<IConfirmMobileOtp>(),
-      TBody: Type<IinitiateAbdmAuthenticationTBody>(),
-    },
-
-    confirmWithAadhaarOtp: {
-      path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
-      method: "POST",
-      TRes: Type<IConfirmMobileOtp>(),
-      TBody: Type<IConfirmMobileOtp>(),
-    },
-
-    confirmWithMobileOtp: {
-      path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
-      method: "POST",
-      TRes: Type<IConfirmMobileOtp>(),
-      TBody: Type<IConfirmMobileOtp>(),
-    },
-
-    linkViaQR: {
-      path: "/api/v1/abdm/healthid/link_via_qr/",
-      method: "POST",
-      TRes: Type<ILinkABHANumber>(),
-      TBody: Type<ILinkViaQRBody>(),
-    },
-
-    linkCareContext: {
-      path: "/api/v1/abdm/healthid/add_care_context/",
-      method: "POST",
-      TRes: Type<unknown>(),
-      TBody: Type<unknown>(),
-    },
-
-    getAbhaCard: {
-      path: "/api/v1/abdm/healthid/get_abha_card/",
-      method: "POST",
-      TRes: Type<unknown>(),
-      TBody: Type<IgetAbhaCardTBody>(),
-    },
-
-    // ABDM Health Facility
-
-    listHealthFacility: {
-      path: "/api/v1/abdm/health_facility/",
-      method: "GET",
-    },
-
-    createHealthFacility: {
-      path: "/api/v1/abdm/health_facility/",
-      method: "POST",
-      TRes: Type<IHealthFacility>(),
-      TBody: Type<IcreateHealthFacilityTBody>(),
-    },
-
-    getHealthFacility: {
-      path: "/api/v1/abdm/health_facility/{facility_id}/",
-      method: "GET",
-      TRes: Type<IHealthFacility>(),
-    },
-
-    updateHealthFacility: {
-      path: "/api/v1/abdm/health_facility/{facility_id}/",
-      method: "PUT",
-      TRes: Type<IHealthFacility>(),
-      TBody: Type<IcreateHealthFacilityTBody>(),
-    },
-
-    partialUpdateHealthFacility: {
-      path: "/api/v1/abdm/health_facility/{facility_id}/",
-      method: "PATCH",
-      TRes: Type<IHealthFacility>(),
-      TBody: Type<IpartialUpdateHealthFacilityTBody>(),
-    },
-
-    registerHealthFacilityAsService: {
-      path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
-      method: "POST",
-      TRes: Type<IHealthFacility>(),
-      TBody: Type<IcreateHealthFacilityTBody>(),
-    },
-
-    listConsents: {
-      path: "/api/v1/abdm/consent/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<ConsentRequestModel>>(),
-    },
-
-    createConsent: {
-      path: "/api/v1/abdm/consent/",
-      method: "POST",
-      TRes: Type<ConsentRequestModel>(),
-      TBody: Type<CreateConsentTBody>(),
-    },
-
-    getConsent: {
-      path: "/api/v1/abdm/consent/{id}/",
-      method: "GET",
-    },
-
-    checkConsentStatus: {
-      path: "/api/v1/abdm/consent/{id}/status/",
-      method: "GET",
-      TRes: Type<void>(),
-    },
-
-    getHealthInformation: {
-      path: "/api/v1/abdm/health_information/{artefactId}",
-      method: "GET",
-      TRes: Type<HealthInformationModel>(),
-    },
-
-    findPatient: {
-      path: "/api/v1/abdm/patients/find/",
-      method: "POST",
-      TRes: Type<unknown>(),
-      TBody: Type<{ id: string }>(),
+      getAbhaCard: {
+        path: "/api/abdm/health_id/get_abha_card",
+        method: "GET",
+        TRes: Type<unknown>(),
+      },
     },
   },
 
