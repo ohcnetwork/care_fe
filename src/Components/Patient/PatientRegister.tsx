@@ -905,6 +905,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         value: abhaProfile.pincode,
       });
 
+    if (abhaProfile.address) {
+      field("address").onChange({
+        name: "address",
+        value: abhaProfile.address,
+      });
+
+      field("permanent_address").onChange({
+        name: "permanent_address",
+        value: abhaProfile.address,
+      });
+    }
+
     dispatch({ type: "set_form", form: { ...state.form, ...values } });
     setShowLinkAbhaNumberModal(false);
   };
