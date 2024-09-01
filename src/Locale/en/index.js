@@ -18,6 +18,7 @@ import Shifting from "./Shifting.json";
 import SortOptions from "./SortOptions.json";
 import Users from "./Users.json";
 import FileUpload from "./FileUpload.json";
+import ABDM from "./ABDM.json";
 
 export default {
   ...Auth,
@@ -39,5 +40,6 @@ export default {
   ...Users,
   ...LogUpdate,
   ...FileUpload,
-  SortOptions,
+  ...ABDM,
+  ...SortOptions,
 };
