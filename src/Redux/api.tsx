@@ -1562,9 +1562,9 @@ const routes = {
       },
 
       getAbhaCard: {
-        path: "/api/abdm/health_id/get_abha_card",
+        path: "/api/abdm/v3/health_id/abha_card",
         method: "GET",
-        TRes: Type<unknown>(),
+        TRes: Type<Blob>(),
       },
     },
   },

@@ -21,23 +21,49 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
   const printRef = useRef(null);
 
   const downloadAbhaCard = async (type: "pdf" | "png") => {
-    if (!patientId) return;
+    console.log("downloadAbhaCard", type, patientId, abha);
+    if (!patientId || !abha?.abha_number) return;
+    console.log("downloadAbhaCard", type, patientId, abha);
+
     const { res, data } = await request(routes.abdm.healthId.getAbhaCard, {
-      body: {},
+      query: { abha_id: abha?.abha_number },
     });
 
     if (res?.status === 200 && data) {
+      const imageUrl = URL.createObjectURL(data);
+
       if (type === "png") {
         const downloadLink = document.createElement("a");
-        downloadLink.href = "data:application/octet-stream;base64," + data;
+        downloadLink.href = imageUrl;
         downloadLink.download = "abha.png";
         downloadLink.click();
+        URL.revokeObjectURL(imageUrl);
       } else {
-        const htmlPopup = `<embed width=100% height=100%" type='application/pdf' src='data:application/pdf;base64,${data}'></embed>`;
-
-        const printWindow = window.open("", "PDF");
+        const printWindow = window.open("", "_blank");
+        const htmlPopup = `
+            <html>
+              <head>
+                <title>Print Image</title>
+                <style>
+                @media print {
+                  @page {
+                    size: landscape;
+                  }
+                  body, html { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100%; }
+                }
+                </style>
+              </head>
+              <body>
+                <embed width="100%" height="100%" src="${imageUrl}" type="image/png"></embed>
+              </body>
+            </html>
+          `;
         printWindow?.document.write(htmlPopup);
-        printWindow?.print();
+        printWindow?.document.close();
+        printWindow?.addEventListener("load", () => {
+          printWindow?.print();
+          URL.revokeObjectURL(imageUrl);
+        });
       }
     }
   };
