@@ -11,6 +11,7 @@ import { capitalize } from "lodash-es";
 import * as Notify from "../../../Utils/Notifications";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
+import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 
 type ILoginWithOtpProps = {
   onSuccess: (abhaNumber: AbhaNumberModel) => void;
@@ -169,17 +170,17 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        <span className="items-center text-xs text-gray-800">
-          <input
-            type="checkbox"
-            checked={disclaimerAccepted}
-            onChange={(e) => {
-              setDisclaimerAccepted(e.target.checked);
-            }}
-            className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
-          />
-          {t("link_abha_disclaimer")}
-        </span>
+        <CheckBoxFormField
+          name="abha_link_disclaimer_1"
+          label={<>{t("link_abha_disclaimer")}</>}
+          value={disclaimerAccepted}
+          onChange={(e) => {
+            setDisclaimerAccepted(e.value);
+          }}
+          className="mr-2 rounded border-gray-700"
+          labelClassName="text-xs text-gray-800"
+          errorClassName="hidden"
+        />
       </div>
 
       <div className="mt-4 flex items-center">

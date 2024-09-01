@@ -11,6 +11,7 @@ import { validateRule } from "../../Users/UserAdd";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import * as Notify from "../../../Utils/Notifications";
+import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 
 type ICreateWithAadhaarProps = {
   onSuccess: (abhaNumber: AbhaNumberModel) => void;
@@ -137,44 +138,52 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        <span className="items-center text-xs text-gray-800">
-          <input
-            type="checkbox"
-            checked={disclaimerAccepted[0]}
-            onChange={(e) => {
-              setDisclaimerAccepted([e.target.checked, disclaimerAccepted[1]]);
-            }}
-            className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
-          />
-          {t("create_abha__disclaimer_1.1")}
-          <a
-            target="_blank"
-            rel="noreferrer"
-            href="https://docs.coronasafe.network/coronasafe-care-documentation/privacy-policy/privacy-policy-as-per-abdm-guidelines"
-          >
-            {t("create_abha__disclaimer_1.2")}
-          </a>
-        </span>
+        <CheckBoxFormField
+          name="abha_create_disclaimer_1"
+          label={
+            <>
+              {t("create_abha__disclaimer_1.1")}
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href="https://docs.coronasafe.network/coronasafe-care-documentation/privacy-policy/privacy-policy-as-per-abdm-guidelines"
+              >
+                {t("create_abha__disclaimer_1.2")}
+              </a>
+            </>
+          }
+          value={disclaimerAccepted[0]}
+          onChange={(e) => {
+            setDisclaimerAccepted([e.value, disclaimerAccepted[1]]);
+          }}
+          className="mr-2 rounded border-gray-700"
+          labelClassName="text-xs text-gray-800"
+          errorClassName="hidden"
+        />
 
-        <span className="items-center text-xs text-gray-800">
-          <input
-            type="checkbox"
-            checked={disclaimerAccepted[1]}
-            onChange={(e) => {
-              setDisclaimerAccepted([disclaimerAccepted[0], e.target.checked]);
-            }}
-            className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
-          />
-          {t("create_abha__disclaimer_2.1")}
-          <a
-            target="_blank"
-            rel="noreferrer"
-            href="https://abdm.gov.in/publications/policies_regulations/health_data_management_policy"
-          >
-            {t("create_abha__disclaimer_2.2")}
-          </a>
-          {t("create_abha__disclaimer_2.3")}
-        </span>
+        <CheckBoxFormField
+          name="abha_create_disclaimer_2"
+          label={
+            <>
+              {t("create_abha__disclaimer_2.1")}
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href="https://abdm.gov.in/publications/policies_regulations/health_data_management_policy"
+              >
+                {t("create_abha__disclaimer_2.2")}
+              </a>
+              {t("create_abha__disclaimer_2.3")}
+            </>
+          }
+          value={disclaimerAccepted[1]}
+          onChange={(e) => {
+            setDisclaimerAccepted([disclaimerAccepted[0], e.value]);
+          }}
+          className="mr-2 rounded border-gray-700"
+          labelClassName="text-xs text-gray-800"
+          errorClassName="hidden"
+        />
       </div>
 
       <div className="mt-4 flex items-center">
