@@ -151,7 +151,11 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
             className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
           />
           {t("create_abha__disclaimer_1.1")}
-          <a href="https://docs.coronasafe.network/coronasafe-care-documentation/privacy-policy/privacy-policy-as-per-abdm-guidelines">
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href="https://docs.coronasafe.network/coronasafe-care-documentation/privacy-policy/privacy-policy-as-per-abdm-guidelines"
+          >
             {t("create_abha__disclaimer_1.2")}
           </a>
         </span>
@@ -166,7 +170,11 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
             className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
           />
           {t("create_abha__disclaimer_2.1")}
-          <a href="https://abdm.gov.in/publications/policies_regulations/health_data_management_policy">
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href="https://abdm.gov.in/publications/policies_regulations/health_data_management_policy"
+          >
             {t("create_abha__disclaimer_2.2")}
           </a>
           {t("create_abha__disclaimer_2.3")}
