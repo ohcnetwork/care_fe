@@ -84,6 +84,11 @@ export default {
       },
     }),
   ],
+  resolve: {
+    alias: {
+      "@careConfig": path.resolve(__dirname, "./care.config.ts"),
+    },
+  },
   build: {
     outDir: "build",
     assetsDir: "bundle",

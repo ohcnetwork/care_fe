@@ -7,8 +7,8 @@ import * as Notify from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
 import axios from "axios";
 import { UserModel } from "../Users/models";
-import useConfig from "../../Common/hooks/useConfig";
 import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
+import careConfig from "@careConfig";
 
 interface FieldOption {
   id: string | number;
@@ -63,7 +63,6 @@ const SCRIBE_FILE_TYPES = {
 };
 
 export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
-  const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
   const [stage, setStage] = useState("start");
@@ -546,7 +545,7 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
     }
   }
 
-  if (!enable_scribe) return null;
+  if (!careConfig.scribe.enabled) return null;
 
   return (
     <Popover>

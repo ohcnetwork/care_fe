@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import handleResponse from "./handleResponse";
 import { RequestOptions, RequestResult, Route } from "./types";
 import { makeHeaders, makeUrl } from "./utils";
@@ -14,8 +15,6 @@ type ControllerXORControllerRef =
 
 type Options<TData, TBody> = RequestOptions<TData, TBody> &
   ControllerXORControllerRef;
-
-const CARE_API_URL = import.meta.env.REACT_CARE_API_URL;
 
 export default async function request<TData, TBody>(
   { path, method, noAuth }: Route<TData, TBody>,
@@ -36,7 +35,7 @@ export default async function request<TData, TBody>(
   }
 
   const signal = controller?.signal ?? controllerRef?.current?.signal;
-  const url = `${CARE_API_URL}${makeUrl(path, query, pathParams)}`;
+  const url = `${careConfig.apiUrl}${makeUrl(path, query, pathParams)}`;
 
   const options: RequestInit = { method, signal };
 

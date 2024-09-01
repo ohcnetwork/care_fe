@@ -20,8 +20,7 @@ import DialogModal from "../Common/Dialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import uploadFile from "../../Utils/request/uploadFile";
-
-const CARE_API_URL = import.meta.env.REACT_CARE_API_URL;
+import careConfig from "@careConfig";
 
 interface Props {
   open: boolean;
@@ -119,7 +118,7 @@ const CoverImageEditModal = ({
 
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
-    const url = `${CARE_API_URL}/api/v1/facility/${facility.id}/cover_image/`;
+    const url = `${careConfig.apiUrl}/api/v1/facility/${facility.id}/cover_image/`;
     setIsProcessing(true);
 
     uploadFile(
