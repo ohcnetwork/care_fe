@@ -267,10 +267,19 @@ function DiagnosisSection({ consultationData }: IDiagnosisSection) {
           (type) =>
             !!diagnoses[type].length && (
               <div>
-                <b>{t(`diagnosis__${type}`)}</b>
+                <b>
+                  {t(`diagnosis__${type}`)} {t("diagnosis")}
+                </b>
                 <ol className="mx-6 list-decimal">
                   {diagnoses[type].map((d) => (
-                    <li key={d.id}>{d.diagnosis_object.label}</li>
+                    <li key={d.id}>
+                      {d.diagnosis_object.label}
+                      {d.is_principal && (
+                        <span className="ml-2 rounded-sm bg-secondary-800 px-2 py-1 text-xs font-normal text-white">
+                          {t(`diagnosis__${d.verification_status}`)}
+                        </span>
+                      )}
+                    </li>
                   ))}
                 </ol>
               </div>
