@@ -11,7 +11,7 @@ import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
-  getBedTypes,
+  BED_TYPES,
 } from "../../Common/constants";
 import {
   MultiSelectFormField,
@@ -561,9 +561,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             return;
           }}
         />
-        {getBedTypes({ kasp_string, kasp_enabled }).map((x) => {
+        {BED_TYPES.map((x) => {
           const res = capacityData.find((data) => {
-            return data.room_type === x.id;
+            return data.room_type === x;
           });
           if (res) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
@@ -578,7 +578,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 bedCapacityId={res.id}
                 key={`bed_${res.id}`}
                 room_type={res.room_type}
-                label={x.text}
+                label={t(`bed_type__${x}`)}
                 used={res.current_capacity || 0}
                 total={res.total_capacity || 0}
                 lastUpdated={res.modified_date}
