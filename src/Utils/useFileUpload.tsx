@@ -84,11 +84,13 @@ export default function useFileUpload(
     const f = e.target.files[0];
     const fileName = f.name;
     setFile(e.target.files[0]);
-    setUploadFileName(
-      uploadFileName ||
-        fileName.substring(0, fileName.lastIndexOf(".")) ||
-        fileName,
-    );
+
+    // This is commented out to prompt users to input valid file names. See https://github.com/ohcnetwork/care_fe/issues/7942#issuecomment-2324391329
+    //setUploadFileName(
+    //  uploadFileName ||
+    //    fileName.substring(0, fileName.lastIndexOf(".")) ||
+    //    fileName,
+    //);
 
     const ext: string = fileName.split(".")[1];
 
