@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import { lazy, ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -35,7 +35,11 @@ import SkillsSlideOver from "./SkillsSlideOver";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
-import { showUserDelete } from "../../Utils/permissions";
+import {
+  hasPermissionToViewSensitiveUserDetails,
+  showUserDelete,
+} from "../../Utils/permissions";
+import { UserModel } from "./models";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -53,7 +57,7 @@ export default function ManageUsers() {
     limit: 18,
     cacheBlacklist: ["username"],
   });
-  let manageUsers: any = null;
+  let manageUsers: ReactNode = null;
   const [expandSkillList, setExpandSkillList] = useState(false);
   const [expandFacilityList, setExpandFacilityList] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
@@ -138,7 +142,7 @@ export default function ManageUsers() {
   const handleWorkingHourSubmit = async () => {
     const username = selectedUser;
     if (!username || !weeklyHours || +weeklyHours < 0 || +weeklyHours > 168) {
-      setWeeklyHoursError("Value should be between 0 and 168");
+      setWeeklyHoursError(t("user__working_hours__validation__range"));
       return;
     }
     const { res, data, error } = await request(routes.partialUpdateUser, {
@@ -147,13 +151,13 @@ export default function ManageUsers() {
     });
     if (res && res.status === 200 && data) {
       Notification.Success({
-        msg: "Working hours updated successfully",
+        msg: t("user__working_hours__update_success"),
       });
       setExpandWorkingHours(false);
       setSelectedUser(null);
     } else {
       Notification.Error({
-        msg: "Error while updating working hours: " + (error || ""),
+        msg: t("user__working_hours__update_error") + ": " + (error || ""),
       });
     }
     setWeeklyHours("0");
@@ -167,11 +171,11 @@ export default function ManageUsers() {
     });
     if (res?.status === 204) {
       Notification.Success({
-        msg: "User deleted successfully",
+        msg: t("user__delete_success"),
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting User: " + (error || ""),
+        msg: t("user__delete_error") + ": " + (error || ""),
       });
     }
 
@@ -179,7 +183,7 @@ export default function ManageUsers() {
     await refetchUserList();
   };
 
-  const handleDelete = (user: any) => {
+  const handleDelete = (user: UserModel) => {
     setUserData({
       show: true,
       username: user.username,
@@ -187,11 +191,11 @@ export default function ManageUsers() {
     });
   };
 
-  let userList: any[] = [];
+  let userList: ReactNode = [];
 
   userListData?.results &&
     userListData.results.length &&
-    (userList = userListData.results.map((user: any, idx) => {
+    (userList = userListData.results.map((user: UserModel, idx) => {
       const cur_online = isUserOnline(user);
       return (
         <div key={`usr_${user.id}`} id={`usr_${idx}`}>
@@ -207,34 +211,38 @@ export default function ManageUsers() {
                       {user.username}
                     </div>
                   )}
-                  <div className="min-width-50 shrink-0 text-sm text-secondary-600">
-                    {user.last_login && cur_online ? (
-                      <span>
-                        {" "}
-                        <CareIcon icon="l-clock" className="text-lg" />{" "}
-                        Currently Online
-                      </span>
-                    ) : (
-                      <>
+                  {hasPermissionToViewSensitiveUserDetails(authUser, user) && (
+                    <div className="min-width-50 shrink-0 text-sm text-secondary-600">
+                      {user.last_login && cur_online ? (
                         <span>
-                          <CareIcon icon="l-clock" className="text-lg" /> Last
-                          Online:{" "}
+                          {" "}
+                          <CareIcon icon="l-clock" className="text-lg" />{" "}
+                          {t("currently_online")}
                         </span>
-                        <span
-                          aria-label="Online"
-                          className={classNames(
-                            "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-secondary-300",
-                          )}
-                        ></span>
-                        <span className="pl-2">
-                          {user.last_login
-                            ? relativeTime(user.last_login)
-                            : "Never"}
-                        </span>
-                      </>
-                    )}
-                  </div>
+                      ) : (
+                        <>
+                          <span>
+                            <CareIcon icon="l-clock" className="text-lg" />
+                            {t("last_online")}:{" "}
+                          </span>
+                          <span
+                            aria-label="Online"
+                            className={classNames(
+                              "inline-block h-2 w-2 shrink-0 rounded-full",
+                              cur_online
+                                ? "bg-primary-400"
+                                : "bg-secondary-300",
+                            )}
+                          ></span>
+                          <span className="pl-2">
+                            {user.last_login
+                              ? relativeTime(user.last_login)
+                              : t("never")}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div
                   id="name"
@@ -279,54 +287,64 @@ export default function ManageUsers() {
                       value={user.district_object.name}
                     />
                   )}
-                  {user.user_type === "Doctor" && (
-                    <>
-                      <div className="col-span-1">
-                        <UserDetails
-                          id="doctor-qualification"
-                          title="Qualification"
-                        >
-                          {user.doctor_qualification ? (
-                            <span className="font-semibold">
-                              {user.doctor_qualification}
-                            </span>
-                          ) : (
-                            <span className="text-secondary-600">Unknown</span>
-                          )}
-                        </UserDetails>
-                      </div>
-                      <div className="col-span-1">
-                        <UserDetails id="doctor-experience" title="Experience">
-                          {user.doctor_experience_commenced_on ? (
-                            <span className="font-semibold">
-                              {dayjs().diff(
-                                user.doctor_experience_commenced_on,
-                                "years",
-                                false,
-                              )}{" "}
-                              years
-                            </span>
-                          ) : (
-                            <span className="text-secondary-600">Unknown</span>
-                          )}
-                        </UserDetails>
-                      </div>
-                      <div className="col-span-2">
-                        <UserDetails
-                          id="medical-council-registration"
-                          title="Medical Council Registration"
-                        >
-                          {user.doctor_medical_council_registration ? (
-                            <span className="font-semibold">
-                              {user.doctor_medical_council_registration}
-                            </span>
-                          ) : (
-                            <span className="text-secondary-600">Unknown</span>
-                          )}
-                        </UserDetails>
-                      </div>
-                    </>
-                  )}
+                  {hasPermissionToViewSensitiveUserDetails(authUser, user) &&
+                    user.user_type === "Doctor" && (
+                      <>
+                        <div className="col-span-1">
+                          <UserDetails
+                            id="doctor-qualification"
+                            title="Qualification"
+                          >
+                            {user.doctor_qualification ? (
+                              <span className="font-semibold">
+                                {user.doctor_qualification}
+                              </span>
+                            ) : (
+                              <span className="text-secondary-600">
+                                {t("unknown")}
+                              </span>
+                            )}
+                          </UserDetails>
+                        </div>
+                        <div className="col-span-1">
+                          <UserDetails
+                            id="doctor-experience"
+                            title="Experience"
+                          >
+                            {user.doctor_experience_commenced_on ? (
+                              <span className="font-semibold">
+                                {dayjs().diff(
+                                  user.doctor_experience_commenced_on,
+                                  "years",
+                                  false,
+                                )}{" "}
+                                {t("years")}
+                              </span>
+                            ) : (
+                              <span className="text-secondary-600">
+                                {t("unknown")}
+                              </span>
+                            )}
+                          </UserDetails>
+                        </div>
+                        <div className="col-span-2">
+                          <UserDetails
+                            id="medical-council-registration"
+                            title="Medical Council Registration"
+                          >
+                            {user.doctor_medical_council_registration ? (
+                              <span className="font-semibold">
+                                {user.doctor_medical_council_registration}
+                              </span>
+                            ) : (
+                              <span className="text-secondary-600">
+                                Unknown
+                              </span>
+                            )}
+                          </UserDetails>
+                        </div>
+                      </>
+                    )}
                 </div>
                 {user.local_body_object && (
                   <UserDetails id="local_body" title="Location">
@@ -354,31 +372,34 @@ export default function ManageUsers() {
                       </UserDetails>
                     </div>
                   )}
-                  {user.username && (
-                    <div className="col-span-1">
-                      <UserDetails id="home_facility" title="Home Facility">
-                        <span className="block font-semibold">
-                          {user.home_facility_object?.name ||
-                            "No Home Facility"}
-                        </span>
-                      </UserDetails>
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <UserDetails
-                    id="working-hours"
-                    title="Average weekly working hours"
-                  >
-                    {user.weekly_working_hours ? (
-                      <span className="font-semibold">
-                        {user.weekly_working_hours} hours
-                      </span>
-                    ) : (
-                      <span className="text-secondary-600">-</span>
+                  {hasPermissionToViewSensitiveUserDetails(authUser, user) &&
+                    user.username && (
+                      <div className="col-span-1">
+                        <UserDetails id="home_facility" title="Home Facility">
+                          <span className="block font-semibold">
+                            {user.home_facility_object?.name ||
+                              t("no_home_facility")}
+                          </span>
+                        </UserDetails>
+                      </div>
                     )}
-                  </UserDetails>
                 </div>
+                {hasPermissionToViewSensitiveUserDetails(authUser, user) && (
+                  <div>
+                    <UserDetails
+                      id="working-hours"
+                      title={t("user__weekly_working_hours")}
+                    >
+                      {user.weekly_working_hours ? (
+                        <span className="font-semibold">
+                          {user.weekly_working_hours} {t("hours")}
+                        </span>
+                      ) : (
+                        <span className="text-secondary-600">-</span>
+                      )}
+                    </UserDetails>
+                  </div>
+                )}
               </div>
               {user.username && (
                 <div className="mb-0 mt-auto flex w-full flex-col justify-between gap-2 p-4">
@@ -392,7 +413,7 @@ export default function ManageUsers() {
                       }}
                     >
                       <CareIcon icon="l-hospital" className="text-lg" />
-                      <p>Linked Facilities</p>
+                      <p>{t("linked_facilities")}</p>
                     </ButtonV2>
                     <ButtonV2
                       id="skills"
@@ -403,7 +424,7 @@ export default function ManageUsers() {
                       }}
                     >
                       <CareIcon icon="l-award" className="text-xl" />
-                      <p>Linked Skills</p>
+                      <p>{t("linked_skills")}</p>
                     </ButtonV2>
                   </div>
                   {["DistrictAdmin", "StateAdmin"].includes(
@@ -416,12 +437,12 @@ export default function ManageUsers() {
                         onClick={() => {
                           setExpandWorkingHours(true);
                           setSelectedUser(user.username);
-                          setWeeklyHours(user.weekly_working_hours);
+                          setWeeklyHours(user.weekly_working_hours ?? "0");
                         }}
                       >
                         <CareIcon icon="l-clock" className="text-xl" />
                         <p className="whitespace-normal md:whitespace-nowrap">
-                          Set Average weekly working hours
+                          {t("set_average_weekly_working_hours")}
                         </p>
                       </ButtonV2>
                     </div>
@@ -450,7 +471,7 @@ export default function ManageUsers() {
       <div>
         <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
           <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
-            No Users Found
+            {t("no_users_found")}
           </div>
         </div>
       </div>
@@ -589,7 +610,7 @@ export default function ManageUsers() {
   );
 }
 
-export function UserFacilities(props: { user: any }) {
+export function UserFacilities(props: { user: UserModel }) {
   const { t } = useTranslation();
   const { user } = props;
   const username = user.username;
@@ -598,11 +619,11 @@ export function UserFacilities(props: { user: any }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [facility, setFacility] = useState<any>(null);
+  const [facility, setFacility] = useState<FacilityModel | null>(null);
   const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
     show: boolean;
     userName: string;
-    facility?: FacilityModel;
+    facility?: FacilityModel | null;
     isHomeFacility: boolean;
   }>({ show: false, userName: "", facility: undefined, isHomeFacility: false });
   const authUser = useAuthUser();
@@ -658,11 +679,14 @@ export function UserFacilities(props: { user: any }) {
     setOffset(offset);
   };
 
-  const updateHomeFacility = async (username: string, facility: any) => {
+  const updateHomeFacility = async (
+    username: string,
+    facility: FacilityModel | undefined,
+  ) => {
     setIsLoading(true);
     const { res } = await request(routes.partialUpdateUser, {
       pathParams: { username },
-      body: { home_facility: facility.id.toString() },
+      body: { home_facility: facility?.id?.toString() },
     });
     if (!res?.ok) {
       Notification.Error({
@@ -715,11 +739,14 @@ export function UserFacilities(props: { user: any }) {
     setIsLoading(false);
   };
 
-  const addFacility = async (username: string, facility: any) => {
+  const addFacility = async (
+    username: string,
+    facility: FacilityModel | null,
+  ) => {
     setIsLoading(true);
     const { res } = await request(routes.addUserFacility, {
       pathParams: { username },
-      body: { facility: facility.id.toString() },
+      body: { facility: facility?.id?.toString() },
     });
 
     if (!res?.ok) {
@@ -756,7 +783,7 @@ export function UserFacilities(props: { user: any }) {
           showAll={false} // Show only facilities that user has access to link (not all facilities)
           showNOptions={8}
           selected={facility}
-          setSelected={setFacility}
+          setSelected={(facility) => setFacility(facility as FacilityModel)}
           errors=""
           className="z-40"
         />
@@ -789,7 +816,7 @@ export function UserFacilities(props: { user: any }) {
                     }
                   >
                     <CareIcon icon="l-estate" className="mr-1 pt-px text-lg" />
-                    Home Facility
+                    {t("home_facility")}
                   </span>
                   {(["DistrictAdmin", "StateAdmin"].includes(
                     authUser.user_type,

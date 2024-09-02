@@ -36,7 +36,7 @@ export type UserModel = UserBareMinimum & {
   is_superuser?: boolean;
   verified?: boolean;
   home_facility?: string;
-  home_facility_object?: HomeFacilityObjectModel;
+  home_facility_object?: HomeFacilityObjectModel | null;
   local_body_object?: LocalBodyModel;
   district_object?: DistrictModel;
   state_object?: StateModel;
@@ -44,6 +44,7 @@ export type UserModel = UserBareMinimum & {
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;
   weekly_working_hours?: string | null;
+  created_by?: string;
 };
 
 export type UserBaseModel = {

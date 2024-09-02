@@ -192,5 +192,6 @@
   "live": "Live",
   "discharged": "Discharged",
   "archived": "Archived",
-  "no_changes_made": "No changes made"
+  "no_changes_made": "No changes made",
+  "hours": "Hours"
 }
