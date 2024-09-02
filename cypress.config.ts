@@ -32,4 +32,7 @@ export default defineConfig({
     requestTimeout: 15000,
     excludeSpecPattern: "**/*roles.cy.ts",
   },
+  env: {
+    API_URL: process.env.REACT_CARE_API_URL,
+  },
 });
