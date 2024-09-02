@@ -183,6 +183,7 @@
   "GENDER__1": "Male",
   "GENDER__2": "Female",
   "GENDER__3": "Non-binary",
+  "normal": "Normal",
   "done": "Done",
   "view": "View",
   "rename": "Rename",
@@ -191,5 +192,6 @@
   "discard": "Discard",
   "live": "Live",
   "discharged": "Discharged",
-  "archived": "Archived"
+  "archived": "Archived",
+  "no_changes_made": "No changes made"
 }
