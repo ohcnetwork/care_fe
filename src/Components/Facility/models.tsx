@@ -101,7 +101,12 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
+export type PatientCategory =
+  | "Comfort Care" // Discontinued
+  | "Mild"
+  | "Moderate"
+  | "Critical"
+  | "Actively Dying";
 
 export interface PatientConsentModel {
   id: string;
@@ -286,7 +291,7 @@ export type ABGPlotsFields =
   | "lactate"
   | "sodium"
   | "potassium"
-  | "ventilator_fi02";
+  | "ventilator_fio2";
 
 export type ABGPlotsRes = {
   ph: string;
@@ -297,7 +302,7 @@ export type ABGPlotsRes = {
   lactate: string;
   sodium: string;
   potassium: string;
-  ventilator_fi02: number;
+  ventilator_fio2: number;
 };
 
 export type DialysisPlotsFields =
@@ -392,7 +397,7 @@ export type PrimaryParametersPlotFields =
   | "insulin_intake_frequency"
   | "insulin_intake_dose"
   | "ventilator_spo2"
-  | "ventilator_fi02"
+  | "ventilator_fio2"
   | "rhythm"
   | "rhythm_detail";
 
@@ -409,7 +414,7 @@ export type PrimaryParametersPlotRes = {
   insulin_intake_frequency: number;
   insulin_intake_dose: string;
   ventilator_spo2: number;
-  ventilator_fi02: number;
+  ventilator_fio2: number;
   rhythm: number;
   rhythm_detail: string;
 };
@@ -421,7 +426,7 @@ export type VentilatorPlotFields =
   | "ventilator_pressure_support"
   | "ventilator_tidal_volume"
   | "ventilator_peep"
-  | "ventilator_fi02"
+  | "ventilator_fio2"
   | "ventilator_spo2"
   | "etco2"
   | "bilateral_air_entry"
@@ -435,7 +440,7 @@ export type VentilatorPlotRes = {
   ventilator_pressure_support: number;
   ventilator_tidal_volume: number;
   ventilator_peep: string;
-  ventilator_fi02: number;
+  ventilator_fio2: number;
   ventilator_spo2: number;
   etco2: number;
   bilateral_air_entry: boolean;

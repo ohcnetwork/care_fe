@@ -1,7 +1,7 @@
 import { useState } from "react";
 import FilePreviewDialog from "../Components/Common/FilePreviewDialog";
 import { FileUploadModel } from "../Components/Patient/models";
-import { ExtImage, StateInterface } from "../Components/Patient/FileUpload";
+import { StateInterface } from "../Components/Files/FileUpload";
 import request from "./request/request";
 import routes from "../Redux/api";
 import DialogModal from "../Components/Common/Dialog";
@@ -11,13 +11,16 @@ import { Cancel, Submit } from "../Components/Common/components/ButtonV2";
 import { formatDateTime } from "./utils";
 import * as Notification from "./Notifications.js";
 import TextFormField from "../Components/Form/FormFields/TextFormField";
+import {
+  FILE_EXTENSIONS,
+  PREVIEWABLE_FILE_EXTENSIONS,
+} from "../Common/constants";
 
 export interface FileManagerOptions {
   type: string;
   onArchive?: () => void;
   onEdit?: () => void;
 }
-
 export interface FileManagerResult {
   viewFile: (file: FileUploadModel, associating_id: string) => void;
   archiveFile: (
@@ -25,8 +28,17 @@ export interface FileManagerResult {
     associating_id: string,
     skipPrompt?: { reason: string },
   ) => void;
-  editFile: (file: FileUploadModel) => void;
+  editFile: (file: FileUploadModel, associating_id: string) => void;
   Dialogues: React.ReactNode;
+  isPreviewable: (file: FileUploadModel) => boolean;
+  getFileType: (
+    file: FileUploadModel,
+  ) => keyof typeof FILE_EXTENSIONS | "UNKNOWN";
+  downloadFile: (
+    file: FileUploadModel,
+    associating_id: string,
+  ) => Promise<void>;
+  type: string;
 }
 
 export default function useFileManager(
@@ -92,7 +104,9 @@ export default function useFileManager(
       open: true,
       name: data.name as string,
       extension,
-      isImage: ExtImage.includes(extension),
+      isImage: FILE_EXTENSIONS.IMAGE.includes(
+        extension as (typeof FILE_EXTENSIONS.IMAGE)[number],
+      ),
     });
     downloadFileUrl(signedUrl);
     setFileUrl(signedUrl);
@@ -195,8 +209,8 @@ export default function useFileManager(
     setEditing(false);
   };
 
-  const editFile = (file: FileUploadModel) => {
-    setEditDialogueOpen(file);
+  const editFile = (file: FileUploadModel, associating_id: string) => {
+    setEditDialogueOpen({ ...file, associating_id });
   };
 
   const Dialogues = (
@@ -245,6 +259,7 @@ export default function useFileManager(
           <div>
             <TextAreaFormField
               name="editFileName"
+              id="archive-file-reason"
               label={
                 <span>
                   State the reason for archiving{" "}
@@ -327,7 +342,12 @@ export default function useFileManager(
                 <div className="text-xs uppercase text-secondary-700">
                   {item.label}
                 </div>
-                <div className="break-words text-base">{item.content}</div>
+                <div
+                  className="break-words text-base"
+                  data-archive-info={item.label}
+                >
+                  {item.content}
+                </div>
               </div>
             </div>
           ))}
@@ -364,6 +384,7 @@ export default function useFileManager(
           <div>
             <TextFormField
               name="editFileName"
+              id="edit-file-name"
               label="Enter the file name"
               value={editDialogueOpen?.name}
               onChange={(e) => {
@@ -388,10 +409,63 @@ export default function useFileManager(
     </>
   );
 
+  const isPreviewable = (file: FileUploadModel) =>
+    !!file.extension &&
+    PREVIEWABLE_FILE_EXTENSIONS.includes(
+      file.extension.slice(1) as (typeof PREVIEWABLE_FILE_EXTENSIONS)[number],
+    );
+
+  const getFileType: (
+    f: FileUploadModel,
+  ) => keyof typeof FILE_EXTENSIONS | "UNKNOWN" = (file: FileUploadModel) => {
+    if (!file.extension) return "UNKNOWN";
+    const ftype = (
+      Object.keys(FILE_EXTENSIONS) as (keyof typeof FILE_EXTENSIONS)[]
+    ).find((type) =>
+      FILE_EXTENSIONS[type].includes((file.extension?.slice(1) || "") as never),
+    );
+    return ftype || "UNKNOWN";
+  };
+
+  const downloadFile = async (
+    file: FileUploadModel,
+    associating_id: string,
+  ) => {
+    try {
+      if (!file.id) return;
+      Notification.Success({ msg: "Downloading file..." });
+      const { data: fileData } = await request(routes.retrieveUpload, {
+        query: { file_type: fileType, associating_id },
+        pathParams: { id: file.id },
+      });
+      const response = await fetch(fileData?.read_signed_url || "");
+      if (!response.ok) throw new Error("Network response was not ok.");
+
+      const data = await response.blob();
+      const blobUrl = window.URL.createObjectURL(data);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = file.name || "file";
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(blobUrl);
+      document.body.removeChild(a);
+    } catch (err) {
+      Notification.Error({ msg: "Failed to download file" });
+    }
+  };
+
   return {
     viewFile,
     archiveFile,
     editFile,
     Dialogues,
+    isPreviewable,
+    getFileType,
+    downloadFile,
+    type: fileType,
   };
 }

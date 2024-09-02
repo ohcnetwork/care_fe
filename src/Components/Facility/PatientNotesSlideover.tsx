@@ -15,6 +15,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
 import { Link } from "raviger";
+import { t } from "i18next";
 
 interface PatientNotesProps {
   patientId: string;
@@ -224,14 +225,14 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             <AutoExpandingTextInputFormField
               id="doctor_notes_textarea"
               maxHeight={160}
-              rows={1}
+              rows={2}
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
               className="w-full grow"
               errorClassName="hidden"
               innerClassName="pr-10"
-              placeholder="Type your Note"
+              placeholder={t("notes_placeholder")}
               disabled={!patientActive}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
