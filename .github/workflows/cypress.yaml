@@ -89,7 +89,7 @@ jobs:
           parallel: true
           group: "UI-Chrome"
         env:
-          CARE_API: http://localhost:9000
+          REACT_CARE_API_URL: http://localhost:9000
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
@@ -111,7 +111,7 @@ jobs:
           group: "UI-Chrome"
         env:
           CYPRESS_SPLIT_TESTS: "true"
-          CARE_API: http://localhost:9000
+          REACT_CARE_API_URL: http://localhost:9000
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
