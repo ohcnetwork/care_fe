@@ -62,6 +62,7 @@
   "patient_registration__address": "Address",
   "patient_registration__age": "Age",
   "patient_consultation__op": "OP",
+  "patient_consultation__ip": "IP",
   "patient_consultation__dc_admission": "Date of domiciliary care commenced",
   "patient_consultation__admission": "Date of admission",
   "patient_registration__gender": "Gender",

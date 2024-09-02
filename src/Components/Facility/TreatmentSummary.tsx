@@ -125,7 +125,12 @@ function BasicDetailsSection({
             {patientData ? formatPatientAge(patientData, true) : ""}
           </div>
           <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
-            <b>{t("patient_consultation__op")} :</b>{" "}
+            <b>
+              {consultationData?.suggestion === "A"
+                ? t("patient_consultation__ip")
+                : t("patient_consultation__op")}{" "}
+              :
+            </b>{" "}
             {consultationData?.patient_no ?? ""}
           </div>
         </div>
