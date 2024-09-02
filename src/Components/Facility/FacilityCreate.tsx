@@ -851,7 +851,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     types={["mobile", "landline"]}
                   />
                   <div className="py-4 md:col-span-2">
-                    <h4 className="mb-4">Spoke Facilities</h4>
+                    <h4 className="mb-4">{t("spokes")}</h4>
                     {facilityId && (
                       <SpokeFacilityEditor
                         facility={{ ...facilityQuery.data, id: facilityId }}

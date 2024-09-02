@@ -1,4 +1,3 @@
-//import { useTranslation } from "react-i18next";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
@@ -15,6 +14,7 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import { useEffect, useState } from "react";
 import { SPOKE_RELATION_TYPES } from "../../Common/constants";
 import FacilityBlock from "./FacilityBlock";
+import { useTranslation } from "react-i18next";
 
 export interface SpokeFacilityEditorProps {
   facility: Omit<FacilityModel, "id"> & { id: string };
@@ -23,7 +23,7 @@ export interface SpokeFacilityEditorProps {
 export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
   const { facility } = props;
 
-  //const { t } = useTranslation();
+  const { t } = useTranslation();
 
   const spokesQuery = useQuery(routes.getFacilitySpokes, {
     pathParams: {
@@ -85,7 +85,7 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
     }, [selectedFacility]);
 
     return (
-      <>
+      <div className="flex w-full flex-col items-center gap-4 md:flex-row">
         {"id" in item ? (
           <div className="w-full">
             <FacilityBlock facility={item.spoke_object} />
@@ -94,7 +94,7 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
           <FacilitySelect
             multiple={false}
             name="facility"
-            placeholder="Add Spoke Facility"
+            placeholder={t("add_spoke")}
             showAll={false}
             showNOptions={8}
             selected={selectedFacility}
@@ -119,10 +119,10 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
           value={item.relationship}
           onChange={(v) => setItem({ ...item, relationship: v.value })}
           errorClassName="hidden"
-          className="shrink-0"
+          className="w-full shrink-0 md:w-auto"
           disabled={processing}
         />
-      </>
+      </div>
     );
   };
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
 interface Identifier {
   id: string;
@@ -29,6 +30,8 @@ export interface ModelCrudEditorProps<TRes extends Identifier, TReq, TErr> {
 export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
   props: ModelCrudEditorProps<TRes, TReq, TErr>,
 ) {
+  const { t } = useTranslation();
+
   const {
     onCreate,
     onUpdate,
@@ -94,7 +97,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
     }, [item]);
 
     return (
-      <>
+      <div className="flex w-full flex-col items-center gap-4 md:flex-row">
         {children(item, setItem, processing, errors)}
         {props.type === "creating" && (
           <ButtonV2
@@ -112,12 +115,13 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
           <button
             disabled={processing}
             onClick={() => handleDelete(props.item.id)}
-            className="text-xl text-red-500 hover:text-red-700 disabled:grayscale"
+            className="w-full text-xl text-red-500 hover:text-red-700 disabled:grayscale md:w-auto"
           >
-            <CareIcon icon="l-times-circle" />
+            <CareIcon icon="l-times-circle" />{" "}
+            <span className="text-sm md:hidden">{t("remove")}</span>
           </button>
         )}
-      </>
+      </div>
     );
   };
 
