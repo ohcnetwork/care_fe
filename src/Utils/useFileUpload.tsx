@@ -248,7 +248,7 @@ export default function useFileUpload(
       type="file"
       accept={
         "allowedExtensions" in options
-          ? options.allowedExtensions?.join(",")
+          ? options.allowedExtensions?.map((e) => "." + e).join(",")
           : "allowAllExtensions" in options
             ? "*"
             : DEFAULT_ALLOWED_EXTENSIONS.join(",")
