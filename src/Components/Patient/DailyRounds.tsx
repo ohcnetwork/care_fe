@@ -790,6 +790,7 @@ export const DailyRounds = (props: any) => {
                     <EditDiagnosesBuilder
                       value={diagnoses}
                       suggestions={diagnosisSuggestions}
+                      onUpdate={() => setDiagnosisSuggestions([])}
                     />
                   ) : (
                     <div className="flex animate-pulse justify-center py-4 text-center font-medium text-secondary-800">

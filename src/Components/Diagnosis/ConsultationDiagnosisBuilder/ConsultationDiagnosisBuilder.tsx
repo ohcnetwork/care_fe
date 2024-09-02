@@ -80,11 +80,13 @@ interface EditDiagnosesProps {
   className?: string;
   value: ConsultationDiagnosis[];
   suggestions?: ICD11DiagnosisModel[];
+  onUpdate?: (diagnoses: ConsultationDiagnosis[]) => void;
 }
 
 export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
   const consultation = useSlug("consultation");
   const [diagnoses, setDiagnoses] = useState(props.value);
+  const [prefill, setPrefill] = useState<ICD11DiagnosisModel>();
 
   useEffect(() => {
     setDiagnoses(props.value);
@@ -138,8 +140,12 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
                 Notification.Error({ msg: error });
               }
 
+              setPrefill(undefined);
+              props.onUpdate?.(diagnoses);
+
               return false;
             }}
+            prefill={prefill}
           />
           {!!props.suggestions?.length && (
             <div className="mb-4 flex flex-wrap gap-2">
@@ -147,6 +153,8 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
                 <button
                   key={i}
                   className="flex items-center gap-2 rounded-full border border-primary-500 px-4 py-1 text-sm text-primary-500 transition-all hover:bg-primary-400/10"
+                  onClick={() => setPrefill(suggestion)}
+                  type="button"
                 >
                   <CareIcon icon="l-heart-medical" />
                   {suggestion.label}

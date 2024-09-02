@@ -17,6 +17,7 @@ interface AddICD11DiagnosisProps {
   onAdd: (object: CreateDiagnosis) => Promise<boolean>;
   disallowed: ICD11DiagnosisModel[];
   disabled?: boolean;
+  prefill?: ICD11DiagnosisModel;
 }
 
 export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
@@ -34,6 +35,8 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
       Error({ msg: "ICD-11 Diagnosis functionality is facing issues." });
     }
   }, [res?.status]);
+
+  useEffect(() => props.prefill && setSelected(props.prefill), [props.prefill]);
 
   const handleAdd = async (status: CreateDiagnosis["verification_status"]) => {
     if (!selected) return;
