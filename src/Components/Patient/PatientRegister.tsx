@@ -19,14 +19,7 @@ import {
 } from "../../Utils/utils";
 import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  lazy,
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { lazy, useCallback, useReducer, useRef, useState } from "react";
 
 import AccordionV2 from "../Common/components/AccordionV2";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -190,7 +183,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     title: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [careExtId, setCareExtId] = useState("");
   const [formField, setFormField] = useState<any>();
   const [resetNum, setResetNum] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -217,13 +209,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     useState(false);
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
-
-  useEffect(() => {
-    if (extId && formField) {
-      setCareExtId(extId);
-      fetchExtResultData(formField);
-    }
-  }, [careExtId, formField]);
 
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
