@@ -18,8 +18,8 @@ export const PrescriptionFormValidator = () => {
         form.target_dosage &&
         form.base_dosage.split(" ")[1] !== form.target_dosage.split(" ")[1]
       ) {
-        errors.base_dosage = t("unit_must_be_same_as_target_dosage_unit");
-        errors.target_dosage = t("unit_must_be_same_as_base_dosage_unit");
+        errors.base_dosage = t("inconsistent_dosage_units_error");
+        errors.target_dosage = t("inconsistent_dosage_units_error");
       }
     } else {
       errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
@@ -36,8 +36,7 @@ export const PrescriptionFormValidator = () => {
         maxDosageValue &&
         baseDosageValue > maxDosageValue
       ) {
-        errors.max_dosage =
-          "Max dosage in 24 hours must be greater than or equal to base dosage";
+        errors.max_dosage = t("max_dosage_in_24hrs_gte_base_dosage_error");
       }
     } else {
       errors.frequency = RequiredFieldValidator()(form.frequency);
@@ -56,7 +55,7 @@ export const EditPrescriptionFormValidator = (old: Prescription) => {
     const errors = PrescriptionFormValidator()(form);
 
     if (comparePrescriptions(old, form)) {
-      errors.$all = "No changes made";
+      errors.$all = t("no_changes_made");
     }
 
     return errors;
@@ -97,13 +96,13 @@ export const AdministrationDosageValidator = (
     if (!valueDosage) return t("field_required");
 
     if (value?.split(" ")[1] !== base_dosage?.split(" ")[1])
-      return "Unit must be the same as start and target dosage's unit";
+      return t("inconsistent_dosage_units_error");
 
     if (baseDosage && targetDosage) {
       const [min, max] = [baseDosage, targetDosage].sort((a, b) => a - b);
 
       if (!(min <= valueDosage && valueDosage <= max)) {
-        return "Dosage should be between start and target dosage";
+        return t("administration_dosage_range_error");
       }
     }
   };
