@@ -1,10 +1,3 @@
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import {
-  MultiSelectOptionChip,
-  dropdownOptionClassNames,
-} from "../MultiSelectMenuV2";
-import { ReactNode, useEffect, useRef, useState } from "react";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 import {
   Combobox,
   ComboboxButton,
@@ -12,6 +5,14 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import {
+  MultiSelectOptionChip,
+  dropdownOptionClassNames,
+} from "../MultiSelectMenuV2";
+import { ReactNode, useEffect, useRef, useState } from "react";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
@@ -176,6 +177,7 @@ export const AutocompleteMutliSelect = <T, V>(
 
           <DropdownTransition>
             <ComboboxOptions
+              modal={false}
               as="ul"
               className="cui-dropdown-base absolute top-12 z-10 mt-0.5"
             >
