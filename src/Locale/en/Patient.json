@@ -1,0 +1,11 @@
+{
+  "personal_demographic": "Personal/Demographic Details",
+  "import_external_result": "Import From External Results",
+  "date_of_birth_note": "Date of Birth Note",
+  "date_of_birth_note_description": "Please enter the correct date of birth for the patient",
+  "transfer_patient_dialog_title": "Patient Transfer Form",
+  "abha_details": "Abha Details",
+  "abha_address": "Abha Address",
+  "link_abha_number": "Link Abha Number",
+  "abha_address_not_found": "No Abha Address Associated with this ABHA Number"
+}
