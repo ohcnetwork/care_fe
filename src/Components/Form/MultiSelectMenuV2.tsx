@@ -1,4 +1,3 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import {
   Label,
   Listbox,
@@ -6,8 +5,10 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
 import { ReactNode, useRef } from "react";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { classNames } from "../../Utils/utils";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -135,6 +136,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
               </ListboxButton>
             </div>
             <ListboxOptions
+              modal={false}
               as="ul"
               className="cui-dropdown-base absolute top-full"
             >
