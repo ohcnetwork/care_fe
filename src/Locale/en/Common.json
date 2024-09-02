@@ -192,5 +192,9 @@
   "live": "Live",
   "discharged": "Discharged",
   "archived": "Archived",
-  "no_changes_made": "No changes made"
+  "no_changes_made": "No changes made",
+  "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
+  "oxygen_information": "Oxygen Information",
+  "deleted_successfuly": "{{name}} Deleted Successfuly",
+  "delete_item": "Delete {{name}}"
 }

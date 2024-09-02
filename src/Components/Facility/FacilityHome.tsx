@@ -88,7 +88,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       onResponse: ({ res }) => {
         if (res?.ok) {
           Notification.Success({
-            msg: "Facility deleted successfully",
+            msg: t("deleted_successfuly", { name: "facility" }),
           });
         }
         navigate("/facility");
@@ -150,11 +150,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       backUrl="/facility"
     >
       <ConfirmDialog
-        title={`Delete ${facilityData?.name}`}
+        title={t("delete_item", { name: facilityData?.name })}
         description={
           <span>
-            Are you sure you want to delete{" "}
-            <strong>{facilityData?.name}</strong>
+            {t("are_you_sure_want_to_delete", { name: facilityData?.name })}
           </span>
         }
         action="Delete"
@@ -474,7 +473,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       <FacilityStaffList facilityId={facilityId} />
 
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
+        <h1 className="mb-6 text-xl font-bold">{t("oxygen_information")}</h1>
         <div
           className="overflow-x-auto overflow-y-hidden"
           id="facility-oxygen-info"
@@ -532,7 +531,7 @@ const LiveMonitoringButton = () => {
           id="facility-detailspage-livemonitoring"
         >
           <CareIcon icon="l-video" className="text-lg" />
-          <span>Live Monitoring</span>
+          <span>{t("live_monitoring")}</span>
         </ButtonV2>
       </PopoverButton>
 
@@ -571,7 +570,7 @@ const LiveMonitoringButton = () => {
                 className="w-full"
                 href={`/facility/${facilityId}/live-monitoring?location=${location}`}
               >
-                Open Live Monitoring
+                {t("open_live_monitoring")}
               </ButtonV2>
             </div>
           </div>
