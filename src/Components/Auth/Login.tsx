@@ -21,7 +21,7 @@ export const Login = (props: { forgot?: boolean }) => {
     main_logo,
     recaptcha_site_key,
     github_url,
-    coronasafe_url,
+    ohcn_url,
     state_logo,
     custom_logo,
     custom_logo_alt,
@@ -173,7 +173,7 @@ export const Login = (props: { forgot?: boolean }) => {
               </>
             )}
             <a
-              href={coronasafe_url}
+              href={ohcn_url}
               className="inline-block"
               target="_blank"
               rel="noopener noreferrer"
@@ -181,7 +181,7 @@ export const Login = (props: { forgot?: boolean }) => {
               <img
                 src={custom_logo_alt?.light ?? main_logo.light}
                 className="h-8"
-                alt="coronasafe logo"
+                alt="Open Healthcare Network logo"
               />
             </a>
           </div>
@@ -214,26 +214,22 @@ export const Login = (props: { forgot?: boolean }) => {
                 target="_blank"
               >
                 <img
-                  src="https://cdn.coronasafe.network/dpg-logo.svg"
+                  src="https://cdn.ohc.network/dpg-logo.svg"
                   className="h-12"
                   alt="Logo of Digital Public Goods Alliance"
                 />
               </a>
               <div className="ml-2 h-8 w-px rounded-full bg-white/50" />
-              <a
-                href={coronasafe_url}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
+              <a href={ohcn_url} rel="noopener noreferrer" target="_blank">
                 <img
-                  src="https://cdn.coronasafe.network/ohc_logo_light.png"
+                  src="https://cdn.ohc.network/ohc_logo_light.png"
                   className="inline-block h-10"
-                  alt="coronasafe logo"
+                  alt="Open Healthcare Network logo"
                 />
               </a>
             </div>
             <a
-              href={coronasafe_url}
+              href={ohcn_url}
               target="_blank"
               rel="noopener noreferrer"
               className="text-secondary-500"
