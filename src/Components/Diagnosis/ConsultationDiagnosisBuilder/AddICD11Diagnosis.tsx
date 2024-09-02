@@ -26,6 +26,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   const hasError = !!props.disallowed.find((d) => d?.id === selected?.id);
 
   const { res, data, loading, refetch } = useQuery(routes.listICD11Diagnosis, {
+    prefetch: false,
     silent: true,
   });
 
