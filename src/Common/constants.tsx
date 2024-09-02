@@ -441,17 +441,49 @@ export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
   "TD",
 ] as const;
 
-export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
+export type PatientCategoryID =
+  | "Comfort"
+  | "Stable"
+  | "Moderate"
+  | "Critical"
+  | "ActivelyDying";
 
 export const PATIENT_CATEGORIES: {
   id: PatientCategoryID;
   text: PatientCategory;
+  description: string;
   twClass: string;
 }[] = [
-  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Mild", twClass: "patient-stable" },
-  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
-  { id: "Critical", text: "Critical", twClass: "patient-critical" },
+  {
+    id: "Comfort", // Comfort Care is discontinued
+    text: "Comfort Care",
+    twClass: "patient-comfort",
+    description: "End of life care",
+  },
+  {
+    id: "Stable",
+    text: "Mild",
+    twClass: "patient-stable",
+    description: "Urgent: not life-threatening",
+  },
+  {
+    id: "Moderate",
+    text: "Moderate",
+    twClass: "patient-abnormal",
+    description: "Emergency: could be life-threatening",
+  },
+  {
+    id: "Critical",
+    text: "Critical",
+    twClass: "patient-critical",
+    description: "Immediate: life-threatening",
+  },
+  {
+    id: "ActivelyDying",
+    text: "Actively Dying",
+    twClass: "patient-activelydying",
+    description: "",
+  },
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
@@ -716,27 +748,27 @@ export const NURSING_CARE_PROCEDURES = [
 ] as const;
 
 export const EYE_OPEN_SCALE = [
-  { value: 4, text: "Spontaneous" },
-  { value: 3, text: "To Speech" },
-  { value: 2, text: "To Pain" },
   { value: 1, text: "No Response" },
+  { value: 2, text: "To Pain" },
+  { value: 3, text: "To Speech" },
+  { value: 4, text: "Spontaneous" },
 ];
 
 export const VERBAL_RESPONSE_SCALE = [
-  { value: 5, text: "Oriented to Time, Place and Person" },
-  { value: 4, text: "Confused/Irritable" },
-  { value: 3, text: "Inappropriate words/Cry to Pain" },
-  { value: 2, text: "Incomprehensible words/Moans to pain" },
   { value: 1, text: "No Response" },
+  { value: 2, text: "Incomprehensible words/Moans to pain" },
+  { value: 3, text: "Inappropriate words/Cry to Pain" },
+  { value: 4, text: "Confused/Irritable" },
+  { value: 5, text: "Oriented to Time, Place and Person" },
 ];
 
 export const MOTOR_RESPONSE_SCALE = [
-  { value: 6, text: "Obeying commands/Normal acrivity" },
-  { value: 5, text: "Moves to localized pain" },
-  { value: 4, text: "Flexion/Withdrawal from pain" },
-  { value: 3, text: "Abnormal Flexion(decorticate)" },
-  { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
+  { value: 2, text: "Abnormal Extension(decerebrate)" },
+  { value: 3, text: "Abnormal Flexion(decorticate)" },
+  { value: 4, text: "Flexion/Withdrawal from pain" },
+  { value: 5, text: "Moves to localized pain" },
+  { value: 6, text: "Obeying commands/Normal acrivity" },
 ];
 export const CONSULTATION_TABS = [
   { text: "UPDATES", desc: "Overview" },
@@ -1660,3 +1692,60 @@ export const PressureSoreTissueTypeOptions = [
   "Slough",
   "Necrotic",
 ] as const;
+
+export const FILE_EXTENSIONS = {
+  IMAGE: ["jpeg", "jpg", "png", "gif", "svg", "bmp", "webp", "jfif"],
+  AUDIO: ["mp3", "wav"],
+  VIDEO: [
+    "webm",
+    "mpg",
+    "mp2",
+    "mpeg",
+    "mpe",
+    "mpv",
+    "ogg",
+    "mp4",
+    "m4v",
+    "avi",
+    "wmv",
+    "mov",
+    "qt",
+    "flv",
+    "swf",
+  ],
+  PRESENTATION: ["pptx"],
+  DOCUMENT: ["pdf", "docx"],
+} as const;
+
+export const PREVIEWABLE_FILE_EXTENSIONS = [
+  "html",
+  "htm",
+  "pdf",
+  "mp4",
+  "webm",
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+] as const;
+
+export const HEADER_CONTENT_TYPES = {
+  pdf: "application/pdf",
+  txt: "text/plain",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  doc: "application/msword",
+  xls: "application/vnd.ms-excel",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  epub: "application/epub+zip",
+  gif: "image/gif",
+  html: "text/html",
+  htm: "text/html",
+  mp4: "video/mp4",
+  png: "image/png",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  svg: "image/svg+xml",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+} as const;

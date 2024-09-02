@@ -18,12 +18,12 @@ import {
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
 import EventsList from "./Events/EventsList";
-import SwitchTabs from "../../Common/components/SwitchTabs";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import EncounterSymptomsCard from "../../Symptoms/SymptomsCard";
+import Tabs from "../../Common/components/Tabs";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -651,20 +651,24 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
-          <SwitchTabs
+          <Tabs
             className="mt-3 w-full lg:w-full"
-            tab2={
-              <div className="flex items-center justify-center gap-1 text-sm">
-                Events
-                <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
-                  beta
-                </span>
-              </div>
-            }
-            tab1="Daily Rounds"
-            onClickTab1={() => setShowEvents(false)}
-            onClickTab2={() => setShowEvents(true)}
-            isTab2Active={showEvents}
+            tabs={[
+              {
+                text: (
+                  <div className="flex items-center justify-center gap-1 text-sm">
+                    Events
+                    <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
+                      beta
+                    </span>
+                  </div>
+                ),
+                value: 1,
+              },
+              { text: "Daily Rounds", value: 0 },
+            ]}
+            onTabChange={(v) => setShowEvents(!!v)}
+            currentTab={showEvents ? 1 : 0}
           />
           {showEvents ? (
             <EventsList />
