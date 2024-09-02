@@ -27,7 +27,7 @@ export const useTimer = () => {
   const [time, setTime] = useState(0);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: number;
     if (running) {
       interval = setInterval(() => {
         setTime((prevTime) => prevTime + 1);
