@@ -24,6 +24,7 @@ jobs:
           else
             echo "branch=develop" >> $GITHUB_OUTPUT
           fi
+          
       - name: Checkout care 📥
         uses: actions/checkout@v3
         with:
@@ -38,6 +39,7 @@ jobs:
           make docker_config_file=docker-compose.pre-built.yaml up 
           make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
           cd ..
+          
       - name: Wait for care to be up ♻
         uses: nick-fields/retry@v2
         with:
@@ -54,7 +56,7 @@ jobs:
       - name: Install dependencies 📦
         run: npm ci
 
-      - name: Build & Compile rescript files ⚙️
+      - name: Build files ⚙️
         run: npm run build
 
       - name: Install Specific Chrome Version
@@ -62,6 +64,13 @@ jobs:
           sudo apt-get install -y wget
           sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install ./google-chrome-stable_current_amd64.deb
+
+      - name: Cache Cypress Binary
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-cache
+      
       - name: Cache build artifacts
         uses: actions/cache@v3
         with:
@@ -84,6 +93,12 @@ jobs:
           path: |
             ./*
           key: ${{ runner.os }}-build-${{ github.sha }}
+
+      - name: Restore Cypress Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-cache
 
       - name: Determine PR Origin
         id: pr_origin
