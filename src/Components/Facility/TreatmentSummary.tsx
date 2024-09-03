@@ -1,6 +1,6 @@
 import { GENDER_TYPES } from "../../Common/constants";
 import {
-  classNames,
+  
   formatDate,
   formatDateTime,
   formatPatientAge,
