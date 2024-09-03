@@ -146,7 +146,7 @@ export default function ShowInvestigation(props: any) {
   return (
     <>
       <PageTitle
-        title={t("investigations")}
+        title={t("")}
         className="mx-3 md:mx-4 print:hidden"
         breadcrumbs={false}
         hideBack={true}
@@ -156,7 +156,7 @@ export default function ShowInvestigation(props: any) {
         }}
         backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
       />
-      <PrintPreview title={`Report of Investigation : ${patientData?.name}`}>
+      <PrintPreview title={`Investigation Report for ${patientData?.name}`}>
         <InvestigationTable
           title={`ID: ${sessionId}`}
           data={state.initialValues}

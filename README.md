@@ -14,7 +14,6 @@
 
 [![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/0)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/0)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/1)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/1)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/2)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/2)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/3)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/3)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/4)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/4)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/5)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/5)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/6)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/6)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/7)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/7)
 
-[![Storybook](https://raw.githubusercontent.com/storybooks/brand/master/badge/badge-storybook.svg)](https://careui.coronasafe.in)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=coronasafe_care_fe&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=coronasafe_care_fe)
 ![Code scanning - action](https://github.com/ohcnetwork/care_fe/workflows/Code%20scanning%20-%20action/badge.svg)
 ![OSSAR](https://github.com/ohcnetwork/care_fe/workflows/OSSAR/badge.svg)
@@ -116,7 +115,6 @@ npm run cypress:open       # To debug and run tests individually.
 
 - [CARE Documentation](https://docs.ohc.network/docs/care)
 - [Swagger API Documentation](https://careapi.ohc.network/swagger/)
-- [Storybook component library](https://careui.coronasafe.in/)
 - [Testing Documentation](https://docs.coronasafe.network/care-testing-documentation/)
 
 ## 🚀 Production
