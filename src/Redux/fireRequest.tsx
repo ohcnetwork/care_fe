@@ -3,6 +3,7 @@ import * as Notification from "../Utils/Notifications.js";
 import { LocalStorageKeys } from "../Common/constants";
 import api from "./api";
 import axios from "axios";
+import careConfig from "@careConfig";
 
 const requestMap: any = api;
 export const actions = {
@@ -90,6 +91,7 @@ export const fireRequest = (
     // set authorization header in the request header
     const config: any = {
       headers: {},
+      baseURL: careConfig.apiUrl,
     };
     if (!request.noAuth) {
       const access_token = localStorage.getItem(LocalStorageKeys.accessToken);

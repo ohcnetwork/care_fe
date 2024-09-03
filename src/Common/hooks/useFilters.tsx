@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
-import useConfig from "./useConfig";
 import { classNames, humanizeStrings } from "../../Utils/utils";
 import FiltersCache from "../../Utils/FiltersCache";
+import careConfig from "@careConfig";
 
 export type FilterState = Record<string, unknown>;
 
@@ -27,7 +27,6 @@ export default function useFilters({
   cacheBlacklist?: string[];
 }) {
   const { t } = useTranslation();
-  const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, _setQueryParams] = useQueryParams();
@@ -155,8 +154,9 @@ export default function useFilters({
       return { name, value, paramKey };
     },
     kasp(nameSuffix = "", paramKey = "is_kasp") {
-      const name = nameSuffix ? kasp_string + " " + nameSuffix : kasp_string;
-      const [trueLabel, falseLabel] = [kasp_string, "Non " + kasp_string];
+      const { kasp } = careConfig;
+      const name = nameSuffix ? kasp.string + " " + nameSuffix : kasp.string;
+      const [trueLabel, falseLabel] = [kasp.string, "Non " + kasp.string];
       return badgeUtils.boolean(name, paramKey, { trueLabel, falseLabel });
     },
   };

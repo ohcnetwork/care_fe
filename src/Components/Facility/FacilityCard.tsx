@@ -9,14 +9,13 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatPhoneNumber, parsePhoneNumber } from "../../Utils/utils";
 import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import useConfig from "../../Common/hooks/useConfig";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import careConfig from "@careConfig";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
-  const { kasp_string } = useConfig();
 
   const { t } = useTranslation();
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
@@ -92,7 +91,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   <div className="flow-root grow">
                     {facility.kasp_empanelled && (
                       <div className="float-right ml-2 mt-2 inline-flex items-center rounded-md bg-yellow-100 px-2.5 py-0.5 text-sm font-medium leading-5 text-yellow-800">
-                        {kasp_string}
+                        {careConfig.kasp.string}
                       </div>
                     )}
                     <div
