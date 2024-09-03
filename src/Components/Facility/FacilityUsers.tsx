@@ -289,7 +289,7 @@ export default function FacilityUsers(props: any) {
       >
         <UserFacilities user={selectedUser} />
       </SlideOverCustom>
-      <div className="">
+      <div>
         <div>{manageUsers}</div>
       </div>
       {userData.show && (
