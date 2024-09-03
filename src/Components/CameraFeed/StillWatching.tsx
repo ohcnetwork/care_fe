@@ -3,24 +3,13 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
-import useConfig from "../../Common/hooks/useConfig";
 import { useTimer } from "../../Utils/useTimer";
-
-export type StillWatchingConfig = {
-  idleTimeout?: number;
-  promptDuration?: number;
-};
-
-const DEFAULT_CONFIG = {
-  idleTimeout: 3 * 60,
-  promptDuration: 30,
-} satisfies StillWatchingConfig;
+import careConfig from "@careConfig";
 
 type State = "watching" | "prompted" | "timed-out";
 
-const useStillWatching = (config: StillWatchingConfig) => {
-  const { idleTimeout, promptDuration } = { ...DEFAULT_CONFIG, ...config };
-
+const useStillWatching = () => {
+  const { idleTimeout, promptDuration } = careConfig.stillWatching;
   const [state, setState] = useState<State>("watching");
   const [sequence, setSequence] = useState(1);
 
@@ -58,8 +47,7 @@ const useStillWatching = (config: StillWatchingConfig) => {
 
 export default function StillWatching(props: { children: React.ReactNode }) {
   const { t } = useTranslation();
-  const { still_watching: config = {} } = useConfig();
-  const { state, remainingTime, reset } = useStillWatching(config);
+  const { state, remainingTime, reset } = useStillWatching();
 
   return (
     <div onClick={() => reset()}>

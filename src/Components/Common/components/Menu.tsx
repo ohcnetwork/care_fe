@@ -1,9 +1,9 @@
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
-
 import { ButtonSize, ButtonVariant } from "./ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { classNames } from "../../../Utils/utils";
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 
@@ -51,6 +51,7 @@ export default function DropdownMenu({
         </MenuButton>
 
         <MenuItems
+          modal={false}
           className={`absolute right-0 z-10 mt-2 min-w-full origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:min-w-[250px] md:w-max ${props.itemClassName}`}
         >
           <>{props.children}</>
