@@ -67,7 +67,6 @@ export const Scribe: React.FC<ScribeProps> = ({
   form,
   onFormUpdate,
   existingData,
-  context,
 }) => {
   const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
@@ -421,10 +420,10 @@ export const Scribe: React.FC<ScribeProps> = ({
         .join(" ");
     };
 
-    const getOptionText = (value: string | number): string => {
-      if (!options) return value.toString();
+    const getOptionText = (value: string | number | null): string => {
+      if (!options) return value?.toString() || "";
       const option = options.find((opt) => opt.id === value);
-      return option ? option.text : value.toString();
+      return option ? option.text : value?.toString() || "";
     };
 
     const renderPrimitive = (value: any): any => {

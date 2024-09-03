@@ -49,6 +49,9 @@ import SymptomsApi from "../Symptoms/api";
 import DiagnosesRoutes from "../Diagnosis/routes";
 import MedicineRoutes from "../Medicine/routes";
 import { scrollTo } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import { EncounterSymptom } from "../Symptoms/types";
+import _ from "lodash";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -99,6 +102,12 @@ export const DailyRounds = (props: any) => {
     form: { ...initForm },
     errors: { ...initError },
   };
+
+  const { data: additionalSymptoms, refetch: refetchAdditionalSymptoms } =
+    useQuery(SymptomsApi.list, {
+      pathParams: { consultationId },
+      query: { limit: 100 },
+    });
 
   const DailyRoundsFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -488,26 +497,57 @@ export const DailyRounds = (props: any) => {
       <div className="flex w-full justify-end md:m-4">
         <Scribe
           form={SCRIBE_FORMS.daily_round}
-          existingData={async () => {
-            const { data } = await request(SymptomsApi.list, {
-              pathParams: { consultationId },
-              query: { limit: 100 },
-            });
-            return state.form;
+          existingData={{
+            ...state.form,
+            additional_symptoms: additionalSymptoms?.results.filter(
+              (s) => s.clinical_impression_status !== "entered-in-error",
+            ),
           }}
           onFormUpdate={async (fields) => {
             // Symptoms
             let rounds_type = fields.rounds_type || state.form.rounds_type;
+            const existingSymptoms = additionalSymptoms?.results.filter(
+              (s) => s.clinical_impression_status !== "entered-in-error",
+            );
+
             if (fields.additional_symptoms) {
+              const coveredSymptoms: EncounterSymptom[] = [];
               for (const symptom of fields.additional_symptoms) {
-                const { res } = await request(SymptomsApi.add, {
-                  pathParams: { consultationId },
-                  body: {
-                    ...symptom,
-                  },
-                });
-                if (res?.ok) setSymptomsSeed((s) => s + 1);
+                const existingSymptom = existingSymptoms?.find(
+                  (s) => s.symptom === symptom.symptom,
+                );
+                // Check if symptom is altered or added
+                if (!_.isEqual(symptom, existingSymptom)) {
+                  if (existingSymptom) {
+                    // symptom was altered
+                    await request(SymptomsApi.partialUpdate, {
+                      pathParams: { consultationId, external_id: symptom.id },
+                      body: _.pick(symptom, ["onset_date", "cure_date"]),
+                    });
+                  } else {
+                    // symptom does not exist, so must be added
+                    await request(SymptomsApi.add, {
+                      pathParams: { consultationId },
+                      body: {
+                        ...symptom,
+                      },
+                    });
+                  }
+                }
+                coveredSymptoms.push(symptom);
               }
+              // check for deleted symptoms
+              const deletedSymptoms =
+                existingSymptoms?.filter(
+                  (s) => !coveredSymptoms.find((c) => c.symptom === s.symptom),
+                ) || [];
+              for (const symptom of deletedSymptoms) {
+                //symptom was deleted
+                await request(SymptomsApi.markAsEnteredInError, {
+                  pathParams: { consultationId, external_id: symptom.id },
+                });
+              }
+              setSymptomsSeed((s) => s + 1);
             }
 
             // ICD11 Diagnosis
@@ -676,6 +716,7 @@ export const DailyRounds = (props: any) => {
                   name: "symptoms_dirty",
                   value: true,
                 });
+                refetchAdditionalSymptoms();
               }}
             />
           </div>
