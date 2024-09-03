@@ -5,12 +5,13 @@ import { AssetData } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
 import { Cancel } from "../Common/components/ButtonV2";
 import { Link } from "raviger";
-import { LocalStorageKeys, AssetImportSchema } from "../../Common/constants";
+import { AssetImportSchema } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import careConfig from "@careConfig";
+import request from "src/Utils/request/request";
 const ExcelFileDragAndDrop = lazy(
   () => import("../Common/ExcelFIleDragAndDrop"),
 );
@@ -84,17 +85,8 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
         asset_data["warranty_amc_end_of_validity"] =
           asset.warranty_amc_end_of_validity;
 
-      const response = await fetch("/api/v1/asset/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-        },
-        body: JSON.stringify(asset_data),
-      });
-      const data = await response.json();
-      if (response.status !== 201) {
+      const { res } = await request(routes.createAsset, { body: asset_data });
+      if (!res?.ok) {
         Notification.Error({
           msg:
             "Error importing asset: " + asset.name + " " + JSON.stringify(data),
