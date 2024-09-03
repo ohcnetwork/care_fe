@@ -18,7 +18,7 @@ interface AddICD11DiagnosisProps {
   disallowed: ICD11DiagnosisModel[];
   disabled?: boolean;
   prefill?: ICD11DiagnosisModel;
-  setPrefill?: (prefill?: ICD11DiagnosisModel) => void;
+  onSelect?: (selected: ICD11DiagnosisModel) => unknown;
 }
 
 export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
@@ -39,8 +39,6 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   }, [res?.status]);
 
   useEffect(() => props.prefill && setSelected(props.prefill), [props.prefill]);
-
-  useEffect(() => props.setPrefill?.(undefined), [selected]);
 
   const handleAdd = async (status: CreateDiagnosis["verification_status"]) => {
     if (!selected) return;
@@ -70,7 +68,10 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
         disabled={props.disabled || adding}
         placeholder={t("search_icd11_placeholder")}
         value={selected}
-        onChange={(e) => setSelected(e.value)}
+        onChange={(e) => {
+          setSelected(e.value);
+          props.onSelect?.(e.value);
+        }}
         options={mergeQueryOptions(
           selected ? [selected] : [],
           data ?? [],

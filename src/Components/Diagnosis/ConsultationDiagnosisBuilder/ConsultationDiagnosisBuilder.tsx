@@ -144,7 +144,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
               return false;
             }}
             prefill={prefill}
-            setPrefill={setPrefill}
+            onSelect={() => setPrefill(undefined)}
           />
           {!!props.suggestions?.length && (
             <div className="mb-4 flex flex-wrap gap-2">
