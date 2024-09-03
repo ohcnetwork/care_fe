@@ -1,14 +1,15 @@
-import { AssetBedModel } from "../Assets/AssetTypes";
 import {
   Listbox,
   ListboxButton,
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
+
+import { AssetBedModel } from "../Assets/AssetTypes";
+import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
-import ButtonV2 from "../Common/components/ButtonV2";
 
 interface Props {
   disabled?: boolean;
@@ -108,6 +109,7 @@ export const CameraPresetDropdown = (
           </span>
         </ListboxButton>
         <ListboxOptions
+          modal={false}
           as="ul"
           className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-secondary-500 focus:outline-none md:max-h-60"
         >

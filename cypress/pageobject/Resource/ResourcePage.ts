@@ -15,27 +15,27 @@ class ResourcePage {
   }
 
   clickCompletedResources() {
-    cy.contains("Completed").click();
+    cy.contains("button", "Completed").click();
   }
 
   verifyCompletedResources() {
     cy.wait("@resource").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.contains("Active").should("have.class", "text-primary-500");
-    cy.contains("Completed").should("have.class", "text-white");
+    cy.contains("button", "Active").should("have.class", "text-primary-500");
+    cy.contains("button", "Completed").should("have.class", "text-white");
   }
 
   clickActiveResources() {
-    cy.contains("Active").click();
+    cy.contains("button", "Active").click();
   }
 
   verifyActiveResources() {
     cy.wait("@resource").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.contains("Active").should("have.class", "text-white");
-    cy.contains("Completed").should("have.class", "text-primary-500");
+    cy.contains("button", "Active").should("have.class", "text-white");
+    cy.contains("button", "Completed").should("have.class", "text-primary-500");
   }
 
   clickListViewButton() {
