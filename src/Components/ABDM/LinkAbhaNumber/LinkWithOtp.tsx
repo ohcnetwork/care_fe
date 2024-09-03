@@ -7,7 +7,6 @@ import { classNames } from "../../../Utils/utils";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import Dropdown, { DropdownItem } from "../../Common/components/Menu";
 import OtpFormField from "../../Form/FormFields/OtpFormField";
-import { capitalize } from "lodash-es";
 import * as Notify from "../../../Utils/Notifications";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
@@ -201,7 +200,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
           >
             {authMethods.map((method) => (
               <DropdownItem key={method} onClick={() => handleSendOtp(method)}>
-                {capitalize(method.replace(/_/g, " "))}
+                {t(`abha__auth_method__${method}`)}
               </DropdownItem>
             ))}
           </Dropdown>
