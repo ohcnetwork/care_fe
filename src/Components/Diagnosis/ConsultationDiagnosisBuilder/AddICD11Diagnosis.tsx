@@ -18,6 +18,7 @@ interface AddICD11DiagnosisProps {
   disallowed: ICD11DiagnosisModel[];
   disabled?: boolean;
   prefill?: ICD11DiagnosisModel;
+  setPrefill?: (prefill?: ICD11DiagnosisModel) => void;
 }
 
 export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
@@ -38,6 +39,8 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   }, [res?.status]);
 
   useEffect(() => props.prefill && setSelected(props.prefill), [props.prefill]);
+
+  useEffect(() => props.setPrefill?.(undefined), [selected]);
 
   const handleAdd = async (status: CreateDiagnosis["verification_status"]) => {
     if (!selected) return;

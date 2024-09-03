@@ -133,33 +133,37 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
 
               if (res?.ok && data) {
                 setDiagnoses([...diagnoses, data]);
+                setPrefill(undefined);
+                props.onUpdate?.(diagnoses);
                 return true;
               }
 
               if (error) {
                 Notification.Error({ msg: error });
               }
-
-              setPrefill(undefined);
-              props.onUpdate?.(diagnoses);
-
               return false;
             }}
             prefill={prefill}
+            setPrefill={setPrefill}
           />
           {!!props.suggestions?.length && (
             <div className="mb-4 flex flex-wrap gap-2">
-              {props.suggestions?.map((suggestion, i) => (
-                <button
-                  key={i}
-                  className="flex items-center gap-2 rounded-full border border-primary-500 px-4 py-1 text-sm text-primary-500 transition-all hover:bg-primary-400/10"
-                  onClick={() => setPrefill(suggestion)}
-                  type="button"
-                >
-                  <CareIcon icon="l-heart-medical" />
-                  {suggestion.label}
-                </button>
-              ))}
+              {props.suggestions
+                ?.filter(
+                  (s) =>
+                    !diagnoses.map((d) => d.diagnosis_object.id).includes(s.id),
+                )
+                .map((suggestion, i) => (
+                  <button
+                    key={i}
+                    className="flex items-center gap-2 rounded-full border border-primary-500 px-4 py-1 text-sm text-primary-500 transition-all hover:bg-primary-400/10"
+                    onClick={() => setPrefill(suggestion)}
+                    type="button"
+                  >
+                    <CareIcon icon="l-heart-medical" />
+                    {suggestion.label}
+                  </button>
+                ))}
             </div>
           )}
         </div>
