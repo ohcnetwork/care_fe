@@ -88,7 +88,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       onResponse: ({ res }) => {
         if (res?.ok) {
           Notification.Success({
-            msg: t("deleted_successfuly", { name: facilityData?.name }),
+            msg: t("deleted_successfully", { name: facilityData?.name }),
           });
         }
         navigate("/facility");

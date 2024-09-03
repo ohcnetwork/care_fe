@@ -195,6 +195,6 @@
   "no_changes_made": "No changes made",
   "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
   "oxygen_information": "Oxygen Information",
-  "deleted_successfuly": "{{name}} Deleted Successfuly",
+  "deleted_successfully": "{{name}} Deleted Successfully",
   "delete_item": "Delete {{name}}"
 }
