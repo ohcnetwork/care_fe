@@ -195,6 +195,8 @@
   "discharged": "Discharged",
   "archived": "Archived",
   "no_changes_made": "No changes made",
+  "user_deleted_successfuly": "User Deleted Successfuly",
+  "users": "Users",
   "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
   "oxygen_information": "Oxygen Information",
   "deleted_successfully": "{{name}} deleted successfully",
