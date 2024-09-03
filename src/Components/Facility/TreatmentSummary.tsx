@@ -35,7 +35,7 @@ const TreatmentSummary = (props: any) => {
 
   return (
     <>
-      <PrintPreview title="Treatment Summary" className="print-preview">
+      <PrintPreview title="Treatment Summary" className="print-preview" >
         <h2 className="text-center text-lg">
           {consultationData?.facility_name ?? ""}
         </h2>
@@ -364,12 +364,6 @@ const TreatmentSummary = (props: any) => {
           </div>
         </div>
       </PrintPreview>
-      <div className="my-5 flex justify-center">
-        <button className="btn btn-secondary text-lg" onClick={() => goBack()}>
-          <CareIcon className="mr-2" icon="l-arrow-left" />
-          Back
-        </button>
-      </div>
     </>
   );
 };
