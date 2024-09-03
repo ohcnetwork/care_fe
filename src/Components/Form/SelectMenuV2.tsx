@@ -5,10 +5,11 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
+
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
-import { classNames } from "../../Utils/utils";
 import { ReactNode } from "react";
+import { classNames } from "../../Utils/utils";
+import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -131,7 +132,11 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                 props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12",
               )}
             >
-              <ListboxOptions as="ul" className="cui-dropdown-base">
+              <ListboxOptions
+                modal={false}
+                as="ul"
+                className="cui-dropdown-base"
+              >
                 {options.map((option, index) => (
                   <ListboxOption
                     as="li"

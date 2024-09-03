@@ -176,6 +176,7 @@
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
   "ration_card__APL": "APL",
+  "empty_date_time": "--:-- --; --/--/----",
   "caution": "Caution",
   "feed_optimal_experience_for_phones": "For optimal viewing experience, consider rotating your device.",
   "feed_optimal_experience_for_apple_phones": "For optimal viewing experience, consider rotating your device. Ensure auto-rotate is enabled in your device settings.",
@@ -183,6 +184,7 @@
   "GENDER__1": "Male",
   "GENDER__2": "Female",
   "GENDER__3": "Non-binary",
+  "normal": "Normal",
   "done": "Done",
   "view": "View",
   "rename": "Rename",
@@ -201,5 +203,12 @@
   "expires_on": "Expires On",
   "granted_on": "Granted On",
   "full_name": "Full Name",
-  "select_all": "Select All"
+  "select_all": "Select All",
+  "no_changes_made": "No changes made",
+  "user_deleted_successfuly": "User Deleted Successfuly",
+  "users": "Users",
+  "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
+  "oxygen_information": "Oxygen Information",
+  "deleted_successfully": "{{name}} deleted successfully",
+  "delete_item": "Delete {{name}}"
 }
