@@ -9,6 +9,7 @@ import { UserModel } from "../Users/models";
 import useConfig from "../../Common/hooks/useConfig";
 import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
 import uploadFile from "../../Utils/request/uploadFile";
+import _ from "lodash";
 
 interface FieldOption {
   id: string | number;
@@ -23,7 +24,7 @@ export interface Field {
   example: string;
   current: any;
   options?: readonly FieldOption[];
-  validator: (value: any) => boolean;
+  showFields?: string[];
 }
 
 export interface ScribeForm {
@@ -337,7 +338,6 @@ export const Scribe: React.FC<ScribeProps> = ({
           const f = fields.find((f) => f.id === k);
           if (!f) return false;
           if (v === f.current) return false;
-          //if (f.validator) return f.validator(f.type === "number" ? Number(v) : v);
           return true;
         })
         .map(([k, v]) => ({ [k]: v }))
@@ -673,7 +673,12 @@ export const Scribe: React.FC<ScribeProps> = ({
                                   <div className="text-secondary-800">
                                     {processFormField(
                                       fieldDetails,
-                                      formFields,
+                                      fieldDetails?.showFields
+                                        ? _.pick(
+                                            formFields,
+                                            fieldDetails?.showFields,
+                                          )
+                                        : formFields,
                                       field,
                                     )}
                                   </div>

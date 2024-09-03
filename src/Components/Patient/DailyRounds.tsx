@@ -47,11 +47,10 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import SymptomsApi from "../Symptoms/api";
 import DiagnosesRoutes from "../Diagnosis/routes";
-import MedicineRoutes from "../Medicine/routes";
 import { scrollTo } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";
-import { EncounterSymptom } from "../Symptoms/types";
 import _ from "lodash";
+import { scribeReducer } from "../Scribe/scribeutils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -61,7 +60,6 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
-  const [prescriptionSeed, setPrescriptionSeed] = useState(1);
 
   const initForm: any = {
     physical_examination_info: "",
@@ -502,6 +500,7 @@ export const DailyRounds = (props: any) => {
             additional_symptoms: additionalSymptoms?.results.filter(
               (s) => s.clinical_impression_status !== "entered-in-error",
             ),
+            icd11_diagnosis: diagnoses,
           }}
           onFormUpdate={async (fields) => {
             // Symptoms
@@ -511,143 +510,62 @@ export const DailyRounds = (props: any) => {
             );
 
             if (fields.additional_symptoms) {
-              const coveredSymptoms: EncounterSymptom[] = [];
-              for (const symptom of fields.additional_symptoms) {
-                const existingSymptom = existingSymptoms?.find(
-                  (s) => s.symptom === symptom.symptom,
-                );
-                // Check if symptom is altered or added
-                if (!_.isEqual(symptom, existingSymptom)) {
-                  if (existingSymptom) {
-                    // symptom was altered
-                    await request(SymptomsApi.partialUpdate, {
-                      pathParams: { consultationId, external_id: symptom.id },
-                      body: _.pick(symptom, ["onset_date", "cure_date"]),
-                    });
-                  } else {
-                    // symptom does not exist, so must be added
-                    await request(SymptomsApi.add, {
-                      pathParams: { consultationId },
-                      body: {
-                        ...symptom,
-                      },
-                    });
-                  }
-                }
-                coveredSymptoms.push(symptom);
-              }
-              // check for deleted symptoms
-              const deletedSymptoms =
-                existingSymptoms?.filter(
-                  (s) => !coveredSymptoms.find((c) => c.symptom === s.symptom),
-                ) || [];
-              for (const symptom of deletedSymptoms) {
-                //symptom was deleted
-                await request(SymptomsApi.markAsEnteredInError, {
-                  pathParams: { consultationId, external_id: symptom.id },
-                });
-              }
+              await scribeReducer({
+                existingData: existingSymptoms || [],
+                newData: fields.additional_symptoms,
+                comparer: (a, b) => a.symptom === b.symptom,
+                allowedFields: ["onset_date", "cure_date"],
+                onAdd: (stripped, item) =>
+                  request(SymptomsApi.add, {
+                    pathParams: { consultationId },
+                    body: {
+                      ...item,
+                    },
+                  }),
+                onUpdate: (stripped, item) =>
+                  request(SymptomsApi.partialUpdate, {
+                    pathParams: { consultationId, external_id: item.id },
+                    body: stripped,
+                  }),
+                onDelete: (item) =>
+                  request(SymptomsApi.markAsEnteredInError, {
+                    pathParams: { consultationId, external_id: item.id },
+                  }),
+              });
               setSymptomsSeed((s) => s + 1);
             }
 
             // ICD11 Diagnosis
             if (fields.icd11_diagnosis) {
-              for (const diagnosis of fields.icd11_diagnosis) {
-                // Fetch available diagnoses
-
-                const { res: icdRes, data: icdData } = await request(
-                  routes.listICD11Diagnosis,
-                  {
-                    query: { query: diagnosis.diagnosis },
-                  },
-                );
-
-                if (!icdRes?.ok) {
-                  error({
-                    text: "Failed to fetch ICD11 Diagnosis",
-                  });
-                  continue;
-                }
-
-                const availableDiagnosis = icdData?.[0]?.id;
-
-                if (!availableDiagnosis) {
-                  error({
-                    text: "Could not find the requested diagnosis. Please enter manually.",
-                  });
-                  continue;
-                }
-
-                const { res, data } = await request(
-                  DiagnosesRoutes.createConsultationDiagnosis,
-                  {
-                    pathParams: { consultation: consultationId },
-                    body: {
-                      ...diagnosis,
-                      diagnosis: availableDiagnosis,
+              await scribeReducer({
+                existingData: diagnoses || [],
+                newData: fields.icd11_diagnosis,
+                comparer: (a, b) =>
+                  a.diagnosis_object.id === b.diagnosis_object.id,
+                allowedFields: ["verification_status"],
+                // waitng for chips PR to be merged
+                // onAdd: async (stripped, item) => {
+                //
+                // },
+                onUpdate: async (stripped, item) => {
+                  const { data, res } = await request(
+                    DiagnosesRoutes.updateConsultationDiagnosis,
+                    {
+                      pathParams: { consultation: consultationId, id: item.id },
+                      body: stripped,
                     },
-                  },
-                );
-
-                if (res?.ok && data)
-                  setDiagnoses((diagnoses) => [...(diagnoses || []), data]);
-              }
-            }
-
-            // Prescriptions
-            if (fields.prescriptions || fields.prn_prescriptions) {
-              const combined_prescriptions = [
-                ...(fields.prescriptions || []),
-                ...(fields.prn_prescriptions || []),
-              ];
-              for (const prescription of combined_prescriptions) {
-                // fetch medicine
-                const { res: medicineRes, data: medicineData } = await request(
-                  routes.listMedibaseMedicines,
-                  {
-                    query: { query: prescription.medicine },
-                  },
-                );
-
-                if (!medicineRes?.ok) {
-                  error({
-                    text: "Failed to fetch medicine",
-                  });
-                  continue;
-                }
-
-                const availableMedicine = medicineData?.[0]?.id;
-
-                if (!availableMedicine) {
-                  error({
-                    text: "Could not find the requested medicine. Please enter manually.",
-                  });
-                  continue;
-                }
-
-                const { res } = await request(
-                  MedicineRoutes.createPrescription,
-                  {
-                    pathParams: { consultation: consultationId },
-                    body: {
-                      ...prescription,
-                      medicine: availableMedicine,
-                    },
-                  },
-                );
-
-                if (res?.ok) setPrescriptionSeed((s) => s + 1);
-              }
+                  );
+                  if (res?.ok && data)
+                    setDiagnoses((diagnoses) =>
+                      diagnoses?.map((d) => (d.id === data.id ? data : d)),
+                    );
+                },
+              });
             }
 
             if (
               Object.keys(fields).some((f) =>
-                [
-                  "investigations",
-                  "icd11_diagnosis",
-                  "prescriptions",
-                  "prn_prescriptions",
-                ].includes(f),
+                ["investigations", "icd11_diagnosis"].includes(f),
               ) &&
               roundTypes.some((t) => t.id === "DOCTORS_LOG")
             ) {
@@ -939,7 +857,6 @@ export const DailyRounds = (props: any) => {
                     discontinued={
                       showDiscontinuedPrescriptions ? undefined : false
                     }
-                    key={prescriptionSeed}
                     actions={["discontinue"]}
                   />
                 </div>
@@ -964,7 +881,6 @@ export const DailyRounds = (props: any) => {
                       showDiscontinuedPrescriptions ? undefined : false
                     }
                     actions={["discontinue"]}
-                    key={prescriptionSeed}
                   />
                 </div>
               </div>

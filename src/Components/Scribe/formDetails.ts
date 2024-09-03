@@ -19,13 +19,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     current: [],
     description: `An array of objects to store the patient's symptoms along with their date of onset and date of cure (if any). The symptom field should be an integer corresponding to the symptom's ID. The onset_date and cure_date fields should be date strings (e.g., '2022-01-01'). If no onset_date has been specified, use todays date which is '${new Date().toISOString().slice(0, 10)}'. If the symptom is ongoing, the cure_date field should not be included. If the user has 'Other Symptom', only then the other_symptom field should be included with a string value describing the symptom.`,
     options: SYMPTOM_CHOICES,
-    validator: (value) => {
-      if (!Array.isArray(value)) return false;
-      value.forEach((s) => {
-        if (!s.symptom || !s.onset_date) return false;
-      });
-      return true;
-    },
+    showFields: ["onset_date", "cure_date"],
   },
   {
     friendlyName: "Physical Examination Info",
@@ -36,9 +30,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     current: "",
     description:
       "This field is designated for storing detailed findings from the physical examination of the patient. It should include all observable physical attributes, conditions, or symptoms noted during the examination. When processing a doctor's transcript, identify and extract descriptions that pertain directly to the patient's physical state, such as visible conditions, physical symptoms, or any abnormalities noted by touch, sight, or measurement. This can include, but is not limited to, descriptions of skin conditions, swellings, lacerations, posture, mobility issues, and any other physically observable traits.",
-    validator: (value) => {
-      return typeof value === "string";
-    },
   },
   {
     friendlyName: "Other Details",
@@ -49,9 +40,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       "Patient reports trouble sleeping and a decreased appetite. Additionally, the patient is allergic to penicillin and has a history of asthma.",
     description:
       "This field is for capturing any supplementary details about the patient that are mentioned in the doctor's transcript but do not directly pertain to the physical examination findings. This includes, but is not limited to, behavioral observations, medical history, patient complaints, lifestyle factors, allergies, or any other non-physical observations that are relevant to the patient's overall health and well-being. When processing a transcript, extract information that describes the patient's health, habits, or conditions in a broader sense than what is observed through physical examination alone.",
-    validator: (value) => {
-      return typeof value === "string";
-    },
   },
   {
     friendlyName: "Patient Category",
@@ -66,9 +54,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
         text: category.text,
       }),
     ),
-    validator: (value) => {
-      return typeof value === "string";
-    },
   },
   {
     friendlyName: "Action",
@@ -81,7 +66,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       id: action.text,
       text: action.desc,
     })),
-    validator: (value) => typeof value === "string",
   },
   {
     friendlyName: "Review Interval",
@@ -92,7 +76,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     description:
       "An integer to represent the interval at which the patient's condition is reviewed.",
     options: REVIEW_AT_CHOICES,
-    validator: (value) => typeof value === "number",
   },
   {
     friendlyName: "Admitted To",
@@ -102,7 +85,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "General Ward",
     description:
       "A string to store the department or ward where the patient is admitted.",
-    validator: (value) => typeof value === "string",
   },
   {
     friendlyName: "bp",
@@ -112,12 +94,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "{ systolic: 120 }",
     description:
       "An object to store the blood pressure of the patient. It may contain two integers, systolic and diastolic.",
-    validator: (value) => {
-      if (typeof value !== "object") return false;
-      if (value.systolic && typeof value.systolic !== "number") return false;
-      if (value.diastolic && typeof value.diastolic !== "number") return false;
-      return true;
-    },
   },
   {
     friendlyName: "Pulse",
@@ -127,7 +103,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "72",
     description:
       "An integer to store the pulse rate of the patient. It can be null if the pulse rate is not taken.",
-    validator: (value) => typeof value === "number",
   },
   {
     friendlyName: "Respiratory Rate",
@@ -137,7 +112,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "16",
     description:
       "An integer to store the respiratory rate of the patient. It can be null if the respiratory rate is not taken.",
-    validator: (value) => typeof value === "number",
   },
   {
     friendlyName: "Temperature",
@@ -147,7 +121,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "98.6",
     description:
       "A float to store the temperature of the patient. It can be null if the temperature is not taken.",
-    validator: (value) => typeof value === "number",
   },
   {
     friendlyName: "SPO2",
@@ -157,7 +130,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "98",
     description:
       "An integer to store the SPO2 level of the patient. It can be null if the SPO2 level is not taken.",
-    validator: (value) => typeof value === "number",
   },
   {
     friendlyName: "Rhythm",
@@ -170,7 +142,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       id: rhythm.id,
       text: rhythm.desc ?? "",
     })),
-    validator: (value) => typeof value === "number",
   },
   {
     friendlyName: "Rhythm Detail",
@@ -180,7 +151,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "Just minor irregularities.",
     description:
       "A string to store the details about the rhythm of the patient.",
-    validator: (value) => typeof value === "string",
   },
   {
     friendlyName: "Level Of Consciousness",
@@ -194,7 +164,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       id: loc.id,
       text: loc.value,
     })),
-    validator: (value) => typeof value === "string",
   },
   {
     friendlyName: "Diagnosis",
@@ -205,13 +174,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       "[{diagnosis: '4A42.0 Paediatric onset systemic sclerosis', verification_status: 'confirmed', is_principal: true}, {diagnosis: 2, verification_status: 'provisional', is_principal: false}]",
     description:
       "A list of objects to store the patient's diagnosis along with their verification status and whether it is the principal diagnosis. If not specifically said, set is_principal to false. NOTE: only one principal diagnosis can exist. The diagnosis field should be a string that may contain a corresponding diagnosis ID. The verification_status field should be a string with one of the following values: 'unconfirmed', 'provisional', 'differential', or 'confirmed'.",
-    validator: (value) => {
-      if (!Array.isArray(value)) return false;
-      value.forEach((d) => {
-        if (!d.diagnosis || !d.verification_status) return false;
-      });
-      return true;
-    },
+    showFields: ["diagnosis", "verification_status"],
   },
   {
     friendlyName: "Investigations",
@@ -240,14 +203,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     ]`,
     description:
       "A list of objects to store the patient's investigations. The type field should be an array of strings corresponding to the names of the investigations provided in the options. The repetitive field should be a boolean value. The time field should be a string and only be filled if repetitive field is false. The frequency field should be a string with one of the following values: '15 min', '30 min', '1 hr', '6 hrs', '12 hrs', '24 hrs', or '48 hrs' and should be only filled if this is a repititive investigation. The time field should be of the example format if present - (2024-07-31T18:10). The notes field should be a string. If the type is not available in options, DO NOT MAKE IT.",
-    validator: (value) => {
-      if (!Array.isArray(value)) return false;
-      value.forEach((i) => {
-        if (!i.type || !i.repetitive) return false;
-        if (i.repetitive && !i.frequency) return false;
-      });
-      return true;
-    },
+    showFields: ["type", "repetitive", "time", "frequency", "notes"],
   },
   {
     friendlyName: "Prescriptions",
@@ -280,10 +236,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     QOD: Alternate Day,
     QWK: Once a Week
     `,
-    validator: (value) => {
-      if (!Array.isArray(value)) return false;
-      return true;
-    },
   },
   {
     friendlyName: "PRN Prescriptions",
@@ -303,10 +255,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       {base_dosage: "3 drop(s)", dosage_type:"PRN", indicator: "If patient gets fever", max_dosage: "5 drops(s)", min_hours_between_doses: 12, route: "IV", medicine: "Glentona", notes: "Example"}
     ]`,
     description: "A list of objects to store the patient's PRN prescriptions.",
-    validator: (value) => {
-      if (!Array.isArray(value)) return false;
-      return true;
-    },
   },
   /*{
     friendlyName: "Round Type",
