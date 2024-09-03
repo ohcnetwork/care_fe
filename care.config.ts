@@ -6,9 +6,17 @@ interface ILogo {
 }
 
 const logo = (value?: string, fallback?: ILogo) => {
-  return value ? (JSON.parse(value) as ILogo) : fallback;
-};
+  if (!value) {
+    return fallback;
+  }
 
+  try {
+    return JSON.parse(value) as ILogo;
+  } catch {
+    // TODO: define vite plugin to validate care.config.ts during build step
+    return fallback;
+  }
+};
 const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
 
