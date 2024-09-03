@@ -16,7 +16,6 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["vite/client", "vite-plugin-pwa/client"],
-    "baseUrl": ".",
     "paths": {
       "@careConfig": ["./care.config.ts"]
     }

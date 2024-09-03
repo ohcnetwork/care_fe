@@ -11,7 +11,8 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import careConfig from "@careConfig";
-import request from "src/Utils/request/request";
+import request from "../../Utils/request/request";
+
 const ExcelFileDragAndDrop = lazy(
   () => import("../Common/ExcelFIleDragAndDrop"),
 );
