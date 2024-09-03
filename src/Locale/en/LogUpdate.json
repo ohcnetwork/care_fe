@@ -52,5 +52,22 @@
   "NURSING_CARE_PROCEDURE__chest_tube_care": "Chest Tube Care",
   "NURSING_CARE_PROCEDURE__tracheostomy_care": "Tracheostomy Care",
   "NURSING_CARE_PROCEDURE__stoma_care": "Stoma Care",
-  "NURSING_CARE_PROCEDURE__catheter_care": "Catheter Care"
+  "NURSING_CARE_PROCEDURE__catheter_care": "Catheter Care",
+  "HEARTBEAT_RHYTHM__REGULAR": "Regular",
+  "HEARTBEAT_RHYTHM__IRREGULAR": "Irregular",
+  "HEARTBEAT_RHYTHM__UNKNOWN": "Unknown",
+  "heartbeat_rhythm": "Heartbeat Rhythm",
+  "heartbeat_description": "Heartbeat Description",
+  "blood_pressure": "Blood Pressure",
+  "map_acronym": "M.A.P.",
+  "systolic": "Systolic",
+  "diastolic": "Diastolic",
+  "temperature": "Temperature",
+  "resipiratory_rate": "Respiratory Rate",
+  "pain": "Pain",
+  "pain_chart_description": "Mark region and intensity of pain",
+  "pulse": "Pulse",
+  "bradycardia": "Bradycardia",
+  "tachycardia": "Tachycardia",
+  "spo2": "SpO₂"
 }
