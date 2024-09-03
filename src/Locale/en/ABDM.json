@@ -47,7 +47,7 @@
   "link_abha_disclaimer": "I declare that the ABHA No. of the patient is voluntarily provided by the patient (or guardian or nominee of the patient).",
   "any_id": "Enter any ID linked with your ABHA number",
   "enter_any_id": "Enter any ID linked with your ABHA number",
-  "any_id_description": "Currently we support, Aadhaar Number / Mobile Number",
+  "any_id_description": "Currently we support: Aadhaar Number / Mobile Number",
   "enter_otp": "Enter OTP sent to the registered mobile with the respective ID",
   "verify_and_link": "Verify and Link",
   "get_auth_methods": "Get Available Authentication Methods",
