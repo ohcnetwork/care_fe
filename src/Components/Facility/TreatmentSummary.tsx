@@ -10,7 +10,10 @@ import useQuery from "../../Utils/request/useQuery";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { ConsultationModel } from "./models";
 import { useMemo } from "react";
-import { ConsultationDiagnosis } from "../Diagnosis/types";
+import {
+  ActiveConditionVerificationStatuses,
+  ConsultationDiagnosis,
+} from "../Diagnosis/types";
 import PageHeadTitle from "../Common/PageHeadTitle";
 import { useTranslation } from "react-i18next";
 import { PatientModel } from "../Patient/models";
@@ -213,11 +216,8 @@ interface IDiagnosisSection {
 }
 
 type DiagnosisType =
-  | "principal"
-  | "confirmed"
-  | "provisional"
-  | "unconfirmed"
-  | "differential";
+  | (typeof ActiveConditionVerificationStatuses)[number]
+  | "principal";
 
 function DiagnosisSection({ consultationData }: IDiagnosisSection) {
   const { t } = useTranslation();
@@ -228,8 +228,8 @@ function DiagnosisSection({ consultationData }: IDiagnosisSection) {
         if (curr.is_principal) {
           acc.principal.push(curr);
         } else if (
-          ["confirmed", "provisional", "unconfirmed", "differential"].includes(
-            curr.verification_status,
+          ActiveConditionVerificationStatuses.includes(
+            curr.verification_status as (typeof ActiveConditionVerificationStatuses)[number],
           )
         ) {
           acc[curr.verification_status as keyof typeof acc].push(curr);
