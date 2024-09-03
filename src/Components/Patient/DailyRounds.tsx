@@ -488,7 +488,13 @@ export const DailyRounds = (props: any) => {
       <div className="flex w-full justify-end md:m-4">
         <Scribe
           form={SCRIBE_FORMS.daily_round}
-          existingData={state.form}
+          existingData={async () => {
+            const { data } = await request(SymptomsApi.list, {
+              pathParams: { consultationId },
+              query: { limit: 100 },
+            });
+            return state.form;
+          }}
           onFormUpdate={async (fields) => {
             // Symptoms
             let rounds_type = fields.rounds_type || state.form.rounds_type;

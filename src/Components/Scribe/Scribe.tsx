@@ -67,6 +67,7 @@ export const Scribe: React.FC<ScribeProps> = ({
   form,
   onFormUpdate,
   existingData,
+  context,
 }) => {
   const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
