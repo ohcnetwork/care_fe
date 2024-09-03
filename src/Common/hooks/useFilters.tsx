@@ -194,7 +194,7 @@ export default function useFilters({
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
         {children}
-        {show && (
+        {activeFilters.length > 0 && (
           <button
             id="clear-all-filters"
             className="rounded-full border border-secondary-300 bg-white px-2 py-1 text-xs text-secondary-600 hover:text-secondary-800"
