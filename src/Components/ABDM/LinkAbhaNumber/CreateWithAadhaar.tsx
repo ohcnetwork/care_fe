@@ -117,7 +117,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           name="aadhaar-number"
           label={t("aadhaar_number")}
           minLength={12}
-          maxLength={16}
+          maxLength={12}
           inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
           placeholder={t("enter_aadhaar_number")}
           disabled={memory?.isLoading}
