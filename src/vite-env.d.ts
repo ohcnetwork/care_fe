@@ -27,6 +27,8 @@ interface ImportMetaEnv {
   readonly REACT_SAMPLE_FORMAT_ASSET_IMPORT?: string;
   readonly REACT_SAMPLE_FORMAT_EXTERNAL_RESULT_IMPORT?: string;
   readonly REACT_WARTIME_SHIFTING?: string;
+  readonly REACT_STILL_WATCHING_IDLE_TIMEOUT?: string;
+  readonly REACT_STILL_WATCHING_PROMPT_DURATION?: string;
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_MIN_ENCOUNTER_DATE?: string;
 

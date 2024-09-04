@@ -65,6 +65,15 @@ const careConfig = {
 
   wartimeShifting: env.REACT_WARTIME_SHIFTING === "true",
 
+  stillWatching: {
+    idleTimeout: env.REACT_STILL_WATCHING_IDLE_TIMEOUT
+      ? parseInt(env.REACT_STILL_WATCHING_IDLE_TIMEOUT)
+      : 3 * 60,
+    promptDuration: env.REACT_STILL_WATCHING_PROMPT_DURATION
+      ? parseInt(env.REACT_STILL_WATCHING_PROMPT_DURATION)
+      : 30,
+  },
+
   auth: {
     tokenRefreshInterval: env.REACT_JWT_TOKEN_REFRESH_INTERVAL
       ? parseInt(env.REACT_JWT_TOKEN_REFRESH_INTERVAL)
