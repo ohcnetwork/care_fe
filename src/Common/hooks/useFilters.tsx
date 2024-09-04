@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
+import useConfig from "./useConfig";
 import { classNames, humanizeStrings } from "../../Utils/utils";
 import FiltersCache from "../../Utils/FiltersCache";
-import careConfig from "@careConfig";
 
 export type FilterState = Record<string, unknown>;
 
@@ -27,6 +27,7 @@ export default function useFilters({
   cacheBlacklist?: string[];
 }) {
   const { t } = useTranslation();
+  const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, _setQueryParams] = useQueryParams();
@@ -154,9 +155,8 @@ export default function useFilters({
       return { name, value, paramKey };
     },
     kasp(nameSuffix = "", paramKey = "is_kasp") {
-      const { kasp } = careConfig;
-      const name = nameSuffix ? kasp.string + " " + nameSuffix : kasp.string;
-      const [trueLabel, falseLabel] = [kasp.string, "Non " + kasp.string];
+      const name = nameSuffix ? kasp_string + " " + nameSuffix : kasp_string;
+      const [trueLabel, falseLabel] = [kasp_string, "Non " + kasp_string];
       return badgeUtils.boolean(name, paramKey, { trueLabel, falseLabel });
     },
   };
@@ -170,22 +170,22 @@ export default function useFilters({
   }) => {
     const compiledBadges = badges(badgeUtils);
     const { t } = useTranslation();
-
+  
     const activeFilters = compiledBadges.reduce((acc, badge) => {
       const { paramKey } = badge;
-
+  
       if (Array.isArray(paramKey)) {
         const active = paramKey.filter((key) => qParams[key]);
-        if (active) acc.concat(active);
+        if (active.length > 0) acc = acc.concat(active);
       } else {
         if (qParams[paramKey]) acc.push(paramKey);
       }
-
+  
       return acc;
     }, [] as string[]);
-
+  
     const show = activeFilters.length > 0 || children;
-
+  
     return (
       <div
         className={`col-span-3 my-2 flex w-full flex-wrap items-center gap-2 ${show ? "" : "hidden"}`}
@@ -194,7 +194,7 @@ export default function useFilters({
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
         {children}
-        {show && (
+        {activeFilters.length > 0 && (
           <button
             id="clear-all-filters"
             className="rounded-full border border-secondary-300 bg-white px-2 py-1 text-xs text-secondary-600 hover:text-secondary-800"
@@ -206,6 +206,7 @@ export default function useFilters({
       </div>
     );
   };
+  
 
   const Pagination = ({
     totalCount,
