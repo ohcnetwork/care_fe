@@ -4,7 +4,6 @@ import { useSlugs } from "../../Common/hooks/useSlug";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import {
-  classNames,
   formatDate,
   formatDateTime,
   formatName,
@@ -14,7 +13,7 @@ import MedicineRoutes from "./routes";
 import { Prescription } from "./models";
 import useConfig from "../../Common/hooks/useConfig";
 import { ReactNode } from "react";
-
+import { PatientDetail } from "../Common/components/PatientDetail";
 export default function PrescriptionsPrintPreview() {
   const { main_logo } = useConfig();
   const { t } = useTranslation();
@@ -47,7 +46,7 @@ export default function PrescriptionsPrintPreview() {
       }
       disabled={!(patient && encounter && items)}
     >
-      <div className="mb-3 flex items-center justify-between p-4">
+      <div className="mb-3 flex items-center justify-between p-4 ">
         <h3>{encounter?.facility_name}</h3>
         <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
       </div>
@@ -110,31 +109,6 @@ export default function PrescriptionsPrintPreview() {
   );
 }
 
-const PatientDetail = ({
-  name,
-  children,
-  className,
-}: {
-  name: string;
-  children?: ReactNode;
-  className?: string;
-}) => {
-  return (
-    <div
-      className={classNames(
-        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
-        className,
-      )}
-    >
-      <div className="font-medium text-secondary-800">{name}: </div>
-      {children != null ? (
-        <span className="pl-2 font-bold">{children}</span>
-      ) : (
-        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
-      )}
-    </div>
-  );
-};
 
 const PrescriptionsTable = ({
   items,

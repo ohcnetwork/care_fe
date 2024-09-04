@@ -2,6 +2,7 @@ import { GENDER_TYPES } from "../../Common/constants";
 import {
   formatDate,
   formatDateTime,
+  formatName,
   formatPatientAge,
 } from "../../Utils/utils";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -9,7 +10,7 @@ import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { ConsultationModel } from "./models";
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import {
   ActiveConditionVerificationStatuses,
   ConsultationDiagnosis,
@@ -19,6 +20,8 @@ import { useTranslation } from "react-i18next";
 import { PatientModel } from "../Patient/models";
 import MedicineRoutes from "../Medicine/routes";
 import PrintPreview from "../../CAREUI/misc/PrintPreview";
+import useConfig from "../../Common/hooks/useConfig";
+import { PatientDetail } from "../Common/components/PatientDetail";
 
 export interface ITreatmentSummaryProps {
   consultationId: string;
@@ -31,6 +34,8 @@ export default function TreatmentSummary({
   patientId,
   facilityId,
 }: ITreatmentSummaryProps) {
+
+  const { main_logo } = useConfig();
   const { t } = useTranslation();
   const date = new Date();
   const { goBack } = useAppHistory();
@@ -50,37 +55,55 @@ export default function TreatmentSummary({
     <div>
       <PageHeadTitle title={t("treatment_summary__head_title")} />
       <div className="my-4">
-    <PrintPreview title="Treatment Summary">
-        <div id="section-to-print" className="mx-5">
-          <h2 className="text-center text-lg">
-            {consultationData?.facility_name ?? ""}
-          </h2>
+        <PrintPreview title="Treatment Summary">
+          <div id="section-to-print" className="mx-5">
 
-          <h2 className="text-center text-lg">
-            {t("treatment_summary__heading")}
-          </h2>
-
-          <div className="text-right font-bold">{formatDate(date)}</div>
-
-          <div className="mb-5 mt-2 border border-gray-800">
-            <BasicDetailsSection
-              patientData={patientData}
-              consultationData={consultationData}
-            />
-
-            <ComorbiditiesSection patientData={patientData} />
-
-            <DiagnosisSection consultationData={consultationData} />
-
-            <InvestigationsSection consultationId={consultationId} />
-
-            <TreatmentSection consultationData={consultationData} />
-
-            <PrescriptionsSection consultationId={consultationId} />
-
-            <InstructionsSection consultationData={consultationData} />
-          </div>
+          <div className="mb-3 flex items-center justify-between p-4 ">
+          <h3>{consultationData?.facility_name}</h3>
+          <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
         </div>
+            <h2 className="text-center text-lg">
+              {t("treatment_summary__heading")}
+            </h2>
+
+            <div className="text-right font-bold">{formatDate(date)}</div>
+
+            <div className="mb-5 mt-2 border border-gray-800">
+              <BasicDetailsSection
+                patientData={patientData}
+                consultationData={consultationData}
+              />
+
+              <ComorbiditiesSection patientData={patientData} />
+
+              <DiagnosisSection consultationData={consultationData} />
+
+              <InvestigationsSection consultationId={consultationId} />
+
+              <TreatmentSection consultationData={consultationData} />
+
+              <PrescriptionsSection consultationId={consultationId} />
+
+              <InstructionsSection consultationData={consultationData} />
+            </div>
+            <div className="pt-12">
+        <p className="font-medium text-secondary-800">
+          Sign of the Consulting Doctor
+        </p>
+        <PatientDetail name="Name of the Consulting Doctor">
+          {consultationData?.treating_physician_object &&
+            formatName(consultationData?.treating_physician_object)}
+        </PatientDetail>
+        <p className="pt-6 text-center text-xs font-medium text-secondary-700">
+          Generated on: {formatDateTime(new Date())}
+        </p>
+        <p className="pt-1 text-center text-xs font-medium text-secondary-700">
+          This is a computer generated prescription. It shall be issued to the
+          patient only after the concerned doctor has verified the content and
+          authorized the same by affixing signature.
+        </p>
+      </div>  
+          </div>
         </PrintPreview>
       </div>
     </div>
@@ -517,3 +540,9 @@ function InstructionsSection({ consultationData }: IInstructionsSection) {
     </>
   );
 }
+
+
+
+// Things that i added
+
+

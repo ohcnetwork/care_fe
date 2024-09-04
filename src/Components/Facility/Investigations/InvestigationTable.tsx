@@ -82,7 +82,7 @@ export const InvestigationTable = ({
   });
 
   return (
-    <div className="m-4 p-4 print:m-0">
+    <div className="m-4 p-4">
       <div className="mb flex flex-col items-center justify-between sm:flex-row">
         {title && (
           <div className="text-xl font-bold print:text-xs">{title}</div>
@@ -120,70 +120,63 @@ export const InvestigationTable = ({
         onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <div
-        id="section-to-print"
-        className="print:left-0 print:top-0 print:w-full"
-      >
-        <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg print:overflow-visible print:border-none print:shadow-none">
-          <table className="min-w-full divide-y divide-secondary-200 print:min-w-0 print:divide-none">
-            <thead className="bg-secondary-50 print:bg-white">
-              <tr>
-                {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map(
-                  (heading) => (
-                    <th
-                      key={heading} // Add key prop here
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800 print:text-sm print:font-normal print:tracking-normal print:text-black"
-                    >
-                      {heading}
-                    </th>
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody x-max="2" className="print:divide-none">
-              {filterTests.length > 0 ? (
-                filterTests.map((t: any, i) => {
-                  const value =
-                    changedFields[t.id]?.notes ??
-                    changedFields[t.id]?.value ??
-                    null;
-                  const isChanged = changedFields[t.id]?.initialValue !== value;
-                  return (
-                    <TestRow
-                      data={t}
-                      key={t.id}
-                      i={i}
-                      showForm={showForm}
-                      value={value}
-                      isChanged={isChanged}
-                      onChange={(e: any) => {
-                        const { target, value } =
-                          t?.investigation_object?.investigation_type ===
-                          "Float"
-                            ? {
-                                target: `${t.id}.value`,
-                                value: Number(e.value) || null,
-                              }
-                            : {
-                                target: `${t.id}.notes`,
-                                value: e.value,
-                              };
-                        handleValueChange(value, target);
-                      }}
-                      className="print:text-black"
-                    />
-                  );
-                })
-              ) : (
-                <tr className="text-center text-secondary-500 print:text-black">
-                  <td className="col-span-6">No tests taken</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div className="print:w-full">
+  <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg print:overflow-visible print:border-none print:shadow-none">
+    <table className="min-w-full divide-y divide-secondary-200 print:min-w-0 print:divide-none">
+      <thead className="bg-secondary-50 print:bg-white">
+        <tr>
+          {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map((heading) => (
+            <th
+              key={heading}
+              scope="col"
+              className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800 print:text-sm print:font-normal print:tracking-normal print:text-black"
+            >
+              {heading}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="print:divide-none">
+        {filterTests.length > 0 ? (
+          filterTests.map((t: any, i) => {
+            const value =
+              changedFields[t.id]?.notes ?? changedFields[t.id]?.value ?? null;
+            const isChanged = changedFields[t.id]?.initialValue !== value;
+            return (
+              <TestRow
+                data={t}
+                key={t.id}
+                i={i}
+                showForm={showForm}
+                value={value}
+                isChanged={isChanged}
+                onChange={(e: any) => {
+                  const { target, value } =
+                    t?.investigation_object?.investigation_type === "Float"
+                      ? {
+                          target: `${t.id}.value`,
+                          value: Number(e.value) || null,
+                        }
+                      : {
+                          target: `${t.id}.notes`,
+                          value: e.value,
+                        };
+                  handleValueChange(value, target);
+                }}
+                className="print:text-black"
+              />
+            );
+          })
+        ) : (
+          <tr className="text-center text-secondary-500 print:text-black">
+            <td className="col-span-6">No tests taken</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+
     </div>
   );
 };
