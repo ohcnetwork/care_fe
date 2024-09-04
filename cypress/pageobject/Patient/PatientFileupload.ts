@@ -7,8 +7,8 @@ export class PatientFileUpload {
   }
 
   typeAudioName(name: string) {
-    cy.get("#consultation_audio_file").clear();
-    cy.get("#consultation_audio_file").click().type(name);
+    cy.get("#upload-file-name").clear();
+    cy.get("#upload-file-name").click().type(name);
   }
 
   clickFileTab() {
@@ -16,19 +16,21 @@ export class PatientFileUpload {
   }
 
   typeFileName(name: string) {
-    cy.get("#consultation_file").clear();
-    cy.get("#consultation_file").click().type(name);
+    cy.get("#upload-file-name").clear();
+    cy.get("#upload-file-name").click().type(name);
   }
 
   recordAudio() {
     cy.get("#record-audio").click();
     cy.wait(5000);
     cy.get("#stop-recording").click();
+    cy.wait(1000);
+    cy.get("#save-recording").click();
   }
 
   clickUploadAudioFile() {
     cy.intercept("POST", "**/api/v1/files/").as("uploadAudioFile");
-    cy.verifyAndClickElement("#upload_audio_file", "Save");
+    cy.verifyAndClickElement("#upload_file_button", "Upload");
     cy.wait("@uploadAudioFile").its("response.statusCode").should("eq", 201);
   }
 
@@ -52,8 +54,8 @@ export class PatientFileUpload {
   }
 
   archiveFile() {
-    cy.get("button").contains("ARCHIVE").click().scrollIntoView();
-    cy.get("#editFileName").clear().type("Cypress File Archive");
+    cy.get("#file-div button").contains("Archive").click().scrollIntoView();
+    cy.get("#archive-file-reason").clear().type("Cypress File Archive");
   }
 
   clickSaveArchiveFile() {
@@ -63,27 +65,28 @@ export class PatientFileUpload {
   }
 
   verifyArchiveFile(fileName: string) {
-    cy.get("#archived-files").click();
-    cy.get("button").contains("MORE DETAILS").click().scrollIntoView();
-    cy.get("#archive-file-name").should("contain.text", fileName);
-    cy.get("#archive-file-reason").then(($reason) => {
-      expect($reason.text().split(":")[1]).to.contain("Cypress File Archive");
-    });
+    cy.get("button").contains("Archived Files").click();
+    cy.get("button").contains("More Info").click().scrollIntoView();
+    cy.get('[data-archive-info="File Name"]').should("contain.text", fileName);
+    cy.get('[data-archive-info="Archive Reason"]').should(
+      "contain.text",
+      "Cypress File Archive",
+    );
   }
 
   verifyFileRenameOption(status: boolean) {
     cy.get("#file-div").then(($fileDiv) => {
       if (status) {
-        expect($fileDiv.text()).to.contain("RENAME");
+        expect($fileDiv.text()).to.contain("Rename");
       } else {
-        expect($fileDiv.text()).to.not.contain("RENAME");
+        expect($fileDiv.text()).to.not.contain("Rename");
       }
     });
   }
 
   renameFile(newFileName: string) {
-    cy.get("button").contains("RENAME").click().scrollIntoView();
-    cy.get("#editFileName").clear().type(newFileName);
+    cy.get("button").contains("Rename").click().scrollIntoView();
+    cy.get("#edit-file-name").clear().type(newFileName);
   }
 
   clickSaveFileName() {

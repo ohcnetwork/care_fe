@@ -10,7 +10,7 @@ export default function PDFViewer(
     onDocumentLoadSuccess: (numPages: number) => void;
   }>,
 ) {
-  pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+  pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
   return (
     <div className="flex flex-col items-center justify-center">

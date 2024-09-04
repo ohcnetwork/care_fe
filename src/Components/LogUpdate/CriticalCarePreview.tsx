@@ -268,6 +268,14 @@ export default function CriticalCarePreview(props: Props) {
               },
             ]}
           />
+          <Detail
+            label={t("heartbeat_rhythm")}
+            value={data.rhythm && t(`HEARTBEAT_RHYTHM__${data.rhythm}`)}
+          />
+          <Detail
+            label={t("heartbeat_description")}
+            value={data.rhythm_detail}
+          />
           <h4 className="py-4">Pain Scale</h4>
           <PainChart pain={data.pain_scale_enhanced ?? []} />
         </Section>
@@ -388,7 +396,6 @@ export default function CriticalCarePreview(props: Props) {
                 label="Oxygen Modality"
                 value={tOption("OXYGEN_MODALITY", "ventilator_oxygen_modality")}
               />
-              {data.ventilator_oxygen_modality_flow_rate ?? "-"}
               {data.ventilator_oxygen_modality === "HIGH_FLOW_NASAL_CANNULA" ? (
                 <>
                   <RangeDetail

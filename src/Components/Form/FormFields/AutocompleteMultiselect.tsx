@@ -1,10 +1,3 @@
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import {
-  MultiSelectOptionChip,
-  dropdownOptionClassNames,
-} from "../MultiSelectMenuV2";
-import { ReactNode, useEffect, useRef, useState } from "react";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 import {
   Combobox,
   ComboboxButton,
@@ -12,6 +5,14 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import {
+  MultiSelectOptionChip,
+  dropdownOptionClassNames,
+} from "../MultiSelectMenuV2";
+import { ReactNode, useEffect, useRef, useState } from "react";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
@@ -26,6 +27,7 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
   optionDisabled?: OptionCallback<T, boolean>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
+  minQueryLength?: number;
   isLoading?: boolean;
   selectAll?: boolean;
 };
@@ -64,6 +66,7 @@ type AutocompleteMutliSelectProps<T, V = T> = {
   isLoading?: boolean;
   selectAll?: boolean;
   error?: string;
+  minQueryLength?: number;
 };
 
 /**
@@ -80,7 +83,9 @@ export const AutocompleteMutliSelect = <T, V>(
   const [query, setQuery] = useState(""); // Ensure lower case
   const comboButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    props.onQuery && props.onQuery(query);
+    query.length >= (props.minQueryLength || 1) &&
+      props.onQuery &&
+      props.onQuery(query);
   }, [query]);
   const handleSingleSelect = (o: any) => {
     if (o.option?.isSingleSelect === true && comboButtonRef.current) {
@@ -172,10 +177,15 @@ export const AutocompleteMutliSelect = <T, V>(
 
           <DropdownTransition>
             <ComboboxOptions
+              modal={false}
               as="ul"
               className="cui-dropdown-base absolute top-12 z-10 mt-0.5"
             >
-              {props.isLoading ? (
+              {props.minQueryLength && query.length < props.minQueryLength ? (
+                <div className="p-2 text-sm text-secondary-500">
+                  {`Please enter at least ${props.minQueryLength} characters to search`}
+                </div>
+              ) : props.isLoading ? (
                 <Searching />
               ) : filteredOptions.length ? (
                 <>
