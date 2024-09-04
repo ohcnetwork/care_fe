@@ -1,4 +1,5 @@
 // cypress/support/pageObjects/FacilityHome.ts
+import { cy } from "local-cypress";
 
 class FacilityHome {
   // Selectors
