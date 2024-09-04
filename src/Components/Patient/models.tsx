@@ -2,6 +2,7 @@ import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import {
   CONSCIOUSNESS_LEVEL,
+  HEARTBEAT_RHYTHM_CHOICES,
   HumanBodyRegion,
   INSULIN_INTAKE_FREQUENCY_OPTIONS,
   LIMB_RESPONSE_OPTIONS,
@@ -12,7 +13,6 @@ import {
   PressureSoreTissueTypeOptions,
   RATION_CARD_CATEGORY,
   RESPIRATORY_SUPPORT,
-  RHYTHM_CHOICES,
   VENTILATOR_MODE_OPTIONS,
 } from "../../Common/constants";
 
@@ -311,7 +311,7 @@ export type IPressureSore = {
 };
 export interface DailyRoundsModel {
   spo2?: number;
-  rhythm?: (typeof RHYTHM_CHOICES)[number]["text"];
+  rhythm?: (typeof HEARTBEAT_RHYTHM_CHOICES)[number];
   rhythm_detail?: string;
   bp?: BloodPressure;
   pulse?: number;

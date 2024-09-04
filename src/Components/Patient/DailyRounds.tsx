@@ -46,9 +46,8 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import SymptomsApi from "../Symptoms/api";
-import DiagnosesRoutes from "../Diagnosis/routes";
-import MedicineRoutes from "../Medicine/routes";
 import { scrollTo } from "../../Utils/utils";
+import { ICD11DiagnosisModel } from "../Facility/models";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -58,7 +57,9 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
-  const [prescriptionSeed, setPrescriptionSeed] = useState(1);
+  const [diagnosisSuggestions, setDiagnosisSuggestions] = useState<
+    ICD11DiagnosisModel[]
+  >([]);
 
   const initForm: any = {
     physical_examination_info: "",
@@ -489,6 +490,7 @@ export const DailyRounds = (props: any) => {
         <Scribe
           form={SCRIBE_FORMS.daily_round}
           onFormUpdate={async (fields) => {
+            setDiagnosisSuggestions([]);
             // Symptoms
             let rounds_type = fields.rounds_type || state.form.rounds_type;
             if (fields.additional_symptoms) {
@@ -522,74 +524,10 @@ export const DailyRounds = (props: any) => {
                   continue;
                 }
 
-                const availableDiagnosis = icdData?.[0]?.id;
+                const availableDiagnosis = icdData?.slice(0, 5);
 
-                if (!availableDiagnosis) {
-                  error({
-                    text: "Could not find the requested diagnosis. Please enter manually.",
-                  });
-                  continue;
-                }
-
-                const { res, data } = await request(
-                  DiagnosesRoutes.createConsultationDiagnosis,
-                  {
-                    pathParams: { consultation: consultationId },
-                    body: {
-                      ...diagnosis,
-                      diagnosis: availableDiagnosis,
-                    },
-                  },
-                );
-
-                if (res?.ok && data)
-                  setDiagnoses((diagnoses) => [...(diagnoses || []), data]);
-              }
-            }
-
-            // Prescriptions
-            if (fields.prescriptions || fields.prn_prescriptions) {
-              const combined_prescriptions = [
-                ...(fields.prescriptions || []),
-                ...(fields.prn_prescriptions || []),
-              ];
-              for (const prescription of combined_prescriptions) {
-                // fetch medicine
-                const { res: medicineRes, data: medicineData } = await request(
-                  routes.listMedibaseMedicines,
-                  {
-                    query: { query: prescription.medicine },
-                  },
-                );
-
-                if (!medicineRes?.ok) {
-                  error({
-                    text: "Failed to fetch medicine",
-                  });
-                  continue;
-                }
-
-                const availableMedicine = medicineData?.[0]?.id;
-
-                if (!availableMedicine) {
-                  error({
-                    text: "Could not find the requested medicine. Please enter manually.",
-                  });
-                  continue;
-                }
-
-                const { res } = await request(
-                  MedicineRoutes.createPrescription,
-                  {
-                    pathParams: { consultation: consultationId },
-                    body: {
-                      ...prescription,
-                      medicine: availableMedicine,
-                    },
-                  },
-                );
-
-                if (res?.ok) setPrescriptionSeed((s) => s + 1);
+                if (availableDiagnosis?.length)
+                  setDiagnosisSuggestions(availableDiagnosis);
               }
             }
 
@@ -598,8 +536,7 @@ export const DailyRounds = (props: any) => {
                 [
                   "investigations",
                   "icd11_diagnosis",
-                  "prescriptions",
-                  "prn_prescriptions",
+                  "additional_symptoms",
                 ].includes(f),
               ) &&
               roundTypes.some((t) => t.id === "DOCTORS_LOG")
@@ -850,7 +787,11 @@ export const DailyRounds = (props: any) => {
                   </h3>
                   {/*  */}
                   {diagnoses ? (
-                    <EditDiagnosesBuilder value={diagnoses} />
+                    <EditDiagnosesBuilder
+                      value={diagnoses}
+                      suggestions={diagnosisSuggestions}
+                      onUpdate={() => setDiagnosisSuggestions([])}
+                    />
                   ) : (
                     <div className="flex animate-pulse justify-center py-4 text-center font-medium text-secondary-800">
                       Fetching existing diagnosis of patient...
@@ -891,7 +832,6 @@ export const DailyRounds = (props: any) => {
                     discontinued={
                       showDiscontinuedPrescriptions ? undefined : false
                     }
-                    key={prescriptionSeed}
                     actions={["discontinue"]}
                   />
                 </div>
@@ -916,7 +856,6 @@ export const DailyRounds = (props: any) => {
                       showDiscontinuedPrescriptions ? undefined : false
                     }
                     actions={["discontinue"]}
-                    key={prescriptionSeed}
                   />
                 </div>
               </div>
