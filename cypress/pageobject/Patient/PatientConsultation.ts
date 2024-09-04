@@ -52,7 +52,7 @@ export class PatientConsultationPage {
     cy.searchAndSelectOption("#icd11-search", icdCode);
     cy.get("#diagnosis-list")
       .contains("Add as")
-      .focus()
+      .scrollIntoView()
       .click()
       .then(() => {
         cy.get(`#${statusId}`).click();
