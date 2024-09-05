@@ -6,8 +6,8 @@ import routes from "../../Redux/api";
 import * as Notify from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
 import { UserModel } from "../Users/models";
-import useConfig from "../../Common/hooks/useConfig";
 import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
+import careConfig from "@careConfig";
 import uploadFile from "../../Utils/request/uploadFile";
 import _ from "lodash";
 
@@ -69,7 +69,6 @@ export const Scribe: React.FC<ScribeProps> = ({
   onFormUpdate,
   existingData,
 }) => {
-  const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
   const [stage, setStage] = useState("start");
@@ -541,7 +540,7 @@ export const Scribe: React.FC<ScribeProps> = ({
     }
   }
 
-  if (!enable_scribe) return null;
+  if (!careConfig.scribe.enabled) return null;
 
   return (
     <Popover>

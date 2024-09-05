@@ -22,8 +22,8 @@ import { useEffect, useState } from "react";
  * // To display the timer in your component:
  * <div>{time}</div>
  */
-export const useTimer = () => {
-  const [running, setRunning] = useState(false);
+export const useTimer = (autoStart = false) => {
+  const [running, setRunning] = useState(autoStart);
   const [time, setTime] = useState(0);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export const useTimer = () => {
   }, [running]);
 
   return {
-    seconds: time,
+    seconds: time / 100,
     time: (
       <span>
         {("0" + Math.floor((time / 6000) % 60)).slice(-2)}:
@@ -48,5 +48,6 @@ export const useTimer = () => {
     ),
     start: () => setRunning(true),
     stop: () => setRunning(false),
+    reset: () => setTime(0),
   };
 };

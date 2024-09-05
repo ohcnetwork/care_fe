@@ -51,6 +51,7 @@ import { scrollTo } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";
 import _ from "lodash";
 import { scribeReducer } from "../Scribe/scribeutils";
+import { ICD11DiagnosisModel } from "../Facility/models";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -60,6 +61,9 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
+  const [diagnosisSuggestions, setDiagnosisSuggestions] = useState<
+    ICD11DiagnosisModel[]
+  >([]);
 
   const initForm: any = {
     physical_examination_info: "",
@@ -503,6 +507,7 @@ export const DailyRounds = (props: any) => {
             icd11_diagnosis: diagnoses,
           }}
           onFormUpdate={async (fields) => {
+            setDiagnosisSuggestions([]);
             // Symptoms
             let rounds_type = fields.rounds_type || state.form.rounds_type;
             const existingSymptoms = additionalSymptoms?.results.filter(
@@ -543,10 +548,27 @@ export const DailyRounds = (props: any) => {
                 comparer: (a, b) =>
                   a.diagnosis_object.id === b.diagnosis_object.id,
                 allowedFields: ["verification_status"],
-                // waitng for chips PR to be merged
-                // onAdd: async (stripped, item) => {
-                //
-                // },
+
+                onAdd: async (stripped, item) => {
+                  const { res: icdRes, data: icdData } = await request(
+                    routes.listICD11Diagnosis,
+                    {
+                      query: { query: item.diagnosis },
+                    },
+                  );
+
+                  if (!icdRes?.ok) {
+                    error({
+                      text: "Failed to fetch ICD11 Diagnosis",
+                    });
+                    return;
+                  }
+
+                  const availableDiagnosis = icdData?.slice(0, 5);
+
+                  if (availableDiagnosis?.length)
+                    setDiagnosisSuggestions(availableDiagnosis);
+                },
                 onUpdate: async (stripped, item) => {
                   const { data, res } = await request(
                     DiagnosesRoutes.updateConsultationDiagnosis,
@@ -561,24 +583,24 @@ export const DailyRounds = (props: any) => {
                     );
                 },
               });
-            }
 
-            if (
-              Object.keys(fields).some((f) =>
-                ["investigations", "icd11_diagnosis"].includes(f),
-              ) &&
-              roundTypes.some((t) => t.id === "DOCTORS_LOG")
-            ) {
-              rounds_type = "DOCTORS_LOG";
-            }
+              if (
+                Object.keys(fields).some((f) =>
+                  ["investigations", "icd11_diagnosis"].includes(f),
+                ) &&
+                roundTypes.some((t) => t.id === "DOCTORS_LOG")
+              ) {
+                rounds_type = "DOCTORS_LOG";
+              }
 
-            dispatch({
-              type: "set_form",
-              form: { ...state.form, ...fields, rounds_type },
-            });
-            fields.action !== undefined && setPreviousAction(fields.action);
-            fields.review_interval !== undefined &&
-              setPreviousReviewInterval(Number(fields.review_interval));
+              dispatch({
+                type: "set_form",
+                form: { ...state.form, ...fields, rounds_type },
+              });
+              fields.action !== undefined && setPreviousAction(fields.action);
+              fields.review_interval !== undefined &&
+                setPreviousReviewInterval(Number(fields.review_interval));
+            }
           }}
         />
       </div>
@@ -810,20 +832,23 @@ export const DailyRounds = (props: any) => {
           {state.form.rounds_type === "DOCTORS_LOG" && (
             <>
               <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2">
-                <div>
+                <div id="diagnosis-list">
                   <h3 className="mb-4 mt-8 text-lg font-semibold">
                     {t("diagnosis")}
                   </h3>
-                  {/*  */}
                   {diagnoses ? (
-                    <EditDiagnosesBuilder value={diagnoses} />
+                    <EditDiagnosesBuilder
+                      value={diagnoses}
+                      suggestions={diagnosisSuggestions}
+                      onUpdate={() => setDiagnosisSuggestions([])}
+                    />
                   ) : (
                     <div className="flex animate-pulse justify-center py-4 text-center font-medium text-secondary-800">
                       Fetching existing diagnosis of patient...
                     </div>
                   )}
                 </div>
-                <div>
+                <div id="investigation">
                   <h3 className="my-4 text-lg font-semibold">
                     {t("investigations")}
                   </h3>
