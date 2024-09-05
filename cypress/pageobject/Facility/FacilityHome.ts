@@ -1,5 +1,3 @@
-// cypress/support/pageObjects/FacilityHome.ts
-
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";

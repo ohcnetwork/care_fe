@@ -33,6 +33,6 @@ export default defineConfig({
     excludeSpecPattern: "**/*roles.cy.ts",
   },
   env: {
-    API_URL: process.env.REACT_CARE_API_URL,
+    API_URL: process.env.REACT_CARE_API_URL ?? "http://localhost:9000",
   },
 });

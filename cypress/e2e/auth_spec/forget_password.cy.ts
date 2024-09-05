@@ -1,5 +1,3 @@
-import { cy, describe, beforeEach, it } from "local-cypress";
-
 describe("Forgot Password", () => {
   beforeEach(() => {
     cy.awaitUrl("/", true);
