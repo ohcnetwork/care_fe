@@ -854,7 +854,7 @@ export const PatientManager = () => {
                 { text: t("discharged"), value: 1 },
               ]}
               onTabChange={(tab) => {
-                if (tab === "LIVE") {
+                if (tab === 0) {
                   updateQuery({ is_active: "True" });
                 } else {
                   const id = qParams.facility || onlyAccessibleFacility?.id;
