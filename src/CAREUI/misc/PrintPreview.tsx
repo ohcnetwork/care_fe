@@ -20,15 +20,15 @@ export default function PrintPreview(props: Props) {
 
   return (
     <Page title={props.title}>
-      <ZoomProvider initialScale={normalScale}>
-        <div className="mx-auto my-8 w-[50rem]">
-          <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
-            <ButtonV2 disabled={props.disabled} onClick={print}>
-              <CareIcon icon="l-print" className="text-lg" />
-              {t("print")}
-            </ButtonV2>
-          </div>
+      <div className="mx-auto my-8 w-[50rem]">
+        <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
+          <ButtonV2 disabled={props.disabled} onClick={print}>
+            <CareIcon icon="l-print" className="text-lg" />
+            {t("print")}
+          </ButtonV2>
+        </div>
 
+        <ZoomProvider initialScale={normalScale}>
           <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out lg:origin-top print:transform-none">
             <div
               id="section-to-print"
@@ -39,8 +39,8 @@ export default function PrintPreview(props: Props) {
           </ZoomTransform>
 
           <ZoomControls disabled={props.disabled} />
-        </div>
-      </ZoomProvider>
+        </ZoomProvider>
+      </div>
     </Page>
   );
 }
