@@ -38,7 +38,7 @@ export default function PrintPreview(props: Props) {
             </div>
           </ZoomTransform>
 
-          <ZoomControls />
+          <ZoomControls disabled={props.disabled} />
         </div>
       </ZoomProvider>
     </Page>
