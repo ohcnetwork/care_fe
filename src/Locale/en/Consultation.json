@@ -55,5 +55,5 @@
   "back_dated_encounter_date_caution": "You are creating an encounter for",
   "encounter_duration_confirmation": "The duration of this encounter would be",
   "consultation_notes": "General Instructions (Advice)",
-  "Procedures": "Procedure Suggestions"
+  "procedure_suggestions": "Procedure Suggestions"
 }
