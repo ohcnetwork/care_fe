@@ -1,7 +1,5 @@
 import "cypress-localstorage-commands";
 
-import { Cypress, cy } from "local-cypress";
-
 const apiUrl = Cypress.env("API_URL");
 
 Cypress.Commands.add("login", (username: string, password: string) => {

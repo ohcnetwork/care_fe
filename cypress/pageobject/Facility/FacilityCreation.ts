@@ -1,5 +1,4 @@
 // FacilityPage.ts
-import { cy } from "local-cypress";
 
 class FacilityPage {
   visitCreateFacilityPage() {

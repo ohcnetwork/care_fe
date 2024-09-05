@@ -1,5 +1,4 @@
 // assetPage.ts
-import { cy, expect } from "local-cypress";
 
 export class AssetPage {
   createAsset() {

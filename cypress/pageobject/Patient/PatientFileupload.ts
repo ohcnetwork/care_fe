@@ -1,5 +1,3 @@
-import { cy } from "local-cypress";
-
 export class PatientFileUpload {
   clickFileUploadIcon() {
     cy.get("#patient-details").click();

@@ -1,13 +1,3 @@
-import {
-  cy,
-  describe,
-  it,
-  before,
-  beforeEach,
-  afterEach,
-  expect,
-} from "local-cypress";
-
 describe("Edit Profile Testing", () => {
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
@@ -52,7 +42,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("export", () => {
-    cy.intercept("**", (req: Cypress.Request) => {
+    cy.intercept("**", (req) => {
       const url = new URL(req.url);
       const params = new URLSearchParams(url.search);
       if (
