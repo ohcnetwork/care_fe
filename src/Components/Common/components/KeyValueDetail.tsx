@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { classNames } from "../../../Utils/utils";
-
-export const PatientDetail = ({
+ const KeyValueDetail = ({
     name,
     children,
     className,
@@ -26,4 +25,6 @@ export const PatientDetail = ({
       </div>
     );
   };
+
+export default KeyValueDetail
   

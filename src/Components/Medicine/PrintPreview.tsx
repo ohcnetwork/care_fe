@@ -13,7 +13,7 @@ import MedicineRoutes from "./routes";
 import { Prescription } from "./models";
 import useConfig from "../../Common/hooks/useConfig";
 import { ReactNode } from "react";
-import { PatientDetail } from "../Common/components/PatientDetail";
+import KeyValueDetail from "../Common/components/KeyValueDetail";
 export default function PrescriptionsPrintPreview() {
   const { main_logo } = useConfig();
   const { t } = useTranslation();
@@ -51,7 +51,7 @@ export default function PrescriptionsPrintPreview() {
         <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
       </div>
       <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
-        <PatientDetail name="Patient" className="col-span-5">
+        <KeyValueDetail name="Patient" className="col-span-5">
           {patient && (
             <>
               <span className="uppercase">{patient.name}</span> -{" "}
@@ -59,12 +59,12 @@ export default function PrescriptionsPrintPreview() {
               {patientAgeInYears(patient).toString()}yrs
             </>
           )}
-        </PatientDetail>
-        <PatientDetail name="IP/OP No." className="col-span-3">
+        </KeyValueDetail>
+        <KeyValueDetail name="IP/OP No." className="col-span-3">
           {encounter?.patient_no}
-        </PatientDetail>
+        </KeyValueDetail>
 
-        <PatientDetail
+        <KeyValueDetail
           name={
             encounter
               ? `${t(`encounter_suggestion__${encounter.suggestion}`)} on`
@@ -73,16 +73,16 @@ export default function PrescriptionsPrintPreview() {
           className="col-span-5"
         >
           {formatDate(encounter?.encounter_date)}
-        </PatientDetail>
-        <PatientDetail name="Bed" className="col-span-3">
+        </KeyValueDetail>
+        <KeyValueDetail name="Bed" className="col-span-3">
           {encounter?.current_bed?.bed_object.location_object?.name}
           {" - "}
           {encounter?.current_bed?.bed_object.name}
-        </PatientDetail>
+        </KeyValueDetail>
 
-        <PatientDetail name="Allergy to medication" className="col-span-8">
+        <KeyValueDetail name="Allergy to medication" className="col-span-8">
           {patient?.allergies ?? "None"}
-        </PatientDetail>
+        </KeyValueDetail>
       </div>
 
       <PrescriptionsTable items={normalPrescriptions} />
@@ -92,10 +92,10 @@ export default function PrescriptionsPrintPreview() {
         <p className="font-medium text-secondary-800">
           Sign of the Consulting Doctor
         </p>
-        <PatientDetail name="Name of the Consulting Doctor">
+        <KeyValueDetail name="Name of the Consulting Doctor">
           {encounter?.treating_physician_object &&
             formatName(encounter?.treating_physician_object)}
-        </PatientDetail>
+        </KeyValueDetail>
         <p className="pt-6 text-center text-xs font-medium text-secondary-700">
           Generated on: {formatDateTime(new Date())}
         </p>

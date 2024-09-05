@@ -21,7 +21,7 @@ import { PatientModel } from "../Patient/models";
 import MedicineRoutes from "../Medicine/routes";
 import PrintPreview from "../../CAREUI/misc/PrintPreview";
 import useConfig from "../../Common/hooks/useConfig";
-import { PatientDetail } from "../Common/components/PatientDetail";
+import KeyValueDetail from "../Common/components/KeyValueDetail";
 
 export interface ITreatmentSummaryProps {
   consultationId: string;
@@ -90,10 +90,10 @@ export default function TreatmentSummary({
         <p className="font-medium text-secondary-800">
           Sign of the Consulting Doctor
         </p>
-        <PatientDetail name="Name of the Consulting Doctor">
+        <KeyValueDetail name="Name of the Consulting Doctor">
           {consultationData?.treating_physician_object &&
             formatName(consultationData?.treating_physician_object)}
-        </PatientDetail>
+        </KeyValueDetail>
         <p className="pt-6 text-center text-xs font-medium text-secondary-700">
           Generated on: {formatDateTime(new Date())}
         </p>
@@ -541,8 +541,5 @@ function InstructionsSection({ consultationData }: IInstructionsSection) {
   );
 }
 
-
-
-// Things that i added
 
 

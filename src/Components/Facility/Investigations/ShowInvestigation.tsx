@@ -8,7 +8,7 @@ import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
 import PrintPreview from "../../../CAREUI/misc/PrintPreview";
-import { PatientDetail } from "../../Common/components/PatientDetail";
+import KeyValueDetail from "../../Common/components/KeyValueDetail";
 import { formatDate, formatDateTime, formatName, patientAgeInYears } from "../../../Utils/utils";
 import useConfig from "../../../Common/hooks/useConfig";
 
@@ -147,49 +147,43 @@ export default function ShowInvestigation(props: any) {
   }
 
   return (
+  
           <PrintPreview title={`Investigation Report for ${patientData?.name}`}
-          >
-        <div id="section-to-print">
-          
-          <div
-          className="print:w-[1100px]">
-
-         
+          >         
         <div className="mb-3 flex items-center justify-between p-4 ">
           <h3>{consultation?.facility_name}</h3>
           <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
         </div>
-        <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
-          <PatientDetail name="Patient" className="col-span-5">
-            {patientData && (
-              <>
-                <span className="uppercase">{patientData.name}</span> -{" "}
-                {t(`GENDER__${patientData.gender}`)},{" "}
-                {patientAgeInYears(patientData).toString()}yrs
-              </>
-            )}
-          </PatientDetail>
-          <PatientDetail name="IP/OP No." className="col-span-3">
-            {consultation?.patient_no}
-          </PatientDetail>
+          <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
+            <KeyValueDetail name="Patient" className="col-span-5">
+              {patientData && (
+                <>
+                  <span className="uppercase">{patientData.name}</span> -{" "}
+                  {t(`GENDER__${patientData.gender}`)},{" "}
+                  {patientAgeInYears(patientData).toString()}yrs
+                </>
+              )}
+            </KeyValueDetail>
+            <KeyValueDetail name="IP/OP No." className="col-span-3">
+              {consultation?.patient_no}
+            </KeyValueDetail>
 
-          <PatientDetail
-            name={
-              consultation
-                ? `${t(`encounter_suggestion__${consultation?.suggestion}`)} on`
-                : ""
-            }
-            className="col-span-5"
-          >
-            {formatDate(consultation?.encounter_date)}
-          </PatientDetail>
-          <PatientDetail name="Bed" className="col-span-3">
-            {consultation?.current_bed?.bed_object.location_object?.name}
-            {" - "}
-            {consultation?.current_bed?.bed_object.name}
-          </PatientDetail>
-        </div>
-        </div>
+            <KeyValueDetail
+              name={
+                consultation
+                  ? `${t(`encounter_suggestion__${consultation?.suggestion}`)} on`
+                  : ""
+              }
+              className="col-span-5"
+            >
+              {formatDate(consultation?.encounter_date)}
+            </KeyValueDetail>
+            <KeyValueDetail name="Bed" className="col-span-3">
+              {consultation?.current_bed?.bed_object.location_object?.name}
+              {" - "}
+              {consultation?.current_bed?.bed_object.name}
+            </KeyValueDetail>
+          </div>
         <InvestigationTable
             title={`Investigation Report of :${patientData?.name}`}
             data={state.initialValues}
@@ -203,10 +197,10 @@ export default function ShowInvestigation(props: any) {
         <p className="font-medium text-secondary-800">
           Sign of the Consulting Doctor
         </p>
-        <PatientDetail name="Name of the Consulting Doctor">
+        <KeyValueDetail name="Name of the Consulting Doctor">
           {consultation?.treating_physician_object &&
             formatName(consultation?.treating_physician_object)}
-        </PatientDetail>
+        </KeyValueDetail>
         <p className="pt-6 text-center text-xs font-medium text-secondary-700">
           Generated on: {formatDateTime(new Date())}
         </p>
@@ -216,8 +210,7 @@ export default function ShowInvestigation(props: any) {
           authorized the same by affixing signature.
         </p>
       </div>  
-      </div>
-
       </PrintPreview>
+      
   );
 }
