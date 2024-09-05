@@ -1,5 +1,6 @@
 import { GENDER_TYPES } from "../../Common/constants";
 import {
+  classNames,
   formatDate,
   formatDateTime,
   formatName,
@@ -8,7 +9,6 @@ import {
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { ConsultationModel } from "./models";
 import { ReactNode, useMemo } from "react";
 import {
@@ -20,8 +20,7 @@ import { useTranslation } from "react-i18next";
 import { PatientModel } from "../Patient/models";
 import MedicineRoutes from "../Medicine/routes";
 import PrintPreview from "../../CAREUI/misc/PrintPreview";
-import useConfig from "../../Common/hooks/useConfig";
-import KeyValueDetail from "../Common/components/KeyValueDetail";
+import careConfig from "@careConfig";
 
 export interface ITreatmentSummaryProps {
   consultationId: string;
@@ -35,7 +34,6 @@ export default function TreatmentSummary({
   facilityId,
 }: ITreatmentSummaryProps) {
 
-  const { main_logo } = useConfig();
   const { t } = useTranslation();
   const date = new Date();
   const { goBack } = useAppHistory();
@@ -60,7 +58,7 @@ export default function TreatmentSummary({
 
           <div className="mb-3 flex items-center justify-between p-4 ">
           <h3>{consultationData?.facility_name}</h3>
-          <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
+          <img className="h-10 w-auto" src={careConfig.mainLogo?.dark} alt="care logo" />
         </div>
             <h2 className="text-center text-lg">
               {t("treatment_summary__heading")}
@@ -90,10 +88,10 @@ export default function TreatmentSummary({
         <p className="font-medium text-secondary-800">
           Sign of the Consulting Doctor
         </p>
-        <KeyValueDetail name="Name of the Consulting Doctor">
+        <PatientDetail name="Name of the Consulting Doctor">
           {consultationData?.treating_physician_object &&
             formatName(consultationData?.treating_physician_object)}
-        </KeyValueDetail>
+        </PatientDetail>
         <p className="pt-6 text-center text-xs font-medium text-secondary-700">
           Generated on: {formatDateTime(new Date())}
         </p>
@@ -540,6 +538,29 @@ function InstructionsSection({ consultationData }: IInstructionsSection) {
     </>
   );
 }
-
-
+const PatientDetail = ({
+  name,
+  children,
+  className,
+}: {
+  name: string;
+  children?: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div
+      className={classNames(
+        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
+        className,
+      )}
+    >
+      <div className="font-medium text-secondary-800">{name}: </div>
+      {children != null ? (
+        <span className="pl-2 font-bold">{children}</span>
+      ) : (
+        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
+      )}
+    </div>
+  );
+};
 

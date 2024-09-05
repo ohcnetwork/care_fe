@@ -81,11 +81,11 @@ To ensure the quality of our pull requests, we use a variety of tools:
 
 To run cypress tests locally, you'll need to setup the backend to run locally and load dummy data required for cypress to the database. See [docs](https://github.com/ohcnetwork/care#self-hosting).
 
-Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `CARE_API` env.
+Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `REACT_CARE_API_URL` env.
 
 ```env
 #.env
-CARE_API=http://127.0.0.1:9000
+REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
 
 Once done, start the development server by running

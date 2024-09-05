@@ -4,6 +4,7 @@ import { useSlugs } from "../../Common/hooks/useSlug";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import {
+  classNames,
   formatDate,
   formatDateTime,
   formatName,
@@ -11,11 +12,10 @@ import {
 } from "../../Utils/utils";
 import MedicineRoutes from "./routes";
 import { Prescription } from "./models";
-import useConfig from "../../Common/hooks/useConfig";
 import { ReactNode } from "react";
-import KeyValueDetail from "../Common/components/KeyValueDetail";
+import careConfig from "@careConfig";
+
 export default function PrescriptionsPrintPreview() {
-  const { main_logo } = useConfig();
   const { t } = useTranslation();
   const [patientId, consultationId] = useSlugs("patient", "consultation");
 
@@ -48,10 +48,14 @@ export default function PrescriptionsPrintPreview() {
     >
       <div className="mb-3 flex items-center justify-between p-4 ">
         <h3>{encounter?.facility_name}</h3>
-        <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
+        <img
+          className="h-10 w-auto"
+          src={careConfig.mainLogo?.dark}
+          alt="care logo"
+        />
       </div>
       <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
-        <KeyValueDetail name="Patient" className="col-span-5">
+        <PatientDetail name="Patient" className="col-span-5">
           {patient && (
             <>
               <span className="uppercase">{patient.name}</span> -{" "}
@@ -59,12 +63,12 @@ export default function PrescriptionsPrintPreview() {
               {patientAgeInYears(patient).toString()}yrs
             </>
           )}
-        </KeyValueDetail>
-        <KeyValueDetail name="IP/OP No." className="col-span-3">
+        </PatientDetail>
+        <PatientDetail name="IP/OP No." className="col-span-3">
           {encounter?.patient_no}
-        </KeyValueDetail>
+        </PatientDetail>
 
-        <KeyValueDetail
+        <PatientDetail
           name={
             encounter
               ? `${t(`encounter_suggestion__${encounter.suggestion}`)} on`
@@ -73,16 +77,16 @@ export default function PrescriptionsPrintPreview() {
           className="col-span-5"
         >
           {formatDate(encounter?.encounter_date)}
-        </KeyValueDetail>
-        <KeyValueDetail name="Bed" className="col-span-3">
+        </PatientDetail>
+        <PatientDetail name="Bed" className="col-span-3">
           {encounter?.current_bed?.bed_object.location_object?.name}
           {" - "}
           {encounter?.current_bed?.bed_object.name}
-        </KeyValueDetail>
+        </PatientDetail>
 
-        <KeyValueDetail name="Allergy to medication" className="col-span-8">
+        <PatientDetail name="Allergy to medication" className="col-span-8">
           {patient?.allergies ?? "None"}
-        </KeyValueDetail>
+        </PatientDetail>
       </div>
 
       <PrescriptionsTable items={normalPrescriptions} />
@@ -92,10 +96,10 @@ export default function PrescriptionsPrintPreview() {
         <p className="font-medium text-secondary-800">
           Sign of the Consulting Doctor
         </p>
-        <KeyValueDetail name="Name of the Consulting Doctor">
+        <PatientDetail name="Name of the Consulting Doctor">
           {encounter?.treating_physician_object &&
             formatName(encounter?.treating_physician_object)}
-        </KeyValueDetail>
+        </PatientDetail>
         <p className="pt-6 text-center text-xs font-medium text-secondary-700">
           Generated on: {formatDateTime(new Date())}
         </p>
@@ -240,5 +244,31 @@ const PrescriptionEntry = ({ obj }: { obj: Prescription }) => {
         )}
       </td>
     </tr>
+  );
+};
+
+const PatientDetail = ({
+  name,
+  children,
+  className,
+}: {
+  name: string;
+  children?: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div
+      className={classNames(
+        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
+        className,
+      )}
+    >
+      <div className="font-medium text-secondary-800">{name}: </div>
+      {children != null ? (
+        <span className="pl-2 font-bold">{children}</span>
+      ) : (
+        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
+      )}
+    </div>
   );
 };

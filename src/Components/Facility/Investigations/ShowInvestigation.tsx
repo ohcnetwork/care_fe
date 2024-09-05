@@ -1,6 +1,6 @@
 import _, { set } from "lodash-es";
 import { navigate } from "raviger";
-import { lazy, useCallback, useReducer } from "react";
+import { lazy, ReactNode, useCallback, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications.js";
@@ -8,10 +8,8 @@ import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
 import PrintPreview from "../../../CAREUI/misc/PrintPreview";
-import KeyValueDetail from "../../Common/components/KeyValueDetail";
-import { formatDate, formatDateTime, formatName, patientAgeInYears } from "../../../Utils/utils";
-import useConfig from "../../../Common/hooks/useConfig";
-
+import { classNames, formatDate, formatDateTime, formatName, patientAgeInYears } from "../../../Utils/utils";
+import careConfig from "@careConfig";
 const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
@@ -40,7 +38,6 @@ const updateFormReducer = (state = initialState, action: any) => {
 
 export default function ShowInvestigation(props: any) {
   const { t } = useTranslation();
-  const { main_logo } = useConfig();
   const { consultationId, patientId, facilityId, sessionId } = props;
 
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
@@ -152,10 +149,10 @@ export default function ShowInvestigation(props: any) {
           >         
         <div className="mb-3 flex items-center justify-between p-4 ">
           <h3>{consultation?.facility_name}</h3>
-          <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
+          <img className="h-10 w-auto" src={careConfig.mainLogo?.dark} alt="care logo" />
         </div>
           <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
-            <KeyValueDetail name="Patient" className="col-span-5">
+            <PatientDetail name="Patient" className="col-span-5">
               {patientData && (
                 <>
                   <span className="uppercase">{patientData.name}</span> -{" "}
@@ -163,12 +160,12 @@ export default function ShowInvestigation(props: any) {
                   {patientAgeInYears(patientData).toString()}yrs
                 </>
               )}
-            </KeyValueDetail>
-            <KeyValueDetail name="IP/OP No." className="col-span-3">
+            </PatientDetail>
+            <PatientDetail name="IP/OP No." className="col-span-3">
               {consultation?.patient_no}
-            </KeyValueDetail>
+            </PatientDetail>
 
-            <KeyValueDetail
+            <PatientDetail
               name={
                 consultation
                   ? `${t(`encounter_suggestion__${consultation?.suggestion}`)} on`
@@ -177,12 +174,12 @@ export default function ShowInvestigation(props: any) {
               className="col-span-5"
             >
               {formatDate(consultation?.encounter_date)}
-            </KeyValueDetail>
-            <KeyValueDetail name="Bed" className="col-span-3">
+            </PatientDetail>
+            <PatientDetail name="Bed" className="col-span-3">
               {consultation?.current_bed?.bed_object.location_object?.name}
               {" - "}
               {consultation?.current_bed?.bed_object.name}
-            </KeyValueDetail>
+            </PatientDetail>
           </div>
         <InvestigationTable
             title={`Investigation Report of :${patientData?.name}`}
@@ -197,10 +194,10 @@ export default function ShowInvestigation(props: any) {
         <p className="font-medium text-secondary-800">
           Sign of the Consulting Doctor
         </p>
-        <KeyValueDetail name="Name of the Consulting Doctor">
+        <PatientDetail name="Name of the Consulting Doctor">
           {consultation?.treating_physician_object &&
             formatName(consultation?.treating_physician_object)}
-        </KeyValueDetail>
+        </PatientDetail>
         <p className="pt-6 text-center text-xs font-medium text-secondary-700">
           Generated on: {formatDateTime(new Date())}
         </p>
@@ -214,3 +211,29 @@ export default function ShowInvestigation(props: any) {
       
   );
 }
+
+const PatientDetail = ({
+  name,
+  children,
+  className,
+}: {
+  name: string;
+  children?: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div
+      className={classNames(
+        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
+        className,
+      )}
+    >
+      <div className="font-medium text-secondary-800">{name}: </div>
+      {children != null ? (
+        <span className="pl-2 font-bold">{children}</span>
+      ) : (
+        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
+      )}
+    </div>
+  );
+};
