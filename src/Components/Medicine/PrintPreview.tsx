@@ -46,7 +46,7 @@ export default function PrescriptionsPrintPreview() {
       }
       disabled={!(patient && encounter && items)}
     >
-      <div className="mb-3 flex items-center justify-between p-4 ">
+      <div className="mb-3 flex items-center justify-between p-4">
         <h3>{encounter?.facility_name}</h3>
         <img
           className="h-10 w-auto"
@@ -113,6 +113,31 @@ export default function PrescriptionsPrintPreview() {
   );
 }
 
+const PatientDetail = ({
+  name,
+  children,
+  className,
+}: {
+  name: string;
+  children?: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div
+      className={classNames(
+        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
+        className,
+      )}
+    >
+      <div className="font-medium text-secondary-800">{name}: </div>
+      {children != null ? (
+        <span className="pl-2 font-bold">{children}</span>
+      ) : (
+        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
+      )}
+    </div>
+  );
+};
 
 const PrescriptionsTable = ({
   items,
@@ -244,31 +269,5 @@ const PrescriptionEntry = ({ obj }: { obj: Prescription }) => {
         )}
       </td>
     </tr>
-  );
-};
-
-const PatientDetail = ({
-  name,
-  children,
-  className,
-}: {
-  name: string;
-  children?: ReactNode;
-  className?: string;
-}) => {
-  return (
-    <div
-      className={classNames(
-        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
-        className,
-      )}
-    >
-      <div className="font-medium text-secondary-800">{name}: </div>
-      {children != null ? (
-        <span className="pl-2 font-bold">{children}</span>
-      ) : (
-        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
-      )}
-    </div>
   );
 };
