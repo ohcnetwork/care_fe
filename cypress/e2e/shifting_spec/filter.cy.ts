@@ -1,4 +1,3 @@
-import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import ShiftingPage from "../../pageobject/Shift/ShiftFilters";
 
 describe("Shifting section filter", () => {

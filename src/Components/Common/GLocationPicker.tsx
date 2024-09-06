@@ -4,8 +4,8 @@ import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
 import Spinner from "./Spinner";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import useConfig from "../../Common/hooks/useConfig";
 import { PopoverButton } from "@headlessui/react";
+import careConfig from "@careConfig";
 
 interface GLocationPickerProps {
   lat: number;
@@ -24,7 +24,6 @@ const GLocationPicker = ({
   handleOnClose,
   handleOnSelectCurrentLocation,
 }: GLocationPickerProps) => {
-  const { gmaps_api_key } = useConfig();
   const [location, setLocation] = React.useState<google.maps.LatLng | null>(
     null,
   );
@@ -87,7 +86,7 @@ const GLocationPicker = ({
     <div className="flex h-80 w-80 sm:h-96 sm:w-96">
       <Wrapper
         libraries={["places"]}
-        apiKey={gmaps_api_key}
+        apiKey={careConfig.gmapsApiKey}
         render={render}
       ></Wrapper>
     </div>

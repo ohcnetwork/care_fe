@@ -12,7 +12,6 @@ import { downloadShiftRequests } from "../../Redux/actions";
 import { formatFilter } from "./Commons";
 
 import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
 import useFilters from "../../Common/hooks/useFilters";
 import { lazy, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,6 +20,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Tabs from "../Common/components/Tabs";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -31,13 +31,12 @@ export default function BoardView() {
     limit: -1,
     cacheBlacklist: ["patient_name"],
   });
-  const { wartime_shifting } = useConfig();
 
-  const shiftStatusOptions = wartime_shifting
+  const shiftStatusOptions = careConfig.wartimeShifting
     ? SHIFTING_CHOICES_WARTIME
     : SHIFTING_CHOICES_PEACETIME;
 
-  const COMPLETED = wartime_shifting
+  const COMPLETED = careConfig.wartimeShifting
     ? [
         "COMPLETED",
         "REJECTED",

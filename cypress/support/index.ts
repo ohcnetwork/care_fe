@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import "./commands";
 
 declare global {
