@@ -11,7 +11,6 @@ type Props = {
   title: string;
 };
 
-
 export default function PrintPreview(props: Props) {
   return (
     <Page title={props.title}>
@@ -26,7 +25,11 @@ export default function PrintPreview(props: Props) {
         <div className="bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out print:p-2 print:text-sm print:shadow-none">
           <div
             id="section-to-print"
-            className={classNames("w-full", props.className, "print:w-full print:inset-x-0 print:absolute")}
+            className={classNames(
+              "w-full",
+              props.className,
+              "print:absolute print:inset-x-0 print:w-full",
+            )}
           >
             {props.children}
           </div>
