@@ -144,54 +144,20 @@ export default function ShowInvestigation(props: any) {
   }
 
   return (
-  
-          <PrintPreview title={`Investigation Report for ${patientData?.name}`}
-          >         
-        <div className="mb-3 flex items-center justify-between p-4 ">
-          <h3>{consultation?.facility_name}</h3>
-          <img className="h-10 w-auto" src={careConfig.mainLogo?.dark} alt="care logo" />
-        </div>
-          <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
-            <PatientDetail name="Patient" className="col-span-5">
-              {patientData && (
-                <>
-                  <span className="uppercase">{patientData.name}</span> -{" "}
-                  {t(`GENDER__${patientData.gender}`)},{" "}
-                  {patientAgeInYears(patientData).toString()}yrs
-                </>
-              )}
-            </PatientDetail>
-            <PatientDetail name="IP/OP No." className="col-span-3">
-              {consultation?.patient_no}
-            </PatientDetail>
 
-            <PatientDetail
-              name={
-                consultation
-                  ? `${t(`encounter_suggestion__${consultation?.suggestion}`)} on`
-                  : ""
-              }
-              className="col-span-5"
-            >
-              {formatDate(consultation?.encounter_date)}
-            </PatientDetail>
-            <PatientDetail name="Bed" className="col-span-3">
-              {consultation?.current_bed?.bed_object.location_object?.name}
-              {" - "}
-              {consultation?.current_bed?.bed_object.name}
-            </PatientDetail>
-          </div>
-        <InvestigationTable
-            title={`Investigation Report of :${patientData?.name}`}
-            data={state.initialValues}
-            isDischargedPatient={!!consultation?.discharge_date}
-            changedFields={state.changedFields}
-            handleValueChange={handleValueChange}
-            handleUpdateCancel={handleUpdateCancel}
-            handleSave={handleSubmit}
-          />        
-      </PrintPreview>
-      
+    <PrintPreview title={`Investigation Report for ${patientData?.name}`}
+    >
+      <InvestigationTable
+        title={`Investigation Report of :${patientData?.name}`}
+        data={state.initialValues}
+        isDischargedPatient={!!consultation?.discharge_date}
+        changedFields={state.changedFields}
+        handleValueChange={handleValueChange}
+        handleUpdateCancel={handleUpdateCancel}
+        handleSave={handleSubmit}
+      />
+    </PrintPreview>
+
   );
 }
 
@@ -199,6 +165,7 @@ const PatientDetail = ({
   name,
   children,
   className,
+
 }: {
   name: string;
   children?: ReactNode;
