@@ -190,23 +190,6 @@ export default function ShowInvestigation(props: any) {
             handleUpdateCancel={handleUpdateCancel}
             handleSave={handleSubmit}
           />        
-        <div className="pt-12">
-        <p className="font-medium text-secondary-800">
-          Sign of the Consulting Doctor
-        </p>
-        <PatientDetail name="Name of the Consulting Doctor">
-          {consultation?.treating_physician_object &&
-            formatName(consultation?.treating_physician_object)}
-        </PatientDetail>
-        <p className="pt-6 text-center text-xs font-medium text-secondary-700">
-          Generated on: {formatDateTime(new Date())}
-        </p>
-        <p className="pt-1 text-center text-xs font-medium text-secondary-700">
-          This is a computer generated prescription. It shall be issued to the
-          patient only after the concerned doctor has verified the content and
-          authorized the same by affixing signature.
-        </p>
-      </div>  
       </PrintPreview>
       
   );
