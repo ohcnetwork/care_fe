@@ -1,5 +1,3 @@
-import { cy } from "local-cypress";
-
 export default class UserProfilePage {
   assertVideoConnectLink(link: string) {
     cy.get("#videoconnectlink-profile-details").should("contain.text", link);

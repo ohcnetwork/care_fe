@@ -1,5 +1,3 @@
-import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
-
 describe("Resource filter", () => {
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");

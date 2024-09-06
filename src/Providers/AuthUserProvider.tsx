@@ -5,8 +5,8 @@ import routes from "../Redux/api";
 import useQuery from "../Utils/request/useQuery";
 import { LocalStorageKeys } from "../Common/constants";
 import request from "../Utils/request/request";
-import useConfig from "../Common/hooks/useConfig";
 import { navigate } from "raviger";
+import careConfig from "@careConfig";
 
 interface Props {
   children: React.ReactNode;
@@ -14,9 +14,6 @@ interface Props {
 }
 
 export default function AuthUserProvider({ children, unauthorized }: Props) {
-  const { jwt_token_refresh_interval } = useConfig();
-  const tokenRefreshInterval = jwt_token_refresh_interval ?? 5 * 60 * 1000;
-
   const {
     res,
     data: user,
@@ -30,8 +27,11 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     }
 
     updateRefreshToken(true);
-    setInterval(() => updateRefreshToken(), tokenRefreshInterval);
-  }, [user, tokenRefreshInterval]);
+    setInterval(
+      () => updateRefreshToken(),
+      careConfig.auth.tokenRefreshInterval,
+    );
+  }, [user]);
 
   const signIn = useCallback(
     async (creds: { username: string; password: string }) => {

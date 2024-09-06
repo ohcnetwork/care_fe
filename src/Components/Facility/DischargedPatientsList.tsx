@@ -402,10 +402,6 @@ const DischargedPatientsList = ({
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
-            ...dateRange(
-              "Symptoms onset",
-              "last_consultation_symptoms_onset_date",
-            ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
               name: "Telemedicine",

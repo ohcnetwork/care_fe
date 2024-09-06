@@ -1,4 +1,3 @@
-import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
