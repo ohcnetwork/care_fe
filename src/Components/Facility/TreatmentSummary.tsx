@@ -28,9 +28,7 @@ export interface ITreatmentSummaryProps {
 export default function TreatmentSummary({
   consultationId,
   patientId,
-  facilityId,
 }: ITreatmentSummaryProps) {
-
   const { t } = useTranslation();
   const date = new Date();
 
@@ -48,13 +46,16 @@ export default function TreatmentSummary({
     <div>
       <PageHeadTitle title={t("treatment_summary__head_title")} />
       <div className="my-4">
-        <PrintPreview title="Treatment Summary">
+        <PrintPreview title={t("treatment_summary__head_title")}>
           <div id="section-to-print" className="mx-5">
-
-          <div className="mb-3 flex items-center justify-between p-4 ">
-          <h3>{consultationData?.facility_name}</h3>
-          <img className="h-10 w-auto" src={careConfig.mainLogo?.dark} alt="care logo" />
-        </div>
+            <div className="mb-3 flex items-center justify-between p-4">
+              <h3>{consultationData?.facility_name}</h3>
+              <img
+                className="h-10 w-auto"
+                src={careConfig.mainLogo?.dark}
+                alt="care logo"
+              />
+            </div>
             <h2 className="text-center text-lg">
               {t("treatment_summary__heading")}
             </h2>
@@ -516,4 +517,3 @@ function InstructionsSection({ consultationData }: IInstructionsSection) {
     </>
   );
 }
-

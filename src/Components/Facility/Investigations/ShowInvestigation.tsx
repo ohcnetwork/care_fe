@@ -1,15 +1,12 @@
 import _, { set } from "lodash-es";
 import { navigate } from "raviger";
-import { lazy, ReactNode, useCallback, useReducer } from "react";
-import { useTranslation } from "react-i18next";
+import { lazy, useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications.js";
 import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
 import PrintPreview from "../../../CAREUI/misc/PrintPreview";
-import { classNames, formatDate, formatDateTime, formatName, patientAgeInYears } from "../../../Utils/utils";
-import careConfig from "@careConfig";
 const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
@@ -37,8 +34,7 @@ const updateFormReducer = (state = initialState, action: any) => {
 };
 
 export default function ShowInvestigation(props: any) {
-  const { t } = useTranslation();
-  const { consultationId, patientId, facilityId, sessionId } = props;
+  const { consultationId, patientId, sessionId } = props;
 
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
   const { loading: investigationLoading } = useQuery(routes.getInvestigation, {
@@ -144,9 +140,7 @@ export default function ShowInvestigation(props: any) {
   }
 
   return (
-
-    <PrintPreview title={`Investigation Report for ${patientData?.name}`}
-    >
+    <PrintPreview title={`Investigation Report for ${patientData?.name}`}>
       <InvestigationTable
         title={`Investigation Report of :${patientData?.name}`}
         data={state.initialValues}
@@ -157,33 +151,5 @@ export default function ShowInvestigation(props: any) {
         handleSave={handleSubmit}
       />
     </PrintPreview>
-
   );
 }
-
-const PatientDetail = ({
-  name,
-  children,
-  className,
-
-}: {
-  name: string;
-  children?: ReactNode;
-  className?: string;
-}) => {
-  return (
-    <div
-      className={classNames(
-        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
-        className,
-      )}
-    >
-      <div className="font-medium text-secondary-800">{name}: </div>
-      {children != null ? (
-        <span className="pl-2 font-bold">{children}</span>
-      ) : (
-        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
-      )}
-    </div>
-  );
-};
