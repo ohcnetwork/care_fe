@@ -45,8 +45,8 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
           <span className="text-sm font-semibold text-secondary-700">
-            {(attributeValue as BloodPressure).systolic}/
-            {(attributeValue as BloodPressure).diastolic} mmHg
+            {(attributeValue as BloodPressure).systolic || "--"}/
+            {(attributeValue as BloodPressure).diastolic || "--"} mmHg
           </span>
         </div>
       );

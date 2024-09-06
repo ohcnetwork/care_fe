@@ -83,12 +83,7 @@ export const DailyRounds = (props: any) => {
     rhythm_detail: "",
     ventilator_spo2: null,
     consciousness_level: undefined,
-    bp: {
-      systolic: undefined,
-      diastolic: undefined,
-      mean: undefined,
-    },
-    // bed: null,
+    bp: undefined,
   };
 
   const initError = Object.assign(
@@ -246,7 +241,7 @@ export const DailyRounds = (props: any) => {
           }
           return;
         case "bp": {
-          const error = BloodPressureValidator(state.form.bp);
+          const error = state.form.bp && BloodPressureValidator(state.form.bp);
           if (error) {
             errors.bp = error;
             invalidForm = true;
@@ -656,17 +651,19 @@ export const DailyRounds = (props: any) => {
             state.form.rounds_type,
           ) && (
             <>
-              <h3 className="mb-6 md:col-span-2">Vitals</h3>
+              <h3 className="mb-6 md:col-span-2">{t("vitals")}</h3>
 
-              <BloodPressureFormField
-                {...field("bp")}
-                label="Blood Pressure"
-                id="bloodPressure"
-              />
+              <div className="md:col-span-2">
+                <BloodPressureFormField
+                  {...field("bp")}
+                  label={t("blood_pressure")}
+                  id="bloodPressure"
+                />
+              </div>
 
               <RangeAutocompleteFormField
                 {...field("pulse")}
-                label="Pulse"
+                label={t("pulse")}
                 unit="bpm"
                 start={0}
                 end={200}
@@ -692,12 +689,12 @@ export const DailyRounds = (props: any) => {
 
               <TemperatureFormField
                 {...field("temperature")}
-                label="Temperature"
+                label={t("temperature")}
               />
 
               <RangeAutocompleteFormField
                 {...field("resp")}
-                label="Respiratory Rate"
+                label={t("resipiratory_rate")}
                 unit="bpm"
                 start={0}
                 end={150}
@@ -723,7 +720,7 @@ export const DailyRounds = (props: any) => {
 
               <RangeAutocompleteFormField
                 {...field("ventilator_spo2")}
-                label="SPO2"
+                label={t("spo2")}
                 unit="%"
                 start={0}
                 end={100}
@@ -747,21 +744,24 @@ export const DailyRounds = (props: any) => {
                 ]}
               />
 
-              <SelectFormField
-                {...field("rhythm")}
-                label="Rhythm"
-                placeholder="Unknown"
-                options={RHYTHM_CHOICES}
-                optionLabel={(option) => option.desc}
-                optionValue={(option) => option.id}
-              />
+              <div className="space-y-2">
+                <SelectFormField
+                  {...field("rhythm")}
+                  label={t("rhythm")}
+                  placeholder={t("unknown")}
+                  options={RHYTHM_CHOICES}
+                  optionLabel={(option) => option.desc}
+                  optionValue={(option) => option.id}
+                  errorClassName="hidden"
+                />
 
-              <TextAreaFormField
-                {...field("rhythm_detail")}
-                className="md:col-span-1"
-                label="Rhythm Description"
-                rows={7}
-              />
+                <TextAreaFormField
+                  {...field("rhythm_detail")}
+                  placeholder={t("rhythm_description")}
+                  labelClassName="hidden"
+                  rows={5}
+                />
+              </div>
 
               <RadioFormField
                 label="Level Of Consciousness"

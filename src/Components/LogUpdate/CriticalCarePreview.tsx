@@ -16,6 +16,7 @@ import { VentilatorFields } from "./Sections/RespiratorySupport/Ventilator";
 import PressureSore from "./Sections/PressureSore/PressureSore";
 import { IOBalanceSections } from "./Sections/IOBalance";
 import PainChart from "./components/PainChart";
+import { meanArterialPressure } from "../Common/BloodPressureFormField";
 
 type Props = {
   facilityId: string;
@@ -215,10 +216,7 @@ export default function CriticalCarePreview(props: Props) {
                 unit="mmHg"
                 valueDescriptions={rangeValueDescription({ low: 49, high: 89 })}
               />
-              <Detail
-                label="Mean"
-                value={data.bp.mean && properRoundOf(data.bp.mean)}
-              />
+              <Detail label="Mean" value={meanArterialPressure(data.bp)} />
             </div>
           )}
           <RangeDetail
@@ -490,7 +488,7 @@ const Section = (props: { title: string; children: React.ReactNode }) => {
 
 const Detail = (props: {
   label: React.ReactNode;
-  value?: string | number | boolean;
+  value?: string | number | boolean | null;
   suffix?: React.ReactNode;
 }) => {
   let value = props.value;
@@ -517,7 +515,7 @@ const Detail = (props: {
 
 const RangeDetail = (props: {
   label: React.ReactNode;
-  value?: number;
+  value?: number | null;
   unit: React.ReactNode;
   max: number;
   valueDescriptions: ValueDescription[];

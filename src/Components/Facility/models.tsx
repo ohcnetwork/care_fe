@@ -14,6 +14,7 @@ import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import {
   AssignedToObjectModel,
+  BloodPressure,
   DailyRoundsModel,
   FileUploadModel,
 } from "../Patient/models";
@@ -402,11 +403,7 @@ export type PrimaryParametersPlotFields =
   | "rhythm_detail";
 
 export type PrimaryParametersPlotRes = {
-  bp: {
-    mean?: number;
-    systolic?: number;
-    diastolic?: number;
-  };
+  bp: BloodPressure;
   pulse: number;
   temperature: string;
   resp: number;

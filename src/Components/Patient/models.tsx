@@ -286,11 +286,12 @@ export const DailyRoundTypes = [
   "TELEMEDICINE",
 ] as const;
 
-export interface BloodPressure {
-  diastolic?: number;
-  mean?: number;
-  systolic?: number;
-}
+export type BloodPressure = {
+  systolic_not_measurable?: boolean;
+  diastolic_not_measurable?: boolean;
+  systolic?: number | null;
+  diastolic?: number | null;
+};
 
 export interface IPainScale {
   description: string;

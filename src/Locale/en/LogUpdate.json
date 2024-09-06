@@ -1,6 +1,6 @@
 {
   "RESPIRATORY_SUPPORT_SHORT__UNKNOWN": "None",
-  "RESPIRATORY_SUPPORT_SHORT__OXYGEN_SUPPORT": "O2 Support",
+  "RESPIRATORY_SUPPORT_SHORT__OXYGEN_SUPPORT": "O₂ Support",
   "RESPIRATORY_SUPPORT_SHORT__NON_INVASIVE": "NIV",
   "RESPIRATORY_SUPPORT_SHORT__INVASIVE": "IV",
   "RESPIRATORY_SUPPORT__UNKNOWN": "None",
@@ -58,6 +58,8 @@
   "HEARTBEAT_RHYTHM__UNKNOWN": "Unknown",
   "heartbeat_rhythm": "Heartbeat Rhythm",
   "heartbeat_description": "Heartbeat Description",
+  "rhythm": "Rhythm",
+  "rhythm_description": "Rhythm description",
   "blood_pressure": "Blood Pressure",
   "map_acronym": "M.A.P.",
   "systolic": "Systolic",
@@ -69,5 +71,6 @@
   "pulse": "Pulse",
   "bradycardia": "Bradycardia",
   "tachycardia": "Tachycardia",
-  "spo2": "SpO₂"
+  "spo2": "SpO₂",
+  "vitals": "Vitals"
 }
