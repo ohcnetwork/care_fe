@@ -1,16 +1,13 @@
 import { GENDER_TYPES } from "../../Common/constants";
 import {
-  classNames,
   formatDate,
   formatDateTime,
-  formatName,
   formatPatientAge,
 } from "../../Utils/utils";
-import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { ConsultationModel } from "./models";
-import { ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import {
   ActiveConditionVerificationStatuses,
   ConsultationDiagnosis,
@@ -36,8 +33,6 @@ export default function TreatmentSummary({
 
   const { t } = useTranslation();
   const date = new Date();
-  const { goBack } = useAppHistory();
-  const url = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`;
 
   const { data: patientData } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
@@ -84,23 +79,6 @@ export default function TreatmentSummary({
 
               <InstructionsSection consultationData={consultationData} />
             </div>
-            <div className="pt-12">
-        <p className="font-medium text-secondary-800">
-          Sign of the Consulting Doctor
-        </p>
-        <PatientDetail name="Name of the Consulting Doctor">
-          {consultationData?.treating_physician_object &&
-            formatName(consultationData?.treating_physician_object)}
-        </PatientDetail>
-        <p className="pt-6 text-center text-xs font-medium text-secondary-700">
-          Generated on: {formatDateTime(new Date())}
-        </p>
-        <p className="pt-1 text-center text-xs font-medium text-secondary-700">
-          This is a computer generated prescription. It shall be issued to the
-          patient only after the concerned doctor has verified the content and
-          authorized the same by affixing signature.
-        </p>
-      </div>  
           </div>
         </PrintPreview>
       </div>
@@ -538,29 +516,4 @@ function InstructionsSection({ consultationData }: IInstructionsSection) {
     </>
   );
 }
-const PatientDetail = ({
-  name,
-  children,
-  className,
-}: {
-  name: string;
-  children?: ReactNode;
-  className?: string;
-}) => {
-  return (
-    <div
-      className={classNames(
-        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
-        className,
-      )}
-    >
-      <div className="font-medium text-secondary-800">{name}: </div>
-      {children != null ? (
-        <span className="pl-2 font-bold">{children}</span>
-      ) : (
-        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
-      )}
-    </div>
-  );
-};
 

@@ -11,7 +11,6 @@ type Props = {
   title: string;
 };
 
-const PRINT_BUTTON_LABEL: string = "Print";
 
 export default function PrintPreview(props: Props) {
   return (
@@ -20,7 +19,7 @@ export default function PrintPreview(props: Props) {
         <div className="top-0 z-20 flex justify-end gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 print:hidden">
           <ButtonV2 disabled={props.disabled} onClick={() => window.print()}>
             <CareIcon icon="l-print" className="text-lg" />
-            {PRINT_BUTTON_LABEL}
+            Print
           </ButtonV2>
         </div>
 
