@@ -54,5 +54,10 @@
   "encounter_date_field_label__R": "Date & Time of Consultation",
   "back_dated_encounter_date_caution": "You are creating an encounter for",
   "encounter_duration_confirmation": "The duration of this encounter would be",
-  "consultation_notes": "General Instructions (Advice)"
+  "consultation_notes": "General Instructions (Advice)",
+  "incomplete_patient_details_warning": "Patient details are incomplete. Please update the details before proceeding.",
+  "update_patient_details": "Update Patient Details",
+  "consultation_missing_warning": "You have not created a consultation for the patient in",
+  "create_consultation": "Create Consultation",
+  "patient_details_incomplete": "Patient Details Incomplete"
 }

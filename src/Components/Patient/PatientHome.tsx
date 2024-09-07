@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { lazy, useEffect, useState } from "react";
 
 import {
@@ -23,7 +23,7 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { buttonStyles } from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -40,6 +40,7 @@ import routes from "../../Redux/api";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import request from "../../Utils/request/request";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import { isPatientMandatoryDataFilled } from "./Utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -303,36 +304,63 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </div>
-        {(patientData?.facility != patientData?.last_consultation?.facility ||
-          (patientData.is_active &&
-            patientData?.last_consultation?.discharge_date)) && (
+
+        {!isPatientMandatoryDataFilled(patientData) && (
           <div className="relative mt-2">
             <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
               <div className="text-center">
                 <p className="font-bold text-red-800">
                   <CareIcon icon="l-exclamation-triangle" className="mr-2" />
                   <span className="inline">
-                    You have not created a consultation for the patient in{" "}
-                    <strong>{patientData.facility_object?.name || "-"} </strong>
+                    {t("incomplete_patient_details_warning")}
                   </span>
                 </p>
               </div>
             </div>
             <div className="mt-4 flex items-center">
-              <ButtonV2
-                className="mb-2 w-full"
-                disabled={!patientData.is_active}
-                onClick={() =>
-                  navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                  )
-                }
+              <Link
+                href={`/facility/${patientData?.facility}/patient/${id}/update`}
+                className={classNames(buttonStyles({}), "mb-2 w-full")}
               >
-                Create Consultation
-              </ButtonV2>
+                {t("update_patient_details")}
+              </Link>
             </div>
           </div>
         )}
+
+        {isPatientMandatoryDataFilled(patientData) &&
+          (patientData?.facility != patientData?.last_consultation?.facility ||
+            (patientData.is_active &&
+              patientData?.last_consultation?.discharge_date)) && (
+            <div className="relative mt-2">
+              <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
+                <div className="text-center">
+                  <p className="font-bold text-red-800">
+                    <CareIcon icon="l-exclamation-triangle" className="mr-2" />
+                    <span className="inline">
+                      {t("consultation_missing_warning")}{" "}
+                      <strong>
+                        {patientData.facility_object?.name || "-"}{" "}
+                      </strong>
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center">
+                <Link
+                  href={`/facility/${patientData?.facility}/patient/${id}/consultation`}
+                  className={classNames(
+                    buttonStyles({}),
+                    "mb-2 w-full",
+                    !patientData.is_active &&
+                      "pointer-events-none cursor-not-allowed opacity-50",
+                  )}
+                >
+                  {t("create_consultation")}
+                </Link>
+              </div>
+            </div>
+          )}
         <section className="lg:flex" data-testid="patient-dashboard">
           <div className="mx-2 lg:w-2/3">
             <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">
