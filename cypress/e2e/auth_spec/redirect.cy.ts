@@ -1,4 +1,3 @@
-import { cy, describe, it, beforeEach, Cypress } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("redirect", () => {

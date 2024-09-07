@@ -1,6 +1,3 @@
-/// <reference types="cypress" />
-
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
@@ -65,7 +62,7 @@ describe("Asset Tab", () => {
       "Dummy Facility 40",
       "ACTIVE",
       "ONVIF Camera",
-      "Camera Loc"
+      "Camera Loc",
     );
     assetFilters.clickadvancefilter();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters

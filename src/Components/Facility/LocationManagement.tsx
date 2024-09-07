@@ -87,7 +87,7 @@ export default function LocationManagement({ facilityId }: Props) {
               id="add-new-location"
               href={`/facility/${facilityId}/location/add`}
               authorizeFor={NonReadOnlyUsers}
-              className="mr-8 hidden lg:block"
+              className="mr-4 hidden lg:block"
             >
               <CareIcon icon="l-plus" className="text-lg" />
               Add New Location

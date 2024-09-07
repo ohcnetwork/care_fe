@@ -1,4 +1,3 @@
-import { useEffect, useState, useMemo } from "react";
 import {
   Combobox,
   ComboboxButton,
@@ -6,15 +5,17 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { debounce } from "lodash-es";
-import { DropdownTransition } from "../Common/components/HelperComponents";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
 } from "./MultiSelectMenuV2";
-import { useTranslation } from "react-i18next";
+import { useEffect, useMemo, useState } from "react";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { DropdownTransition } from "../Common/components/HelperComponents";
 import { classNames } from "../../Utils/utils";
+import { debounce } from "lodash-es";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   id?: string;
@@ -153,6 +154,7 @@ const AutoCompleteAsync = (props: Props) => {
           </div>
           <DropdownTransition>
             <ComboboxOptions
+              modal={false}
               as="ul"
               className="cui-dropdown-base absolute top-12 z-10 text-sm"
             >
