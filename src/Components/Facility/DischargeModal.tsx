@@ -16,7 +16,6 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { dischargePatient } from "../../Redux/actions";
-import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
@@ -32,6 +31,7 @@ import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
 import Loading from "../Common/Loading";
+import careConfig from "@careConfig";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -65,7 +65,6 @@ const DischargeModal = ({
   death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
   const { t } = useTranslation();
-  const { enable_hcx } = useConfig();
 
   const dispatch: any = useDispatch();
   const [preDischargeForm, setPreDischargeForm] =
@@ -406,7 +405,7 @@ const DischargeModal = ({
           error={errors?.discharge_notes}
         />
 
-        {enable_hcx && (
+        {careConfig.hcx.enabled && (
           // TODO: if policy and approved pre-auth exists
           <div className="my-5 rounded p-5 shadow">
             <h2 className="mb-2">Claim Insurance</h2>

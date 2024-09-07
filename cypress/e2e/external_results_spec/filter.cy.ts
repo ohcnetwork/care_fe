@@ -1,5 +1,3 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
-
 describe("External Results Filters", () => {
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");

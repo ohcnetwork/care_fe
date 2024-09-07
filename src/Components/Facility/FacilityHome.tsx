@@ -88,7 +88,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       onResponse: ({ res }) => {
         if (res?.ok) {
           Notification.Success({
-            msg: "Facility deleted successfully",
+            msg: t("deleted_successfully", { name: facilityData?.name }),
           });
         }
         navigate("/facility");
@@ -150,11 +150,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
       backUrl="/facility"
     >
       <ConfirmDialog
-        title={`Delete ${facilityData?.name}`}
+        title={t("delete_item", { name: facilityData?.name })}
         description={
           <span>
-            Are you sure you want to delete{" "}
-            <strong>{facilityData?.name}</strong>
+            {t("are_you_sure_want_to_delete", { name: facilityData?.name })}
           </span>
         }
         action="Delete"
@@ -247,7 +246,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     </div>
                     <div className="mb-4" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
-                        Address
+                        {t("address")}
                       </h1>
                       <p className="text-base font-medium">
                         {facilityData?.address}
@@ -257,7 +256,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <div className="flex-col md:flex lg:flex-1">
                       <div className="mb-4">
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
-                          Local Body
+                          {t("local_body")}
                         </h1>
                         <p className="w-2/3 text-base font-medium md:w-full">
                           {facilityData?.local_body_object?.name}
@@ -266,7 +265,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       <div className="mb-4 flex flex-col flex-wrap gap-4 md:flex-row">
                         <div>
                           <h1 className="text-base font-semibold text-[#B9B9B9]">
-                            Ward
+                            {t("ward")}
                           </h1>
                           <p className="text-base font-medium">
                             {facilityData?.ward_object?.number +
@@ -276,7 +275,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         </div>
                         <div>
                           <h1 className="text-base font-semibold text-[#B9B9B9]">
-                            District
+                            {t("district")}
                           </h1>
                           <p className="text-base font-medium">
                             {facilityData?.district_object?.name}
@@ -286,7 +285,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       <div className="flex items-center gap-3">
                         <div id="phone-number-view">
                           <h1 className="text-base font-semibold text-[#B9B9B9]">
-                            Phone Number
+                            {t("phone_number")}
                           </h1>
                           <ContactLink
                             tel={String(facilityData?.phone_number)}
@@ -304,7 +303,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 {facilityData?.features?.some((feature) =>
                   FACILITY_FEATURE_TYPES.some((f) => f.id === feature),
                 ) && (
-                  <h1 className="text-lg font-semibold">Available features</h1>
+                  <h1 className="text-lg font-semibold">
+                    {t("available_features")}
+                  </h1>
                 )}
                 <div
                   className="mt-5 flex flex-wrap gap-2"
@@ -346,7 +347,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon icon="l-edit-alt" className="text-lg" />}
                 >
-                  Update Facility
+                  {t("update_facility")}
                 </DropdownItem>
                 <DropdownItem
                   id="configure-facility"
@@ -354,14 +355,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon icon="l-setting" className="text-lg" />}
                 >
-                  Configure Facility
+                  {t("configure_facility")}
                 </DropdownItem>
                 <DropdownItem
                   id="inventory-management"
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}
                   icon={<CareIcon icon="l-clipboard-alt" className="w-5" />}
                 >
-                  Inventory Management
+                  {t("inventory_management")}
                 </DropdownItem>
                 <DropdownItem
                   id="location-management"
@@ -371,7 +372,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <CareIcon icon="l-location-point" className="text-lg" />
                   }
                 >
-                  Location Management
+                  {t("location_management")}
                 </DropdownItem>
                 <DropdownItem
                   id="resource-request"
@@ -381,7 +382,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon icon="l-gold" className="text-lg" />}
                 >
-                  Resource Request
+                  {t("resource_request")}
                 </DropdownItem>
                 <DropdownItem
                   id="create-assets"
@@ -389,28 +390,28 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon icon="l-plus-circle" className="text-lg" />}
                 >
-                  Create Asset
+                  {t("create_asset")}
                 </DropdownItem>
                 <DropdownItem
                   id="view-assets"
                   onClick={() => navigate(`/assets?facility=${facilityId}`)}
                   icon={<CareIcon icon="l-medkit" className="text-lg" />}
                 >
-                  View Assets
+                  {t("view_asset")}
                 </DropdownItem>
                 <DropdownItem
                   id="view-users"
                   onClick={() => navigate(`/facility/${facilityId}/users`)}
                   icon={<CareIcon icon="l-users-alt" className="text-lg" />}
                 >
-                  View Users
+                  {t("view_users")}
                 </DropdownItem>
                 <DropdownItem
                   id="view-abdm-records"
                   onClick={() => navigate(`/facility/${facilityId}/abdm`)}
                   icon={<CareIcon icon="l-file-network" className="text-lg" />}
                 >
-                  View ABDM Records
+                  {t("view_abdm_records")}
                 </DropdownItem>
                 {hasPermissionToDeleteFacility ? (
                   <DropdownItem
@@ -420,7 +421,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     className="flex items-center gap-3"
                     icon={<CareIcon icon="l-trash-alt" className="text-lg" />}
                   >
-                    Delete Facility
+                    {t("delete_facility")}
                   </DropdownItem>
                 ) : (
                   <></>
@@ -437,7 +438,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 onClick={() => navigate(`/facility/${facilityId}/cns`)}
               >
                 <CareIcon icon="l-monitor-heart-rate" className="text-lg" />
-                <span>Central Nursing Station</span>
+                <span>{t("central_nursing_station")}</span>
               </ButtonV2>
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
@@ -451,7 +452,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 authorizeFor={NonReadOnlyUsers}
               >
                 <CareIcon icon="l-plus" className="text-lg" />
-                <span className="text-sm">Add Details of a Patient</span>
+                <span className="text-sm">{t("add_details_of_patient")}</span>
               </ButtonV2>
               <ButtonV2
                 id="view-patient-facility-list"
@@ -462,7 +463,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 onClick={() => navigate(`/patients?facility=${facilityId}`)}
               >
                 <CareIcon icon="l-user-injured" className="text-lg" />
-                <span>View Patients</span>
+                <span>{t("view_patients")}</span>
               </ButtonV2>
             </div>
           </div>
@@ -472,7 +473,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       <FacilityStaffList facilityId={facilityId} />
 
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
+        <h1 className="mb-6 text-xl font-bold">{t("oxygen_information")}</h1>
         <div
           className="overflow-x-auto overflow-y-hidden"
           id="facility-oxygen-info"
@@ -517,6 +518,8 @@ const LiveMonitoringButton = () => {
   const facilityId = useSlug("facility");
   const [location, setLocation] = useState<string>();
 
+  const { t } = useTranslation();
+
   return (
     <Popover className="relative">
       <PopoverButton className="mt-2 w-full">
@@ -528,7 +531,7 @@ const LiveMonitoringButton = () => {
           id="facility-detailspage-livemonitoring"
         >
           <CareIcon icon="l-video" className="text-lg" />
-          <span>Live Monitoring</span>
+          <span>{t("live_monitoring")}</span>
         </ButtonV2>
       </PopoverButton>
 
@@ -545,7 +548,7 @@ const LiveMonitoringButton = () => {
             <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
               <div>
                 <FieldLabel htmlFor="location" className="text-sm">
-                  Choose a location
+                  {t("choose_location")}
                 </FieldLabel>
                 <div className="flex w-full items-center gap-2">
                   <LocationSelect
@@ -567,7 +570,7 @@ const LiveMonitoringButton = () => {
                 className="w-full"
                 href={`/facility/${facilityId}/live-monitoring?location=${location}`}
               >
-                Open Live Monitoring
+                {t("open_live_monitoring")}
               </ButtonV2>
             </div>
           </div>
