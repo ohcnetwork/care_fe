@@ -165,7 +165,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       <Combobox
         disabled={props.disabled}
         value={(value ?? props.placeholder ?? "Select") as T}
-        onChange={(selection: any) => props.onChange(selection.value)}
+        onChange={(selection: any) => props.onChange(selection?.value)}
       >
         <div className="relative">
           <div className="flex">
