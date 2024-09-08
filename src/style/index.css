@@ -605,6 +605,10 @@ button:disabled,
     }
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+}
 
 /*
   Range Sliders for Camera Feed
@@ -612,6 +616,7 @@ button:disabled,
 
 #feed-range {
     -webkit-appearance: none;
+    appearance: none;
     margin: 18px 0;
     width: 100%;
 }

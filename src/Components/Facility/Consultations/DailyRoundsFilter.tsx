@@ -6,13 +6,13 @@ import {
 } from "@headlessui/react";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
-import TextFormField from "../../Form/FormFields/TextFormField";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DailyRoundTypes, DailyRoundsModel } from "../../Patient/models";
 import { FieldChangeEvent } from "../../Form/FormFields/Utils";
+import DateFormField from "../../Form/FormFields/DateFormField";
 
 type FilterState = {
   rounds_type?: DailyRoundsModel["rounds_type"];
@@ -79,19 +79,42 @@ export default function DailyRoundsFilter(props: Props) {
                   optionLabel={(o) => t(o)}
                   optionValue={(o) => o}
                 />
-                <TextFormField
+                <DateFormField
                   {...field("taken_at_after")}
                   label="Measured after"
-                  type="datetime-local"
-                  max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                  value={
+                    field("taken_at_after").value
+                      ? new Date(field("taken_at_after").value as string)
+                      : new Date()
+                  }
+                  onChange={(e) =>
+                    field("taken_at_after").onChange({
+                      ...e,
+                      value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
+                    })
+                  }
+                  max={new Date()}
+                  errorClassName="hidden"
+                  time
                 />
-                <TextFormField
+                <DateFormField
                   {...field("taken_at_before")}
                   label="Measured before"
-                  type="datetime-local"
-                  max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                  value={
+                    field("taken_at_before").value
+                      ? new Date(field("taken_at_before").value as string)
+                      : new Date()
+                  }
+                  onChange={(e) =>
+                    field("taken_at_before").onChange({
+                      ...e,
+                      value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
+                    })
+                  }
+                  max={new Date()}
+                  errorClassName="hidden"
+                  time
                 />
-
                 <PopoverButton>
                   <ButtonV2
                     variant="secondary"

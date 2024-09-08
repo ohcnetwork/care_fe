@@ -8,6 +8,7 @@ type Props = FormFieldBaseProps<DateRange> & {
   min?: Date;
   disableFuture?: boolean;
   disablePast?: boolean;
+  time?: boolean;
 };
 
 /**
@@ -21,6 +22,7 @@ type Props = FormFieldBaseProps<DateRange> & {
  *   label="Predicted date of birth"
  *   required
  *   disablePast // equivalent to min={new Date()}
+ *   time={true} // allows picking time as well
  * />
  * ```
  */
@@ -36,6 +38,7 @@ const DateRangeFormField = (props: Props) => {
         disabled={field.disabled}
         min={props.min || (props.disableFuture ? new Date() : undefined)}
         max={props.max || (props.disablePast ? new Date() : undefined)}
+        time={props.time}
       />
     </FormField>
   );

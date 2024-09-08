@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
@@ -31,6 +31,7 @@ interface Props {
   placeholder?: string;
   isOpen?: boolean;
   setIsOpen?: (isOpen: boolean) => void;
+  time?: boolean;
 }
 
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -48,8 +49,8 @@ const DateInputV2: React.FC<Props> = ({
   position = "CENTER",
   disabled,
   placeholder,
-  isOpen,
   setIsOpen,
+  time,
 }) => {
   const [dayCount, setDayCount] = useState<Array<number>>([]);
   const [blankDays, setBlankDays] = useState<Array<number>>([]);
@@ -57,10 +58,15 @@ const DateInputV2: React.FC<Props> = ({
   const [datePickerHeaderDate, setDatePickerHeaderDate] = useState(new Date());
   const [type, setType] = useState<DatePickerType>("date");
   const [year, setYear] = useState(new Date());
-  const [displayValue, setDisplayValue] = useState<string>(
-    value ? dayjs(value).format("DDMMYYYY") : "",
-  );
 
+  const [editingText, setEditingText] = useState<string | null>(null);
+
+  const hours = dayjs(value).hour() % 12;
+  const minutes = dayjs(value).minute();
+  const ampm = dayjs(value).hour() > 11 ? "PM" : "AM";
+
+  const hourScrollerRef = useRef<HTMLDivElement>(null);
+  const minuteScrollerRef = useRef<HTMLDivElement>(null);
   const decrement = () => {
     switch (type) {
       case "date":
@@ -99,9 +105,7 @@ const DateInputV2: React.FC<Props> = ({
 
   const isSelectedDate = (date: number) => {
     if (value) {
-      return dayjs(
-        new Date(value.getFullYear(), value.getMonth(), date),
-      ).isSame(dayjs(value));
+      return dayjs(value).date() === date;
     }
   };
 
@@ -117,14 +121,36 @@ const DateInputV2: React.FC<Props> = ({
               datePickerHeaderDate.getFullYear(),
               datePickerHeaderDate.getMonth(),
               date,
+              datePickerHeaderDate.getHours(),
+              datePickerHeaderDate.getMinutes(),
+              datePickerHeaderDate.getSeconds(),
             ),
           );
-          close();
-          setIsOpen?.(false);
+          if (!time) {
+            close();
+            setIsOpen?.(false);
+          }
         })()
       : Notification.Error({
           msg: outOfLimitsErrorMessage ?? "Cannot select date out of range",
         });
+  };
+
+  const handleTimeChange = (options: {
+    newHours?: typeof hours;
+    newMinutes?: typeof minutes;
+    newAmpm?: typeof ampm;
+  }) => {
+    const { newHours = hours, newMinutes = minutes, newAmpm = ampm } = options;
+    onChange(
+      new Date(
+        datePickerHeaderDate.getFullYear(),
+        datePickerHeaderDate.getMonth(),
+        datePickerHeaderDate.getDate(),
+        newAmpm === "PM" ? (newHours % 12) + 12 : newHours % 12,
+        newMinutes,
+      ),
+    );
   };
 
   const getDayCount = (date: Date) => {
@@ -219,7 +245,28 @@ const DateInputV2: React.FC<Props> = ({
 
   useEffect(() => {
     value && setDatePickerHeaderDate(new Date(value));
+    const timeScrollers = [hourScrollerRef, minuteScrollerRef];
+    timeScrollers.forEach((scroller) => {
+      if (!scroller.current) return;
+      const selected = scroller.current.querySelector("[data-selected=true]");
+      if (selected) {
+        const selectedPosition = (
+          selected as HTMLDivElement
+        ).getBoundingClientRect().top;
+
+        const toScroll =
+          selectedPosition - scroller.current.getBoundingClientRect().top;
+
+        selected.parentElement?.scrollBy({ top: toScroll, behavior: "smooth" });
+      }
+    });
   }, [value]);
+
+  const dateFormat = `DD/MM/YYYY${time ? " hh:mm a" : ""}`;
+
+  const getDisplayValue = (date: Date) => {
+    return dayjs(date).format(dateFormat);
+  };
 
   const getPosition = () => {
     switch (position) {
@@ -258,7 +305,7 @@ const DateInputV2: React.FC<Props> = ({
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
                   placeholder={placeholder ?? t("select_date")}
-                  value={value && dayjs(value).format("DD/MM/YYYY")}
+                  value={value && dayjs(value).format(dateFormat)}
                 />
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
                   <CareIcon
@@ -267,45 +314,41 @@ const DateInputV2: React.FC<Props> = ({
                   />
                 </div>
               </PopoverButton>
-
-              {(open || isOpen) && (
-                <PopoverPanel
-                  static
+              <PopoverPanel
+                static
+                className={classNames(
+                  `cui-dropdown-base absolute my-0.5 ${time ? "w-[400px]" : "w-72"} transition-all ${open ? "visible opacity-100" : "invisible opacity-0"} flex divide-y-0 rounded p-4`,
+                  getPosition(),
+                )}
+              >
+                <div
                   className={classNames(
-                    "cui-dropdown-base absolute my-0.5 w-72 divide-y-0 rounded p-4",
-                    getPosition(),
+                    "flex w-full items-center justify-between gap-y-4",
+                    position?.includes("TOP") ? "flex-col-reverse" : "flex-col",
                   )}
                 >
-                  <div
-                    className={classNames(
-                      "flex w-full items-center justify-between gap-y-4",
-                      position?.includes("TOP")
-                        ? "flex-col-reverse"
-                        : "flex-col",
-                    )}
-                  >
-                    <input
-                      id="date-input"
-                      autoFocus
-                      className="cui-input-base bg-secondary-50"
-                      value={
-                        displayValue.replace(
-                          /^(\d{2})(\d{0,2})(\d{0,4}).*/,
-                          (_, dd, mm, yyyy) =>
-                            [dd, mm, yyyy].filter(Boolean).join("/"),
-                        ) || ""
-                      } // Display the value in DD/MM/YYYY format
-                      placeholder={t("DD/MM/YYYY")}
-                      onChange={(e) => {
-                        setDisplayValue(e.target.value.replaceAll("/", ""));
-                        const value = dayjs(e.target.value, "DD/MM/YYYY", true);
-                        if (isDateWithinLimits(value)) {
-                          onChange(value.toDate());
-                          close();
-                          setIsOpen?.(false);
-                        }
-                      }}
-                    />
+                  <input
+                    id="date-input"
+                    autoFocus
+                    className="cui-input-base bg-secondary-50"
+                    value={
+                      editingText ||
+                      (value ? getDisplayValue(value) : "Select Date")
+                    }
+                    placeholder={dateFormat}
+                    onChange={(e) => {
+                      const value = dayjs(e.target.value, dateFormat, true);
+                      if (isDateWithinLimits(value)) {
+                        onChange(value.toDate());
+                        //close();
+                        setIsOpen?.(false);
+                      }
+                      setEditingText(e.target.value);
+                    }}
+                    onBlur={() => setEditingText(null)}
+                  />
+
+                  <div className="flex flex-row items-stretch gap-4">
                     <div className="flex w-full flex-col items-center justify-between">
                       <div className="flex">
                         <button
@@ -409,12 +452,13 @@ const DateInputV2: React.FC<Props> = ({
                                   id={`date-${d}`}
                                   className="aspect-square w-[14.26%]"
                                 >
-                                  <div
+                                  <button
                                     onClick={setDateValue(d, close)}
-                                    className={`${baseClasses} ${conditionalClasses}`}
+                                    type="button"
+                                    className={`${baseClasses} ${conditionalClasses} block w-full`}
                                   >
                                     {d}
-                                  </div>
+                                  </button>
                                 </div>
                               );
                             })}
@@ -473,9 +517,104 @@ const DateInputV2: React.FC<Props> = ({
                         </div>
                       )}
                     </div>
+                    {time && (
+                      <div className="flex shrink-0 gap-1">
+                        {(
+                          [
+                            {
+                              name: "Hours",
+                              value: hours,
+                              options: Array.from(
+                                { length: 12 },
+                                (_, i) => i + 1,
+                              ),
+                              onChange: (val: any) => {
+                                handleTimeChange({
+                                  newHours: val,
+                                });
+                              },
+                              ref: hourScrollerRef,
+                            },
+                            {
+                              name: "Minutes",
+                              value: minutes,
+                              options: Array.from({ length: 60 }, (_, i) => i),
+                              onChange: (val: any) => {
+                                handleTimeChange({
+                                  newMinutes: val,
+                                });
+                              },
+                              ref: minuteScrollerRef,
+                            },
+                            {
+                              name: "am/pm",
+                              value: ampm,
+                              options: ["AM", "PM"],
+                              onChange: (val: any) => {
+                                handleTimeChange({
+                                  newAmpm: val,
+                                });
+                              },
+                              ref: undefined,
+                            },
+                          ] as const
+                        ).map((input, i) => (
+                          <div
+                            key={i}
+                            className="scrollbar-hide flex h-[237px] shrink-0 flex-col gap-1 overflow-auto"
+                            ref={input.ref}
+                            onScroll={(e) => {
+                              const optionsHeight =
+                                e.currentTarget.scrollHeight / 3;
+                              const scrollTop = e.currentTarget.scrollTop;
+                              const containerHeight =
+                                e.currentTarget.clientHeight;
+                              if (scrollTop >= optionsHeight * 2) {
+                                e.currentTarget.scrollTo({
+                                  top: optionsHeight,
+                                });
+                              }
+                              if (
+                                scrollTop + containerHeight <=
+                                optionsHeight
+                              ) {
+                                e.currentTarget.scrollTo({
+                                  top: optionsHeight + scrollTop,
+                                });
+                              }
+                            }}
+                          >
+                            {[
+                              ...input.options,
+                              ...(input.name === "am/pm" ? [] : input.options),
+                              ...(input.name === "am/pm" ? [] : input.options),
+                            ].map((option, j) => (
+                              <button
+                                type="button"
+                                key={j}
+                                className={`flex aspect-square w-9 shrink-0 items-center justify-center rounded-md border transition-all ${(input.name === "Hours" && option === 12 ? [0, 12].includes(input.value) : input.value === option) ? "bg-primary-500 font-bold text-white" : "border-gray-300 hover:bg-secondary-300"} text-sm`}
+                                onClick={() => input.onChange(option as any)}
+                                data-selected={
+                                  (input.name === "Hours" && option === 12
+                                    ? [0, 12].includes(input.value)
+                                    : input.value === option) &&
+                                  j + 1 >= input.options.length &&
+                                  j + 1 <= input.options.length * 2
+                                }
+                              >
+                                {option.toLocaleString("en-US", {
+                                  minimumIntegerDigits: 2,
+                                  useGrouping: false,
+                                })}
+                              </button>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </PopoverPanel>
-              )}
+                </div>
+              </PopoverPanel>
             </div>
           )}
         </Popover>
