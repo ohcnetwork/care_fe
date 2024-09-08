@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import supportedBrowsers from "../../Common/supportedBrowsers";
+import supportedBrowsers from "../../supportedBrowsers";
 import bowser from "bowser";
 
 const BrowserWarning = () => {
