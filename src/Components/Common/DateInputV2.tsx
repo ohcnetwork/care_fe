@@ -273,7 +273,7 @@ const DateInputV2: React.FC<Props> = ({
       case "LEFT":
         return "left-0";
       case "RIGHT":
-        return "right-0 transform translate-x-1/2";
+        return "right-0 transform md:translate-x-1/2";
       case "CENTER":
         return "transform -translate-x-1/2";
       case "TOP-LEFT":
@@ -317,7 +317,7 @@ const DateInputV2: React.FC<Props> = ({
               <PopoverPanel
                 static
                 className={classNames(
-                  `cui-dropdown-base absolute my-0.5 ${time ? "w-[400px]" : "w-72"} transition-all ${open ? "visible opacity-100" : "invisible opacity-0"} flex divide-y-0 rounded p-4`,
+                  `cui-dropdown-base absolute my-0.5 ${time ? "w-full md:w-[400px]" : "w-72"} transition-all ${open ? "visible opacity-100" : "invisible opacity-0"} flex divide-y-0 rounded p-4`,
                   getPosition(),
                 )}
               >
