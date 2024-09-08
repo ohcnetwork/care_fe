@@ -6,6 +6,7 @@ import { classNames } from "../../../Utils/utils";
 import CreateWithAadhaar from "./CreateWithAadhaar";
 import { useTranslation } from "react-i18next";
 import LinkWithOtp from "./LinkWithOtp";
+import LinkWithQr from "./LinkWithQr";
 
 interface ILinkAbhaNumberProps {
   show: boolean;
@@ -42,6 +43,13 @@ const ABHA_LINK_OPTIONS = {
     value: "link_with_demographics",
     create: false,
   },
+  link_with_qr: {
+    title: "abha_link_options__link_with_qr__title",
+    description: "abha_link_options__link_with_qr__description",
+    disabled: false,
+    value: "link_with_qr",
+    create: false,
+  },
 };
 
 export default function LinkAbhaNumber({
@@ -66,6 +74,10 @@ export default function LinkAbhaNumber({
 
       {currentAbhaLinkOption === "link_with_otp" && (
         <LinkWithOtp onSuccess={onSuccess} />
+      )}
+
+      {currentAbhaLinkOption === "link_with_qr" && (
+        <LinkWithQr onSuccess={onSuccess} />
       )}
 
       <div className="mt-6">
@@ -97,6 +109,7 @@ export default function LinkAbhaNumber({
                 ABHA_LINK_OPTIONS[currentAbhaLinkOption]?.create ===
                   option.create,
             )
+            .sort((a) => (a.disabled ? 1 : -1))
             .map((option) => (
               <ButtonV2
                 onClick={() =>

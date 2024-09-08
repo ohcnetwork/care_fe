@@ -1423,6 +1423,12 @@ const routes = {
         method: "GET",
         TRes: Type<AbhaNumberModel>(),
       },
+      create: {
+        path: "/api/abdm/abha_number/",
+        method: "POST",
+        TBody: Type<Partial<AbhaNumberModel>>(),
+        TRes: Type<AbhaNumberModel>(),
+      },
     },
 
     healthId: {

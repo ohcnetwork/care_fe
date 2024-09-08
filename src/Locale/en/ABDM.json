@@ -7,6 +7,7 @@
   "abha_link_options__create_with_driving_license__title": "Create with Driving License",
   "abha_link_options__create_with_driving_license__description": "Create New ABHA Number Using Driving License",
   "abha_link_options__link_with_demographics__title": "Link with Demographics",
+  "abha_link_options__link_with_qr__title": "Link with ABHA QR",
   "abha_link_options__link_with_demographics__description": "Link Existing ABHA Number Using Demographic details",
   "abha_link_options__disabled_tooltip": "We are currently working on this feature",
   "aadhaar_number": "Aadhaar Number",
@@ -129,5 +130,6 @@
   "show_abha_profile": "Show ABHA Profile",
   "link_abha_profile": "Link ABHA Profile",
   "abha__auth_method__AADHAAR_OTP": "Aadhaar OTP",
-  "abha__auth_method__MOBILE_OTP": "Mobile OTP"
+  "abha__auth_method__MOBILE_OTP": "Mobile OTP",
+  "abha__qr_scanning_error": "Error scanning QR code, Invalid QR code"
 }
