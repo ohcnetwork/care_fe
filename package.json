@@ -28,7 +28,7 @@
   "license": "MIT",
   "scripts": {
     "build:react": "cross-env NODE_ENV=production vite build",
-    "build": "npm run generate-build-meta && npm run build:react",
+    "build": "npm run generate-build-meta && npm run supported-browsers && npm run build:react",
     "dev": "vite",
     "preview": "cross-env NODE_ENV=production vite preview",
     "generate-build-meta": "node ./scripts/generate-build-version.js",
