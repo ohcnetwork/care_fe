@@ -7,7 +7,7 @@ import HistoryAPIProvider from "./Providers/HistoryAPIProvider";
 import AuthUserProvider from "./Providers/AuthUserProvider";
 
 const App = () => {
-   return (
+  return (
     <Suspense fallback={<Loading />}>
       <ThemedFavicon />
       <HistoryAPIProvider>

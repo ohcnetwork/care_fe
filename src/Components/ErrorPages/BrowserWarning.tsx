@@ -1,38 +1,34 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import supportedBrowsers from "../../supportedBrowsers";
 import bowser from "bowser";
+import { useTranslation } from "react-i18next";
 
 const BrowserWarning = () => {
-  const [isSupported, setIsSupported] = useState<boolean>(true);
-  const [browserInfo, setBrowserInfo] = useState<{ name: string; version: string }>({ name: "", version: "" });
-
-  useEffect(() => {
+  const { t } = useTranslation();
+  const notSupported = React.useMemo(() => {
     const userAgent = window.navigator.userAgent;
-
     if (!supportedBrowsers.test(userAgent)) {
-      setIsSupported(false);
-
       const browser = bowser.getParser(userAgent).getBrowser();
-      const name = browser.name || "Unknown";
-      const version = browser.version || "Unknown";
-
-      setBrowserInfo({ name, version });
+      return {
+        name: browser.name || "Unknown",
+        version: browser.version || "Unknown",
+      };
     }
   }, []);
 
-  if (isSupported) {
+  if (!notSupported) {
     return null;
   }
 
   return (
-    <div className="fixed left-0 top-0 z-50 w-full h-20 bg-gray-800 bg-opacity-60 flex items-center justify-center text-center text-gray-300">
-    <div>
-      <h2 className="text-lg font-medium">Unsupported Browser</h2>
-      <p className="text-sm">
-        Your browser ({browserInfo.name} version {browserInfo.version}) is not supported. Please update your browser to the latest version or switch to a supported browser for the best experience.
-      </p>
+    <div className="fixed left-0 top-0 z-50 flex h-20 w-full items-center justify-center bg-gray-800 bg-opacity-60 text-center text-gray-300">
+      <div>
+        <h2 className="text-lg font-medium">{t("unsupported_browser")}</h2>
+        <p className="text-sm">
+          {t("unsupported_browser_description", notSupported)}
+        </p>
+      </div>
     </div>
-  </div>
   );
 };
 
