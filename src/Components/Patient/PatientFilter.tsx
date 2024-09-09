@@ -87,10 +87,6 @@ export default function PatientFilter(props: any) {
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
     is_declared_positive: filter.is_declared_positive || null,
-    last_consultation_symptoms_onset_date_before:
-      filter.last_consultation_symptoms_onset_date_before || null,
-    last_consultation_symptoms_onset_date_after:
-      filter.last_consultation_symptoms_onset_date_after || null,
     last_vaccinated_date_before: filter.last_vaccinated_date_before || null,
     last_vaccinated_date_after: filter.last_vaccinated_date_after || null,
     last_consultation_is_telemedicine:
@@ -191,8 +187,6 @@ export default function PatientFilter(props: any) {
       covin_id,
       is_kasp,
       is_declared_positive,
-      last_consultation_symptoms_onset_date_before,
-      last_consultation_symptoms_onset_date_after,
       last_vaccinated_date_before,
       last_vaccinated_date_after,
       last_consultation_is_telemedicine,
@@ -250,12 +244,6 @@ export default function PatientFilter(props: any) {
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
-      last_consultation_symptoms_onset_date_before: dateQueryString(
-        last_consultation_symptoms_onset_date_before,
-      ),
-      last_consultation_symptoms_onset_date_after: dateQueryString(
-        last_consultation_symptoms_onset_date_after,
-      ),
       last_vaccinated_date_before: dateQueryString(last_vaccinated_date_before),
       last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
       last_consultation_is_telemedicine:
@@ -586,21 +574,6 @@ export default function PatientFilter(props: any) {
                 filterState.last_consultation_discharge_date_after,
               ),
               end: getDate(filterState.last_consultation_discharge_date_before),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="last_consultation_symptoms_onset_date"
-            label="Onset of Symptoms Date"
-            value={{
-              start: getDate(
-                filterState.last_consultation_symptoms_onset_date_after,
-              ),
-              end: getDate(
-                filterState.last_consultation_symptoms_onset_date_before,
-              ),
             }}
             onChange={handleDateRangeChange}
             errorClassName="hidden"
