@@ -8,24 +8,42 @@ type AutoExpandingTextInputFormFieldProps = TextAreaFormFieldProps & {
 const AutoExpandingTextInputFormField = (
   props: AutoExpandingTextInputFormFieldProps,
 ) => {
-  const myref = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (myref.current == null) return;
-    const text = myref.current.textContent?.split("\n");
-    const len = text?.length || 1;
-    // 46 is height of the textarea when there is only 1 line
-    // getting line height from window
-    const lineHeight =
-      window.getComputedStyle(myref.current).lineHeight.slice(0, -2) || "20";
-    // added 26 for padding (20+26 = 46)
-    const height =
-      Math.min(len * parseInt(lineHeight), (props.maxHeight || 160) - 26) + 26;
-    // 160 is the max height of the textarea if not specified
-    myref.current.style.cssText = "height:" + height + "px";
-  });
+    const resizeTextArea = () => {
+      if (textareaRef.current == null) return;
 
-  return <TextAreaFormField ref={myref} {...props} />;
+      // Reset the height to allow shrink on deleting text
+      textareaRef.current.style.height = "auto";
+
+      // Check if the text area is empty, reset to initial height if true
+      if (textareaRef.current.value.trim() === "") {
+        textareaRef.current.style.height = "initial";
+      } else {
+        // Calculate new height based on scroll height, considering maxHeight if provided
+        const newHeight = Math.min(
+          textareaRef.current.scrollHeight,
+          props.maxHeight || 160,
+        );
+        textareaRef.current.style.height = `${newHeight}px`;
+      }
+    };
+
+    resizeTextArea();
+
+    // Add an event listener to handle dynamic resizing as user types
+    textareaRef.current?.addEventListener("input", resizeTextArea);
+
+    const currentRef = textareaRef.current;
+
+    // Cleanup event listener on component unmount
+    return () => {
+      currentRef?.removeEventListener("input", resizeTextArea);
+    };
+  }, [props.maxHeight, props.value]);
+
+  return <TextAreaFormField ref={textareaRef} {...props} />;
 };
 
 export default AutoExpandingTextInputFormField;

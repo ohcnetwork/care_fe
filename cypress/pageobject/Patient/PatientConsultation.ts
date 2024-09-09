@@ -28,6 +28,10 @@ export class PatientConsultationPage {
     cy.searchAndSelectOption("#referred_to", referance);
   }
 
+  selectBed(bedNo: string) {
+    cy.searchAndSelectOption("#bed", bedNo);
+  }
+
   selectPatientWard(ward: string) {
     cy.searchAndSelectOption("#transferred_from_location", ward);
   }
@@ -48,7 +52,7 @@ export class PatientConsultationPage {
     cy.searchAndSelectOption("#icd11-search", icdCode);
     cy.get("#diagnosis-list")
       .contains("Add as")
-      .focus()
+      .scrollIntoView()
       .click()
       .then(() => {
         cy.get(`#${statusId}`).click();

@@ -17,7 +17,6 @@ import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import useConfig from "../../Common/hooks/useConfig";
 
 import useMergeState from "../../Common/hooks/useMergeState";
 import { useTranslation } from "react-i18next";
@@ -26,18 +25,20 @@ import { dateQueryString, parsePhoneNumber } from "../../Utils/utils";
 import dayjs from "dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import careConfig from "@careConfig";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function ListFilter(props: any) {
-  const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
   const { filter, onChange, closeFilter, removeFilters } = props;
 
   const { t } = useTranslation();
 
   const shiftStatusOptions = (
-    wartime_shifting ? SHIFTING_CHOICES_WARTIME : SHIFTING_CHOICES_PEACETIME
+    careConfig.wartimeShifting
+      ? SHIFTING_CHOICES_WARTIME
+      : SHIFTING_CHOICES_PEACETIME
   ).map((option) => option.text);
 
   const [filterState, setFilterState] = useMergeState({
@@ -227,7 +228,7 @@ export default function ListFilter(props: any) {
         </div>
       </div>
 
-      {wartime_shifting && (
+      {careConfig.wartimeShifting && (
         <div>
           <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
           <div className="">
@@ -308,12 +309,12 @@ export default function ListFilter(props: any) {
         errorClassName="hidden"
       />
 
-      {kasp_enabled && (
+      {careConfig.kasp.enabled && (
         <SelectFormField
           name="is_kasp"
           id="is-kasp"
           placeholder="Show all"
-          label={`${t("is")} ${kasp_string}`}
+          label={`${t("is")} ${careConfig.kasp.string}`}
           value={filterState.is_kasp}
           options={["yes", "no"]}
           optionLabel={(option) => option}

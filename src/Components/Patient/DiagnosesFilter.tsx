@@ -37,6 +37,7 @@ export default function DiagnosesFilter(props: Props) {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const { res, data, loading, refetch } = useQuery(routes.listICD11Diagnosis, {
     silent: true,
+    prefetch: false,
   });
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function DiagnosesFilter(props: Props) {
       name="icd11_search"
       className="w-full"
       placeholder={t("search_icd11_placeholder")}
+      minQueryLength={2}
       value={diagnoses}
       onChange={(e) => {
         setDiagnoses(e.value);

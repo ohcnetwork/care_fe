@@ -1,11 +1,18 @@
-import { useEffect, useState } from "react";
-import { Combobox } from "@headlessui/react";
-import { DropdownTransition } from "../../Common/components/HelperComponents";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
+import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import { useEffect, useState } from "react";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { DropdownTransition } from "../../Common/components/HelperComponents";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
+import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
 
 type OptionCallback<T, R> = (option: T) => R;
@@ -157,12 +164,12 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     >
       <Combobox
         disabled={props.disabled}
-        value={value ?? props.placeholder ?? "Select"}
+        value={(value ?? props.placeholder ?? "Select") as T}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
         <div className="relative">
           <div className="flex">
-            <Combobox.Input
+            <ComboboxInput
               className="cui-input-base truncate pr-16"
               placeholder={props.placeholder ?? "Select"}
               displayValue={(value: any) => value?.label || ""}
@@ -171,7 +178,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
               autoComplete="off"
             />
             {!props.disabled && (
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+              <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <div className="absolute right-0 top-1 mr-2 flex h-full items-center gap-1 pb-2 text-lg text-secondary-900">
                   <span>{value?.icon}</span>
 
@@ -194,15 +201,19 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   {props.isLoading ? (
                     <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
-                    <CareIcon icon="l-angle-down" />
+                    <CareIcon id="dropdown-toggle" icon="l-angle-down" />
                   )}
                 </div>
-              </Combobox.Button>
+              </ComboboxButton>
             )}
           </div>
 
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
+            <ComboboxOptions
+              modal={false}
+              as="ul"
+              className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right"
+            >
               {props.minQueryLength && query.length < props.minQueryLength ? (
                 <div className="p-2 text-sm text-secondary-500">
                   {`Please enter at least ${props.minQueryLength} characters to search`}
@@ -213,14 +224,15 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                 </div>
               ) : (
                 filteredOptions.map((option, index) => (
-                  <Combobox.Option
+                  <ComboboxOption
+                    as="li"
                     id={`${props.id}-option-${option.label}-value-${index}`}
                     key={`${props.id}-option-${option.label}-value-${index}`}
                     className={dropdownOptionClassNames}
                     value={option}
                     disabled={option.disabled}
                   >
-                    {({ active }) => (
+                    {({ focus }) => (
                       <div className="flex flex-col">
                         <div className="flex justify-between">
                           <span>{option.label}</span>
@@ -232,7 +244,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                               "text-sm font-normal",
                               option.disabled
                                 ? "text-secondary-700"
-                                : active
+                                : focus
                                   ? "text-primary-200"
                                   : "text-secondary-700",
                             )}
@@ -242,10 +254,10 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                         )}
                       </div>
                     )}
-                  </Combobox.Option>
+                  </ComboboxOption>
                 ))
               )}
-            </Combobox.Options>
+            </ComboboxOptions>
           </DropdownTransition>
         </div>
       </Combobox>

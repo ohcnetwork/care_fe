@@ -1,13 +1,3 @@
-// FacilityCreation
-import {
-  cy,
-  describe,
-  before,
-  beforeEach,
-  it,
-  afterEach,
-  expect,
-} from "local-cypress";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
@@ -37,7 +27,7 @@ describe("Facility Creation", () => {
   const totalOccupancy = "10";
   const doctorCapacity = "5";
   const totalDoctor = "10";
-  const facilityName = "cypress facility";
+  const facilityName = "Cypress Facility";
   const facilityName2 = "Dummy Facility 40";
   const facilityAddress = "cypress address";
   const facilityUpdateAddress = "cypress updated address";
@@ -132,6 +122,7 @@ describe("Facility Creation", () => {
     facilityFeature.forEach((featureText) => {
       cy.get("[role='option']").contains(featureText).click();
     });
+    facilityPage.clickfacilityfeatureoption();
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");

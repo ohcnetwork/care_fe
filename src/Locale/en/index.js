@@ -17,6 +17,7 @@ import Resource from "./Resource.json";
 import Shifting from "./Shifting.json";
 import SortOptions from "./SortOptions.json";
 import Users from "./Users.json";
+import FileUpload from "./FileUpload.json";
 
 export default {
   ...Auth,
@@ -37,5 +38,6 @@ export default {
   ...Bed,
   ...Users,
   ...LogUpdate,
+  ...FileUpload,
   SortOptions,
 };

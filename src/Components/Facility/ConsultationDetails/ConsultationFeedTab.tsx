@@ -21,6 +21,7 @@ import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { Warn } from "../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
 import { GetStatusResponse } from "../../CameraFeed/routes";
+import StillWatching from "../../CameraFeed/StillWatching";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { t } = useTranslation();
@@ -145,8 +146,10 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     return <span>No bed/asset linked allocated</span>;
   }
 
+  const cannotSaveToPreset = !hasMoved || !preset?.id;
+
   return (
-    <>
+    <StillWatching>
       <ConfirmDialog
         title="Update Preset"
         description="Are you sure you want to update this preset to the current location?"
@@ -231,13 +234,13 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                 ) : (
                   <ButtonV2
                     size="small"
-                    variant={hasMoved ? "secondary" : "secondary"}
-                    disabled={!hasMoved}
+                    variant="secondary"
+                    disabled={cannotSaveToPreset}
                     border
-                    ghost={!hasMoved}
-                    shadow={hasMoved}
+                    ghost={cannotSaveToPreset}
+                    shadow={!cannotSaveToPreset}
                     tooltip={
-                      hasMoved
+                      !cannotSaveToPreset
                         ? "Save current position to selected preset"
                         : "Change camera position to update preset"
                     }
@@ -255,7 +258,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
           </div>
         </CameraFeed>
       </div>
-    </>
+    </StillWatching>
   );
 };
 
