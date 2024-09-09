@@ -11,11 +11,7 @@ import SearchInput from "../Form/SearchInput";
 import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
-
-import useConfig from "../../Common/hooks/useConfig";
-
 import useFilters from "../../Common/hooks/useFilters";
-
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -24,11 +20,11 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ListView() {
-  const { wartime_shifting } = useConfig();
   const {
     qParams,
     updateQuery,
@@ -127,7 +123,7 @@ export default function ListView() {
                     </dd>
                   </dt>
                 </div>
-                {wartime_shifting && (
+                {careConfig.wartimeShifting && (
                   <div className="sm:col-span-1">
                     <dt
                       title={t("shifting_approving_facility")}

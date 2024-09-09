@@ -1,6 +1,6 @@
 import "cypress-localstorage-commands";
 
-import { Cypress, cy } from "local-cypress";
+const apiUrl = Cypress.env("API_URL");
 
 Cypress.Commands.add("login", (username: string, password: string) => {
   cy.log(`Logging in the user: ${username}:${password}`);
@@ -14,7 +14,7 @@ Cypress.Commands.add("login", (username: string, password: string) => {
 Cypress.Commands.add("refreshApiLogin", (username, password) => {
   cy.request({
     method: "POST",
-    url: "/api/v1/auth/login/",
+    url: `${apiUrl}/api/v1/auth/login/`,
     body: {
       username,
       password,
@@ -43,7 +43,7 @@ Cypress.Commands.add("loginByApi", (username, password) => {
       if (tkn && token.access && token.username === username) {
         cy.request({
           method: "POST",
-          url: "/api/v1/auth/token/verify/",
+          url: `${apiUrl}/api/v1/auth/token/verify/`,
           body: {
             token: token.access,
           },
@@ -69,7 +69,7 @@ Cypress.Commands.add("loginByApi", (username, password) => {
 Cypress.Commands.add(
   "awaitUrl",
   (url: string, disableLoginVerification = false) => {
-    cy.intercept(/currentuser/).as("currentuser");
+    cy.intercept(/getcurrentuser/).as("currentuser");
     cy.visit(url);
     disableLoginVerification
       ? cy.wait("@currentuser")

@@ -1,22 +1,22 @@
 {
   "name": "care_fe",
   "version": "2.5.4",
-  "description": "Care is a single point to link Hospitals,Corona Care Centers and Volunteers to the unified Corona Safe Network",
+  "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git@github.com:coronasafe/care_fe.git"
+    "url": "git@github.com:ohcnetwork/care_fe.git"
   },
   "bugs": {
-    "url": "https://support.coronasafe.network",
-    "email": "info@coronasafe.network"
+    "url": "https://github.com/ohcnetwork/care_fe/issues",
+    "email": "info@ohc.network"
   },
   "contributors": [
-    "coronasafe Contributors"
+    "Open Healthcare Network Contributors"
   ],
-  "homepage": "https://care.coronasafe.in",
+  "homepage": "https://care.ohc.network",
   "keywords": [
-    "Coronasafe",
+    "ohcnetwork",
     "care",
     "react",
     "tailwind",
@@ -24,7 +24,7 @@
     "typescript",
     "vite"
   ],
-  "author": "Coronsafe Care Contributors",
+  "author": "Open Healthcare Network Contributors",
   "license": "MIT",
   "scripts": {
     "build:react": "cross-env NODE_ENV=production vite build",
@@ -40,9 +40,7 @@
     "prepare": "husky install",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "format": "prettier ./src --write"
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.18",
@@ -88,15 +86,10 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^8.1.0",
-    "@storybook/addon-interactions": "^8.1.0",
-    "@storybook/addon-links": "^8.1.0",
-    "@storybook/blocks": "^8.1.0",
-    "@storybook/builder-vite": "^8.1.0",
-    "@storybook/react-vite": "^8.1.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.13",
+    "@types/events": "^3.0.3",
     "@types/google.maps": "^3.55.8",
     "@types/lodash-es": "^4.17.12",
     "@types/qrcode.react": "^1.0.5",
@@ -108,7 +101,7 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@vitejs/plugin-react-swc": "^3.6.0",
     "autoprefixer": "^10.4.19",
-    "cypress": "^13.13.1",
+    "cypress": "^13.14.1",
     "cypress-localstorage-commands": "^2.2.5",
     "cypress-split": "^1.23.2",
     "eslint-config-prettier": "^9.1.0",
@@ -117,7 +110,6 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-storybook": "^0.8.0",
     "gentype": "^4.5.0",
     "glob": "^11.0.0",
     "husky": "^8.0.3",
@@ -129,7 +121,6 @@
     "prop-types": "^15.8.1",
     "redux-devtools-extension": "^2.13.9",
     "snyk": "^1.1291.0",
-    "storybook": "^8.1.0",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5",
     "uuid": "^10.0.0",

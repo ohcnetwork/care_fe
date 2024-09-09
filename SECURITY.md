@@ -23,4 +23,4 @@
 
 ## Reporting a Vulnerability
 
-Please create an issue at https://github.com/coronasafe/care_fe/issues/new
+Please create an issue at https://github.com/ohcnetwork/care_fe/issues/new

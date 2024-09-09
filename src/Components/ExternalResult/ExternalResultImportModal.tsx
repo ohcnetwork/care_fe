@@ -1,13 +1,13 @@
 import _ from "lodash-es";
 import { navigate } from "raviger";
 import { useEffect, useState, lazy } from "react";
-import useConfig from "../../Common/hooks/useConfig";
 import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { ExternalResultImportSchema } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import { IExternalResult } from "./models";
+import careConfig from "@careConfig";
 const ExcelFileDragAndDrop = lazy(
   () => import("../Common/ExcelFIleDragAndDrop"),
 );
@@ -18,7 +18,6 @@ interface Props {
 }
 
 export default function ExternalResultImportModal({ open, onClose }: Props) {
-  const { sample_format_external_result_import } = useConfig();
   const [loading, setLoading] = useState(false);
 
   const fetchUser = async () => {
@@ -105,7 +104,7 @@ export default function ExternalResultImportModal({ open, onClose }: Props) {
         onClose={onClose}
         handleSubmit={handleSubmit}
         loading={loading}
-        sampleLink={sample_format_external_result_import}
+        sampleLink={careConfig.sampleFormats.externalResultImport}
         schema={ExternalResultImportSchema}
       />
     </DialogModal>

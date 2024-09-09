@@ -7,7 +7,7 @@ sidebar_label: Upgrading
 ## Breaking changes
 
 These are a list of changes that should be accounted for when upgrading an existing installation of Care. If you
-encounter any problems while following these instructions, please [create a new issue](https://github.com/coronasafe/care_fe/issues/new/choose)
+encounter any problems while following these instructions, please [create a new issue](https://github.com/ohcnetwork/care_fe/issues/new/choose)
 on our Github repo.
 
 Breaking Changes before **September Minor Release v11.2** are not yet documented

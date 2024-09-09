@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Combobox,
   ComboboxButton,
@@ -6,12 +5,14 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { DropdownTransition } from "../../Common/components/HelperComponents";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import { useEffect, useState } from "react";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { DropdownTransition } from "../../Common/components/HelperComponents";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
+import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
 
 type OptionCallback<T, R> = (option: T) => R;
@@ -210,6 +211,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
           <DropdownTransition>
             <ComboboxOptions
+              modal={false}
               as="ul"
               className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right"
             >

@@ -13,7 +13,7 @@ jobs:
   auto-label-deploy-failed:
     runs-on: ubuntu-latest
     if: |
-      github.repository == 'coronasafe/care_fe' && github.event.issue.pull_request &&
+      github.repository == 'ohcnetwork/care_fe' && github.event.issue.pull_request &&
       contains(github.event.comment.body, 'Deploy Preview')
     steps:
       - name: Add 'Deploy-Failed'

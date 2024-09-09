@@ -206,10 +206,6 @@ export const PatientManager = () => {
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
     is_declared_positive: qParams.is_declared_positive || undefined,
-    last_consultation_symptoms_onset_date_before:
-      qParams.last_consultation_symptoms_onset_date_before || undefined,
-    last_consultation_symptoms_onset_date_after:
-      qParams.last_consultation_symptoms_onset_date_after || undefined,
     last_vaccinated_date_before:
       qParams.last_vaccinated_date_before || undefined,
     last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
@@ -261,10 +257,6 @@ export const PatientManager = () => {
     [
       params.last_consultation_discharge_date_before,
       params.last_consultation_discharge_date_after,
-    ],
-    [
-      params.last_consultation_symptoms_onset_date_before,
-      params.last_consultation_symptoms_onset_date_after,
     ],
   ];
 
@@ -514,7 +506,9 @@ export const PatientManager = () => {
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
           >
-            <span className="absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100">
+            <span
+              className={`absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center ${category === "Actively Dying" ? "text-[10px]" : "text-xs"} font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100`}
+            >
               {category || "UNKNOWN"}
             </span>
           </div>
@@ -852,7 +846,7 @@ export const PatientManager = () => {
                 { text: t("discharged"), value: 1 },
               ]}
               onTabChange={(tab) => {
-                if (tab === "LIVE") {
+                if (tab === 0) {
                   updateQuery({ is_active: "True" });
                 } else {
                   const id = qParams.facility || onlyAccessibleFacility?.id;
@@ -1123,10 +1117,6 @@ export const PatientManager = () => {
             ),
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Declared positive", "date_declared_positive"),
-            ...dateRange(
-              "Symptoms onset",
-              "last_consultation_symptoms_onset_date",
-            ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
               name: "Telemedicine",

@@ -7,26 +7,25 @@ import * as Notification from "../../Utils/Notifications.js";
 import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import useConfig from "../../Common/hooks/useConfig";
 import CircularProgress from "../Common/components/CircularProgress";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { useAuthContext } from "../../Common/hooks/useAuthUser";
 import FiltersCache from "../../Utils/FiltersCache";
 import { classNames } from "../../Utils/utils";
+import careConfig from "@careConfig";
 
 export const Login = (props: { forgot?: boolean }) => {
   const { signIn } = useAuthContext();
   const {
-    main_logo,
-    recaptcha_site_key,
-    github_url,
-    coronasafe_url,
-    state_logo,
-    custom_logo,
-    custom_logo_alt,
-    custom_description,
-  } = useConfig();
+    mainLogo,
+    reCaptchaSiteKey,
+    urls,
+    stateLogo,
+    customLogo,
+    customLogoAlt,
+    customDescription,
+  } = careConfig;
   const initForm: any = {
     username: "",
     password: "",
@@ -162,10 +161,10 @@ export const Login = (props: { forgot?: boolean }) => {
         <div></div>
         <div className="mt-4 flex flex-col items-start rounded-lg py-4 md:mt-12">
           <div className="mb-4 hidden items-center gap-6 md:flex">
-            {(custom_logo || state_logo) && (
+            {(customLogo || stateLogo) && (
               <>
                 <img
-                  src={custom_logo?.light ?? state_logo?.light}
+                  src={customLogo?.light ?? stateLogo?.light}
                   className="h-16 rounded-lg py-3"
                   alt="state logo"
                 />
@@ -173,15 +172,15 @@ export const Login = (props: { forgot?: boolean }) => {
               </>
             )}
             <a
-              href={coronasafe_url}
+              href={urls.ohcn}
               className="inline-block"
               target="_blank"
               rel="noopener noreferrer"
             >
               <img
-                src={custom_logo_alt?.light ?? main_logo.light}
+                src={customLogoAlt?.light ?? mainLogo?.light}
                 className="h-8"
-                alt="coronasafe logo"
+                alt="Open Healthcare Network logo"
               />
             </a>
           </div>
@@ -189,13 +188,13 @@ export const Login = (props: { forgot?: boolean }) => {
             <h1 className="text-4xl font-black leading-tight tracking-wider text-white lg:text-5xl">
               {t("care")}
             </h1>
-            {custom_description ? (
+            {customDescription ? (
               <div className="py-6">
                 <ReactMarkdown
                   rehypePlugins={[rehypeRaw]}
                   className="max-w-xl text-secondary-400"
                 >
-                  {custom_description || t("goal")}
+                  {customDescription || t("goal")}
                 </ReactMarkdown>
               </div>
             ) : (
@@ -214,26 +213,22 @@ export const Login = (props: { forgot?: boolean }) => {
                 target="_blank"
               >
                 <img
-                  src="https://cdn.coronasafe.network/dpg-logo.svg"
+                  src="https://cdn.ohc.network/dpg-logo.svg"
                   className="h-12"
                   alt="Logo of Digital Public Goods Alliance"
                 />
               </a>
               <div className="ml-2 h-8 w-px rounded-full bg-white/50" />
-              <a
-                href={coronasafe_url}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
+              <a href={urls.ohcn} rel="noopener noreferrer" target="_blank">
                 <img
-                  src="https://cdn.coronasafe.network/ohc_logo_light.png"
+                  src="https://cdn.ohc.network/ohc_logo_light.png"
                   className="inline-block h-10"
-                  alt="coronasafe logo"
+                  alt="Open Healthcare Network logo"
                 />
               </a>
             </div>
             <a
-              href={coronasafe_url}
+              href={urls.ohcn}
               target="_blank"
               rel="noopener noreferrer"
               className="text-secondary-500"
@@ -242,7 +237,7 @@ export const Login = (props: { forgot?: boolean }) => {
             </a>
             <div className="mx-auto mt-2">
               <a
-                href={github_url}
+                href={urls.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-400 hover:text-primary-500"
@@ -258,10 +253,10 @@ export const Login = (props: { forgot?: boolean }) => {
         <div className="relative h-full items-center justify-center md:flex">
           <div className="p-8 md:w-4/5 md:p-0 lg:w-[400px]">
             <div className="flex items-center gap-1 md:hidden">
-              {(custom_logo || state_logo) && (
+              {(customLogo || stateLogo) && (
                 <>
                   <img
-                    src={custom_logo?.dark ?? state_logo?.dark}
+                    src={customLogo?.dark ?? stateLogo?.dark}
                     className="h-14 rounded-lg py-3"
                     alt="state logo"
                   />
@@ -269,7 +264,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 </>
               )}
               <img
-                src={custom_logo_alt?.dark ?? main_logo.dark}
+                src={customLogoAlt?.dark ?? mainLogo?.dark}
                 className="h-8 w-auto"
                 alt="care logo"
               />
@@ -314,7 +309,7 @@ export const Login = (props: { forgot?: boolean }) => {
                       {isCaptchaEnabled && (
                         <div className="grid px-8 py-4">
                           <ReCaptcha
-                            sitekey={recaptcha_site_key}
+                            sitekey={reCaptchaSiteKey}
                             onChange={onCaptchaChange}
                           />
                           <span className="text-red-500">{errors.captcha}</span>
