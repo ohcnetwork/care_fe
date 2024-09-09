@@ -1,4 +1,3 @@
-import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
@@ -345,8 +344,8 @@ describe("Patient Consultation in multiple combination", () => {
       "Bleeding",
     ]);
     patientConsultationPage.clickAddSymptom();
-    // Comfort Care category
-    patientConsultationPage.selectPatientCategory("Comfort Care");
+    // Mild category
+    patientConsultationPage.selectPatientCategory("Mild");
     // Date of symptoms
     // Decision after consultation - Referred to Facility
     patientConsultationPage.selectPatientSuggestion(

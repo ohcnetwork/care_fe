@@ -1,7 +1,3 @@
-/// <reference types="cypress" />
-
-import { cy, describe, beforeEach, it } from "local-cypress";
-
 describe("Authorisation/Authentication", () => {
   beforeEach(() => {
     cy.awaitUrl("/", true);

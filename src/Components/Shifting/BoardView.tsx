@@ -12,15 +12,15 @@ import { downloadShiftRequests } from "../../Redux/actions";
 import { formatFilter } from "./Commons";
 
 import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
 import useFilters from "../../Common/hooks/useFilters";
 import { lazy, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import withScrolling from "react-dnd-scrolling";
 import ButtonV2 from "../Common/components/ButtonV2";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import Tabs from "../Common/components/Tabs";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -31,13 +31,12 @@ export default function BoardView() {
     limit: -1,
     cacheBlacklist: ["patient_name"],
   });
-  const { wartime_shifting } = useConfig();
 
-  const shiftStatusOptions = wartime_shifting
+  const shiftStatusOptions = careConfig.wartimeShifting
     ? SHIFTING_CHOICES_WARTIME
     : SHIFTING_CHOICES_PEACETIME;
 
-  const COMPLETED = wartime_shifting
+  const COMPLETED = careConfig.wartimeShifting
     ? [
         "COMPLETED",
         "REJECTED",
@@ -153,12 +152,15 @@ export default function BoardView() {
             placeholder={t("search_patient")}
           />
 
-          <SwitchTabs
-            tab1={t("active")}
-            tab2={t("completed")}
-            onClickTab1={() => setBoardFilter(activeBoards)}
-            onClickTab2={() => setBoardFilter(completedBoards)}
-            isTab2Active={boardFilter[0].text !== activeBoards[0].text}
+          <Tabs
+            tabs={[
+              { text: t("active"), value: 0 },
+              { text: t("archived"), value: 1 },
+            ]}
+            onTabChange={(tab) =>
+              setBoardFilter(tab ? completedBoards : activeBoards)
+            }
+            currentTab={boardFilter[0].text !== activeBoards[0].text ? 1 : 0}
           />
 
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">

@@ -25,7 +25,6 @@ yarn-error.log*
 dist
 dev-dist
 build
-storybook-static
 .swp
 stats.json
 public/build-meta.json

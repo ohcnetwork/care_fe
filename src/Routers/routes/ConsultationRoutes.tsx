@@ -4,14 +4,16 @@ import ShowInvestigation from "../../Components/Facility/Investigations/ShowInve
 import ManagePrescriptions from "../../Components/Medicine/ManagePrescriptions";
 import { DailyRoundListDetails } from "../../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../../Components/Patient/DailyRounds";
-import { FileUpload } from "../../Components/Patient/FileUpload";
 import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
-import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
+import TreatmentSummary, {
+  ITreatmentSummaryProps,
+} from "../../Components/Facility/TreatmentSummary";
 import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
 import PatientConsentRecords from "../../Components/Patient/PatientConsentRecords";
 import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
 import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
 import CriticalCarePreview from "../../Components/LogUpdate/CriticalCarePreview";
+import FileUploadPage from "../../Components/Patient/FileUploadPage";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -38,14 +40,11 @@ export default {
     patientId,
     id,
   }: any) => (
-    <FileUpload
+    <FileUploadPage
       facilityId={facilityId}
       patientId={patientId}
       consultationId={id}
       type="CONSULTATION"
-      hideBack={false}
-      audio={true}
-      unspecified={true}
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
@@ -132,12 +131,11 @@ export default {
     <ConsultationDetails consultationId={consultationId} tab={"updates"} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
-    ({ facilityId, patientId, consultationId }: any) => (
+    ({ facilityId, patientId, consultationId }: ITreatmentSummaryProps) => (
       <TreatmentSummary
         facilityId={facilityId}
         consultationId={consultationId}
         patientId={patientId}
-        dailyRoundsListData={[]}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/notes":

@@ -1,4 +1,3 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";

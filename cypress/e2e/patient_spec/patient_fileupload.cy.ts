@@ -1,4 +1,3 @@
-import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientFileUpload } from "../../pageobject/Patient/PatientFileupload";
@@ -36,7 +35,7 @@ function runTests(testDescription, visitPatientFileUploadSection) {
       cy.verifyNotification("File Uploaded Successfully");
       patientFileUpload.verifyUploadFilePresence(cypressAudioName);
       // Verify the download of the audio file
-      cy.get("button").contains("DOWNLOAD").click();
+      cy.get("button").contains("Download").click();
       cy.verifyNotification("Downloading file...");
     });
 
