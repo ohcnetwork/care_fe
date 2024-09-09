@@ -95,18 +95,6 @@ const careConfig = {
       "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
     environment: env.REACT_SENTRY_ENVIRONMENT || "staging",
   },
-
-  hcx: {
-    enabled: env.REACT_ENABLE_HCX === "true",
-  },
-
-  abdm: {
-    enabled: (env.REACT_ENABLE_ABDM ?? "true") === "true",
-  },
-
-  scribe: {
-    enabled: env.REACT_ENABLE_SCRIBE === "true",
-  },
 } as const;
 
 export default careConfig;

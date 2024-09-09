@@ -111,6 +111,7 @@ import { HCXPolicyModel } from "../Components/HCX/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
 import { ScribeModel } from "../Components/Scribe/Scribe";
+import { FeatureFlagsResponse } from "../Utils/featureFlags";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -131,6 +132,11 @@ export interface LoginCredentials {
 }
 
 const routes = {
+  getFeatureFlags: {
+    path: "/api/flags/",
+    method: "GET",
+    TRes: Type<FeatureFlagsResponse>(),
+  },
   createScribe: {
     path: "/api/care_scribe/scribe/",
     method: "POST",

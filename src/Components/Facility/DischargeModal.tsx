@@ -27,7 +27,7 @@ import { FieldError } from "../Form/FieldValidators";
 import { useTranslation } from "react-i18next";
 import useConfirmedAction from "../../Common/hooks/useConfirmedAction";
 import ConfirmDialog from "../Common/ConfirmDialog";
-import careConfig from "@careConfig";
+import { useFeatureFlags } from "../../Utils/featureFlags";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -80,6 +80,7 @@ const DischargeModal = ({
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
   const [facility, setFacility] = useState<FacilityModel | null>(referred_to);
   const [errors, setErrors] = useState<any>({});
+  const featureFlags = useFeatureFlags();
 
   useEffect(() => {
     setPreDischargeForm((prev) => ({
@@ -384,7 +385,7 @@ const DischargeModal = ({
           )}
         </div>
 
-        {careConfig.hcx.enabled && (
+        {featureFlags.hcx.enabled && (
           // TODO: if policy and approved pre-auth exists
           <div className="my-5 rounded p-5 shadow">
             <h2 className="mb-2">Claim Insurance</h2>

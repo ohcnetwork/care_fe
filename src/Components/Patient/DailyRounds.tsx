@@ -488,6 +488,7 @@ export const DailyRounds = (props: any) => {
     >
       <div className="flex w-full justify-end md:m-4">
         <Scribe
+          facilityId={facilityId}
           form={SCRIBE_FORMS.daily_round}
           onFormUpdate={async (fields) => {
             setDiagnosisSuggestions([]);

@@ -28,6 +28,7 @@ import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
 import useAuthUser from "../Common/hooks/useAuthUser";
 import careConfig from "@careConfig";
+import { useFeatureFlags } from "../Utils/featureFlags";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
@@ -59,10 +60,11 @@ const Routes = {
 
 export default function AppRouter() {
   const authUser = useAuthUser();
+  const featureFlags = useFeatureFlags();
 
   let routes = Routes;
 
-  if (careConfig.hcx.enabled) {
+  if (featureFlags.hcx.enabled) {
     routes = { ...routes, ...HCXRoutes };
   }
 
