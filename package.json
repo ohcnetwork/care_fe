@@ -41,7 +41,7 @@
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
-    "supported-browsers": "echo \"export default $(browserslist-useragent-regexp --allowHigherVersions --ignorePatch --ignoreMinor);\" > src/supportedBrowsers.ts"
+    "supported-browsers": "echo \"export default $(browserslist-useragent-regexp --allowHigherVersions --ignorePatch --ignoreMinor);\" | sed $'s/\\e\\\\[[0-9;:]*[a-zA-Z]//g' > src/supportedBrowsers.ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.18",
