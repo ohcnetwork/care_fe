@@ -11,8 +11,6 @@ import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import PainChart from "../components/PainChart";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { HEARTBEAT_RHYTHM_CHOICES } from "../../../Common/constants";
-import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
-import { FieldLabel } from "../../Form/FormFields/FormField";
 import { BloodPressure } from "../../Patient/models";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
@@ -133,59 +131,31 @@ const BPAttributeEditor = ({
 }: LogUpdateSectionProps & { attribute: "systolic" | "diastolic" }) => {
   const { t } = useTranslation();
 
-  const handleChange = (bp: BloodPressure) => {
-    if (Object.values(bp).every((v) => (v ?? false) === false)) {
-      onChange({ bp: undefined });
-      return;
-    }
-
-    onChange({ bp });
-  };
-
   return (
-    <div>
-      <FieldLabel>{t(attribute)}</FieldLabel>
-      <RangeFormField
-        name={attribute + "_slider"}
-        label={
-          <CheckBoxFormField
-            label={t("not_measurable")}
-            labelClassName="text-sm"
-            value={log.bp?.[`${attribute}_not_measurable`]}
-            name={`${attribute}_not_measurable`}
-            onChange={({ value }) => {
-              const bp = log.bp ?? {};
-              bp[`${attribute}_not_measurable`] = value;
-              if (value) {
-                bp[attribute] = null;
-              }
-              handleChange(bp);
-            }}
-            errorClassName="hidden"
-          />
-        }
-        disabled={log.bp?.[`${attribute}_not_measurable`]}
-        onChange={({ value }) => {
-          const bp = log.bp ?? {};
-          bp[`${attribute}_not_measurable`] = false;
-          bp[attribute] = value;
-          handleChange(bp);
-        }}
-        value={log.bp?.[attribute] ?? undefined}
-        min={0}
-        max={400}
-        sliderMin={30}
-        sliderMax={270}
-        step={1}
-        unit="mmHg"
-        valueDescriptions={rangeValueDescription(
-          attribute === "systolic"
-            ? { low: 99, high: 139 }
-            : { low: 49, high: 89 },
-        )}
-        hideUnitInLabel
-      />
-    </div>
+    <RangeFormField
+      name={attribute}
+      label={t(attribute)}
+      onChange={(event) => {
+        const bp = log.bp ?? {};
+        bp[event.name as keyof BloodPressure] = event.value;
+        onChange({
+          bp: Object.values(bp).filter(Boolean).length ? bp : undefined,
+        });
+      }}
+      value={log.bp?.[attribute] ?? undefined}
+      min={0}
+      max={400}
+      sliderMin={30}
+      sliderMax={270}
+      step={1}
+      unit="mmHg"
+      valueDescriptions={rangeValueDescription(
+        attribute === "systolic"
+          ? { low: 99, high: 139 }
+          : { low: 49, high: 89 },
+      )}
+      hideUnitInLabel
+    />
   );
 };
 

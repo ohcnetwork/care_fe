@@ -488,7 +488,7 @@ const Section = (props: { title: string; children: React.ReactNode }) => {
 
 const Detail = (props: {
   label: React.ReactNode;
-  value?: string | number | boolean | null;
+  value?: string | number | boolean;
   suffix?: React.ReactNode;
 }) => {
   let value = props.value;
@@ -515,7 +515,7 @@ const Detail = (props: {
 
 const RangeDetail = (props: {
   label: React.ReactNode;
-  value?: number | null;
+  value?: number;
   unit: React.ReactNode;
   max: number;
   valueDescriptions: ValueDescription[];

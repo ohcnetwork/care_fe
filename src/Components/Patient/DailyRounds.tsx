@@ -327,7 +327,7 @@ export const DailyRounds = (props: any) => {
       if (!["VENTILATOR"].includes(state.form.rounds_type)) {
         data = {
           ...data,
-          bp: state.form.bp ?? {},
+          bp: state.form.bp,
           pulse: state.form.pulse ?? null,
           resp: state.form.resp ?? null,
           temperature: state.form.temperature ?? null,
@@ -653,13 +653,11 @@ export const DailyRounds = (props: any) => {
             <>
               <h3 className="mb-6 md:col-span-2">{t("vitals")}</h3>
 
-              <div className="md:col-span-2">
-                <BloodPressureFormField
-                  {...field("bp")}
-                  label={t("blood_pressure")}
-                  id="bloodPressure"
-                />
-              </div>
+              <BloodPressureFormField
+                {...field("bp")}
+                label={t("blood_pressure")}
+                id="bloodPressure"
+              />
 
               <RangeAutocompleteFormField
                 {...field("pulse")}

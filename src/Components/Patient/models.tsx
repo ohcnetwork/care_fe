@@ -287,10 +287,8 @@ export const DailyRoundTypes = [
 ] as const;
 
 export type BloodPressure = {
-  systolic_not_measurable?: boolean;
-  diastolic_not_measurable?: boolean;
-  systolic?: number | null;
-  diastolic?: number | null;
+  systolic?: number;
+  diastolic?: number;
 };
 
 export interface IPainScale {
