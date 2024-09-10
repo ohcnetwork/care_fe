@@ -143,7 +143,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "prettier --write --ignore-unknown",
+      "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss",
       "eslint --fix",
       "git update-index --again"
     ]
