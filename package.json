@@ -44,7 +44,7 @@
     "supported-browsers": "echo \"export default $(browserslist-useragent-regexp --allowHigherVersions --ignorePatch --ignoreMinor);\" | sed 's/\\x1b\\[[0-9;]*m//g' > src/supportedBrowsers.ts"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.0.18",
+    "@fontsource/inter": "^5.0.21",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.3",
     "@headlessui/react": "^2.1.2",
