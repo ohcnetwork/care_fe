@@ -201,5 +201,8 @@
   "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
   "oxygen_information": "Oxygen Information",
   "deleted_successfully": "{{name}} deleted successfully",
-  "delete_item": "Delete {{name}}"
+  "delete_item": "Delete {{name}}",
+  "unsupported_browser": "Unsupported Browser",
+  "unsupported_browser_description": "Your browser ({{name}} version {{version}}) is not supported. Please update your browser to the latest version or switch to a supported browser for the best experience."
+
 }

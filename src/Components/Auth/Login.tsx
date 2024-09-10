@@ -13,6 +13,7 @@ import rehypeRaw from "rehype-raw";
 import { useAuthContext } from "../../Common/hooks/useAuthUser";
 import FiltersCache from "../../Utils/FiltersCache";
 import { classNames } from "../../Utils/utils";
+import BrowserWarning from "../ErrorPages/BrowserWarning";
 import careConfig from "@careConfig";
 
 export const Login = (props: { forgot?: boolean }) => {
@@ -157,6 +158,7 @@ export const Login = (props: { forgot?: boolean }) => {
 
   return (
     <div className="relative flex flex-col-reverse overflow-hidden md:h-screen md:flex-row">
+      {!forgotPassword && <BrowserWarning />}
       <div className="login-hero relative flex flex-auto flex-col justify-between p-6 md:h-full md:w-[calc(50%+130px)] md:flex-none md:p-0 md:px-16 md:pr-[calc(4rem+130px)]">
         <div></div>
         <div className="mt-4 flex flex-col items-start rounded-lg py-4 md:mt-12">
