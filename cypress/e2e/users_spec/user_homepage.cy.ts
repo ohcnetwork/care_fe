@@ -6,8 +6,6 @@ describe("User Homepage", () => {
   const usernameToTest = "devdoctor";
   const currentuser = "devdistrictadmin";
   const loginPage = new LoginPage();
-  const phone_number = "9876543219";
-  const alt_phone_number = "9876543219";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -22,28 +20,28 @@ describe("User Homepage", () => {
 
   it("User advance filter functionality", () => {
     userPage.clickAdvancedFilters();
-    userPage.typeInFirstName("Dev");
-    userPage.typeInLastName("Doctor");
-    userPage.selectRole("Doctor");
+    userPage.typeInFirstName("Dummy");
+    userPage.typeInLastName("Nurse");
+    userPage.selectRole("Nurse");
     userPage.selectState("Kerala");
     userPage.selectDistrict("Ernakulam");
-    userPage.typeInPhoneNumber(phone_number);
-    userPage.typeInAltPhoneNumber(alt_phone_number);
+    userPage.typeInPhoneNumber("8878825662");
+    userPage.typeInAltPhoneNumber("8878825662");
     userPage.selectHomeFacility("Dummy Facility 40");
     userPage.applyFilter();
     userPage.verifyUrlafteradvancefilter();
     userPage.checkUsernameText(usernameToTest);
-    userPage.verifyDataTestIdText("First Name", "First Name: Dev");
-    userPage.verifyDataTestIdText("Last Name", "Last Name: Doctor");
+    userPage.verifyDataTestIdText("First Name", "First Name: Dummy");
+    userPage.verifyDataTestIdText("Last Name", "Last Name: Nurse");
     userPage.verifyDataTestIdText(
       "Phone Number",
-      "Phone Number: +919876543219",
+      "Phone Number: +918878825662",
     );
     userPage.verifyDataTestIdText(
       "WhatsApp no.",
-      "WhatsApp no.: +919876543219",
+      "WhatsApp no.: +918878825662",
     );
-    userPage.verifyDataTestIdText("Role", "Role: Doctor");
+    userPage.verifyDataTestIdText("Role", "Role: Nurse");
     userPage.verifyDataTestIdText(
       "Home Facility",
       "Home Facility: Dummy Facility 40",
