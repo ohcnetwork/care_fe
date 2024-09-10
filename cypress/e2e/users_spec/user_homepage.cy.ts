@@ -48,7 +48,7 @@ describe("User Homepage", () => {
     );
     userPage.verifyDataTestIdText(
       "WhatsApp no.",
-      `WhatsApp no.: +91${phoneNumber}`,
+      `WhatsApp no.: +91${altPhoneNumber}`,
     );
     userPage.verifyDataTestIdText("Role", `Role: ${role}`);
     userPage.verifyDataTestIdText(
