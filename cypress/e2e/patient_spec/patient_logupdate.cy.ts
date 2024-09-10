@@ -49,7 +49,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient("Dummy Patient 10");
     patientLogupdate.clickLogupdate();
     cy.verifyNotification("Please assign a bed to the patient");
-    patientLogupdate.selectBed("Dummy Bed 4");
+    patientLogupdate.selectBed("Dummy Bed 2");
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.selectPatientCategory(patientCategory);
