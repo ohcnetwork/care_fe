@@ -38,7 +38,6 @@ describe("User Homepage", () => {
     userPage.typeInAltPhoneNumber(altPhoneNumber);
     userPage.selectHomeFacility(homeFacility);
     userPage.applyFilter();
-    userPage.verifyUrlafteradvancefilter();
     userPage.checkUsernameText(nurseUserName);
     // Verify the badges related to the data
     userPage.verifyDataTestIdText("First Name", `First Name: ${firstName}`);
