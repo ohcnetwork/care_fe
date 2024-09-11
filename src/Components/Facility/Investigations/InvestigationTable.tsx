@@ -4,6 +4,7 @@ import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { classNames } from "../../../Utils/utils";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
   return (
@@ -70,6 +71,7 @@ export const InvestigationTable = ({
   handleUpdateCancel,
   handleSave,
 }: any) => {
+  const { t } = useTranslation();
   const [searchFilter, setSearchFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
   const filterTests = Object.values(data).filter((i: any) => {
