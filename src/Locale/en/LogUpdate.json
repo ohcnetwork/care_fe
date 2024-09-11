@@ -69,5 +69,6 @@
   "pulse": "Pulse",
   "bradycardia": "Bradycardia",
   "tachycardia": "Tachycardia",
-  "spo2": "SpO₂"
+  "spo2": "SpO₂",
+  "procedures_select_placeholder": "Select procedures to add details"
 }
