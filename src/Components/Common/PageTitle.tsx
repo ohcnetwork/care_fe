@@ -78,7 +78,7 @@ export default function PageTitle({
         </div>
         {componentRight}
       </div>
-      <div className={hideBack ? "my-2" : "my-2 ml-8 print:hidden"}>
+      <div className={hideBack ? "my-2" : "my-2 ml-8"}>
         {breadcrumbs && <Breadcrumbs replacements={crumbsReplacements} />}
       </div>
     </div>
