@@ -7,6 +7,7 @@ import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
 import PrintPreview from "../../../CAREUI/misc/PrintPreview";
+import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
@@ -33,9 +34,15 @@ const updateFormReducer = (state = initialState, action: any) => {
   }
 };
 
-export default function ShowInvestigation(props: any) {
+interface ShowInvestigationProps {
+  consultationId: string;
+  patientId: string;
+  sessionId: string;
+  facilityId: string;
+}
+export default function ShowInvestigation(props: ShowInvestigationProps) {
   const { consultationId, patientId, sessionId } = props;
-
+  const { t } = useTranslation();
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
   const { loading: investigationLoading } = useQuery(routes.getInvestigation, {
     pathParams: {
@@ -138,11 +145,16 @@ export default function ShowInvestigation(props: any) {
   if (patientLoading || investigationLoading) {
     return <Loading />;
   }
-
   return (
-    <PrintPreview title={`Investigation Report for ${patientData?.name}`}>
+    <PrintPreview
+      title={t("Investigation Report for {{name}}", {
+        name: patientData?.name,
+      })}
+    >
       <InvestigationTable
-        title={`Investigation Report of :${patientData?.name}`}
+        title={t("Investigation Report of : {{name}}", {
+          name: patientData?.name,
+        })}
         data={state.initialValues}
         isDischargedPatient={!!consultation?.discharge_date}
         changedFields={state.changedFields}
