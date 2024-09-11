@@ -50,7 +50,7 @@
     "@headlessui/react": "^2.1.2",
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
-    "@sentry/browser": "^8.29.0",
+    "@sentry/browser": "^8.30.0",
     "@yudiel/react-qr-scanner": "^2.0.0-beta.3",
     "axios": "^1.7.7",
     "bowser": "^2.11.0",
