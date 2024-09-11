@@ -147,12 +147,12 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
   }
   return (
     <PrintPreview
-      title={t("Investigation Report for {{name}}", {
+      title={t("investigation_report_for_{{name}}", {
         name: patientData?.name,
       })}
     >
       <InvestigationTable
-        title={t("Investigation Report of : {{name}}", {
+        title={t("investigation_report_of_{{name}}", {
           name: patientData?.name,
         })}
         data={state.initialValues}

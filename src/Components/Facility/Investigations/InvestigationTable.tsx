@@ -174,7 +174,7 @@ export const InvestigationTable = ({
                 })
               ) : (
                 <tr className="text-center text-secondary-500 print:text-black">
-                  <td className="col-span-6">No tests taken</td>
+                  <td className="col-span-6">t(no_tests_taken)</td>
                 </tr>
               )}
             </tbody>
