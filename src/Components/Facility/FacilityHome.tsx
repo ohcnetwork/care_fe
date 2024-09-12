@@ -179,23 +179,32 @@ export const FacilityHome = ({ facilityId }: Props) => {
           }
         >
           <CoverImage />
-          {editCoverImageTooltip}
+          <div
+            onClick={() =>
+              hasPermissionToEditCoverImage && setEditCoverImage(true)
+            }
+          >
+            {editCoverImageTooltip}
+          </div>
         </div>
       ) : (
         <div
           className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch bg-secondary-300 md:hidden ${
             hasPermissionToEditCoverImage && "cursor-pointer"
           }`}
-          onClick={() =>
-            hasPermissionToEditCoverImage && setEditCoverImage(true)
-          }
         >
           <CareIcon
             icon="l-hospital"
             className="block p-10 text-4xl text-secondary-500"
             aria-hidden="true"
           />
-          {editCoverImageTooltip}
+          <div
+            onClick={() =>
+              hasPermissionToEditCoverImage && setEditCoverImage(true)
+            }
+          >
+            {editCoverImageTooltip}
+          </div>
         </div>
       )}
       <div
@@ -211,9 +220,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   className={`group relative hidden h-80 w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:mr-2 md:flex lg:mr-6 lg:h-80 lg:w-80 ${
                     hasPermissionToEditCoverImage && "cursor-pointer"
                   }`}
-                  onClick={() =>
-                    hasPermissionToEditCoverImage && setEditCoverImage(true)
-                  }
                 >
                   {hasCoverImage ? (
                     <CoverImage />
@@ -228,7 +234,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </svg>
                     </div>
                   )}
-                  {editCoverImageTooltip}
+                  <div
+                    onClick={() =>
+                      hasPermissionToEditCoverImage && setEditCoverImage(true)
+                    }
+                  >
+                    {editCoverImageTooltip}
+                  </div>
                 </div>
                 <div className="mb-6 grid gap-4 md:mb-0">
                   <div className="flex-col justify-between md:flex lg:flex-1">
