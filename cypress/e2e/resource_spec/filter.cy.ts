@@ -80,6 +80,7 @@ describe("Resource filter", () => {
     cy.get("input[name='modified_date_start']").click();
     cy.get("#date-1").click();
     cy.get("#date-1").click();
+    cy.get("body").click(0, 0);
     cy.contains("Apply").click();
     cy.wait("@resource_filter");
   });

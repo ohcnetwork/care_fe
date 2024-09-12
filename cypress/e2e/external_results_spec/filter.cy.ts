@@ -21,15 +21,17 @@ describe("External Results Filters", () => {
 
   it("filter by date", () => {
     cy.get("input[name='created_date_start']").click();
-    cy.get("[id^='headlessui-popover-panel-'] .care-l-angle-left-b").click();
+    cy.get("[data-test-id='increment-date-range']").click();
     cy.get("div[id='date-1']").click();
     cy.get("div[id='date-8']").click();
+    cy.get("[data-test-id='slide-over-container']").click(0, 0);
     cy.get("input[name='result_date_start']").click();
-    cy.get("[id^='headlessui-popover-panel-'] .care-l-angle-left-b").click();
+    cy.get("[data-test-id='increment-date-range']").click();
     cy.get("div[id='date-1']").click();
     cy.get("div[id='date-8']").click();
+    cy.get("[data-test-id='slide-over-container']").click(0, 0);
     cy.get("input[name='sample_collection_date_start']").click();
-    cy.get("[id^='headlessui-popover-panel-'] .care-l-angle-left-b").click();
+    cy.get("[data-test-id='increment-date-range']").click();
     cy.get("div[id='date-1']").click();
     cy.get("div[id='date-8']").click();
     cy.contains("Apply").click();

@@ -86,7 +86,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectPatientPrincipalDiagnosis(diagnosis4);
     patientTreatmentPlan.clickAddProcedure();
     patientTreatmentPlan.typeProcedureName(procedureName);
-    patientTreatmentPlan.typeProcedureTime("2024-02-22T12:30");
+    patientTreatmentPlan.typeProcedureTime("22/02/2024 12:30 pm");
     patientTreatmentPlan.typeTreatmentPlan(patientTreatment);
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     patientTreatmentPlan.typeSpecialInstruction(specialInstruction);
@@ -182,12 +182,12 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.typeCauseOfDeath("Cause of Death");
     patientConsultationPage.typePatientConsultationDate(
       "#death_datetime",
-      "2024-02-22T12:45",
+      "22/02/2024 12:30 pm",
     );
     patientConsultationPage.typeDeathConfirmedBy(doctorName);
     patientConsultationPage.typePatientConsultationDate(
       "#encounter_date",
-      "2024-02-22T12:30",
+      "22/02/2024 12:30 pm",
     );
     cy.submitButton("Create Consultation");
     cy.verifyNotification(
@@ -245,7 +245,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.typePatientConsultationDate(
       "#icu_admission_date",
-      "2024-02-23T12:30",
+      "23/02/2024 12:30 pm",
     );
     // add investigation
     patientInvestigation.clickAddInvestigation();
@@ -293,7 +293,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     // verify the free text in referring facility name
     patientConsultationPage.typeReferringFacility("Life Care Hospital");
-    patientConsultationPage.selectSymptomsDate("01012024");
+    patientConsultationPage.selectSymptomsDate("01/01/2024");
     patientConsultationPage.typeAndMultiSelectSymptoms("s", [
       "Sore throat",
       "Sputum",
@@ -338,7 +338,7 @@ describe("Patient Consultation in multiple combination", () => {
       "Outpatient/Emergency Room",
     );
     // Select the Symptoms - Breathlessness and Bleeding symptoms
-    patientConsultationPage.selectSymptomsDate("01012024");
+    patientConsultationPage.selectSymptomsDate("01/01/2024");
     patientConsultationPage.typeAndMultiSelectSymptoms("b", [
       "Breathlessness",
       "Bleeding",

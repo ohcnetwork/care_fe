@@ -30,7 +30,7 @@ stats.json
 public/build-meta.json
 .vscode/*
 !.vscode/launch.json
-
+src/supportedBrowsers.ts
 
 # Reason React
 /lib/bs/**

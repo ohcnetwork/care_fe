@@ -247,7 +247,7 @@ describe("Location Management Section", () => {
       "email@support.com",
       "Vendor's Name",
       serialNumber,
-      "25122021",
+      "25/12/2021",
       "Test note for asset creation!",
     );
     assetPage.clickassetupdatebutton();

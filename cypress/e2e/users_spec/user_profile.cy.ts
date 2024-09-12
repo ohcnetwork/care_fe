@@ -7,7 +7,7 @@ describe("Manage User Profile", () => {
   const userProfilePage = new UserProfilePage();
   const manageUserPage = new ManageUserPage();
 
-  const date_of_birth = "01011999";
+  const date_of_birth = "01/01/1999";
   const gender = "Male";
   const email = "test@example.com";
   const phone = "+918899887788";

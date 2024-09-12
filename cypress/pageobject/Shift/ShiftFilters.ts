@@ -139,18 +139,12 @@ class ShiftingPage {
     modified_date_end: string,
   ) {
     this.createdDateStartInput().click();
-    cy.get("[id^='headlessui-popover-panel-'] .care-l-angle-left-b")
-      .eq(0)
-      .closest("button")
-      .click();
+    cy.get("[data-test-id='increment-date-range']").click();
     cy.get(created_date_start).click();
     cy.get(created_date_end).click();
 
     this.modifiedDateStartInput().click();
-    cy.get("[id^='headlessui-popover-panel-'] .care-l-angle-left-b")
-      .eq(0)
-      .closest("button")
-      .click();
+    cy.get("[data-test-id='increment-date-range']").click();
     cy.get(modified_date_start).click();
     cy.get(modified_date_end).click();
 

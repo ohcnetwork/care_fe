@@ -19,13 +19,11 @@ const getRelativeDateString = (deltaDays = 0) => {
   if (deltaDays) {
     date.setDate(date.getDate() + deltaDays);
   }
-  return date
-    .toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    .replace("/", "");
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 };
 
 describe("Patient Creation with consultation", () => {
@@ -39,7 +37,7 @@ describe("Patient Creation with consultation", () => {
   const phone_number = generatePhoneNumber();
   const age = calculateAge();
   const patientFacility = "Dummy Facility 40";
-  const patientDateOfBirth = "01012001";
+  const patientDateOfBirth = "01/01/2001";
   const patientMenstruationStartDate = getRelativeDateString(-10);
   const patientDateOfDelivery = getRelativeDateString(-20);
   const patientOneName = "Patient With No Consultation";

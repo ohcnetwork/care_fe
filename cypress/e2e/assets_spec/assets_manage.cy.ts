@@ -67,7 +67,7 @@ describe("Asset", () => {
     assetPage.clickupdatedetailbutton();
     assetPage.scrollintonotes();
     assetPage.enterAssetNotes("Dummy Notes");
-    assetPage.enterAssetservicedate("01092023");
+    assetPage.enterAssetservicedate("01/09/2023");
     assetPage.clickassetupdatebutton();
     assetPage.scrollintoservicehistory();
     assetPage.clickedithistorybutton();

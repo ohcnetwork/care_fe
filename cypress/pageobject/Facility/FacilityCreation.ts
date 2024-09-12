@@ -247,6 +247,7 @@ class FacilityPage {
   fillEntryDate(date) {
     cy.get("#entry_date").click();
     cy.get("#date-input").click().type(date);
+    cy.get("body").click(0, 0);
   }
 
   clickEditButton() {

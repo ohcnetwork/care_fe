@@ -54,6 +54,7 @@ export class PatientPage {
     cy.get("#date_of_birth").scrollIntoView();
     cy.get("#date_of_birth").should("be.visible").click();
     cy.get("#date-input").click().type(dateOfBirth);
+    cy.get("body").click(0, 0);
   }
 
   typePatientAge(age: string) {
@@ -81,11 +82,13 @@ export class PatientPage {
   typeLastMenstruationStartDate(date: string) {
     cy.get("#last_menstruation_start_date").click();
     cy.get("#date-input").click().type(date);
+    cy.get("body").click(0, 0);
   }
 
   typeDateOfDelivery(date: string) {
     cy.get("#date_of_delivery").click();
     cy.get("#date-input").click().type(date);
+    cy.get("body").click(0, 0);
   }
 
   clickPermanentAddress() {

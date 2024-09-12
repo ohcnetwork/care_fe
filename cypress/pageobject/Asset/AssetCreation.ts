@@ -63,6 +63,7 @@ export class AssetPage {
       "[data-testid=asset-last-serviced-on-input] input[type='text']",
     ).click();
     cy.get("#date-input").click().type(lastServicedOn);
+    cy.get("body").click(0, 0);
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 
@@ -121,6 +122,7 @@ export class AssetPage {
       "[data-testid=asset-last-serviced-on-input] input[type='text']",
     ).click();
     cy.get("#date-input").click().clear().type(lastServicedOn);
+    cy.get("body").click(0, 0);
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
@@ -277,6 +279,7 @@ export class AssetPage {
   enterAssetservicedate(text: string) {
     cy.get("input[name='last_serviced_on']").click();
     cy.get("#date-input").click().type(text);
+    cy.get("body").click(0, 0);
   }
 
   scrollintoWarrantyDetails() {

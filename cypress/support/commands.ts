@@ -173,6 +173,7 @@ Cypress.Commands.add("clickAndTypeDate", (selector: string, date: string) => {
   cy.get(selector).scrollIntoView();
   cy.get(selector).click();
   cy.get("#date-input").click().type(date);
+  cy.get("body").click(0, 0);
 });
 
 Cypress.Commands.add(

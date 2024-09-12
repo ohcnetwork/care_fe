@@ -33,7 +33,9 @@ class PatientTreatmentPlan {
   }
 
   typeProcedureTime(time: string) {
-    cy.get("#procedure-time").type(time);
+    cy.get("#procedure-time").click();
+    cy.get("#date-input").clear().type(time);
+    cy.get("body").click(0, 0);
   }
 
   typeTreatmentPlan(treatment: string) {
