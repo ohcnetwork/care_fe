@@ -116,7 +116,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     <div
       id="facility-coverimage"
       className={
-        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60"
       }
       onClick={() => setEditCoverImage(true)}
     >
@@ -179,32 +179,23 @@ export const FacilityHome = ({ facilityId }: Props) => {
           }
         >
           <CoverImage />
-          <div
-            onClick={() =>
-              hasPermissionToEditCoverImage && setEditCoverImage(true)
-            }
-          >
-            {editCoverImageTooltip}
-          </div>
+          {editCoverImageTooltip}
         </div>
       ) : (
         <div
           className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch bg-secondary-300 md:hidden ${
             hasPermissionToEditCoverImage && "cursor-pointer"
           }`}
+          onClick={() =>
+            hasPermissionToEditCoverImage && setEditCoverImage(true)
+          }
         >
           <CareIcon
             icon="l-hospital"
             className="block p-10 text-4xl text-secondary-500"
             aria-hidden="true"
           />
-          <div
-            onClick={() =>
-              hasPermissionToEditCoverImage && setEditCoverImage(true)
-            }
-          >
-            {editCoverImageTooltip}
-          </div>
+          {editCoverImageTooltip}
         </div>
       )}
       <div
@@ -220,6 +211,9 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   className={`group relative hidden h-80 w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:mr-2 md:flex lg:mr-6 lg:h-80 lg:w-80 ${
                     hasPermissionToEditCoverImage && "cursor-pointer"
                   }`}
+                  onClick={() =>
+                    hasPermissionToEditCoverImage && setEditCoverImage(true)
+                  }
                 >
                   {hasCoverImage ? (
                     <CoverImage />
@@ -234,13 +228,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       </svg>
                     </div>
                   )}
-                  <div
-                    onClick={() =>
-                      hasPermissionToEditCoverImage && setEditCoverImage(true)
-                    }
-                  >
-                    {editCoverImageTooltip}
-                  </div>
+                  {editCoverImageTooltip}
                 </div>
                 <div className="mb-6 grid gap-4 md:mb-0">
                   <div className="flex-col justify-between md:flex lg:flex-1">
