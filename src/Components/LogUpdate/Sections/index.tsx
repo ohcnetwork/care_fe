@@ -44,6 +44,7 @@ export const RoundTypeSections = {
     "NursingCare",
   ],
   DOCTORS_LOG: ["NeurologicalMonitoring", "RespiratorySupport"],
+  COMMUNITY_NURSES_LOG: [],
 } as const satisfies Record<
   (typeof DailyRoundTypes)[number],
   (keyof typeof LogUpdateSections)[]

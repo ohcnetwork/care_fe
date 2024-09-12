@@ -3,11 +3,19 @@ import { navigate } from "raviger";
 import dayjs from "dayjs";
 import { lazy, useCallback, useEffect, useState } from "react";
 import {
+  APPETITE_CHOICES,
+  BLADDER_DRAINAGE_CHOICES,
+  BLADDER_ISSUE_CHOICES,
+  BOWEL_DIFFICULTY_CHOICES,
   CONSCIOUSNESS_LEVEL,
+  NUTRITION_ROUTE_CHOICES,
+  ORAL_ISSUE_CHOICES,
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
+  SLEEP_CHOICES,
   TELEMEDICINE_ACTIONS,
+  URINATION_FREQUENCY_CHOICES,
 } from "../../Common/constants";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
@@ -30,7 +38,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { SCRIBE_FORMS } from "../Scribe/formDetails";
-import { DailyRoundsModel } from "./models";
+import { DailyRoundsModel, DailyRoundTypes } from "./models";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
 import { error } from "@pnotify/core";
@@ -48,6 +56,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import SymptomsApi from "../Symptoms/api";
 import { scrollTo } from "../../Utils/utils";
 import { ICD11DiagnosisModel } from "../Facility/models";
+import NursingCare from "../LogUpdate/Sections/NursingCare";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -281,6 +290,16 @@ export const DailyRounds = (props: any) => {
           }
           return;
         }
+
+        case "oral_issue": {
+          if (state.form.nutrition_route !== "ORAL" && state.form[field]) {
+            errors[field] = t("oral_issue_for_non_oral_nutrition_route_error");
+            invalidForm = true;
+            break;
+          }
+          return;
+        }
+
         default:
           return;
       }
@@ -329,7 +348,7 @@ export const DailyRounds = (props: any) => {
         review_interval: Number(prevReviewInterval),
       };
 
-      if (!["VENTILATOR"].includes(state.form.rounds_type)) {
+      if (state.form.rounds_type !== "VENTILATOR") {
         data = {
           ...data,
           bp: state.form.bp ?? {},
@@ -340,6 +359,15 @@ export const DailyRounds = (props: any) => {
           rhythm_detail: state.form.rhythm_detail,
           ventilator_spo2: state.form.ventilator_spo2 ?? null,
           consciousness_level: state.form.consciousness_level || undefined,
+          bowel_difficulty: state.form.bowel_difficulty ?? null,
+          bladder_drainage: state.form.bladder_drainage ?? null,
+          bladder_issue: state.form.bladder_issue ?? null,
+          is_experiencing_dysuria: state.form.is_experiencing_dysuria ?? null,
+          urination_frequency: state.form.urination_frequency ?? null,
+          sleep: state.form.sleep ?? null,
+          nutrition_route: state.form.nutrition_route ?? null,
+          oral_issue: state.form.oral_issue ?? null,
+          appetite: state.form.appetite ?? null,
         };
       }
 
@@ -408,10 +436,24 @@ export const DailyRounds = (props: any) => {
   const field = (name: string) => {
     return {
       id: name,
+      label: t(`LOG_UPDATE_FIELD_LABEL__${name}`),
       name,
       value: state.form[name],
       error: state.errors[name],
       onChange: handleFormFieldChange,
+    };
+  };
+
+  const selectField = <T extends string>(
+    name: keyof DailyRoundsModel,
+    options: readonly T[],
+  ) => {
+    return {
+      ...field(name),
+      options,
+      optionLabel: (option: T) => t(`${name.toUpperCase()}__${option}`),
+      optionDisplay: (option: T) => t(`${name.toUpperCase()}__${option}`), // Duplicate as radio form field uses prop name `optionDisplay` instead. TODO: convert all `optionDisplay` to `optionLabel` of radio form field for consistency with other reusable components
+      optionValue: (option: T) => option,
     };
   };
 
@@ -428,24 +470,20 @@ export const DailyRounds = (props: any) => {
     return <Loading />;
   }
 
-  const roundTypes: { id: string; text: string }[] = [];
+  const roundTypes: (typeof DailyRoundTypes)[number][] = [];
 
   if (
     ["Doctor", "Staff", "DistrictAdmin", "StateAdmin"].includes(
       authUser.user_type,
     )
   ) {
-    roundTypes.push({ id: "DOCTORS_LOG", text: t("DOCTORS_LOG") });
+    roundTypes.push("DOCTORS_LOG");
   }
-
-  roundTypes.push(
-    { id: "NORMAL", text: t("NORMAL") },
-    { id: "VENTILATOR", text: t("VENTILATOR") },
-  );
-
+  roundTypes.push("NORMAL", "COMMUNITY_NURSES_LOG", "VENTILATOR");
   if (consultationSuggestion === "DC") {
-    roundTypes.push({ id: "TELEMEDICINE", text: t("TELEMEDICINE") });
+    roundTypes.push("TELEMEDICINE");
   }
+
   const submitButtonDisabled = (() => {
     if (buttonText !== "Save") {
       return false;
@@ -539,7 +577,7 @@ export const DailyRounds = (props: any) => {
                   "additional_symptoms",
                 ].includes(f),
               ) &&
-              roundTypes.some((t) => t.id === "DOCTORS_LOG")
+              roundTypes.some((t) => t === "DOCTORS_LOG")
             ) {
               rounds_type = "DOCTORS_LOG";
             }
@@ -577,13 +615,9 @@ export const DailyRounds = (props: any) => {
           </div>
           <div className="w-full md:w-1/3">
             <SelectFormField
-              {...field("rounds_type")}
+              {...selectField("rounds_type", roundTypes)}
               required
               className="w-full"
-              label="Round Type"
-              options={roundTypes}
-              optionLabel={(option) => option.text}
-              optionValue={(option) => option.id}
             />
           </div>
           <div className="w-full md:w-1/3">
@@ -621,41 +655,60 @@ export const DailyRounds = (props: any) => {
             rows={5}
           />
 
-          {state.form.rounds_type !== "DOCTORS_LOG" && (
+          {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
             <>
+              <hr className="my-4 md:col-span-2" />
+              <h3 className="mb-6 md:col-span-2">Routine</h3>
+              <SelectFormField {...selectField("sleep", SLEEP_CHOICES)} />
               <SelectFormField
-                {...field("action")}
-                label="Action"
-                options={TELEMEDICINE_ACTIONS}
-                optionLabel={(option) => option.desc}
-                optionValue={(option) => option.text}
-                value={prevAction}
-                onChange={(event) => {
-                  handleFormFieldChange(event);
-                  setPreviousAction(event.value);
-                }}
+                {...selectField("bowel_difficulty", BOWEL_DIFFICULTY_CHOICES)}
               />
-
-              <SelectFormField
-                {...field("review_interval")}
-                label="Review After"
-                labelSuffix={getExpectedReviewTime()}
-                options={REVIEW_AT_CHOICES}
-                optionLabel={(option) => option.text}
-                optionValue={(option) => option.id}
-                value={prevReviewInterval}
-                onChange={(event) => {
-                  handleFormFieldChange(event);
-                  setPreviousReviewInterval(Number(event.value));
-                }}
-              />
+              <div className="grid grid-cols-3 gap-x-6 md:col-span-2">
+                <h5 className="mb-3 md:col-span-3">Bladder</h5>
+                <SelectFormField
+                  {...selectField("bladder_drainage", BLADDER_DRAINAGE_CHOICES)}
+                />
+                <SelectFormField
+                  {...selectField("bladder_issue", BLADDER_ISSUE_CHOICES)}
+                />
+                <SelectFormField
+                  name="is_experiencing_dysuria"
+                  label="Experiences Dysuria?"
+                  onChange={handleFormFieldChange}
+                  options={[true, false]}
+                  optionLabel={(c) => (c ? "Yes" : "No")}
+                />
+                <SelectFormField
+                  {...selectField(
+                    "urination_frequency",
+                    URINATION_FREQUENCY_CHOICES,
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-x-6 md:col-span-2">
+                <h5 className="mb-3 md:col-span-2">Nutrition</h5>
+                <SelectFormField
+                  {...selectField("nutrition_route", NUTRITION_ROUTE_CHOICES)}
+                />
+                <SelectFormField
+                  {...selectField("oral_issue", ORAL_ISSUE_CHOICES)}
+                  disabled={state.form.nutrition_route !== "ORAL"}
+                />
+                <SelectFormField
+                  {...selectField("appetite", APPETITE_CHOICES)}
+                />
+              </div>
             </>
           )}
 
-          {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
-            state.form.rounds_type,
-          ) && (
+          {[
+            "NORMAL",
+            "TELEMEDICINE",
+            "DOCTORS_LOG",
+            "COMMUNITY_NURSES_LOG",
+          ].includes(state.form.rounds_type) && (
             <>
+              <hr className="my-4 md:col-span-2" />
               <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
               <BloodPressureFormField
@@ -689,7 +742,43 @@ export const DailyRounds = (props: any) => {
                   },
                 ]}
               />
+            </>
+          )}
 
+          {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
+            <>
+              <RangeAutocompleteFormField
+                {...field("blood_sugar_level")}
+                label="Blood Sugar Level"
+                unit="mg/dL"
+                start={0}
+                end={700}
+                step={1}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
+                    label: "Low",
+                  },
+                  {
+                    value: 69,
+                    className: "text-primary-500",
+                    label: "Normal",
+                  },
+                  {
+                    value: 110,
+                    className: "text-danger-500",
+                    label: "High",
+                  },
+                ]}
+              />
+            </>
+          )}
+
+          {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
+            state.form.rounds_type,
+          ) && (
+            <>
               <TemperatureFormField
                 {...field("temperature")}
                 label="Temperature"
@@ -764,18 +853,53 @@ export const DailyRounds = (props: any) => {
               />
 
               <RadioFormField
-                label="Level Of Consciousness"
-                {...field("consciousness_level")}
-                options={CONSCIOUSNESS_LEVEL.map((level) => ({
-                  label: t(`CONSCIOUSNESS_LEVEL__${level.value}`),
-                  value: level.value,
-                }))}
-                optionDisplay={(option) => option.label}
-                optionValue={(option) => option.value}
+                {...selectField(
+                  "consciousness_level",
+                  CONSCIOUSNESS_LEVEL.map((a) => a.value),
+                )}
                 unselectLabel="Unknown"
                 layout="vertical"
               />
             </>
+          )}
+
+          {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
+            <div className="md:col-span-2">
+              <hr className="my-4 md:col-span-2" />
+              <div className="mb-4 mt-8 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">
+                  {t("prescription_medications")}
+                </h3>
+                <CheckBoxFormField
+                  label="Include discontinued prescriptions"
+                  name="toggle-discontinued-prescriptions-visibility"
+                  value={showDiscontinuedPrescriptions}
+                  onChange={({ value }) =>
+                    setShowDiscontinuedPrescriptions(value)
+                  }
+                  errorClassName="hidden"
+                />
+              </div>
+              <PrescriptionBuilder
+                discontinued={showDiscontinuedPrescriptions ? undefined : false}
+                actions={["discontinue"]}
+              />
+            </div>
+          )}
+
+          {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
+            <div className="md:col-span-2">
+              <hr className="mb-4 mt-8 md:col-span-2" />
+              <div className="mb-4 mt-8 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Nursing Care</h3>
+              </div>
+              <NursingCare
+                log={{ nursing: state.form.nursing }}
+                onChange={(log) =>
+                  handleFormFieldChange({ name: "nursing", value: log.nursing })
+                }
+              />
+            </div>
           )}
 
           {state.form.rounds_type === "DOCTORS_LOG" && (
@@ -858,6 +982,38 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
               </div>
+            </>
+          )}
+
+          {state.form.rounds_type !== "DOCTORS_LOG" && (
+            <>
+              <hr className="mb-4 mt-8 md:col-span-2" />
+              <SelectFormField
+                {...field("action")}
+                label="Action"
+                options={TELEMEDICINE_ACTIONS}
+                optionLabel={(option) => option.desc}
+                optionValue={(option) => option.text}
+                value={prevAction}
+                onChange={(event) => {
+                  handleFormFieldChange(event);
+                  setPreviousAction(event.value);
+                }}
+              />
+
+              <SelectFormField
+                {...field("review_interval")}
+                label="Review After"
+                labelSuffix={getExpectedReviewTime()}
+                options={REVIEW_AT_CHOICES}
+                optionLabel={(option) => option.text}
+                optionValue={(option) => option.id}
+                value={prevReviewInterval}
+                onChange={(event) => {
+                  handleFormFieldChange(event);
+                  setPreviousReviewInterval(Number(event.value));
+                }}
+              />
             </>
           )}
         </div>
