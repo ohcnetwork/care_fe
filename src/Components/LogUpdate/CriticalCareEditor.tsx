@@ -51,6 +51,7 @@ export default function CriticalCareEditor(props: Props) {
     >
       <div className="py-4">
         <ButtonV2
+          id="back-to-consultation"
           variant="secondary"
           onClick={() => {
             if (current) {
