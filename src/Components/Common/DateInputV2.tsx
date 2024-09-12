@@ -254,8 +254,7 @@ const DateInputV2: React.FC<Props> = ({
     getDayCount(datePickerHeaderDate);
   }, [datePickerHeaderDate]);
 
-  useEffect(() => {
-    value && setDatePickerHeaderDate(value);
+  const scrollTime = (smooth: boolean = true) => {
     const timeScrollers = [hourScrollerRef, minuteScrollerRef];
     timeScrollers.forEach((scroller) => {
       if (!scroller.current) return;
@@ -268,10 +267,23 @@ const DateInputV2: React.FC<Props> = ({
         const toScroll =
           selectedPosition - scroller.current.getBoundingClientRect().top;
 
-        selected.parentElement?.scrollBy({ top: toScroll, behavior: "smooth" });
+        selected.parentElement?.scrollBy({
+          top: toScroll,
+          behavior: smooth ? "smooth" : "instant",
+        });
       }
     });
-  }, [value, popOverOpen]);
+  };
+
+  useEffect(() => {
+    value && setDatePickerHeaderDate(value);
+    scrollTime();
+  }, [value]);
+
+  useEffect(() => {
+    if (!popOverOpen) return;
+    scrollTime(false);
+  }, [popOverOpen]);
 
   useEffect(() => {
     isOpen && popoverButtonRef.current?.click();
