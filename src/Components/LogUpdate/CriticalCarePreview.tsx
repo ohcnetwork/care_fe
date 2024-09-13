@@ -555,17 +555,13 @@ const Detail = (props: {
 }) => {
   const context = React.useContext(sectionContext);
 
-  if (context === null) {
-    throw "This component must be used as a descendant of Section component only";
-  }
-
   let value = props.value;
   value = value === "" ? null : value;
   value = value === true ? "Yes" : value;
   value = value === false ? "No" : value;
 
   React.useEffect(() => {
-    if (value != null) {
+    if (context && value != null) {
       context.hasValue();
     }
   }, [context, value]);
