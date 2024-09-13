@@ -359,15 +359,17 @@ export const DailyRounds = (props: any) => {
           rhythm_detail: state.form.rhythm_detail,
           ventilator_spo2: state.form.ventilator_spo2 ?? null,
           consciousness_level: state.form.consciousness_level || undefined,
-          bowel_difficulty: state.form.bowel_difficulty ?? null,
-          bladder_drainage: state.form.bladder_drainage ?? null,
-          bladder_issue: state.form.bladder_issue ?? null,
-          is_experiencing_dysuria: state.form.is_experiencing_dysuria ?? null,
-          urination_frequency: state.form.urination_frequency ?? null,
-          sleep: state.form.sleep ?? null,
-          nutrition_route: state.form.nutrition_route ?? null,
-          oral_issue: state.form.oral_issue ?? null,
-          appetite: state.form.appetite ?? null,
+          bowel_difficulty: state.form.bowel_difficulty,
+          bladder_drainage: state.form.bladder_drainage,
+          bladder_issue: state.form.bladder_issue,
+          is_experiencing_dysuria: state.form.is_experiencing_dysuria,
+          urination_frequency: state.form.urination_frequency,
+          sleep: state.form.sleep,
+          nutrition_route: state.form.nutrition_route,
+          oral_issue: state.form.oral_issue,
+          appetite: state.form.appetite,
+          blood_sugar_level: state.form.blood_sugar_level,
+          nursing: state.form.nursing,
         };
       }
 
@@ -403,10 +405,16 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${t(state.form.rounds_type)} log created successfully`,
+            msg: t("LOG_UPDATE_CREATED_NOTIFICATION", {
+              roundType: t(`ROUNDS_TYPE__${state.form.rounds_type}`),
+            }),
           });
 
-          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
+          if (
+            ["NORMAL", "TELEMEDICINE", "COMMUNITY_NURSES_LOG"].includes(
+              state.form.rounds_type,
+            )
+          ) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
@@ -489,7 +497,11 @@ export const DailyRounds = (props: any) => {
       return false;
     }
 
-    if (["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)) {
+    if (
+      ["VENTILATOR", "DOCTORS_LOG", "COMMUNITY_NURSES_LOG"].includes(
+        state.form.rounds_type,
+      )
+    ) {
       return false;
     }
 
@@ -672,9 +684,7 @@ export const DailyRounds = (props: any) => {
                   {...selectField("bladder_issue", BLADDER_ISSUE_CHOICES)}
                 />
                 <SelectFormField
-                  name="is_experiencing_dysuria"
-                  label="Experiences Dysuria?"
-                  onChange={handleFormFieldChange}
+                  {...field("is_experiencing_dysuria")}
                   options={[true, false]}
                   optionLabel={(c) => (c ? "Yes" : "No")}
                 />
