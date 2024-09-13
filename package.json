@@ -44,15 +44,15 @@
     "supported-browsers": "echo \"export default $(browserslist-useragent-regexp --allowHigherVersions --ignorePatch --ignoreMinor);\" | sed 's/\\x1b\\[[0-9;]*m//g' > src/supportedBrowsers.ts"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.0.18",
+    "@fontsource/inter": "^5.0.21",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.3",
     "@headlessui/react": "^2.1.2",
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
-    "@sentry/browser": "^8.12.0",
+    "@sentry/browser": "^8.29.0",
     "@yudiel/react-qr-scanner": "^2.0.0-beta.3",
-    "axios": "^1.6.8",
+    "axios": "^1.7.7",
     "bowser": "^2.11.0",
     "browser-image-compression": "^2.0.2",
     "browserslist-useragent-regexp": "^4.1.3",

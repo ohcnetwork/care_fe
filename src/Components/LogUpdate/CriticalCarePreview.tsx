@@ -47,6 +47,7 @@ export default function CriticalCarePreview(props: Props) {
     <div className="w-full transition-all duration-200 ease-in-out md:mx-auto md:max-w-5xl md:pt-8">
       <div className="py-4">
         <ButtonV2
+          id="back-to-consultation"
           variant="secondary"
           href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`}
         >

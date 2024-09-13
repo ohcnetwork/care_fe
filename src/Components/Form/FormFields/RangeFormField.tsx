@@ -123,7 +123,7 @@ export default function RangeFormField(props: Props) {
             {!props.hideInput && (
               <>
                 <TextFormField
-                  name="range"
+                  name={`${props.name}-range-input`}
                   type="number"
                   value={displayValue}
                   placeholder="--.--"
