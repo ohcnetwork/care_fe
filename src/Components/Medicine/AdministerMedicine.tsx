@@ -151,6 +151,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
               min={new Date(prescription.created_date)}
               max={new Date()}
               errorClassName="hidden"
+              position="TOP-RIGHT"
               time
             />
           </div>

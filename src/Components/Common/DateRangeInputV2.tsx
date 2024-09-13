@@ -34,7 +34,7 @@ const DateRangeInputV2 = ({ value, onChange, ...props }: Props) => {
           }}
           min={props.min}
           max={end || props.max}
-          position="RIGHT"
+          position="RIGHT-CENTER"
           placeholder="Start date"
           disabled={props.disabled}
           time={props.time}

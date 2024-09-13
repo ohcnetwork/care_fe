@@ -13,6 +13,7 @@ type Props = FormFieldBaseProps<Date> & {
   disableFuture?: boolean;
   disablePast?: boolean;
   time?: boolean;
+  popOverClassName?: string;
 };
 
 /**
@@ -50,6 +51,7 @@ const DateFormField = (props: Props) => {
         position={props.position ?? "RIGHT"}
         placeholder={props.placeholder}
         time={props.time}
+        popOverClassName={props.popOverClassName}
       />
     </FormField>
   );

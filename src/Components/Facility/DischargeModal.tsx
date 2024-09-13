@@ -333,6 +333,8 @@ const DischargeModal = ({
             value={
               dischargeOrDeathTime ? new Date(dischargeOrDeathTime) : new Date()
             }
+            position="TOP-RIGHT"
+            popOverClassName="max-h-[50vh]"
             onChange={(e) => {
               const updates: Record<string, string | undefined> = {
                 discharge_date: undefined,

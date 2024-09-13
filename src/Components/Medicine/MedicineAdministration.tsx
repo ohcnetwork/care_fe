@@ -217,6 +217,7 @@ export default function MedicineAdministration(props: Props) {
                   disabled={!shouldAdminister[index] || !isCustomTime[index]}
                   min={new Date(obj.created_date)}
                   max={new Date()}
+                  position="TOP-RIGHT"
                   errorClassName="hidden"
                   time
                 />

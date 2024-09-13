@@ -215,6 +215,7 @@ const Beds = (props: BedsProps) => {
               max={new Date()}
               error=""
               errorClassName="hidden"
+              position="TOP-RIGHT"
               time
             />
             <div>

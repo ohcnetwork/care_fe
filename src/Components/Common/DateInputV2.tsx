@@ -12,6 +12,8 @@ export type DatePickerPosition =
   | "LEFT"
   | "RIGHT"
   | "CENTER"
+  | "LEFT-CENTER"
+  | "RIGHT-CENTER"
   | "TOP-LEFT"
   | "TOP-RIGHT"
   | "TOP-CENTER";
@@ -32,6 +34,7 @@ interface Props {
   isOpen?: boolean;
   setIsOpen?: (isOpen: boolean) => void;
   time?: boolean;
+  popOverClassName?: string;
 }
 
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -52,6 +55,7 @@ const DateInputV2: React.FC<Props> = ({
   setIsOpen,
   time,
   isOpen,
+  popOverClassName,
 }) => {
   const [dayCount, setDayCount] = useState<Array<number>>([]);
   const [blankDays, setBlankDays] = useState<Array<number>>([]);
@@ -290,6 +294,7 @@ const DateInputV2: React.FC<Props> = ({
   }, [isOpen]);
 
   const dateFormat = `DD/MM/YYYY${time ? " hh:mm a" : ""}`;
+  const placeHolder = dateFormat.replace("a", "am/pm");
 
   const getDisplayValue = (date: Date) => {
     return dayjs(date).format(dateFormat);
@@ -299,7 +304,11 @@ const DateInputV2: React.FC<Props> = ({
     switch (position) {
       case "LEFT":
         return "left-0";
+      case "LEFT-CENTER":
+        return "right-0 transform md:translate-x-1/2";
       case "RIGHT":
+        return "right-0";
+      case "RIGHT-CENTER":
         return "right-0 transform md:translate-x-1/2";
       case "CENTER":
         return "transform -translate-x-1/2";
@@ -351,8 +360,9 @@ const DateInputV2: React.FC<Props> = ({
                   <PopoverPanel
                     static
                     className={classNames(
-                      `cui-dropdown-base absolute my-0.5 ${time ? "w-full md:w-[400px]" : "w-72"} divide-y-0 rounded p-4`,
+                      `cui-dropdown-base absolute my-0.5 ${time ? "max-h-[80vh] w-full md:h-auto md:w-[400px]" : "w-72"} divide-y-0 rounded p-4`,
                       getPosition(),
+                      popOverClassName,
                     )}
                   >
                     <div
@@ -374,7 +384,7 @@ const DateInputV2: React.FC<Props> = ({
                               : ""
                         }
                         autoFocus
-                        placeholder={dateFormat}
+                        placeholder={placeHolder}
                         onChange={(e) => {
                           const nvalue = dayjs(
                             e.target.value,
@@ -390,8 +400,8 @@ const DateInputV2: React.FC<Props> = ({
                         }}
                         onBlur={() => setEditingText(null)}
                       />
-                      <div className="flex flex-row items-stretch gap-4">
-                        <div className="flex w-full flex-col items-center justify-between">
+                      <div className="flex flex-col items-center gap-4 px-4 md:flex-row md:px-0">
+                        <div className="flex flex-1 flex-col items-center justify-between">
                           <div className="flex">
                             <button
                               type="button"
