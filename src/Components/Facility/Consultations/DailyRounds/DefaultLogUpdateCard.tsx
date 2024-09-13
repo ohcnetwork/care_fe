@@ -21,7 +21,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
     >
       <LogUpdateCardAttribute
         attributeKey={"rounds_type"}
-        attributeValue={round.rounds_type}
+        attributeValue={t(`ROUNDS_TYPE__${round.rounds_type}`)}
       />
       <LogUpdateCardAttribute
         attributeKey="patient_category"

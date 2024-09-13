@@ -4,7 +4,7 @@ import useQuery from "../../Utils/request/useQuery";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Loading from "../Common/Loading";
 import Card from "../../CAREUI/display/Card";
-import React from "react";
+import React, { useEffect } from "react";
 import { ABGAnalysisFields } from "./Sections/ABGAnalysis";
 import {
   classNames,
@@ -16,6 +16,7 @@ import { VentilatorFields } from "./Sections/RespiratorySupport/Ventilator";
 import PressureSore from "./Sections/PressureSore/PressureSore";
 import { IOBalanceSections } from "./Sections/IOBalance";
 import PainChart from "./components/PainChart";
+import { DailyRoundsModel } from "../Patient/models";
 
 type Props = {
   facilityId: string;
@@ -55,15 +56,38 @@ export default function CriticalCarePreview(props: Props) {
       </div>
 
       <Card className="md:rounded-xl lg:p-8">
-        <h2 className="mb-3 text-black">Consultation Updates</h2>
+        <h2 className="mb-3 flex flex-col gap-4 text-black md:flex-row md:items-center">
+          <span>Consultation Updates</span>
+          <div className="max-w-min whitespace-nowrap rounded-full border border-primary-300 bg-primary-100 px-3 py-2 text-sm font-semibold text-primary-500">
+            <span>{t(`ROUNDS_TYPE__${data.rounds_type}`)}</span>
+          </div>
+        </h2>
 
         <Section title="General">
-          {/* <EncounterSymptomsCard /> */}
           <Detail
             label="Physical Examination Info"
             value={data.physical_examination_info}
           />
           <Detail label="Other Details" value={data.other_details} />
+        </Section>
+
+        <Section title="Routine">
+          <ChoiceDetail data={data} name="sleep" />
+          <ChoiceDetail data={data} name="bowel_difficulty" />
+          <Section subSection title="Bladder">
+            <ChoiceDetail data={data} name="bladder_drainage" />
+            <ChoiceDetail data={data} name="bladder_issue" />
+            <Detail
+              label={t("LOG_UPDATE_FIELD_LABEL__is_experiencing_dysuria")}
+              value={data.is_experiencing_dysuria}
+            />
+            <ChoiceDetail data={data} name="urination_frequency" />
+          </Section>
+          <Section subSection title="Nutrition">
+            <ChoiceDetail data={data} name="nutrition_route" />
+            <ChoiceDetail data={data} name="oral_issue" />
+            <ChoiceDetail data={data} name="appetite" />
+          </Section>
         </Section>
 
         <Section title="Neurological Monitoring">
@@ -73,7 +97,10 @@ export default function CriticalCarePreview(props: Props) {
           />
           <div className="grid gap-x-4 gap-y-2 py-2 md:grid-cols-2">
             {(["left", "right"] as const).map((dir) => (
-              <div className="rounded border border-secondary-300 bg-secondary-100 p-3">
+              <div
+                key={dir}
+                className="rounded border border-secondary-300 bg-secondary-100 p-3"
+              >
                 <h5 className="capitalize">{dir} Pupil</h5>
                 <Detail
                   label="Size"
@@ -477,27 +504,76 @@ export default function CriticalCarePreview(props: Props) {
   );
 }
 
-const Section = (props: { title: string; children: React.ReactNode }) => {
+type SectionContextType = {
+  hasValue: () => void;
+};
+
+const sectionContext = React.createContext<SectionContextType | null>(null);
+
+const Section = (props: {
+  title: string;
+  children: React.ReactNode;
+  subSection?: boolean;
+}) => {
+  const parentContext = React.useContext(sectionContext);
+  const [hasValue, setHasValue] = React.useState(false);
+
+  useEffect(() => {
+    if (parentContext && hasValue) {
+      parentContext.hasValue();
+    }
+  }, [parentContext, hasValue]);
+
   return (
-    <section
-      id={props.title.toLowerCase().replaceAll(" ", "-")}
-      className="border-b border-b-secondary-400 py-6"
+    <sectionContext.Provider
+      value={{
+        hasValue: () => setHasValue(true),
+      }}
     >
-      <h3 className="pb-4">{props.title}</h3>
-      {props.children}
-    </section>
+      <section
+        id={props.title.toLowerCase().replaceAll(" ", "-")}
+        className={classNames(
+          props.subSection ? "py-6" : "border-b border-b-secondary-400 py-4",
+          !hasValue && "hidden",
+        )}
+      >
+        {props.subSection ? (
+          <h5 className="pb-2">{props.title}</h5>
+        ) : (
+          <h3 className="pb-4">{props.title}</h3>
+        )}
+        {props.children}
+      </section>
+    </sectionContext.Provider>
   );
 };
 
 const Detail = (props: {
   label: React.ReactNode;
-  value?: string | number | boolean;
+  value?: string | number | boolean | null;
   suffix?: React.ReactNode;
 }) => {
+  const context = React.useContext(sectionContext);
+
+  if (context === null) {
+    throw "This component must be used as a descendant of Section component only";
+  }
+
   let value = props.value;
-  value = value === "" ? undefined : value;
+  value = value === "" ? null : value;
   value = value === true ? "Yes" : value;
   value = value === false ? "No" : value;
+
+  React.useEffect(() => {
+    if (value != null) {
+      context.hasValue();
+    }
+  }, [context, value]);
+
+  if (value == null) {
+    // Skip showing detail if attribute not filled.
+    return null;
+  }
 
   value = typeof value === "string" ? parseFloat(value) || value : value;
   value = typeof value === "number" ? properRoundOf(value) : value;
@@ -513,6 +589,25 @@ const Detail = (props: {
         <span className="text-secondary-700">--</span>
       )}
     </p>
+  );
+};
+
+const ChoiceDetail = (props: {
+  name: keyof DailyRoundsModel;
+  data: DailyRoundsModel;
+}) => {
+  const { t } = useTranslation();
+  const value = props.data[props.name];
+
+  if (value == null) {
+    return;
+  }
+
+  return (
+    <Detail
+      label={t(`LOG_UPDATE_FIELD_LABEL__${props.name}`)}
+      value={t(`${props.name.toUpperCase()}__${value}`)}
+    />
   );
 };
 
