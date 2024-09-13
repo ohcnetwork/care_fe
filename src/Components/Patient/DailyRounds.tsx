@@ -366,7 +366,7 @@ export const DailyRounds = (props: any) => {
           urination_frequency: state.form.urination_frequency,
           sleep: state.form.sleep,
           nutrition_route: state.form.nutrition_route,
-          oral_issue: state.form.oral_issue,
+          oral_issue: state.form.oral_issue ?? undefined,
           appetite: state.form.appetite,
           blood_sugar_level: state.form.blood_sugar_level,
           nursing: state.form.nursing,
@@ -384,9 +384,15 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${t(obj.rounds_type as string)} log updated successfully`,
+            msg: t("LOG_UPDATE_UPDATED_NOTIFICATION", {
+              roundType: t(`ROUNDS_TYPE__${state.form.rounds_type}`),
+            }),
           });
-          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
+          if (
+            ["NORMAL", "TELEMEDICINE", "COMMUNITY_NURSES_LOG"].includes(
+              state.form.rounds_type,
+            )
+          ) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
@@ -675,7 +681,7 @@ export const DailyRounds = (props: any) => {
               <SelectFormField
                 {...selectField("bowel_difficulty", BOWEL_DIFFICULTY_CHOICES)}
               />
-              <div className="grid grid-cols-3 gap-x-6 md:col-span-2">
+              <div className="grid gap-x-6 md:col-span-2 md:grid-cols-3">
                 <h5 className="mb-3 md:col-span-3">Bladder</h5>
                 <SelectFormField
                   {...selectField("bladder_drainage", BLADDER_DRAINAGE_CHOICES)}
@@ -695,7 +701,7 @@ export const DailyRounds = (props: any) => {
                   )}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-x-6 md:col-span-2">
+              <div className="grid gap-x-6 md:col-span-2 md:grid-cols-2">
                 <h5 className="mb-3 md:col-span-2">Nutrition</h5>
                 <SelectFormField
                   {...selectField("nutrition_route", NUTRITION_ROUTE_CHOICES)}

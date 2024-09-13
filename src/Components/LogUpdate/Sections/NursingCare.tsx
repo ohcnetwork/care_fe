@@ -34,7 +34,7 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
           <tbody>
             {nursing.map((obj) => (
               <tr key={obj.procedure}>
-                <td className="whitespace-nowrap border border-secondary-400 p-2 pr-16 text-left text-sm font-semibold">
+                <td className="whitespace-nowrap border border-secondary-400 p-2 pr-4 text-left text-sm font-semibold md:pr-16">
                   {t(`NURSING_CARE_PROCEDURE__${obj.procedure}`)}
                 </td>
                 <td className="w-full border border-secondary-400">

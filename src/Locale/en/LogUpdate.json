@@ -1,5 +1,6 @@
 {
   "LOG_UPDATE_CREATED_NOTIFICATION": "{{ roundType }} created successfully",
+  "LOG_UPDATE_UPDATED_NOTIFICATION": "{{ roundType }} updated successfully",
   "LOG_UPDATE_FIELD_LABEL__rounds_type": "Rounds Type",
   "LOG_UPDATE_FIELD_LABEL__consciousness_level": "Level of Consciousness",
   "LOG_UPDATE_FIELD_LABEL__sleep": "Sleep",

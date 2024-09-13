@@ -58,12 +58,13 @@ export default function CriticalCarePreview(props: Props) {
       <Card className="md:rounded-xl lg:p-8">
         <h2 className="mb-3 flex flex-col gap-4 text-black md:flex-row md:items-center">
           <span>Consultation Updates</span>
-          <div className="max-w-min whitespace-nowrap rounded-full border border-primary-300 bg-primary-100 px-3 py-2 text-sm font-semibold text-primary-500">
+          <div className="max-w-min whitespace-nowrap rounded-full border border-primary-300 bg-primary-100 px-2.5 py-1.5 text-sm font-semibold text-primary-500">
             <span>{t(`ROUNDS_TYPE__${data.rounds_type}`)}</span>
           </div>
         </h2>
 
         <Section title="General">
+          <Detail label="Patient Category" value={data.patient_category} />
           <Detail
             label="Physical Examination Info"
             value={data.physical_examination_info}
@@ -95,41 +96,50 @@ export default function CriticalCarePreview(props: Props) {
             label="Level of Consciousness"
             value={tOption("CONSCIOUSNESS_LEVEL", "consciousness_level")}
           />
-          <div className="grid gap-x-4 gap-y-2 py-2 md:grid-cols-2">
-            {(["left", "right"] as const).map((dir) => (
-              <div
-                key={dir}
-                className="rounded border border-secondary-300 bg-secondary-100 p-3"
-              >
-                <h5 className="capitalize">{dir} Pupil</h5>
-                <Detail
-                  label="Size"
-                  value={
-                    data[`${dir}_pupil_size`] != null
-                      ? data[`${dir}_pupil_size`] || "Cannot be assessed"
-                      : undefined
-                  }
-                />
-                {data[`${dir}_pupil_size`] === 0 && (
+          {(data.left_pupil_light_reaction ||
+            data.left_pupil_light_reaction_detail ||
+            data.left_pupil_size ||
+            data.left_pupil_size_detail ||
+            data.right_pupil_light_reaction ||
+            data.right_pupil_light_reaction_detail ||
+            data.right_pupil_size ||
+            data.right_pupil_size_detail) && (
+            <div className="grid gap-x-4 gap-y-2 py-2 md:grid-cols-2">
+              {(["left", "right"] as const).map((dir) => (
+                <div
+                  key={dir}
+                  className="rounded border border-secondary-300 bg-secondary-100 p-3"
+                >
+                  <h5 className="capitalize">{dir} Pupil</h5>
                   <Detail
-                    label="Pupil size description"
-                    value={data[`${dir}_pupil_size_detail`]}
+                    label="Size"
+                    value={
+                      data[`${dir}_pupil_size`] != null
+                        ? data[`${dir}_pupil_size`] || "Cannot be assessed"
+                        : undefined
+                    }
                   />
-                )}
-                <Detail
-                  label="Light Reaction"
-                  value={tOption(
-                    "PUPIL_REACTION",
-                    `${dir}_pupil_light_reaction`,
+                  {data[`${dir}_pupil_size`] === 0 && (
+                    <Detail
+                      label="Pupil size description"
+                      value={data[`${dir}_pupil_size_detail`]}
+                    />
                   )}
-                />
-                <Detail
-                  label="Light Reaction Description"
-                  value={data[`${dir}_pupil_light_reaction_detail`]}
-                />
-              </div>
-            ))}
-          </div>
+                  <Detail
+                    label="Light Reaction"
+                    value={tOption(
+                      "PUPIL_REACTION",
+                      `${dir}_pupil_light_reaction`,
+                    )}
+                  />
+                  <Detail
+                    label="Light Reaction Description"
+                    value={data[`${dir}_pupil_light_reaction_detail`]}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
           <div className="space-y-1">
             <Detail label="Glasgow Eye Open" value={data.glasgow_eye_open} />
             <Detail
@@ -222,7 +232,7 @@ export default function CriticalCarePreview(props: Props) {
           />
         </Section>
 
-        <Section title="Vitals">
+        <Section title="Vitals" show={!!data.pain_scale_enhanced?.length}>
           {data.bp && (
             <div className="mb-2 max-w-96 space-y-1 rounded border border-secondary-300 bg-secondary-100 p-3">
               <h5>Blood Pressure</h5>
@@ -304,20 +314,23 @@ export default function CriticalCarePreview(props: Props) {
             label={t("heartbeat_description")}
             value={data.rhythm_detail}
           />
-          <h4 className="py-4">Pain Scale</h4>
-          <PainChart pain={data.pain_scale_enhanced ?? []} />
+          {!!data.pain_scale_enhanced?.length && (
+            <>
+              <h4 className="py-4">Pain Scale</h4>
+              <PainChart pain={data.pain_scale_enhanced ?? []} />
+            </>
+          )}
         </Section>
 
         {!!IOBalanceSections.flatMap((s) =>
           s.fields.flatMap((f) => data[f.key] ?? []),
         ).length && (
-          <Section title="I/O Balance">
-            <ShowOnData
-              data={data}
-              fields={IOBalanceSections.flatMap((s) =>
-                s.fields.map((f) => f.key),
-              )}
-            />
+          <Section
+            title="I/O Balance"
+            show={IOBalanceSections.flatMap((s) =>
+              s.fields.map((f) => f.key),
+            ).some((field) => data[field]?.length)}
+          >
             <div className="space-y-3">
               {IOBalanceSections.map(({ name, fields }) => (
                 <div key={name} className="space-y-2">
@@ -384,7 +397,7 @@ export default function CriticalCarePreview(props: Props) {
                 <li key={care.procedure}>
                   <Detail
                     label={t(`NURSING_CARE_PROCEDURE__${care.procedure}`)}
-                    value={care.description}
+                    value={care.description || t("no_remarks")}
                   />
                 </li>
               ))}
@@ -392,8 +405,10 @@ export default function CriticalCarePreview(props: Props) {
           </Section>
         )}
 
-        <Section title="Pressure Sore">
-          <ShowOnData data={data} fields={["pressure_sore"]} />
+        <Section
+          title="Pressure Sore"
+          show={!!(data.pressure_sore ?? []).length}
+        >
           <PressureSore
             log={data}
             readonly
@@ -521,9 +536,10 @@ const Section = (props: {
   title: string;
   children: React.ReactNode;
   subSection?: boolean;
+  show?: boolean;
 }) => {
   const parentContext = React.useContext(sectionContext);
-  const [hasValue, setHasValue] = React.useState(false);
+  const [hasValue, setHasValue] = React.useState(props.show ?? false);
 
   useEffect(() => {
     if (parentContext && hasValue) {
@@ -593,26 +609,6 @@ const Detail = (props: {
       )}
     </p>
   );
-};
-
-const ShowOnData = (props: {
-  data: DailyRoundsModel;
-  fields: (keyof DailyRoundsModel)[];
-}) => {
-  const context = React.useContext(sectionContext);
-
-  useEffect(() => {
-    if (
-      context &&
-      props.fields.some(
-        (field) => props.data[field] != null && props.data[field] !== "",
-      )
-    ) {
-      context.hasValue();
-    }
-  }, [props.data, context]);
-
-  return null;
 };
 
 const ChoiceDetail = (props: {
