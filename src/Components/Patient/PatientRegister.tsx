@@ -1468,7 +1468,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                               </div>
@@ -1501,7 +1501,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 { label: "Yes", value: "true" },
                                 { label: "No", value: "false" },
                               ]}
-                              optionDisplay={(option) => option.label}
+                              optionLabel={(option) => option.label}
                               optionValue={(option) => option.value}
                             />
                           </CollapseV2>
@@ -1781,7 +1781,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                               </div>
@@ -1815,7 +1815,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                             value: "3",
                                           },
                                         ]}
-                                        optionDisplay={(option) => option.label}
+                                        optionLabel={(option) => option.label}
                                         optionValue={(option) => option.value}
                                       />
                                     </div>
@@ -1850,7 +1850,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                                 <CollapseV2
