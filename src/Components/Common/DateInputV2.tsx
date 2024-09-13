@@ -375,7 +375,14 @@ const DateInputV2: React.FC<Props> = ({
                     >
                       <input
                         id="date-input"
-                        className="cui-input-base bg-secondary-50"
+                        className={`cui-input-base bg-secondary-50 ${
+                          editingText === null ||
+                          isDateWithinLimits(
+                            dayjs(editingText.toLowerCase(), dateFormat, true),
+                          )
+                            ? ""
+                            : "focus:border-red-500 focus:ring-red-500"
+                        }`}
                         value={
                           editingText !== null
                             ? editingText
@@ -387,7 +394,7 @@ const DateInputV2: React.FC<Props> = ({
                         placeholder={placeHolder}
                         onChange={(e) => {
                           const nvalue = dayjs(
-                            e.target.value,
+                            e.target.value.toLowerCase(),
                             dateFormat,
                             true,
                           );

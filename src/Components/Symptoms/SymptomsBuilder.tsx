@@ -184,6 +184,7 @@ const SymptomEntry = (props: {
         disableFuture
         disabled={disabled}
         onChange={props.onChange}
+        position="LEFT"
         errorClassName="hidden"
       />
       <DateFormField

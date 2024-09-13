@@ -579,6 +579,7 @@ export const DailyRounds = (props: any) => {
                   value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
                 })
               }
+              position="LEFT"
               time
               errorClassName="hidden"
             />
