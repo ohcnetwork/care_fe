@@ -312,6 +312,12 @@ export default function CriticalCarePreview(props: Props) {
           s.fields.flatMap((f) => data[f.key] ?? []),
         ).length && (
           <Section title="I/O Balance">
+            <ShowOnData
+              data={data}
+              fields={IOBalanceSections.flatMap((s) =>
+                s.fields.map((f) => f.key),
+              )}
+            />
             <div className="space-y-3">
               {IOBalanceSections.map(({ name, fields }) => (
                 <div key={name} className="space-y-2">
@@ -387,6 +393,7 @@ export default function CriticalCarePreview(props: Props) {
         )}
 
         <Section title="Pressure Sore">
+          <ShowOnData data={data} fields={["pressure_sore"]} />
           <PressureSore
             log={data}
             readonly
@@ -586,6 +593,26 @@ const Detail = (props: {
       )}
     </p>
   );
+};
+
+const ShowOnData = (props: {
+  data: DailyRoundsModel;
+  fields: (keyof DailyRoundsModel)[];
+}) => {
+  const context = React.useContext(sectionContext);
+
+  useEffect(() => {
+    if (
+      context &&
+      props.fields.some(
+        (field) => props.data[field] != null && props.data[field] !== "",
+      )
+    ) {
+      context.hasValue();
+    }
+  }, [props.data, context]);
+
+  return null;
 };
 
 const ChoiceDetail = (props: {
