@@ -1,5 +1,5 @@
 // FacilityCreation
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";

@@ -14,7 +14,6 @@
 
 [![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/0)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/0)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/1)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/1)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/2)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/2)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/3)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/3)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/4)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/4)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/5)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/5)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/6)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/6)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/7)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/7)
 
-[![Storybook](https://raw.githubusercontent.com/storybooks/brand/master/badge/badge-storybook.svg)](https://careui.coronasafe.in)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=coronasafe_care_fe&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=coronasafe_care_fe)
 ![Code scanning - action](https://github.com/ohcnetwork/care_fe/workflows/Code%20scanning%20-%20action/badge.svg)
 ![OSSAR](https://github.com/ohcnetwork/care_fe/workflows/OSSAR/badge.svg)
@@ -36,6 +35,12 @@
 ```sh
 npm install
 ```
+#### Run the following command to generate the `supportedBrowsers.ts` file:
+
+```bash
+npm run supported-browsers
+```
+This script just generates regex expression for matching the list of compatible browsers, so that we can show a warning notification for unsupported browsers.
 
 #### 🏃 Run the app in development mode
 
@@ -82,11 +87,11 @@ To ensure the quality of our pull requests, we use a variety of tools:
 
 To run cypress tests locally, you'll need to setup the backend to run locally and load dummy data required for cypress to the database. See [docs](https://github.com/ohcnetwork/care#self-hosting).
 
-Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `CARE_API` env.
+Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `REACT_CARE_API_URL` env.
 
 ```env
 #.env
-CARE_API=http://127.0.0.1:9000
+REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
 
 Once done, start the development server by running
@@ -116,7 +121,6 @@ npm run cypress:open       # To debug and run tests individually.
 
 - [CARE Documentation](https://docs.ohc.network/docs/care)
 - [Swagger API Documentation](https://careapi.ohc.network/swagger/)
-- [Storybook component library](https://careui.coronasafe.in/)
 - [Testing Documentation](https://docs.coronasafe.network/care-testing-documentation/)
 
 ## 🚀 Production

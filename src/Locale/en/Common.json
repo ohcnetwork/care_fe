@@ -66,6 +66,7 @@
   "contact_person_number": "Contact person number",
   "referral_letter": "Referral Letter",
   "close": "Close",
+  "print": "Print",
   "print_referral_letter": "Print Referral Letter",
   "date_of_positive_covid_19_swab": "Date of Positive Covid 19 Swab",
   "patient_no": "OP/IP No",
@@ -179,6 +180,7 @@
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
   "ration_card__APL": "APL",
+  "empty_date_time": "--:-- --; --/--/----",
   "caution": "Caution",
   "feed_optimal_experience_for_phones": "For optimal viewing experience, consider rotating your device.",
   "feed_optimal_experience_for_apple_phones": "For optimal viewing experience, consider rotating your device. Ensure auto-rotate is enabled in your device settings.",
@@ -186,6 +188,7 @@
   "GENDER__1": "Male",
   "GENDER__2": "Female",
   "GENDER__3": "Non-binary",
+  "normal": "Normal",
   "done": "Done",
   "view": "View",
   "rename": "Rename",
@@ -194,5 +197,15 @@
   "discard": "Discard",
   "live": "Live",
   "discharged": "Discharged",
-  "archived": "Archived"
+  "archived": "Archived",
+  "no_changes_made": "No changes made",
+  "user_deleted_successfuly": "User Deleted Successfuly",
+  "users": "Users",
+  "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
+  "oxygen_information": "Oxygen Information",
+  "deleted_successfully": "{{name}} deleted successfully",
+  "delete_item": "Delete {{name}}",
+  "unsupported_browser": "Unsupported Browser",
+  "unsupported_browser_description": "Your browser ({{name}} version {{version}}) is not supported. Please update your browser to the latest version or switch to a supported browser for the best experience."
+
 }
