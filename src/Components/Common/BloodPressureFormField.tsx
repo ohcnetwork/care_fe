@@ -14,7 +14,7 @@ type Props = FormFieldBaseProps<BloodPressure | null>;
 export default function BloodPressureFormField(props: Props) {
   const { t } = useTranslation();
   const field = useFormFieldPropsResolver(props);
-  const map = meanArterialPressure(props.value);
+  const map = meanArterialPressure(props.value)?.toFixed();
 
   const handleChange = (event: FieldChangeEvent<number>) => {
     const bp = field.value ?? {};
@@ -96,7 +96,7 @@ export const meanArterialPressure = (bp?: BloodPressure | null) => {
   if (bp?.diastolic == null || bp?.systolic == null) {
     return;
   }
-  return ((2 * bp.diastolic + bp.systolic) / 3).toFixed();
+  return (2 * bp.diastolic + bp.systolic) / 3;
 };
 
 export const BloodPressureValidator: FieldValidator<BloodPressure> = (bp) => {

@@ -1,10 +1,6 @@
 import { useTranslation } from "react-i18next";
 import PatientCategoryBadge from "../../../Common/PatientCategoryBadge";
-import {
-  BloodPressure,
-  DailyRoundsModel,
-  NameQuantity,
-} from "../../../Patient/models";
+import { DailyRoundsModel, NameQuantity } from "../../../Patient/models";
 import { PatientCategory } from "../../models";
 
 interface Props<T extends keyof DailyRoundsModel> {
@@ -45,8 +41,8 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
           <span className="text-sm font-semibold text-secondary-700">
-            {(attributeValue as BloodPressure).systolic || "--"}/
-            {(attributeValue as BloodPressure).diastolic || "--"} mmHg
+            {(attributeValue as DailyRoundsModel["bp"])?.systolic || "--"}/
+            {(attributeValue as DailyRoundsModel["bp"])?.diastolic || "--"} mmHg
           </span>
         </div>
       );

@@ -21,7 +21,8 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
       <div className="flex items-end justify-between">
         <h2 className="text-lg">{t("blood_pressure")}</h2>
         <span>
-          {t("map_acronym")}: {meanArterialPressure(log.bp) ?? "--"} mmHg
+          {t("map_acronym")}: {meanArterialPressure(log.bp)?.toFixed() ?? "--"}{" "}
+          mmHg
         </span>
       </div>
       <BPAttributeEditor attribute="systolic" log={log} onChange={onChange} />

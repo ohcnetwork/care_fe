@@ -217,7 +217,10 @@ export default function CriticalCarePreview(props: Props) {
                 unit="mmHg"
                 valueDescriptions={rangeValueDescription({ low: 49, high: 89 })}
               />
-              <Detail label="Mean" value={meanArterialPressure(data.bp)} />
+              <Detail
+                label="Mean"
+                value={meanArterialPressure(data.bp)?.toFixed()}
+              />
             </div>
           )}
           <RangeDetail
