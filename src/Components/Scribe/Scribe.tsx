@@ -38,9 +38,13 @@ export type ScribeModel = {
   external_id: string;
   requested_by: UserModel;
   form_data: {
-    name: string;
-    field: string;
+    friendlyName: string;
+    default: string;
     description: string;
+    example: string;
+    id: string;
+    options?: any[];
+    type: string;
   }[];
   transcript: string;
   ai_response: string;

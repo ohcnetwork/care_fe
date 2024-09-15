@@ -1,0 +1,8 @@
+{
+  "voice_autofill": "Voice Autofill",
+  "stop_recording": "Stop Recording",
+  "process_transcript": "Process Transcript",
+  "retake_recording": "Retake Recording",
+  "transcript_information": "This is what we heard",
+  "transcript_edit_info": "You can update this if we made an error"
+}

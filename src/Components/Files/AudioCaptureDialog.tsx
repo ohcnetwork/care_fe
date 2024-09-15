@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import useRecorder from "../../Utils/useRecorder";
 import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTimer } from "../../Utils/useTimer";
 import { t } from "i18next";
+import useVoiceRecorder from "../../Utils/useVoiceRecorder";
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -23,8 +23,8 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   const [status, setStatus] = useState<Status | null>(null);
 
-  const [audioURL, , startRecording, stopRecording, , resetRecording] =
-    useRecorder((permission: boolean) => {
+  const { audioURL, resetRecording, startRecording, stopRecording } =
+    useVoiceRecorder((permission: boolean) => {
       if (!permission) {
         handleStopRecording();
         resetRecording();

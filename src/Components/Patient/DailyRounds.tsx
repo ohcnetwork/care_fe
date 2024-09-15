@@ -28,7 +28,7 @@ import PatientCategorySelect from "./PatientCategorySelect";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { Scribe } from "../Scribe/Scribe";
+import * as Scribe from "../Scribe";
 import { SCRIBE_FORMS } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
@@ -52,6 +52,7 @@ import useQuery from "../../Utils/request/useQuery";
 import _ from "lodash";
 import { scribeReducer } from "../Scribe/scribeutils";
 import { ICD11DiagnosisModel } from "../Facility/models";
+import { EncounterSymptom, SYMPTOM_CHOICES } from "../Symptoms/types";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -425,6 +426,13 @@ export const DailyRounds = (props: any) => {
     };
   };
 
+  const scribeArbitraryField = (id: string) => ({
+    id,
+    value: () => state.form[id],
+    onUpdate: (e: string | number) =>
+      handleFormFieldChange({ name: id, value: e }),
+  });
+
   const getExpectedReviewTime = () => {
     const nextReviewTime = Number(
       state.form.review_interval || prevReviewInterval,
@@ -496,8 +504,10 @@ export const DailyRounds = (props: any) => {
       }
       className="mx-auto max-w-4xl"
     >
-      <div className="flex w-full justify-end md:m-4">
-        <Scribe
+      <Scribe.Provider>
+        <Scribe.Controller />
+        <div className="flex w-full justify-end md:m-4">
+          {/*<Scribe
           form={SCRIBE_FORMS.daily_round}
           existingData={{
             ...state.form,
@@ -602,329 +612,411 @@ export const DailyRounds = (props: any) => {
                 setPreviousReviewInterval(Number(fields.review_interval));
             }
           }}
-        />
-      </div>
-      <form className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11">
-        <DraftSection
-          handleDraftSelect={(newState) => {
-            dispatch({ type: "set_state", state: newState });
-          }}
-          formData={state.form}
-        />
-        <div className="flex flex-col gap-6 md:flex-row">
-          <div className="w-full md:w-1/3">
-            <TextFormField
-              {...field("taken_at")}
-              required
-              className="w-full"
-              label="Measured at"
-              type="datetime-local"
-              value={dayjs(state.form.taken_at || undefined).format(
-                "YYYY-MM-DDTHH:mm",
-              )}
-              max={dayjs().format("YYYY-MM-DDTHH:mm")}
-            />
-          </div>
-          <div className="w-full md:w-1/3">
-            <SelectFormField
-              {...field("rounds_type")}
-              required
-              className="w-full"
-              label="Round Type"
-              options={roundTypes}
-              optionLabel={(option) => option.text}
-              optionValue={(option) => option.id}
-            />
-          </div>
-          <div className="w-full md:w-1/3">
-            <PatientCategorySelect
-              {...field("patient_category")}
-              required
-              label="Category"
-              id="patientCategory"
-            />
-          </div>
+        />*/}
         </div>
-
-        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <div className="pb-6 md:col-span-2">
-            <FieldLabel>Symptoms</FieldLabel>
-            <EncounterSymptomsBuilder
-              key={symptomsSeed}
-              onChange={() => {
-                handleFormFieldChange({
-                  name: "symptoms_dirty",
-                  value: true,
-                });
-                refetchAdditionalSymptoms();
-              }}
-            />
-          </div>
-
-          <TextAreaFormField
-            {...field("physical_examination_info")}
-            label="Physical Examination Info"
-            rows={5}
+        <form className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11">
+          <DraftSection
+            handleDraftSelect={(newState) => {
+              dispatch({ type: "set_state", state: newState });
+            }}
+            formData={state.form}
           />
-          <TextAreaFormField
-            {...field("other_details")}
-            label="Other Details"
-            rows={5}
-          />
-
-          {state.form.rounds_type !== "DOCTORS_LOG" && (
-            <>
-              <SelectFormField
-                {...field("action")}
-                label="Action"
-                options={TELEMEDICINE_ACTIONS}
-                optionLabel={(option) => option.desc}
-                optionValue={(option) => option.text}
-                value={prevAction}
-                onChange={(event) => {
-                  handleFormFieldChange(event);
-                  setPreviousAction(event.value);
-                }}
+          <div className="flex flex-col gap-6 md:flex-row">
+            <div className="w-full md:w-1/3">
+              <TextFormField
+                {...field("taken_at")}
+                required
+                className="w-full"
+                label="Measured at"
+                type="datetime-local"
+                value={dayjs(state.form.taken_at || undefined).format(
+                  "YYYY-MM-DDTHH:mm",
+                )}
+                max={dayjs().format("YYYY-MM-DDTHH:mm")}
               />
-
+            </div>
+            <div className="w-full md:w-1/3">
               <SelectFormField
-                {...field("review_interval")}
-                label="Review After"
-                labelSuffix={getExpectedReviewTime()}
-                options={REVIEW_AT_CHOICES}
+                {...field("rounds_type")}
+                required
+                className="w-full"
+                label="Round Type"
+                options={roundTypes}
                 optionLabel={(option) => option.text}
                 optionValue={(option) => option.id}
-                value={prevReviewInterval}
-                onChange={(event) => {
-                  handleFormFieldChange(event);
-                  setPreviousReviewInterval(Number(event.value));
-                }}
               />
-            </>
-          )}
-
-          {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
-            state.form.rounds_type,
-          ) && (
-            <>
-              <h3 className="mb-6 md:col-span-2">Vitals</h3>
-
-              <BloodPressureFormField
-                {...field("bp")}
-                label="Blood Pressure"
-                id="bloodPressure"
-              />
-
-              <RangeAutocompleteFormField
-                {...field("pulse")}
-                label="Pulse"
-                unit="bpm"
-                start={0}
-                end={200}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Bradycardia",
-                  },
-                  {
-                    value: 40,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "Tachycardia",
-                  },
-                ]}
-              />
-
-              <TemperatureFormField
-                {...field("temperature")}
-                label="Temperature"
-              />
-
-              <RangeAutocompleteFormField
-                {...field("resp")}
-                label="Respiratory Rate"
-                unit="bpm"
-                start={0}
-                end={150}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Bradypnea",
-                  },
-                  {
-                    value: 12,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 16,
-                    className: "text-danger-500",
-                    label: "Tachypnea",
-                  },
-                ]}
-              />
-
-              <RangeAutocompleteFormField
-                {...field("ventilator_spo2")}
-                label="SPO2"
-                unit="%"
-                start={0}
-                end={100}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Low",
-                  },
-                  {
-                    value: 90,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "High",
-                  },
-                ]}
-              />
-
-              <SelectFormField
-                {...field("rhythm")}
-                label="Rhythm"
-                placeholder="Unknown"
-                options={RHYTHM_CHOICES}
-                optionLabel={(option) => option.desc}
-                optionValue={(option) => option.id}
-              />
-
-              <TextAreaFormField
-                {...field("rhythm_detail")}
-                className="md:col-span-1"
-                label="Rhythm Description"
-                rows={7}
-              />
-
-              <RadioFormField
-                label="Level Of Consciousness"
-                {...field("consciousness_level")}
-                options={CONSCIOUSNESS_LEVEL.map((level) => ({
-                  label: t(`CONSCIOUSNESS_LEVEL__${level.value}`),
-                  value: level.value,
+            </div>
+            <div className="w-full md:w-1/3">
+              <Scribe.Input<string>
+                {...scribeArbitraryField("patient_category")}
+                friendlyName="Patient Category"
+                type="string"
+                example="Mild"
+                description="A string to categorize the patient."
+                options={PATIENT_CATEGORIES.filter(
+                  (c) => c.id !== "Comfort",
+                ).map((category) => ({
+                  id: category.id,
+                  text: category.text,
                 }))}
-                optionDisplay={(option) => option.label}
-                optionValue={(option) => option.value}
-                unselectLabel="Unknown"
-                layout="vertical"
-              />
-            </>
-          )}
+              >
+                {({ value, aiResponse }) => (
+                  <PatientCategorySelect
+                    {...field("patient_category")}
+                    value={value() as any}
+                    disabled={!!aiResponse}
+                    required
+                    label="Category"
+                    id="patientCategory"
+                  />
+                )}
+              </Scribe.Input>
+            </div>
+          </div>
 
-          {state.form.rounds_type === "DOCTORS_LOG" && (
-            <>
-              <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2">
-                <div id="diagnosis-list">
-                  <h3 className="mb-4 mt-8 text-lg font-semibold">
-                    {t("diagnosis")}
-                  </h3>
-                  {diagnoses ? (
-                    <EditDiagnosesBuilder
-                      value={diagnoses}
-                      suggestions={diagnosisSuggestions}
-                      onUpdate={() => setDiagnosisSuggestions([])}
+          <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+            <div className="pb-6 md:col-span-2">
+              <Scribe.Input<EncounterSymptom[]>
+                {...scribeArbitraryField("additional_symptoms")}
+                friendlyName="Symptoms"
+                type="{symptom: number, other_symptom?: string, onset_date: string, cure_date?: string}[]"
+                example="[{symptom: 1, onset_date: '2024-12-03'}, {symptom: 2, onset_date: '2024-12-03', cure_date: '2024-12-05'}, {symptom: 9, other_symptom: 'Other symptom', onset_date: '2024-12-03'}]"
+                description="An array of objects to store the patient's symptoms along with their date of onset and date of cure (if any). The symptom field should be an integer corresponding to the symptom's ID. The onset_date and cure_date fields should be date strings (e.g., '2022-01-01'). If no onset_date has been specified, use todays date which is '${new Date().toISOString().slice(0, 10)}'. If the symptom is ongoing, the cure_date field should not be included. If the user has 'Other Symptom', only then the other_symptom field should be included with a string value describing the symptom."
+                value={() =>
+                  additionalSymptoms?.results.filter(
+                    (s) => s.clinical_impression_status !== "entered-in-error",
+                  ) || []
+                }
+                comparer={(a, b) => a.symptom === b.symptom}
+                updatableFields={["onset_date", "cure_date"]}
+                options={SYMPTOM_CHOICES}
+                onAdd={(item) =>
+                  request(SymptomsApi.add, {
+                    pathParams: { consultationId },
+                    body: {
+                      ...item,
+                    },
+                  })
+                }
+                onUpdate={(stripped, item) =>
+                  request(SymptomsApi.partialUpdate, {
+                    pathParams: { consultationId, external_id: item.id },
+                    body: stripped,
+                  })
+                }
+                onDelete={(item) =>
+                  request(SymptomsApi.markAsEnteredInError, {
+                    pathParams: { consultationId, external_id: item.id },
+                  })
+                }
+              >
+                {({ value, aiResponse, actions }) => (
+                  <>
+                    <FieldLabel>Symptoms</FieldLabel>
+                    <EncounterSymptomsBuilder
+                      key={symptomsSeed}
+                      onChange={() => {
+                        handleFormFieldChange({
+                          name: "symptoms_dirty",
+                          value: true,
+                        });
+                        refetchAdditionalSymptoms();
+                      }}
                     />
-                  ) : (
-                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-secondary-800">
-                      Fetching existing diagnosis of patient...
+                  </>
+                )}
+              </Scribe.Input>
+            </div>
+
+            <Scribe.Input<string>
+              {...scribeArbitraryField("physical_examination_info")}
+              friendlyName="Physical Examination Info"
+              type="string"
+              example="Patient presents with red burn marks over the chest and swollen arms. Examination reveals no additional external injuries or abnormalities."
+              description="This field is designated for storing detailed findings from the physical examination of the patient. It should include all observable physical attributes, conditions, or symptoms noted during the examination. When processing a doctor's transcript, identify and extract descriptions that pertain directly to the patient's physical state, such as visible conditions, physical symptoms, or any abnormalities noted by touch, sight, or measurement. This can include, but is not limited to, descriptions of skin conditions, swellings, lacerations, posture, mobility issues, and any other physically observable traits."
+            >
+              {({ value, aiResponse }) => (
+                <TextAreaFormField
+                  {...field("physical_examination_info")}
+                  value={value() as any}
+                  disabled={!!aiResponse}
+                  label="Physical Examination Info"
+                  rows={5}
+                />
+              )}
+            </Scribe.Input>
+            <Scribe.Input<string>
+              {...scribeArbitraryField("other_details")}
+              friendlyName="Other Details"
+              type="string"
+              example="Patient reports trouble sleeping and a decreased appetite. Additionally, the patient is allergic to penicillin and has a history of asthma."
+              description="This field is for capturing any supplementary details about the patient that are mentioned in the doctor's transcript but do not directly pertain to the physical examination findings. This includes, but is not limited to, behavioral observations, medical history, patient complaints, lifestyle factors, allergies, or any other non-physical observations that are relevant to the patient's overall health and well-being. When processing a transcript, extract information that describes the patient's health, habits, or conditions in a broader sense than what is observed through physical examination alone."
+            >
+              {({ value, aiResponse }) => (
+                <TextAreaFormField
+                  {...field("other_details")}
+                  disabled={!!aiResponse}
+                  value={value() as any}
+                  label="Other Details"
+                  rows={5}
+                />
+              )}
+            </Scribe.Input>
+
+            {state.form.rounds_type !== "DOCTORS_LOG" && (
+              <>
+                <SelectFormField
+                  {...field("action")}
+                  label="Action"
+                  options={TELEMEDICINE_ACTIONS}
+                  optionLabel={(option) => option.desc}
+                  optionValue={(option) => option.text}
+                  value={prevAction}
+                  onChange={(event) => {
+                    handleFormFieldChange(event);
+                    setPreviousAction(event.value);
+                  }}
+                />
+
+                <SelectFormField
+                  {...field("review_interval")}
+                  label="Review After"
+                  labelSuffix={getExpectedReviewTime()}
+                  options={REVIEW_AT_CHOICES}
+                  optionLabel={(option) => option.text}
+                  optionValue={(option) => option.id}
+                  value={prevReviewInterval}
+                  onChange={(event) => {
+                    handleFormFieldChange(event);
+                    setPreviousReviewInterval(Number(event.value));
+                  }}
+                />
+              </>
+            )}
+
+            {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
+              state.form.rounds_type,
+            ) && (
+              <>
+                <h3 className="mb-6 md:col-span-2">Vitals</h3>
+
+                <BloodPressureFormField
+                  {...field("bp")}
+                  label="Blood Pressure"
+                  id="bloodPressure"
+                />
+
+                <RangeAutocompleteFormField
+                  {...field("pulse")}
+                  label="Pulse"
+                  unit="bpm"
+                  start={0}
+                  end={200}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Bradycardia",
+                    },
+                    {
+                      value: 40,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 100,
+                      className: "text-danger-500",
+                      label: "Tachycardia",
+                    },
+                  ]}
+                />
+
+                <TemperatureFormField
+                  {...field("temperature")}
+                  label="Temperature"
+                />
+
+                <RangeAutocompleteFormField
+                  {...field("resp")}
+                  label="Respiratory Rate"
+                  unit="bpm"
+                  start={0}
+                  end={150}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Bradypnea",
+                    },
+                    {
+                      value: 12,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 16,
+                      className: "text-danger-500",
+                      label: "Tachypnea",
+                    },
+                  ]}
+                />
+
+                <RangeAutocompleteFormField
+                  {...field("ventilator_spo2")}
+                  label="SPO2"
+                  unit="%"
+                  start={0}
+                  end={100}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Low",
+                    },
+                    {
+                      value: 90,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 100,
+                      className: "text-danger-500",
+                      label: "High",
+                    },
+                  ]}
+                />
+
+                <SelectFormField
+                  {...field("rhythm")}
+                  label="Rhythm"
+                  placeholder="Unknown"
+                  options={RHYTHM_CHOICES}
+                  optionLabel={(option) => option.desc}
+                  optionValue={(option) => option.id}
+                />
+
+                <TextAreaFormField
+                  {...field("rhythm_detail")}
+                  className="md:col-span-1"
+                  label="Rhythm Description"
+                  rows={7}
+                />
+
+                <RadioFormField
+                  label="Level Of Consciousness"
+                  {...field("consciousness_level")}
+                  options={CONSCIOUSNESS_LEVEL.map((level) => ({
+                    label: t(`CONSCIOUSNESS_LEVEL__${level.value}`),
+                    value: level.value,
+                  }))}
+                  optionDisplay={(option) => option.label}
+                  optionValue={(option) => option.value}
+                  unselectLabel="Unknown"
+                  layout="vertical"
+                />
+              </>
+            )}
+
+            {state.form.rounds_type === "DOCTORS_LOG" && (
+              <>
+                <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2">
+                  <div id="diagnosis-list">
+                    <h3 className="mb-4 mt-8 text-lg font-semibold">
+                      {t("diagnosis")}
+                    </h3>
+                    {diagnoses ? (
+                      <EditDiagnosesBuilder
+                        value={diagnoses}
+                        suggestions={diagnosisSuggestions}
+                        onUpdate={() => setDiagnosisSuggestions([])}
+                      />
+                    ) : (
+                      <div className="flex animate-pulse justify-center py-4 text-center font-medium text-secondary-800">
+                        Fetching existing diagnosis of patient...
+                      </div>
+                    )}
+                  </div>
+                  <div id="investigation">
+                    <h3 className="my-4 text-lg font-semibold">
+                      {t("investigations")}
+                    </h3>
+                    <InvestigationBuilder
+                      investigations={state.form.investigations}
+                      setInvestigations={(investigations) => {
+                        handleFormFieldChange({
+                          name: "investigations",
+                          value: investigations,
+                        });
+                      }}
+                    />
+                    <FieldErrorText error={state.errors.investigation} />
+                  </div>
+                  <div>
+                    <div className="mb-4 mt-8 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">
+                        {t("prescription_medications")}
+                      </h3>
+                      <CheckBoxFormField
+                        label="Include discontinued prescriptions"
+                        name="toggle-discontinued-prescriptions-visibility"
+                        value={showDiscontinuedPrescriptions}
+                        onChange={({ value }) =>
+                          setShowDiscontinuedPrescriptions(value)
+                        }
+                        errorClassName="hidden"
+                      />
                     </div>
-                  )}
-                </div>
-                <div id="investigation">
-                  <h3 className="my-4 text-lg font-semibold">
-                    {t("investigations")}
-                  </h3>
-                  <InvestigationBuilder
-                    investigations={state.form.investigations}
-                    setInvestigations={(investigations) => {
-                      handleFormFieldChange({
-                        name: "investigations",
-                        value: investigations,
-                      });
-                    }}
-                  />
-                  <FieldErrorText error={state.errors.investigation} />
-                </div>
-                <div>
-                  <div className="mb-4 mt-8 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">
-                      {t("prescription_medications")}
-                    </h3>
-                    <CheckBoxFormField
-                      label="Include discontinued prescriptions"
-                      name="toggle-discontinued-prescriptions-visibility"
-                      value={showDiscontinuedPrescriptions}
-                      onChange={({ value }) =>
-                        setShowDiscontinuedPrescriptions(value)
+                    <PrescriptionBuilder
+                      discontinued={
+                        showDiscontinuedPrescriptions ? undefined : false
                       }
-                      errorClassName="hidden"
+                      actions={["discontinue"]}
                     />
                   </div>
-                  <PrescriptionBuilder
-                    discontinued={
-                      showDiscontinuedPrescriptions ? undefined : false
-                    }
-                    actions={["discontinue"]}
-                  />
-                </div>
-                <div>
-                  <div className="mb-4 mt-8 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">
-                      {t("prn_prescriptions")}
-                    </h3>
-                    <CheckBoxFormField
-                      label="Include discontinued prescriptions"
-                      name="toggle-discontinued-prescriptions-visibility"
-                      value={showDiscontinuedPrescriptions}
-                      onChange={({ value }) =>
-                        setShowDiscontinuedPrescriptions(value)
+                  <div>
+                    <div className="mb-4 mt-8 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">
+                        {t("prn_prescriptions")}
+                      </h3>
+                      <CheckBoxFormField
+                        label="Include discontinued prescriptions"
+                        name="toggle-discontinued-prescriptions-visibility"
+                        value={showDiscontinuedPrescriptions}
+                        onChange={({ value }) =>
+                          setShowDiscontinuedPrescriptions(value)
+                        }
+                        errorClassName="hidden"
+                      />
+                    </div>
+                    <PrescriptionBuilder
+                      is_prn
+                      discontinued={
+                        showDiscontinuedPrescriptions ? undefined : false
                       }
-                      errorClassName="hidden"
+                      actions={["discontinue"]}
                     />
                   </div>
-                  <PrescriptionBuilder
-                    is_prn
-                    discontinued={
-                      showDiscontinuedPrescriptions ? undefined : false
-                    }
-                    actions={["discontinue"]}
-                  />
                 </div>
-              </div>
-            </>
-          )}
-        </div>
+              </>
+            )}
+          </div>
 
-        <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
-          <Cancel onClick={() => goBack()} />
-          <Submit
-            disabled={submitButtonDisabled}
-            onClick={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-            label={buttonText}
-          />
-        </div>
-      </form>
+          <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
+            <Cancel onClick={() => goBack()} />
+            <Submit
+              disabled={submitButtonDisabled}
+              onClick={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+              label={buttonText}
+            />
+          </div>
+        </form>
+      </Scribe.Provider>
     </Page>
   );
 };
