@@ -1,12 +1,12 @@
 {
-  "create_resource_request": "Create Resource Request",
-  "contact_person": "Name of Contact Person at Facility",
-  "approving_facility": "Name of Approving Facility",
-  "contact_phone": "Contact Person Number",
-  "request_title": "Request Title",
-  "request_title_placeholder": "Type your title here",
-  "required_quantity": "Required Quantity",
-  "request_description": "Description of Request",
-  "request_description_placeholder": "Type your description here",
-  "search_resource": "Search Resource"
+  "create_resource_request": "संसाधन अनुरोध बनाएँ",
+  "contact_person": "सुविधा केंद्र पर संपर्क व्यक्ति का नाम",
+  "approving_facility": "अनुमोदन सुविधा का नाम",
+  "contact_phone": "संपर्क व्यक्ति संख्या",
+  "request_title": "शीर्षक का अनुरोध करें",
+  "request_title_placeholder": "अपना शीर्षक यहाँ लिखें",
+  "required_quantity": "आवश्यक मात्रा",
+  "request_description": "अनुरोध का विवरण",
+  "request_description_placeholder": "अपना विवरण यहाँ लिखें",
+  "search_resource": "संसाधन खोजें"
 }
