@@ -1,14 +1,14 @@
 {
-  "monitor": "Monitor",
-  "show_default_presets": "Show Default Presets",
-  "show_patient_presets": "Show Patient Presets",
-  "moving_camera": "Moving Camera",
-  "full_screen": "Full Screen",
-  "feed_is_currently_not_live": "Feed is currently not live",
-  "zoom_out": "Zoom Out",
-  "zoom_in": "Zoom In",
-  "right": "Right",
-  "left": "Left",
-  "down": "Down",
-  "up": "Up"
+  "monitor": "கண்காணிக்கவும்",
+  "show_default_presets": "இயல்புநிலை முன்னமைவுகளைக் காட்டு",
+  "show_patient_presets": "நோயாளியின் முன்னமைவுகளைக் காட்டு",
+  "moving_camera": "நகரும் கேமரா",
+  "full_screen": "முழுத்திரை",
+  "feed_is_currently_not_live": "ஊட்டம் தற்போது நேரலையில் இல்லை",
+  "zoom_out": "பெரிதாக்கவும்",
+  "zoom_in": "பெரிதாக்கவும்",
+  "right": "சரி",
+  "left": "விட்டு",
+  "down": "கீழே",
+  "up": "மேலே"
 }
