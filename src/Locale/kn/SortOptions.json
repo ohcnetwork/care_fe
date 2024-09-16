@@ -1,0 +1,18 @@
+{
+  "-created_date": "ಇತ್ತೀಚಿಗೆ ರಚಿಸಿದ ದಿನಾಂಕ ಮೊದಲು",
+  "created_date": "ಮೊದಲು ರಚಿಸಿದ ಹಳೆಯ ದಿನಾಂಕ",
+  "-category_severity": "ಅತ್ಯಧಿಕ ತೀವ್ರತೆಯ ವಿಭಾಗ ಮೊದಲು",
+  "category_severity": "ಕಡಿಮೆ ತೀವ್ರತೆಯ ವರ್ಗ ಮೊದಲು",
+  "-modified_date": "ಮೊದಲು ಇತ್ತೀಚಿನ ನವೀಕರಿಸಿದ ದಿನಾಂಕ",
+  "modified_date": "ಹಳೆಯ ನವೀಕರಿಸಿದ ದಿನಾಂಕ ಮೊದಲು",
+  "facility__name,last_consultation__current_bed__bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ 1-N",
+  "facility__name,-last_consultation__current_bed__bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ N-1",
+  "-review_time": "ಇತ್ತೀಚಿನ ವಿಮರ್ಶೆ ದಿನಾಂಕ ಮೊದಲು",
+  "review_time": "ಹಳೆಯ ವಿಮರ್ಶೆ ದಿನಾಂಕ ಮೊದಲು",
+  "taken_at": "ಹಳೆಯ ತೆಗೆದ ದಿನಾಂಕ ಮೊದಲು",
+  "-taken_at": "ಇತ್ತೀಚೆಗೆ ತೆಗೆದುಕೊಂಡ ದಿನಾಂಕ ಮೊದಲು",
+  "name": "ರೋಗಿಯ ಹೆಸರು AZ",
+  "-name": "ರೋಗಿಯ ಹೆಸರು ZA",
+  "bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ 1-N",
+  "-bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ N-1"
+}
