@@ -1,14 +1,14 @@
 {
-  "monitor": "Monitor",
-  "show_default_presets": "Show Default Presets",
-  "show_patient_presets": "Show Patient Presets",
-  "moving_camera": "Moving Camera",
-  "full_screen": "Full Screen",
-  "feed_is_currently_not_live": "Feed is currently not live",
-  "zoom_out": "Zoom Out",
-  "zoom_in": "Zoom In",
-  "right": "Right",
-  "left": "Left",
-  "down": "Down",
-  "up": "Up"
+  "monitor": "മോണിറ്റർ",
+  "show_default_presets": "ഡിഫോൾട്ട് പ്രീസെറ്റുകൾ കാണിക്കുക",
+  "show_patient_presets": "രോഗിയുടെ പ്രീസെറ്റുകൾ കാണിക്കുക",
+  "moving_camera": "ചലിക്കുന്ന ക്യാമറ",
+  "full_screen": "പൂർണ്ണ സ്ക്രീൻ",
+  "feed_is_currently_not_live": "ഫീഡ് നിലവിൽ തത്സമയമല്ല",
+  "zoom_out": "സൂം ഔട്ട്",
+  "zoom_in": "സൂം ഇൻ ചെയ്യുക",
+  "right": "ശരിയാണ്",
+  "left": "ഇടത്",
+  "down": "താഴേക്ക്",
+  "up": "മുകളിലേക്ക്"
 }
