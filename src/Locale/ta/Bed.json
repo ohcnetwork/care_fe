@@ -1,13 +1,13 @@
 {
-  "bed_search_placeholder": "Search by beds name",
-  "BED_WITH_OXYGEN_SUPPORT": "Bed with Oxygen Support",
-  "REGULAR": "Regular",
-  "ICU": "ICU",
-  "ISOLATION": "Isolation",
-  "add_beds": "Add Bed(s)",
-  "update_bed": "Update Bed",
-  "bed_type": "Bed Type",
-  "make_multiple_beds_label": "Do you want to make multiple beds?",
-  "number_of_beds": "Number of beds",
-  "number_of_beds_out_of_range_error": "Number of beds cannot be greater than 100"
+  "bed_search_placeholder": "படுக்கைகளின் பெயரைக் கொண்டு தேடுங்கள்",
+  "BED_WITH_OXYGEN_SUPPORT": "ஆக்ஸிஜன் ஆதரவுடன் படுக்கை",
+  "REGULAR": "வழக்கமான",
+  "ICU": "ஐசியூ",
+  "ISOLATION": "தனிமைப்படுத்துதல்",
+  "add_beds": "படுக்கைகளைச் சேர்",
+  "update_bed": "படுக்கையைப் புதுப்பிக்கவும்",
+  "bed_type": "படுக்கை வகை",
+  "make_multiple_beds_label": "நீங்கள் பல படுக்கைகளை உருவாக்க விரும்புகிறீர்களா?",
+  "number_of_beds": "படுக்கைகளின் எண்ணிக்கை",
+  "number_of_beds_out_of_range_error": "படுக்கைகளின் எண்ணிக்கை 100க்கு மேல் இருக்கக்கூடாது"
 }
