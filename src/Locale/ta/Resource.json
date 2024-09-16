@@ -1,12 +1,12 @@
 {
-  "create_resource_request": "Create Resource Request",
-  "contact_person": "Name of Contact Person at Facility",
-  "approving_facility": "Name of Approving Facility",
-  "contact_phone": "Contact Person Number",
-  "request_title": "Request Title",
-  "request_title_placeholder": "Type your title here",
-  "required_quantity": "Required Quantity",
-  "request_description": "Description of Request",
-  "request_description_placeholder": "Type your description here",
-  "search_resource": "Search Resource"
+  "create_resource_request": "ஆதார கோரிக்கையை உருவாக்கவும்",
+  "contact_person": "வசதி உள்ள தொடர்பு நபரின் பெயர்",
+  "approving_facility": "அங்கீகரிக்கும் வசதியின் பெயர்",
+  "contact_phone": "தொடர்பு நபர் எண்",
+  "request_title": "தலைப்பு கோரிக்கை",
+  "request_title_placeholder": "உங்கள் தலைப்பை இங்கே தட்டச்சு செய்யவும்",
+  "required_quantity": "தேவையான அளவு",
+  "request_description": "கோரிக்கையின் விளக்கம்",
+  "request_description_placeholder": "உங்கள் விளக்கத்தை இங்கே தட்டச்சு செய்யவும்",
+  "search_resource": "தேடல் ஆதாரம்"
 }
