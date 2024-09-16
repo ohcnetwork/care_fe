@@ -1,14 +1,14 @@
 {
-  "monitor": "Monitor",
-  "show_default_presets": "Show Default Presets",
-  "show_patient_presets": "Show Patient Presets",
-  "moving_camera": "Moving Camera",
-  "full_screen": "Full Screen",
-  "feed_is_currently_not_live": "Feed is currently not live",
-  "zoom_out": "Zoom Out",
-  "zoom_in": "Zoom In",
-  "right": "Right",
-  "left": "Left",
-  "down": "Down",
-  "up": "Up"
+  "monitor": "निगरानी करना",
+  "show_default_presets": "डिफ़ॉल्ट प्रीसेट दिखाएं",
+  "show_patient_presets": "मरीज़ प्रीसेट दिखाएँ",
+  "moving_camera": "चलता कैमरा",
+  "full_screen": "पूर्ण स्क्रीन",
+  "feed_is_currently_not_live": "फ़ीड वर्तमान में लाइव नहीं है",
+  "zoom_out": "ज़ूम आउट",
+  "zoom_in": "ज़ूम इन",
+  "right": "सही",
+  "left": "बाएं",
+  "down": "नीचे",
+  "up": "ऊपर"
 }
