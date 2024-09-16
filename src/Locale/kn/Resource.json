@@ -1,0 +1,12 @@
+{
+  "create_resource_request": "ಸಂಪನ್ಮೂಲ ವಿನಂತಿಯನ್ನು ರಚಿಸಿ",
+  "contact_person": "ಸೌಲಭ್ಯದಲ್ಲಿರುವ ಸಂಪರ್ಕ ವ್ಯಕ್ತಿಯ ಹೆಸರು",
+  "approving_facility": "ಅನುಮೋದಿಸುವ ಸೌಲಭ್ಯದ ಹೆಸರು",
+  "contact_phone": "ಸಂಪರ್ಕ ವ್ಯಕ್ತಿ ಸಂಖ್ಯೆ",
+  "request_title": "ವಿನಂತಿ ಶೀರ್ಷಿಕೆ",
+  "request_title_placeholder": "ನಿಮ್ಮ ಶೀರ್ಷಿಕೆಯನ್ನು ಇಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ",
+  "required_quantity": "ಅಗತ್ಯವಿರುವ ಪ್ರಮಾಣ",
+  "request_description": "ವಿನಂತಿಯ ವಿವರಣೆ",
+  "request_description_placeholder": "ನಿಮ್ಮ ವಿವರಣೆಯನ್ನು ಇಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ",
+  "search_resource": "ಹುಡುಕಾಟ ಸಂಪನ್ಮೂಲ"
+}

@@ -1,0 +1,16 @@
+{
+  "user_management": "பயனர் மேலாண்மை",
+  "facilities": "வசதிகள்",
+  "add_new_user": "புதிய பயனரைச் சேர்க்கவும்",
+  "no_users_found": "பயனர்கள் இல்லை",
+  "home_facility": "வீட்டு வசதி",
+  "no_home_facility": "வீட்டு வசதி ஒதுக்கப்படவில்லை",
+  "clear_home_facility": "தெளிவான வீட்டு வசதி",
+  "linked_facilities": "இணைக்கப்பட்ட வசதிகள்",
+  "no_linked_facilities": "இணைக்கப்பட்ட வசதிகள் இல்லை",
+  "average_weekly_working_hours": "சராசரி வாராந்திர வேலை நேரம்",
+  "set_average_weekly_working_hours_for": "சராசரி வாராந்திர வேலை நேரத்தை அமைக்கவும்",
+  "search_by_username": "பயனர்பெயர் மூலம் தேடவும்",
+  "last_online": "கடைசியாக ஆன்லைன்",
+  "total_users": "மொத்த பயனர்கள்"
+}
