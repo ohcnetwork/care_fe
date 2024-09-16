@@ -1,13 +1,13 @@
 {
-  "return_to_care": "Return to CARE",
-  "404_message": "It appears that you have stumbled upon a page that either does not exist or has been moved to another URL. Make sure you have entered the correct link!",
-  "error_404": "Error 404",
-  "page_not_found": "Page Not Found",
-  "session_expired": "Session Expired",
-  "invalid_password_reset_link": "Invalid password reset link",
-  "invalid_link_msg": "It appears that the password reset link you have used is either invalid or expired. Please request a new password reset link.",
-  "return_to_password_reset": "Return to Password Reset",
-  "return_to_login": "Return to Login",
-  "session_expired_msg": "It appears that your session has expired. This could be due to inactivity. Please login again to continue.",
-  "invalid_reset": "Invalid Reset"
+  "return_to_care": "CARE ಗೆ ಹಿಂತಿರುಗಿ",
+  "404_message": "ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲದ ಅಥವಾ ಇನ್ನೊಂದು URL ಗೆ ಸರಿಸಿದ ಪುಟದಲ್ಲಿ ನೀವು ಎಡವಿ ಬಿದ್ದಿರುವಂತೆ ತೋರುತ್ತಿದೆ. ನೀವು ಸರಿಯಾದ ಲಿಂಕ್ ಅನ್ನು ನಮೂದಿಸಿದ್ದೀರಿ ಎಂದು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ!",
+  "error_404": "ದೋಷ 404",
+  "page_not_found": "ಪುಟ ಕಂಡುಬಂದಿಲ್ಲ",
+  "session_expired": "ಅವಧಿ ಮುಗಿದಿದೆ",
+  "invalid_password_reset_link": "ಅಮಾನ್ಯವಾದ ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವ ಲಿಂಕ್",
+  "invalid_link_msg": "ನೀವು ಬಳಸಿದ ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವ ಲಿಂಕ್ ಅಮಾನ್ಯವಾಗಿದೆ ಅಥವಾ ಅವಧಿ ಮೀರಿದೆ ಎಂದು ತೋರುತ್ತಿದೆ. ದಯವಿಟ್ಟು ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವ ಲಿಂಕ್ ಅನ್ನು ವಿನಂತಿಸಿ.",
+  "return_to_password_reset": "ಪಾಸ್ವರ್ಡ್ ಮರುಹೊಂದಿಸಲು ಹಿಂತಿರುಗಿ",
+  "return_to_login": "ಲಾಗಿನ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+  "session_expired_msg": "ನಿಮ್ಮ ಅವಧಿ ಮುಗಿದಿದೆ ಎಂದು ತೋರುತ್ತಿದೆ. ಇದು ನಿಷ್ಕ್ರಿಯತೆಯ ಕಾರಣದಿಂದಾಗಿರಬಹುದು. ಮುಂದುವರಿಸಲು ದಯವಿಟ್ಟು ಮತ್ತೆ ಲಾಗಿನ್ ಮಾಡಿ.",
+  "invalid_reset": "ಅಮಾನ್ಯ ಮರುಹೊಂದಿಸಿ"
 }
