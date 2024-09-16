@@ -1,11 +1,11 @@
 {
-  "Facilities": "Facilities",
-  "Patients": "Patients",
-  "Sample Test": "Sample Test",
-  "Shifting": "Shifting",
-  "Resource": "Resource",
-  "External Results": "External Results",
-  "Users": "Users",
-  "Profile": "Profile",
-  "Dashboard": "Dashboard"
+  "Facilities": "सुविधाएँ",
+  "Patients": "मरीजों",
+  "Sample Test": "नमूना परीक्षण",
+  "Shifting": "स्थानांतरण",
+  "Resource": "संसाधन",
+  "External Results": "बाह्य परिणाम",
+  "Users": "उपयोगकर्ताओं",
+  "Profile": "प्रोफ़ाइल",
+  "Dashboard": "डैशबोर्ड"
 }
