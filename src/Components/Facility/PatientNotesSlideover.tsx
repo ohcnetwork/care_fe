@@ -219,7 +219,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           />
           <div className="relative mx-4 flex items-center">
             <AutoExpandingTextInputFormField
-              id="doctor_notes_textarea"
+              id="discussion_notes_textarea"
               maxHeight={160}
               rows={2}
               name="note"

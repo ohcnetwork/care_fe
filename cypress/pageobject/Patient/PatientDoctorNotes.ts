@@ -1,17 +1,29 @@
 export class PatientDoctorNotes {
-  visitDoctorNotesPage() {
-    cy.get("#patient_doctor_notes").scrollIntoView();
-    cy.get("#patient_doctor_notes").click();
+  visitDiscussionNotesPage() {
+    cy.get("#patient_discussion_notes").scrollIntoView();
+    cy.get("#patient_discussion_notes").click();
   }
 
-  addDoctorsNotes(notes: string) {
-    cy.get("#doctor_notes_textarea").scrollIntoView();
-    cy.get("#doctor_notes_textarea").click().type(notes);
+  addDiscussionNotes(notes: string) {
+    cy.wait(2000);
+    cy.get("#discussion_notes_textarea").scrollIntoView();
+    cy.get("#discussion_notes_textarea").click().type(notes);
   }
 
-  postDoctorNotes() {
-    cy.intercept("POST", "**/api/v1/patient/*/notes").as("postDoctorNotes");
+  selectNurseDiscussion() {
+    cy.get("#patient-note-tab-Nurses").scrollIntoView();
+    cy.get("#patient-note-tab-Nurses").click();
+  }
+
+  verifyDiscussionMessage(text: string) {
+    cy.get("#patient-notes-list").contains(text);
+  }
+
+  postDiscussionNotes() {
+    cy.intercept("POST", "**/api/v1/patient/*/notes").as("postDiscussionNotes");
     cy.get("#add_doctor_note_button").click();
-    cy.wait("@postDoctorNotes").its("response.statusCode").should("eq", 201);
+    cy.wait("@postDiscussionNotes")
+      .its("response.statusCode")
+      .should("eq", 201);
   }
 }
