@@ -371,6 +371,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const { res, data } = await request(routes.getPatient, {
         pathParams: { id: id ? id : 0 },
       });
+      const { data: abhaNumberData } = await request(
+        routes.abha.getAbhaNumber,
+        {
+          pathParams: { abhaNumberId: id ?? "" },
+          silent: true,
+        },
+      );
+
       if (!status.aborted) {
         if (res?.ok && data) {
           setPatientName(data.name || "");
@@ -382,8 +390,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             age: data.year_of_birth
               ? new Date().getFullYear() - data.year_of_birth
               : "",
-            health_id_number: data.abha_number_object?.abha_number || "",
-            health_id: data.abha_number_object?.health_id || "",
+            health_id_number: abhaNumberData?.abha_number || "",
+            health_id: abhaNumberData?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
             gender: data.gender ? data.gender : undefined,
             state: data.state ? data.state : "",
