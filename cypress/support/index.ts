@@ -43,7 +43,6 @@ declare global {
         selector: string,
         texts: string[],
       ): Chainable<Element>;
-      checkConfig<T>(configName: string): Chainable<T>;
     }
   }
 }

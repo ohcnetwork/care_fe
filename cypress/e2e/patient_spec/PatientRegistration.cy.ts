@@ -8,6 +8,7 @@ import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 
 const yearOfBirth = "2001";
+const isHCXEnabled = Cypress.env("ENABLE_HCX");
 
 const calculateAge = () => {
   const currentYear = new Date().getFullYear();
@@ -176,22 +177,20 @@ describe("Patient Creation with consultation", () => {
       "policy_id",
       patientOneFirstPolicyId,
     );
-    cy.checkConfig<boolean>("enable_hcx").then((isHCXEnabled) => {
-      if (isHCXEnabled) {
-        patientInsurance.selectInsurer("test");
-      } else {
-        patientInsurance.typePatientInsuranceDetail(
-          patientOneFirstInsuranceId,
-          "insurer_id",
-          patientOneFirstInsurerId,
-        );
-        patientInsurance.typePatientInsuranceDetail(
-          patientOneFirstInsuranceId,
-          "insurer_name",
-          patientOneFirstInsurerName,
-        );
-      }
-    });
+    if (isHCXEnabled) {
+      patientInsurance.selectInsurer("test");
+    } else {
+      patientInsurance.typePatientInsuranceDetail(
+        patientOneFirstInsuranceId,
+        "insurer_id",
+        patientOneFirstInsurerId,
+      );
+      patientInsurance.typePatientInsuranceDetail(
+        patientOneFirstInsuranceId,
+        "insurer_name",
+        patientOneFirstInsurerName,
+      );
+    }
 
     patientInsurance.clickAddInsruanceDetails();
     patientInsurance.typePatientInsuranceDetail(
@@ -204,22 +203,20 @@ describe("Patient Creation with consultation", () => {
       "policy_id",
       patientOneSecondPolicyId,
     );
-    cy.checkConfig<boolean>("enable_hcx").then((isHCXEnabled) => {
-      if (isHCXEnabled) {
-        patientInsurance.selectInsurer("Care");
-      } else {
-        patientInsurance.typePatientInsuranceDetail(
-          patientOneSecondInsuranceId,
-          "insurer_id",
-          patientOneSecondInsurerId,
-        );
-        patientInsurance.typePatientInsuranceDetail(
-          patientOneSecondInsuranceId,
-          "insurer_name",
-          patientOneSecondInsurerName,
-        );
-      }
-    });
+    if (isHCXEnabled) {
+      patientInsurance.selectInsurer("Care");
+    } else {
+      patientInsurance.typePatientInsuranceDetail(
+        patientOneSecondInsuranceId,
+        "insurer_id",
+        patientOneSecondInsurerId,
+      );
+      patientInsurance.typePatientInsuranceDetail(
+        patientOneSecondInsuranceId,
+        "insurer_name",
+        patientOneSecondInsurerName,
+      );
+    }
 
     patientPage.clickUpdatePatient();
     cy.wait(3000);
@@ -244,33 +241,30 @@ describe("Patient Creation with consultation", () => {
       .contains(patientOneFirstSubscriberId)
       .scrollIntoView();
     cy.wait(2000);
-    cy.checkConfig<boolean>("enable_hcx").then((isHCXEnabled) => {
-      patientInsurance.verifyPatientPolicyDetails(
-        patientOneFirstSubscriberId,
-        patientOneFirstPolicyId,
-        patientOneFirstInsurerId,
-        patientOneFirstInsurerName,
-        isHCXEnabled,
-      );
-    });
+    patientInsurance.verifyPatientPolicyDetails(
+      patientOneFirstSubscriberId,
+      patientOneFirstPolicyId,
+      patientOneFirstInsurerId,
+      patientOneFirstInsurerName,
+      isHCXEnabled,
+    );
+
     patientInsurance.clickPatientInsuranceViewDetail();
     cy.wait(3000);
-    cy.checkConfig<boolean>("enable_hcx").then((isHCXEnabled) => {
-      patientInsurance.verifyPatientPolicyDetails(
-        patientOneFirstSubscriberId,
-        patientOneFirstPolicyId,
-        patientOneFirstInsurerId,
-        patientOneFirstInsurerName,
-        isHCXEnabled,
-      );
-      patientInsurance.verifyPatientPolicyDetails(
-        patientOneSecondSubscriberId,
-        patientOneSecondPolicyId,
-        patientOneSecondInsurerId,
-        patientOneSecondInsurerName,
-        isHCXEnabled,
-      );
-    });
+    patientInsurance.verifyPatientPolicyDetails(
+      patientOneFirstSubscriberId,
+      patientOneFirstPolicyId,
+      patientOneFirstInsurerId,
+      patientOneFirstInsurerName,
+      isHCXEnabled,
+    );
+    patientInsurance.verifyPatientPolicyDetails(
+      patientOneSecondSubscriberId,
+      patientOneSecondPolicyId,
+      patientOneSecondInsurerId,
+      patientOneSecondInsurerName,
+      isHCXEnabled,
+    );
   });
 
   it("Patient Registration using the transfer with no consultation", () => {

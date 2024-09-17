@@ -204,9 +204,3 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
     });
   });
 });
-
-Cypress.Commands.add("checkConfig", (configName) => {
-  return cy.request("/config.json").then((response) => {
-    return response.body[configName];
-  });
-});
