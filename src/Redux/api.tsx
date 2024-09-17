@@ -1,4 +1,3 @@
-import { IConfig } from "../Common/hooks/useConfig";
 import {
   ConsentRequestModel,
   CreateConsentTBody,
@@ -141,13 +140,6 @@ export interface LoginCredentials {
 }
 
 const routes = {
-  config: {
-    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
-    method: "GET",
-    noAuth: true,
-    TRes: Type<IConfig>(),
-  },
-
   createScribe: {
     path: "/api/care_scribe/scribe/",
     method: "POST",

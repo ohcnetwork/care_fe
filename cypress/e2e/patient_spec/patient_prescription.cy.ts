@@ -1,4 +1,3 @@
-import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";

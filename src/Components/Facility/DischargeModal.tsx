@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CircularProgress from "../Common/components/CircularProgress";
 import ClaimCard from "../HCX/ClaimCard";
-import ConfirmDialog from "../Common/ConfirmDialog";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DISCHARGE_REASONS } from "../../Common/constants";
@@ -22,13 +21,14 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import dayjs from "../../Utils/dayjs";
 import { dischargePatient } from "../../Redux/actions";
-import routes from "../../Redux/api";
-import useConfig from "../../Common/hooks/useConfig";
-import useConfirmedAction from "../../Common/hooks/useConfirmedAction";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
+import useConfirmedAction from "../../Common/hooks/useConfirmedAction";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import careConfig from "@careConfig";
+import routes from "../../Redux/api";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -62,7 +62,6 @@ const DischargeModal = ({
   death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
   const { t } = useTranslation();
-  const { enable_hcx } = useConfig();
 
   const dispatch: any = useDispatch();
   const [preDischargeForm, setPreDischargeForm] =
@@ -383,7 +382,7 @@ const DischargeModal = ({
           )}
         </div>
 
-        {enable_hcx && (
+        {careConfig.hcx.enabled && (
           // TODO: if policy and approved pre-auth exists
           <div className="my-5 rounded p-5 shadow">
             <h2 className="mb-2">Claim Insurance</h2>

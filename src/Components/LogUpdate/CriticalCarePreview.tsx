@@ -46,6 +46,7 @@ export default function CriticalCarePreview(props: Props) {
     <div className="w-full transition-all duration-200 ease-in-out md:mx-auto md:max-w-5xl md:pt-8">
       <div className="py-4">
         <ButtonV2
+          id="back-to-consultation"
           variant="secondary"
           href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`}
         >
@@ -267,6 +268,14 @@ export default function CriticalCarePreview(props: Props) {
                 text: "Tachycardia",
               },
             ]}
+          />
+          <Detail
+            label={t("heartbeat_rhythm")}
+            value={data.rhythm && t(`HEARTBEAT_RHYTHM__${data.rhythm}`)}
+          />
+          <Detail
+            label={t("heartbeat_description")}
+            value={data.rhythm_detail}
           />
           <h4 className="py-4">Pain Scale</h4>
           <PainChart pain={data.pain_scale_enhanced ?? []} />

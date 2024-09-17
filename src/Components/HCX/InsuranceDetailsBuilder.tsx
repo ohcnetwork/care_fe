@@ -13,8 +13,8 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
+import careConfig from "@careConfig";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
@@ -99,7 +99,6 @@ const InsuranceDetailEditCard = ({
   gridView?: boolean;
 }) => {
   const { t } = useTranslation();
-  const { enable_hcx } = useConfig();
   const seletedInsurer =
     policy.insurer_id && policy.insurer_name
       ? { code: policy.insurer_id, name: policy.insurer_name }
@@ -139,7 +138,7 @@ const InsuranceDetailEditCard = ({
           value={policy.policy_id}
           onChange={handleUpdate}
         />
-        {enable_hcx ? (
+        {careConfig.hcx.enabled ? (
           <InsurerAutocomplete
             required
             name="insurer"

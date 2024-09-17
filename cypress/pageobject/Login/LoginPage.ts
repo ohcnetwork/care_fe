@@ -1,5 +1,4 @@
 // LoginPage.ts
-import { cy } from "local-cypress";
 
 class LoginPage {
   loginAsDisctrictAdmin(): void {

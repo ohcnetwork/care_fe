@@ -48,6 +48,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           <span>{t("view_details")}</span>
         </ButtonV2>
         <ButtonV2
+          id="update-log"
           variant="secondary"
           disabled={!!props.consultationData?.discharge_date}
           border

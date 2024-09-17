@@ -86,9 +86,7 @@ export default function useFileUpload(
       return;
     }
     const selectedFiles = Array.from(e.target.files);
-    const fileNames = selectedFiles.map((file) => file.name);
     setFiles((prev) => [...prev, ...selectedFiles]);
-    setUploadFileNames((prev) => [...prev, ...fileNames]);
 
     selectedFiles.forEach((file) => {
       const ext: string = file.name.split(".")[1];
@@ -258,7 +256,7 @@ export default function useFileUpload(
       multiple={multiple}
       accept={
         "allowedExtensions" in options
-          ? options.allowedExtensions?.join(",")
+          ? options.allowedExtensions?.map((e) => "." + e).join(",")
           : "allowAllExtensions" in options
             ? "*"
             : DEFAULT_ALLOWED_EXTENSIONS.join(",")
