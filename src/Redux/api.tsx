@@ -117,6 +117,7 @@ import {
   type Type,
 } from "../Components/Facility/ConsultationDetails/Events/types";
 import { InvestigationSessionType } from "../Components/Facility/Investigations/investigationsTab";
+import { AbhaNumberModel } from "../Components/ABDM/types/abha";
 import { ScribeModel } from "../Components/Scribe/Scribe";
 import { InsurerOptionModel } from "../Components/HCX/InsurerAutocomplete";
 import { PMJAYPackageItem } from "../Components/Common/PMJAYProcedurePackageAutocomplete";
@@ -1351,6 +1352,12 @@ const routes = {
   },
 
   abha: {
+    getAbhaNumber: {
+      path: "/api/v1/abdm/abha_numbers/{abhaNumberId}/",
+      method: "GET",
+      TRes: Type<AbhaNumberModel>(),
+    },
+
     // ABDM HealthID endpoints
     generateAadhaarOtp: {
       path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
@@ -1400,6 +1407,13 @@ const routes = {
       method: "POST",
       TRes: Type<ICreateHealthIdResponse>(),
       TBody: Type<ICreateHealthIdRequest>(),
+    },
+
+    linkPatient: {
+      path: "/api/v1/abdm/healthid/link_patient/",
+      method: "POST",
+      TBody: Type<{ abha_number: string; patient: string }>(),
+      TRes: Type<AbhaNumberModel>(),
     },
 
     searchByHealthId: {

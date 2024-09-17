@@ -202,7 +202,7 @@ const ScanABHAQRSection = ({
                 dob: abha?.dob.replace(/\//g, "-"),
                 address: abha?.address,
                 "dist name": abha?.["dist name"] ?? abha?.district_name,
-                "state name": abha?.["state name"],
+                "state name": abha?.["state name"] ?? abha?.state_name,
               },
             });
 
