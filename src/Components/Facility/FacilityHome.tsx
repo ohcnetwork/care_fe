@@ -18,7 +18,6 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import Table from "../Common/components/Table";
 
 import { navigate } from "raviger";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import request from "../../Utils/request/request.js";
@@ -62,8 +61,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [coverImageLoaded, setCoverImageLoaded] = useState(false);
   const [coverImageUrl, setCoverImageUrl] = useState<string | undefined>("");
   const authUser = useAuthUser();
-
-  useMessageListener((data) => console.log(data));
 
   const {
     data: facilityData,
