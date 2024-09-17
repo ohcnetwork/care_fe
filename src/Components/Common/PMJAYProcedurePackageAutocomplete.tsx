@@ -5,9 +5,10 @@ import {
 
 import { Autocomplete } from "../Form/FormFields/Autocomplete";
 import FormField from "../Form/FormFields/FormField";
-import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
+import { useState } from "react";
+import useQuery from "../../Utils/request/useQuery";
+import { mergeQueryOptions } from "../../Utils/utils";
 
 export type PMJAYPackageItem = {
   name?: string;
@@ -21,8 +22,11 @@ type Props = FormFieldBaseProps<PMJAYPackageItem>;
 export default function PMJAYProcedurePackageAutocomplete(props: Props) {
   const field = useFormFieldPropsResolver(props);
 
-  const { fetchOptions, isLoading, options } =
-    useAsyncOptions<PMJAYPackageItem>("code");
+  const [query, setQuery] = useState("");
+
+  const { data, loading } = useQuery(routes.hcx.claims.listPMJYPackages, {
+    query: { query, limit: 10 },
+  });
 
   return (
     <FormField field={field}>
@@ -32,32 +36,20 @@ export default function PMJAYProcedurePackageAutocomplete(props: Props) {
         disabled={field.disabled}
         value={field.value}
         onChange={field.handleChange}
-        options={options(field.value ? [field.value] : []).map((o) => {
-          // TODO: update backend to return price as number instead
-          return {
+        options={mergeQueryOptions(
+          (field.value ? [field.value] : []).map((o) => ({
             ...o,
             price:
               o.price && parseFloat(o.price?.toString().replaceAll(",", "")),
-          };
-        })}
+          })),
+          data ?? [],
+          (obj) => obj.code,
+        )}
         optionLabel={optionLabel}
         optionDescription={optionDescription}
         optionValue={(option) => option}
-        onQuery={(query) =>
-          fetchOptions(async () => {
-            const { res, data } = await request(
-              routes.hcx.claims.listPMJYPackages,
-              { query: { query, limit: 10 } },
-            );
-
-            if (res?.ok && data) {
-              return data;
-            }
-
-            return [];
-          })
-        }
-        isLoading={isLoading}
+        onQuery={setQuery}
+        isLoading={loading}
       />
     </FormField>
   );
