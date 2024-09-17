@@ -35,6 +35,12 @@
 ```sh
 npm install
 ```
+#### Run the following command to generate the `supportedBrowsers.ts` file:
+
+```bash
+npm run supported-browsers
+```
+This script just generates regex expression for matching the list of compatible browsers, so that we can show a warning notification for unsupported browsers.
 
 #### 🏃 Run the app in development mode
 
