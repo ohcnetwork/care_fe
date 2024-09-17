@@ -44,7 +44,7 @@ describe("Facility Manage Functions", () => {
     // It's only button functionality because we can't access S3 bucket in local
     facilityManage.clickCoverImage();
     facilityManage.verifyUploadButtonVisible();
-    facilityManage.uploadCoverImage("facilitycoverimage.jpg");
+    facilityManage.uploadCoverImage("facility-cover-image.jpg");
     facilityManage.clickSaveCoverImage();
   });
 

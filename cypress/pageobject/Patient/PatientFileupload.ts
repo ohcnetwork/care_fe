@@ -40,7 +40,7 @@ export class PatientFileUpload {
 
   uploadFile() {
     cy.get("#file_upload_patient").selectFile(
-      "cypress/fixtures/sampleAsset.xlsx",
+      "cypress/fixtures/sample-asset.xlsx",
       { force: true },
     );
   }

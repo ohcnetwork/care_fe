@@ -2,7 +2,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames, isAppleDevice } from "../../Utils/utils";
+import { classNames, isAppleDevice, keysOf } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
@@ -193,23 +193,19 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             {notesActionIcons}
           </div>
           <div className="flex bg-primary-800 text-sm">
-            {Object.values(PATIENT_NOTES_THREADS).map((current) => (
+            {keysOf(PATIENT_NOTES_THREADS).map((current) => (
               <button
+                id={`patient-note-tab-${current}`}
                 key={current}
                 className={classNames(
                   "flex flex-1 justify-center border-b-4 py-1",
-                  thread === current
+                  thread === PATIENT_NOTES_THREADS[current]
                     ? "border-primary-500 font-medium text-white"
                     : "border-primary-800 text-white/70",
                 )}
-                onClick={() => setThread(current)}
+                onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
               >
-                {
-                  {
-                    10: "Doctor's Discussions",
-                    20: "Nurse's Discussions",
-                  }[current]
-                }
+                {t(`patient_notes_thread__${current}`)}
               </button>
             ))}
           </div>
@@ -223,7 +219,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           />
           <div className="relative mx-4 flex items-center">
             <AutoExpandingTextInputFormField
-              id="doctor_notes_textarea"
+              id="discussion_notes_textarea"
               maxHeight={160}
               rows={2}
               name="note"

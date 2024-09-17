@@ -47,25 +47,6 @@ export interface AssignedToObjectModel {
   user_type: string;
 }
 
-export interface AbhaObject {
-  id: number;
-  created_date: string;
-  modified_date: string;
-  abha_number: string;
-  email: string | null;
-  first_name: string;
-  date_of_birth: string;
-  gender: "M" | "F" | "O";
-  address: string;
-  district: string;
-  state: string;
-  health_id: string | null;
-  name: string;
-  last_name: string;
-  middle_name: string;
-  profile_photo: string;
-}
-
 export interface PatientModel {
   id?: string;
   action?: number;
@@ -149,10 +130,6 @@ export interface PatientModel {
     id: number;
     occupation: Occupation;
   };
-
-  // ABDM related
-  abha_number?: string;
-  abha_number_object?: AbhaObject;
 }
 
 export interface SampleTestModel {
