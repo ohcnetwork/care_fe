@@ -1400,6 +1400,13 @@ const routes = {
       TBody: Type<ICreateHealthIdRequest>(),
     },
 
+    linkPatient: {
+      path: "/api/v1/abdm/healthid/link_patient/",
+      method: "POST",
+      TBody: Type<{ abha_number: string; patient: string }>(),
+      TRes: Type<AbhaNumberModel>(),
+    },
+
     searchByHealthId: {
       path: "/api/v1/abdm/healthid/search_by_health_id/",
       method: "POST",
