@@ -4,7 +4,7 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
 import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import { lazy, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -60,6 +60,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [coverImageEdited, setCoverImageEdited] = useState(false);
   const [coverImageLoaded, setCoverImageLoaded] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | undefined>("");
   const authUser = useAuthUser();
 
   useMessageListener((data) => console.log(data));
@@ -78,6 +79,27 @@ export const FacilityHome = ({ facilityId }: Props) => {
       }
     },
   });
+
+  const fetchImage = async () => {
+    try {
+      let imageUrl = facilityData?.read_cover_image_url;
+      if (imageUrl) {
+        await fetch(`${imageUrl}`, {
+          headers: { "Force-Revalidate": "1" },
+          credentials: "include",
+          mode: "no-cors",
+        });
+        imageUrl += "?" + Date.now();
+        setCoverImageUrl(imageUrl);
+      }
+    } catch (error) {
+      return;
+    }
+  };
+
+  useEffect(() => {
+    setCoverImageUrl(facilityData?.read_cover_image_url);
+  }, [facilityData?.read_cover_image_url]);
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
@@ -129,7 +151,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const CoverImage = () => (
     <>
       <img
-        src={`${facilityData?.read_cover_image_url}`}
+        src={coverImageUrl}
         alt={facilityData?.name}
         className="h-full w-full rounded-lg object-cover"
         onLoad={() => setCoverImageLoaded(true)}
@@ -168,6 +190,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         open={editCoverImage}
         onSave={() => {
           facilityFetch();
+          fetchImage();
           setCoverImageEdited(true);
         }}
         onClose={() => setEditCoverImage(false)}
