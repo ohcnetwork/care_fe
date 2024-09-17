@@ -40,6 +40,7 @@ import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
+import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
 import careConfig from "@careConfig";
@@ -57,6 +58,7 @@ const formatSkills = (arr: SkillModel[]) => {
 export default function PatientInfoCard(props: {
   patient: PatientModel;
   consultation?: ConsultationModel;
+  abhaNumber?: AbhaNumberModel;
   fetchPatientData?: (state: { aborted: boolean }) => void;
   activeShiftingData: any;
   consultationId: string;
@@ -734,7 +736,7 @@ export default function PatientInfoCard(props: {
 
               <div>
                 {careConfig.abdm.enabled &&
-                  (patient.abha_number ? (
+                  (props.abhaNumber ? (
                     <>
                       <MenuItem>
                         {({ close }) => (
@@ -964,18 +966,18 @@ export default function PatientInfoCard(props: {
       />
       <ABHAProfileModal
         patientId={patient.id}
-        abha={patient.abha_number_object}
+        abha={props.abhaNumber}
         show={showABHAProfile}
         onClose={() => setShowABHAProfile(false)}
       />
       <LinkCareContextModal
         consultationId={props.consultationId}
-        patient={patient}
+        abha={props.abhaNumber}
         show={showLinkCareContext}
         onClose={() => setShowLinkCareContext(false)}
       />
       <FetchRecordsModal
-        patient={patient}
+        abha={props.abhaNumber}
         show={showFetchABDMRecords}
         onClose={() => setShowFetchABDMRecords(false)}
       />
