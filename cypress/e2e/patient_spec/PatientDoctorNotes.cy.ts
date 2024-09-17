@@ -27,7 +27,6 @@ describe("Patient", () => {
     );
     cy.closeNotification();
     // switch the switch to nurse note, as the bydefault is doctornotes
-
     patientDoctorNotes.addDoctorsNotes("Test nurse Notes");
     patientDoctorNotes.postDoctorNotes();
     cy.verifyNotification("Note added successfully");
