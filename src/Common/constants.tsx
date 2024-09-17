@@ -773,22 +773,6 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 5, text: "Moves to localized pain" },
   { value: 6, text: "Obeying commands/Normal acrivity" },
 ];
-export const CONSULTATION_TABS = [
-  { text: "UPDATES", desc: "Overview" },
-  { text: "FEED", desc: "Feed" },
-  { text: "SUMMARY", desc: "Vitals" },
-  { text: "ABG", desc: "ABG" },
-  { text: "MEDICINES", desc: "Medicines" },
-  { text: "FILES", desc: "Files" },
-  { text: "INVESTIGATIONS", desc: "Investigations" },
-  { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
-  { text: "VENTILATOR", desc: "Ventilation" },
-  { text: "NUTRITION", desc: "Nutrition" },
-  { text: "PRESSURE_SORE", desc: "Pressure Sore" },
-  { text: "NURSING", desc: "Nursing" },
-  { text: "DIALYSIS", desc: "Dialysis" },
-  { text: "ABDM", desc: "ABDM Records" },
-];
 
 export const RHYTHM_CHOICES = [
   { id: 5, text: "REGULAR", desc: "Regular" },

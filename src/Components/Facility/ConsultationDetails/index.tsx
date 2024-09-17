@@ -1,4 +1,4 @@
-import { CONSULTATION_TABS, GENDER_TYPES } from "../../../Common/constants";
+import { GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
 import {
   getConsultation,
@@ -13,6 +13,7 @@ import { PatientModel } from "../../Patient/models";
 import {
   formatDateTime,
   humanizeStrings,
+  keysOf,
   relativeTime,
 } from "../../../Utils/utils";
 
@@ -44,6 +45,7 @@ import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 import Error404 from "../../ErrorPages/404";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -75,6 +77,7 @@ const TABS = {
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
+  const { t } = useTranslation();
   let tab = undefined;
   if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
     tab = props.tab.toUpperCase() as keyof typeof TABS;
@@ -388,8 +391,8 @@ export const ConsultationDetails = (props: any) => {
                 className="flex space-x-6 overflow-x-auto pb-2 pl-2"
                 id="consultation_tab_nav"
               >
-                {CONSULTATION_TABS.map((p) => {
-                  if (p.text === "FEED") {
+                {keysOf(TABS).map((p) => {
+                  if (p === "FEED") {
                     if (
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
@@ -399,17 +402,17 @@ export const ConsultationDetails = (props: any) => {
                       return null; // Hide feed tab
                   }
 
-                  if (p.text === "ABDM" && !abhaNumberData?.abha_number) {
+                  if (p === "ABDM" && !abhaNumberData?.abha_number) {
                     return null;
                   }
 
                   return (
                     <Link
-                      key={p.text}
-                      className={tabButtonClasses(tab === p.text)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                      key={p}
+                      className={tabButtonClasses(tab === p)}
+                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
                     >
-                      {p.desc}
+                      {t(`CONSULTATION_TAB__${p}`)}
                     </Link>
                   );
                 })}
