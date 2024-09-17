@@ -7,7 +7,6 @@ import {
   deleteAssetBed,
 } from "../../Redux/actions.js";
 import { CameraPTZ, getCameraPTZ } from "../../Common/constants.js";
-import { StreamStatus, useMSEMediaPlayer } from "./useMSEplayer.js";
 import { useFeedPTZ } from "./useFeedPTZ.js";
 import * as Notification from "../../Utils/Notifications.js";
 import { AxiosError } from "axios";
@@ -20,6 +19,14 @@ import ConfirmDialog from "../Common/ConfirmDialog.js";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import useFullscreen from "../../Common/hooks/useFullscreen.js";
 import TextFormField from "../Form/FormFields/TextFormField.js";
+import VideoPlayer from "./videoPlayer.js";
+
+export enum StreamStatus {
+  Playing,
+  Stop,
+  Loading,
+  Offline,
+}
 
 export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
   const { cameraPTZ } = props;
@@ -103,10 +110,7 @@ const CameraFeedOld = (props: any) => {
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
   const liveFeedPlayerRef = useRef<any>(null);
-
-  const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
-
-  const { startStream } = useMSEMediaPlayer({ videoEl });
+  const [streamUrl, setStreamUrl] = useState<string>("");
 
   const refreshPresetsHash = props.refreshPresetsHash;
 
@@ -238,20 +242,15 @@ const CameraFeedOld = (props: any) => {
   const startStreamFeed = useCallback(async () => {
     if (!liveFeedPlayerRef.current) return;
 
-    let _streamUrl = "";
     await getStreamToken({
       onSuccess: (data) => {
-        _streamUrl = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0&token=${data.token}`;
+        setStreamUrl(
+          `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0&token=${data.token}`,
+        );
       },
       onError: () => {
         setStreamStatus(StreamStatus.Offline);
       },
-    });
-    if (!_streamUrl) return;
-    startStream({
-      url: _streamUrl,
-      onSuccess: () => setStreamStatus(StreamStatus.Playing),
-      onError: () => setStreamStatus(StreamStatus.Offline),
     });
   }, [liveFeedPlayerRef.current]);
 
@@ -412,13 +411,10 @@ const CameraFeedOld = (props: any) => {
         <div className="relative mt-4 flex flex-col gap-4 lg:flex-row">
           <div className="flex-1">
             <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
-              <video
-                id="mse-video"
-                autoPlay
-                muted
-                playsInline
+              <VideoPlayer
+                playerRef={liveFeedPlayerRef}
+                streamUrl={streamUrl}
                 className="z-10 h-full w-full"
-                ref={liveFeedPlayerRef}
                 onPlay={() => {
                   setVideoStartTime(() => new Date());
                 }}
@@ -428,7 +424,9 @@ const CameraFeedOld = (props: any) => {
                     setStreamStatus(StreamStatus.Loading);
                   }
                 }}
-              ></video>
+                onSuccess={() => setStreamStatus(StreamStatus.Playing)}
+                onError={() => setStreamStatus(StreamStatus.Offline)}
+              />
 
               {streamStatus === StreamStatus.Playing &&
                 calculateVideoLiveDelay() > 3 && (

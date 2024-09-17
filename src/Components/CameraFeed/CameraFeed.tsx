@@ -1,17 +1,17 @@
-import { LegacyRef, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AssetData } from "../Assets/AssetTypes";
 import useOperateCamera, { PTZPayload } from "./useOperateCamera";
-import usePlayer from "./usePlayer";
 import { getStreamUrl } from "./utils";
 import { classNames, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState } from "./FeedAlert";
-import FeedNetworkSignal from "./FeedNetworkSignal";
+import FeedNetworkSignal, { StreamStatus } from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
 import useFullscreen from "../../Common/hooks/useFullscreen";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
+import VideoPlayer from "./videoPlayer";
 
 interface Props {
   children?: React.ReactNode;
@@ -32,15 +32,13 @@ interface Props {
 export default function CameraFeed(props: Props) {
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
-  const streamUrl = getStreamUrl(props.asset);
+  const [streamUrl, setStreamUrl] = useState<string>("");
   const inlineControls = useBreakpoints({ default: false, sm: true });
-
-  const player = usePlayer(playerRef);
 
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [state, setState] = useState<FeedAlertState>();
-  useEffect(() => setState(player.status), [player.status, setState]);
-
+  const [playedOn, setPlayedOn] = useState<Date>();
+  const [playerStatus, setPlayerStatus] = useState<StreamStatus>("stop");
   // Move camera when selected preset has changed
   useEffect(() => {
     async function move(preset: PTZPayload) {
@@ -74,8 +72,8 @@ export default function CameraFeed(props: Props) {
 
   const initializeStream = useCallback(async () => {
     if (!playerRef.current) return;
-
-    const _streamUrl = await props
+    setPlayerStatus("loading");
+    await props
       .operate({ type: "get_stream_token" })
       .then(({ res, data }) => {
         if (res?.status != 200) {
@@ -83,31 +81,18 @@ export default function CameraFeed(props: Props) {
           return props.onStreamError?.();
         }
         const result = data?.result as { token: string };
-        return getStreamUrl(props.asset, result.token);
+        return setStreamUrl(getStreamUrl(props.asset, result.token));
       })
       .catch(() => {
         setState("host_unreachable");
         return props.onStreamError?.();
       });
-
-    if (!_streamUrl) return;
-    player.initializeStream({
-      url: _streamUrl,
-      onSuccess: async () => {
-        props.onStreamSuccess?.();
-        const { res } = await props.operate({ type: "get_status" });
-        if (res?.status === 500) {
-          setState("host_unreachable");
-        }
-      },
-      onError: props.onStreamError,
-    });
-  }, [playerRef.current]);
+  }, []);
 
   // Start stream on mount
   useEffect(() => {
     initializeStream();
-  }, [initializeStream]);
+  }, []);
 
   const resetStream = () => {
     setState("loading");
@@ -174,7 +159,7 @@ export default function CameraFeed(props: Props) {
             isFullscreen ? "hidden lg:flex" : "flex",
             "items-center justify-between px-4 py-0.5 transition-all duration-500 ease-in-out lg:py-1",
             (() => {
-              if (player.status !== "playing") {
+              if (playerStatus !== "playing") {
                 return "bg-black text-zinc-400";
               }
 
@@ -188,7 +173,7 @@ export default function CameraFeed(props: Props) {
         >
           <div
             className={classNames(
-              player.status !== "playing"
+              playerStatus !== "playing"
                 ? "pointer-events-none opacity-10"
                 : "opacity-100",
               "transition-all duration-200 ease-in-out",
@@ -209,8 +194,8 @@ export default function CameraFeed(props: Props) {
               >
                 <FeedNetworkSignal
                   playerRef={playerRef as any}
-                  playedOn={player.playedOn}
-                  status={player.status}
+                  playedOn={playedOn}
+                  status={playerStatus}
                   onReset={resetStream}
                 />
               </div>
@@ -220,7 +205,7 @@ export default function CameraFeed(props: Props) {
         <div className="group relative aspect-video bg-black">
           {/* Notifications */}
           <FeedAlert state={state} />
-          {player.status === "playing" && <FeedWatermark />}
+          {playerStatus === "playing" && <FeedWatermark />}
 
           {/* No Feed informations */}
           {(() => {
@@ -231,7 +216,7 @@ export default function CameraFeed(props: Props) {
                     message="Host Unreachable"
                     className="text-warning-500"
                     icon="l-exclamation-triangle"
-                    streamUrl={streamUrl}
+                    streamUrl=""
                     asset={props.asset}
                     onResetClick={resetStream}
                   />
@@ -242,7 +227,7 @@ export default function CameraFeed(props: Props) {
                     message="Authentication Error"
                     className="text-warning-500"
                     icon="l-exclamation-triangle"
-                    streamUrl={streamUrl}
+                    streamUrl=""
                     asset={props.asset}
                     onResetClick={resetStream}
                   />
@@ -253,7 +238,7 @@ export default function CameraFeed(props: Props) {
                     message="Offline"
                     className="text-secondary-500"
                     icon="l-exclamation-triangle"
-                    streamUrl={streamUrl}
+                    streamUrl=""
                     asset={props.asset}
                     onResetClick={resetStream}
                   />
@@ -262,26 +247,32 @@ export default function CameraFeed(props: Props) {
           })()}
 
           {/* Video Player */}
-          <video
-            onContextMenu={(e) => e.preventDefault()}
+          <VideoPlayer
+            playerRef={playerRef}
+            streamUrl={streamUrl}
             className="absolute inset-x-0 mx-auto aspect-video max-h-full w-full"
-            id="mse-video"
-            autoPlay
-            muted
-            disablePictureInPicture
-            playsInline
-            onPlay={player.onPlayCB}
-            onEnded={() => player.setStatus("stop")}
-            ref={playerRef as LegacyRef<HTMLVideoElement>}
+            onPlay={() => {
+              setPlayedOn(new Date());
+              setState("playing");
+              setPlayerStatus("playing");
+            }}
+            onEnded={() => setPlayerStatus("stop")}
+            onSuccess={async () => {
+              props.onStreamSuccess?.();
+              const { res } = await props.operate({ type: "get_status" });
+              if (res?.status === 500) {
+                setState("host_unreachable");
+              }
+            }}
+            onError={props.onStreamError}
           />
-
-          {inlineControls && player.status === "playing" && controls}
+          {inlineControls && playerStatus === "playing" && controls}
         </div>
         {!inlineControls && (
           <div
             className={classNames(
               "py-4 transition-all duration-500 ease-in-out",
-              player.status !== "playing"
+              playerStatus !== "playing"
                 ? "pointer-events-none px-6 opacity-30"
                 : "px-12 opacity-100",
             )}
