@@ -37,8 +37,6 @@ export default function CreateClaimCard({
   const [createdClaim, setCreatedClaim] = useState<HCXClaimModel>();
   const [use_, setUse_] = useState(use);
 
-  console.log(items);
-
   useEffect(() => {
     async function autoFill() {
       const latestApprovedPreAuthsRes = await dispatch(

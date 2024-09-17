@@ -1361,7 +1361,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         ref={fieldRef["procedure"]}
                       >
-                        <FieldLabel>Procedures</FieldLabel>
+                        <FieldLabel>{t("procedure_suggestions")}</FieldLabel>
                         <ProcedureBuilder
                           procedures={
                             Array.isArray(state.form.procedure)

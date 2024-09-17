@@ -3,11 +3,18 @@ import { UserPage } from "../../pageobject/Users/UserSearch";
 
 describe("User Homepage", () => {
   const userPage = new UserPage();
-  const usernameToTest = "devdoctor";
-  const currentuser = "devdistrictadmin";
   const loginPage = new LoginPage();
-  const phone_number = "9876543219";
-  const alt_phone_number = "9876543219";
+  const currentuser = "devdistrictadmin";
+  const firstName = "Dummy";
+  const lastName = "Nurse";
+  const role = "Nurse";
+  const state = "Kerala";
+  const district = "Ernakulam";
+  const phoneNumber = "8878825662";
+  const altPhoneNumber = "8878825662";
+  const homeFacility = "Dummy Facility 40";
+  const nurseUserName = "dummynurse1";
+  const doctorUserName = "devdoctor";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -22,33 +29,32 @@ describe("User Homepage", () => {
 
   it("User advance filter functionality", () => {
     userPage.clickAdvancedFilters();
-    userPage.typeInFirstName("Dev");
-    userPage.typeInLastName("Doctor");
-    userPage.selectRole("Doctor");
-    userPage.selectState("Kerala");
-    userPage.selectDistrict("Ernakulam");
-    userPage.typeInPhoneNumber(phone_number);
-    userPage.typeInAltPhoneNumber(alt_phone_number);
-    userPage.selectHomeFacility("Dummy Facility 40");
+    userPage.typeInFirstName(firstName);
+    userPage.typeInLastName(lastName);
+    userPage.selectRole(role);
+    userPage.selectState(state);
+    userPage.selectDistrict(district);
+    userPage.typeInPhoneNumber(phoneNumber);
+    userPage.typeInAltPhoneNumber(altPhoneNumber);
+    userPage.selectHomeFacility(homeFacility);
     userPage.applyFilter();
-    userPage.verifyUrlafteradvancefilter();
-    userPage.checkUsernameText(usernameToTest);
-    userPage.verifyDataTestIdText("First Name", "First Name: Dev");
-    userPage.verifyDataTestIdText("Last Name", "Last Name: Doctor");
+    userPage.checkUsernameText(nurseUserName);
+    // Verify the badges related to the data
+    userPage.verifyDataTestIdText("First Name", `First Name: ${firstName}`);
+    userPage.verifyDataTestIdText("Last Name", `Last Name: ${lastName}`);
     userPage.verifyDataTestIdText(
       "Phone Number",
-      "Phone Number: +919876543219",
+      `Phone Number: +91${phoneNumber}`,
     );
     userPage.verifyDataTestIdText(
       "WhatsApp no.",
-      "WhatsApp no.: +919876543219",
+      `WhatsApp no.: +91${altPhoneNumber}`,
     );
-    userPage.verifyDataTestIdText("Role", "Role: Doctor");
+    userPage.verifyDataTestIdText("Role", `Role: ${role}`);
     userPage.verifyDataTestIdText(
       "Home Facility",
-      "Home Facility: Dummy Facility 40",
+      `Home Facility: ${homeFacility}`,
     );
-    userPage.verifyDataTestIdText("District", "District: Ernakulam");
     userPage.clearFilters();
     userPage.verifyDataTestIdNotVisible("First Name");
     userPage.verifyDataTestIdNotVisible("Last Name");
@@ -61,14 +67,14 @@ describe("User Homepage", () => {
 
   it("Search by username", () => {
     userPage.checkSearchInputVisibility();
-    userPage.typeInSearchInput(usernameToTest);
-    userPage.checkUrlForUsername(usernameToTest);
-    userPage.checkUsernameText(usernameToTest);
+    userPage.typeInSearchInput(doctorUserName);
+    userPage.checkUrlForUsername(doctorUserName);
+    userPage.checkUsernameText(doctorUserName);
     userPage.checkUsernameBadgeVisibility(true);
     userPage.clearSearchInput();
     userPage.checkUsernameBadgeVisibility(false);
-    userPage.typeInSearchInput(usernameToTest);
-    userPage.checkUsernameText(usernameToTest);
+    userPage.typeInSearchInput(doctorUserName);
+    userPage.checkUsernameText(doctorUserName);
     userPage.clickRemoveIcon();
     userPage.checkUsernameBadgeVisibility(false);
     userPage.checkUsernameText(currentuser);

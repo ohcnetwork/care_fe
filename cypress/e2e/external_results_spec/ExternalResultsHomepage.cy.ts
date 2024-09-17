@@ -33,7 +33,9 @@ describe("Edit Profile Testing", () => {
     cy.get("div").contains("Import/Export").click();
     cy.get("div").contains("Import Results").click();
     cy.get("[data-testid=import-file]")
-      .selectFile("cypress/fixtures/externalresultsample.csv", { force: true })
+      .selectFile("cypress/fixtures/external-result-sample.csv", {
+        force: true,
+      })
       .wait(100);
     cy.submitButton("Import");
     cy.wait("@import").then((interception) => {

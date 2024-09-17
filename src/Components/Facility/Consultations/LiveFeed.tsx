@@ -258,7 +258,6 @@ const LiveFeed = (props: any) => {
     updatePreset: (option) => {
       getCameraStatus({
         onSuccess: async (data) => {
-          console.log({ currentPreset, data });
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             console.log("Updating Preset");
