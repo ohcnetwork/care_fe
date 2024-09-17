@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { HCXActions } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
 import InsurerAutocomplete from "./InsurerAutocomplete";
-import useConfig from "../../Common/hooks/useConfig";
+import careConfig from "@careConfig";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
@@ -57,7 +57,7 @@ export default function InsuranceDetailsBuilder(props: Props) {
     <FormField field={field}>
       <ul className="flex flex-col gap-3">
         {props.value?.length === 0 && (
-          <span className="py-16 text-center text-gray-500">
+          <span className="py-16 text-center text-secondary-500">
             No insurance details added
           </span>
         )}
@@ -93,14 +93,13 @@ const InsuranceDetailEditCard = ({
   handleRemove: () => void;
   gridView?: boolean;
 }) => {
-  const { enable_hcx } = useConfig();
   const seletedInsurer =
     policy.insurer_id && policy.insurer_name
       ? { code: policy.insurer_id, name: policy.insurer_name }
       : undefined;
 
   return (
-    <div className="rounded-lg border-2 border-dashed border-gray-200 p-4">
+    <div className="rounded-lg border-2 border-dashed border-secondary-200 p-4">
       <div className="flex items-center justify-between">
         <FieldLabel className="my-auto !font-bold">Policy</FieldLabel>
         <ButtonV2 variant="danger" type="button" ghost onClick={handleRemove}>
@@ -133,7 +132,7 @@ const InsuranceDetailEditCard = ({
           value={policy.policy_id}
           onChange={handleUpdate}
         />
-        {enable_hcx ? (
+        {careConfig.hcx.enabled ? (
           <InsurerAutocomplete
             required
             name="insurer_"

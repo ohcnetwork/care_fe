@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSlug from "../../../Common/hooks/useSlug";
 import {
   ConsultationDiagnosis,
@@ -11,6 +11,7 @@ import request from "../../../Utils/request/request";
 import DiagnosesRoutes from "../routes";
 import * as Notification from "../../../Utils/Notifications";
 import PrincipalDiagnosisSelect from "./PrincipalDiagnosisSelect";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface CreateDiagnosesProps {
   className?: string;
@@ -21,7 +22,7 @@ interface CreateDiagnosesProps {
 export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
   return (
     <div className={props.className}>
-      <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
+      <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
         <ul className="flex w-full flex-col gap-2 p-4">
           {props.value.map((diagnosis, index) => (
             <li key={index} id={`diagnosis-entry-${index}`}>
@@ -45,7 +46,7 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
 
         {props.value.length === 0 && <NoDiagnosisAdded />}
 
-        <div className="w-full rounded-b-lg bg-gray-200 px-4 pt-4">
+        <div className="w-full rounded-b-lg bg-secondary-200 px-4 pt-4">
           <AddICD11Diagnosis
             disallowed={props.value.map(
               (obj) => obj.diagnosis_object as ICD11DiagnosisModel,
@@ -78,14 +79,22 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
 interface EditDiagnosesProps {
   className?: string;
   value: ConsultationDiagnosis[];
+  suggestions?: ICD11DiagnosisModel[];
+  onUpdate?: (diagnoses: ConsultationDiagnosis[]) => void;
 }
 
 export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
   const consultation = useSlug("consultation");
   const [diagnoses, setDiagnoses] = useState(props.value);
+  const [prefill, setPrefill] = useState<ICD11DiagnosisModel>();
+
+  useEffect(() => {
+    setDiagnoses(props.value);
+  }, [props.value]);
+
   return (
     <div className={props.className}>
-      <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
+      <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
         <ul className="flex w-full flex-col gap-2 p-4">
           {diagnoses.map((diagnosis, index) => (
             <li key={index} id={`diagnosis-entry-${index}`}>
@@ -108,7 +117,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
 
         {diagnoses.length === 0 && <NoDiagnosisAdded />}
 
-        <div className="w-full rounded-b-lg bg-gray-200 px-4 pt-4">
+        <div className="w-full rounded-b-lg bg-secondary-200 px-4 pt-4">
           <AddICD11Diagnosis
             disallowed={diagnoses.map(
               (obj) => obj.diagnosis_object as ICD11DiagnosisModel,
@@ -124,16 +133,34 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
 
               if (res?.ok && data) {
                 setDiagnoses([...diagnoses, data]);
+                setPrefill(undefined);
+                props.onUpdate?.(diagnoses);
                 return true;
               }
 
               if (error) {
                 Notification.Error({ msg: error });
               }
-
               return false;
             }}
+            prefill={prefill}
+            onSelect={() => setPrefill(undefined)}
           />
+          {!!props.suggestions?.length && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {props.suggestions?.map((suggestion, i) => (
+                <button
+                  key={i}
+                  className="flex items-center gap-2 rounded-full border border-primary-500 px-4 py-1 text-sm text-primary-500 transition-all hover:bg-primary-400/10"
+                  onClick={() => setPrefill(suggestion)}
+                  type="button"
+                >
+                  <CareIcon icon="l-heart-medical" />
+                  {suggestion.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -188,7 +215,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
 
 const NoDiagnosisAdded = () => {
   return (
-    <div className="flex w-full justify-center gap-2 pb-8 text-center text-gray-500">
+    <div className="flex w-full justify-center gap-2 pb-8 text-center text-secondary-500">
       Atleast one diagnosis must be added
     </div>
   );

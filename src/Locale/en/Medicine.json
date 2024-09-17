@@ -39,6 +39,7 @@
   "prescription_logs": "Prescription Logs",
   "modification_caution_note": "No modifications possible once added",
   "discontinue_caution_note": "Are you sure you want to discontinue this prescription?",
+  "confirm_discontinue": "Confirm Discontinue",
   "edit_caution_note": "A new prescription will be added to the consultation with the edited details and the current prescription will be discontinued.",
   "reason_for_discontinuation": "Reason for discontinuation",
   "reason_for_edit": "Reason for edit",
@@ -47,10 +48,11 @@
   "PRESCRIPTION_ROUTE_IM": "IM",
   "PRESCRIPTION_ROUTE_SC": "S/C",
   "PRESCRIPTION_ROUTE_INHALATION": "Inhalation",
-  "PRESCRIPTION_ROUTE_NASOGASTRIC": "Nasogastric/Gastrostomy tube",
+  "PRESCRIPTION_ROUTE_NASOGASTRIC": "Nasogastric / Gastrostomy tube",
   "PRESCRIPTION_ROUTE_INTRATHECAL": "intrathecal injection",
   "PRESCRIPTION_ROUTE_TRANSDERMAL": "Transdermal",
   "PRESCRIPTION_ROUTE_RECTAL": "Rectal",
+  "PRESCRIPTION_ROUTE_SUBLINGUAL": "Sublingual",
   "PRESCRIPTION_FREQUENCY_STAT": "Imediately",
   "PRESCRIPTION_FREQUENCY_OD": "Once daily",
   "PRESCRIPTION_FREQUENCY_HS": "Night only",
@@ -59,5 +61,8 @@
   "PRESCRIPTION_FREQUENCY_QID": "6th hourly",
   "PRESCRIPTION_FREQUENCY_Q4H": "4th hourly",
   "PRESCRIPTION_FREQUENCY_QOD": "Alternate day",
-  "PRESCRIPTION_FREQUENCY_QWK": "Once a week"
+  "PRESCRIPTION_FREQUENCY_QWK": "Once a week",
+  "inconsistent_dosage_units_error": "Dosage units must be same",
+  "max_dosage_in_24hrs_gte_base_dosage_error": "Max. dosage in 24 hours must be greater than or equal to base dosage",
+  "administration_dosage_range_error": "Dosage should be between start and target dosage"
 }

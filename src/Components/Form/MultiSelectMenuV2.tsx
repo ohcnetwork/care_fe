@@ -1,8 +1,14 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "../Common/components/HelperComponents";
-import { Listbox } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
+import {
+  Label,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 import { ReactNode, useRef } from "react";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { classNames } from "../../Utils/utils";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -49,7 +55,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       disabled: props.optionDisabled?.(option),
       isSelected: props.value?.includes(value as any) ?? false,
       displayChip: (
-        <div className="rounded-full border border-secondary-400 bg-secondary-100 px-2 text-xs text-gray-900">
+        <div className="rounded-full border border-secondary-400 bg-secondary-100 px-2 text-xs text-secondary-900">
           {selectedLabel}
         </div>
       ),
@@ -87,95 +93,95 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
         }
         multiple
       >
-        {({ open }) => (
-          <>
-            <Listbox.Label className="sr-only !relative">
-              {props.placeholder}
-            </Listbox.Label>
-            <div className="relative">
-              <div>
-                <Listbox.Button
-                  className="cui-input-base flex w-full rounded"
-                  ref={buttonRef}
-                >
-                  <div className="relative z-0 flex w-full items-center">
-                    <div className="relative flex flex-1 items-center pr-4 focus:z-10">
-                      <p className="ml-2.5 text-sm font-normal text-gray-600">
-                        <Placeholder />
-                      </p>
+        <>
+          <Label className="sr-only !relative">{props.placeholder}</Label>
+          <div className="relative">
+            <div>
+              <ListboxButton
+                className="cui-input-base flex w-full rounded"
+                ref={buttonRef}
+              >
+                <div className="relative z-0 flex w-full items-center">
+                  <div className="relative flex flex-1 items-center pr-4 focus:z-10">
+                    <p className="ml-2.5 text-sm font-normal text-secondary-600">
+                      <Placeholder />
+                    </p>
 
-                      {selectedOptions.length !== 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {selectedOptions.map((option, index) => (
-                            <MultiSelectOptionChip
-                              key={index}
-                              label={option.selectedLabel}
-                              onRemove={() => {
-                                const updatedOptions = selectedOptions.filter(
-                                  (selectedOption) =>
-                                    selectedOption.value !== option.value,
-                                );
-                                props.onChange(
-                                  updatedOptions.map((o) => o.value) as any,
-                                );
-                              }}
-                            />
+                    {selectedOptions.length !== 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedOptions.map((option, index) => (
+                          <MultiSelectOptionChip
+                            key={index}
+                            label={option.selectedLabel}
+                            onRemove={() => {
+                              const updatedOptions = selectedOptions.filter(
+                                (selectedOption) =>
+                                  selectedOption.value !== option.value,
+                              );
+                              props.onChange(
+                                updatedOptions.map((o) => o.value) as any,
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <CareIcon
+                    id="dropdown-toggle"
+                    icon="l-angle-down"
+                    className="-mb-0.5 text-lg text-secondary-900"
+                  />
+                </div>
+              </ListboxButton>
+            </div>
+            <ListboxOptions
+              modal={false}
+              as="ul"
+              className="cui-dropdown-base absolute top-full"
+            >
+              {options.map((option, index) => (
+                <ListboxOption
+                  as="li"
+                  id={`${props.id}-option-${index}`}
+                  key={index}
+                  className={dropdownOptionClassNames}
+                  value={option}
+                  onClick={() => handleSingleSelect(option)}
+                  disabled={option.disabled}
+                >
+                  {({ focus }) => (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between">
+                        {option.label}
+                        {(option.icon || option.isSelected) &&
+                          (option.isSelected ? (
+                            <CareIcon icon="l-check" className="text-lg" />
+                          ) : (
+                            option.icon
                           ))}
-                        </div>
+                      </div>
+                      {option.description && (
+                        <p
+                          className={classNames(
+                            "text-sm font-normal",
+                            option.disabled
+                              ? "text-secondary-500"
+                              : focus
+                                ? "text-primary-200"
+                                : "text-secondary-500",
+                          )}
+                        >
+                          {option.description}
+                        </p>
                       )}
                     </div>
-                    <CareIcon
-                      icon="l-angle-down"
-                      className="-mb-0.5 text-lg text-gray-900"
-                    />
-                  </div>
-                </Listbox.Button>
-              </div>
-              <DropdownTransition show={open}>
-                <Listbox.Options className="cui-dropdown-base absolute top-full">
-                  {options.map((option, index) => (
-                    <Listbox.Option
-                      id={`${props.id}-option-${index}`}
-                      key={index}
-                      className={dropdownOptionClassNames}
-                      value={option}
-                      onClick={() => handleSingleSelect(option)}
-                      disabled={option.disabled}
-                    >
-                      {({ active }) => (
-                        <div className="flex flex-col gap-2">
-                          <div className="flex justify-between">
-                            {option.label}
-                            {(option.icon || option.isSelected) &&
-                              (option.isSelected ? (
-                                <CareIcon icon="l-check" className="text-lg" />
-                              ) : (
-                                option.icon
-                              ))}
-                          </div>
-                          {option.description && (
-                            <p
-                              className={classNames(
-                                "text-sm font-normal",
-                                option.disabled
-                                  ? "text-gray-700"
-                                  : active
-                                    ? "text-primary-200"
-                                    : "text-gray-700",
-                              )}
-                            >
-                              {option.description}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
-              </DropdownTransition>
-            </div>
-          </>
-        )}
+                  )}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </div>
+        </>
       </Listbox>
     </div>
   );
@@ -193,7 +199,7 @@ export const MultiSelectOptionChip = ({
   onRemove,
 }: MultiSelectOptionChipProps) => {
   return (
-    <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
+    <span className="flex items-center gap-2 rounded-full border-secondary-300 bg-secondary-200 px-3 text-xs text-secondary-700">
       <p className="py-1">{label}</p>
       {onRemove && (
         <p
@@ -211,22 +217,22 @@ export const MultiSelectOptionChip = ({
 };
 
 interface OptionRenderPropArg {
-  active: boolean;
+  focus: boolean;
   selected: boolean;
   disabled: boolean;
 }
 
 export const dropdownOptionClassNames = ({
-  active,
+  focus,
   selected,
   disabled,
 }: OptionRenderPropArg) => {
   return classNames(
     "group/option relative w-full cursor-default select-none p-4 text-sm transition-colors duration-75 ease-in-out",
-    !disabled && active && "bg-primary-500 text-white",
-    !disabled && !active && selected && "text-primary-500",
-    !disabled && !active && !selected && "text-gray-900",
-    disabled && "cursor-not-allowed text-gray-800",
+    !disabled && focus && "bg-primary-500 text-white",
+    !disabled && !focus && selected && "text-primary-500",
+    !disabled && !focus && !selected && "text-secondary-900",
+    disabled && "cursor-not-allowed text-secondary-600",
     selected ? "font-semibold" : "font-normal",
   );
 };

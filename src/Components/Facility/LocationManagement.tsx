@@ -87,7 +87,7 @@ export default function LocationManagement({ facilityId }: Props) {
               id="add-new-location"
               href={`/facility/${facilityId}/location/add`}
               authorizeFor={NonReadOnlyUsers}
-              className="mr-8 hidden lg:block"
+              className="mr-4 hidden lg:block"
             >
               <CareIcon icon="l-plus" className="text-lg" />
               Add New Location
@@ -105,7 +105,7 @@ export default function LocationManagement({ facilityId }: Props) {
             </ButtonV2>
           </div>
           <div className="w-full @container">
-            <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+            <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
               <span>No locations available</span>
             </PaginatedList.WhenEmpty>
 
@@ -225,7 +225,7 @@ const Location = ({
   setShowDeletePopup,
   facilityId,
 }: LocationProps) => (
-  <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
+  <div className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
     <div className="flex-1">
       <div className="flex w-full items-start justify-between gap-2">
         <div className="flex items-end gap-3">
@@ -243,16 +243,16 @@ const Location = ({
         </div>
       </div>
       <p
-        className="mt-3 break-all text-sm font-medium text-gray-700"
+        className="mt-3 break-all text-sm font-medium text-secondary-700"
         id="view-location-description"
       >
         {description || "-"}
       </p>
-      <p className="mt-3 text-sm font-semibold text-gray-700">
+      <p className="mt-3 text-sm font-semibold text-secondary-700">
         Middleware Address:
       </p>
       <p
-        className="mt-1 break-all font-mono text-sm font-bold text-gray-700"
+        className="mt-1 break-all font-mono text-sm font-bold text-secondary-700"
         id="view-location-middleware"
       >
         {middleware_address || "-"}
@@ -261,7 +261,7 @@ const Location = ({
         route={routes.listFacilityAssetLocationAvailability}
         params={{ external_id: id, facility_external_id: facilityId }}
         header={
-          <p className="mt-3 text-sm font-semibold text-gray-700">
+          <p className="mt-3 text-sm font-semibold text-secondary-700">
             Middleware Uptime
           </p>
         }
@@ -312,7 +312,7 @@ const Location = ({
       </div>
     </div>
 
-    <div className="mt-3 flex items-center justify-between gap-4 text-sm font-medium text-gray-700">
+    <div className="mt-3 flex items-center justify-between gap-4 text-sm font-medium text-secondary-700">
       <RecordMeta time={created_date} prefix="Created:" />
       <RecordMeta time={modified_date} prefix="Modified:" />
     </div>

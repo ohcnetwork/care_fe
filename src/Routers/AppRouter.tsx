@@ -11,7 +11,6 @@ import {
   SidebarShrinkContext,
 } from "../Components/Common/Sidebar/Sidebar";
 import { BLACKLISTED_PATHS } from "../Common/constants";
-import useConfig from "../Common/hooks/useConfig";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import HealthInformation from "../Components/ABDM/HealthInformation";
 import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
@@ -28,6 +27,7 @@ import ResourceRoutes from "./routes/ResourceRoutes";
 import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
 import useAuthUser from "../Common/hooks/useAuthUser";
+import careConfig from "@careConfig";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
@@ -59,11 +59,10 @@ const Routes = {
 
 export default function AppRouter() {
   const authUser = useAuthUser();
-  const { main_logo, enable_hcx } = useConfig();
 
   let routes = Routes;
 
-  if (enable_hcx) {
+  if (careConfig.hcx.enabled) {
     routes = { ...routes, ...HCXRoutes };
   }
 
@@ -107,7 +106,7 @@ export default function AppRouter() {
 
   return (
     <SidebarShrinkContext.Provider value={{ shrinked, setShrinked }}>
-      <div className="absolute inset-0 flex h-screen overflow-hidden bg-gray-100 print:overflow-visible">
+      <div className="absolute inset-0 flex h-screen overflow-hidden bg-secondary-100 print:overflow-visible">
         <>
           <div className="block md:hidden">
             <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
@@ -121,7 +120,7 @@ export default function AppRouter() {
           <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="border-r border-gray-200 px-4 text-gray-500 focus:bg-gray-100 focus:text-gray-600 focus:outline-none md:hidden"
+              className="border-r border-secondary-200 px-4 text-secondary-500 focus:bg-secondary-100 focus:text-secondary-600 focus:outline-none md:hidden"
               aria-label="Open sidebar"
             >
               <svg
@@ -144,7 +143,7 @@ export default function AppRouter() {
             >
               <img
                 className="h-6 w-auto"
-                src={main_logo.dark}
+                src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />
             </a>

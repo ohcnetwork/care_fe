@@ -1,11 +1,18 @@
+import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
 } from "../MultiSelectMenuV2";
 import { ReactNode, useEffect, useRef, useState } from "react";
+
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
@@ -20,6 +27,7 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
   optionDisabled?: OptionCallback<T, boolean>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
+  minQueryLength?: number;
   isLoading?: boolean;
   selectAll?: boolean;
 };
@@ -58,6 +66,7 @@ type AutocompleteMutliSelectProps<T, V = T> = {
   isLoading?: boolean;
   selectAll?: boolean;
   error?: string;
+  minQueryLength?: number;
 };
 
 /**
@@ -74,7 +83,9 @@ export const AutocompleteMutliSelect = <T, V>(
   const [query, setQuery] = useState(""); // Ensure lower case
   const comboButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    props.onQuery && props.onQuery(query);
+    query.length >= (props.minQueryLength || 1) &&
+      props.onQuery &&
+      props.onQuery(query);
   }, [query]);
   const handleSingleSelect = (o: any) => {
     if (o.option?.isSingleSelect === true && comboButtonRef.current) {
@@ -116,7 +127,7 @@ export const AutocompleteMutliSelect = <T, V>(
       >
         <div className="relative">
           <div className="flex">
-            <Combobox.Input
+            <ComboboxInput
               multiple
               className={classNames(
                 "cui-input-base truncate pr-16",
@@ -125,24 +136,28 @@ export const AutocompleteMutliSelect = <T, V>(
               placeholder={
                 value.length
                   ? `${value.length} item(s) selected`
-                  : props.placeholder ?? "Select"
+                  : (props.placeholder ?? "Select")
               }
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
               autoComplete="off"
             />
             {!props.disabled && (
-              <Combobox.Button
+              <ComboboxButton
                 ref={comboButtonRef}
                 className="absolute inset-y-0 right-0 flex items-center pr-2"
               >
-                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
+                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
                   {props.isLoading ? (
                     <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
-                    <CareIcon icon="l-angle-down" className="-mb-1.5" />
+                    <CareIcon
+                      id="dropdown-toggle"
+                      icon="l-angle-down"
+                      className="-mb-1.5"
+                    />
                   )}
                 </div>
-              </Combobox.Button>
+              </ComboboxButton>
             )}
           </div>
           {value.length !== 0 && (
@@ -161,13 +176,22 @@ export const AutocompleteMutliSelect = <T, V>(
           )}
 
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 mt-0.5">
-              {props.isLoading ? (
+            <ComboboxOptions
+              modal={false}
+              as="ul"
+              className="cui-dropdown-base absolute top-12 z-10 mt-0.5"
+            >
+              {props.minQueryLength && query.length < props.minQueryLength ? (
+                <div className="p-2 text-sm text-secondary-500">
+                  {`Please enter at least ${props.minQueryLength} characters to search`}
+                </div>
+              ) : props.isLoading ? (
                 <Searching />
               ) : filteredOptions.length ? (
                 <>
                   {props.selectAll && (
-                    <Combobox.Option
+                    <ComboboxOption
+                      as="li"
                       id={`${props.id}-option-select-all`}
                       key={`${props.id}-option-select-all`}
                       className={dropdownOptionClassNames}
@@ -179,10 +203,11 @@ export const AutocompleteMutliSelect = <T, V>(
                           <CareIcon icon="l-check" className="text-lg" />
                         )}
                       </div>
-                    </Combobox.Option>
+                    </ComboboxOption>
                   )}
                   {filteredOptions.map((option, index) => (
-                    <Combobox.Option
+                    <ComboboxOption
+                      as="li"
                       id={`${props.id}-option-${index}`}
                       key={`${props.id}-option-${index}`}
                       className={dropdownOptionClassNames}
@@ -192,7 +217,7 @@ export const AutocompleteMutliSelect = <T, V>(
                       }}
                       disabled={option.disabled}
                     >
-                      {({ active, selected }) => (
+                      {({ focus, selected }) => (
                         <>
                           <div className="flex justify-between">
                             {option.label}
@@ -205,10 +230,10 @@ export const AutocompleteMutliSelect = <T, V>(
                               className={classNames(
                                 "text-sm font-normal",
                                 option.disabled
-                                  ? "text-gray-700"
-                                  : active
+                                  ? "text-secondary-700"
+                                  : focus
                                     ? "text-primary-200"
-                                    : "text-gray-700",
+                                    : "text-secondary-700",
                               )}
                             >
                               {option.description}
@@ -216,7 +241,7 @@ export const AutocompleteMutliSelect = <T, V>(
                           )}
                         </>
                       )}
-                    </Combobox.Option>
+                    </ComboboxOption>
                   ))}
                 </>
               ) : (
@@ -225,7 +250,7 @@ export const AutocompleteMutliSelect = <T, V>(
                   {query ? "No results" : "Type to search"}
                 </span>
               )}
-            </Combobox.Options>
+            </ComboboxOptions>
           </DropdownTransition>
         </div>
       </Combobox>

@@ -9,6 +9,7 @@ import {
 import {
   classNames,
   formatDateTime,
+  formatName,
   formatPatientAge,
 } from "../../Utils/utils";
 import { downloadShiftRequests } from "../../Redux/actions";
@@ -17,8 +18,6 @@ import { useDrag, useDrop } from "react-dnd";
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
-
 import { useTranslation } from "react-i18next";
 import { ExportButton } from "../Common/Export";
 import dayjs from "../../Utils/dayjs";
@@ -29,6 +28,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { PaginatedResponse } from "../../Utils/request/types";
 import { IShift } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import careConfig from "@careConfig";
 
 interface boardProps {
   board: string;
@@ -40,7 +40,6 @@ interface boardProps {
 }
 
 const ShiftCard = ({ shift, filter }: any) => {
-  const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -90,10 +89,10 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("phone_number")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-mobile-android" className="mr-2 text-xl" />
-                  <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                  <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                     {shift.patient_object.phone_number || ""}
                   </dd>
                 </dt>
@@ -101,22 +100,22 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("origin_facility")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-plane-departure" className="mr-2 text-xl" />
-                  <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                  <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                     {(shift.origin_facility_object || {}).name}
                   </dd>
                 </dt>
               </div>
-              {wartime_shifting && (
+              {careConfig.wartimeShifting && (
                 <div className="sm:col-span-1">
                   <dt
                     title={t("shifting_approving_facility")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-user-check" className="mr-2 text-xl" />
-                    <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                    <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                       {(shift.shifting_approving_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -125,11 +124,11 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("assigned_facility")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-plane-arrival" className="mr-2 text-xl" />
 
-                  <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                  <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                     {shift.assigned_facility_external ||
                       shift.assigned_facility_object?.name ||
                       t("yet_to_be_decided")}
@@ -143,7 +142,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   className={
                     "flex items-center text-sm font-medium leading-5 " +
                     (dayjs().subtract(2, "hours").isBefore(shift.modified_date)
-                      ? "text-gray-900"
+                      ? "text-secondary-900"
                       : "rounded bg-red-400 p-1 text-white")
                   }
                 >
@@ -157,10 +156,10 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("patient_address")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-home" className="mr-2 text-xl" />
-                  <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                  <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                     {shift.patient_object.address || "--"}
                   </dd>
                 </dt>
@@ -170,12 +169,12 @@ const ShiftCard = ({ shift, filter }: any) => {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("assigned_to")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-user" className="mr-2 text-xl" />
-                    <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
-                      {shift.assigned_to_object.first_name}{" "}
-                      {shift.assigned_to_object.last_name} -{" "}
+                    <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
+                      {formatName(shift.assigned_to_object)}
+                      {" - "}
                       {shift.assigned_to_object.user_type}
                     </dd>
                   </dt>
@@ -185,10 +184,10 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("patient_state")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-map-marker" className="mr-2 text-xl" />
-                  <dd className="text-sm font-bold leading-5 text-gray-900">
+                  <dd className="text-sm font-bold leading-5 text-secondary-900">
                     {shift.patient_object.state_object.name || "--"}
                   </dd>
                 </dt>
@@ -344,12 +343,12 @@ export default function ShiftingBoard({
     <div
       ref={drop}
       className={classNames(
-        "mr-2 h-full w-full flex-shrink-0 rounded-md bg-gray-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
+        "mr-2 h-full w-full flex-shrink-0 rounded-md bg-secondary-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
         isOver && "cursor-move",
       )}
       style={{ minHeight: `${containerHeight + 100}px` }}
     >
-      <div className="sticky top-0 z-10 rounded bg-gray-200 pt-2">
+      <div className="sticky top-0 z-10 rounded bg-secondary-200 pt-2">
         <div className="mx-2 flex items-center justify-between rounded bg-white p-4 shadow">
           <h3 className="flex h-8 items-center text-xs">
             {title || board}{" "}
@@ -376,13 +375,13 @@ export default function ShiftingBoard({
             )}
         {isLoading ? (
           <div className="m-1">
-            <div className="mx-auto w-full max-w-sm rounded-md border border-gray-300 bg-white p-4 shadow">
-              <div className="flex animate-pulse space-x-4 ">
+            <div className="mx-auto w-full max-w-sm rounded-md border border-secondary-300 bg-white p-4 shadow">
+              <div className="flex animate-pulse space-x-4">
                 <div className="flex-1 space-y-4 py-1">
-                  <div className="h-4 w-3/4 rounded bg-gray-400"></div>
+                  <div className="h-4 w-3/4 rounded bg-secondary-400"></div>
                   <div className="space-y-2">
-                    <div className="h-4 rounded bg-gray-400"></div>
-                    <div className="h-4 w-5/6 rounded bg-gray-400"></div>
+                    <div className="h-4 rounded bg-secondary-400"></div>
+                    <div className="h-4 w-5/6 rounded bg-secondary-400"></div>
                   </div>
                 </div>
               </div>

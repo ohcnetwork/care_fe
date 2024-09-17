@@ -54,7 +54,10 @@ export default function Breadcrumbs(props: any) {
         <ol className="flex flex-wrap items-center space-x-1">
           <li>
             <div>
-              <Link href="/" className="text-gray-500 hover:text-gray-700">
+              <Link
+                href="/"
+                className="text-secondary-500 hover:text-secondary-700"
+              >
                 <CareIcon icon="l-estate" className="mr-1 text-lg" />
                 <span className="sr-only">Home</span>
               </Link>
@@ -64,7 +67,7 @@ export default function Breadcrumbs(props: any) {
             <li>
               <div className="flex cursor-pointer items-center">
                 <svg
-                  className="h-5 w-5 shrink-0 text-gray-400"
+                  className="h-5 w-5 shrink-0 text-secondary-400"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
                   viewBox="0 0 20 20"
@@ -74,7 +77,7 @@ export default function Breadcrumbs(props: any) {
                 </svg>
                 <span
                   onClick={() => setShowFullPath(true)}
-                  className="ml-1 mt-0.5 inline-flex items-center rounded-full bg-gray-500 px-2.5 py-1 text-xs font-medium hover:bg-gray-700"
+                  className="ml-1 mt-0.5 inline-flex items-center rounded-full bg-secondary-500 px-2.5 py-1 text-xs font-medium hover:bg-secondary-700"
                 >
                   <svg
                     className="mx-0.25 h-1.5 w-1.5 text-white"
@@ -107,13 +110,13 @@ export default function Breadcrumbs(props: any) {
                 <li
                   key={crumb.name}
                   className={classNames(
-                    "cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-700",
+                    "cursor-pointer text-sm font-medium text-secondary-500 hover:text-secondary-700",
                     crumb.style,
                   )}
                 >
                   <div className="flex items-center">
                     <svg
-                      className="h-5 w-5 shrink-0 text-gray-400"
+                      className="h-5 w-5 shrink-0 text-secondary-400"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
                       viewBox="0 0 20 20"
@@ -123,7 +126,7 @@ export default function Breadcrumbs(props: any) {
                     </svg>
                     <Link
                       href={crumb.uri}
-                      className="ml-1 block text-gray-500 hover:text-gray-700"
+                      className="ml-1 block text-secondary-500 hover:text-secondary-700"
                     >
                       {crumb.name.match(/^\w{8}-(\w{4}-){3}\w{12}$/) ? (
                         <div>

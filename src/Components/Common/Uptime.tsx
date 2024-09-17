@@ -1,4 +1,4 @@
-import { Popover } from "@headlessui/react";
+import { Popover, PopoverPanel } from "@headlessui/react";
 import { useEffect, useRef, useState } from "react";
 import { AssetStatus, AvailabilityRecord } from "../Assets/AssetTypes";
 import { classNames } from "../../Utils/utils";
@@ -8,14 +8,14 @@ import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",
-  "Not Monitored": "bg-gray-400",
+  "Not Monitored": "bg-secondary-400",
   Down: "bg-red-500",
   "Under Maintenance": "bg-blue-500",
 };
 
 const STATUS_COLORS_TEXT = {
   Operational: "text-green-500",
-  "Not Monitored": "text-gray-400",
+  "Not Monitored": "text-secondary-400",
   Down: "text-red-500",
   "Under Maintenance": "text-blue-500",
 };
@@ -47,12 +47,12 @@ function UptimeInfo({
   let totalMinutes = 0;
 
   return (
-    <div className="absolute z-50 w-full rounded-lg shadow-lg ring-1 ring-gray-400">
+    <div className="absolute z-50 w-full rounded-lg shadow-lg ring-1 ring-secondary-400">
       <div className="rounded-lg bg-white px-6 py-4">
         <div className="flow-root rounded-md">
-          <div className="block text-center text-sm text-gray-800">
-            <span className="font-bold ">{date}</span>
-            <div className="my-2 border-t border-gray-200"></div>
+          <div className="block text-center text-sm text-secondary-800">
+            <span className="font-bold">{date}</span>
+            <div className="my-2 border-t border-secondary-200"></div>
             {incidents.length === 0 ? (
               <>
                 <span>No status for the day</span>
@@ -119,7 +119,7 @@ function UptimeInfo({
                     );
                   })}
                 </div>
-                <div className="my-2 border-t border-gray-200"></div>
+                <div className="my-2 border-t border-secondary-200"></div>
                 <div className="mt-1 flex justify-between">
                   <span className="font-bold">Total downtime</span>
                   <span>
@@ -148,7 +148,7 @@ function UptimeInfoPopover({
 }) {
   return (
     <Popover className="relative mt-10 hidden sm:block">
-      <Popover.Panel
+      <PopoverPanel
         className={classNames(
           "absolute z-50 w-64 px-4 sm:px-0 lg:w-96",
           day > numDays - 10
@@ -160,7 +160,7 @@ function UptimeInfoPopover({
         static
       >
         <UptimeInfo records={records} date={date} />
-      </Popover.Panel>
+      </PopoverPanel>
     </Popover>
   );
 }
@@ -372,7 +372,7 @@ export default function Uptime(
             {props.header}
             <div>
               <div className="mt-2 overflow-x-clip px-5">
-                <div className="mb-1 mt-2 flex justify-center text-xs text-gray-700 opacity-70">
+                <div className="mb-1 mt-2 flex justify-center text-xs text-secondary-700 opacity-70">
                   {getUptimePercent(numDays)}% uptime
                 </div>
                 <div
@@ -393,21 +393,21 @@ export default function Uptime(
                           <div
                             className={`h-[11px] w-3 rounded-t-sm ${
                               hoveredDay === index
-                                ? "bg-gray-700"
+                                ? "bg-secondary-700"
                                 : dayStatus[0]
                             }`}
                           ></div>
                           <div
                             className={`h-[11px] w-3 ${
                               hoveredDay === index
-                                ? "bg-gray-700"
+                                ? "bg-secondary-700"
                                 : dayStatus[1]
                             }`}
                           ></div>
                           <div
                             className={`h-[11px] w-3 rounded-b-sm ${
                               hoveredDay === index
-                                ? "bg-gray-700"
+                                ? "bg-secondary-700"
                                 : dayStatus[2]
                             }`}
                           ></div>
@@ -425,7 +425,7 @@ export default function Uptime(
                   })}
                 </div>
                 <div
-                  className={`flex text-xs text-gray-700 opacity-70 ${
+                  className={`flex text-xs text-secondary-700 opacity-70 ${
                     hoveredDay == -1 && "mt-2"
                   }`}
                 >

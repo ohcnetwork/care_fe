@@ -1,14 +1,14 @@
 import { useEffect, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
-import { CapacityModal, OptionsType } from "./models";
+import { CapacityModal } from "./models";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { getBedTypes } from "../../Common/constants";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import { useTranslation } from "react-i18next";
+import { BED_TYPES } from "../../Common/constants.js";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;
@@ -49,11 +49,11 @@ const bedCountReducer = (state = initialState, action: any) => {
 };
 
 export const BedCapacity = (props: BedCapacityProps) => {
-  const config = useConfig();
+  const { t } = useTranslation();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
+  const [bedTypes, setBedTypes] = useState(BED_TYPES);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
-  const [bedTypes, setBedTypes] = useState<OptionsType[]>(getBedTypes(config));
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
@@ -71,11 +71,11 @@ export const BedCapacity = (props: BedCapacityProps) => {
       if (capacityQuery?.data) {
         const existingData = capacityQuery.data?.results;
         // if all options are diabled
-        if (existingData.length === getBedTypes(config).length) {
+        if (existingData.length === BED_TYPES.length) {
           return;
         }
         // disable existing bed types
-        const updatedBedTypes = getBedTypes(config).map((type: OptionsType) => {
+        const updatedBedTypes = BED_TYPES.map((type) => {
           const isExisting = existingData.find(
             (i: CapacityModal) => i.room_type === type.id,
           );
@@ -111,8 +111,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
 
   useEffect(() => {
     const lastBedType =
-      bedTypes.filter((i: OptionsType) => i.disabled).length ===
-      getBedTypes(config).length - 1;
+      bedTypes.filter((i) => i.disabled).length === BED_TYPES.length - 1;
     setIsLastOptionType(lastBedType);
   }, [bedTypes]);
 
@@ -127,7 +126,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       if (!state.form[field]) {
-        errors[field] = "Field is required";
+        errors[field] = t("field_required");
         invalidForm = true;
       } else if (
         field === "currentOccupancy" &&
@@ -177,7 +176,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
       );
       setIsLoading(false);
       if (data) {
-        const updatedBedTypes = bedTypes.map((type: OptionsType) => {
+        const updatedBedTypes = bedTypes.map((type) => {
           return {
             ...type,
             disabled: data.room_type !== type.id ? type.disabled : true,
@@ -209,7 +208,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
           <div role="status">
             <svg
               aria-hidden="true"
-              className="mr-2 h-8 w-8 animate-spin fill-primary text-gray-200 dark:text-gray-600"
+              className="mr-2 h-8 w-8 animate-spin fill-primary text-secondary-200 dark:text-secondary-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

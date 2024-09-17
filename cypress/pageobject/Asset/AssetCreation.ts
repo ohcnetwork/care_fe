@@ -1,5 +1,4 @@
 // assetPage.ts
-import { cy, expect } from "local-cypress";
 
 export class AssetPage {
   createAsset() {
@@ -200,7 +199,7 @@ export class AssetPage {
   verifyEmptyStatusError() {
     cy.get("[data-testid=asset-working-status-input] span").should(
       "contain",
-      "Field is required",
+      "This field is required",
     );
   }
 

@@ -3,13 +3,13 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
   ADMITTED_TO,
+  CONSENT_TYPE_CHOICES,
   DISCHARGE_REASONS,
   FACILITY_TYPES,
   GENDER_TYPES,
   PATIENT_FILTER_CATEGORIES,
   RATION_CARD_CATEGORY,
 } from "../../Common/constants";
-import useConfig from "../../Common/hooks/useConfig";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
@@ -34,6 +34,7 @@ import request from "../../Utils/request/request";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { useTranslation } from "react-i18next";
+import careConfig from "@careConfig";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -41,7 +42,6 @@ const getDate = (value: any) =>
 export default function PatientFilter(props: any) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter, removeFilters } = props;
 
   const [filterState, setFilterState] = useMergeState({
@@ -78,6 +78,7 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_admitted_bed_type_list
         ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
+    last_consultation__consent_types: filter.last_consultation__consent_types,
     last_consultation_current_bed__location:
       filter.last_consultation_current_bed__location || "",
     last_consultation__new_discharge_reason:
@@ -86,10 +87,6 @@ export default function PatientFilter(props: any) {
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
     is_declared_positive: filter.is_declared_positive || null,
-    last_consultation_symptoms_onset_date_before:
-      filter.last_consultation_symptoms_onset_date_before || null,
-    last_consultation_symptoms_onset_date_after:
-      filter.last_consultation_symptoms_onset_date_after || null,
     last_vaccinated_date_before: filter.last_vaccinated_date_before || null,
     last_vaccinated_date_after: filter.last_vaccinated_date_after || null,
     last_consultation_is_telemedicine:
@@ -183,14 +180,13 @@ export default function PatientFilter(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
+      last_consultation__consent_types,
       last_consultation__new_discharge_reason,
       last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
       is_kasp,
       is_declared_positive,
-      last_consultation_symptoms_onset_date_before,
-      last_consultation_symptoms_onset_date_after,
       last_vaccinated_date_before,
       last_vaccinated_date_after,
       last_consultation_is_telemedicine,
@@ -241,18 +237,13 @@ export default function PatientFilter(props: any) {
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
+      last_consultation__consent_types: last_consultation__consent_types,
       last_consultation__new_discharge_reason:
         last_consultation__new_discharge_reason || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
-      last_consultation_symptoms_onset_date_before: dateQueryString(
-        last_consultation_symptoms_onset_date_before,
-      ),
-      last_consultation_symptoms_onset_date_after: dateQueryString(
-        last_consultation_symptoms_onset_date_after,
-      ),
       last_vaccinated_date_before: dateQueryString(last_vaccinated_date_before),
       last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
       last_consultation_is_telemedicine:
@@ -373,6 +364,26 @@ export default function PatientFilter(props: any) {
               />
             </div>
           )}
+          <div className="w-full flex-none" id="consent-type-select">
+            <FieldLabel className="text-sm">Has consent records for</FieldLabel>
+            <MultiSelectMenuV2
+              id="last_consultation__consent_types"
+              placeholder="Select consent types"
+              options={[
+                ...CONSENT_TYPE_CHOICES,
+                { id: "None", text: "No consents" },
+              ]}
+              value={filterState.last_consultation__consent_types}
+              optionValue={(o) => o.id}
+              optionLabel={(o) => o.text}
+              onChange={(o) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation__consent_types: o,
+                })
+              }
+            />
+          </div>
           {(props.dischargePage ||
             ["StateAdmin", "StateReadOnlyAdmin"].includes(
               authUser.user_type,
@@ -567,21 +578,6 @@ export default function PatientFilter(props: any) {
             onChange={handleDateRangeChange}
             errorClassName="hidden"
           />
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="last_consultation_symptoms_onset_date"
-            label="Onset of Symptoms Date"
-            value={{
-              start: getDate(
-                filterState.last_consultation_symptoms_onset_date_after,
-              ),
-              end: getDate(
-                filterState.last_consultation_symptoms_onset_date_before,
-              ),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
         </div>
       </AccordionV2>
       <AccordionV2
@@ -678,14 +674,18 @@ export default function PatientFilter(props: any) {
         className="w-full rounded-md"
       >
         <div className="grid w-full grid-cols-1 gap-4">
-          {kasp_enabled && (
+          {careConfig.kasp.enabled && (
             <div className="w-full flex-none">
-              <FieldLabel className="text-sm">{kasp_string}</FieldLabel>
+              <FieldLabel className="text-sm">
+                {careConfig.kasp.string}
+              </FieldLabel>
               <SelectMenuV2
                 placeholder="Show all"
                 options={[true, false]}
                 optionLabel={(o) =>
-                  o ? `Show ${kasp_string}` : `Show Non ${kasp_string}`
+                  o
+                    ? `Show ${careConfig.kasp.string}`
+                    : `Show Non ${careConfig.kasp.string}`
                 }
                 value={filterState.is_kasp}
                 onChange={(v) => setFilterState({ ...filterState, is_kasp: v })}

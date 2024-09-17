@@ -59,14 +59,14 @@ const LinkCareContextModal = ({
       />
 
       <div>
-        <span className="items-center text-xs text-gray-800">
+        <span className="items-center text-xs text-secondary-800">
           <input
             type="checkbox"
             checked={acceptedDisclaimer}
             onChange={(e) => {
               setAcceptedDisclaimer(e.target.checked);
             }}
-            className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
+            className="mr-2 rounded border-secondary-700 shadow-sm ring-0 ring-offset-0"
           />
           I declare that the data of the patient is voluntarily provided by the
           patient (or guardian or nominee of the patient).

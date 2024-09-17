@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { getBedTypes } from "../../Common/constants";
 import routes from "../../Redux/api";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import useQuery from "../../Utils/request/useQuery";
@@ -7,12 +6,11 @@ import DialogModal from "../Common/Dialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
-import useConfig from "../../Common/hooks/useConfig";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { BED_TYPES } from "../../Common/constants";
 
 export const FacilityBedCapacity = (props: any) => {
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
-  const config = useConfig();
 
   const capacityQuery = useQuery(routes.getCapacity, {
     pathParams: { facilityId: props.facilityId },
@@ -21,7 +19,7 @@ export const FacilityBedCapacity = (props: any) => {
   let capacityList: any = null;
   if (!capacityQuery.data || !capacityQuery.data.results.length) {
     capacityList = (
-      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
+      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         No Bed Types Found
       </h5>
     );
@@ -45,7 +43,7 @@ export const FacilityBedCapacity = (props: any) => {
             return;
           }}
         />
-        {getBedTypes(config).map((x) => {
+        {BED_TYPES.map((x) => {
           const res = capacityQuery.data?.results.find((data) => {
             return data.room_type === x.id;
           });

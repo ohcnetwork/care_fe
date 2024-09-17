@@ -5,12 +5,14 @@ import { AssetData } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
 import { Cancel } from "../Common/components/ButtonV2";
 import { Link } from "raviger";
-import { LocalStorageKeys, AssetImportSchema } from "../../Common/constants";
-import useConfig from "../../Common/hooks/useConfig";
+import { AssetImportSchema } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import careConfig from "@careConfig";
+import request from "../../Utils/request/request";
+
 const ExcelFileDragAndDrop = lazy(
   () => import("../Common/ExcelFIleDragAndDrop"),
 );
@@ -29,7 +31,6 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
   const [errors, setErrors] = useState<any>({
     location: "",
   });
-  const { sample_format_asset_import } = useConfig();
 
   const closeModal = () => {
     onClose && onClose();
@@ -85,17 +86,8 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
         asset_data["warranty_amc_end_of_validity"] =
           asset.warranty_amc_end_of_validity;
 
-      const response = await fetch("/api/v1/asset/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-        },
-        body: JSON.stringify(asset_data),
-      });
-      const data = await response.json();
-      if (response.status !== 201) {
+      const { res } = await request(routes.createAsset, { body: asset_data });
+      if (!res?.ok) {
         Notification.Error({
           msg:
             "Error importing asset: " + asset.name + " " + JSON.stringify(data),
@@ -124,11 +116,11 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
       className="w-[48rem]"
       fixedWidth={false}
     >
-      <span className="mt-1 text-gray-700">{facility.name}</span>
+      <span className="mt-1 text-secondary-700">{facility.name}</span>
       {!loading && locations.length === 0 ? (
         <>
           <div className="flex h-full flex-col items-center justify-center">
-            <h1 className="m-7 text-2xl font-medium text-gray-700">
+            <h1 className="m-7 text-2xl font-medium text-secondary-700">
               You need at least one location to import an assest.
             </h1>
             <Link href={`/facility/${facility.id}/location/add`}>
@@ -176,7 +168,7 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
             handleSubmit={handleUpload}
             loading={isImporting}
             schema={AssetImportSchema}
-            sampleLink={sample_format_asset_import}
+            sampleLink={careConfig.sampleFormats.assetImport}
             setIsValid={setIsValid}
           />
         </>

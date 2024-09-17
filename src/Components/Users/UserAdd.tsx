@@ -26,7 +26,6 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import Checkbox from "../Common/components/CheckBox";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -41,6 +40,8 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -163,6 +164,7 @@ export const validateRule = (
 };
 
 export const UserAdd = (props: UserProps) => {
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { userId } = props;
 
@@ -355,7 +357,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "doctor_experience_commenced_on":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (
             state.form.user_type === "Doctor" &&
@@ -368,7 +370,7 @@ export const UserAdd = (props: UserProps) => {
         case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -604,11 +606,12 @@ export const UserAdd = (props: UserProps) => {
       title={headerText}
       options={
         <Link
-          href="https://school.coronasafe.network/targets/12953"
-          className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
+          href="https://school.ohc.network/targets/12953"
+          className="inline-block rounded border border-secondary-600 bg-secondary-50 px-4 py-2 text-secondary-600 transition hover:bg-secondary-100"
           target="_blank"
         >
-          <CareIcon icon="l-info-circle" className="text-lg" /> &nbsp;Need Help?
+          <CareIcon icon="l-question-circle" className="text-lg" /> &nbsp;Need
+          Help?
         </Link>
       }
       backUrl="/users"
@@ -686,14 +689,10 @@ export const UserAdd = (props: UserProps) => {
                 required
                 types={["mobile", "landline"]}
               />
-              <Checkbox
-                checked={state.form.phone_number_is_whatsapp}
-                onCheck={(checked) => {
-                  handleFieldChange({
-                    name: "phone_number_is_whatsapp",
-                    value: checked,
-                  });
-                }}
+              <CheckBoxFormField
+                name="phone_number_is_whatsapp"
+                value={state.form.phone_number_is_whatsapp}
+                onChange={handleFieldChange}
                 label="Is the phone number a WhatsApp number?"
               />
             </div>
@@ -724,7 +723,7 @@ export const UserAdd = (props: UserProps) => {
                 }}
               />
               {usernameInputInFocus && (
-                <div className="text-small pl-2 text-gray-500">
+                <div className="text-small pl-2 text-secondary-500">
                   <div>
                     {usernameExists !== userExistsEnums.idle && (
                       <>
@@ -814,7 +813,7 @@ export const UserAdd = (props: UserProps) => {
                 onBlur={() => setPasswordInputInFocus(false)}
               />
               {passwordInputInFocus && (
-                <div className="text-small pl-2 text-gray-500">
+                <div className="text-small pl-2 text-secondary-500">
                   {validateRule(
                     state.form.password?.length >= 8,
                     "Password should be atleast 8 characters long",

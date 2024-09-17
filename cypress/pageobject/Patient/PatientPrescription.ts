@@ -1,4 +1,3 @@
-import { cy } from "local-cypress";
 export class PatientPrescription {
   clickAddPrescription() {
     cy.get("#add-prescription").scrollIntoView();
@@ -28,7 +27,7 @@ export class PatientPrescription {
   }
 
   clickAdministerButton() {
-    cy.get("#administer-medicine").should("be.visible");
+    cy.get("#administer-medicine").scrollIntoView().should("be.visible");
     cy.verifyAndClickElement("#administer-medicine", "Administer");
   }
 

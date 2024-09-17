@@ -1,20 +1,6 @@
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
 import { fireRequest } from "./fireRequest";
 
-// Facility
-export const getUserList = (params: object, key?: string) => {
-  return fireRequest("userList", [], params, null, key);
-};
-
-export const getFacilityUsers = (id: string, params?: object) => {
-  return fireRequest(
-    "getFacilityUsers",
-    [],
-    { ...params },
-    { facility_id: id },
-  );
-};
-
 // asset bed
 export const listAssetBeds = (params: object, altKey?: string) =>
   fireRequest("listAssetBeds", [], params, {}, altKey);

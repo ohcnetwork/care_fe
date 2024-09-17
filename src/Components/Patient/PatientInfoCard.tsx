@@ -8,17 +8,18 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants.js";
 import { ConsultationModel, PatientCategory } from "../Facility/models.js";
-import { Switch, Menu } from "@headlessui/react";
+import { Switch, MenuItem, Field, Label } from "@headlessui/react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import useConfig from "../../Common/hooks/useConfig.js";
 import dayjs from "../../Utils/dayjs.js";
 import {
   classNames,
   formatDate,
   formatDateTime,
+  formatName,
   formatPatientAge,
+  humanizeStrings,
 } from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal.js";
@@ -42,20 +43,13 @@ import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
+import careConfig from "@careConfig";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
 
-  if (skills.length === 1) {
-    return skills[0];
-  }
-
-  if (skills.length === 2) {
-    return `${skills[0]} and ${skills[1]}`;
-  }
-
-  if (skills.length === 3) {
-    return `${skills[0]}, ${skills[1]} and ${skills[2]}`;
+  if (skills.length <= 3) {
+    return humanizeStrings(skills);
   }
 
   return `${skills[0]}, ${skills[1]} and ${skills.length - 2} other skills...`;
@@ -81,8 +75,6 @@ export default function PatientInfoCard(props: {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
-
-  const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
@@ -142,29 +134,6 @@ export default function PatientInfoCard(props: {
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
-  const { data: consentRecords, loading: consentRecordsLoading } = useQuery(
-    routes.listConsents,
-    {
-      pathParams: {
-        consultationId: consultation?.id ?? "",
-      },
-      prefetch: !!consultation?.id,
-    },
-  );
-
-  const { data: consentFiles, loading: consentFilesLoading } = useQuery(
-    routes.viewUpload,
-    {
-      query: {
-        file_type: "CONSENT_RECORD",
-        associating_id: consentRecords?.results.map((cr) => cr.id).join(","),
-        limit: 1,
-        offset: 0,
-        is_archived: false,
-      },
-      prefetch: (consentRecords?.results.length || 0) > 0,
-    },
-  );
 
   return (
     <>
@@ -177,7 +146,6 @@ export default function PatientInfoCard(props: {
         {patient?.facility && patient?.id && consultation?.id ? (
           <Beds
             facilityId={patient?.facility}
-            patientId={patient?.id}
             discharged={!!consultation?.discharge_date}
             consultationId={consultation?.id ?? ""}
             setState={setOpen}
@@ -220,12 +188,12 @@ export default function PatientInfoCard(props: {
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
               <div
-                className={`w-24 min-w-20 bg-gray-200 ${categoryClass}-profile h-24`}
+                className={`w-24 min-w-20 bg-secondary-200 ${categoryClass}-profile h-24`}
               >
                 {consultation?.current_bed &&
                 consultation?.discharge_date === null ? (
                   <div className="tooltip flex h-full flex-col items-center justify-center">
-                    <p className="w-full truncate px-2 text-center text-sm text-gray-900">
+                    <p className="w-full truncate px-2 text-center text-sm text-secondary-900">
                       {
                         consultation?.current_bed?.bed_object?.location_object
                           ?.name
@@ -234,7 +202,7 @@ export default function PatientInfoCard(props: {
                     <p className="w-full truncate px-2 text-center text-base font-bold">
                       {consultation?.current_bed?.bed_object.name}
                     </p>
-                    <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
+                    <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm">
                       <span>
                         {
                           consultation?.current_bed?.bed_object?.location_object
@@ -248,7 +216,7 @@ export default function PatientInfoCard(props: {
                   <div className="flex h-full items-center justify-center">
                     <CareIcon
                       icon="l-user-injured"
-                      className="text-3xl text-gray-500"
+                      className="text-3xl text-secondary-500"
                     />
                   </div>
                 )}
@@ -276,7 +244,7 @@ export default function PatientInfoCard(props: {
                 id="patient-name-consultation"
               >
                 {patient.name}
-                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
+                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
                 <div className="mr-3 flex flex-col items-center">
@@ -321,13 +289,13 @@ export default function PatientInfoCard(props: {
                 id="patient-name-consultation"
               >
                 {patient.name}
-                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
+                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
                 <div
-                  className="flex w-full flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
+                  className="flex w-full flex-wrap items-center justify-center gap-2 text-sm text-secondary-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
                   id="patient-consultationbadges"
                 >
                   {consultation?.patient_no && (
@@ -341,7 +309,7 @@ export default function PatientInfoCard(props: {
                   )}
                   {patient.action && patient.action != 10 && (
                     <div>
-                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-blue-100 p-1 px-3 text-xs font-semibold leading-4">
+                      <div className="inline-flex w-full items-center justify-start rounded border border-secondary-500 bg-blue-100 p-1 px-3 text-xs font-semibold leading-4">
                         <span className="font-semibold text-indigo-800">
                           {" "}
                           {
@@ -355,7 +323,7 @@ export default function PatientInfoCard(props: {
                   )}
                   <div>
                     {patient.blood_group && (
-                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-gray-100 p-1 px-2 text-xs font-semibold leading-4">
+                      <div className="inline-flex w-full items-center justify-start rounded border border-secondary-500 bg-secondary-100 p-1 px-2 text-xs font-semibold leading-4">
                         Blood Group: {patient.blood_group}
                       </div>
                     )}
@@ -366,9 +334,9 @@ export default function PatientInfoCard(props: {
                       <div>
                         <div
                           className={
-                            "inline-flex w-full items-center justify-center rounded border border-gray-500 p-1 text-xs font-semibold leading-4 " +
+                            "inline-flex w-full items-center justify-center rounded border border-secondary-500 p-1 text-xs font-semibold leading-4 " +
                             (dayjs().isBefore(patient.review_time)
-                              ? " bg-gray-100 "
+                              ? " bg-secondary-100"
                               : " bg-red-400 text-white")
                           }
                         >
@@ -380,25 +348,22 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
-                  {!consentFilesLoading &&
-                    !consentRecordsLoading &&
-                    !consentFiles?.results.filter((c) => !c.is_archived)
-                      .length && (
-                      <div>
-                        <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
-                          <span className="font-semibold text-white">
-                            Consent Records Missing
-                          </span>
-                        </div>
+                  {!!consultation?.has_consents?.length || (
+                    <div>
+                      <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
+                        <span className="font-semibold text-white">
+                          Consent Records Missing
+                        </span>
                       </div>
-                    )}
+                    </div>
+                  )}
                   {consultation?.suggestion === "DC" && (
                     <div>
                       <div>
-                        <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4">
+                        <div className="inline-flex w-full items-center justify-start rounded border border-secondary-500 bg-secondary-100 p-1 px-3 text-xs font-semibold leading-4">
                           <CareIcon
                             icon="l-estate"
-                            className="mr-1 text-base text-gray-700"
+                            className="mr-1 text-base text-secondary-700"
                           />
                           <span>Domiciliary Care</span>
                         </div>
@@ -415,7 +380,7 @@ export default function PatientInfoCard(props: {
                       "Respiratory Support",
                       RESPIRATORY_SUPPORT.find(
                         (resp) =>
-                          resp.text ===
+                          resp.value ===
                           consultation?.last_daily_round?.ventilator_interface,
                       )?.id ?? "UNKNOWN",
                       consultation?.last_daily_round?.ventilator_interface,
@@ -425,7 +390,7 @@ export default function PatientInfoCard(props: {
                       <div className="flex flex-col items-center gap-2 text-sm">
                         <div
                           key={"patient_stat_" + i}
-                          className="flex items-center justify-center rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4"
+                          className="flex items-center justify-center rounded border border-secondary-500 bg-secondary-100 p-1 px-3 text-xs font-semibold leading-4"
                         >
                           {stat[0]} : {stat[1]}
                         </div>
@@ -464,7 +429,7 @@ export default function PatientInfoCard(props: {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4">
+                    <div className="flex items-center justify-center rounded border border-secondary-500 bg-secondary-100 p-1 px-3 text-xs font-semibold leading-4">
                       <span className="flex">
                         {consultation?.encounter_date && (
                           <div>
@@ -521,14 +486,14 @@ export default function PatientInfoCard(props: {
                       {t("treating_doctor")}:{" "}
                     </span>
                     {consultation?.treating_physician_object
-                      ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
+                      ? formatName(consultation.treating_physician_object)
                       : consultation?.deprecated_verified_by}
                     <CareIcon
                       icon="l-check"
                       className="fill-current text-xl text-green-500"
                     />
                     <br className="md:hidden" />
-                    <span className="tooltip text-xs text-gray-800">
+                    <span className="tooltip text-xs text-secondary-800">
                       {!!skillsQuery.data?.results?.length &&
                         formatSkills(skillsQuery.data?.results)}
                       {(skillsQuery.data?.results?.length || 0) > 3 && (
@@ -561,12 +526,12 @@ export default function PatientInfoCard(props: {
                     {dayjs(consultation.discharge_date || undefined).diff(
                       consultation.encounter_date,
                       "day",
-                    )}
+                    ) + 1}
                   </span>
                 </div>
               </div>
-              <span className="mt-1 text-xs font-medium text-gray-700">
-                IP Days
+              <span className="mt-1 text-xs font-medium text-secondary-700">
+                IP Day No
               </span>
             </div>
           )}
@@ -577,12 +542,12 @@ export default function PatientInfoCard(props: {
           )}
           {!!consultation?.discharge_date && (
             <div className="flex min-w-max flex-col items-center justify-center">
-              <div className="text-sm font-normal leading-5 text-gray-500">
+              <div className="text-sm font-normal leading-5 text-secondary-500">
                 Discharge Reason
               </div>
-              <div className="mt-[6px] text-xl font-semibold leading-5 text-gray-900">
+              <div className="mt-[6px] text-xl font-semibold leading-5 text-secondary-900">
                 {!consultation?.new_discharge_reason ? (
-                  <span className="text-gray-800">
+                  <span className="text-secondary-800">
                     {consultation.suggestion === "OP"
                       ? "OP file closed"
                       : "UNKNOWN"}
@@ -700,7 +665,7 @@ export default function PatientInfoCard(props: {
                   ],
                 ]
                   .concat(
-                    enable_hcx
+                    careConfig.hcx.enabled
                       ? [
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
@@ -770,10 +735,10 @@ export default function PatientInfoCard(props: {
               </div>
 
               <div>
-                {enable_abdm &&
+                {careConfig.abdm.enabled &&
                   (props.abhaNumber ? (
                     <>
-                      <Menu.Item>
+                      <MenuItem>
                         {({ close }) => (
                           <>
                             <div
@@ -832,10 +797,10 @@ export default function PatientInfoCard(props: {
                             </div>
                           </>
                         )}
-                      </Menu.Item>
+                      </MenuItem>
                     </>
                   ) : (
-                    <Menu.Item>
+                    <MenuItem>
                       {({ close }) => (
                         <div
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -853,12 +818,12 @@ export default function PatientInfoCard(props: {
                           </span>
                         </div>
                       )}
-                    </Menu.Item>
+                    </MenuItem>
                   ))}
               </div>
               <div>
                 {!consultation?.discharge_date && (
-                  <Menu.Item>
+                  <MenuItem>
                     {({ close }) => (
                       <>
                         {hasActiveShiftingRequest() ? (
@@ -904,9 +869,9 @@ export default function PatientInfoCard(props: {
                         )}
                       </>
                     )}
-                  </Menu.Item>
+                  </MenuItem>
                 )}
-                <Menu.Item>
+                <MenuItem>
                   {({ close }) => (
                     <div
                       className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -924,13 +889,13 @@ export default function PatientInfoCard(props: {
                       </span>
                     </div>
                   )}
-                </Menu.Item>
-                <Menu.Item>
+                </MenuItem>
+                <MenuItem>
                   {({ close }) => (
                     <div
                       className={`dropdown-item-primary pointer-events-auto ${
                         consultation?.discharge_date &&
-                        "text-gray-500 accent-gray-500 hover:bg-white"
+                        "text-secondary-500 accent-secondary-500 hover:bg-white"
                       } m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out`}
                       onClick={() => {
                         if (!consultation?.discharge_date) {
@@ -944,7 +909,7 @@ export default function PatientInfoCard(props: {
                           icon="l-hospital"
                           className={`text-lg ${
                             consultation?.discharge_date
-                              ? "text-gray-500"
+                              ? "text-secondary-500"
                               : "text-primary-500"
                           }`}
                         />
@@ -952,10 +917,10 @@ export default function PatientInfoCard(props: {
                       </span>
                     </div>
                   )}
-                </Menu.Item>
+                </MenuItem>
               </div>
               <div className="px-4 py-2">
-                <Switch.Group as="div" className="flex items-center">
+                <Field as="div" className="flex items-center">
                   <Switch
                     checked={medicoLegalCase}
                     onChange={(checked) => {
@@ -968,8 +933,8 @@ export default function PatientInfoCard(props: {
                       switchMedicoLegalCase(checked);
                     }}
                     className={classNames(
-                      medicoLegalCase ? "bg-primary" : "bg-gray-200",
-                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ",
+                      medicoLegalCase ? "bg-primary" : "bg-secondary-200",
+                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
                     )}
                   >
                     <span
@@ -980,12 +945,12 @@ export default function PatientInfoCard(props: {
                       )}
                     />
                   </Switch>
-                  <Switch.Label as="span" className="ml-3 text-sm">
-                    <span className="font-medium text-gray-900">
+                  <Label as="span" className="ml-3 text-sm">
+                    <span className="font-medium text-secondary-900">
                       Medico-Legal Case
                     </span>{" "}
-                  </Switch.Label>
-                </Switch.Group>
+                  </Label>
+                </Field>
               </div>
             </DropdownMenu>
           </div>
