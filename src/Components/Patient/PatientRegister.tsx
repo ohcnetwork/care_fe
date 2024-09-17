@@ -785,6 +785,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           controllerRef: submitController,
         });
     if (res?.ok && requestData) {
+      if (state.form.abha_number) {
+        const { res, data } = await request(routes.abha.linkPatient, {
+          body: {
+            patient: requestData.id,
+            abha_number: state.form.abha_number,
+          },
+        });
+
+        if (res?.status === 200 && data) {
+          Notification.Success({
+            msg: t("abha_number_linked_successfully"),
+          });
+        } else {
+          Notification.Error({
+            msg: t("failed_to_link_abha_number"),
+          });
+        }
+      }
+
       await Promise.all(
         insuranceDetails.map(async (obj) => {
           const policy = {
