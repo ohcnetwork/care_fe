@@ -781,11 +781,10 @@ export const DailyRounds = (props: any) => {
           {state.form.rounds_type === "DOCTORS_LOG" && (
             <>
               <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2">
-                <div>
+                <div id="diagnosis-list">
                   <h3 className="mb-4 mt-8 text-lg font-semibold">
                     {t("diagnosis")}
                   </h3>
-                  {/*  */}
                   {diagnoses ? (
                     <EditDiagnosesBuilder
                       value={diagnoses}
@@ -798,7 +797,7 @@ export const DailyRounds = (props: any) => {
                     </div>
                   )}
                 </div>
-                <div>
+                <div id="investigation">
                   <h3 className="my-4 text-lg font-semibold">
                     {t("investigations")}
                   </h3>

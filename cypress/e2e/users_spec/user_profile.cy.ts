@@ -1,4 +1,3 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import UserProfilePage from "../../pageobject/Users/UserProfilePage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
@@ -26,9 +25,7 @@ describe("Manage User Profile", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    console.log(localStorage);
     cy.clearLocalStorage(/filters--.+/);
-    console.log(localStorage);
     cy.awaitUrl("/user/profile");
   });
 

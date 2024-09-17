@@ -1,3 +1,5 @@
+import { PatientModel } from "../../Patient/models";
+
 export type AbhaNumberModel = {
   id: number;
   external_id: string;
@@ -18,4 +20,6 @@ export type AbhaNumberModel = {
   email: string | null;
   profile_photo: string | null;
   new: boolean;
+  patient: string | null;
+  patient_object: PatientModel | null;
 };
