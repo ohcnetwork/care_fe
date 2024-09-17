@@ -91,16 +91,22 @@ const DischargeModal = ({
       limit: 1,
     },
     onResponse: (res) => {
-      if (res?.res?.ok && res?.data?.results?.length !== 0) {
-        setLatestClaim(res?.data?.results[0]);
-        if (isCreateClaimLoading)
-          Notification.Success({ msg: "Fetched Claim Approval Results" });
-      } else {
-        setLatestClaim(undefined);
-        if (isCreateClaimLoading)
-          Notification.Success({ msg: "Error Fetched Claim Approval Results" });
-      }
+      if (!isCreateClaimLoading) return;
+
       setIsCreateClaimLoading(false);
+
+      if (res?.data?.results?.length !== 0) {
+        setLatestClaim(res?.data?.results[0]);
+        Notification.Success({
+          msg: t("claim__fetched_claim_approval_results"),
+        });
+        return;
+      }
+
+      setLatestClaim(undefined);
+      Notification.Success({
+        msg: t("claim__error_fetching_claim_approval_results"),
+      });
     },
   });
 

@@ -33,15 +33,18 @@ export default function ConsultationClaims({
         consultation: consultationId,
       },
       onResponse: (res) => {
-        if (res.data && res.data.results) {
-          if (isCreateLoading)
-            Notification.Success({ msg: "Fetched Claim Approval Results" });
-        } else {
-          if (isCreateLoading)
-            Notification.Error({
-              msg: "Error Fetching Claim Approval Results",
-            });
+        if (!isCreateLoading) return;
+
+        if (res.data?.results) {
+          Notification.Success({
+            msg: t("claim__fetched_claim_approval_results"),
+          });
+          return;
         }
+
+        Notification.Error({
+          msg: t("claim__error_fetching_claim_approval_results"),
+        });
       },
     },
   );

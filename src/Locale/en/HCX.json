@@ -57,5 +57,7 @@
   "fetched_attachments_successfully": "Fetched attachments successfully",
   "add_attachments": "Add Attachments",
   "claim__request_claim": "Request Claim",
-  "claim__requesting_claim": "Requesting Claim"
+  "claim__requesting_claim": "Requesting Claim",
+  "claim__fetched_claim_approval_results": "Fetched Claim Approval Results",
+  "claim__error_fetching_claim_approval_results": "Error Fetching Claim Approval Results"
 }
