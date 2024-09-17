@@ -2,7 +2,7 @@ import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientDoctorNotes } from "../../pageobject/Patient/PatientDoctorNotes";
 
-describe("Patient Doctor notes in the consultation page", () => {
+describe("Patient Discussion notes in the consultation page", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const patientDoctorNotes = new PatientDoctorNotes();
