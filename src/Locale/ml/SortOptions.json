@@ -1,0 +1,18 @@
+{
+  "-created_date": "ആദ്യം സൃഷ്ടിച്ച ഏറ്റവും പുതിയ തീയതി",
+  "created_date": "ഏറ്റവും പഴയ സൃഷ്ടിച്ച തീയതി ആദ്യം",
+  "-category_severity": "ഏറ്റവും ഉയർന്ന തീവ്രത വിഭാഗം ആദ്യം",
+  "category_severity": "ഏറ്റവും കുറഞ്ഞ തീവ്രത വിഭാഗം ആദ്യം",
+  "-modified_date": "ഏറ്റവും പുതിയ അപ്ഡേറ്റ് തീയതി ആദ്യം",
+  "modified_date": "ഏറ്റവും പഴയ പുതുക്കിയ തീയതി ആദ്യം",
+  "facility__name,last_consultation__current_bed__bed__name": "ബെഡ് നമ്പർ 1-N",
+  "facility__name,-last_consultation__current_bed__bed__name": "കിടക്ക നമ്പർ N-1",
+  "-review_time": "ഏറ്റവും പുതിയ അവലോകന തീയതി ആദ്യം",
+  "review_time": "ഏറ്റവും പഴയ അവലോകന തീയതി ആദ്യം",
+  "taken_at": "ആദ്യം എടുത്ത ഏറ്റവും പഴയ തീയതി",
+  "-taken_at": "ഏറ്റവും പുതിയ തീയതി ആദ്യം",
+  "name": "രോഗിയുടെ പേര് AZ",
+  "-name": "രോഗിയുടെ പേര് ZA",
+  "bed__name": "ബെഡ് നമ്പർ 1-N",
+  "-bed__name": "കിടക്ക നമ്പർ N-1"
+}
