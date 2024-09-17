@@ -60,7 +60,6 @@ const DataTable = (props: any) => {
 
 const DataDescription = (props: any) => {
   const { title, data } = props;
-  console.log("Data Description", title, data);
 
   return (
     <div>
