@@ -402,10 +402,6 @@ const DischargedPatientsList = ({
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
-            ...dateRange(
-              "Symptoms onset",
-              "last_consultation_symptoms_onset_date",
-            ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
               name: "Telemedicine",
@@ -421,12 +417,15 @@ const DischargedPatientsList = ({
             ),
           ]}
           children={
-            <>
-              {qParams.last_consultation_admitted_bed_type_list &&
-                LastAdmittedToTypeBadges()}
-              {qParams.last_consultation__consent_types &&
-                HasConsentTypesBadges()}
-            </>
+            (qParams.last_consultation_admitted_bed_type_list ||
+              qParams.last_consultation__consent_types) && (
+              <>
+                {qParams.last_consultation_admitted_bed_type_list &&
+                  LastAdmittedToTypeBadges()}
+                {qParams.last_consultation__consent_types &&
+                  HasConsentTypesBadges()}
+              </>
+            )
           }
         />
       </div>

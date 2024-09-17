@@ -1,0 +1,13 @@
+{
+  "bed_search_placeholder": "ಹಾಸಿಗೆಗಳ ಹೆಸರಿನ ಮೂಲಕ ಹುಡುಕಿ",
+  "BED_WITH_OXYGEN_SUPPORT": "ಆಮ್ಲಜನಕ ಬೆಂಬಲದೊಂದಿಗೆ ಬೆಡ್",
+  "REGULAR": "ನಿಯಮಿತ",
+  "ICU": "ಐಸಿಯು",
+  "ISOLATION": "ಪ್ರತ್ಯೇಕತೆ",
+  "add_beds": "ಬೆಡ್(ಗಳು) ಸೇರಿಸಿ",
+  "update_bed": "ಹಾಸಿಗೆಯನ್ನು ನವೀಕರಿಸಿ",
+  "bed_type": "ಹಾಸಿಗೆಯ ಪ್ರಕಾರ",
+  "make_multiple_beds_label": "ನೀವು ಬಹು ಹಾಸಿಗೆಗಳನ್ನು ಮಾಡಲು ಬಯಸುವಿರಾ?",
+  "number_of_beds": "ಹಾಸಿಗೆಗಳ ಸಂಖ್ಯೆ",
+  "number_of_beds_out_of_range_error": "ಹಾಸಿಗೆಗಳ ಸಂಖ್ಯೆ 100 ಕ್ಕಿಂತ ಹೆಚ್ಚಿರಬಾರದು"
+}

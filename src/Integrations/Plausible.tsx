@@ -1,11 +1,9 @@
 import { useLocationChange } from "raviger";
-import useConfig from "../Common/hooks/useConfig";
 import Script from "../Components/Common/Script";
 import { useEffect } from "react";
+import careConfig from "@careConfig";
 
 export default function Plausible() {
-  const { site_url, analytics_server_url } = useConfig();
-
   useLocationChange(() => {
     plausible("pageview");
   });
@@ -17,11 +15,11 @@ export default function Plausible() {
   return (
     <Script
       defer
-      data-domain={site_url}
+      data-domain={careConfig.plausible.domain}
       // To add another extension, combine the extension using dots. Refer: https://plausible.io/docs/script-extensions#you-can-combine-extensions-according-to-your-needs
       // Do not accidentally remove existing extensions.
       // `manual` extension is used for the URL to be overridden. See https://plausible.io/docs/script-extensions#scriptmanualjs
-      src={`${analytics_server_url}/js/script.manual.tagged-events.js`}
+      src={`${careConfig.plausible.server}/js/script.manual.tagged-events.js`}
     />
   );
 }

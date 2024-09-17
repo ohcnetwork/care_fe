@@ -20,7 +20,6 @@ import { navigate } from "raviger";
 import { parsePhoneNumber } from "../../Utils/utils.js";
 import { phonePreg } from "../../Common/validation";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import Card from "../../CAREUI/display/Card.js";
@@ -30,6 +29,7 @@ import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -44,7 +44,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [patientCategory, setPatientCategory] = useState<any>();
   const { t } = useTranslation();
-  const { wartime_shifting } = useConfig();
 
   const initForm: any = {
     shifting_approving_facility: null,
@@ -79,7 +78,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
     },
   };
 
-  if (wartime_shifting) {
+  if (careConfig.wartimeShifting) {
     requiredFields = {
       ...requiredFields,
       shifting_approving_facility: {
@@ -200,7 +199,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
       setIsLoading(true);
 
       const data = {
-        status: wartime_shifting ? "PENDING" : "APPROVED",
+        status: careConfig.wartimeShifting ? "PENDING" : "APPROVED",
         origin_facility: props.facilityId,
         shifting_approving_facility: state.form.shifting_approving_facility?.id,
         assigned_facility: state.form?.assigned_facility?.id,
@@ -282,7 +281,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           types={["mobile", "landline"]}
         />
 
-        {wartime_shifting && (
+        {careConfig.wartimeShifting && (
           <div>
             <FieldLabel required>
               Name of shifting approving facility
@@ -336,7 +335,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           label="Patient Category"
         />
 
-        {wartime_shifting && (
+        {careConfig.wartimeShifting && (
           <>
             <SelectFormField
               {...field("preferred_vehicle_choice")}

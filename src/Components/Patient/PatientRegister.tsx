@@ -61,7 +61,6 @@ import countryList from "../../Common/static/countries.json";
 import { debounce } from "lodash-es";
 
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
 import { validatePincode } from "../../Common/validation";
 import { FormContextValue } from "../Form/FormContext.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
@@ -73,6 +72,7 @@ import SelectMenuV2 from "../Form/SelectMenuV2.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import { useTranslation } from "react-i18next";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -181,7 +181,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-  const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const [showAlertMessage, setAlertMessage] = useState({
@@ -372,6 +371,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const { res, data } = await request(routes.getPatient, {
         pathParams: { id: id ? id : 0 },
       });
+      const { data: abhaNumberData } = await request(
+        routes.abha.getAbhaNumber,
+        {
+          pathParams: { abhaNumberId: id ?? "" },
+          silent: true,
+        },
+      );
+
       if (!status.aborted) {
         if (res?.ok && data) {
           setPatientName(data.name || "");
@@ -383,8 +390,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             age: data.year_of_birth
               ? new Date().getFullYear() - data.year_of_birth
               : "",
-            health_id_number: data.abha_number_object?.abha_number || "",
-            health_id: data.abha_number_object?.health_id || "",
+            health_id_number: abhaNumberData?.abha_number || "",
+            health_id: abhaNumberData?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
             gender: data.gender ? data.gender : undefined,
             state: data.state ? data.state : "",
@@ -504,7 +511,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const errors: Partial<Record<keyof any, FieldError>> = {};
 
     const insuranceDetailsError = insuranceDetails
-      .map((policy) => HCXPolicyValidator(policy, enable_hcx))
+      .map((policy) => HCXPolicyValidator(policy, careConfig.hcx.enabled))
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
@@ -644,7 +651,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const handlePincodeChange = async (e: any, setField: any) => {
     if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
+    const pincodeDetails = await getPincodeDetails(
+      e.value,
+      careConfig.govDataApiKey,
+    );
     if (!pincodeDetails) return;
 
     const matchedState = stateData?.results?.find((state) => {
@@ -775,6 +785,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           controllerRef: submitController,
         });
     if (res?.ok && requestData) {
+      if (state.form.abha_number) {
+        const { res, data } = await request(routes.abha.linkPatient, {
+          body: {
+            patient: requestData.id,
+            abha_number: state.form.abha_number,
+          },
+        });
+
+        if (res?.status === 200 && data) {
+          Notification.Success({
+            msg: t("abha_number_linked_successfully"),
+          });
+        } else {
+          Notification.Error({
+            msg: t("failed_to_link_abha_number"),
+          });
+        }
+      }
+
       await Promise.all(
         insuranceDetails.map(async (obj) => {
           const policy = {
@@ -792,7 +821,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 body: policy,
               });
 
-          if (enable_hcx && policyData?.id) {
+          if (careConfig.hcx.enabled && policyData?.id) {
             await request(routes.hcxCheckEligibility, {
               body: { policy: policyData?.id },
               onResponse: ({ res }) => {
@@ -1181,7 +1210,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           Import From External Results
                         </ButtonV2>
                       </div>
-                      {enable_abdm && (
+                      {careConfig.abdm.enabled && (
                         <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                           <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                             ABHA Details
