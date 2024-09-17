@@ -7,15 +7,21 @@ interface IProps {
   claim: HCXClaimModel;
 }
 
+const claimStatus = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+};
+
 export default function ClaimCardInfo({ claim }: IProps) {
   const { t } = useTranslation();
 
   const status =
     claim.outcome === "Complete"
       ? claim.error_text
-        ? t("claim__status__rejected")
-        : t("claim__status__approved")
-      : t("claim__status__pending");
+        ? claimStatus.REJECTED
+        : claimStatus.APPROVED
+      : claimStatus.PENDING;
 
   return (
     <>
@@ -42,12 +48,12 @@ export default function ClaimCardInfo({ claim }: IProps) {
           <span
             className={classNames(
               "rounded p-1 px-2 text-sm font-bold text-white shadow",
-              status === t("claim__status__approved") && "bg-primary-400",
-              status === t("claim__status__rejected") && "bg-danger-400",
-              status === t("claim__status__pending") && "bg-yellow-400",
+              status === claimStatus.APPROVED && "bg-primary-400",
+              status === claimStatus.REJECTED && "bg-danger-400",
+              status === claimStatus.PENDING && "bg-yellow-400",
             )}
           >
-            {status}
+            {t(`claim__status__${status}`)}
           </span>
         </div>
       </div>
