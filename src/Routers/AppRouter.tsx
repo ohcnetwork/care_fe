@@ -28,6 +28,7 @@ import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
 import useAuthUser from "../Common/hooks/useAuthUser";
 import careConfig from "@careConfig";
+import ScribeTestPage from "../Components/Scribe/ScribeTestPage";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
@@ -55,6 +56,8 @@ const Routes = {
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
+  // REMOVE AFTER DEVELOPMENT
+  "/scribe-test": () => <ScribeTestPage />,
 };
 
 export default function AppRouter() {

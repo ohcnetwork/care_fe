@@ -9,6 +9,7 @@ import { UserModel } from "../Users/models";
 import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
 import careConfig from "@careConfig";
 import uploadFile from "../../Utils/request/uploadFile";
+import _ from "lodash";
 
 interface FieldOption {
   id: string | number;
@@ -21,24 +22,29 @@ export interface Field {
   description: string;
   type: string;
   example: string;
-  default: any;
+  current: any;
   options?: readonly FieldOption[];
-  validator: (value: any) => boolean;
+  showFields?: string[];
 }
 
 export interface ScribeForm {
   id: string;
   name: string;
-  fields: () => Promise<Field[]> | Field[];
+  fields: (dehydratedFields: Field[]) => Promise<Field[]>;
+  dehydratedFields: (current: any) => Field[];
 }
 
 export type ScribeModel = {
   external_id: string;
   requested_by: UserModel;
   form_data: {
-    name: string;
-    field: string;
+    friendlyName: string;
+    default: string;
     description: string;
+    example: string;
+    id: string;
+    options?: any[];
+    type: string;
   }[];
   transcript: string;
   ai_response: string;
@@ -62,7 +68,11 @@ const SCRIBE_FILE_TYPES = {
   SCRIBE: 1,
 };
 
-export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
+export const Scribe: React.FC<ScribeProps> = ({
+  form,
+  onFormUpdate,
+  existingData,
+}) => {
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
   const [stage, setStage] = useState("start");
@@ -78,21 +88,6 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
   const [updatedTranscript, setUpdatedTranscript] = useState<string>("");
   const [scribeID, setScribeID] = useState<string>("");
   const stageRef = useRef(stage);
-  const [fields, setFields] = useState<Field[]>([]);
-
-  useEffect(() => {
-    const loadFields = async () => {
-      const fields = await form.fields();
-      setFields(
-        fields.map((f) => ({
-          ...f,
-          validate: undefined,
-          default: JSON.stringify(f.default),
-        })),
-      );
-    };
-    loadFields();
-  }, [form]);
 
   useEffect(() => {
     if (stageRef.current === "cancelled") {
@@ -292,9 +287,14 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
     });
   };
 
+  const getHydratedFields = async () => {
+    return form.fields(form.dehydratedFields(existingData));
+  };
+
   const handleAudioUploads = async () => {
     if (isAudioUploading) return;
     setIsAudioUploading(true);
+    const fields = await getHydratedFields();
     request(routes.createScribe, {
       body: {
         status: "CREATED",
@@ -328,6 +328,7 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
     if (stageRef.current === "cancelled") return;
     setProgress(75);
     setIsGPTProcessing(true);
+    const fields = await getHydratedFields();
     try {
       const updatedFieldsResponse = await waitForFormData(external_id);
       setProgress(100);
@@ -339,8 +340,7 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
         .filter(([k, v]) => {
           const f = fields.find((f) => f.id === k);
           if (!f) return false;
-          if (v === f.default) return false;
-          //if (f.validator) return f.validator(f.type === "number" ? Number(v) : v);
+          if (v === f.current) return false;
           return true;
         })
         .map(([k, v]) => ({ [k]: v }))
@@ -423,10 +423,10 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
         .join(" ");
     };
 
-    const getOptionText = (value: string | number): string => {
-      if (!options) return value.toString();
+    const getOptionText = (value: string | number | null): string => {
+      if (!options) return value?.toString() || "";
       const option = options.find((opt) => opt.id === value);
-      return option ? option.text : value.toString();
+      return option ? option.text : value?.toString() || "";
     };
 
     const renderPrimitive = (value: any): any => {
@@ -662,9 +662,9 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
                           {Object.keys(formFields ?? {})
                             .filter((field) => formFields?.[field])
                             .map((field) => {
-                              const fieldDetails = fields.find(
-                                (f) => f?.id === field,
-                              );
+                              const fieldDetails = form
+                                .dehydratedFields(existingData)
+                                .find((f) => f?.id === field);
                               return (
                                 <div
                                   key={field}
@@ -676,7 +676,12 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
                                   <div className="text-secondary-800">
                                     {processFormField(
                                       fieldDetails,
-                                      formFields,
+                                      fieldDetails?.showFields
+                                        ? _.pick(
+                                            formFields,
+                                            fieldDetails?.showFields,
+                                          )
+                                        : formFields,
                                       field,
                                     )}
                                   </div>
