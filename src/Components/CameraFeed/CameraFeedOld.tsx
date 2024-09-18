@@ -1,33 +1,86 @@
-import { useEffect, useState, useRef, LegacyRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
   listAssetBeds,
   partialUpdateAssetBed,
   deleteAssetBed,
-} from "../../../Redux/actions";
-import { getCameraPTZ } from "../../../Common/constants";
-import {
-  StreamStatus,
-  useMSEMediaPlayer,
-} from "../../../Common/hooks/useMSEplayer";
-import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import * as Notification from "../../../Utils/Notifications.js";
-import { FeedCameraPTZHelpButton } from "./Feed";
+} from "../../Redux/actions.js";
+import { CameraPTZ, getCameraPTZ } from "../../Common/constants.js";
+import { useFeedPTZ } from "./useFeedPTZ.js";
+import * as Notification from "../../Utils/Notifications.js";
 import { AxiosError } from "axios";
-import { BedSelect } from "../../Common/BedSelect";
-import { BedModel } from "../models";
-import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import Page from "../../Common/components/Page";
-import ConfirmDialog from "../../Common/ConfirmDialog";
-import { FieldLabel } from "../../Form/FormFields/FormField";
-import useFullscreen from "../../../Common/hooks/useFullscreen";
-import ReactPlayer from "react-player";
-import { isIOS } from "../../../Utils/utils";
-import TextFormField from "../../Form/FormFields/TextFormField";
+import { BedSelect } from "../Common/BedSelect.js";
+import { BedModel } from "../Facility/models.js";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions.js";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon.js";
+import Page from "../Common/components/Page.js";
+import ConfirmDialog from "../Common/ConfirmDialog.js";
+import { FieldLabel } from "../Form/FormFields/FormField.js";
+import useFullscreen from "../../Common/hooks/useFullscreen.js";
+import TextFormField from "../Form/FormFields/TextFormField.js";
+import VideoPlayer from "./videoPlayer.js";
 
-const LiveFeed = (props: any) => {
+export enum StreamStatus {
+  Playing,
+  Stop,
+  Loading,
+  Offline,
+}
+
+export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
+  const { cameraPTZ } = props;
+  return (
+    <button
+      key="option.action"
+      className="tooltip rounded text-2xl text-secondary-600"
+    >
+      <CareIcon icon="l-question-circle" />
+
+      <ul className="tooltip-text tooltip-left -top-60 right-10 p-2 text-sm">
+        {cameraPTZ.map((option) => {
+          return (
+            <li key={option.action} className="flex items-center gap-3 py-2">
+              <span className="w-16 font-semibold">{option.label}</span>
+              <div className="flex gap-1">
+                {option.shortcutKey.map((hotkey, index) => {
+                  const isArrowKey = hotkey.includes("Arrow");
+                  hotkey = hotkey.replace("Control", "Ctrl");
+
+                  const keyElement = (
+                    <div
+                      key={index}
+                      className="rounded-md border border-secondary-500 p-1.5 font-mono shadow-md"
+                    >
+                      {isArrowKey ? (
+                        <CareIcon icon={option.icon as IconName} />
+                      ) : (
+                        hotkey
+                      )}
+                    </div>
+                  );
+
+                  // Skip wrapping with + for joining with next key
+                  if (index === option.shortcutKey.length - 1)
+                    return keyElement;
+
+                  return (
+                    <div key={index} className="flex items-center gap-1">
+                      {keyElement}
+                      <span className="p-1">+</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </button>
+  );
+};
+
+const CameraFeedOld = (props: any) => {
   const middlewareHostname = props.middlewareHostname;
   const [presetsPage, setPresetsPage] = useState(0);
   const cameraAsset = props.asset;
@@ -57,21 +110,7 @@ const LiveFeed = (props: any) => {
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
   const liveFeedPlayerRef = useRef<any>(null);
-
-  const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
-
-  const streamUrl = isIOS
-    ? `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
-
-  const { startStream } = useMSEMediaPlayer({
-    config: {
-      middlewareHostname,
-      ...cameraAsset,
-    },
-    url: streamUrl,
-    videoEl,
-  });
+  const [streamUrl, setStreamUrl] = useState<string>("");
 
   const refreshPresetsHash = props.refreshPresetsHash;
 
@@ -80,6 +119,7 @@ const LiveFeed = (props: any) => {
   const {
     absoluteMove,
     getCameraStatus,
+    getStreamToken,
     getPTZPayload,
     getPresets,
     gotoPreset,
@@ -199,12 +239,20 @@ const LiveFeed = (props: any) => {
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
-  const startStreamFeed = () => {
-    startStream({
-      onSuccess: () => setStreamStatus(StreamStatus.Playing),
-      onError: () => setStreamStatus(StreamStatus.Offline),
+  const startStreamFeed = useCallback(async () => {
+    if (!liveFeedPlayerRef.current) return;
+
+    await getStreamToken({
+      onSuccess: (data) => {
+        setStreamUrl(
+          `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0&token=${data.token}`,
+        );
+      },
+      onError: () => {
+        setStreamStatus(StreamStatus.Offline);
+      },
     });
-  };
+  }, [liveFeedPlayerRef.current]);
 
   const viewOptions = (page: number) => {
     return presets
@@ -228,7 +276,7 @@ const LiveFeed = (props: any) => {
     return () => {
       clearTimeout(tId);
     };
-  }, [startStream, streamStatus]);
+  }, [startStreamFeed, streamStatus]);
 
   const handlePagination = (cOffset: number) => {
     setPage({
@@ -243,13 +291,10 @@ const LiveFeed = (props: any) => {
         precision === 16 ? 1 : precision * 2,
       );
     },
-    reset: () => {
+    reset: async () => {
       setStreamStatus(StreamStatus.Loading);
       setVideoStartTime(null);
-      startStream({
-        onSuccess: () => setStreamStatus(StreamStatus.Playing),
-        onError: () => setStreamStatus(StreamStatus.Offline),
-      });
+      await startStreamFeed();
     },
     fullScreen: () => {
       if (!liveFeedPlayerRef.current) return;
@@ -364,56 +409,23 @@ const LiveFeed = (props: any) => {
       <div className="mt-4 flex flex-col">
         <div className="relative mt-4 flex flex-col gap-4 lg:flex-row">
           <div className="flex-1">
-            {/* ADD VIDEO PLAYER HERE */}
             <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
-              {isIOS ? (
-                <div className="absolute inset-0">
-                  <ReactPlayer
-                    url={streamUrl}
-                    ref={liveFeedPlayerRef.current as LegacyRef<ReactPlayer>}
-                    controls={false}
-                    playsinline
-                    playing
-                    muted
-                    width="100%"
-                    height="100%"
-                    onPlay={() => {
-                      setVideoStartTime(() => new Date());
-                      setStreamStatus(StreamStatus.Playing);
-                    }}
-                    onWaiting={() => {
-                      const delay = calculateVideoLiveDelay();
-                      if (delay > 5) {
-                        setStreamStatus(StreamStatus.Loading);
-                      }
-                    }}
-                    onError={(e, _, hlsInstance) => {
-                      if (e === "hlsError") {
-                        const recovered = hlsInstance.recoverMediaError();
-                        console.info(recovered);
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <video
-                  id="mse-video"
-                  autoPlay
-                  muted
-                  playsInline
-                  className="z-10 h-full w-full"
-                  ref={liveFeedPlayerRef}
-                  onPlay={() => {
-                    setVideoStartTime(() => new Date());
-                  }}
-                  onWaiting={() => {
-                    const delay = calculateVideoLiveDelay();
-                    if (delay > 5) {
-                      setStreamStatus(StreamStatus.Loading);
-                    }
-                  }}
-                ></video>
-              )}
+              <VideoPlayer
+                playerRef={liveFeedPlayerRef}
+                streamUrl={streamUrl}
+                className="z-10 h-full w-full"
+                onPlay={() => {
+                  setVideoStartTime(() => new Date());
+                }}
+                onWaiting={() => {
+                  const delay = calculateVideoLiveDelay();
+                  if (delay > 5) {
+                    setStreamStatus(StreamStatus.Loading);
+                  }
+                }}
+                onSuccess={() => setStreamStatus(StreamStatus.Playing)}
+                onError={() => setStreamStatus(StreamStatus.Offline)}
+              />
 
               {streamStatus === StreamStatus.Playing &&
                 calculateVideoLiveDelay() > 3 && (
@@ -670,4 +682,4 @@ const LiveFeed = (props: any) => {
   );
 };
 
-export default LiveFeed;
+export default CameraFeedOld;

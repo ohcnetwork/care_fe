@@ -3,11 +3,19 @@ import { navigate } from "raviger";
 import dayjs from "dayjs";
 import { lazy, useCallback, useEffect, useState } from "react";
 import {
+  APPETITE_CHOICES,
+  BLADDER_DRAINAGE_CHOICES,
+  BLADDER_ISSUE_CHOICES,
+  BOWEL_ISSUE_CHOICES,
   CONSCIOUSNESS_LEVEL,
+  NUTRITION_ROUTE_CHOICES,
+  ORAL_ISSUE_CHOICES,
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
+  SLEEP_CHOICES,
   TELEMEDICINE_ACTIONS,
+  URINATION_FREQUENCY_CHOICES,
 } from "../../Common/constants";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
@@ -30,7 +38,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { SCRIBE_FORMS } from "../Scribe/formDetails";
-import { DailyRoundsModel } from "./models";
+import { DailyRoundsModel, DailyRoundTypes } from "./models";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
 import { error } from "@pnotify/core";
@@ -48,6 +56,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import SymptomsApi from "../Symptoms/api";
 import { scrollTo } from "../../Utils/utils";
 import { ICD11DiagnosisModel } from "../Facility/models";
+import NursingCare from "../LogUpdate/Sections/NursingCare";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -281,6 +290,16 @@ export const DailyRounds = (props: any) => {
           }
           return;
         }
+
+        case "oral_issue": {
+          if (state.form.nutrition_route !== "ORAL" && state.form[field]) {
+            errors[field] = t("oral_issue_for_non_oral_nutrition_route_error");
+            invalidForm = true;
+            break;
+          }
+          return;
+        }
+
         default:
           return;
       }
@@ -329,7 +348,7 @@ export const DailyRounds = (props: any) => {
         review_interval: Number(prevReviewInterval),
       };
 
-      if (!["VENTILATOR"].includes(state.form.rounds_type)) {
+      if (state.form.rounds_type !== "VENTILATOR") {
         data = {
           ...data,
           bp: state.form.bp ?? {},
@@ -340,6 +359,17 @@ export const DailyRounds = (props: any) => {
           rhythm_detail: state.form.rhythm_detail,
           ventilator_spo2: state.form.ventilator_spo2 ?? null,
           consciousness_level: state.form.consciousness_level || undefined,
+          bowel_issue: state.form.bowel_issue ?? undefined,
+          bladder_drainage: state.form.bladder_drainage ?? undefined,
+          bladder_issue: state.form.bladder_issue ?? undefined,
+          is_experiencing_dysuria: state.form.is_experiencing_dysuria,
+          urination_frequency: state.form.urination_frequency ?? undefined,
+          sleep: state.form.sleep ?? undefined,
+          nutrition_route: state.form.nutrition_route ?? undefined,
+          oral_issue: state.form.oral_issue ?? undefined,
+          appetite: state.form.appetite ?? undefined,
+          blood_sugar_level: state.form.blood_sugar_level,
+          nursing: state.form.nursing,
         };
       }
 
@@ -354,9 +384,15 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${t(obj.rounds_type as string)} log updated successfully`,
+            msg: t("LOG_UPDATE_UPDATED_NOTIFICATION", {
+              roundType: t(`ROUNDS_TYPE__${state.form.rounds_type}`),
+            }),
           });
-          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
+          if (
+            ["NORMAL", "TELEMEDICINE", "COMMUNITY_NURSES_LOG"].includes(
+              state.form.rounds_type,
+            )
+          ) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
@@ -375,10 +411,16 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${t(state.form.rounds_type)} log created successfully`,
+            msg: t("LOG_UPDATE_CREATED_NOTIFICATION", {
+              roundType: t(`ROUNDS_TYPE__${state.form.rounds_type}`),
+            }),
           });
 
-          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
+          if (
+            ["NORMAL", "TELEMEDICINE", "COMMUNITY_NURSES_LOG"].includes(
+              state.form.rounds_type,
+            )
+          ) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
@@ -408,10 +450,23 @@ export const DailyRounds = (props: any) => {
   const field = (name: string) => {
     return {
       id: name,
+      label: t(`LOG_UPDATE_FIELD_LABEL__${name}`),
       name,
       value: state.form[name],
       error: state.errors[name],
       onChange: handleFormFieldChange,
+    };
+  };
+
+  const selectField = <T extends string>(
+    name: keyof DailyRoundsModel,
+    options: readonly T[],
+  ) => {
+    return {
+      ...field(name),
+      options,
+      optionLabel: (option: T) => t(`${name.toUpperCase()}__${option}`),
+      optionValue: (option: T) => option,
     };
   };
 
@@ -428,30 +483,30 @@ export const DailyRounds = (props: any) => {
     return <Loading />;
   }
 
-  const roundTypes: { id: string; text: string }[] = [];
+  const roundTypes: (typeof DailyRoundTypes)[number][] = [];
 
   if (
     ["Doctor", "Staff", "DistrictAdmin", "StateAdmin"].includes(
       authUser.user_type,
     )
   ) {
-    roundTypes.push({ id: "DOCTORS_LOG", text: t("DOCTORS_LOG") });
+    roundTypes.push("DOCTORS_LOG");
   }
-
-  roundTypes.push(
-    { id: "NORMAL", text: t("NORMAL") },
-    { id: "VENTILATOR", text: t("VENTILATOR") },
-  );
-
+  roundTypes.push("NORMAL", "COMMUNITY_NURSES_LOG", "VENTILATOR");
   if (consultationSuggestion === "DC") {
-    roundTypes.push({ id: "TELEMEDICINE", text: t("TELEMEDICINE") });
+    roundTypes.push("TELEMEDICINE");
   }
+
   const submitButtonDisabled = (() => {
     if (buttonText !== "Save") {
       return false;
     }
 
-    if (["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)) {
+    if (
+      ["VENTILATOR", "DOCTORS_LOG", "COMMUNITY_NURSES_LOG"].includes(
+        state.form.rounds_type,
+      )
+    ) {
       return false;
     }
 
@@ -539,7 +594,7 @@ export const DailyRounds = (props: any) => {
                   "additional_symptoms",
                 ].includes(f),
               ) &&
-              roundTypes.some((t) => t.id === "DOCTORS_LOG")
+              roundTypes.some((t) => t === "DOCTORS_LOG")
             ) {
               rounds_type = "DOCTORS_LOG";
             }
@@ -577,20 +632,15 @@ export const DailyRounds = (props: any) => {
           </div>
           <div className="w-full md:w-1/3">
             <SelectFormField
-              {...field("rounds_type")}
+              {...selectField("rounds_type", roundTypes)}
               required
               className="w-full"
-              label="Round Type"
-              options={roundTypes}
-              optionLabel={(option) => option.text}
-              optionValue={(option) => option.id}
             />
           </div>
           <div className="w-full md:w-1/3">
             <PatientCategorySelect
               {...field("patient_category")}
               required
-              label="Category"
               id="patientCategory"
             />
           </div>
@@ -610,63 +660,67 @@ export const DailyRounds = (props: any) => {
             />
           </div>
 
-          <TextAreaFormField
-            {...field("physical_examination_info")}
-            label="Physical Examination Info"
-            rows={5}
-          />
-          <TextAreaFormField
-            {...field("other_details")}
-            label="Other Details"
-            rows={5}
-          />
+          <TextAreaFormField {...field("physical_examination_info")} rows={5} />
+          <TextAreaFormField {...field("other_details")} rows={5} />
 
-          {state.form.rounds_type !== "DOCTORS_LOG" && (
+          {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
             <>
+              <hr className="my-4 md:col-span-2" />
+              <h3 className="mb-6 md:col-span-2">{t("routine")}</h3>
+              <SelectFormField {...selectField("sleep", SLEEP_CHOICES)} />
               <SelectFormField
-                {...field("action")}
-                label="Action"
-                options={TELEMEDICINE_ACTIONS}
-                optionLabel={(option) => option.desc}
-                optionValue={(option) => option.text}
-                value={prevAction}
-                onChange={(event) => {
-                  handleFormFieldChange(event);
-                  setPreviousAction(event.value);
-                }}
+                {...selectField("bowel_issue", BOWEL_ISSUE_CHOICES)}
               />
-
-              <SelectFormField
-                {...field("review_interval")}
-                label="Review After"
-                labelSuffix={getExpectedReviewTime()}
-                options={REVIEW_AT_CHOICES}
-                optionLabel={(option) => option.text}
-                optionValue={(option) => option.id}
-                value={prevReviewInterval}
-                onChange={(event) => {
-                  handleFormFieldChange(event);
-                  setPreviousReviewInterval(Number(event.value));
-                }}
-              />
+              <div className="grid gap-x-6 md:col-span-2 md:grid-cols-3">
+                <h5 className="mb-3 md:col-span-3">{t("bladder")}</h5>
+                <SelectFormField
+                  {...selectField("bladder_drainage", BLADDER_DRAINAGE_CHOICES)}
+                />
+                <SelectFormField
+                  {...selectField("bladder_issue", BLADDER_ISSUE_CHOICES)}
+                />
+                <SelectFormField
+                  {...field("is_experiencing_dysuria")}
+                  options={[true, false]}
+                  optionLabel={(c) => t(c ? "yes" : "no")}
+                />
+                <SelectFormField
+                  {...selectField(
+                    "urination_frequency",
+                    URINATION_FREQUENCY_CHOICES,
+                  )}
+                />
+              </div>
+              <div className="grid gap-x-6 md:col-span-2 md:grid-cols-2">
+                <h5 className="mb-3 md:col-span-2">{t("nutrition")}</h5>
+                <SelectFormField
+                  {...selectField("nutrition_route", NUTRITION_ROUTE_CHOICES)}
+                />
+                <SelectFormField
+                  {...selectField("oral_issue", ORAL_ISSUE_CHOICES)}
+                  disabled={state.form.nutrition_route !== "ORAL"}
+                />
+                <SelectFormField
+                  {...selectField("appetite", APPETITE_CHOICES)}
+                />
+              </div>
             </>
           )}
 
-          {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
-            state.form.rounds_type,
-          ) && (
+          {[
+            "NORMAL",
+            "TELEMEDICINE",
+            "DOCTORS_LOG",
+            "COMMUNITY_NURSES_LOG",
+          ].includes(state.form.rounds_type) && (
             <>
-              <h3 className="mb-6 md:col-span-2">Vitals</h3>
+              <hr className="my-4 md:col-span-2" />
+              <h3 className="mb-6 md:col-span-2">{t("vitals")}</h3>
 
-              <BloodPressureFormField
-                {...field("bp")}
-                label="Blood Pressure"
-                id="bloodPressure"
-              />
+              <BloodPressureFormField {...field("bp")} id="bloodPressure" />
 
               <RangeAutocompleteFormField
                 {...field("pulse")}
-                label="Pulse"
                 unit="bpm"
                 start={0}
                 end={200}
@@ -689,15 +743,46 @@ export const DailyRounds = (props: any) => {
                   },
                 ]}
               />
+            </>
+          )}
 
-              <TemperatureFormField
-                {...field("temperature")}
-                label="Temperature"
+          {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
+            <>
+              <RangeAutocompleteFormField
+                {...field("blood_sugar_level")}
+                unit="mg/dL"
+                start={0}
+                end={700}
+                step={1}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
+                    label: "Low",
+                  },
+                  {
+                    value: 69,
+                    className: "text-primary-500",
+                    label: "Normal",
+                  },
+                  {
+                    value: 110,
+                    className: "text-danger-500",
+                    label: "High",
+                  },
+                ]}
               />
+            </>
+          )}
+
+          {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
+            state.form.rounds_type,
+          ) && (
+            <>
+              <TemperatureFormField {...field("temperature")} />
 
               <RangeAutocompleteFormField
                 {...field("resp")}
-                label="Respiratory Rate"
                 unit="bpm"
                 start={0}
                 end={150}
@@ -723,7 +808,6 @@ export const DailyRounds = (props: any) => {
 
               <RangeAutocompleteFormField
                 {...field("ventilator_spo2")}
-                label="SPO2"
                 unit="%"
                 start={0}
                 end={100}
@@ -749,8 +833,7 @@ export const DailyRounds = (props: any) => {
 
               <SelectFormField
                 {...field("rhythm")}
-                label="Rhythm"
-                placeholder="Unknown"
+                placeholder={t("HEARTBEAT_RHYTHM__UNKNOWN")}
                 options={RHYTHM_CHOICES}
                 optionLabel={(option) => option.desc}
                 optionValue={(option) => option.id}
@@ -759,23 +842,63 @@ export const DailyRounds = (props: any) => {
               <TextAreaFormField
                 {...field("rhythm_detail")}
                 className="md:col-span-1"
-                label="Rhythm Description"
                 rows={7}
               />
 
               <RadioFormField
-                label="Level Of Consciousness"
-                {...field("consciousness_level")}
+                {...selectField(
+                  "consciousness_level",
+                  CONSCIOUSNESS_LEVEL.map((a) => a.value),
+                )}
                 options={CONSCIOUSNESS_LEVEL.map((level) => ({
                   label: t(`CONSCIOUSNESS_LEVEL__${level.value}`),
                   value: level.value,
                 }))}
-                optionDisplay={(option) => option.label}
+                optionLabel={(option) => option.label}
                 optionValue={(option) => option.value}
                 unselectLabel="Unknown"
                 layout="vertical"
               />
             </>
+          )}
+
+          {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
+            <div className="md:col-span-2">
+              <hr className="my-4 md:col-span-2" />
+              <div className="mb-4 mt-8 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">
+                  {t("prescription_medications")}
+                </h3>
+                <CheckBoxFormField
+                  label="Include discontinued prescriptions"
+                  name="toggle-discontinued-prescriptions-visibility"
+                  value={showDiscontinuedPrescriptions}
+                  onChange={({ value }) =>
+                    setShowDiscontinuedPrescriptions(value)
+                  }
+                  errorClassName="hidden"
+                />
+              </div>
+              <PrescriptionBuilder
+                discontinued={showDiscontinuedPrescriptions ? undefined : false}
+                actions={["discontinue"]}
+              />
+            </div>
+          )}
+
+          {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
+            <div className="md:col-span-2">
+              <hr className="mb-4 mt-8 md:col-span-2" />
+              <div className="mb-4 mt-8 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">{t("nursing_care")}</h3>
+              </div>
+              <NursingCare
+                log={{ nursing: state.form.nursing }}
+                onChange={(log) =>
+                  handleFormFieldChange({ name: "nursing", value: log.nursing })
+                }
+              />
+            </div>
           )}
 
           {state.form.rounds_type === "DOCTORS_LOG" && (
@@ -858,6 +981,36 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
               </div>
+            </>
+          )}
+
+          {state.form.rounds_type !== "DOCTORS_LOG" && (
+            <>
+              <hr className="mb-4 mt-8 md:col-span-2" />
+              <SelectFormField
+                {...field("action")}
+                options={TELEMEDICINE_ACTIONS}
+                optionLabel={(option) => option.desc}
+                optionValue={(option) => option.text}
+                value={prevAction}
+                onChange={(event) => {
+                  handleFormFieldChange(event);
+                  setPreviousAction(event.value);
+                }}
+              />
+
+              <SelectFormField
+                {...field("review_interval")}
+                labelSuffix={getExpectedReviewTime()}
+                options={REVIEW_AT_CHOICES}
+                optionLabel={(option) => option.text}
+                optionValue={(option) => option.id}
+                value={prevReviewInterval}
+                onChange={(event) => {
+                  handleFormFieldChange(event);
+                  setPreviousReviewInterval(Number(event.value));
+                }}
+              />
             </>
           )}
         </div>
