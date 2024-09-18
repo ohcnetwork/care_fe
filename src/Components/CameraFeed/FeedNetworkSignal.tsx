@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { calculateVideoDelay } from "./utils";
 import NetworkSignal from "../../CAREUI/display/NetworkSignal";
-
-export type StreamStatus = "playing" | "stop" | "loading" | "offline";
+import { StreamStatus } from "./FeedAlert";
 
 interface Props {
   playerRef: React.RefObject<HTMLVideoElement>;
