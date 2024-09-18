@@ -1,14 +1,13 @@
 import _, { set } from "lodash-es";
 import { navigate } from "raviger";
 import { lazy, useCallback, useReducer } from "react";
-import { useTranslation } from "react-i18next";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications.js";
 import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
-import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
-
+import PrintPreview from "../../../CAREUI/misc/PrintPreview";
+import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
@@ -35,10 +34,15 @@ const updateFormReducer = (state = initialState, action: any) => {
   }
 };
 
-export default function ShowInvestigation(props: any) {
+interface ShowInvestigationProps {
+  consultationId: string;
+  patientId: string;
+  sessionId: string;
+  facilityId: string;
+}
+export default function ShowInvestigation(props: ShowInvestigationProps) {
+  const { consultationId, patientId, sessionId } = props;
   const { t } = useTranslation();
-  const { consultationId, patientId, facilityId, sessionId } = props;
-
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
   const { loading: investigationLoading } = useQuery(routes.getInvestigation, {
     pathParams: {
@@ -141,20 +145,16 @@ export default function ShowInvestigation(props: any) {
   if (patientLoading || investigationLoading) {
     return <Loading />;
   }
-
   return (
-    <div className="mx-auto max-w-7xl px-4">
-      <PageTitle
-        title={t("investigations")}
-        className="mx-3 md:mx-4"
-        crumbsReplacements={{
-          [facilityId]: { name: patientData?.facility_object?.name },
-          [patientId]: { name: patientData?.name },
-        }}
-        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
-      />
+    <PrintPreview
+      title={t("investigation_report_for_{{name}}", {
+        name: patientData?.name,
+      })}
+    >
       <InvestigationTable
-        title={`ID: ${sessionId}`}
+        title={t("investigation_report_of_{{name}}", {
+          name: patientData?.name,
+        })}
         data={state.initialValues}
         isDischargedPatient={!!consultation?.discharge_date}
         changedFields={state.changedFields}
@@ -162,6 +162,6 @@ export default function ShowInvestigation(props: any) {
         handleUpdateCancel={handleUpdateCancel}
         handleSave={handleSubmit}
       />
-    </div>
+    </PrintPreview>
   );
 }

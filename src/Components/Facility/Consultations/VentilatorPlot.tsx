@@ -6,6 +6,7 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import BinaryChronologicalChart from "./components/BinaryChronologicalChart";
+import { VentilatorPlotFields } from "../models";
 
 /*
 interface ModalityType {
@@ -39,23 +40,7 @@ export const VentilatorPlot = (props: any) => {
       consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: {
-          page: currentPage,
-          fields: [
-            "ventilator_pip",
-            "ventilator_mean_airway_pressure",
-            "ventilator_resp_rate",
-            "ventilator_pressure_support",
-            "ventilator_tidal_volume",
-            "ventilator_peep",
-            "ventilator_fio2",
-            "ventilator_spo2",
-            "etco2",
-            "bilateral_air_entry",
-            "ventilator_oxygen_modality_oxygen_rate",
-            "ventilator_oxygen_modality_flow_rate",
-          ],
-        },
+        body: { page: currentPage, fields: VentilatorPlotFields },
         pathParams: {
           consultationId,
         },
