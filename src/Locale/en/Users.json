@@ -11,6 +11,15 @@
   "average_weekly_working_hours": "Average weekly working hours",
   "set_average_weekly_working_hours_for": "Set Average weekly working hours for",
   "search_by_username": "Search by username",
+  "user__working_hours__validation__range": "Value should be between 0 and 168",
+  "user__working_hours__update_success": "Working hours updated successfully",
+  "user__working_hours__update_error": "Error while updating working hours",
+  "user__delete_success": "User deleted successfully",
+  "user__delete_error": "Error while deleting user",
+  "user__weekly_working_hours": "Average weekly working hours",
+  "set_average_weekly_working_hours": "Set Average weekly working hours",
+  "linked_skills": "Linked Skills",
   "last_online": "Last Online",
+  "currently_online": "Currently Online",
   "total_users": "Total Users"
 }

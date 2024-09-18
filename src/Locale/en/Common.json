@@ -196,6 +196,7 @@
   "discharged": "Discharged",
   "archived": "Archived",
   "no_changes_made": "No changes made",
+  "hours": "Hours",
   "user_deleted_successfuly": "User Deleted Successfuly",
   "users": "Users",
   "are_you_sure_want_to_delete": "Are you sure you want to delete {{name}}?",
@@ -204,5 +205,4 @@
   "delete_item": "Delete {{name}}",
   "unsupported_browser": "Unsupported Browser",
   "unsupported_browser_description": "Your browser ({{name}} version {{version}}) is not supported. Please update your browser to the latest version or switch to a supported browser for the best experience."
-
 }
