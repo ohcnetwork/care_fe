@@ -15,6 +15,7 @@ import {
 } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import { NeurologicalTablesFields } from "../models";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -38,15 +39,15 @@ const DataTable = (props: any) => {
             return (
               <div
                 key={`${title}_${i}`}
-                className="flex flex-col divide-x divide-secondary-200"
+                className="flex flex-col justify-between divide-x divide-secondary-200"
               >
-                <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-900">
+                <div className="w-20 bg-secondary-50 px-2 py-4 text-center text-xs font-medium leading-4 text-secondary-900">
                   {x.date}
                 </div>
-                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
+                <div className="whitespace-nowrap bg-white px-2 py-5 text-center text-xs leading-4 text-secondary-900">
                   {x.left}
                 </div>
-                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
+                <div className="whitespace-nowrap bg-white px-2 py-5 text-center text-xs leading-4 text-secondary-900">
                   {x.right}
                 </div>
               </div>
@@ -60,7 +61,6 @@ const DataTable = (props: any) => {
 
 const DataDescription = (props: any) => {
   const { title, data } = props;
-  console.log("Data Description", title, data);
 
   return (
     <div>
@@ -114,28 +114,7 @@ export const NeurologicalTable = (props: any) => {
       consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: {
-          page: currentPage,
-          fields: [
-            "consciousness_level",
-            "left_pupil_size",
-            "left_pupil_size_detail",
-            "right_pupil_size",
-            "right_pupil_size_detail",
-            "left_pupil_light_reaction",
-            "left_pupil_light_reaction_detail",
-            "right_pupil_light_reaction",
-            "right_pupil_light_reaction_detail",
-            "limb_response_upper_extremity_right",
-            "limb_response_upper_extremity_left",
-            "limb_response_lower_extremity_left",
-            "limb_response_lower_extremity_right",
-            "glasgow_eye_open",
-            "glasgow_verbal_response",
-            "glasgow_motor_response",
-            "glasgow_total_calculated",
-          ],
-        },
+        body: { page: currentPage, fields: NeurologicalTablesFields },
         pathParams: {
           consultationId,
         },
@@ -321,7 +300,7 @@ export const NeurologicalTable = (props: any) => {
               <div className="bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
                 Motor
               </div>
-              <div className="bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
+              <div className="border-t-2 bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
                 Total
               </div>
             </div>
@@ -332,7 +311,7 @@ export const NeurologicalTable = (props: any) => {
                     key={`glascow_${i}`}
                     className="flex flex-col divide-x divide-secondary-200"
                   >
-                    <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-800">
+                    <div className="w-20 bg-secondary-50 px-2 py-4 text-center text-xs font-medium leading-5 text-secondary-800">
                       {x.date}
                     </div>
                     <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-secondary-800">

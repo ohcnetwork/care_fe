@@ -20,6 +20,8 @@ import DialogModal from "../Common/Dialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import uploadFile from "../../Utils/request/uploadFile";
+import careConfig from "@careConfig";
+
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -116,7 +118,7 @@ const CoverImageEditModal = ({
 
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
-    const url = `/api/v1/facility/${facility.id}/cover_image/`;
+    const url = `${careConfig.apiUrl}/api/v1/facility/${facility.id}/cover_image/`;
     setIsProcessing(true);
 
     uploadFile(
@@ -127,9 +129,14 @@ const CoverImageEditModal = ({
         Authorization:
           "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
       },
-      (xhr: XMLHttpRequest) => {
+      async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           Success({ msg: "Cover image updated." });
+          setIsProcessing(false);
+          setIsCaptureImgBeingUploaded(false);
+          await sleep(1000);
+          onSave?.();
+          closeModal();
         } else {
           Notification.Error({
             msg: "Something went wrong!",
@@ -145,12 +152,6 @@ const CoverImageEditModal = ({
         setIsProcessing(false);
       },
     );
-
-    await sleep(1000);
-    setIsProcessing(false);
-    setIsCaptureImgBeingUploaded(false);
-    onSave && onSave();
-    closeModal();
   };
 
   const handleDelete = async () => {

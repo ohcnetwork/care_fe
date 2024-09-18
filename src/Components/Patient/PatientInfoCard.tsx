@@ -8,11 +8,10 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants.js";
 import { ConsultationModel, PatientCategory } from "../Facility/models.js";
-import { Switch, Menu } from "@headlessui/react";
+import { Switch, MenuItem, Field, Label } from "@headlessui/react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import useConfig from "../../Common/hooks/useConfig.js";
 import dayjs from "../../Utils/dayjs.js";
 import {
   classNames,
@@ -41,8 +40,10 @@ import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
+import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
+import careConfig from "@careConfig";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -57,6 +58,7 @@ const formatSkills = (arr: SkillModel[]) => {
 export default function PatientInfoCard(props: {
   patient: PatientModel;
   consultation?: ConsultationModel;
+  abhaNumber?: AbhaNumberModel;
   fetchPatientData?: (state: { aborted: boolean }) => void;
   activeShiftingData: any;
   consultationId: string;
@@ -73,8 +75,6 @@ export default function PatientInfoCard(props: {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
-
-  const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
@@ -665,7 +665,7 @@ export default function PatientInfoCard(props: {
                   ],
                 ]
                   .concat(
-                    enable_hcx
+                    careConfig.hcx.enabled
                       ? [
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
@@ -735,10 +735,10 @@ export default function PatientInfoCard(props: {
               </div>
 
               <div>
-                {enable_abdm &&
-                  (patient.abha_number ? (
+                {careConfig.abdm.enabled &&
+                  (props.abhaNumber ? (
                     <>
-                      <Menu.Item>
+                      <MenuItem>
                         {({ close }) => (
                           <>
                             <div
@@ -797,10 +797,10 @@ export default function PatientInfoCard(props: {
                             </div>
                           </>
                         )}
-                      </Menu.Item>
+                      </MenuItem>
                     </>
                   ) : (
-                    <Menu.Item>
+                    <MenuItem>
                       {({ close }) => (
                         <div
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -818,12 +818,12 @@ export default function PatientInfoCard(props: {
                           </span>
                         </div>
                       )}
-                    </Menu.Item>
+                    </MenuItem>
                   ))}
               </div>
               <div>
                 {!consultation?.discharge_date && (
-                  <Menu.Item>
+                  <MenuItem>
                     {({ close }) => (
                       <>
                         {hasActiveShiftingRequest() ? (
@@ -869,9 +869,9 @@ export default function PatientInfoCard(props: {
                         )}
                       </>
                     )}
-                  </Menu.Item>
+                  </MenuItem>
                 )}
-                <Menu.Item>
+                <MenuItem>
                   {({ close }) => (
                     <div
                       className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -889,8 +889,8 @@ export default function PatientInfoCard(props: {
                       </span>
                     </div>
                   )}
-                </Menu.Item>
-                <Menu.Item>
+                </MenuItem>
+                <MenuItem>
                   {({ close }) => (
                     <div
                       className={`dropdown-item-primary pointer-events-auto ${
@@ -917,10 +917,10 @@ export default function PatientInfoCard(props: {
                       </span>
                     </div>
                   )}
-                </Menu.Item>
+                </MenuItem>
               </div>
               <div className="px-4 py-2">
-                <Switch.Group as="div" className="flex items-center">
+                <Field as="div" className="flex items-center">
                   <Switch
                     checked={medicoLegalCase}
                     onChange={(checked) => {
@@ -945,12 +945,12 @@ export default function PatientInfoCard(props: {
                       )}
                     />
                   </Switch>
-                  <Switch.Label as="span" className="ml-3 text-sm">
+                  <Label as="span" className="ml-3 text-sm">
                     <span className="font-medium text-secondary-900">
                       Medico-Legal Case
                     </span>{" "}
-                  </Switch.Label>
-                </Switch.Group>
+                  </Label>
+                </Field>
               </div>
             </DropdownMenu>
           </div>
@@ -966,18 +966,18 @@ export default function PatientInfoCard(props: {
       />
       <ABHAProfileModal
         patientId={patient.id}
-        abha={patient.abha_number_object}
+        abha={props.abhaNumber}
         show={showABHAProfile}
         onClose={() => setShowABHAProfile(false)}
       />
       <LinkCareContextModal
         consultationId={props.consultationId}
-        patient={patient}
+        abha={props.abhaNumber}
         show={showLinkCareContext}
         onClose={() => setShowLinkCareContext(false)}
       />
       <FetchRecordsModal
-        patient={patient}
+        abha={props.abhaNumber}
         show={showFetchABDMRecords}
         onClose={() => setShowFetchABDMRecords(false)}
       />

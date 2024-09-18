@@ -10,10 +10,10 @@ export default function PDFViewer(
     onDocumentLoadSuccess: (numPages: number) => void;
   }>,
 ) {
-  pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+  pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex h-full flex-col items-center justify-center">
       <div className="w-full overflow-auto">
         <Document
           file={props.url}

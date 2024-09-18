@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
 import { DupPatientModel } from "./models";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -12,6 +13,7 @@ interface Props {
 const tdClass = "border border-secondary-400 p-2 text-left";
 
 const DuplicatePatientDialog = (props: Props) => {
+  const { t } = useTranslation();
   const { patientList, handleOk, handleCancel } = props;
   const [action, setAction] = useState("");
 
@@ -79,10 +81,7 @@ const DuplicatePatientDialog = (props: Props) => {
                 value="transfer"
                 onChange={(e) => setAction(e.target.value)}
               />
-              <p>
-                Admit the patient record to your facility by adding the date of
-                birth
-              </p>
+              <p>{t("duplicate_patient_record_confirmation")}</p>
             </label>
           </div>
 
@@ -99,18 +98,11 @@ const DuplicatePatientDialog = (props: Props) => {
                 value="close"
                 onChange={(e) => setAction(e.target.value)}
               />
-              <p>
-                I confirm that the suspect / patient I want to create is not on
-                the list.
-              </p>
+              <p>{t("duplicate_patient_record_rejection")}</p>
             </label>
           </div>
 
-          <p>
-            Please contact your district care coordinator, the shifting facility
-            or the patient themselves if you are not sure about the patient's
-            date of birth.
-          </p>
+          <p>{t("duplicate_patient_record_birth_unknown")}</p>
         </div>
       </div>
       <div className="mt-4 flex flex-col justify-between sm:flex-row">

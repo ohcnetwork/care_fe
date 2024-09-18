@@ -14,9 +14,14 @@ export default function PatientCategorySelect(
     <SelectFormField
       {...props}
       required={props.required ?? true}
-      options={PATIENT_CATEGORIES}
+      options={
+        props.value === "Comfort"
+          ? PATIENT_CATEGORIES
+          : PATIENT_CATEGORIES.filter((c) => c.id !== "Comfort")
+      } // Comfort Care is discontinued
       optionValue={(option) => option.id}
       optionLabel={(option) => option.text}
+      optionDescription={(option) => option.description}
       optionSelectedLabel={(option) => (
         <span className="flex items-center gap-3">
           <div
@@ -27,6 +32,7 @@ export default function PatientCategorySelect(
                 Stable: "bg-patient-stable",
                 Moderate: "bg-patient-abnormal",
                 Critical: "bg-patient-critical",
+                ActivelyDying: "bg-patient-activelydying",
               }[option.id],
             )}
           />

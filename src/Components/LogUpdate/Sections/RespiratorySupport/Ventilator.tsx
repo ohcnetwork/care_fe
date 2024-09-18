@@ -58,7 +58,7 @@ export const VentilatorFields = [
     valueDescription: rangeValueDescription({}),
   },
   {
-    key: "ventilator_fi02",
+    key: "ventilator_fio2",
     label: (
       <span>
         FiO<sub>2</sub>
