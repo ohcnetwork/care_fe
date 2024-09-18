@@ -371,6 +371,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const { res, data } = await request(routes.getPatient, {
         pathParams: { id: id ? id : 0 },
       });
+      const { data: abhaNumberData } = await request(
+        routes.abha.getAbhaNumber,
+        {
+          pathParams: { abhaNumberId: id ?? "" },
+          silent: true,
+        },
+      );
+
       if (!status.aborted) {
         if (res?.ok && data) {
           setPatientName(data.name || "");
@@ -382,8 +390,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             age: data.year_of_birth
               ? new Date().getFullYear() - data.year_of_birth
               : "",
-            health_id_number: data.abha_number_object?.abha_number || "",
-            health_id: data.abha_number_object?.health_id || "",
+            health_id_number: abhaNumberData?.abha_number || "",
+            health_id: abhaNumberData?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
             gender: data.gender ? data.gender : undefined,
             state: data.state ? data.state : "",
@@ -777,6 +785,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           controllerRef: submitController,
         });
     if (res?.ok && requestData) {
+      if (state.form.abha_number) {
+        const { res, data } = await request(routes.abha.linkPatient, {
+          body: {
+            patient: requestData.id,
+            abha_number: state.form.abha_number,
+          },
+        });
+
+        if (res?.status === 200 && data) {
+          Notification.Success({
+            msg: t("abha_number_linked_successfully"),
+          });
+        } else {
+          Notification.Error({
+            msg: t("failed_to_link_abha_number"),
+          });
+        }
+      }
+
       await Promise.all(
         insuranceDetails.map(async (obj) => {
           const policy = {
@@ -1468,7 +1495,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                               </div>
@@ -1501,7 +1528,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 { label: "Yes", value: "true" },
                                 { label: "No", value: "false" },
                               ]}
-                              optionDisplay={(option) => option.label}
+                              optionLabel={(option) => option.label}
                               optionValue={(option) => option.value}
                             />
                           </CollapseV2>
@@ -1781,7 +1808,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                               </div>
@@ -1815,7 +1842,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                             value: "3",
                                           },
                                         ]}
-                                        optionDisplay={(option) => option.label}
+                                        optionLabel={(option) => option.label}
                                         optionValue={(option) => option.value}
                                       />
                                     </div>
@@ -1850,7 +1877,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                                 <CollapseV2

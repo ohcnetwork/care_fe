@@ -115,5 +115,7 @@
   "add_details_of_patient": "Add Details of Patient",
   "choose_location": "Choose Location",
   "live_monitoring": "Live Monitoring",
-  "open_live_monitoring": "Open Live Monitoring"
+  "open_live_monitoring": "Open Live Monitoring",
+  "abha_number_linked_successfully": "ABHA number linked successfully",
+  "failed_to_link_abha_number": "Failed to link ABHA number"
 }

@@ -3,22 +3,22 @@ import * as Notification from "../../Utils/Notifications.js";
 import ButtonV2 from "../Common/components/ButtonV2";
 import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
-import { PatientModel } from "../Patient/models";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { useState } from "react";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import { AbhaNumberModel } from "./types/abha.js";
 
 interface IProps {
   consultationId: string;
-  patient: PatientModel;
+  abha?: AbhaNumberModel;
   show: boolean;
   onClose: () => void;
 }
 
 const LinkCareContextModal = ({
   consultationId,
-  patient,
+  abha,
   show,
   onClose,
 }: IProps) => {
@@ -33,7 +33,7 @@ const LinkCareContextModal = ({
     >
       <div className="flex items-center justify-between">
         <TextFormField
-          value={patient?.abha_number_object?.name}
+          value={abha?.name}
           onChange={() => null}
           disabled
           label="Name"
@@ -41,7 +41,7 @@ const LinkCareContextModal = ({
           error=""
         />
         <TextFormField
-          value={patient?.abha_number_object?.gender}
+          value={abha?.gender}
           onChange={() => null}
           disabled
           label="Gender"
@@ -52,11 +52,7 @@ const LinkCareContextModal = ({
       <DateFormField
         name="dob"
         label="Date of Birth"
-        value={
-          patient?.abha_number_object?.date_of_birth
-            ? new Date(patient?.abha_number_object?.date_of_birth)
-            : undefined
-        }
+        value={abha?.date_of_birth ? new Date(abha?.date_of_birth) : undefined}
         onChange={() => null}
         disabled
         required
@@ -84,19 +80,15 @@ const LinkCareContextModal = ({
             const { res } = await request(routes.abha.linkCareContext, {
               body: {
                 consultation: consultationId,
-                name: patient?.abha_number_object?.name,
-                gender: patient?.abha_number_object?.gender,
-                dob: patient?.abha_number_object?.date_of_birth,
+                name: abha?.name,
+                gender: abha?.gender,
+                dob: abha?.date_of_birth,
               },
               reattempts: 0,
             });
             if (res?.status === 202) {
               Notification.Success({
                 msg: "Care Context sucessfully linked!",
-              });
-            } else {
-              Notification.Error({
-                msg: "Error in linking Care Context!",
               });
             }
             setIsLinkingCareContext(false);

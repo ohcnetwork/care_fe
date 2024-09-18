@@ -770,7 +770,7 @@ export const DailyRounds = (props: any) => {
                   label: t(`CONSCIOUSNESS_LEVEL__${level.value}`),
                   value: level.value,
                 }))}
-                optionDisplay={(option) => option.label}
+                optionLabel={(option) => option.label}
                 optionValue={(option) => option.value}
                 unselectLabel="Unknown"
                 layout="vertical"

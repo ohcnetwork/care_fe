@@ -22,9 +22,12 @@
   "investigations": "Investigations",
   "search_investigation_placeholder": "Search Investigation & Groups",
   "save_investigation": "Save Investigation",
+  "investigation_report_for_{{name}}": "Investigation Report for {{name}}",
+  "investigation_report_of_{{name}}":"Investigation Report of : {{name}}",
   "investigation_reports": "Investigation Reports",
   "no_investigation": "No investigation Reports found",
   "investigations_suggested": "Investigations Suggested",
+  "no_tests_taken":"No tests taken",
   "to_be_conducted": "To be conducted",
   "log_report": "Log Report",
   "no_investigation_suggestions": "No Investigation Suggestions",
@@ -56,4 +59,7 @@
   "encounter_duration_confirmation": "The duration of this encounter would be",
   "consultation_notes": "General Instructions (Advice)",
   "diagnosis_at_discharge": "Diagnosis at Discharge"
+  "procedure_suggestions": "Procedure Suggestions",
+  "patient_notes_thread__Doctors": "Doctor's Discussions",
+  "patient_notes_thread__Nurses": "Nurse's Discussions"
 }
