@@ -139,7 +139,7 @@ const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
 
   return (
     <div className="pb-8 pt-4">
-      <div className="m-2 w-fit overflow-hidden rounded-lg border border-black shadow">
+      <div className="m-2 w-full overflow-hidden overflow-x-auto rounded-lg border border-black shadow">
         <table className="border-collapse overflow-hidden rounded-lg border bg-secondary-100">
           <thead className="bg-white shadow">
             <tr>
