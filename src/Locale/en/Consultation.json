@@ -58,7 +58,7 @@
   "back_dated_encounter_date_caution": "You are creating an encounter for",
   "encounter_duration_confirmation": "The duration of this encounter would be",
   "consultation_notes": "General Instructions (Advice)",
-  "diagnosis_at_discharge": "Diagnosis at Discharge"
+  "diagnosis_at_discharge": "Diagnosis at Discharge",
   "procedure_suggestions": "Procedure Suggestions",
   "patient_notes_thread__Doctors": "Doctor's Discussions",
   "patient_notes_thread__Nurses": "Nurse's Discussions"
