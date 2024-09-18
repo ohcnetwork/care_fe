@@ -102,7 +102,7 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     }
   };
 
-  const starthls = () => {
+  const startHLS = () => {
     console.debug("Broken os/browser, falling back to hls");
     try {
       if (!playerRef.current || !props.streamUrl) return;
@@ -121,7 +121,7 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     }
   };
 
-  const startmse = () => {
+  const startMSE = () => {
     try {
       if (!playerRef.current || !props.streamUrl) return;
       if (typeof ManagedMediaSource !== "undefined") {
@@ -169,9 +169,9 @@ export default function VideoPlayer(props: VideoPlayerProps) {
   useEffect(() => {
     // if the device is ios < 18 or safari < 17 then fallback to hls
     if (isIOSVersionLessThan18() || isSafariVersionLessThan17()) {
-      starthls();
+      startHLS();
     } else {
-      startmse();
+      startMSE();
     }
     return () => {
       cleanup();
