@@ -466,7 +466,6 @@ export const DailyRounds = (props: any) => {
       ...field(name),
       options,
       optionLabel: (option: T) => t(`${name.toUpperCase()}__${option}`),
-      optionDisplay: (option: T) => t(`${name.toUpperCase()}__${option}`), // Duplicate as radio form field uses prop name `optionDisplay` instead. TODO: convert all `optionDisplay` to `optionLabel` of radio form field for consistency with other reusable components
       optionValue: (option: T) => option,
     };
   };
@@ -851,6 +850,12 @@ export const DailyRounds = (props: any) => {
                   "consciousness_level",
                   CONSCIOUSNESS_LEVEL.map((a) => a.value),
                 )}
+                options={CONSCIOUSNESS_LEVEL.map((level) => ({
+                  label: t(`CONSCIOUSNESS_LEVEL__${level.value}`),
+                  value: level.value,
+                }))}
+                optionLabel={(option) => option.label}
+                optionValue={(option) => option.value}
                 unselectLabel="Unknown"
                 layout="vertical"
               />
