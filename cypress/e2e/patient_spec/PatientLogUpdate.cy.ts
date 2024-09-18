@@ -192,7 +192,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSystolic(patientModifiedSystolic);
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
-    cy.verifyNotification("Progress Note log updated successfully");
+    cy.verifyNotification("Progress Note updated successfully");
   });
 
   it("Create a new TeleIcu log update for a domicilary care patient", () => {
@@ -271,7 +271,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickClearButtonInElement("#diastolic");
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
-    cy.verifyNotification("Brief Update log updated successfully");
+    cy.verifyNotification("Brief Update updated successfully");
     cy.contains("button", "Daily Rounds").click();
     patientLogupdate.clickLogUpdateViewDetails(
       "#dailyround-entry",
