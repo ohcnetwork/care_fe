@@ -6,7 +6,7 @@ import {
   APPETITE_CHOICES,
   BLADDER_DRAINAGE_CHOICES,
   BLADDER_ISSUE_CHOICES,
-  BOWEL_DIFFICULTY_CHOICES,
+  BOWEL_ISSUE_CHOICES,
   CONSCIOUSNESS_LEVEL,
   NUTRITION_ROUTE_CHOICES,
   ORAL_ISSUE_CHOICES,
@@ -359,7 +359,7 @@ export const DailyRounds = (props: any) => {
           rhythm_detail: state.form.rhythm_detail,
           ventilator_spo2: state.form.ventilator_spo2 ?? null,
           consciousness_level: state.form.consciousness_level || undefined,
-          bowel_difficulty: state.form.bowel_difficulty,
+          bowel_issue: state.form.bowel_issue,
           bladder_drainage: state.form.bladder_drainage,
           bladder_issue: state.form.bladder_issue,
           is_experiencing_dysuria: state.form.is_experiencing_dysuria,
@@ -642,7 +642,6 @@ export const DailyRounds = (props: any) => {
             <PatientCategorySelect
               {...field("patient_category")}
               required
-              label="Category"
               id="patientCategory"
             />
           </div>
@@ -662,27 +661,19 @@ export const DailyRounds = (props: any) => {
             />
           </div>
 
-          <TextAreaFormField
-            {...field("physical_examination_info")}
-            label="Physical Examination Info"
-            rows={5}
-          />
-          <TextAreaFormField
-            {...field("other_details")}
-            label="Other Details"
-            rows={5}
-          />
+          <TextAreaFormField {...field("physical_examination_info")} rows={5} />
+          <TextAreaFormField {...field("other_details")} rows={5} />
 
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
             <>
               <hr className="my-4 md:col-span-2" />
-              <h3 className="mb-6 md:col-span-2">Routine</h3>
+              <h3 className="mb-6 md:col-span-2">{t("routine")}</h3>
               <SelectFormField {...selectField("sleep", SLEEP_CHOICES)} />
               <SelectFormField
-                {...selectField("bowel_difficulty", BOWEL_DIFFICULTY_CHOICES)}
+                {...selectField("bowel_issue", BOWEL_ISSUE_CHOICES)}
               />
               <div className="grid gap-x-6 md:col-span-2 md:grid-cols-3">
-                <h5 className="mb-3 md:col-span-3">Bladder</h5>
+                <h5 className="mb-3 md:col-span-3">{t("bladder")}</h5>
                 <SelectFormField
                   {...selectField("bladder_drainage", BLADDER_DRAINAGE_CHOICES)}
                 />
@@ -692,7 +683,7 @@ export const DailyRounds = (props: any) => {
                 <SelectFormField
                   {...field("is_experiencing_dysuria")}
                   options={[true, false]}
-                  optionLabel={(c) => (c ? "Yes" : "No")}
+                  optionLabel={(c) => t(c ? "yes" : "no")}
                 />
                 <SelectFormField
                   {...selectField(
@@ -702,7 +693,7 @@ export const DailyRounds = (props: any) => {
                 />
               </div>
               <div className="grid gap-x-6 md:col-span-2 md:grid-cols-2">
-                <h5 className="mb-3 md:col-span-2">Nutrition</h5>
+                <h5 className="mb-3 md:col-span-2">{t("nutrition")}</h5>
                 <SelectFormField
                   {...selectField("nutrition_route", NUTRITION_ROUTE_CHOICES)}
                 />
@@ -725,17 +716,12 @@ export const DailyRounds = (props: any) => {
           ].includes(state.form.rounds_type) && (
             <>
               <hr className="my-4 md:col-span-2" />
-              <h3 className="mb-6 md:col-span-2">Vitals</h3>
+              <h3 className="mb-6 md:col-span-2">{t("vitals")}</h3>
 
-              <BloodPressureFormField
-                {...field("bp")}
-                label="Blood Pressure"
-                id="bloodPressure"
-              />
+              <BloodPressureFormField {...field("bp")} id="bloodPressure" />
 
               <RangeAutocompleteFormField
                 {...field("pulse")}
-                label="Pulse"
                 unit="bpm"
                 start={0}
                 end={200}
@@ -765,7 +751,6 @@ export const DailyRounds = (props: any) => {
             <>
               <RangeAutocompleteFormField
                 {...field("blood_sugar_level")}
-                label="Blood Sugar Level"
                 unit="mg/dL"
                 start={0}
                 end={700}
@@ -795,14 +780,10 @@ export const DailyRounds = (props: any) => {
             state.form.rounds_type,
           ) && (
             <>
-              <TemperatureFormField
-                {...field("temperature")}
-                label="Temperature"
-              />
+              <TemperatureFormField {...field("temperature")} />
 
               <RangeAutocompleteFormField
                 {...field("resp")}
-                label="Respiratory Rate"
                 unit="bpm"
                 start={0}
                 end={150}
@@ -828,7 +809,6 @@ export const DailyRounds = (props: any) => {
 
               <RangeAutocompleteFormField
                 {...field("ventilator_spo2")}
-                label="SPO2"
                 unit="%"
                 start={0}
                 end={100}
@@ -854,8 +834,7 @@ export const DailyRounds = (props: any) => {
 
               <SelectFormField
                 {...field("rhythm")}
-                label="Rhythm"
-                placeholder="Unknown"
+                placeholder={t("HEARTBEAT_RHYTHM__UNKNOWN")}
                 options={RHYTHM_CHOICES}
                 optionLabel={(option) => option.desc}
                 optionValue={(option) => option.id}
@@ -864,7 +843,6 @@ export const DailyRounds = (props: any) => {
               <TextAreaFormField
                 {...field("rhythm_detail")}
                 className="md:col-span-1"
-                label="Rhythm Description"
                 rows={7}
               />
 
@@ -907,7 +885,7 @@ export const DailyRounds = (props: any) => {
             <div className="md:col-span-2">
               <hr className="mb-4 mt-8 md:col-span-2" />
               <div className="mb-4 mt-8 flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Nursing Care</h3>
+                <h3 className="text-lg font-semibold">{t("nursing_care")}</h3>
               </div>
               <NursingCare
                 log={{ nursing: state.form.nursing }}
@@ -1006,7 +984,6 @@ export const DailyRounds = (props: any) => {
               <hr className="mb-4 mt-8 md:col-span-2" />
               <SelectFormField
                 {...field("action")}
-                label="Action"
                 options={TELEMEDICINE_ACTIONS}
                 optionLabel={(option) => option.desc}
                 optionValue={(option) => option.text}
@@ -1019,7 +996,6 @@ export const DailyRounds = (props: any) => {
 
               <SelectFormField
                 {...field("review_interval")}
-                label="Review After"
                 labelSuffix={getExpectedReviewTime()}
                 options={REVIEW_AT_CHOICES}
                 optionLabel={(option) => option.text}

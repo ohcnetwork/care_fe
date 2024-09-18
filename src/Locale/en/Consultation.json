@@ -13,7 +13,7 @@
   "CONSULTATION_TAB__NURSING": "Nursing",
   "CONSULTATION_TAB__DIALYSIS": "Dialysis",
   "CONSULTATION_TAB__ABDM": "ABDM Records",
-  "CONSULTATION_TAB_TITLE__NURSING": "Nursing Information",
+  "nursing_information": "Nursing Information",
   "no_consultation_updates": "No consultation updates",
   "consultation_updates": "Consultation updates",
   "update_log": "Update Log",

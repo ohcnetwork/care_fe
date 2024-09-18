@@ -4,7 +4,7 @@ import {
   APPETITE_CHOICES,
   BLADDER_DRAINAGE_CHOICES,
   BLADDER_ISSUE_CHOICES,
-  BOWEL_DIFFICULTY_CHOICES,
+  BOWEL_ISSUE_CHOICES,
   CONSCIOUSNESS_LEVEL,
   HEARTBEAT_RHYTHM_CHOICES,
   HumanBodyRegion,
@@ -364,6 +364,8 @@ export interface DailyRoundsModel {
   infusions?: NameQuantity[];
   iv_fluids?: NameQuantity[];
   output?: NameQuantity[];
+  total_intake_calculated?: number;
+  total_output_calculated?: number;
   ventilator_spo2?: number;
   ventilator_interface?: (typeof RESPIRATORY_SUPPORT)[number]["value"];
   ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
@@ -379,7 +381,7 @@ export interface DailyRoundsModel {
 
   ventilator_tidal_volume?: number;
   pressure_sore?: IPressureSore[];
-  bowel_difficulty?: (typeof BOWEL_DIFFICULTY_CHOICES)[number];
+  bowel_issue?: (typeof BOWEL_ISSUE_CHOICES)[number];
   bladder_drainage?: (typeof BLADDER_DRAINAGE_CHOICES)[number];
   bladder_issue?: (typeof BLADDER_ISSUE_CHOICES)[number];
   is_experiencing_dysuria?: boolean;

@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { NURSING_CARE_PROCEDURES } from "../../../Common/constants";
-import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { MultiSelectFormField } from "../../Form/FormFields/SelectFormField";
+import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField";
 
 const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();
@@ -34,11 +34,12 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
           <tbody>
             {nursing.map((obj) => (
               <tr key={obj.procedure}>
-                <td className="whitespace-nowrap border border-secondary-400 p-2 pr-4 text-left text-sm font-semibold md:pr-16">
+                <td className="whitespace-nowrap border border-r-2 border-t-0 border-secondary-400 border-r-secondary-300 bg-secondary-50 p-2 pr-4 text-left text-sm font-semibold md:pr-16">
                   {t(`NURSING_CARE_PROCEDURE__${obj.procedure}`)}
                 </td>
-                <td className="w-full border border-secondary-400">
-                  <TextAreaFormField
+                <td className="w-full border border-t-0 border-secondary-400">
+                  <AutoExpandingTextInputFormField
+                    innerClassName="border-none rounded-none"
                     name={`${obj.procedure}__description`}
                     value={obj.description}
                     onChange={(val) =>
@@ -50,7 +51,8 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
                         ),
                       })
                     }
-                    rows={2}
+                    rows={1}
+                    maxHeight={160}
                     placeholder={t("add_remarks")}
                     errorClassName="hidden"
                   />

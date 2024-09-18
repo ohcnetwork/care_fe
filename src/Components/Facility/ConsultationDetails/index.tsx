@@ -23,7 +23,7 @@ import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
 import { ConsultationABGTab } from "./ConsultationABGTab";
-import { ConsultationNursingTab } from "./ConsultationNursingTab";
+import ConsultationNursingTab from "./ConsultationNursingTab";
 import { ConsultationFeedTab } from "./ConsultationFeedTab";
 import { ConsultationSummaryTab } from "./ConsultationSummaryTab";
 import { ConsultationFilesTab } from "./ConsultationFilesTab";

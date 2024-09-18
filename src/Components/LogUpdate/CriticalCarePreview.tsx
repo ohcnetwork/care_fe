@@ -74,7 +74,7 @@ export default function CriticalCarePreview(props: Props) {
 
         <Section title="Routine">
           <ChoiceDetail data={data} name="sleep" />
-          <ChoiceDetail data={data} name="bowel_difficulty" />
+          <ChoiceDetail data={data} name="bowel_issue" />
           <Section subSection title="Bladder">
             <ChoiceDetail data={data} name="bladder_drainage" />
             <ChoiceDetail data={data} name="bladder_issue" />
@@ -307,11 +307,11 @@ export default function CriticalCarePreview(props: Props) {
             ]}
           />
           <Detail
-            label={t("heartbeat_rhythm")}
+            label={t("LOG_UPDATE_FIELD_LABEL__rhythm")}
             value={data.rhythm && t(`HEARTBEAT_RHYTHM__${data.rhythm}`)}
           />
           <Detail
-            label={t("heartbeat_description")}
+            label={t("LOG_UPDATE_FIELD_LABEL__rhythm_detail")}
             value={data.rhythm_detail}
           />
           {!!data.pain_scale_enhanced?.length && (

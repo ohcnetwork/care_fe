@@ -779,7 +779,7 @@ export const RHYTHM_CHOICES = [
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ] as const;
 
-export const BOWEL_DIFFICULTY_CHOICES = [
+export const BOWEL_ISSUE_CHOICES = [
   "NO_DIFFICULTY",
   "CONSTIPATION",
   "DIARRHOEA",
