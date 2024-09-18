@@ -95,6 +95,20 @@ const REVERSE_CHOICES = {
   },
 } as const;
 
+const ROUTINE_ROWS = [
+  { field: "sleep" } as const,
+  { field: "bowel_issue" } as const,
+  { title: "Bladder" } as const,
+  { subField: true, field: "bladder_drainage" } as const,
+  { subField: true, field: "bladder_issue" } as const,
+  { subField: true, field: "is_experiencing_dysuria" } as const,
+  { subField: true, field: "urination_frequency" } as const,
+  { title: "Nutrition" } as const,
+  { subField: true, field: "nutrition_route" } as const,
+  { subField: true, field: "oral_issue" } as const,
+  { subField: true, field: "appetite" } as const,
+];
+
 const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
@@ -156,19 +170,7 @@ const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
             </tr>
           </thead>
           <tbody className="bg-secondary-200">
-            {[
-              { field: "sleep" } as const,
-              { field: "bowel_issue" } as const,
-              { title: "Bladder" } as const,
-              { subField: true, field: "bladder_drainage" } as const,
-              { subField: true, field: "bladder_issue" } as const,
-              { subField: true, field: "is_experiencing_dysuria" } as const,
-              { subField: true, field: "urination_frequency" } as const,
-              { title: "Nutrition" } as const,
-              { subField: true, field: "nutrition_route" } as const,
-              { subField: true, field: "oral_issue" } as const,
-              { subField: true, field: "appetite" } as const,
-            ].map((row) => (
+            {ROUTINE_ROWS.map((row) => (
               <tr
                 key={row.field ?? row.title}
                 className={classNames(
