@@ -57,7 +57,7 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
         label="Bilateral Air Entry"
         labelClassName="text-lg sm:font-bold"
         options={[true, false]}
-        optionDisplay={(c) => (c ? "Yes" : "No")}
+        optionLabel={(c) => (c ? "Yes" : "No")}
         optionValue={(c) => JSON.stringify(c)}
         name="bilateral_air_entry"
         value={
@@ -90,7 +90,7 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
       <RadioFormField
         label={<h4>Respiratory Support</h4>}
         options={RESPIRATORY_SUPPORT}
-        optionDisplay={(c) => t(`RESPIRATORY_SUPPORT__${c.value}`)}
+        optionLabel={(c) => t(`RESPIRATORY_SUPPORT__${c.value}`)}
         optionValue={(c) => c.value}
         name="respiratory_support"
         value={log.ventilator_interface}

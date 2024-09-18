@@ -288,7 +288,7 @@ export const ConsultationDetails = (props: any) => {
               Patient Details
             </Link>
             <a
-              id="patient_doctor_notes"
+              id="patient_discussion_notes"
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(

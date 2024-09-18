@@ -420,7 +420,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               { label: t("yes"), value: "true" },
               { label: t("no"), value: "false" },
             ]}
-            optionDisplay={(option) => option.label}
+            optionLabel={(option) => option.label}
             optionValue={(option) => option.value}
           />
 
@@ -434,7 +434,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 { label: t("no"), value: "false" },
               ]}
               optionValue={(option) => option.value}
-              optionDisplay={(option) => option.label}
+              optionLabel={(option) => option.label}
               onChange={handleFormFieldChange}
             />
           )}
@@ -448,7 +448,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               { label: t("no"), value: "false" },
             ]}
             optionValue={(option) => option.value}
-            optionDisplay={(option) => option.label}
+            optionLabel={(option) => option.label}
             onChange={handleFormFieldChange}
           />
 

@@ -140,7 +140,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         label={t("heartbeat_rhythm")}
         name="heartbeat-rythm"
         options={HEARTBEAT_RHYTHM_CHOICES}
-        optionDisplay={(c) => t(`HEARTBEAT_RHYTHM__${c}`)}
+        optionLabel={(c) => t(`HEARTBEAT_RHYTHM__${c}`)}
         optionValue={(c) => c}
         value={log.rhythm}
         onChange={(c) => onChange({ rhythm: c.value ?? undefined })}
