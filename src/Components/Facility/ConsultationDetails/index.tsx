@@ -1,4 +1,4 @@
-import { GENDER_TYPES } from "../../../Common/constants";
+import { CONSULTATION_TABS, GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
 import {
   getConsultation,
@@ -13,7 +13,6 @@ import { PatientModel } from "../../Patient/models";
 import {
   formatDateTime,
   humanizeStrings,
-  keysOf,
   relativeTime,
 } from "../../../Utils/utils";
 
@@ -23,7 +22,7 @@ import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
 import { ConsultationABGTab } from "./ConsultationABGTab";
-import ConsultationNursingTab from "./ConsultationNursingTab";
+import { ConsultationNursingTab } from "./ConsultationNursingTab";
 import { ConsultationFeedTab } from "./ConsultationFeedTab";
 import { ConsultationSummaryTab } from "./ConsultationSummaryTab";
 import { ConsultationFilesTab } from "./ConsultationFilesTab";
@@ -45,7 +44,6 @@ import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 import Error404 from "../../ErrorPages/404";
-import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -77,7 +75,6 @@ const TABS = {
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
-  const { t } = useTranslation();
   let tab = undefined;
   if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
     tab = props.tab.toUpperCase() as keyof typeof TABS;
@@ -291,7 +288,7 @@ export const ConsultationDetails = (props: any) => {
               Patient Details
             </Link>
             <a
-              id="patient_discussion_notes"
+              id="patient_doctor_notes"
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
@@ -391,8 +388,8 @@ export const ConsultationDetails = (props: any) => {
                 className="flex space-x-6 overflow-x-auto pb-2 pl-2"
                 id="consultation_tab_nav"
               >
-                {keysOf(TABS).map((p) => {
-                  if (p === "FEED") {
+                {CONSULTATION_TABS.map((p) => {
+                  if (p.text === "FEED") {
                     if (
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
@@ -402,17 +399,17 @@ export const ConsultationDetails = (props: any) => {
                       return null; // Hide feed tab
                   }
 
-                  if (p === "ABDM" && !abhaNumberData?.abha_number) {
+                  if (p.text === "ABDM" && !abhaNumberData?.abha_number) {
                     return null;
                   }
 
                   return (
                     <Link
-                      key={p}
-                      className={tabButtonClasses(tab === p)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
+                      key={p.text}
+                      className={tabButtonClasses(tab === p.text)}
+                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
                     >
-                      {t(`CONSULTATION_TAB__${p}`)}
+                      {p.desc}
                     </Link>
                   );
                 })}

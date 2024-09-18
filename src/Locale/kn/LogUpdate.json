@@ -56,12 +56,18 @@
   "HEARTBEAT_RHYTHM__REGULAR": "ನಿಯಮಿತ",
   "HEARTBEAT_RHYTHM__IRREGULAR": "ಅನಿಯಮಿತ",
   "HEARTBEAT_RHYTHM__UNKNOWN": "ಅಜ್ಞಾತ",
+  "heartbeat_rhythm": "ಹೃದಯ ಬಡಿತದ ಲಯ",
+  "heartbeat_description": "ಹೃದಯ ಬಡಿತದ ವಿವರಣೆ",
   "blood_pressure": "ರಕ್ತದೊತ್ತಡ",
   "map_acronym": "ನಕ್ಷೆ",
   "systolic": "ಸಿಸ್ಟೊಲಿಕ್",
   "diastolic": "ಡಯಾಸ್ಟೊಲಿಕ್",
+  "temperature": "ತಾಪಮಾನ",
+  "resipiratory_rate": "ಉಸಿರಾಟದ ದರ",
   "pain": "ನೋವು",
   "pain_chart_description": "ನೋವಿನ ಪ್ರದೇಶ ಮತ್ತು ತೀವ್ರತೆಯನ್ನು ಗುರುತಿಸಿ",
+  "pulse": "ನಾಡಿ",
   "bradycardia": "ಬ್ರಾಡಿಕಾರ್ಡಿಯಾ",
-  "tachycardia": "ಟಾಕಿಕಾರ್ಡಿಯಾ"
+  "tachycardia": "ಟಾಕಿಕಾರ್ಡಿಯಾ",
+  "spo2": "SpO₂"
 }

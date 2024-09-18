@@ -773,69 +773,26 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 5, text: "Moves to localized pain" },
   { value: 6, text: "Obeying commands/Normal acrivity" },
 ];
+export const CONSULTATION_TABS = [
+  { text: "UPDATES", desc: "Overview" },
+  { text: "FEED", desc: "Feed" },
+  { text: "SUMMARY", desc: "Vitals" },
+  { text: "ABG", desc: "ABG" },
+  { text: "MEDICINES", desc: "Medicines" },
+  { text: "FILES", desc: "Files" },
+  { text: "INVESTIGATIONS", desc: "Investigations" },
+  { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
+  { text: "VENTILATOR", desc: "Ventilation" },
+  { text: "NUTRITION", desc: "Nutrition" },
+  { text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { text: "NURSING", desc: "Nursing" },
+  { text: "DIALYSIS", desc: "Dialysis" },
+  { text: "ABDM", desc: "ABDM Records" },
+];
 
 export const RHYTHM_CHOICES = [
   { id: 5, text: "REGULAR", desc: "Regular" },
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
-] as const;
-
-export const BOWEL_ISSUE_CHOICES = [
-  "NO_DIFFICULTY",
-  "CONSTIPATION",
-  "DIARRHOEA",
-] as const;
-
-export const BLADDER_DRAINAGE_CHOICES = [
-  "NORMAL",
-  "CONDOM_CATHETER",
-  "DIAPER",
-  "INTERMITTENT_CATHETER",
-  "CONTINUOUS_INDWELLING_CATHETER",
-  "CONTINUOUS_SUPRAPUBIC_CATHETER",
-  "UROSTOMY",
-] as const;
-
-export const BLADDER_ISSUE_CHOICES = [
-  "NO_ISSUES",
-  "INCONTINENCE",
-  "RETENTION",
-  "HESITANCY",
-] as const;
-
-export const URINATION_FREQUENCY_CHOICES = [
-  "NORMAL",
-  "DECREASED",
-  "INCREASED",
-] as const;
-
-export const SLEEP_CHOICES = [
-  "EXCESSIVE",
-  "SATISFACTORY",
-  "UNSATISFACTORY",
-  "NO_SLEEP",
-] as const;
-
-export const NUTRITION_ROUTE_CHOICES = [
-  "ORAL",
-  "RYLES_TUBE",
-  "GASTROSTOMY_OR_JEJUNOSTOMY",
-  "PEG",
-  "PARENTERAL_TUBING_FLUID",
-  "PARENTERAL_TUBING_TPN",
-] as const;
-
-export const ORAL_ISSUE_CHOICES = [
-  "NO_ISSUE",
-  "DYSPHAGIA",
-  "ODYNOPHAGIA",
-] as const;
-
-export const APPETITE_CHOICES = [
-  "INCREASED",
-  "SATISFACTORY",
-  "REDUCED",
-  "NO_TASTE_FOR_FOOD",
-  "CANNOT_BE_ASSESSED",
 ] as const;
 
 export const LOCATION_BED_TYPES = [

@@ -928,7 +928,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("kasp_empanelled")}
                       label={`Is this facility ${careConfig.kasp.string} empanelled?`}
                       options={[true, false]}
-                      optionLabel={(o) => (o ? "Yes" : "No")}
+                      optionDisplay={(o) => (o ? "Yes" : "No")}
                       optionValue={(o) => String(o)}
                     />
                   )}

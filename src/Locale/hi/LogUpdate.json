@@ -56,12 +56,18 @@
   "HEARTBEAT_RHYTHM__REGULAR": "नियमित",
   "HEARTBEAT_RHYTHM__IRREGULAR": "अनियमित",
   "HEARTBEAT_RHYTHM__UNKNOWN": "अज्ञात",
+  "heartbeat_rhythm": "दिल की धड़कन की लय",
+  "heartbeat_description": "दिल की धड़कन का विवरण",
   "blood_pressure": "रक्तचाप",
   "map_acronym": "मानचित्र",
   "systolic": "सिस्टोलिक",
   "diastolic": "डायस्टोलिक",
+  "temperature": "तापमान",
+  "resipiratory_rate": "श्वसन दर",
   "pain": "दर्द",
   "pain_chart_description": "दर्द का क्षेत्र और तीव्रता चिह्नित करें",
+  "pulse": "नाड़ी",
   "bradycardia": "मंदनाड़ी",
-  "tachycardia": "tachycardia"
+  "tachycardia": "tachycardia",
+  "spo2": "SpO₂"
 }

@@ -38,7 +38,7 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
         label="Frequency"
         name="insulin_intake_frequency"
         options={INSULIN_INTAKE_FREQUENCY_OPTIONS}
-        optionLabel={(c) => t(`INSULIN_INTAKE_FREQUENCY__${c}`)}
+        optionDisplay={(c) => t(`INSULIN_INTAKE_FREQUENCY__${c}`)}
         optionValue={(c) => c}
         value={log.insulin_intake_frequency}
         onChange={(c) =>

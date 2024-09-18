@@ -56,12 +56,18 @@
   "HEARTBEAT_RHYTHM__REGULAR": "പതിവ്",
   "HEARTBEAT_RHYTHM__IRREGULAR": "ക്രമരഹിതം",
   "HEARTBEAT_RHYTHM__UNKNOWN": "അജ്ഞാതം",
+  "heartbeat_rhythm": "ഹൃദയമിടിപ്പ് താളം",
+  "heartbeat_description": "ഹൃദയമിടിപ്പ് വിവരണം",
   "blood_pressure": "രക്തസമ്മർദ്ദം",
   "map_acronym": "മാപ്പ്",
   "systolic": "സിസ്റ്റോളിക്",
   "diastolic": "ഡയസ്റ്റോളിക്",
+  "temperature": "താപനില",
+  "resipiratory_rate": "ശ്വസന നിരക്ക്",
   "pain": "വേദന",
   "pain_chart_description": "വേദനയുടെ പ്രദേശവും തീവ്രതയും അടയാളപ്പെടുത്തുക",
+  "pulse": "പൾസ്",
   "bradycardia": "ബ്രാഡികാർഡിയ",
-  "tachycardia": "ടാക്കിക്കാർഡിയ"
+  "tachycardia": "ടാക്കിക്കാർഡിയ",
+  "spo2": "SpO₂"
 }

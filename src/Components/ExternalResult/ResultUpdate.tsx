@@ -289,7 +289,7 @@ export default function UpdateResult(props: any) {
                   ]}
                   value={state.form.patient_created}
                   onChange={handleChange}
-                  optionLabel={(option) => option.label}
+                  optionDisplay={(option) => option.label}
                   optionValue={(option) => option.value}
                   error={state.errors.patient_created}
                 />

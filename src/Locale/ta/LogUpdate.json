@@ -56,12 +56,18 @@
   "HEARTBEAT_RHYTHM__REGULAR": "வழக்கமான",
   "HEARTBEAT_RHYTHM__IRREGULAR": "ஒழுங்கற்ற",
   "HEARTBEAT_RHYTHM__UNKNOWN": "தெரியவில்லை",
+  "heartbeat_rhythm": "இதயத் துடிப்பு தாளம்",
+  "heartbeat_description": "இதய துடிப்பு விளக்கம்",
   "blood_pressure": "இரத்த அழுத்தம்",
   "map_acronym": "வரைபடம்",
   "systolic": "சிஸ்டாலிக்",
   "diastolic": "டயஸ்டாலிக்",
+  "temperature": "வெப்பநிலை",
+  "resipiratory_rate": "சுவாச விகிதம்",
   "pain": "வலி",
   "pain_chart_description": "வலியின் பகுதி மற்றும் தீவிரத்தை குறிக்கவும்",
+  "pulse": "துடிப்பு",
   "bradycardia": "பிராடி கார்டியா",
-  "tachycardia": "டாக்ரிக்கார்டியா"
+  "tachycardia": "டாக்ரிக்கார்டியா",
+  "spo2": "SpO₂"
 }

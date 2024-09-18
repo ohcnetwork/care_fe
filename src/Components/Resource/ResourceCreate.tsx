@@ -257,7 +257,7 @@ export default function ResourceCreate(props: resourceProps) {
           label={t("is_this_an_emergency")}
           name="emergency"
           options={[true, false]}
-          optionLabel={(o) => (o ? t("yes") : t("no"))}
+          optionDisplay={(o) => (o ? t("yes") : t("no"))}
           optionValue={(o) => String(o)}
           value={state.form.emergency}
           onChange={handleChange}

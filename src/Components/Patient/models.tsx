@@ -1,26 +1,18 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import {
-  APPETITE_CHOICES,
-  BLADDER_DRAINAGE_CHOICES,
-  BLADDER_ISSUE_CHOICES,
-  BOWEL_ISSUE_CHOICES,
   CONSCIOUSNESS_LEVEL,
   HEARTBEAT_RHYTHM_CHOICES,
   HumanBodyRegion,
   INSULIN_INTAKE_FREQUENCY_OPTIONS,
   LIMB_RESPONSE_OPTIONS,
   NURSING_CARE_PROCEDURES,
-  NUTRITION_ROUTE_CHOICES,
   OCCUPATION_TYPES,
-  ORAL_ISSUE_CHOICES,
   OXYGEN_MODALITY_OPTIONS,
   PressureSoreExudateAmountOptions,
   PressureSoreTissueTypeOptions,
   RATION_CARD_CATEGORY,
   RESPIRATORY_SUPPORT,
-  SLEEP_CHOICES,
-  URINATION_FREQUENCY_CHOICES,
   VENTILATOR_MODE_OPTIONS,
 } from "../../Common/constants";
 
@@ -265,7 +257,6 @@ export interface SampleListModel {
 
 export const DailyRoundTypes = [
   "NORMAL",
-  "COMMUNITY_NURSES_LOG",
   "DOCTORS_LOG",
   "VENTILATOR",
   "AUTOMATED",
@@ -364,8 +355,6 @@ export interface DailyRoundsModel {
   infusions?: NameQuantity[];
   iv_fluids?: NameQuantity[];
   output?: NameQuantity[];
-  total_intake_calculated?: number;
-  total_output_calculated?: number;
   ventilator_spo2?: number;
   ventilator_interface?: (typeof RESPIRATORY_SUPPORT)[number]["value"];
   ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
@@ -381,15 +370,6 @@ export interface DailyRoundsModel {
 
   ventilator_tidal_volume?: number;
   pressure_sore?: IPressureSore[];
-  bowel_issue?: (typeof BOWEL_ISSUE_CHOICES)[number];
-  bladder_drainage?: (typeof BLADDER_DRAINAGE_CHOICES)[number];
-  bladder_issue?: (typeof BLADDER_ISSUE_CHOICES)[number];
-  is_experiencing_dysuria?: boolean;
-  urination_frequency?: (typeof URINATION_FREQUENCY_CHOICES)[number];
-  sleep?: (typeof SLEEP_CHOICES)[number];
-  nutrition_route?: (typeof NUTRITION_ROUTE_CHOICES)[number];
-  oral_issue?: (typeof ORAL_ISSUE_CHOICES)[number];
-  appetite?: (typeof APPETITE_CHOICES)[number];
 }
 
 export interface FacilityNameModel {

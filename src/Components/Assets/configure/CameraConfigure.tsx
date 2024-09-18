@@ -1,6 +1,6 @@
 import { SyntheticEvent } from "react";
 import { AssetData } from "../AssetTypes";
-import CameraFeedOld from "../../CameraFeed/CameraFeedOld";
+import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { getCameraConfig } from "../../../Utils/transformUtils";
@@ -76,7 +76,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
         </form>
       </Card>
       <Card className="mt-4">
-        <CameraFeedOld
+        <LiveFeed
           middlewareHostname={facilityMiddlewareHostname}
           asset={getCameraConfig(asset)}
           showRefreshButton={true}

@@ -46,7 +46,7 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
 
 type MultiSelectFormFieldProps<T, V = T> = FormFieldBaseProps<V[]> & {
   placeholder?: React.ReactNode;
-  options: readonly T[];
+  options: T[];
   optionLabel: OptionCallback<T, React.ReactNode>;
   optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
   optionDescription?: OptionCallback<T, React.ReactNode>;

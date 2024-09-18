@@ -5,7 +5,6 @@ import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
-import { DialysisPlotsFields } from "../models";
 
 export const DialysisPlots = (props: any) => {
   const { consultationId } = props;
@@ -16,7 +15,10 @@ export const DialysisPlots = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (currentPage: number) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: { page: currentPage, fields: DialysisPlotsFields },
+        body: {
+          page: currentPage,
+          fields: ["dialysis_fluid_balance", "dialysis_net_balance"],
+        },
         pathParams: {
           consultationId,
         },

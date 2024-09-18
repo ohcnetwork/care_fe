@@ -3,7 +3,6 @@ import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import { formatDateTime } from "../../../Utils/utils";
 import PainChart from "../../LogUpdate/components/PainChart";
-import { PainDiagramsFields } from "../models";
 
 export const PainDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -20,7 +19,9 @@ export const PainDiagrams = (props: any) => {
       const { res, data: dailyRound } = await request(
         routes.dailyRoundsAnalyse,
         {
-          body: { fields: PainDiagramsFields },
+          body: {
+            fields: ["pain_scale_enhanced"],
+          },
           pathParams: {
             consultationId,
           },

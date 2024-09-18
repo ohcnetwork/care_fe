@@ -1,3 +1,4 @@
+import { navigate } from "raviger";
 import { DailyRoundsModel } from "../../Patient/models";
 import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAssistantLogUpdateCard";
 import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
@@ -22,6 +23,8 @@ export default function DailyRoundsList({ consultation }: Props) {
   const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
   const [query, setQuery] = useState<QueryParams>();
+
+  const consultationUrl = `/facility/${consultation.facility}/patient/${consultation.patient}/consultation/${consultation.id}`;
 
   return (
     <PaginatedList
@@ -80,6 +83,14 @@ export default function DailyRoundsList({ consultation }: Props) {
                       );
                     }
 
+                    const itemUrl = [
+                      "NORMAL",
+                      "TELEMEDICINE",
+                      "DOCTORS_LOG",
+                    ].includes(item.rounds_type as string)
+                      ? `${consultationUrl}/daily-rounds/${item.id}`
+                      : `${consultationUrl}/daily_rounds/${item.id}`;
+
                     return (
                       <TimelineNode
                         event={{
@@ -93,6 +104,8 @@ export default function DailyRoundsList({ consultation }: Props) {
                         <DefaultLogUpdateCard
                           round={item}
                           consultationData={consultation}
+                          onViewDetails={() => navigate(itemUrl)}
+                          onUpdateLog={() => navigate(`${itemUrl}/update`)}
                         />
                       </TimelineNode>
                     );

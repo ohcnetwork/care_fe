@@ -33,10 +33,6 @@ interface RelativeMoveOperation {
   data: PTZPayload;
 }
 
-interface GetStreamToken {
-  type: "get_stream_token";
-}
-
 interface ResetFeedOperation {
   type: "reset";
 }
@@ -47,7 +43,6 @@ export type OperationAction =
   | GoToPresetOperation
   | AbsoluteMoveOperation
   | RelativeMoveOperation
-  | GetStreamToken
   | ResetFeedOperation;
 
 /**

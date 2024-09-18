@@ -13,12 +13,6 @@ export type GetStatusResponse = {
   };
 };
 
-export type GetStreamTokenResponse = {
-  result: {
-    token: string;
-  };
-};
-
 export type GetPresetsResponse = {
   result: Record<string, number>;
 };
@@ -27,9 +21,7 @@ export const FeedRoutes = {
   operateAsset: {
     path: "/api/v1/asset/{id}/operate_assets/",
     method: "POST",
-    TRes: Type<
-      GetStreamTokenResponse | GetStatusResponse | GetPresetsResponse
-    >(),
+    TRes: Type<GetStatusResponse | GetPresetsResponse>(),
     TBody: Type<{ action: OperationAction }>(),
   },
 } as const;

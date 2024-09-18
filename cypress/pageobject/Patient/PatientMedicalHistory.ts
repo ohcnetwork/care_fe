@@ -31,7 +31,7 @@ class PatientMedicalHistory {
     patientSymptoms4,
     patientSymptoms5,
     patientSymptoms6,
-    patientSymptoms7,
+    patientSymptoms7
   ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");
@@ -51,7 +51,7 @@ class PatientMedicalHistory {
   verifyNoSymptosPresent(patientSymptoms1: string) {
     cy.get("[data-testid=patient-details]").should(
       "not.contain",
-      patientSymptoms1,
+      patientSymptoms1
     );
   }
 }

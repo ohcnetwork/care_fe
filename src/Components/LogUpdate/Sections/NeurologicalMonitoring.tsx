@@ -31,7 +31,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
       <RadioFormField
         name="consciousness_level"
         options={CONSCIOUSNESS_LEVEL}
-        optionLabel={(c) => t(`CONSCIOUSNESS_LEVEL__${c.value}`)}
+        optionDisplay={(c) => t(`CONSCIOUSNESS_LEVEL__${c.value}`)}
         optionValue={(c) => c.value}
         value={log.consciousness_level}
         onChange={(c) =>
@@ -60,7 +60,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
                     (o) => o.value !== "UNKNOWN",
                   )}
                   id={`${d}_reaction`}
-                  optionLabel={(c) => t(`PUPIL_REACTION__${c.value}`)}
+                  optionDisplay={(c) => t(`PUPIL_REACTION__${c.value}`)}
                   optionValue={(c) => c.value}
                   name={`${d}_pupil_light_reaction`}
                   value={log[`${d}_pupil_light_reaction`]}
@@ -98,7 +98,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
         <RadioFormField
           label={<b>Eye Opening Response</b>}
           options={EYE_OPEN_SCALE}
-          optionLabel={(c) => c.value + " - " + c.text}
+          optionDisplay={(c) => c.value + " - " + c.text}
           optionValue={(c) => `${c.value}`}
           name="eye_opening_response"
           value={`${log.glasgow_eye_open}`}
@@ -110,7 +110,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
         <RadioFormField
           label={<b>Verbal Response</b>}
           options={VERBAL_RESPONSE_SCALE}
-          optionLabel={(c) => c.value + " - " + c.text}
+          optionDisplay={(c) => c.value + " - " + c.text}
           optionValue={(c) => `${c.value}`}
           name="verbal_response"
           value={`${log.glasgow_verbal_response}`}
@@ -124,7 +124,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
         <RadioFormField
           label={<b>Motor Response</b>}
           options={MOTOR_RESPONSE_SCALE}
-          optionLabel={(c) => c.value + " - " + c.text}
+          optionDisplay={(c) => c.value + " - " + c.text}
           optionValue={(c) => `${c.value}`}
           name="motor_response"
           value={`${log.glasgow_motor_response}`}
@@ -164,7 +164,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
               </span>
             }
             options={LIMB_RESPONSE_OPTIONS.filter((o) => o.value !== "UNKNOWN")}
-            optionLabel={(c) => t(`LIMB_RESPONSE__${c.value}`)}
+            optionDisplay={(c) => t(`LIMB_RESPONSE__${c.value}`)}
             optionValue={(c) => c.value}
             name={key}
             value={log[key]}
