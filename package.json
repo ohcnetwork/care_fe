@@ -29,7 +29,7 @@
   "scripts": {
     "build:react": "cross-env NODE_ENV=production vite build",
     "build": "npm run generate-build-meta && npm run supported-browsers && npm run build:react",
-    "dev": "vite",
+    "dev": "npm run supported-browsers && vite",
     "preview": "cross-env NODE_ENV=production vite preview",
     "generate-build-meta": "node ./scripts/generate-build-version.js",
     "test": "snyk test",
@@ -41,7 +41,7 @@
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
-    "supported-browsers": "echo \"export default $(browserslist-useragent-regexp --allowHigherVersions --ignorePatch --ignoreMinor);\" | sed 's/\\x1b\\[[0-9;]*m//g' > src/supportedBrowsers.ts"
+    "supported-browsers": "node ./scripts/generate-supported-browsers.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.21",
