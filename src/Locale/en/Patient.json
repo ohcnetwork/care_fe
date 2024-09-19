@@ -1,4 +1,6 @@
 {
+    "occupation": "Occupation",
+    "ration_card_category": "Ration Card Category",
     "socioeconomic_status": "Socioeconomic status",
     "domestic_healthcare_support": "Domestic healthcare support",
     "has_domestic_healthcare_support": "Has domestic healthcare support?",

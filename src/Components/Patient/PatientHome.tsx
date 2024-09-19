@@ -515,48 +515,50 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   )}
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Occupation
+                {patientData.meta_info?.occupation && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      {t("occupation")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {parseOccupation(patientData.meta_info.occupation)}
+                    </div>
                   </div>
-                  <div className="mt-1 text-sm font-medium leading-5">
-                    {parseOccupation(patientData.meta_info?.occupation) || "-"}
+                )}
+                {patientData.ration_card_category && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      {t("ration_card_category")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {t(`ration_card__${patientData.ration_card_category}`)}
+                    </div>
                   </div>
-                </div>
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Ration Card Category
+                )}
+                {patientData.meta_info?.socioeconomic_status && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      {t("socioeconomic_status")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {t(
+                        `SOCIOECONOMIC_STATUS__${patientData.meta_info.socioeconomic_status}`,
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData.ration_card_category
-                      ? t(`ration_card__${patientData.ration_card_category}`)
-                      : "-"}
+                )}
+                {patientData.meta_info?.domestic_healthcare_support && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      {t("domestic_healthcare_support")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {t(
+                        `DOMESTIC_HEALTHCARE_SUPPORT__${patientData.meta_info.domestic_healthcare_support}`,
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    {t("socioeconomic_status")}
-                  </div>
-                  <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData.meta_info?.socioeconomic_status
-                      ? t(
-                          `SOCIOECONOMIC_STATUS__${patientData.meta_info.socioeconomic_status}`,
-                        )
-                      : "-"}
-                  </div>
-                </div>
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    {t("domestic_healthcare_support")}
-                  </div>
-                  <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData.meta_info?.domestic_healthcare_support
-                      ? t(
-                          `DOMESTIC_HEALTHCARE_SUPPORT__${patientData.meta_info.domestic_healthcare_support}`,
-                        )
-                      : "-"}
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
