@@ -122,6 +122,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
     <div>
       <div className="flex flex-col justify-center">
         <TextFormField
+          type="password"
           name="aadhaar-number"
           label={t("aadhaar_number")}
           minLength={12}
@@ -302,6 +303,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
     <div>
       <div className="flex flex-col justify-center">
         <TextFormField
+          type="password"
           name="aadhaar-number"
           label={t("aadhaar_number")}
           min={12}

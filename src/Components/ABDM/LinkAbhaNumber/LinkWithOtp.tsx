@@ -151,6 +151,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
     <div>
       <div className="flex flex-col justify-center">
         <TextFormField
+          type="password"
           name="id"
           label={t("any_id")}
           inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
@@ -279,6 +280,7 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
     <div>
       <div className="flex flex-col justify-center">
         <TextFormField
+          type="password"
           name="id"
           label={t("any_id")}
           inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
