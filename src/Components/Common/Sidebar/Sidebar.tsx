@@ -101,8 +101,8 @@ const StatelessSidebar = ({
   }, [activeLink, lastIndicatorPosition]);
 
   useEffect(() => {
-    window.addEventListener("resize", updateIndicator);
-    return () => window.removeEventListener("resize", updateIndicator);
+    addEventListener("resize", updateIndicator);
+    return () => removeEventListener("resize", updateIndicator);
   }, []);
 
   const handleOverflow = (value: boolean) => {
