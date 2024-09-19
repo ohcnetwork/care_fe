@@ -23,6 +23,7 @@ declare global {
         selector: string,
         symptoms: string | string[],
       ): Chainable<Element>;
+      selectRadioOption(name: string, value: string): Chainable<Element>;
       typeAndMultiSelectOption(
         selector: string,
         input: string,
