@@ -102,6 +102,8 @@ describe("Patient Creation with consultation", () => {
     facilityPage.selectLocalBody(patientOneLocalbody);
     facilityPage.selectWard(patientOneWard);
     patientPage.selectPatientOccupation(patientOccupation);
+    patientPage.selectSocioeconomicStatus("MIDDLE_CLASS");
+    patientPage.selectDomesticHealthcareSupport("FAMILY_MEMBER");
     // Patient Medical History
     patientMedicalHistory.typePatientPresentHealth(patientOnePresentHealth);
     patientMedicalHistory.typePatientOngoingMedication(
@@ -131,6 +133,8 @@ describe("Patient Creation with consultation", () => {
       yearOfBirth,
       patientOneBloodGroup,
       patientOccupation,
+      "Middle Class",
+      "Family member",
     );
     patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,

@@ -2,10 +2,12 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   BLOOD_GROUPS,
+  DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   OCCUPATION_TYPES,
   RATION_CARD_CATEGORY,
+  SOCIOECONOMIC_STATUS_CHOICES,
   VACCINES,
 } from "../../Common/constants";
 import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
@@ -15,7 +17,6 @@ import {
   RequiredFieldValidator,
 } from "../Form/FieldValidators";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import { Occupation, PatientModel } from "./models";
 import {
   compareBy,
   dateQueryString,
@@ -53,6 +54,7 @@ import HCXPolicyValidator from "../HCX/validators";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
+import { PatientModel, Occupation, PatientMeta } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -75,6 +77,9 @@ import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
+
+type PatientForm = PatientModel &
+  PatientMeta & { age?: number; is_postpartum?: boolean };
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: string;
@@ -190,7 +195,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showImport, setShowImport] = useState<{
     show?: boolean;
-    field?: FormContextValue<PatientModel> | null;
+    field?: FormContextValue<PatientForm> | null;
   }>({
     show: false,
     field: null,
@@ -429,6 +434,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             occupation: data.meta_info?.occupation
               ? parseOccupationFromExt(data.meta_info.occupation)
               : null,
+
             is_vaccinated: String(data.is_vaccinated),
             number_of_doses: data.number_of_doses
               ? String(data.number_of_doses)
@@ -748,7 +754,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         formData.nationality === "India" ? formData.local_body : undefined,
       ward: formData.ward,
       meta_info: {
-        ...state.form?.meta_info,
+        ...formData.meta_info,
         occupation: formData.occupation ?? null,
       },
       village: formData.village,
@@ -1145,7 +1151,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           )}
           <>
             <div className={`${showImport.show && "hidden"}`}>
-              <Form<PatientModel & { age?: number; is_postpartum?: boolean }>
+              <Form<PatientForm>
                 defaults={id ? state.form : initForm}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -1738,22 +1744,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
-                              <AutocompleteFormField
-                                {...field("occupation")}
-                                label="Occupation"
-                                placeholder="Select Occupation"
-                                options={occupationTypes}
-                                optionLabel={(o) => o.text}
-                                optionValue={(o) => o.id}
-                              />
-                              <SelectFormField
-                                {...field("ration_card_category")}
-                                label="Ration Card Category"
-                                placeholder="Select"
-                                options={RATION_CARD_CATEGORY}
-                                optionLabel={(o) => t(`ration_card__${o}`)}
-                                optionValue={(o) => o}
-                              />
                             </>
                           ) : (
                             <div id="passport_no-div">
@@ -1766,6 +1756,90 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       </div>
+                      {field("nationality").value === "India" && (
+                        <div className="mb-8 rounded border border-secondary-200 p-4">
+                          <AccordionV2
+                            className="mt-2 shadow-none md:mt-0 lg:mt-0"
+                            expandIcon={
+                              <CareIcon
+                                icon="l-angle-down"
+                                className="text-2xl font-bold"
+                              />
+                            }
+                            title={
+                              <h1 className="text-left text-xl font-bold text-purple-500">
+                                Social Profile
+                              </h1>
+                            }
+                            expanded
+                          >
+                            <div>
+                              <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
+                                <AutocompleteFormField
+                                  {...field("occupation")}
+                                  label="Occupation"
+                                  placeholder="Select Occupation"
+                                  options={occupationTypes}
+                                  optionLabel={(o) => o.text}
+                                  optionValue={(o) => o.id}
+                                />
+                                <SelectFormField
+                                  {...field("ration_card_category")}
+                                  label="Ration Card Category"
+                                  placeholder="Select"
+                                  options={RATION_CARD_CATEGORY}
+                                  optionLabel={(o) => t(`ration_card__${o}`)}
+                                  optionValue={(o) => o}
+                                />
+                                <RadioFormField
+                                  name="socioeconomic_status"
+                                  label={t("socioeconomic_status")}
+                                  options={SOCIOECONOMIC_STATUS_CHOICES}
+                                  optionLabel={(o) =>
+                                    t(`SOCIOECONOMIC_STATUS__${o}`)
+                                  }
+                                  optionValue={(o) => o}
+                                  value={
+                                    field("meta_info").value
+                                      ?.socioeconomic_status
+                                  }
+                                  onChange={({ name, value }) =>
+                                    field("meta_info").onChange({
+                                      name: "meta_info",
+                                      value: {
+                                        ...(field("meta_info").value ?? {}),
+                                        [name]: value,
+                                      },
+                                    })
+                                  }
+                                />
+                                <RadioFormField
+                                  name="domestic_healthcare_support"
+                                  label={t("has_domestic_healthcare_support")}
+                                  options={DOMESTIC_HEALTHCARE_SUPPORT_CHOICES}
+                                  optionLabel={(o) =>
+                                    t(`DOMESTIC_HEALTHCARE_SUPPORT__${o}`)
+                                  }
+                                  optionValue={(o) => o}
+                                  value={
+                                    field("meta_info").value
+                                      ?.domestic_healthcare_support
+                                  }
+                                  onChange={({ name, value }) =>
+                                    field("meta_info").onChange({
+                                      name: "meta_info",
+                                      value: {
+                                        ...(field("meta_info").value ?? {}),
+                                        [name]: value,
+                                      },
+                                    })
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </AccordionV2>
+                        </div>
+                      )}
                       <div className="mb-8 rounded border border-secondary-200 p-4">
                         <AccordionV2
                           className="mt-2 shadow-none md:mt-0 lg:mt-0"
