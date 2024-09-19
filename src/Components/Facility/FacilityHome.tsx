@@ -113,7 +113,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     <div
       id="facility-coverimage"
       className={
-        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60"
       }
       onClick={() => setEditCoverImage(true)}
     >

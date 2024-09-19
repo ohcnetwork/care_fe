@@ -166,6 +166,8 @@
   "not_specified": "Not Specified",
   "all_changes_have_been_saved": "All changes have been saved",
   "no_data_found": "No data found",
+  "other_details": "Other details",
+  "no_remarks": "No remarks",
   "edit": "Edit",
   "clear_selection": "Clear selection",
   "select_date": "Select date",
@@ -203,6 +205,6 @@
   "deleted_successfully": "{{name}} deleted successfully",
   "delete_item": "Delete {{name}}",
   "unsupported_browser": "Unsupported Browser",
-  "unsupported_browser_description": "Your browser ({{name}} version {{version}}) is not supported. Please update your browser to the latest version or switch to a supported browser for the best experience."
-  
+  "unsupported_browser_description": "Your browser ({{name}} version {{version}}) is not supported. Please update your browser to the latest version or switch to a supported browser for the best experience.",
+  "add_remarks": "Add remarks"
 }

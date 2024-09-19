@@ -2,14 +2,15 @@ import { Transition } from "@headlessui/react";
 import { useEffect, useState } from "react";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
-import { StreamStatus } from "./usePlayer";
+export type StreamStatus = "playing" | "stop" | "loading" | "offline";
 
 export type FeedAlertState =
   | StreamStatus
   | "moving"
   | "zooming"
   | "saving_preset"
-  | "host_unreachable";
+  | "host_unreachable"
+  | "authentication_error";
 
 interface Props {
   state?: FeedAlertState;
@@ -24,6 +25,7 @@ const ALERT_ICON_MAP: Partial<Record<FeedAlertState, IconName>> = {
   zooming: "l-search",
   saving_preset: "l-save",
   host_unreachable: "l-exclamation-triangle",
+  authentication_error: "l-exclamation-triangle",
 };
 
 export default function FeedAlert({ state }: Props) {

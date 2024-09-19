@@ -5,7 +5,7 @@ import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type Props<T, V = string> = FormFieldBaseProps<V | null> & {
   options: readonly T[];
-  optionDisplay: (option: T) => React.ReactNode;
+  optionLabel: (option: T) => React.ReactNode;
   optionValue: (option: T) => V;
   containerClassName?: string;
   unselectLabel?: string;
@@ -47,7 +47,7 @@ const RadioFormField = <T, V extends string>(props: Props<T, V>) => {
             <RadioInput
               key={value}
               id={`${props.name}-option-${value}`}
-              label={props.optionDisplay(option)}
+              label={props.optionLabel(option)}
               name={field.name}
               value={props.optionValue(option)}
               checked={value === field.value}
