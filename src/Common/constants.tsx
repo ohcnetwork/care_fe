@@ -735,10 +735,23 @@ export const HEARTBEAT_RHYTHM_CHOICES = [
 ] as const;
 
 export const NURSING_CARE_PROCEDURES = [
+  "oral_care",
+  "hair_care",
+  "bed_bath",
+  "eye_care",
+  "perineal_care",
+  "skin_care",
+  "pre_enema",
+  "wound_dressing",
+  "lymphedema_care",
+  "ascitic_tapping",
+  "colostomy_care",
+  "colostomy_change",
   "personal_hygiene",
   "positioning",
   "suctioning",
   "ryles_tube_care",
+  "ryles_tube_change",
   "iv_sitecare",
   "nubulisation",
   "dressing",
@@ -746,8 +759,10 @@ export const NURSING_CARE_PROCEDURES = [
   "restrain",
   "chest_tube_care",
   "tracheostomy_care",
+  "tracheostomy_change",
   "stoma_care",
   "catheter_care",
+  "catheter_change",
 ] as const;
 
 export const EYE_OPEN_SCALE = [
