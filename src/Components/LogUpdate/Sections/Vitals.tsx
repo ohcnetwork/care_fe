@@ -59,8 +59,8 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
       />
       <hr />
       <RangeFormField
-        label={t("spo2")}
-        name="ventilator_spo2" //TODO: ensure whether this should be ventilator_spo2 itself or spo2
+        label={t("ventilator_spo2")}
+        name="ventilator_spo2"
         onChange={(c) => onChange({ ventilator_spo2: c.value })}
         value={log.ventilator_spo2}
         min={0}
@@ -70,7 +70,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         valueDescriptions={rangeValueDescription({ low: 89 })}
       />
       <RangeFormField
-        label={t("temperature")}
+        label={t("LOG_UPDATE_FIELD_LABEL__temperature")}
         name="temperature"
         onChange={(c) => onChange({ temperature: c.value })}
         value={log.temperature}
@@ -88,7 +88,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         ]}
       />
       <RangeFormField
-        label={t("resipiratory_rate")}
+        label={t("LOG_UPDATE_FIELD_LABEL__resp")}
         name="resp"
         onChange={(c) => onChange({ resp: c.value })}
         value={log.resp}
@@ -111,7 +111,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
       />
       <hr />
       <RangeFormField
-        label={t("pulse")}
+        label={t("LOG_UPDATE_FIELD_LABEL__pulse")}
         name="pulse"
         onChange={(c) => onChange({ pulse: c.value })}
         value={log.pulse}
@@ -137,16 +137,16 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         ]}
       />
       <RadioFormField
-        label={t("heartbeat_rhythm")}
+        label={t("LOG_UPDATE_FIELD_LABEL__rhythm")}
         name="heartbeat-rythm"
         options={HEARTBEAT_RHYTHM_CHOICES}
-        optionDisplay={(c) => t(`HEARTBEAT_RHYTHM__${c}`)}
+        optionLabel={(c) => t(`HEARTBEAT_RHYTHM__${c}`)}
         optionValue={(c) => c}
         value={log.rhythm}
         onChange={(c) => onChange({ rhythm: c.value ?? undefined })}
       />
       <TextAreaFormField
-        label={t("heartbeat_description")}
+        label={t("LOG_UPDATE_FIELD_LABEL__rhythm_detail")}
         name="rhythm_detail"
         value={log.rhythm_detail}
         onChange={(c) => onChange({ rhythm_detail: c.value })}
