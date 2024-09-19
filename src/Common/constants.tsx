@@ -1415,6 +1415,20 @@ export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 3, text: "Comfort Care Only" },
   { id: 4, text: "Active treatment" },
 ];
+
+export const SOCIOECONOMIC_STATUS_CHOICES = [
+  "MIDDLE_CLASS",
+  "POOR",
+  "VERY_POOR",
+  "WELL_OFF",
+] as const;
+
+export const DOMESTIC_HEALTHCARE_SUPPORT_CHOICES = [
+  "FAMILY_MEMBER",
+  "PAID_CAREGIVER",
+  "NO_SUPPORT",
+] as const;
+
 export const OCCUPATION_TYPES = [
   {
     id: 27,
