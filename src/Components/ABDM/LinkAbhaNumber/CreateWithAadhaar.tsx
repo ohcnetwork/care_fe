@@ -39,6 +39,9 @@ export default function CreateWithAadhaar({
     [
       <EnterAadhaar {...({} as IEnterAadhaarProps)} />,
       <VerifyAadhaar {...({} as IVerifyAadhaarProps)} />,
+      <HandleExistingAbhaNumber
+        {...({ onSuccess } as IHandleExistingAbhaNumberProps)}
+      />,
       <LinkMobileNumber {...({} as ILinkMobileNumberProps)} />,
       <VerifyMobileNumber {...({} as IVerifyMobileNumberProps)} />,
       <ChooseAbhaAddress
@@ -210,7 +213,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
 
 type IVerifyAadhaarProps = InjectedStepProps<Memory>;
 
-function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
+function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
   const { t } = useTranslation();
   const [otp, setOtp] = useState("");
 
@@ -253,14 +256,7 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
       Notify.Success({
         msg: data.detail ?? t("otp_verification_success"),
       });
-      if (
-        data.abha_number.mobile ===
-        memory?.mobileNumber.replace("+91", "").replace(/ /g, "")
-      ) {
-        goTo(4); // skip linking mobile number
-      } else {
-        next();
-      }
+      next();
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -386,10 +382,69 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
   );
 }
 
+type IHandleExistingAbhaNumberProps = InjectedStepProps<Memory> & {
+  onSuccess: (abhaNumber: AbhaNumberModel) => void;
+};
+
+function HandleExistingAbhaNumber({
+  memory,
+  onSuccess,
+  next,
+}: IHandleExistingAbhaNumberProps) {
+  const { t } = useTranslation();
+
+  // skip this step for new abha number
+  useEffect(() => {
+    if (memory?.abhaNumber?.new) {
+      next();
+    }
+  }, [memory?.abhaNumber, memory?.mobileNumber]); // eslint-disable-line
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold text-secondary-800">
+        {t("abha_number_exists")}
+      </h2>
+      <p className="text-sm text-secondary-800">
+        {t("abha_number_exists_description")}
+      </p>
+      <div className="mt-4 flex flex-col items-center justify-center gap-2">
+        <ButtonV2 className="w-full" onClick={next}>
+          {t("create_new_abha_address")}
+        </ButtonV2>
+        <ButtonV2
+          variant="secondary"
+          className="w-full"
+          onClick={() => onSuccess(memory?.abhaNumber as AbhaNumberModel)}
+        >
+          {t("use_existing_abha_address")}
+        </ButtonV2>
+        <p className="text-xs text-secondary-800">
+          {memory?.abhaNumber?.health_id}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 type ILinkMobileNumberProps = InjectedStepProps<Memory>;
 
-function LinkMobileNumber({ memory, setMemory, next }: ILinkMobileNumberProps) {
+function LinkMobileNumber({
+  memory,
+  goTo,
+  setMemory,
+  next,
+}: ILinkMobileNumberProps) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (
+      memory?.abhaNumber?.mobile ===
+      memory?.mobileNumber.replace("+91", "").replace(/ /g, "")
+    ) {
+      goTo(5); // skip linking mobile number
+    }
+  }, [memory?.abhaNumber, memory?.mobileNumber]); // eslint-disable-line
 
   const handleSubmit = async () => {
     setMemory((prev) => ({ ...prev, isLoading: true }));
