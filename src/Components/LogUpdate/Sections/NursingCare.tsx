@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { NURSING_CARE_PROCEDURES } from "../../../Common/constants";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
-import { MultiSelectFormField } from "../../Form/FormFields/SelectFormField";
 import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField";
+import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
 
 const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();
@@ -10,7 +10,7 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
 
   return (
     <div className="flex flex-col">
-      <MultiSelectFormField
+      <AutocompleteMultiSelectFormField
         name="procedures"
         placeholder={t("procedures_select_placeholder")}
         value={nursing.map((p) => p.procedure)}
