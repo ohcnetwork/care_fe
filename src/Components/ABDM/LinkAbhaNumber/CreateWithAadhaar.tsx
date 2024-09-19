@@ -3,7 +3,7 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { classNames } from "../../../Utils/utils";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { useEffect, useState } from "react";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2, { ButtonWithTimer } from "../../Common/components/ButtonV2";
 import OtpFormField from "../../Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "../../Form/FormFields/PhoneNumberFormField";
 import { AbhaNumberModel } from "../types/abha";
@@ -12,6 +12,8 @@ import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import * as Notify from "../../../Utils/Notifications";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
+
+const MAX_OTP_RESEND_ALLOWED = 2;
 
 type ICreateWithAadhaarProps = {
   onSuccess: (abhaNumber: AbhaNumberModel) => void;
@@ -26,6 +28,8 @@ type Memory = {
 
   transactionId: string;
   abhaNumber: AbhaNumberModel | null;
+
+  resendOtpCount: number;
 };
 
 export default function CreateWithAadhaar({
@@ -50,6 +54,7 @@ export default function CreateWithAadhaar({
       validationError: "",
       transactionId: "",
       abhaNumber: null,
+      resendOtpCount: 0,
     },
   );
 
@@ -94,7 +99,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
       routes.abdm.healthId.abhaCreateSendAadhaarOtp,
       {
         body: {
-          aadhaar: memory?.aadhaarNumber,
+          aadhaar: memory!.aadhaarNumber,
         },
       },
     );
@@ -243,6 +248,7 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
         ...prev,
         transactionId: data.transaction_id,
         abhaNumber: data.abha_number,
+        resendOtpCount: 0,
       }));
       Notify.Success({
         msg: data.detail ?? t("otp_verification_success"),
@@ -255,6 +261,42 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
       } else {
         next();
       }
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: false }));
+  };
+
+  const handleResendOtp = async () => {
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    const { res, data } = await request(
+      routes.abdm.healthId.abhaCreateSendAadhaarOtp,
+      {
+        body: {
+          aadhaar: memory!.aadhaarNumber,
+          // transaction_id: memory?.transactionId,
+        },
+        silent: true,
+      },
+    );
+
+    if (res?.status === 200 && data) {
+      setMemory((prev) => ({
+        ...prev,
+        transactionId: data.transaction_id,
+        resendOtpCount: prev.resendOtpCount + 1,
+      }));
+      Notify.Success({
+        msg: data.detail ?? t("aadhaar_otp_send_success"),
+      });
+    } else {
+      setMemory((prev) => ({
+        ...prev,
+        resendOtpCount: Infinity,
+      }));
+      Notify.Success({
+        msg: t("aadhaar_otp_send_error"),
+      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -319,7 +361,7 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
         />
       </div>
 
-      <div className="mt-4 flex items-center">
+      <div className="mt-4 flex flex-col items-center gap-2">
         <ButtonV2
           className="w-full"
           loading={memory?.isLoading}
@@ -328,6 +370,17 @@ function VerifyAadhaar({ memory, setMemory, next, goTo }: IVerifyAadhaarProps) {
         >
           {t("verify_otp")}
         </ButtonV2>
+
+        {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
+          <ButtonWithTimer
+            ghost
+            className="w-full"
+            initialInverval={60}
+            onClick={handleResendOtp}
+          >
+            {t("resend_otp")}
+          </ButtonWithTimer>
+        )}
       </div>
     </div>
   );
@@ -423,11 +476,47 @@ function VerifyMobileNumber({
       setMemory((prev) => ({
         ...prev,
         transactionId: data.transaction_id,
+        resendOtpCount: 0,
       }));
       Notify.Success({
         msg: data.detail ?? t("mobile_otp_verify_success"),
       });
       next();
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: false }));
+  };
+
+  const handleResendOtp = async () => {
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    const { res, data } = await request(
+      routes.abdm.healthId.abhaCreateLinkMobileNumber,
+      {
+        body: {
+          mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
+          transaction_id: memory?.transactionId,
+        },
+      },
+    );
+
+    if (res?.status === 200 && data) {
+      setMemory((prev) => ({
+        ...prev,
+        transactionId: data.transaction_id,
+        resendOtpCount: prev.resendOtpCount + 1,
+      }));
+      Notify.Success({
+        msg: data.detail ?? t("mobile_otp_send_success"),
+      });
+    } else {
+      setMemory((prev) => ({
+        ...prev,
+        resendOtpCount: Infinity,
+      }));
+      Notify.Success({
+        msg: t("mobile_otp_send_error"),
+      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -457,7 +546,7 @@ function VerifyMobileNumber({
         />
       </div>
 
-      <div className="mt-4 flex items-center">
+      <div className="mt-4 flex flex-col items-center gap-2">
         <ButtonV2
           className="w-full"
           loading={memory?.isLoading}
@@ -465,6 +554,17 @@ function VerifyMobileNumber({
         >
           {t("verify_otp")}
         </ButtonV2>
+
+        {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
+          <ButtonWithTimer
+            ghost
+            className="w-full"
+            initialInverval={60}
+            onClick={handleResendOtp}
+          >
+            {t("resend_otp")}
+          </ButtonWithTimer>
+        )}
       </div>
     </div>
   );

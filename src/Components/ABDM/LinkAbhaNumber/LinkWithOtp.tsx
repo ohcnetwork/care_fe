@@ -4,13 +4,15 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { useMemo, useState } from "react";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { classNames } from "../../../Utils/utils";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2, { ButtonWithTimer } from "../../Common/components/ButtonV2";
 import Dropdown, { DropdownItem } from "../../Common/components/Menu";
 import OtpFormField from "../../Form/FormFields/OtpFormField";
 import * as Notify from "../../../Utils/Notifications";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
+
+const MAX_OTP_RESEND_ALLOWED = 2;
 
 type ILoginWithOtpProps = {
   onSuccess: (abhaNumber: AbhaNumberModel) => void;
@@ -26,6 +28,8 @@ type Memory = {
   type: "aadhaar" | "mobile" | "abha-number" | "abha-address";
   otp_system: "abdm" | "aadhaar";
   abhaNumber: AbhaNumberModel | null;
+
+  resendOtpCount: number;
 };
 
 export default function LinkWithOtp({ onSuccess }: ILoginWithOtpProps) {
@@ -42,6 +46,7 @@ export default function LinkWithOtp({ onSuccess }: ILoginWithOtpProps) {
       type: "aadhaar",
       otp_system: "aadhaar",
       abhaNumber: null,
+      resendOtpCount: 0,
     },
   );
 
@@ -241,6 +246,35 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
     setMemory((prev) => ({ ...prev, isLoading: false }));
   };
 
+  const handleResendOtp = async () => {
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    const { res, data } = await request(routes.abdm.healthId.abhaLoginSendOtp, {
+      body: {
+        value: memory?.id,
+        type: memory?.type,
+        otp_system: memory?.otp_system,
+      },
+    });
+
+    if (res?.status === 200 && data) {
+      setMemory((prev) => ({
+        ...prev,
+        transactionId: data.transaction_id,
+        resendOtpCount: (prev.resendOtpCount ?? 0) + 1,
+      }));
+      Notify.Success({ msg: data.detail ?? t("send_otp_success") });
+    } else {
+      setMemory((prev) => ({
+        ...prev,
+        resendOtpCount: Infinity,
+      }));
+      Notify.Error({ msg: t("send_otp_error") });
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: false }));
+  };
+
   return (
     <div>
       <div className="flex flex-col justify-center">
@@ -273,7 +307,7 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
         />
       </div>
 
-      <div className="mt-4 flex items-center">
+      <div className="mt-4 flex flex-col items-center gap-2">
         <ButtonV2
           className="w-full"
           loading={memory?.isLoading}
@@ -282,6 +316,17 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
         >
           {t("verify_and_link")}
         </ButtonV2>
+
+        {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
+          <ButtonWithTimer
+            ghost
+            className="w-full"
+            initialInverval={60}
+            onClick={handleResendOtp}
+          >
+            {t("resend_otp")}
+          </ButtonWithTimer>
+        )}
       </div>
     </div>
   );

@@ -1437,6 +1437,7 @@ const routes = {
         method: "POST",
         TBody: Type<{
           aadhaar: string;
+          transaction_id?: string;
         }>(),
         TRes: Type<{
           transaction_id: string;
