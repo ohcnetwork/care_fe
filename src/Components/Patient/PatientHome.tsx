@@ -533,6 +533,30 @@ export const PatientHome = (props: any) => {
                       : "-"}
                   </div>
                 </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
+                    {t("socioeconomic_status")}
+                  </div>
+                  <div className="mt-1 text-sm font-medium leading-5">
+                    {patientData.meta_info?.socioeconomic_status
+                      ? t(
+                          `SOCIOECONOMIC_STATUS__${patientData.meta_info.socioeconomic_status}`,
+                        )
+                      : "-"}
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
+                    {t("domestic_healthcare_support")}
+                  </div>
+                  <div className="mt-1 text-sm font-medium leading-5">
+                    {patientData.meta_info?.domestic_healthcare_support
+                      ? t(
+                          `DOMESTIC_HEALTHCARE_SUPPORT__${patientData.meta_info.domestic_healthcare_support}`,
+                        )
+                      : "-"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

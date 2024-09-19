@@ -1,5 +1,6 @@
 {
-    "socioeconomic_status": "Socioeconomic Status",
+    "socioeconomic_status": "Socioeconomic status",
+    "domestic_healthcare_support": "Domestic healthcare support",
     "has_domestic_healthcare_support": "Has domestic healthcare support?",
     "SOCIOECONOMIC_STATUS__MIDDLE_CLASS": "Middle Class",
     "SOCIOECONOMIC_STATUS__POOR": "Poor",
