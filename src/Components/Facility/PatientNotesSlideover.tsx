@@ -184,23 +184,19 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             {notesActionIcons}
           </div>
           <div className="flex bg-primary-800 text-sm">
-            {Object.values(PATIENT_NOTES_THREADS).map((current) => (
+            {keysOf(PATIENT_NOTES_THREADS).map((current) => (
               <button
+                id={`patient-note-tab-${current}`}
                 key={current}
                 className={classNames(
                   "flex flex-1 justify-center border-b-4 py-1",
-                  thread === current
+                  thread === PATIENT_NOTES_THREADS[current]
                     ? "border-primary-500 font-medium text-white"
                     : "border-primary-800 text-white/70",
                 )}
-                onClick={() => setThread(current)}
+                onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
               >
-                {
-                  {
-                    10: "Doctor's Discussions",
-                    20: "Nurse's Discussions",
-                  }[current]
-                }
+                {t(`patient_notes_thread__${current}`)}
               </button>
             ))}
           </div>

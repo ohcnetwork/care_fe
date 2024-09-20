@@ -9,9 +9,9 @@ import {
 } from "./models";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
+  BED_TYPES,
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
-  getBedTypes,
 } from "../../Common/constants";
 import {
   MultiSelectFormField,
@@ -55,7 +55,6 @@ import TextFormField from "../Form/FormFields/TextFormField";
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
 import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 import request from "../../Utils/request/request.js";
@@ -63,6 +62,7 @@ import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { RequestResult } from "../../Utils/request/types.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -143,7 +143,6 @@ const facilityCreateReducer = (state = initialState, action: FormAction) => {
 
 export const FacilityCreate = (props: FacilityProps) => {
   const { t } = useTranslation();
-  const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
   const { facilityId } = props;
 
   const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
@@ -327,7 +326,10 @@ export const FacilityCreate = (props: FacilityProps) => {
 
     if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
+    const pincodeDetails = await getPincodeDetails(
+      e.value,
+      careConfig.govDataApiKey,
+    );
     if (!pincodeDetails) return;
 
     const matchedState = (stateData ? stateData.results : []).find((state) => {
@@ -452,7 +454,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
-    console.log(state.form);
     if (validated) {
       setIsLoading(true);
       const data: FacilityRequest = {
@@ -561,7 +562,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             return;
           }}
         />
-        {getBedTypes({ kasp_string, kasp_enabled }).map((x) => {
+        {BED_TYPES.map((x) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
@@ -922,12 +923,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                     />
                   </div>
 
-                  {kasp_enabled && (
+                  {careConfig.kasp.enabled && (
                     <RadioFormField
                       {...field("kasp_empanelled")}
-                      label={`Is this facility ${kasp_string} empanelled?`}
+                      label={`Is this facility ${careConfig.kasp.string} empanelled?`}
                       options={[true, false]}
-                      optionDisplay={(o) => (o ? "Yes" : "No")}
+                      optionLabel={(o) => (o ? "Yes" : "No")}
                       optionValue={(o) => String(o)}
                     />
                   )}

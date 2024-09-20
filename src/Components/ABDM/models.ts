@@ -124,6 +124,7 @@ export interface ABHAQRContent {
   address: string;
   distlgd: string;
   district_name?: string;
+  state_name?: string;
   dob: string;
   gender: "M" | "F" | "O";
   hid?: string;
@@ -132,6 +133,6 @@ export interface ABHAQRContent {
   hidn: string;
   mobile: string;
   name: string;
-  "state name": string;
+  "state name"?: string;
   statelgd: string;
 }

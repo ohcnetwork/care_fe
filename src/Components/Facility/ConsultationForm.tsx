@@ -38,7 +38,6 @@ import { UserBareMinimum } from "../Users/models";
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
 import RouteToFacilitySelect, {
@@ -65,6 +64,7 @@ import {
   EncounterSymptomsBuilder,
   CreateSymptomsBuilder,
 } from "../Symptoms/SymptomsBuilder.js";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -229,7 +229,6 @@ type Props = {
 
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
-  const { kasp_enabled, kasp_string } = useConfig();
   const submitController = useRef<AbortController>();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
@@ -254,8 +253,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const [bedStatusVisible, bedStatusRef] = useVisibility(-300);
 
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
-
-  const { min_encounter_date } = useConfig();
 
   const sections = {
     "Consultation Details": {
@@ -474,11 +471,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           if (
-            min_encounter_date &&
-            dayjs(state.form.encounter_date).isBefore(dayjs(min_encounter_date))
+            dayjs(state.form.encounter_date).isBefore(
+              careConfig.minEncounterDate,
+            )
           ) {
             errors[field] =
-              `Admission date cannot be before ${min_encounter_date}`;
+              `Admission date cannot be before ${careConfig.minEncounterDate}`;
             invalidForm = true;
           }
           return;
@@ -552,7 +550,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         case "is_kasp":
           if (!state.form[field]) {
             errors[field] =
-              `Please select an option, ${kasp_string} is mandatory`;
+              `Please select an option, ${careConfig.kasp.string} is mandatory`;
             invalidForm = true;
           }
           return;
@@ -599,6 +597,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         }
 
         case "treating_physician": {
+          if (state.form.suggestion === "DC") {
+            break;
+          }
           if (state.form.suggestion !== "DD" && !state.form[field]) {
             errors[field] = t("field_required");
             invalidForm = true;
@@ -1123,22 +1124,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       />
                     </div>
                   </div>
-
-                  <div className="col-span-6" ref={fieldRef["category"]}>
-                    <PatientCategorySelect
-                      labelSuffix={
-                        disabledFields.includes("category") && (
-                          <p className="text-xs font-medium text-warning-500">
-                            A daily round already exists.
-                          </p>
-                        )
-                      }
-                      required
-                      label="Category"
-                      {...field("category")}
-                    />
-                  </div>
-
                   <div className="col-span-6" ref={fieldRef["suggestion"]}>
                     <SelectFormField
                       required
@@ -1239,11 +1224,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         "YYYY-MM-DDTHH:mm",
                       )}
                       max={dayjs().format("YYYY-MM-DDTHH:mm")}
-                      min={
-                        min_encounter_date
-                          ? dayjs(min_encounter_date).format("YYYY-MM-DDTHH:mm")
-                          : undefined
-                      }
+                      min={dayjs(careConfig.minEncounterDate).format(
+                        "YYYY-MM-DDTHH:mm",
+                      )}
                     />
                     {dayjs().diff(state.form.encounter_date, "day") > 30 && (
                       <div className="mb-6">
@@ -1300,7 +1283,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </div>
                   )}
 
-                  <div className="col-span-6 mb-6" ref={fieldRef["patient_no"]}>
+                  <div className="col-span-6" ref={fieldRef["patient_no"]}>
                     <TextFormField
                       {...field("patient_no")}
                       label={
@@ -1309,6 +1292,20 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           : "OP Number"
                       }
                       required={state.form.suggestion === "A"}
+                    />
+                  </div>
+                  <div className="col-span-6 mb-6" ref={fieldRef["category"]}>
+                    <PatientCategorySelect
+                      labelSuffix={
+                        disabledFields.includes("category") && (
+                          <p className="text-xs font-medium text-warning-500">
+                            A daily round already exists.
+                          </p>
+                        )
+                      }
+                      required
+                      label="Category"
+                      {...field("category")}
                     />
                   </div>
                 </div>
@@ -1364,7 +1361,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         ref={fieldRef["procedure"]}
                       >
-                        <FieldLabel>Procedures</FieldLabel>
+                        <FieldLabel>{t("procedure_suggestions")}</FieldLabel>
                         <ProcedureBuilder
                           procedures={
                             Array.isArray(state.form.procedure)
@@ -1401,12 +1398,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         />
                       </div>
 
-                      {kasp_enabled && (
+                      {careConfig.kasp.enabled && (
                         <CheckBoxFormField
                           {...field("is_kasp")}
                           className="flex-1"
                           required
-                          label={kasp_string}
+                          label={careConfig.kasp.string}
                           onChange={handleFormFieldChange}
                         />
                       )}
@@ -1428,7 +1425,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           name={"treating_physician"}
                           label={t("treating_doctor")}
                           placeholder="Attending Doctors Name and Designation"
-                          required
+                          required={state.form.suggestion !== "DC"}
                           value={
                             state.form.treating_physician_object ?? undefined
                           }

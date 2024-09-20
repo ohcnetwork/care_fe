@@ -5,7 +5,9 @@ import ManagePrescriptions from "../../Components/Medicine/ManagePrescriptions";
 import { DailyRoundListDetails } from "../../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../../Components/Patient/DailyRounds";
 import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
-import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
+import TreatmentSummary, {
+  ITreatmentSummaryProps,
+} from "../../Components/Facility/TreatmentSummary";
 import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
 import PatientConsentRecords from "../../Components/Patient/PatientConsentRecords";
 import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
@@ -146,12 +148,11 @@ export default {
     <ConsultationDetails consultationId={consultationId} tab={"updates"} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
-    ({ facilityId, patientId, consultationId }: any) => (
+    ({ facilityId, patientId, consultationId }: ITreatmentSummaryProps) => (
       <TreatmentSummary
         facilityId={facilityId}
         consultationId={consultationId}
         patientId={patientId}
-        dailyRoundsListData={[]}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/notes":

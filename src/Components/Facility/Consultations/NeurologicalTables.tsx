@@ -15,6 +15,7 @@ import {
 } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import { NeurologicalTablesFields } from "../models";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -60,7 +61,6 @@ const DataTable = (props: any) => {
 
 const DataDescription = (props: any) => {
   const { title, data } = props;
-  console.log("Data Description", title, data);
 
   return (
     <div>
@@ -114,28 +114,7 @@ export const NeurologicalTable = (props: any) => {
       consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: {
-          page: currentPage,
-          fields: [
-            "consciousness_level",
-            "left_pupil_size",
-            "left_pupil_size_detail",
-            "right_pupil_size",
-            "right_pupil_size_detail",
-            "left_pupil_light_reaction",
-            "left_pupil_light_reaction_detail",
-            "right_pupil_light_reaction",
-            "right_pupil_light_reaction_detail",
-            "limb_response_upper_extremity_right",
-            "limb_response_upper_extremity_left",
-            "limb_response_lower_extremity_left",
-            "limb_response_lower_extremity_right",
-            "glasgow_eye_open",
-            "glasgow_verbal_response",
-            "glasgow_motor_response",
-            "glasgow_total_calculated",
-          ],
-        },
+        body: { page: currentPage, fields: NeurologicalTablesFields },
         pathParams: {
           consultationId,
         },

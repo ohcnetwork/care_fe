@@ -1,0 +1,12 @@
+{
+  "create_resource_request": "റിസോഴ്സ് അഭ്യർത്ഥന സൃഷ്ടിക്കുക",
+  "contact_person": "ഫെസിലിറ്റിയിൽ ബന്ധപ്പെടുന്ന വ്യക്തിയുടെ പേര്",
+  "approving_facility": "അംഗീകാരം നൽകുന്ന സൗകര്യത്തിൻ്റെ പേര്",
+  "contact_phone": "ബന്ധപ്പെടാനുള്ള വ്യക്തി നമ്പർ",
+  "request_title": "പേര് അഭ്യർത്ഥിക്കുക",
+  "request_title_placeholder": "നിങ്ങളുടെ തലക്കെട്ട് ഇവിടെ ടൈപ്പ് ചെയ്യുക",
+  "required_quantity": "ആവശ്യമായ അളവ്",
+  "request_description": "അഭ്യർത്ഥനയുടെ വിവരണം",
+  "request_description_placeholder": "നിങ്ങളുടെ വിവരണം ഇവിടെ ടൈപ്പ് ചെയ്യുക",
+  "search_resource": "തിരയൽ റിസോഴ്സ്"
+}

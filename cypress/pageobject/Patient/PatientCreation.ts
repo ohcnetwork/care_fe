@@ -14,6 +14,7 @@ export class PatientPage {
     cy.get("#name").click().type(patientName);
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
+    cy.wait(2000);
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
     cy.get("#patient-name-consultation")
       .should("be.visible")
@@ -116,6 +117,14 @@ export class PatientPage {
     cy.searchAndSelectOption("#occupation", occupation);
   }
 
+  selectSocioeconomicStatus(value: string) {
+    cy.selectRadioOption("socioeconomic_status", value);
+  }
+
+  selectDomesticHealthcareSupport(value: string) {
+    cy.selectRadioOption("domestic_healthcare_support", value);
+  }
+
   clickCreatePatient() {
     cy.intercept("POST", "**/api/v1/patient/").as("createPatient");
     cy.get("button[data-testid='submit-button']").click();
@@ -164,6 +173,8 @@ export class PatientPage {
     yearOfBirth,
     bloodGroup,
     occupation,
+    socioeconomicStatus = null,
+    domesticHealthcareSupport = null,
     isAntenatal = false,
     isPostPartum = false,
   ) {
@@ -177,6 +188,9 @@ export class PatientPage {
       expect($dashboard).to.contain(yearOfBirth);
       expect($dashboard).to.contain(bloodGroup);
       expect($dashboard).to.contain(occupation);
+      socioeconomicStatus && expect($dashboard).to.contain(socioeconomicStatus);
+      domesticHealthcareSupport &&
+        expect($dashboard).to.contain(domesticHealthcareSupport);
 
       if (isAntenatal) {
         expect($dashboard).to.contain("Antenatal");
