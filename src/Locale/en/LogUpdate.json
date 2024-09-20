@@ -145,7 +145,6 @@
   "pain_chart_description": "Mark region and intensity of pain",
   "bradycardia": "Bradycardia",
   "tachycardia": "Tachycardia",
-  "spo2": "SpO₂",
   "vitals": "Vitals",
   "procedures_select_placeholder": "Select procedures to add details",
   "oral_issue_for_non_oral_nutrition_route_error": "Can be specified only if nutrition route is set to Oral",
