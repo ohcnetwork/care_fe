@@ -18,7 +18,6 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import Table from "../Common/components/Table";
 
 import { navigate } from "raviger";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import request from "../../Utils/request/request.js";
@@ -60,8 +59,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [coverImageEdited, setCoverImageEdited] = useState(false);
   const authUser = useAuthUser();
-
-  useMessageListener((data) => console.log(data));
 
   const {
     data: facilityData,
@@ -116,7 +113,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     <div
       id="facility-coverimage"
       className={
-        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60"
       }
       onClick={() => setEditCoverImage(true)}
     >

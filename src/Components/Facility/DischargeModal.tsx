@@ -385,7 +385,7 @@ const DischargeModal = ({
           )}
         </div>
 
-        {featureFlags.hcx.enabled && (
+        {featureFlags.includes("HCX_ENABLED") && (
           // TODO: if policy and approved pre-auth exists
           <div className="my-5 rounded p-5 shadow">
             <h2 className="mb-2">Claim Insurance</h2>

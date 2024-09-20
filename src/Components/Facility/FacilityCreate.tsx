@@ -454,7 +454,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
-    console.log(state.form);
     if (validated) {
       setIsLoading(true);
       const data: FacilityRequest = {
@@ -929,7 +928,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("kasp_empanelled")}
                       label={`Is this facility ${careConfig.kasp.string} empanelled?`}
                       options={[true, false]}
-                      optionDisplay={(o) => (o ? "Yes" : "No")}
+                      optionLabel={(o) => (o ? "Yes" : "No")}
                       optionValue={(o) => String(o)}
                     />
                   )}

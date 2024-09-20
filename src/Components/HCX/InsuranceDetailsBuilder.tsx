@@ -133,7 +133,7 @@ const InsuranceDetailEditCard = ({
           value={policy.policy_id}
           onChange={handleUpdate}
         />
-        {featureFlags.hcx.enabled ? (
+        {featureFlags.includes("HCX_ENABLED") ? (
           <InsurerAutocomplete
             required
             name="insurer_"

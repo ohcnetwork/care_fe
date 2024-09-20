@@ -2,10 +2,12 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   BLOOD_GROUPS,
+  DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   OCCUPATION_TYPES,
   RATION_CARD_CATEGORY,
+  SOCIOECONOMIC_STATUS_CHOICES,
   VACCINES,
 } from "../../Common/constants";
 import {
@@ -48,7 +50,7 @@ import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
-import { PatientModel, Occupation } from "./models";
+import { PatientModel, Occupation, PatientMeta } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -77,6 +79,9 @@ import { useFeatureFlags } from "../../Utils/featureFlags.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
+
+type PatientForm = PatientModel &
+  PatientMeta & { age?: number; is_postpartum?: boolean };
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: string;
@@ -192,7 +197,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showImport, setShowImport] = useState<{
     show?: boolean;
-    field?: FormContextValue<PatientModel> | null;
+    field?: FormContextValue<PatientForm> | null;
   }>({
     show: false,
     field: null,
@@ -372,6 +377,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const { res, data } = await request(routes.getPatient, {
         pathParams: { id: id ? id : 0 },
       });
+      const { data: abhaNumberData } = await request(
+        routes.abha.getAbhaNumber,
+        {
+          pathParams: { abhaNumberId: id ?? "" },
+          silent: true,
+        },
+      );
+
       if (!status.aborted) {
         if (res?.ok && data) {
           setPatientName(data.name || "");
@@ -383,8 +396,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             age: data.year_of_birth
               ? new Date().getFullYear() - data.year_of_birth
               : "",
-            health_id_number: data.abha_number_object?.abha_number || "",
-            health_id: data.abha_number_object?.health_id || "",
+            health_id_number: abhaNumberData?.abha_number || "",
+            health_id: abhaNumberData?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
             gender: data.gender ? data.gender : undefined,
             state: data.state ? data.state : "",
@@ -423,6 +436,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             occupation: data.meta_info?.occupation
               ? parseOccupationFromExt(data.meta_info.occupation)
               : null,
+
             is_vaccinated: String(data.is_vaccinated),
             number_of_doses: data.number_of_doses
               ? String(data.number_of_doses)
@@ -506,7 +520,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const errors: Partial<Record<keyof any, FieldError>> = {};
 
     const insuranceDetailsError = insuranceDetails
-      .map((policy) => HCXPolicyValidator(policy, featureFlags.hcx.enabled))
+      .map((policy) =>
+        HCXPolicyValidator(policy, featureFlags.includes("HCX_ENABLED")),
+      )
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
@@ -744,7 +760,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         formData.nationality === "India" ? formData.local_body : undefined,
       ward: formData.ward,
       meta_info: {
-        ...state.form?.meta_info,
+        ...formData.meta_info,
         occupation: formData.occupation ?? null,
       },
       village: formData.village,
@@ -780,6 +796,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           controllerRef: submitController,
         });
     if (res?.ok && requestData) {
+      if (state.form.abha_number) {
+        const { res, data } = await request(routes.abha.linkPatient, {
+          body: {
+            patient: requestData.id,
+            abha_number: state.form.abha_number,
+          },
+        });
+
+        if (res?.status === 200 && data) {
+          Notification.Success({
+            msg: t("abha_number_linked_successfully"),
+          });
+        } else {
+          Notification.Error({
+            msg: t("failed_to_link_abha_number"),
+          });
+        }
+      }
+
       await Promise.all(
         insuranceDetails.map(async (obj) => {
           const policy = {
@@ -797,7 +832,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 body: policy,
               });
 
-          if (featureFlags.hcx.enabled && policyData?.id) {
+          if (featureFlags.includes("HCX_ENABLED") && policyData?.id) {
             await request(routes.hcxCheckEligibility, {
               body: { policy: policyData?.id },
               onResponse: ({ res }) => {
@@ -1137,7 +1172,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           )}
           <>
             <div className={`${showImport.show && "hidden"}`}>
-              <Form<PatientModel & { age?: number; is_postpartum?: boolean }>
+              <Form<PatientForm>
                 defaults={id ? state.form : initForm}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -1186,7 +1221,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           Import From External Results
                         </ButtonV2>
                       </div>
-                      {featureFlags.abdm.enabled && (
+                      {featureFlags.includes("ABDM_ENABLED") && (
                         <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                           <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                             ABHA Details
@@ -1471,7 +1506,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                               </div>
@@ -1504,7 +1539,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 { label: "Yes", value: "true" },
                                 { label: "No", value: "false" },
                               ]}
-                              optionDisplay={(option) => option.label}
+                              optionLabel={(option) => option.label}
                               optionValue={(option) => option.value}
                             />
                           </CollapseV2>
@@ -1730,22 +1765,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
-                              <AutocompleteFormField
-                                {...field("occupation")}
-                                label="Occupation"
-                                placeholder="Select Occupation"
-                                options={occupationTypes}
-                                optionLabel={(o) => o.text}
-                                optionValue={(o) => o.id}
-                              />
-                              <SelectFormField
-                                {...field("ration_card_category")}
-                                label="Ration Card Category"
-                                placeholder="Select"
-                                options={RATION_CARD_CATEGORY}
-                                optionLabel={(o) => t(`ration_card__${o}`)}
-                                optionValue={(o) => o}
-                              />
                             </>
                           ) : (
                             <div id="passport_no-div">
@@ -1758,6 +1777,90 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       </div>
+                      {field("nationality").value === "India" && (
+                        <div className="mb-8 rounded border border-secondary-200 p-4">
+                          <AccordionV2
+                            className="mt-2 shadow-none md:mt-0 lg:mt-0"
+                            expandIcon={
+                              <CareIcon
+                                icon="l-angle-down"
+                                className="text-2xl font-bold"
+                              />
+                            }
+                            title={
+                              <h1 className="text-left text-xl font-bold text-purple-500">
+                                Social Profile
+                              </h1>
+                            }
+                            expanded
+                          >
+                            <div>
+                              <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
+                                <AutocompleteFormField
+                                  {...field("occupation")}
+                                  label="Occupation"
+                                  placeholder="Select Occupation"
+                                  options={occupationTypes}
+                                  optionLabel={(o) => o.text}
+                                  optionValue={(o) => o.id}
+                                />
+                                <SelectFormField
+                                  {...field("ration_card_category")}
+                                  label="Ration Card Category"
+                                  placeholder="Select"
+                                  options={RATION_CARD_CATEGORY}
+                                  optionLabel={(o) => t(`ration_card__${o}`)}
+                                  optionValue={(o) => o}
+                                />
+                                <RadioFormField
+                                  name="socioeconomic_status"
+                                  label={t("socioeconomic_status")}
+                                  options={SOCIOECONOMIC_STATUS_CHOICES}
+                                  optionLabel={(o) =>
+                                    t(`SOCIOECONOMIC_STATUS__${o}`)
+                                  }
+                                  optionValue={(o) => o}
+                                  value={
+                                    field("meta_info").value
+                                      ?.socioeconomic_status
+                                  }
+                                  onChange={({ name, value }) =>
+                                    field("meta_info").onChange({
+                                      name: "meta_info",
+                                      value: {
+                                        ...(field("meta_info").value ?? {}),
+                                        [name]: value,
+                                      },
+                                    })
+                                  }
+                                />
+                                <RadioFormField
+                                  name="domestic_healthcare_support"
+                                  label={t("has_domestic_healthcare_support")}
+                                  options={DOMESTIC_HEALTHCARE_SUPPORT_CHOICES}
+                                  optionLabel={(o) =>
+                                    t(`DOMESTIC_HEALTHCARE_SUPPORT__${o}`)
+                                  }
+                                  optionValue={(o) => o}
+                                  value={
+                                    field("meta_info").value
+                                      ?.domestic_healthcare_support
+                                  }
+                                  onChange={({ name, value }) =>
+                                    field("meta_info").onChange({
+                                      name: "meta_info",
+                                      value: {
+                                        ...(field("meta_info").value ?? {}),
+                                        [name]: value,
+                                      },
+                                    })
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </AccordionV2>
+                        </div>
+                      )}
                       <div className="mb-8 rounded border border-secondary-200 p-4">
                         <AccordionV2
                           className="mt-2 shadow-none md:mt-0 lg:mt-0"
@@ -1784,7 +1887,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                               </div>
@@ -1818,7 +1921,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                             value: "3",
                                           },
                                         ]}
-                                        optionDisplay={(option) => option.label}
+                                        optionLabel={(option) => option.label}
                                         optionValue={(option) => option.value}
                                       />
                                     </div>
@@ -1853,7 +1956,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
                                   ]}
-                                  optionDisplay={(option) => option.label}
+                                  optionLabel={(option) => option.label}
                                   optionValue={(option) => option.value}
                                 />
                                 <CollapseV2

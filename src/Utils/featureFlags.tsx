@@ -1,42 +1,20 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import useQuery from "./request/useQuery";
 import routes from "../Redux/api";
+import useAuthUser from "../Common/hooks/useAuthUser";
+import { FacilityModel } from "../Components/Facility/models";
 
-export interface FeatureFlags {
-  hcx: {
-    enabled: boolean;
-  };
-
-  abdm: {
-    enabled: boolean;
-  };
-
-  scribe: {
-    enabled: boolean;
-  };
-}
+export type FeatureFlag = "HCX_ENABLED" | "ABDM_ENABLED" | "SCRIBE_ENABLED";
 
 export interface FeatureFlagsResponse {
-  user_flags: FeatureFlags;
+  user_flags: FeatureFlag[];
   facility_flags: {
     facility: string;
-    features: FeatureFlags;
+    features: FeatureFlag[];
   }[];
 }
 
-const defaultFlags: FeatureFlags = {
-  hcx: {
-    enabled: false,
-  },
-
-  abdm: {
-    enabled: false,
-  },
-
-  scribe: {
-    enabled: false,
-  },
-};
+const defaultFlags: FeatureFlag[] = [];
 
 const FeatureFlagsContext = createContext<FeatureFlagsResponse>({
   user_flags: defaultFlags,
@@ -49,15 +27,16 @@ export const FeatureFlagsProvider = (props: { children: React.ReactNode }) => {
     facility_flags: [],
   });
 
-  const query = useQuery(routes.getFeatureFlags, {
-    silent: true,
-  });
+  const user = useAuthUser();
 
   useEffect(() => {
-    if (query.data) {
-      setFeatureFlags(query.data);
+    if (user.user_flags) {
+      setFeatureFlags((ff) => ({
+        ...ff,
+        user_flags: [...defaultFlags, ...(user.user_flags || [])],
+      }));
     }
-  }, [query.data]);
+  }, [user]);
 
   return (
     <FeatureFlagsContext.Provider value={featureFlags}>
@@ -66,21 +45,34 @@ export const FeatureFlagsProvider = (props: { children: React.ReactNode }) => {
   );
 };
 
-export const useFeatureFlags = (facilityId?: string) => {
+export const useFeatureFlags = (facility?: FacilityModel | string) => {
+  const [facilityObject, setFacilityObject] = useState<
+    FacilityModel | undefined
+  >(typeof facility === "string" ? undefined : facility);
+
   const context = useContext(FeatureFlagsContext);
   if (context === undefined) {
     throw new Error(
       "useFeatureFlags must be used within a FeatureFlagsProvider",
     );
   }
-  let facilityFlags;
-  if (facilityId) {
-    facilityFlags = context?.facility_flags.find(
-      (f) => f.facility === facilityId,
-    )?.features;
-  }
-  return {
-    ...context.user_flags,
-    ...facilityFlags,
-  };
+
+  const facilityQuery = useQuery(routes.getAnyFacility, {
+    pathParams: {
+      id: typeof facility === "string" ? facility : "",
+    },
+    prefetch: typeof facility === "string",
+    silent: true,
+    onResponse: (res) => {
+      setFacilityObject(res.data);
+    },
+  });
+
+  const facilityFlags = facilityObject?.facility_flags || [];
+
+  useEffect(() => {
+    facilityQuery.refetch();
+  }, [facility]);
+
+  return [...context.user_flags, ...facilityFlags];
 };

@@ -64,7 +64,7 @@ export default function AppRouter() {
 
   let routes = Routes;
 
-  if (featureFlags.hcx.enabled) {
+  if (featureFlags.includes("HCX_ENABLED")) {
     routes = { ...routes, ...HCXRoutes };
   }
 

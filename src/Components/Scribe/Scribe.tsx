@@ -551,7 +551,7 @@ export const Scribe: React.FC<ScribeProps> = ({
     }
   }
 
-  if (!featureFlags.scribe.enabled) return null;
+  if (!featureFlags.includes("SCRIBE_ENABLED")) return null;
 
   return (
     <Popover>

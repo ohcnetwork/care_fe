@@ -1,0 +1,22 @@
+{
+  "no_notices_for_you": "आपके लिए कोई नोटिस नहीं.",
+  "mark_as_read": "पढ़े हुए का चिह्न",
+  "mark_as_unread": "अपठित के रूप में चिह्नित करें",
+  "subscribe": "सदस्यता लें",
+  "subscribe_on_this_device": "इस डिवाइस पर सदस्यता लें",
+  "show_unread_notifications": "अपठित दिखाएँ",
+  "show_all_notifications": "सब दिखाएं",
+  "filter_by_category": "श्रेणी के अनुसार फ़िल्टर करें",
+  "mark_all_as_read": "सभी को पढ़ा हुआ मार्क करें",
+  "reload": "पुनः लोड करें",
+  "Notifications": "सूचनाएं",
+  "no_results_found": "कोई परिणाम नहीं मिला",
+  "load_more": "और लोड करें",
+  "subscription_error": "सदस्यता त्रुटि",
+  "unsubscribe_failed": "सदस्यता रद्द करना विफल हुआ.",
+  "unsubscribe": "सदस्यता रद्द",
+  "escape": "पलायन",
+  "loading": "लोड हो रहा है...",
+  "invalid_asset_id_msg": "ओह! आपके द्वारा दर्ज की गई संपत्ति आईडी वैध नहीं लगती।",
+  "asset_not_found_msg": "ओह! आप जिस संपत्ति की तलाश कर रहे हैं वह मौजूद नहीं है। कृपया संपत्ति आईडी की जाँच करें।"
+}
