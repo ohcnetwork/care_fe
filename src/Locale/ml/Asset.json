@@ -1,0 +1,20 @@
+{
+  "create_asset": "അസറ്റ് സൃഷ്ടിക്കുക",
+  "edit_history": "ചരിത്രം തിരുത്തുക",
+  "update_record_for_asset": "അസറ്റിൻ്റെ റെക്കോർഡ് അപ്ഡേറ്റ് ചെയ്യുക",
+  "edited_on": "എഡിറ്റ് ചെയ്തത്",
+  "edited_by": "എഡിറ്റ് ചെയ്തത്",
+  "serviced_on": "സർവീസ് ചെയ്തു",
+  "notes": "കുറിപ്പുകൾ",
+  "back": "തിരികെ",
+  "close": "അടയ്ക്കുക",
+  "update_asset_service_record": "അസറ്റ് സർവീസ് റെക്കോർഡ് അപ്ഡേറ്റ് ചെയ്യുക",
+  "eg_details_on_functionality_service_etc": "ഉദാ. പ്രവർത്തനം, സേവനം മുതലായവയെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ.",
+  "updating": "അപ്ഡേറ്റ് ചെയ്യുന്നു",
+  "update": "അപ്ഡേറ്റ്",
+  "are_you_still_watching": "നിങ്ങൾ ഇപ്പോഴും കാണുന്നുണ്ടോ?",
+  "stream_stop_due_to_inativity": "സജീവമല്ലാത്തതിനാൽ തത്സമയ ഫീഡ് സ്ട്രീമിംഗ് നിർത്തും",
+  "stream_stopped_due_to_inativity": "സജീവമല്ലാത്തതിനാൽ തത്സമയ ഫീഡ് സ്ട്രീമിംഗ് നിർത്തി",
+  "continue_watching": "കാണുന്നത് തുടരുക",
+  "resume": "പുനരാരംഭിക്കുക"
+}

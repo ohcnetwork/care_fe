@@ -1,4 +1,3 @@
-import { IConfig } from "./hooks/useConfig";
 import { PatientCategory } from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
 import { dateQueryString } from "../Utils/utils";
@@ -9,6 +8,7 @@ import {
   ConsentHIType,
   ConsentPurpose,
 } from "../Components/ABDM/types/consent";
+import careConfig from "@careConfig";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -217,33 +217,30 @@ export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-name" },
 ];
 
-export const getBedTypes = ({
-  kasp_enabled,
-  kasp_string,
-}: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
-  const kaspBedTypes = kasp_enabled
-    ? [
-        { id: 40, text: kasp_string + " Ordinary Beds" },
-        { id: 60, text: kasp_string + " Oxygen beds" },
-        { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
-        { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
-      ]
-    : [];
+const { kasp } = careConfig;
 
-  return [
-    { id: 1, text: "Ordinary Beds" },
-    { id: 150, text: "Oxygen beds" },
-    { id: 10, text: "ICU (ICU without ventilator)" },
-    { id: 20, text: "Ventilator (ICU with ventilator)" },
-    { id: 30, text: "Covid Ordinary Beds" },
-    { id: 120, text: "Covid Oxygen beds" },
-    { id: 110, text: "Covid ICU (ICU without ventilator)" },
-    { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-    ...kaspBedTypes,
-    { id: 2, text: "Hostel" },
-    { id: 3, text: "Single Room with Attached Bathroom" },
-  ];
-};
+const KASP_BED_TYPES = kasp.enabled
+  ? [
+      { id: 40, text: kasp.string + " Ordinary Beds" },
+      { id: 60, text: kasp.string + " Oxygen beds" },
+      { id: 50, text: kasp.string + " ICU (ICU without ventilator)" },
+      { id: 70, text: kasp.string + " ICU (ICU with ventilator)" },
+    ]
+  : [];
+
+export const BED_TYPES: OptionsType[] = [
+  { id: 1, text: "Ordinary Beds" },
+  { id: 150, text: "Oxygen beds" },
+  { id: 10, text: "ICU (ICU without ventilator)" },
+  { id: 20, text: "Ventilator (ICU with ventilator)" },
+  { id: 30, text: "Covid Ordinary Beds" },
+  { id: 120, text: "Covid Oxygen beds" },
+  { id: 110, text: "Covid ICU (ICU without ventilator)" },
+  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
+  ...KASP_BED_TYPES,
+  { id: 2, text: "Hostel" },
+  { id: 3, text: "Single Room with Attached Bathroom" },
+];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine" },
@@ -441,17 +438,49 @@ export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
   "TD",
 ] as const;
 
-export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
+export type PatientCategoryID =
+  | "Comfort"
+  | "Stable"
+  | "Moderate"
+  | "Critical"
+  | "ActivelyDying";
 
 export const PATIENT_CATEGORIES: {
   id: PatientCategoryID;
   text: PatientCategory;
+  description: string;
   twClass: string;
 }[] = [
-  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Mild", twClass: "patient-stable" },
-  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
-  { id: "Critical", text: "Critical", twClass: "patient-critical" },
+  {
+    id: "Comfort", // Comfort Care is discontinued
+    text: "Comfort Care",
+    twClass: "patient-comfort",
+    description: "End of life care",
+  },
+  {
+    id: "Stable",
+    text: "Mild",
+    twClass: "patient-stable",
+    description: "Urgent: not life-threatening",
+  },
+  {
+    id: "Moderate",
+    text: "Moderate",
+    twClass: "patient-abnormal",
+    description: "Emergency: could be life-threatening",
+  },
+  {
+    id: "Critical",
+    text: "Critical",
+    twClass: "patient-critical",
+    description: "Immediate: life-threatening",
+  },
+  {
+    id: "ActivelyDying",
+    text: "Actively Dying",
+    twClass: "patient-activelydying",
+    description: "",
+  },
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
@@ -699,11 +728,30 @@ export const RESOURCE_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
+export const HEARTBEAT_RHYTHM_CHOICES = [
+  "REGULAR",
+  "IRREGULAR",
+  "UNKNOWN",
+] as const;
+
 export const NURSING_CARE_PROCEDURES = [
+  "oral_care",
+  "hair_care",
+  "bed_bath",
+  "eye_care",
+  "perineal_care",
+  "skin_care",
+  "pre_enema",
+  "wound_dressing",
+  "lymphedema_care",
+  "ascitic_tapping",
+  "colostomy_care",
+  "colostomy_change",
   "personal_hygiene",
   "positioning",
   "suctioning",
   "ryles_tube_care",
+  "ryles_tube_change",
   "iv_sitecare",
   "nubulisation",
   "dressing",
@@ -711,48 +759,34 @@ export const NURSING_CARE_PROCEDURES = [
   "restrain",
   "chest_tube_care",
   "tracheostomy_care",
+  "tracheostomy_tube_change",
   "stoma_care",
   "catheter_care",
+  "catheter_change",
 ] as const;
 
 export const EYE_OPEN_SCALE = [
-  { value: 4, text: "Spontaneous" },
-  { value: 3, text: "To Speech" },
-  { value: 2, text: "To Pain" },
   { value: 1, text: "No Response" },
+  { value: 2, text: "To Pain" },
+  { value: 3, text: "To Speech" },
+  { value: 4, text: "Spontaneous" },
 ];
 
 export const VERBAL_RESPONSE_SCALE = [
-  { value: 5, text: "Oriented to Time, Place and Person" },
-  { value: 4, text: "Confused/Irritable" },
-  { value: 3, text: "Inappropriate words/Cry to Pain" },
-  { value: 2, text: "Incomprehensible words/Moans to pain" },
   { value: 1, text: "No Response" },
+  { value: 2, text: "Incomprehensible words/Moans to pain" },
+  { value: 3, text: "Inappropriate words/Cry to Pain" },
+  { value: 4, text: "Confused/Irritable" },
+  { value: 5, text: "Oriented to Time, Place and Person" },
 ];
 
 export const MOTOR_RESPONSE_SCALE = [
-  { value: 6, text: "Obeying commands/Normal acrivity" },
-  { value: 5, text: "Moves to localized pain" },
-  { value: 4, text: "Flexion/Withdrawal from pain" },
-  { value: 3, text: "Abnormal Flexion(decorticate)" },
-  { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
-];
-export const CONSULTATION_TABS = [
-  { text: "UPDATES", desc: "Overview" },
-  { text: "FEED", desc: "Feed" },
-  { text: "SUMMARY", desc: "Vitals" },
-  { text: "ABG", desc: "ABG" },
-  { text: "MEDICINES", desc: "Medicines" },
-  { text: "FILES", desc: "Files" },
-  { text: "INVESTIGATIONS", desc: "Investigations" },
-  { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
-  { text: "VENTILATOR", desc: "Ventilation" },
-  { text: "NUTRITION", desc: "Nutrition" },
-  { text: "PRESSURE_SORE", desc: "Pressure Sore" },
-  { text: "NURSING", desc: "Nursing" },
-  { text: "DIALYSIS", desc: "Dialysis" },
-  { text: "ABDM", desc: "ABDM Records" },
+  { value: 2, text: "Abnormal Extension(decerebrate)" },
+  { value: 3, text: "Abnormal Flexion(decorticate)" },
+  { value: 4, text: "Flexion/Withdrawal from pain" },
+  { value: 5, text: "Moves to localized pain" },
+  { value: 6, text: "Obeying commands/Normal acrivity" },
 ];
 
 export const RHYTHM_CHOICES = [
@@ -760,12 +794,71 @@ export const RHYTHM_CHOICES = [
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ] as const;
 
-export const LOCATION_BED_TYPES: Array<any> = [
+export const BOWEL_ISSUE_CHOICES = [
+  "NO_DIFFICULTY",
+  "CONSTIPATION",
+  "DIARRHOEA",
+] as const;
+
+export const BLADDER_DRAINAGE_CHOICES = [
+  "NORMAL",
+  "CONDOM_CATHETER",
+  "DIAPER",
+  "INTERMITTENT_CATHETER",
+  "CONTINUOUS_INDWELLING_CATHETER",
+  "CONTINUOUS_SUPRAPUBIC_CATHETER",
+  "UROSTOMY",
+] as const;
+
+export const BLADDER_ISSUE_CHOICES = [
+  "NO_ISSUES",
+  "INCONTINENCE",
+  "RETENTION",
+  "HESITANCY",
+] as const;
+
+export const URINATION_FREQUENCY_CHOICES = [
+  "NORMAL",
+  "DECREASED",
+  "INCREASED",
+] as const;
+
+export const SLEEP_CHOICES = [
+  "EXCESSIVE",
+  "SATISFACTORY",
+  "UNSATISFACTORY",
+  "NO_SLEEP",
+] as const;
+
+export const NUTRITION_ROUTE_CHOICES = [
+  "ORAL",
+  "RYLES_TUBE",
+  "GASTROSTOMY_OR_JEJUNOSTOMY",
+  "PEG",
+  "PARENTERAL_TUBING_FLUID",
+  "PARENTERAL_TUBING_TPN",
+] as const;
+
+export const ORAL_ISSUE_CHOICES = [
+  "NO_ISSUE",
+  "DYSPHAGIA",
+  "ODYNOPHAGIA",
+] as const;
+
+export const APPETITE_CHOICES = [
+  "INCREASED",
+  "SATISFACTORY",
+  "REDUCED",
+  "NO_TASTE_FOR_FOOD",
+  "CANNOT_BE_ASSESSED",
+] as const;
+
+export const LOCATION_BED_TYPES = [
   { id: "ISOLATION", name: "Isolation" },
   { id: "ICU", name: "ICU" },
   { id: "BED_WITH_OXYGEN_SUPPORT", name: "Bed with oxygen support" },
   { id: "REGULAR", name: "Regular" },
-];
+] as const;
 
 export const ASSET_META_TYPE = [
   { id: "CAMERA", text: "Camera(ONVIF)" },
@@ -1322,6 +1415,20 @@ export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 3, text: "Comfort Care Only" },
   { id: 4, text: "Active treatment" },
 ];
+
+export const SOCIOECONOMIC_STATUS_CHOICES = [
+  "MIDDLE_CLASS",
+  "POOR",
+  "VERY_POOR",
+  "WELL_OFF",
+] as const;
+
+export const DOMESTIC_HEALTHCARE_SUPPORT_CHOICES = [
+  "FAMILY_MEMBER",
+  "PAID_CAREGIVER",
+  "NO_SUPPORT",
+] as const;
+
 export const OCCUPATION_TYPES = [
   {
     id: 27,
@@ -1660,3 +1767,60 @@ export const PressureSoreTissueTypeOptions = [
   "Slough",
   "Necrotic",
 ] as const;
+
+export const FILE_EXTENSIONS = {
+  IMAGE: ["jpeg", "jpg", "png", "gif", "svg", "bmp", "webp", "jfif"],
+  AUDIO: ["mp3", "wav"],
+  VIDEO: [
+    "webm",
+    "mpg",
+    "mp2",
+    "mpeg",
+    "mpe",
+    "mpv",
+    "ogg",
+    "mp4",
+    "m4v",
+    "avi",
+    "wmv",
+    "mov",
+    "qt",
+    "flv",
+    "swf",
+  ],
+  PRESENTATION: ["pptx"],
+  DOCUMENT: ["pdf", "docx"],
+} as const;
+
+export const PREVIEWABLE_FILE_EXTENSIONS = [
+  "html",
+  "htm",
+  "pdf",
+  "mp4",
+  "webm",
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+] as const;
+
+export const HEADER_CONTENT_TYPES = {
+  pdf: "application/pdf",
+  txt: "text/plain",
+  jpeg: "image/jpeg",
+  jpg: "image/jpeg",
+  doc: "application/msword",
+  xls: "application/vnd.ms-excel",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  epub: "application/epub+zip",
+  gif: "image/gif",
+  html: "text/html",
+  htm: "text/html",
+  mp4: "video/mp4",
+  png: "image/png",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  svg: "image/svg+xml",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+} as const;

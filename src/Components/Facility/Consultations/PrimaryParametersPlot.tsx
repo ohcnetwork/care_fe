@@ -10,6 +10,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
 import PageTitle from "../../Common/PageTitle";
 import dayjs from "../../../Utils/dayjs";
+import { PrimaryParametersPlotFields } from "../models";
 
 interface PrimaryParametersPlotProps {
   facilityId: string;
@@ -43,19 +44,7 @@ export const PrimaryParametersPlot = ({
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
           page: currentPage,
-          fields: [
-            "bp",
-            "pulse",
-            "temperature",
-            "resp",
-            "blood_sugar_level",
-            "insulin_intake_frequency",
-            "insulin_intake_dose",
-            "ventilator_spo2",
-            "ventilator_fi02",
-            "rhythm",
-            "rhythm_detail",
-          ],
+          fields: PrimaryParametersPlotFields,
         },
         pathParams: {
           consultationId,
@@ -195,7 +184,7 @@ export const PrimaryParametersPlot = ({
             title="Ventilator FIO2 (%)"
             name="fio2"
             xData={dates}
-            yData={yAxisData("ventilator_fi02")}
+            yData={yAxisData("ventilator_fio2")}
             low={21}
             high={60}
           />

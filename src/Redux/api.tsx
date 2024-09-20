@@ -1,4 +1,3 @@
-import { IConfig } from "../Common/hooks/useConfig";
 import {
   ConsentRequestModel,
   CreateConsentTBody,
@@ -111,6 +110,7 @@ import { Investigation } from "../Components/Facility/Investigations/Reports/typ
 import { HCXPolicyModel } from "../Components/HCX/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
+import { AbhaNumberModel } from "../Components/ABDM/types/abha";
 import { ScribeModel } from "../Components/Scribe/Scribe";
 
 /**
@@ -132,13 +132,6 @@ export interface LoginCredentials {
 }
 
 const routes = {
-  config: {
-    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
-    method: "GET",
-    noAuth: true,
-    TRes: Type<IConfig>(),
-  },
-
   createScribe: {
     path: "/api/care_scribe/scribe/",
     method: "POST",
@@ -1363,6 +1356,12 @@ const routes = {
   },
 
   abha: {
+    getAbhaNumber: {
+      path: "/api/v1/abdm/abha_numbers/{abhaNumberId}/",
+      method: "GET",
+      TRes: Type<AbhaNumberModel>(),
+    },
+
     // ABDM HealthID endpoints
     generateAadhaarOtp: {
       path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
@@ -1412,6 +1411,13 @@ const routes = {
       method: "POST",
       TRes: Type<ICreateHealthIdResponse>(),
       TBody: Type<ICreateHealthIdRequest>(),
+    },
+
+    linkPatient: {
+      path: "/api/v1/abdm/healthid/link_patient/",
+      method: "POST",
+      TBody: Type<{ abha_number: string; patient: string }>(),
+      TRes: Type<AbhaNumberModel>(),
     },
 
     searchByHealthId: {

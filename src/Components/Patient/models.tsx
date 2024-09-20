@@ -1,18 +1,28 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import {
+  APPETITE_CHOICES,
+  BLADDER_DRAINAGE_CHOICES,
+  BLADDER_ISSUE_CHOICES,
+  BOWEL_ISSUE_CHOICES,
   CONSCIOUSNESS_LEVEL,
+  DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
+  HEARTBEAT_RHYTHM_CHOICES,
   HumanBodyRegion,
   INSULIN_INTAKE_FREQUENCY_OPTIONS,
   LIMB_RESPONSE_OPTIONS,
   NURSING_CARE_PROCEDURES,
+  NUTRITION_ROUTE_CHOICES,
   OCCUPATION_TYPES,
+  ORAL_ISSUE_CHOICES,
   OXYGEN_MODALITY_OPTIONS,
   PressureSoreExudateAmountOptions,
   PressureSoreTissueTypeOptions,
   RATION_CARD_CATEGORY,
   RESPIRATORY_SUPPORT,
-  RHYTHM_CHOICES,
+  SLEEP_CHOICES,
+  SOCIOECONOMIC_STATUS_CHOICES,
+  URINATION_FREQUENCY_CHOICES,
   VENTILATOR_MODE_OPTIONS,
 } from "../../Common/constants";
 
@@ -39,23 +49,11 @@ export interface AssignedToObjectModel {
   user_type: string;
 }
 
-export interface AbhaObject {
-  id: number;
-  created_date: string;
-  modified_date: string;
-  abha_number: string;
-  email: string | null;
-  first_name: string;
-  date_of_birth: string;
-  gender: "M" | "F" | "O";
-  address: string;
-  district: string;
-  state: string;
-  health_id: string | null;
-  name: string;
-  last_name: string;
-  middle_name: string;
-  profile_photo: string;
+export interface PatientMeta {
+  readonly id: number;
+  occupation?: Occupation;
+  socioeconomic_status?: (typeof SOCIOECONOMIC_STATUS_CHOICES)[number];
+  domestic_healthcare_support?: (typeof DOMESTIC_HEALTHCARE_SUPPORT_CHOICES)[number];
 }
 
 export interface PatientModel {
@@ -136,15 +134,7 @@ export interface PatientModel {
   created_by?: PerformedByModel;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
-  occupation?: Occupation;
-  meta_info?: {
-    id: number;
-    occupation: Occupation;
-  };
-
-  // ABDM related
-  abha_number?: string;
-  abha_number_object?: AbhaObject;
+  meta_info?: PatientMeta;
 }
 
 export interface SampleTestModel {
@@ -280,6 +270,7 @@ export interface SampleListModel {
 
 export const DailyRoundTypes = [
   "NORMAL",
+  "COMMUNITY_NURSES_LOG",
   "DOCTORS_LOG",
   "VENTILATOR",
   "AUTOMATED",
@@ -311,7 +302,7 @@ export type IPressureSore = {
 };
 export interface DailyRoundsModel {
   spo2?: number;
-  rhythm?: (typeof RHYTHM_CHOICES)[number]["text"];
+  rhythm?: (typeof HEARTBEAT_RHYTHM_CHOICES)[number];
   rhythm_detail?: string;
   bp?: BloodPressure;
   pulse?: number;
@@ -378,12 +369,14 @@ export interface DailyRoundsModel {
   infusions?: NameQuantity[];
   iv_fluids?: NameQuantity[];
   output?: NameQuantity[];
+  total_intake_calculated?: number;
+  total_output_calculated?: number;
   ventilator_spo2?: number;
   ventilator_interface?: (typeof RESPIRATORY_SUPPORT)[number]["value"];
   ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
   ventilator_oxygen_modality_flow_rate?: number;
   ventilator_oxygen_modality_oxygen_rate?: number;
-  ventilator_fi02?: number;
+  ventilator_fio2?: number;
   ventilator_mode?: (typeof VENTILATOR_MODE_OPTIONS)[number];
   ventilator_peep?: number;
   ventilator_pip?: number;
@@ -393,6 +386,15 @@ export interface DailyRoundsModel {
 
   ventilator_tidal_volume?: number;
   pressure_sore?: IPressureSore[];
+  bowel_issue?: (typeof BOWEL_ISSUE_CHOICES)[number];
+  bladder_drainage?: (typeof BLADDER_DRAINAGE_CHOICES)[number];
+  bladder_issue?: (typeof BLADDER_ISSUE_CHOICES)[number];
+  is_experiencing_dysuria?: boolean;
+  urination_frequency?: (typeof URINATION_FREQUENCY_CHOICES)[number];
+  sleep?: (typeof SLEEP_CHOICES)[number];
+  nutrition_route?: (typeof NUTRITION_ROUTE_CHOICES)[number];
+  oral_issue?: (typeof ORAL_ISSUE_CHOICES)[number];
+  appetite?: (typeof APPETITE_CHOICES)[number];
 }
 
 export interface FacilityNameModel {
