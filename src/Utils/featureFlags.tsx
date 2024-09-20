@@ -57,11 +57,11 @@ export const useFeatureFlags = (facility?: FacilityModel | string) => {
     );
   }
 
-  const facilityQuery = useQuery(routes.getAnyFacility, {
+  const facilityQuery = useQuery(routes.getPermittedFacility, {
     pathParams: {
       id: typeof facility === "string" ? facility : "",
     },
-    prefetch: typeof facility === "string",
+    prefetch: false,
     silent: true,
     onResponse: (res) => {
       setFacilityObject(res.data);
