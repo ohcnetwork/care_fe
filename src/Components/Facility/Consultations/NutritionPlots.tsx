@@ -8,6 +8,7 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { NutritionPlotsFields } from "../models";
 
 export const NutritionPlots = (props: any) => {
   const { consultationId } = props;
@@ -24,17 +25,7 @@ export const NutritionPlots = (props: any) => {
       consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: {
-          page: currentPage,
-          fields: [
-            "infusions",
-            "iv_fluids",
-            "feeds",
-            "total_intake_calculated",
-            "total_output_calculated",
-            "output",
-          ],
-        },
+        body: { page: currentPage, fields: NutritionPlotsFields },
         pathParams: {
           consultationId,
         },

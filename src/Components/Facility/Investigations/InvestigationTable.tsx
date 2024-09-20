@@ -4,6 +4,7 @@ import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { classNames } from "../../../Utils/utils";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
   return (
@@ -70,6 +71,7 @@ export const InvestigationTable = ({
   handleUpdateCancel,
   handleSave,
 }: any) => {
+  const { t } = useTranslation();
   const [searchFilter, setSearchFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
   const filterTests = Object.values(data).filter((i: any) => {
@@ -84,16 +86,10 @@ export const InvestigationTable = ({
   return (
     <div className="m-4 p-4">
       <div className="mb flex flex-col items-center justify-between sm:flex-row">
-        {title && <div className="text-xl font-bold">{title}</div>}
-        <div className="flex flex-col py-2 sm:flex-row">
-          <ButtonV2
-            variant="primary"
-            onClick={() => window.print()}
-            className="my-2 mr-2"
-            disabled={showForm}
-          >
-            Print Report
-          </ButtonV2>
+        {title && (
+          <div className="text-xl font-bold print:text-xs">{title}</div>
+        )}
+        <div className="flex flex-col py-2 sm:flex-row print:hidden">
           <ButtonV2
             disabled={isDischargedPatient}
             variant="primary"
@@ -120,22 +116,23 @@ export const InvestigationTable = ({
       <TextFormField
         name="test_search"
         label="Search Test"
-        className="mt-2"
+        className="mt-2 print:hidden"
         placeholder="Search test"
         value={searchFilter}
         onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <div id="section-to-print">
-        <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg">
-          <table className="min-w-full divide-y divide-secondary-200">
-            <thead className="bg-secondary-50">
+      <div className="print:w-full">
+        <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg print:overflow-visible print:border-none print:shadow-none">
+          <table className="min-w-full divide-y divide-secondary-200 print:min-w-0 print:divide-none">
+            <thead className="bg-secondary-50 print:bg-white">
               <tr>
                 {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map(
                   (heading) => (
                     <th
+                      key={heading}
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800"
+                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800 print:text-sm print:font-normal print:tracking-normal print:text-black"
                     >
                       {heading}
                     </th>
@@ -143,7 +140,7 @@ export const InvestigationTable = ({
                 )}
               </tr>
             </thead>
-            <tbody x-max="2">
+            <tbody className="print:divide-none">
               {filterTests.length > 0 ? (
                 filterTests.map((t: any, i) => {
                   const value =
@@ -173,12 +170,13 @@ export const InvestigationTable = ({
                               };
                         handleValueChange(value, target);
                       }}
+                      className="print:text-black"
                     />
                   );
                 })
               ) : (
-                <tr className="text-center text-secondary-500">
-                  No tests taken
+                <tr className="text-center text-secondary-500 print:text-black">
+                  <td className="col-span-6">{t("no_tests_taken")}</td>
                 </tr>
               )}
             </tbody>

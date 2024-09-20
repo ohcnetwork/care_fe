@@ -298,7 +298,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 onChange={handleChange}
                 label={"Is this an emergency?"}
                 options={[true, false]}
-                optionDisplay={(o) => (o ? "Yes" : "No")}
+                optionLabel={(o) => (o ? "Yes" : "No")}
                 optionValue={(o) => String(o)}
                 value={String(state.form.emergency)}
                 error={state.errors.emergency}

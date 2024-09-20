@@ -4,10 +4,8 @@ import {
   formatDateTime,
   formatPatientAge,
 } from "../../Utils/utils";
-import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { ConsultationModel } from "./models";
 import { useMemo } from "react";
 import {
@@ -18,6 +16,8 @@ import PageHeadTitle from "../Common/PageHeadTitle";
 import { useTranslation } from "react-i18next";
 import { PatientModel } from "../Patient/models";
 import MedicineRoutes from "../Medicine/routes";
+import PrintPreview from "../../CAREUI/misc/PrintPreview";
+import careConfig from "@careConfig";
 
 export interface ITreatmentSummaryProps {
   consultationId: string;
@@ -28,12 +28,9 @@ export interface ITreatmentSummaryProps {
 export default function TreatmentSummary({
   consultationId,
   patientId,
-  facilityId,
 }: ITreatmentSummaryProps) {
   const { t } = useTranslation();
   const date = new Date();
-  const { goBack } = useAppHistory();
-  const url = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`;
 
   const { data: patientData } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
@@ -49,50 +46,42 @@ export default function TreatmentSummary({
     <div>
       <PageHeadTitle title={t("treatment_summary__head_title")} />
       <div className="my-4">
-        <div className="my-4 flex flex-wrap justify-center gap-2 sm:justify-end">
-          <button
-            onClick={(_) => window.print()}
-            className="btn btn-primary mr-2"
-          >
-            <CareIcon icon="l-print" className="mr-2" />
-            {t("treatment_summary__print")}
-          </button>
-          <button onClick={(_) => goBack(url)} className="btn btn-default">
-            <CareIcon icon="l-times" className="mr-2" />
-            {t("close")}
-          </button>
-        </div>
+        <PrintPreview title={t("treatment_summary__head_title")}>
+          <div id="section-to-print" className="mx-5">
+            <div className="mb-3 flex items-center justify-between p-4">
+              <h3>{consultationData?.facility_name}</h3>
+              <img
+                className="h-10 w-auto"
+                src={careConfig.mainLogo?.dark}
+                alt="care logo"
+              />
+            </div>
+            <h2 className="text-center text-lg">
+              {t("treatment_summary__heading")}
+            </h2>
 
-        <div id="section-to-print" className="mx-5">
-          <h2 className="text-center text-lg">
-            {consultationData?.facility_name ?? ""}
-          </h2>
+            <div className="text-right font-bold">{formatDate(date)}</div>
 
-          <h2 className="text-center text-lg">
-            {t("treatment_summary__heading")}
-          </h2>
+            <div className="mb-5 mt-2 border border-gray-800">
+              <BasicDetailsSection
+                patientData={patientData}
+                consultationData={consultationData}
+              />
 
-          <div className="text-right font-bold">{formatDate(date)}</div>
+              <ComorbiditiesSection patientData={patientData} />
 
-          <div className="mb-5 mt-2 border border-gray-800">
-            <BasicDetailsSection
-              patientData={patientData}
-              consultationData={consultationData}
-            />
+              <DiagnosisSection consultationData={consultationData} />
 
-            <ComorbiditiesSection patientData={patientData} />
+              <InvestigationsSection consultationId={consultationId} />
 
-            <DiagnosisSection consultationData={consultationData} />
+              <TreatmentSection consultationData={consultationData} />
 
-            <InvestigationsSection consultationId={consultationId} />
+              <PrescriptionsSection consultationId={consultationId} />
 
-            <TreatmentSection consultationData={consultationData} />
-
-            <PrescriptionsSection consultationId={consultationId} />
-
-            <InstructionsSection consultationData={consultationData} />
+              <InstructionsSection consultationData={consultationData} />
+            </div>
           </div>
-        </div>
+        </PrintPreview>
       </div>
     </div>
   );

@@ -169,6 +169,10 @@ Cypress.Commands.add(
   },
 );
 
+Cypress.Commands.add("selectRadioOption", (name: string, value: string) => {
+  cy.get(`input[type='radio'][name='${name}'][value=${value}]`).click();
+});
+
 Cypress.Commands.add("clickAndTypeDate", (selector: string, date: string) => {
   cy.get(selector).scrollIntoView();
   cy.get(selector).click();

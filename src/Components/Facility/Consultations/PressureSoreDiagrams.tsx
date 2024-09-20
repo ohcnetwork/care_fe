@@ -5,7 +5,7 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 import { formatDateTime } from "../../../Utils/utils";
-import { PressureSoreDiagramsRes } from "../models";
+import { PressureSoreDiagramsFields, PressureSoreDiagramsRes } from "../models";
 import PressureSore from "../../LogUpdate/Sections/PressureSore/PressureSore";
 
 export const PressureSoreDiagrams = (props: any) => {
@@ -28,10 +28,7 @@ export const PressureSoreDiagrams = (props: any) => {
       const { res, data: dailyRounds } = await request(
         routes.dailyRoundsAnalyse,
         {
-          body: {
-            page: currentPage,
-            fields: ["pressure_sore"],
-          },
+          body: { page: currentPage, fields: PressureSoreDiagramsFields },
           pathParams: {
             consultationId,
           },

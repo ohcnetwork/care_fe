@@ -283,16 +283,17 @@ export type ICD11DiagnosisModel = {
   label: string;
 };
 
-export type ABGPlotsFields =
-  | "ph"
-  | "pco2"
-  | "po2"
-  | "hco3"
-  | "base_excess"
-  | "lactate"
-  | "sodium"
-  | "potassium"
-  | "ventilator_fio2";
+export const ABGPlotsFields = [
+  "ph",
+  "pco2",
+  "po2",
+  "hco3",
+  "base_excess",
+  "lactate",
+  "sodium",
+  "potassium",
+  "ventilator_fio2",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type ABGPlotsRes = {
   ph: string;
@@ -306,33 +307,35 @@ export type ABGPlotsRes = {
   ventilator_fio2: number;
 };
 
-export type DialysisPlotsFields =
-  | "dialysis_fluid_balance"
-  | "dialysis_net_balance";
+export const DialysisPlotsFields = [
+  "dialysis_fluid_balance",
+  "dialysis_net_balance",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type DialysisPlotsRes = {
   dialysis_fluid_balance: number;
   dialysis_net_balance: number;
 };
 
-export type NeurologicalTablesFields =
-  | "consciousness_level"
-  | "left_pupil_size"
-  | "left_pupil_size_detail"
-  | "right_pupil_size"
-  | "right_pupil_size_detail"
-  | "left_pupil_light_reaction"
-  | "left_pupil_light_reaction_detail"
-  | "right_pupil_light_reaction"
-  | "right_pupil_light_reaction_detail"
-  | "limb_response_upper_extremity_right"
-  | "limb_response_upper_extremity_left"
-  | "limb_response_lower_extremity_left"
-  | "limb_response_lower_extremity_right"
-  | "glasgow_eye_open"
-  | "glasgow_verbal_response"
-  | "glasgow_motor_response"
-  | "glasgow_total_calculated";
+export const NeurologicalTablesFields = [
+  "consciousness_level",
+  "left_pupil_size",
+  "left_pupil_size_detail",
+  "right_pupil_size",
+  "right_pupil_size_detail",
+  "left_pupil_light_reaction",
+  "left_pupil_light_reaction_detail",
+  "right_pupil_light_reaction",
+  "right_pupil_light_reaction_detail",
+  "limb_response_upper_extremity_right",
+  "limb_response_upper_extremity_left",
+  "limb_response_lower_extremity_left",
+  "limb_response_lower_extremity_right",
+  "glasgow_eye_open",
+  "glasgow_verbal_response",
+  "glasgow_motor_response",
+  "glasgow_total_calculated",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NeurologicalTablesRes = {
   consciousness_level: number;
@@ -354,19 +357,36 @@ export type NeurologicalTablesRes = {
   glasgow_total_calculated: number;
 };
 
-export type NursingPlotFields = "nursing";
+export const NursingPlotFields = [
+  "nursing",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NursingPlotRes = {
   nursing: any[];
 };
 
-export type NutritionPlotsFields =
-  | "infusions"
-  | "iv_fluids"
-  | "feeds"
-  | "total_intake_calculated"
-  | "total_output_calculated"
-  | "output";
+export const RoutineFields = [
+  "sleep",
+  "bowel_issue",
+  "bladder_drainage",
+  "bladder_issue",
+  "is_experiencing_dysuria",
+  "urination_frequency",
+  "nutrition_route",
+  "oral_issue",
+  "appetite",
+] as const satisfies (keyof DailyRoundsModel)[];
+
+export type RoutineAnalysisRes = Record<(typeof RoutineFields)[number], any>;
+
+export const NutritionPlotsFields = [
+  "infusions",
+  "iv_fluids",
+  "feeds",
+  "total_intake_calculated",
+  "total_output_calculated",
+  "output",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NutritionPlotsRes = {
   infusions: any[];
@@ -377,30 +397,35 @@ export type NutritionPlotsRes = {
   output: any[];
 };
 
-export type PainDiagramsFields = "pain_scale_enhanced";
+export const PainDiagramsFields = [
+  "pain_scale_enhanced",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PainDiagramsRes = {
   pain_scale_enhanced: any[];
 };
 
-export type PressureSoreDiagramsFields = "pressure_sore";
+export const PressureSoreDiagramsFields = [
+  "pressure_sore",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PressureSoreDiagramsRes = {
   pressure_sore: any[];
 };
 
-export type PrimaryParametersPlotFields =
-  | "bp"
-  | "pulse"
-  | "temperature"
-  | "resp"
-  | "blood_sugar_level"
-  | "insulin_intake_frequency"
-  | "insulin_intake_dose"
-  | "ventilator_spo2"
-  | "ventilator_fio2"
-  | "rhythm"
-  | "rhythm_detail";
+export const PrimaryParametersPlotFields = [
+  "bp",
+  "pulse",
+  "temperature",
+  "resp",
+  "blood_sugar_level",
+  "insulin_intake_frequency",
+  "insulin_intake_dose",
+  "ventilator_spo2",
+  "ventilator_fio2",
+  "rhythm",
+  "rhythm_detail",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PrimaryParametersPlotRes = {
   bp: BloodPressure;
@@ -416,19 +441,20 @@ export type PrimaryParametersPlotRes = {
   rhythm_detail: string;
 };
 
-export type VentilatorPlotFields =
-  | "ventilator_pip"
-  | "ventilator_mean_airway_pressure"
-  | "ventilator_resp_rate"
-  | "ventilator_pressure_support"
-  | "ventilator_tidal_volume"
-  | "ventilator_peep"
-  | "ventilator_fio2"
-  | "ventilator_spo2"
-  | "etco2"
-  | "bilateral_air_entry"
-  | "ventilator_oxygen_modality_oxygen_rate"
-  | "ventilator_oxygen_modality_flow_rate";
+export const VentilatorPlotFields = [
+  "ventilator_pip",
+  "ventilator_mean_airway_pressure",
+  "ventilator_resp_rate",
+  "ventilator_pressure_support",
+  "ventilator_tidal_volume",
+  "ventilator_peep",
+  "ventilator_fio2",
+  "ventilator_spo2",
+  "etco2",
+  "bilateral_air_entry",
+  "ventilator_oxygen_modality_oxygen_rate",
+  "ventilator_oxygen_modality_flow_rate",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type VentilatorPlotRes = {
   ventilator_pip: number;
@@ -448,15 +474,16 @@ export type VentilatorPlotRes = {
 export interface DailyRoundsBody {
   page?: number;
   fields:
-    | ABGPlotsFields[]
-    | DialysisPlotsFields[]
-    | NeurologicalTablesFields[]
-    | NursingPlotFields[]
-    | NutritionPlotsFields[]
-    | PainDiagramsFields[]
-    | PressureSoreDiagramsFields[]
-    | PrimaryParametersPlotFields[]
-    | VentilatorPlotFields[];
+    | typeof ABGPlotsFields
+    | typeof DialysisPlotsFields
+    | typeof NeurologicalTablesFields
+    | typeof NursingPlotFields
+    | typeof RoutineFields
+    | typeof NutritionPlotsFields
+    | typeof PainDiagramsFields
+    | typeof PressureSoreDiagramsFields
+    | typeof PrimaryParametersPlotFields
+    | typeof VentilatorPlotFields;
 }
 
 export interface DailyRoundsRes {
@@ -469,6 +496,7 @@ export interface DailyRoundsRes {
       | DialysisPlotsRes
       | NeurologicalTablesRes
       | NursingPlotRes
+      | RoutineAnalysisRes
       | NutritionPlotsRes
       | PainDiagramsRes
       | PrimaryParametersPlotRes

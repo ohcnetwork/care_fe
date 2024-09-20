@@ -29,8 +29,6 @@ export default function ViewInvestigationSuggestions(props: {
     return <Loading />;
   }
 
-  console.log("Investigations: ", investigations);
-
   return (
     <div className="mt-5" id="investigation-suggestions">
       <h3>{t("investigations_suggested")}</h3>
@@ -110,11 +108,6 @@ export default function ViewInvestigationSuggestions(props: {
                         const investigationMissed =
                           nextInvestigationTime &&
                           dayjs().isAfter(nextInvestigationTime);
-                        console.log(
-                          type,
-                          nextFurthestInvestigation,
-                          nextInvestigationTime,
-                        );
 
                         return (
                           <li
