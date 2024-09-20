@@ -444,6 +444,10 @@ export const DailyRounds = (props: any) => {
       form["investigations_dirty"] = true;
     }
 
+    if (event.name === "nutrition_route" && event.value !== "ORAL") {
+      form["oral_issue"] = undefined;
+    }
+
     dispatch({ type: "set_form", form });
   };
 
