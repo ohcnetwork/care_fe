@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { HCXActions } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
 import InsurerAutocomplete from "./InsurerAutocomplete";
-import { useFeatureFlags } from "../../Utils/featureFlags";
+import careConfig from "@careConfig";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
@@ -97,7 +97,6 @@ const InsuranceDetailEditCard = ({
     policy.insurer_id && policy.insurer_name
       ? { code: policy.insurer_id, name: policy.insurer_name }
       : undefined;
-  const featureFlags = useFeatureFlags();
 
   return (
     <div className="rounded-lg border-2 border-dashed border-secondary-200 p-4">
@@ -133,7 +132,7 @@ const InsuranceDetailEditCard = ({
           value={policy.policy_id}
           onChange={handleUpdate}
         />
-        {featureFlags.includes("HCX_ENABLED") ? (
+        {careConfig.hcx.enabled ? (
           <InsurerAutocomplete
             required
             name="insurer_"

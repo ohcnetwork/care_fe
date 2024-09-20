@@ -4,7 +4,7 @@ import routes from "../Redux/api";
 import useAuthUser from "../Common/hooks/useAuthUser";
 import { FacilityModel } from "../Components/Facility/models";
 
-export type FeatureFlag = "HCX_ENABLED" | "ABDM_ENABLED" | "SCRIBE_ENABLED";
+export type FeatureFlag = "SCRIBE_ENABLED"; // "HCX_ENABLED" | "ABDM_ENABLED" |
 
 export interface FeatureFlagsResponse {
   user_flags: FeatureFlag[];

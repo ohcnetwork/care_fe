@@ -75,7 +75,6 @@ import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import { useTranslation } from "react-i18next";
 import careConfig from "@careConfig";
-import { useFeatureFlags } from "../../Utils/featureFlags.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -514,15 +513,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     prefetch: !!facilityId,
   });
 
-  const featureFlags = useFeatureFlags();
-
   const validateForm = (form: any) => {
     const errors: Partial<Record<keyof any, FieldError>> = {};
 
     const insuranceDetailsError = insuranceDetails
-      .map((policy) =>
-        HCXPolicyValidator(policy, featureFlags.includes("HCX_ENABLED")),
-      )
+      .map((policy) => HCXPolicyValidator(policy, careConfig.hcx.enabled))
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
@@ -832,7 +827,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 body: policy,
               });
 
-          if (featureFlags.includes("HCX_ENABLED") && policyData?.id) {
+          if (careConfig.hcx.enabled && policyData?.id) {
             await request(routes.hcxCheckEligibility, {
               body: { policy: policyData?.id },
               onResponse: ({ res }) => {
@@ -1221,7 +1216,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           Import From External Results
                         </ButtonV2>
                       </div>
-                      {featureFlags.includes("ABDM_ENABLED") && (
+                      {careConfig.abdm.enabled && (
                         <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                           <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                             ABHA Details

@@ -43,7 +43,7 @@ import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
-import { useFeatureFlags } from "../../Utils/featureFlags.js";
+import careConfig from "@careConfig";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -134,8 +134,6 @@ export default function PatientInfoCard(props: {
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
-
-  const featureFlags = useFeatureFlags();
 
   return (
     <>
@@ -667,7 +665,7 @@ export default function PatientInfoCard(props: {
                   ],
                 ]
                   .concat(
-                    featureFlags.includes("HCX_ENABLED")
+                    careConfig.hcx.enabled
                       ? [
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
@@ -737,7 +735,7 @@ export default function PatientInfoCard(props: {
               </div>
 
               <div>
-                {featureFlags.includes("ABDM_ENABLED") &&
+                {careConfig.abdm.enabled &&
                   (props.abhaNumber ? (
                     <>
                       <MenuItem>
