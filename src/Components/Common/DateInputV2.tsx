@@ -6,6 +6,7 @@ import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
 import * as Notification from "../../Utils/Notifications.js";
 import { t } from "i18next";
+import DateTextInput from "./DateTextInput";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition =
@@ -66,7 +67,6 @@ const DateInputV2: React.FC<Props> = ({
   const [type, setType] = useState<DatePickerType>("date");
   const [year, setYear] = useState(new Date());
 
-  const [editingText, setEditingText] = useState<string | null>(null);
   const [popOverOpen, setPopOverOpen] = useState(false);
 
   const hours = dayjs(value).hour() % 12;
@@ -373,40 +373,13 @@ const DateInputV2: React.FC<Props> = ({
                           : "flex-col",
                       )}
                     >
-                      <input
-                        id="date-input"
-                        className={`cui-input-base bg-secondary-50 ${
-                          editingText === null ||
-                          isDateWithinLimits(
-                            dayjs(editingText.toLowerCase(), dateFormat, true),
-                          )
-                            ? ""
-                            : "focus:border-red-500 focus:ring-red-500"
-                        }`}
-                        value={
-                          editingText !== null
-                            ? editingText
-                            : value
-                              ? getDisplayValue(value)
-                              : ""
-                        }
-                        autoFocus
-                        placeholder={placeHolder}
-                        onChange={(e) => {
-                          const nvalue = dayjs(
-                            e.target.value.toLowerCase(),
-                            dateFormat,
-                            true,
-                          );
-                          if (isDateWithinLimits(nvalue)) {
-                            handleChange(nvalue.toDate());
-                            //close();
-                            setIsOpen?.(false);
-                          }
-                          setEditingText(e.target.value);
-                        }}
-                        onBlur={() => setEditingText(null)}
-                      />
+                      {value && (
+                        <DateTextInput
+                          allowTime={!!time}
+                          value={value}
+                          onChange={onChange}
+                        />
+                      )}
                       <div className="flex flex-col items-center gap-4 px-4 md:flex-row md:px-0">
                         <div className="flex flex-1 flex-col items-center justify-between">
                           <div className="flex">
