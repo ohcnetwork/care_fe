@@ -19,7 +19,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
     <div className="space-y-8">
       <div className="flex items-end justify-between">
-        <h2 className="text-lg">{t("blood_pressure")}</h2>
+        <h2 className="text-lg">{t("LOG_UPDATE_FIELD_LABEL__bp")}</h2>
         <span>
           {t("map_acronym")}: {meanArterialPressure(log.bp)?.toFixed() ?? "--"}{" "}
           mmHg
