@@ -759,7 +759,7 @@ export const NURSING_CARE_PROCEDURES = [
   "restrain",
   "chest_tube_care",
   "tracheostomy_care",
-  "tracheostomy_change",
+  "tracheostomy_tube_change",
   "stoma_care",
   "catheter_care",
   "catheter_change",
