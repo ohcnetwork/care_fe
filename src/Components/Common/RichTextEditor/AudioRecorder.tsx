@@ -45,7 +45,7 @@ const AudioRecorder = ({
   const [time, setTime] = useState(0);
   useEffect(() => {
     setAudioBlob(newBlob);
-    let interval: number | NodeJS.Timeout | undefined;
+    let interval: number | undefined;
     if (isRecording) {
       interval = setInterval(() => {
         setTime((prevTime) => prevTime + 10);

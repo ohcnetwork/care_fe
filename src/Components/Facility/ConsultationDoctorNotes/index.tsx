@@ -8,15 +8,14 @@ import routes from "../../../Redux/api.js";
 import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import { classNames } from "../../../Utils/utils.js";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import { classNames, isAppleDevice, keysOf } from "../../../Utils/utils.js";
-import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
+import { keysOf } from "../../../Utils/utils.js";
 import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
 import RichTextEditor from "../../Common/RichTextEditor/RichTextEditor";
 import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
 import Tabs from "../../Common/components/Tabs.js";
+import { useTranslation } from "react-i18next";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -26,7 +25,7 @@ interface ConsultationDoctorNotesProps {
 
 const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const { patientId, facilityId, consultationId } = props;
-
+  const { t } = useTranslation();
   const authUser = useAuthUser();
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"

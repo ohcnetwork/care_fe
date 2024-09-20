@@ -14,6 +14,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import { classNames, keysOf } from "../../Utils/utils.js";
 import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
 import TextFormField from "../Form/FormFields/TextFormField.js";
+import { useTranslation } from "react-i18next";
 
 interface PatientNotesProps {
   patientId: string;
@@ -22,7 +23,7 @@ interface PatientNotesProps {
 
 const PatientNotes = (props: PatientNotesProps) => {
   const { patientId, facilityId } = props;
-
+  const { t } = useTranslation();
   const authUser = useAuthUser();
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"

@@ -2,7 +2,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
+import { classNames, keysOf } from "../../Utils/utils";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
@@ -15,6 +15,7 @@ import useNotificationSubscriptionState from "../../Common/hooks/useNotification
 import RichTextEditor from "../Common/RichTextEditor/RichTextEditor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 interface PatientNotesProps {
   patientId: string;
@@ -25,6 +26,7 @@ interface PatientNotesProps {
 
 export default function PatientNotesSlideover(props: PatientNotesProps) {
   const authUser = useAuthUser();
+  const { t } = useTranslation();
   const notificationSubscriptionState = useNotificationSubscriptionState();
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"
