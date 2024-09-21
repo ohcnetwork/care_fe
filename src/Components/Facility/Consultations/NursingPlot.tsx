@@ -71,6 +71,14 @@ export const NursingPlot = ({ consultationId }: any) => {
     else return false;
   };
 
+  const groupedByDate: any = {};
+  dataToDisplay.forEach((item: any) => {
+    if (!groupedByDate[item.date]) {
+      groupedByDate[item.date] = [];
+    }
+    groupedByDate[item.date].push(item);
+  });
+
   return (
     <div>
       <div className="">
@@ -83,37 +91,57 @@ export const NursingPlot = ({ consultationId }: any) => {
                 </div>
               </div>
             )}
-            {NURSING_CARE_PROCEDURES.map(
-              (f) =>
-                filterEmpty(f) && (
-                  <div key={f} className="m-2 w-3/4">
-                    <div className="sticky top-0 z-10 rounded pt-2">
-                      <div className="mx-2 flex items-center justify-between rounded border bg-secondary-200 p-4">
-                        <h3 className="flex h-8 items-center text-sm">
-                          {t(`NURSING_CARE_PROCEDURE__${f}`)}
-                        </h3>
-                      </div>
-                    </div>
-                    <div className="m-2">
-                      {dataToDisplay
-                        .filter((i: any) => i.procedure === f)
-                        .map((care: any, index: number) => (
-                          <div
+            {
+              <div className="pb-8 pt-4">
+                <div className="item m-2 flex w-full place-items-center overflow-hidden overflow-x-auto rounded-lg border border-black shadow md:w-fit">
+                  <table className="border-collapse overflow-hidden rounded-lg border bg-secondary-100">
+                    <thead className="bg-white shadow">
+                      <tr>
+                        <th className="w-48 border-b-2 border-r-2 border-black">
+                          Procedure
+                        </th>
+
+                        {Object.keys(groupedByDate).map((date, index) => (
+                          <th
                             key={index}
-                            className="my-2 w-full divide-y rounded-lg border bg-white p-4 shadow"
+                            className="w-48 border border-b-2 border-secondary-500 border-b-black p-1 text-sm font-semibold"
                           >
-                            <div className="text-xs font-semibold">
-                              {care.date}
-                            </div>
-                            <div className="py-2 text-sm">
-                              {care.description}
-                            </div>
-                          </div>
+                            {date}
+                          </th>
                         ))}
-                    </div>
-                  </div>
-                ),
-            )}
+                      </tr>
+                    </thead>
+
+                    <tbody className="bg-secondary-200">
+                      {NURSING_CARE_PROCEDURES.filter((f) =>
+                        dataToDisplay.some((i: any) => i.procedure === f),
+                      ).map((f) => (
+                        <tr key={f}>
+                          <td className="w-48 border border-r-2 border-secondary-500 border-r-black bg-white p-2 font-bold">
+                            {t(`NURSING_CARE_PROCEDURE__${f}`)}
+                          </td>
+
+                          {Object.keys(groupedByDate).map((date, index) => {
+                            const matchingCare = groupedByDate[date].find(
+                              (i: any) => i.procedure === f,
+                            );
+
+                            return (
+                              <td
+                                key={index}
+                                className="w-48 border border-secondary-500 bg-secondary-100 p-2 text-center font-medium"
+                              >
+                                {matchingCare ? matchingCare.description : "-"}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
           </div>
         </div>
       </div>
