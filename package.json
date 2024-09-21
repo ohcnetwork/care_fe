@@ -79,7 +79,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^8.0.7",
     "react-pdf": "^9.1.0",
-    "react-redux": "^8.1.1",
+    "react-redux": "^9.1.2",
     "react-webcam": "^7.2.0",
     "redux": "^4.2.1",
     "redux-thunk": "^2.4.2",
