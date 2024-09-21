@@ -1,4 +1,3 @@
-import { navigate } from "raviger";
 import { DailyRoundsModel } from "../../Patient/models";
 import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAssistantLogUpdateCard";
 import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
@@ -24,8 +23,6 @@ export default function DailyRoundsList({ consultation }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState<QueryParams>();
 
-  const consultationUrl = `/facility/${consultation.facility}/patient/${consultation.patient}/consultation/${consultation.id}`;
-
   return (
     <PaginatedList
       route={routes.getDailyReports}
@@ -45,7 +42,7 @@ export default function DailyRoundsList({ consultation }: Props) {
           <div className="flex max-h-screen min-h-full w-full flex-col gap-4">
             <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
-                <span className="flex justify-center rounded-lg bg-white p-3 text-secondary-700  ">
+                <span className="flex justify-center rounded-lg bg-white p-3 text-secondary-700">
                   {t("no_consultation_updates")}
                 </span>
               </PaginatedList.WhenEmpty>
@@ -83,14 +80,6 @@ export default function DailyRoundsList({ consultation }: Props) {
                       );
                     }
 
-                    const itemUrl = [
-                      "NORMAL",
-                      "TELEMEDICINE",
-                      "DOCTORS_LOG",
-                    ].includes(item.rounds_type as string)
-                      ? `${consultationUrl}/daily-rounds/${item.id}`
-                      : `${consultationUrl}/daily_rounds/${item.id}`;
-
                     return (
                       <TimelineNode
                         event={{
@@ -104,8 +93,6 @@ export default function DailyRoundsList({ consultation }: Props) {
                         <DefaultLogUpdateCard
                           round={item}
                           consultationData={consultation}
-                          onViewDetails={() => navigate(itemUrl)}
-                          onUpdateLog={() => navigate(`${itemUrl}/update`)}
                         />
                       </TimelineNode>
                     );

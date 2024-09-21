@@ -1,6 +1,10 @@
-import { Popover, Transition } from "@headlessui/react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import ButtonV2 from "../../Common/components/ButtonV2";
-import { Fragment } from "react";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
@@ -40,7 +44,7 @@ export default function DailyRoundsFilter(props: Props) {
   return (
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
       <Popover className="relative">
-        <Popover.Button>
+        <PopoverButton>
           <ButtonV2
             variant={isFilterApplied ? "primary" : "secondary"}
             className="mr-5 border"
@@ -48,9 +52,8 @@ export default function DailyRoundsFilter(props: Props) {
             <CareIcon icon="l-filter" />
             {t("filter")}
           </ButtonV2>
-        </Popover.Button>
+        </PopoverButton>
         <Transition
-          as={Fragment}
           enter="transition ease-out duration-200"
           enterFrom="opacity-0 translate-y-1"
           enterTo="opacity-100 translate-y-0"
@@ -58,7 +61,7 @@ export default function DailyRoundsFilter(props: Props) {
           leaveFrom="opacity-100 translate-y-0"
           leaveTo="opacity-0 translate-y-1"
         >
-          <Popover.Panel className="absolute right-0 z-30 mt-1 w-80 px-4 sm:px-0 md:w-96 lg:max-w-3xl">
+          <PopoverPanel className="absolute right-0 z-30 mt-1 w-80 px-4 sm:px-0 md:w-96 lg:max-w-3xl">
             <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
               <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                 <div className="flow-root rounded-md">
@@ -70,10 +73,10 @@ export default function DailyRoundsFilter(props: Props) {
               <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
                 <SelectFormField
                   {...field("rounds_type")}
-                  label={t("Round Type")}
+                  label={t("LOG_UPDATE_FIELD_LABEL__rounds_type")}
                   options={DailyRoundTypes}
                   placeholder={t("show_all")}
-                  optionLabel={(o) => t(o)}
+                  optionLabel={(o) => t(`ROUNDS_TYPE__${o}`)}
                   optionValue={(o) => o}
                 />
                 <TextFormField
@@ -89,7 +92,7 @@ export default function DailyRoundsFilter(props: Props) {
                   max={dayjs().format("YYYY-MM-DDTHH:mm")}
                 />
 
-                <Popover.Button>
+                <PopoverButton>
                   <ButtonV2
                     variant="secondary"
                     onClick={() => {
@@ -101,8 +104,8 @@ export default function DailyRoundsFilter(props: Props) {
                   >
                     {t("clear")}
                   </ButtonV2>
-                </Popover.Button>
-                <Popover.Button>
+                </PopoverButton>
+                <PopoverButton>
                   <ButtonV2
                     variant="primary"
                     onClick={() => props.onApply(filter)}
@@ -111,10 +114,10 @@ export default function DailyRoundsFilter(props: Props) {
                   >
                     {t("apply")}
                   </ButtonV2>
-                </Popover.Button>
+                </PopoverButton>
               </div>
             </div>
-          </Popover.Panel>
+          </PopoverPanel>
         </Transition>
       </Popover>
     </div>

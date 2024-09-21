@@ -68,13 +68,15 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Patient Category",
     id: "patient_category",
     type: "string",
-    example: "Comfort Care",
+    example: "Mild",
     default: "",
     description: "A string to categorize the patient.",
-    options: PATIENT_CATEGORIES.map((category) => ({
-      id: category.id,
-      text: category.text,
-    })),
+    options: PATIENT_CATEGORIES.filter((c) => c.id !== "Comfort").map(
+      (category) => ({
+        id: category.id,
+        text: category.text,
+      }),
+    ),
     validator: (value) => {
       return typeof value === "string";
     },
@@ -127,9 +129,9 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
   {
     friendlyName: "bp",
     id: "bp",
-    default: { systolic: null, diastolic: null, mean: null },
+    default: { systolic: null, diastolic: null },
     type: "{ systolic?: number, diastolic?: number }",
-    example: "{ systolic: 120 }",
+    example: "{ systolic: 120, diastolic: 90 }",
     description:
       "An object to store the blood pressure of the patient. It may contain two integers, systolic and diastolic.",
     validator: (value) => {
@@ -210,13 +212,16 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "ALERT",
     description:
       "An option to store the level of consciousness of the patient.",
-    options: CONSCIOUSNESS_LEVEL,
+    options: CONSCIOUSNESS_LEVEL.map((loc) => ({
+      id: loc.id,
+      text: loc.value,
+    })),
     validator: (value) => typeof value === "string",
   },
   {
     friendlyName: "Diagnosis",
     id: "icd11_diagnosis",
-    type: "{diagnosis: string, verification_status: \"unconfirmed\" | \"provisional\" | \"differential\" | \"confirmed\", is_principal: boolean}[]",
+    type: '{diagnosis: string, verification_status: "unconfirmed" | "provisional" | "differential" | "confirmed", is_principal: boolean}[]',
     default: [],
     example:
       "[{diagnosis: '4A42.0 Paediatric onset systemic sclerosis', verification_status: 'confirmed', is_principal: true}, {diagnosis: 2, verification_status: 'provisional', is_principal: false}]",
@@ -265,7 +270,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       });
       return true;
     },
-  },
+  } /*
   {
     friendlyName: "Prescriptions",
     id: "prescriptions",
@@ -325,7 +330,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       return true;
     },
   },
-  /*{
+  {
     friendlyName: "Round Type",
     id: "rounds_type",
     type: "string",
@@ -350,7 +355,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       "A string to store the date and time at which the round was taken or measured. 'The round was taken yesterday/today' would amount to yesterday/today's date.",
     validator: (value) => typeof value === "string",
    },
-*/
+*/,
 ];
 
 export const SCRIBE_FORMS: { [key: string]: ScribeForm } = {

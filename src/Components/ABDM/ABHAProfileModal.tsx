@@ -1,6 +1,5 @@
 import * as Notify from "../../Utils/Notifications";
 
-import { AbhaObject } from "../Patient/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
@@ -8,10 +7,11 @@ import { formatDateTime } from "../../Utils/utils";
 import { useRef } from "react";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { AbhaNumberModel } from "./types/abha";
 
 interface IProps {
   patientId?: string;
-  abha?: AbhaObject;
+  abha?: AbhaNumberModel;
   show: boolean;
   onClose: () => void;
 }

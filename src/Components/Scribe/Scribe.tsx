@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Popover } from "@headlessui/react";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import routes from "../../Redux/api";
 import * as Notify from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
-import axios from "axios";
 import { UserModel } from "../Users/models";
-import useConfig from "../../Common/hooks/useConfig";
 import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
+import careConfig from "@careConfig";
+import uploadFile from "../../Utils/request/uploadFile";
 
 interface FieldOption {
   id: string | number;
@@ -63,7 +63,6 @@ const SCRIBE_FILE_TYPES = {
 };
 
 export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
-  const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
   const [stage, setStage] = useState("start");
@@ -120,21 +119,20 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
         return;
       }
       const newFile = new File([f], `${internal_name}`, { type: f.type });
-      const config = {
-        headers: {
-          "Content-type": newFile?.type?.split(";")?.[0],
-          "Content-disposition": "inline",
-        },
+      const headers = {
+        "Content-type": newFile?.type?.split(";")?.[0],
+        "Content-disposition": "inline",
       };
 
-      axios
-        .put(url, newFile, config)
-        .then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
+      uploadFile(
+        url,
+        newFile,
+        "PUT",
+        headers,
+        (xhr: XMLHttpRequest) => (xhr.status === 200 ? resolve() : reject()),
+        null,
+        reject,
+      );
     });
   };
 
@@ -546,11 +544,11 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
     }
   }
 
-  if (!enable_scribe) return null;
+  if (!careConfig.scribe.enabled) return null;
 
   return (
     <Popover>
-      <Popover.Button>
+      <PopoverButton>
         <ButtonV2
           onClick={() => setOpen(!open)}
           className="rounded py-2 font-bold"
@@ -558,9 +556,9 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
           <CareIcon icon="l-microphone" className="mr-1" />
           Voice AutoFill
         </ButtonV2>
-      </Popover.Button>
+      </PopoverButton>
       {open && (
-        <Popover.Panel className="absolute right-6 z-10 w-[370px]" static>
+        <PopoverPanel className="absolute right-6 z-10 w-[370px]" static>
           <div className="text-center">
             <span className="mt-2 inline-block align-middle" aria-hidden="true">
               &#8203;
@@ -583,7 +581,7 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
                 >
                   <CareIcon
                     icon="l-times-circle"
-                    className=" flex -scale-x-100 justify-center text-lg"
+                    className="flex -scale-x-100 justify-center text-lg"
                   />
                 </ButtonV2>
               </div>
@@ -730,7 +728,7 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
               </div>
             </div>
           </div>
-        </Popover.Panel>
+        </PopoverPanel>
       )}
     </Popover>
   );

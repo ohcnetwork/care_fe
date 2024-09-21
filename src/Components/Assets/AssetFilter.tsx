@@ -46,7 +46,7 @@ function AssetFilter(props: any) {
   useEffect(() => {
     setFacilityId(facility?.id ? `${facility?.id}` : "");
     setLocationId(
-      facility?.id === qParams.facility ? qParams.location ?? "" : "",
+      facility?.id === qParams.facility ? (qParams.location ?? "") : "",
     );
   }, [facility?.id, qParams.facility, qParams.location]);
 

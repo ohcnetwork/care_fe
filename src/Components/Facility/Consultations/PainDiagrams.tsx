@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { make as CriticalCare__PainViewer } from "../../CriticalCareRecording/Pain/CriticalCare__PainViewer.bs";
 import { formatDateTime } from "../../../Utils/utils";
+import PainChart from "../../LogUpdate/components/PainChart";
+import { PainDiagramsFields } from "../models";
 
 export const PainDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -21,9 +20,7 @@ export const PainDiagrams = (props: any) => {
       const { res, data: dailyRound } = await request(
         routes.dailyRoundsAnalyse,
         {
-          body: {
-            fields: ["pain_scale_enhanced"],
-          },
+          body: { fields: PainDiagramsFields },
           pathParams: {
             consultationId,
           },
@@ -79,7 +76,7 @@ export const PainDiagrams = (props: any) => {
         <div className="p-2">Choose Date and Time</div>
         <select
           title="date"
-          className="relative rounded border-secondary-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-secondary-300  focus:outline-none focus:ring-1 focus:ring-secondary-300"
+          className="relative rounded border-secondary-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-secondary-300 focus:outline-none focus:ring-1 focus:ring-secondary-300"
           onChange={(e) => {
             setSelectedDateData(results, e.target.value);
           }}
@@ -107,14 +104,10 @@ export const PainDiagrams = (props: any) => {
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       {dates && dropdown(dates)}
       {!isLoading && selectedData.data ? (
-        <CriticalCare__PainViewer
-          painParameter={selectedData.data}
-          id={selectedData.id}
-          consultationId={consultationId}
-        />
+        <PainChart pain={selectedData.data} />
       ) : (
         <div className="h-screen" />
       )}

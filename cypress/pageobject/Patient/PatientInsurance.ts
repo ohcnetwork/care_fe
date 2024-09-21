@@ -2,7 +2,7 @@ class PatientInsurance {
   typePatientInsuranceDetail(
     containerId: string,
     fieldId: string,
-    value: string
+    value: string,
   ) {
     cy.get(`#${containerId}`).within(() => {
       cy.get(`#${fieldId}`).click().type(value);

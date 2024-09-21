@@ -18,8 +18,6 @@ import { useDrag, useDrop } from "react-dnd";
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
-
 import { useTranslation } from "react-i18next";
 import { ExportButton } from "../Common/Export";
 import dayjs from "../../Utils/dayjs";
@@ -30,6 +28,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { PaginatedResponse } from "../../Utils/request/types";
 import { IShift } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import careConfig from "@careConfig";
 
 interface boardProps {
   board: string;
@@ -41,7 +40,6 @@ interface boardProps {
 }
 
 const ShiftCard = ({ shift, filter }: any) => {
-  const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -110,7 +108,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   </dd>
                 </dt>
               </div>
-              {wartime_shifting && (
+              {careConfig.wartimeShifting && (
                 <div className="sm:col-span-1">
                   <dt
                     title={t("shifting_approving_facility")}
@@ -378,7 +376,7 @@ export default function ShiftingBoard({
         {isLoading ? (
           <div className="m-1">
             <div className="mx-auto w-full max-w-sm rounded-md border border-secondary-300 bg-white p-4 shadow">
-              <div className="flex animate-pulse space-x-4 ">
+              <div className="flex animate-pulse space-x-4">
                 <div className="flex-1 space-y-4 py-1">
                   <div className="h-4 w-3/4 rounded bg-secondary-400"></div>
                   <div className="space-y-2">

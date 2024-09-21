@@ -12,11 +12,10 @@ import {
 } from "../../Utils/utils";
 import MedicineRoutes from "./routes";
 import { Prescription } from "./models";
-import useConfig from "../../Common/hooks/useConfig";
 import { ReactNode } from "react";
+import careConfig from "@careConfig";
 
 export default function PrescriptionsPrintPreview() {
-  const { main_logo } = useConfig();
   const { t } = useTranslation();
   const [patientId, consultationId] = useSlugs("patient", "consultation");
 
@@ -49,7 +48,11 @@ export default function PrescriptionsPrintPreview() {
     >
       <div className="mb-3 flex items-center justify-between p-4">
         <h3>{encounter?.facility_name}</h3>
-        <img className="h-10 w-auto" src={main_logo.dark} alt="care logo" />
+        <img
+          className="h-10 w-auto"
+          src={careConfig.mainLogo?.dark}
+          alt="care logo"
+        />
       </div>
       <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
         <PatientDetail name="Patient" className="col-span-5">
@@ -163,7 +166,6 @@ const PrescriptionsTable = ({
           <th className="max-w-52 p-1">Medicine</th>
           <th className="p-1">Dosage</th>
           <th className="p-1">Directions</th>
-          {/* <th className="p-1">{prn ? "Indicator" : "Freq."}</th> */}
           <th className="max-w-32 p-1">Notes / Instructions</th>
         </tr>
       </thead>

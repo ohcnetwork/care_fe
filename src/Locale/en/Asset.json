@@ -11,5 +11,10 @@
   "update_asset_service_record": "Update Asset Service Record",
   "eg_details_on_functionality_service_etc": "Eg. Details on functionality, service, etc.",
   "updating": "Updating",
-  "update": "Update"
+  "update": "Update",
+  "are_you_still_watching": "Are you still watching?",
+  "stream_stop_due_to_inativity": "The live feed will stop streaming due to inactivity",
+  "stream_stopped_due_to_inativity": "The live feed has stopped streaming due to inactivity",
+  "continue_watching": "Continue watching",
+  "resume": "Resume"
 }
