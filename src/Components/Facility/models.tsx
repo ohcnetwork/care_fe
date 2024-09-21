@@ -8,7 +8,6 @@ import {
   UserRole,
 } from "../../Common/constants";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 
 import {
   AssignedToObjectModel,
@@ -134,8 +133,6 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   new_discharge_reason?: (typeof DISCHARGE_REASONS)[number]["id"];
-  discharge_prescription?: NormalPrescription;
-  discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
