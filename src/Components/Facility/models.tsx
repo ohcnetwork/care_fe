@@ -1,10 +1,5 @@
 import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import {
-  AssignedToObjectModel,
-  DailyRoundsModel,
-  FileUploadModel,
-} from "../Patient/models";
-import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
   ConsultationSuggestionValue,
@@ -15,6 +10,12 @@ import {
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 
+import {
+  AssignedToObjectModel,
+  BloodPressure,
+  DailyRoundsModel,
+  FileUploadModel,
+} from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
 import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
@@ -426,11 +427,7 @@ export const PrimaryParametersPlotFields = [
 ] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PrimaryParametersPlotRes = {
-  bp: {
-    mean?: number;
-    systolic?: number;
-    diastolic?: number;
-  };
+  bp: BloodPressure;
   pulse: number;
   temperature: string;
   resp: number;
