@@ -1,4 +1,3 @@
-import { afterEach, cy, describe, it } from "local-cypress";
 import * as users from "../../fixtures/users.json";
 
 describe("authentication", () => {

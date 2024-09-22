@@ -1,4 +1,6 @@
 import {
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
+  CONSENT_TYPE_CHOICES,
   ConsultationSuggestionValue,
   DISCHARGE_REASONS,
   PATIENT_NOTES_THREADS,
@@ -9,10 +11,14 @@ import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import {
+  AssignedToObjectModel,
+  BloodPressure,
+  DailyRoundsModel,
+  FileUploadModel,
+} from "../Patient/models";
+import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
-import { ConsentRecord } from "./ConsultationForm";
 
 export interface LocalBodyModel {
   id: number;
@@ -95,7 +101,26 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
+export type PatientCategory =
+  | "Comfort Care" // Discontinued
+  | "Mild"
+  | "Moderate"
+  | "Critical"
+  | "Actively Dying";
+
+export interface PatientConsentModel {
+  id: string;
+  type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
+  patient_code_status:
+    | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
+    | null;
+  files: FileUploadModel[] | null;
+  archived: boolean;
+  archived_by?: UserBareMinimum;
+  archived_date: string;
+  created_date: string;
+  created_by: UserBareMinimum;
+}
 
 export interface ConsultationModel {
   encounter_date: string;
@@ -107,8 +132,6 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   new_discharge_reason?: (typeof DISCHARGE_REASONS)[number]["id"];
-  discharge_prescription?: NormalPrescription;
-  discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
@@ -116,7 +139,6 @@ export interface ConsultationModel {
   facility_name?: string;
   id: string;
   modified_date?: string;
-  other_symptoms?: string;
   patient: string;
   treatment_plan?: string;
   referred_to?: FacilityModel["id"];
@@ -135,13 +157,12 @@ export interface ConsultationModel {
   kasp_enabled_date?: string;
   readonly diagnoses?: ConsultationDiagnosis[];
   create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
+  readonly symptoms?: EncounterSymptom[];
+  create_symptoms?: CreateDiagnosis[]; // Used for bulk creating symptoms upon consultation creation
   deprecated_verified_by?: string;
-  treating_physician?: UserBareMinimum["id"];
+  readonly treating_physician?: UserBareMinimum["id"];
   treating_physician_object?: UserBareMinimum;
   suggestion_text?: string;
-  symptoms?: Array<number>;
-  symptoms_text?: string;
-  symptoms_onset_date?: string;
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];
@@ -167,7 +188,7 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
-  consent_records?: ConsentRecord[];
+  has_consents?: (typeof CONSENT_TYPE_CHOICES)[number]["id"][];
 }
 
 export interface PatientStatsModel {
@@ -190,6 +211,7 @@ export interface DupPatientModel {
   date_of_birth: string;
   year_of_birth: number;
   state_id: number;
+  is_expired: boolean;
 }
 
 export interface InventoryItemsModel {
@@ -229,7 +251,8 @@ export interface BedModel {
   facility?: string;
   location_object?: {
     name: string;
-    id?: string;
+    id: string;
+    facility?: { name: string; id: string };
   };
   location?: string;
   is_occupied?: boolean;
@@ -257,16 +280,17 @@ export type ICD11DiagnosisModel = {
   label: string;
 };
 
-export type ABGPlotsFields =
-  | "ph"
-  | "pco2"
-  | "po2"
-  | "hco3"
-  | "base_excess"
-  | "lactate"
-  | "sodium"
-  | "potassium"
-  | "ventilator_fi02";
+export const ABGPlotsFields = [
+  "ph",
+  "pco2",
+  "po2",
+  "hco3",
+  "base_excess",
+  "lactate",
+  "sodium",
+  "potassium",
+  "ventilator_fio2",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type ABGPlotsRes = {
   ph: string;
@@ -277,41 +301,41 @@ export type ABGPlotsRes = {
   lactate: string;
   sodium: string;
   potassium: string;
-  ventilator_fi02: number;
+  ventilator_fio2: number;
 };
 
-export type DialysisPlotsFields =
-  | "dialysis_fluid_balance"
-  | "dialysis_net_balance";
+export const DialysisPlotsFields = [
+  "dialysis_fluid_balance",
+  "dialysis_net_balance",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type DialysisPlotsRes = {
   dialysis_fluid_balance: number;
   dialysis_net_balance: number;
 };
 
-export type NeurologicalTablesFields =
-  | "consciousness_level"
-  | "consciousness_level_detail"
-  | "left_pupil_size"
-  | "left_pupil_size_detail"
-  | "right_pupil_size"
-  | "right_pupil_size_detail"
-  | "left_pupil_light_reaction"
-  | "left_pupil_light_reaction_detail"
-  | "right_pupil_light_reaction"
-  | "right_pupil_light_reaction_detail"
-  | "limb_response_upper_extremity_right"
-  | "limb_response_upper_extremity_left"
-  | "limb_response_lower_extremity_left"
-  | "limb_response_lower_extremity_right"
-  | "glasgow_eye_open"
-  | "glasgow_verbal_response"
-  | "glasgow_motor_response"
-  | "glasgow_total_calculated";
+export const NeurologicalTablesFields = [
+  "consciousness_level",
+  "left_pupil_size",
+  "left_pupil_size_detail",
+  "right_pupil_size",
+  "right_pupil_size_detail",
+  "left_pupil_light_reaction",
+  "left_pupil_light_reaction_detail",
+  "right_pupil_light_reaction",
+  "right_pupil_light_reaction_detail",
+  "limb_response_upper_extremity_right",
+  "limb_response_upper_extremity_left",
+  "limb_response_lower_extremity_left",
+  "limb_response_lower_extremity_right",
+  "glasgow_eye_open",
+  "glasgow_verbal_response",
+  "glasgow_motor_response",
+  "glasgow_total_calculated",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NeurologicalTablesRes = {
   consciousness_level: number;
-  consciousness_level_detail: string;
   left_pupil_size: number;
   left_pupil_size_detail: string;
   right_pupil_size: number;
@@ -330,19 +354,36 @@ export type NeurologicalTablesRes = {
   glasgow_total_calculated: number;
 };
 
-export type NursingPlotFields = "nursing";
+export const NursingPlotFields = [
+  "nursing",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NursingPlotRes = {
   nursing: any[];
 };
 
-export type NutritionPlotsFields =
-  | "infusions"
-  | "iv_fluids"
-  | "feeds"
-  | "total_intake_calculated"
-  | "total_output_calculated"
-  | "output";
+export const RoutineFields = [
+  "sleep",
+  "bowel_issue",
+  "bladder_drainage",
+  "bladder_issue",
+  "is_experiencing_dysuria",
+  "urination_frequency",
+  "nutrition_route",
+  "oral_issue",
+  "appetite",
+] as const satisfies (keyof DailyRoundsModel)[];
+
+export type RoutineAnalysisRes = Record<(typeof RoutineFields)[number], any>;
+
+export const NutritionPlotsFields = [
+  "infusions",
+  "iv_fluids",
+  "feeds",
+  "total_intake_calculated",
+  "total_output_calculated",
+  "output",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NutritionPlotsRes = {
   infusions: any[];
@@ -353,37 +394,38 @@ export type NutritionPlotsRes = {
   output: any[];
 };
 
-export type PainDiagramsFields = "pain_scale_enhanced";
+export const PainDiagramsFields = [
+  "pain_scale_enhanced",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PainDiagramsRes = {
   pain_scale_enhanced: any[];
 };
 
-export type PressureSoreDiagramsFields = "pressure_sore";
+export const PressureSoreDiagramsFields = [
+  "pressure_sore",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PressureSoreDiagramsRes = {
   pressure_sore: any[];
 };
 
-export type PrimaryParametersPlotFields =
-  | "bp"
-  | "pulse"
-  | "temperature"
-  | "resp"
-  | "blood_sugar_level"
-  | "insulin_intake_frequency"
-  | "insulin_intake_dose"
-  | "ventilator_spo2"
-  | "ventilator_fi02"
-  | "rhythm"
-  | "rhythm_detail";
+export const PrimaryParametersPlotFields = [
+  "bp",
+  "pulse",
+  "temperature",
+  "resp",
+  "blood_sugar_level",
+  "insulin_intake_frequency",
+  "insulin_intake_dose",
+  "ventilator_spo2",
+  "ventilator_fio2",
+  "rhythm",
+  "rhythm_detail",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PrimaryParametersPlotRes = {
-  bp: {
-    mean?: number;
-    systolic?: number;
-    diastolic?: number;
-  };
+  bp: BloodPressure;
   pulse: number;
   temperature: string;
   resp: number;
@@ -391,24 +433,25 @@ export type PrimaryParametersPlotRes = {
   insulin_intake_frequency: number;
   insulin_intake_dose: string;
   ventilator_spo2: number;
-  ventilator_fi02: number;
+  ventilator_fio2: number;
   rhythm: number;
   rhythm_detail: string;
 };
 
-export type VentilatorPlotFields =
-  | "ventilator_pip"
-  | "ventilator_mean_airway_pressure"
-  | "ventilator_resp_rate"
-  | "ventilator_pressure_support"
-  | "ventilator_tidal_volume"
-  | "ventilator_peep"
-  | "ventilator_fi02"
-  | "ventilator_spo2"
-  | "etco2"
-  | "bilateral_air_entry"
-  | "ventilator_oxygen_modality_oxygen_rate"
-  | "ventilator_oxygen_modality_flow_rate";
+export const VentilatorPlotFields = [
+  "ventilator_pip",
+  "ventilator_mean_airway_pressure",
+  "ventilator_resp_rate",
+  "ventilator_pressure_support",
+  "ventilator_tidal_volume",
+  "ventilator_peep",
+  "ventilator_fio2",
+  "ventilator_spo2",
+  "etco2",
+  "bilateral_air_entry",
+  "ventilator_oxygen_modality_oxygen_rate",
+  "ventilator_oxygen_modality_flow_rate",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type VentilatorPlotRes = {
   ventilator_pip: number;
@@ -417,7 +460,7 @@ export type VentilatorPlotRes = {
   ventilator_pressure_support: number;
   ventilator_tidal_volume: number;
   ventilator_peep: string;
-  ventilator_fi02: number;
+  ventilator_fio2: number;
   ventilator_spo2: number;
   etco2: number;
   bilateral_air_entry: boolean;
@@ -428,15 +471,16 @@ export type VentilatorPlotRes = {
 export interface DailyRoundsBody {
   page?: number;
   fields:
-    | ABGPlotsFields[]
-    | DialysisPlotsFields[]
-    | NeurologicalTablesFields[]
-    | NursingPlotFields[]
-    | NutritionPlotsFields[]
-    | PainDiagramsFields[]
-    | PressureSoreDiagramsFields[]
-    | PrimaryParametersPlotFields[]
-    | VentilatorPlotFields[];
+    | typeof ABGPlotsFields
+    | typeof DialysisPlotsFields
+    | typeof NeurologicalTablesFields
+    | typeof NursingPlotFields
+    | typeof RoutineFields
+    | typeof NutritionPlotsFields
+    | typeof PainDiagramsFields
+    | typeof PressureSoreDiagramsFields
+    | typeof PrimaryParametersPlotFields
+    | typeof VentilatorPlotFields;
 }
 
 export interface DailyRoundsRes {
@@ -449,6 +493,7 @@ export interface DailyRoundsRes {
       | DialysisPlotsRes
       | NeurologicalTablesRes
       | NursingPlotRes
+      | RoutineAnalysisRes
       | NutritionPlotsRes
       | PainDiagramsRes
       | PrimaryParametersPlotRes

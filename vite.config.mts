@@ -1,8 +1,18 @@
+import path from "node:path";
+import { createRequire } from "node:module";
 import { VitePWA } from "vite-plugin-pwa";
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import checker from "vite-plugin-checker";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+
+const pdfWorkerPath = path.join(
+  path.dirname(
+    createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
+  ),
+  "build",
+  "pdf.worker.min.mjs",
+);
 
 const cdnUrls =
   process.env.CARE_CDN_URL ??
@@ -12,9 +22,18 @@ const cdnUrls =
     "http://localhost:4566",
   ].join(" ");
 
-export default defineConfig({
+/** @type {import('vite').UserConfig} */
+export default {
   envPrefix: "REACT_",
   plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: pdfWorkerPath,
+          dest: "",
+        },
+      ],
+    }),
     react(),
     checker({ typescript: true }),
     treeShakeCareIcons({
@@ -65,6 +84,11 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: {
+      "@careConfig": path.resolve(__dirname, "./care.config.ts"),
+    },
+  },
   build: {
     outDir: "build",
     assetsDir: "bundle",
@@ -81,12 +105,6 @@ export default defineConfig({
   },
   server: {
     port: 4000,
-    proxy: {
-      "/api": {
-        target: process.env.CARE_API ?? "https://careapi.ohc.network",
-        changeOrigin: true,
-      },
-    },
   },
   preview: {
     headers: {
@@ -94,15 +112,9 @@ export default defineConfig({
       script-src 'self' blob: 'nonce-f51b9742' https://plausible.10bedicu.in;\
       style-src 'self' 'unsafe-inline';\
       connect-src 'self' https://plausible.10bedicu.in;\
-      img-src 'self' https://cdn.coronasafe.network ${cdnUrls};\
+      img-src 'self' https://cdn.ohc.network ${cdnUrls};\
       object-src 'self' ${cdnUrls};`,
     },
     port: 4000,
-    proxy: {
-      "/api": {
-        target: process.env.CARE_API ?? "https://careapi.ohc.network",
-        changeOrigin: true,
-      },
-    },
   },
-});
+};

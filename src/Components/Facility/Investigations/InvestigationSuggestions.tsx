@@ -29,13 +29,11 @@ export default function ViewInvestigationSuggestions(props: {
     return <Loading />;
   }
 
-  console.log("Investigations: ", investigations);
-
   return (
     <div className="mt-5" id="investigation-suggestions">
       <h3>{t("investigations_suggested")}</h3>
       <table className="mt-3 hidden w-full rounded-xl bg-white shadow md:table">
-        <thead className="bg-gray-200 text-left">
+        <thead className="bg-secondary-200 text-left">
           <tr>
             <th className="p-4">{t("investigations")}</th>
             <th className="p-4">{t("to_be_conducted")}</th>
@@ -48,7 +46,7 @@ export default function ViewInvestigationSuggestions(props: {
             investigations.investigation.map((investigation, index) => {
               let nextFurthestInvestigation: any = undefined;
               return (
-                <tr key={index} className="border-b border-b-gray-200">
+                <tr key={index} className="border-b border-b-secondary-200">
                   <td className="p-4">
                     <ul className="ml-4 list-decimal">
                       {investigation.type?.map((type, index) => {
@@ -110,11 +108,6 @@ export default function ViewInvestigationSuggestions(props: {
                         const investigationMissed =
                           nextInvestigationTime &&
                           dayjs().isAfter(nextInvestigationTime);
-                        console.log(
-                          type,
-                          nextFurthestInvestigation,
-                          nextInvestigationTime,
-                        );
 
                         return (
                           <li

@@ -1,6 +1,5 @@
 import * as Notify from "../../Utils/Notifications";
 
-import { AbhaObject } from "../Patient/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
@@ -8,10 +7,11 @@ import { formatDateTime } from "../../Utils/utils";
 import { useRef } from "react";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { AbhaNumberModel } from "./types/abha";
 
 interface IProps {
   patientId?: string;
-  abha?: AbhaObject;
+  abha?: AbhaNumberModel;
   show: boolean;
   onClose: () => void;
 }
@@ -67,64 +67,17 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
       }
       show={show}
       onClose={onClose}
+      className="max-w-[500px]"
+      fixedWidth={false}
     >
       <div
         ref={printRef}
         id="section-to-print"
-        className="print flex items-center justify-around border-black p-4 print:w-full print:border"
+        className="print flex flex-col gap-4 border-black sm:flex-row print:w-full print:border"
       >
-        <>
-          <div className="flex flex-col items-center justify-evenly">
-            <div className="flex items-center justify-evenly gap-2 text-lg font-semibold">
-              {abha?.name ? (
-                <span> {abha?.name}</span>
-              ) : (
-                <>
-                  <span> {abha?.first_name}</span>
-                  <span> {abha?.middle_name} </span>
-                  <span> {abha?.last_name} </span>
-                </>
-              )}
-            </div>
-            <span className="font-bold">{abha?.abha_number}</span>
-            {abha?.health_id && (
-              <div className="flex items-center gap-1 font-bold">
-                <span>{abha.health_id.split("@")[0]}</span>
-                {/* <span className="text-gray-700 text-sm">@</span>
-                <span>{abha.health_id.split("@")[1] || "care"}</span> */}
-              </div>
-            )}
-            <div className="mt-2 flex flex-col">
-              {abha?.gender && (
-                <p className="text-sm text-gray-600">
-                  Gender:
-                  <span className="ml-2 text-base font-semibold text-gray-900">
-                    {abha?.gender}
-                  </span>
-                </p>
-              )}
-              {abha?.date_of_birth && (
-                <p className="text-sm text-gray-600">
-                  DOB:
-                  <span className="ml-2 text-base font-semibold text-gray-900">
-                    {abha?.date_of_birth}
-                  </span>
-                </p>
-              )}
-              {abha?.email && (
-                <p className="text-sm text-gray-600">
-                  Email:
-                  <span className="ml-2 text-base font-semibold text-gray-900">
-                    {abha?.email}
-                  </span>
-                </p>
-              )}
-            </div>
-          </div>
-        </>
-        <>
+        <div className="flex-1 sm:aspect-square sm:h-40 sm:flex-auto">
           <QRCode
-            className="border border-black p-1"
+            className="h-full w-full border border-black p-1"
             value={JSON.stringify({
               hidn: abha?.abha_number,
               phr: abha?.health_id,
@@ -136,10 +89,32 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
               "dist name": abha?.district,
             })}
           />
-        </>
+        </div>
+        <div className="flex flex-wrap gap-4">
+          {[
+            {
+              label: "Name",
+              value:
+                abha?.name ||
+                `${abha?.first_name} ${abha?.middle_name} ${abha?.last_name}`,
+            },
+            { label: "DOB", value: abha?.date_of_birth },
+            { label: "Gender", value: abha?.gender },
+            { label: "ABHA Number", value: abha?.abha_number },
+            { label: "ABHA ID", value: abha?.health_id?.split("@")[0] },
+            { label: "Email", value: abha?.email },
+          ].map((item, index) =>
+            item.value ? (
+              <div key={index}>
+                <div className="text-xs text-secondary-700">{item.label}</div>
+                <div>{item.value}</div>
+              </div>
+            ) : null,
+          )}
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-col text-sm text-gray-700">
+      <div className="mt-4 flex flex-col text-xs text-secondary-700">
         {abha?.created_date && (
           <div className="flex items-center gap-1">
             <span className="">Created On: </span>

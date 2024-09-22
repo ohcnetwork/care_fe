@@ -10,7 +10,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
-import { formatDate, formatDateTime } from "../../Utils/utils";
+import { formatDate, formatDateTime, formatName } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -110,7 +110,7 @@ const AssetManage = (props: AssetManageProps) => {
 
   const PrintPreview = () => (
     <div className="">
-      <div className="my-4 flex justify-end ">
+      <div className="my-4 flex justify-end">
         <button
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
@@ -136,24 +136,23 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         transactions?.results.map((transaction: AssetTransaction) => (
           <tr key={`transaction_id_${transaction.id}`}>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
-              <span className="font-medium text-gray-900">
+            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-secondary-500">
+              <span className="font-medium text-secondary-900">
                 {transaction.from_location.name}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
-              <span className="font-medium text-gray-900">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500">
+              <span className="font-medium text-secondary-900">
                 {transaction.to_location.name}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
-              <span className="font-medium text-gray-900">
-                {transaction.performed_by.first_name}{" "}
-                {transaction.performed_by.last_name}
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500">
+              <span className="font-medium text-secondary-900">
+                {formatName(transaction.performed_by)}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-right text-sm leading-5 text-gray-500">
-              <span className="font-medium text-gray-900">
+            <td className="whitespace-nowrap px-6 py-4 text-right text-sm leading-5 text-secondary-500">
+              <span className="font-medium text-secondary-900">
                 {formatDateTime(transaction.modified_date)}
               </span>
             </td>
@@ -164,7 +163,7 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         <tr>
           <td
-            className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500"
+            className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500"
             colSpan={4}
           >
             <h5>No Transactions Found</h5>
@@ -179,23 +178,23 @@ const AssetManage = (props: AssetManageProps) => {
       setServiceDetails(
         services?.results.map((service: AssetService) => (
           <tr key={`service_id_${service.id}`}>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
-              <span className="font-medium text-gray-900">
+            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-secondary-500">
+              <span className="font-medium text-secondary-900">
                 {dayjs(service.serviced_on).format("DD MMM YYYY")}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
-              <span className="whitespace-break-spaces break-words font-medium text-gray-900">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500">
+              <span className="whitespace-break-spaces break-words font-medium text-secondary-900">
                 {service.note || "--"}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
-              <span className="font-medium text-gray-900">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500">
+              <span className="font-medium text-secondary-900">
                 {formatDate(service.created_date)}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
-              <span className="flex justify-center font-medium text-gray-900">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500">
+              <span className="flex justify-center font-medium text-secondary-900">
                 {service.edits?.length > 1 ? (
                   <RelativeDateUserMention
                     actionDate={service.edits?.[0]?.edited_on}
@@ -241,7 +240,7 @@ const AssetManage = (props: AssetManageProps) => {
       setServiceDetails(
         <tr>
           <td
-            className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500"
+            className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500"
             colSpan={4}
           >
             <h5>No Service Logs Found</h5>
@@ -271,9 +270,9 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="flex grow-0 flex-col md:w-[200px]">
         <div className="flex-start flex items-center">
           <div className="w-8">
-            <CareIcon icon={item.icon} className="fill-gray-700 text-lg" />
+            <CareIcon icon={item.icon} className="fill-secondary-700 text-lg" />
           </div>
-          <div className="break-words text-gray-700">{item.label}</div>
+          <div className="break-words text-secondary-700">{item.label}</div>
         </div>
         <div
           className="ml-8 grow-0 break-words text-lg font-semibold"
@@ -358,12 +357,12 @@ const AssetManage = (props: AssetManageProps) => {
                   <div className="tooltip tooltip-bottom">
                     <CareIcon
                       icon={assetClassProp.icon}
-                      className="fill-gray-700 text-3xl"
+                      className="fill-secondary-700 text-3xl"
                     />
                     <span className="tooltip-text">{assetClassProp.name}</span>
                   </div>
                 </div>
-                <div className="mb-2 w-full text-gray-700 sm:hidden">
+                <div className="mb-2 w-full text-secondary-700 sm:hidden">
                   {asset?.description}
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -397,7 +396,7 @@ const AssetManage = (props: AssetManageProps) => {
                   )}
                 </div>
               </div>
-              <div className="mt-3 hidden text-gray-700 sm:block">
+              <div className="mt-3 hidden text-secondary-700 sm:block">
                 {asset?.description}
               </div>
             </div>
@@ -468,7 +467,7 @@ const AssetManage = (props: AssetManageProps) => {
               )}
             </div>
           </div>
-          <div className="flex shrink-0 flex-col justify-between gap-2 border-gray-300 p-6 md:border-l md:p-8">
+          <div className="flex shrink-0 flex-col justify-between gap-2 border-secondary-300 p-6 md:border-l md:p-8">
             <div>
               <div className="mb-5 text-lg font-bold">Service Details</div>
               <div className="flex flex-col gap-6">
@@ -489,7 +488,7 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
 
-            <div className="flex flex-col justify-end break-words text-sm text-gray-600">
+            <div className="flex flex-col justify-end break-words text-sm text-secondary-600">
               {asset?.created_date && (
                 <RecordMeta prefix={t("created")} time={asset?.created_date} />
               )}
@@ -522,27 +521,27 @@ const AssetManage = (props: AssetManageProps) => {
         className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg"
         id="service-history"
       >
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-secondary-200">
           <thead>
             <tr>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Serviced on
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Note
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Created on
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Last Updated
               </th>
-              <th className="relative right-10 bg-gray-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="relative right-10 bg-secondary-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Edit
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-secondary-200 bg-white">
             {servicesDetails}
           </tbody>
         </table>
@@ -552,24 +551,24 @@ const AssetManage = (props: AssetManageProps) => {
         className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg"
         id="transaction-history"
       >
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-secondary-200">
           <thead>
             <tr>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Moved from
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Moved to
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Moved By
               </th>
-              <th className="relative right-5 bg-gray-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="relative right-5 bg-secondary-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Moved On
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-secondary-200 bg-white">
             {transactionDetails}
           </tbody>
         </table>

@@ -24,9 +24,9 @@ export default function MedicineAdministrationTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full whitespace-nowrap">
-        <thead className="sticky top-0 z-20 bg-gray-50 text-xs font-medium text-black">
+        <thead className="sticky top-0 z-10 bg-secondary-50 text-xs font-medium text-black">
           <tr>
-            <th className="sticky left-0 z-20 bg-gray-50 py-3 pl-4 text-left">
+            <th className="sticky left-0 z-20 bg-secondary-50 py-3 pl-4 text-left">
               <div className="flex justify-between gap-2">
                 <span className="text-sm">{t("medicine")}</span>
                 <span className="hidden px-2 text-center text-xs leading-none lg:block">
@@ -51,7 +51,7 @@ export default function MedicineAdministrationTable({
                 disabled={!pagination.hasPrevious}
                 onClick={pagination.previous}
                 tooltip="Previous 24 hours"
-                tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
+                tooltipClassName="tooltip-bottom text-xs"
               >
                 <CareIcon icon="l-angle-left-b" className="text-base" />
               </ButtonV2>
@@ -63,8 +63,8 @@ export default function MedicineAdministrationTable({
                   className={classNames(
                     "leading-none",
                     start.getHours() === 0
-                      ? "text-base font-bold text-gray-800"
-                      : "text-sm font-semibold text-gray-700",
+                      ? "text-base font-bold text-secondary-800"
+                      : "text-sm font-semibold text-secondary-700",
                   )}
                 >
                   {formatDateTime(
@@ -96,7 +96,7 @@ export default function MedicineAdministrationTable({
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y divide-secondary-200">
           {prescriptions.map((obj, index) => (
             <MedicineAdministrationTableRow
               key={obj.id}

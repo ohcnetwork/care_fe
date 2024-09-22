@@ -19,14 +19,14 @@ export default function NetworkSignal({ strength, children }: Props) {
   return (
     <div
       className={classNames(
-        "flex items-center", // Strength colors
+        "relative flex items-center", // Strength colors
         strength === 0 && "text-danger-500",
         strength === 1 && "text-danger-500",
         strength === 2 && "text-warning-500",
         strength === 3 && "text-primary-500",
       )}
     >
-      <div className="flex items-end gap-0.5 p-2">
+      <div className="flex items-end gap-0.5 p-1.5 md:p-2">
         {strength === undefined ? (
           <CareIcon
             icon="l-exclamation-triangle"
@@ -45,10 +45,16 @@ export default function NetworkSignal({ strength, children }: Props) {
                 i === 2 && "h-[15px]",
 
                 // Whether to infill with strength color or not
-                strength > i ? "bg-current" : "bg-zinc-600",
+                strength > i ? "bg-current" : "bg-zinc-500/30",
               )}
             />
           ))
+        )}
+        {!!strength && strength < 2 && (
+          <CareIcon
+            icon="l-exclamation-circle"
+            className="absolute left-0.5 top-0.5 animate-pulse text-xs text-danger-500 md:top-0 md:text-sm"
+          />
         )}
       </div>
       {children}

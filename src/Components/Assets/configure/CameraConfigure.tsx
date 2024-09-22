@@ -1,12 +1,13 @@
 import { SyntheticEvent } from "react";
 import { AssetData } from "../AssetTypes";
-import LiveFeed from "../../Facility/Consultations/LiveFeed";
+import CameraFeedOld from "../../CameraFeed/CameraFeedOld";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { getCameraConfig } from "../../../Utils/transformUtils";
 import { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
+import { FieldErrorText } from "../../Form/FormFields/FormField";
 
 interface CameraConfigureProps {
   asset: AssetData;
@@ -59,8 +60,14 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                 value={newPreset}
                 className="mt-1"
                 onChange={(e) => setNewPreset(e.value)}
-                error=""
+                errorClassName="hidden"
               />
+              {newPreset.length > 12 && (
+                <FieldErrorText
+                  error="It is advisable to keep preset name below 12 characters"
+                  className="!text-warning-500"
+                />
+              )}
             </div>
           </div>
           <div className="mt-4 flex justify-end">
@@ -69,7 +76,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
         </form>
       </Card>
       <Card className="mt-4">
-        <LiveFeed
+        <CameraFeedOld
           middlewareHostname={facilityMiddlewareHostname}
           asset={getCameraConfig(asset)}
           showRefreshButton={true}

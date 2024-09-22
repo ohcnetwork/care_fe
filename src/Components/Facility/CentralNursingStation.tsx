@@ -1,5 +1,4 @@
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment } from "react";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
 import Loading from "../Common/Loading";
@@ -8,7 +7,12 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
-import { Popover, Transition } from "@headlessui/react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
@@ -48,7 +52,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       asset_class: "HL7MONITOR",
       ordering: qParams.ordering || "bed__name",
       bed_is_occupied:
-        (qParams.hide_monitors_without_patient ?? "true") === "true",
+        qParams.monitors_without_patient === "true" ? undefined : "true",
     },
   });
 
@@ -79,14 +83,21 @@ export default function CentralNursingStation({ facilityId }: Props) {
       options={
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
           <Popover className="relative">
-            <Popover.Button>
-              <ButtonV2 variant="secondary" border>
+            <PopoverButton>
+              <ButtonV2
+                variant={
+                  qParams.location ||
+                  qParams.monitors_without_patient === "true"
+                    ? "primary"
+                    : "secondary"
+                }
+                border
+              >
                 <CareIcon icon="l-setting" className="text-lg" />
-                Settings and Filters
+                {t("settings_and_filters")}
               </ButtonV2>
-            </Popover.Button>
+            </PopoverButton>
             <Transition
-              as={Fragment}
               enter="transition ease-out duration-200"
               enterFrom="opacity-0 translate-y-1"
               enterTo="opacity-100 translate-y-0"
@@ -94,12 +105,12 @@ export default function CentralNursingStation({ facilityId }: Props) {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
-                <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
-                  <div className="rounded-t-lg bg-gray-100 px-6 py-4">
+              <PopoverPanel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
+                <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
+                  <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                     <div className="flow-root rounded-md">
-                      <span className="block text-sm text-gray-800">
-                        <span className="font-bold ">{totalCount}</span> Vitals
+                      <span className="block text-sm text-secondary-800">
+                        <span className="font-bold">{totalCount}</span> Vitals
                         Monitor present
                       </span>
                     </div>
@@ -149,10 +160,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       errorClassName="hidden"
                     />
                     <CheckBoxFormField
-                      name="hide_monitors_without_patient"
-                      label="Hide Monitors without Patient"
+                      name="monitors_without_patient"
+                      label="Include monitors without patient"
                       value={JSON.parse(
-                        qParams.hide_monitors_without_patient ?? true,
+                        qParams.monitors_without_patient ?? "false",
                       )}
                       onChange={(e) => updateQuery({ [e.name]: `${e.value}` })}
                       labelClassName="text-sm"
@@ -176,7 +187,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     </ButtonV2>
                   </div>
                 </div>
-              </Popover.Panel>
+              </PopoverPanel>
             </Transition>
           </Popover>
 

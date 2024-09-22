@@ -1,9 +1,29 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import {
+  APPETITE_CHOICES,
+  BLADDER_DRAINAGE_CHOICES,
+  BLADDER_ISSUE_CHOICES,
+  BOWEL_ISSUE_CHOICES,
   CONSCIOUSNESS_LEVEL,
+  DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
+  HEARTBEAT_RHYTHM_CHOICES,
+  HumanBodyRegion,
+  INSULIN_INTAKE_FREQUENCY_OPTIONS,
+  LIMB_RESPONSE_OPTIONS,
+  NURSING_CARE_PROCEDURES,
+  NUTRITION_ROUTE_CHOICES,
   OCCUPATION_TYPES,
-  RHYTHM_CHOICES,
+  ORAL_ISSUE_CHOICES,
+  OXYGEN_MODALITY_OPTIONS,
+  PressureSoreExudateAmountOptions,
+  PressureSoreTissueTypeOptions,
+  RATION_CARD_CATEGORY,
+  RESPIRATORY_SUPPORT,
+  SLEEP_CHOICES,
+  SOCIOECONOMIC_STATUS_CHOICES,
+  URINATION_FREQUENCY_CHOICES,
+  VENTILATOR_MODE_OPTIONS,
 } from "../../Common/constants";
 
 export interface FlowModel {
@@ -29,23 +49,11 @@ export interface AssignedToObjectModel {
   user_type: string;
 }
 
-export interface AbhaObject {
-  id: number;
-  created_date: string;
-  modified_date: string;
-  abha_number: string;
-  email: string | null;
-  first_name: string;
-  date_of_birth: string;
-  gender: "M" | "F" | "O";
-  address: string;
-  district: string;
-  state: string;
-  health_id: string | null;
-  name: string;
-  last_name: string;
-  middle_name: string;
-  profile_photo: string;
+export interface PatientMeta {
+  readonly id: number;
+  occupation?: Occupation;
+  socioeconomic_status?: (typeof SOCIOECONOMIC_STATUS_CHOICES)[number];
+  domestic_healthcare_support?: (typeof DOMESTIC_HEALTHCARE_SUPPORT_CHOICES)[number];
 }
 
 export interface PatientModel {
@@ -101,6 +109,7 @@ export interface PatientModel {
   state?: number;
   nationality?: string;
   passport_no?: string;
+  ration_card_category?: (typeof RATION_CARD_CATEGORY)[number] | null;
   date_of_test?: string;
   date_of_result?: string; // keeping this to avoid errors in Death report
   covin_id?: string;
@@ -125,15 +134,7 @@ export interface PatientModel {
   created_by?: PerformedByModel;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
-  occupation?: Occupation;
-  meta_info?: {
-    id: number;
-    occupation: Occupation;
-  };
-
-  // ABDM related
-  abha_number?: string;
-  abha_number_object?: AbhaObject;
+  meta_info?: PatientMeta;
 }
 
 export interface SampleTestModel {
@@ -267,62 +268,131 @@ export interface SampleListModel {
   fast_track?: string;
 }
 
-export interface DailyRoundsOutput {
-  name: string;
-  quantity: number;
-}
-
 export const DailyRoundTypes = [
   "NORMAL",
+  "COMMUNITY_NURSES_LOG",
+  "DOCTORS_LOG",
   "VENTILATOR",
   "AUTOMATED",
   "TELEMEDICINE",
 ] as const;
 
-export interface BloodPressure {
-  diastolic?: number;
-  mean?: number;
+export type BloodPressure = {
   systolic?: number;
+  diastolic?: number;
+};
+
+export interface IPainScale {
+  description: string;
+  region: HumanBodyRegion;
+  scale: number;
 }
 
+export type NameQuantity = { name: string; quantity: number };
+
+export type IPressureSore = {
+  region: HumanBodyRegion;
+  width: number;
+  length: number;
+  description: string;
+  scale: number;
+  exudate_amount: (typeof PressureSoreExudateAmountOptions)[number];
+  tissue_type: (typeof PressureSoreTissueTypeOptions)[number];
+};
 export interface DailyRoundsModel {
-  ventilator_spo2?: number;
-  ventilator_interface?:
-    | "UNKNOWN"
-    | "OXYGEN_SUPPORT"
-    | "NON_INVASIVE"
-    | "INVASIVE";
-  spo2?: string;
-  rhythm?: (typeof RHYTHM_CHOICES)[number]["text"];
+  spo2?: number;
+  rhythm?: (typeof HEARTBEAT_RHYTHM_CHOICES)[number];
   rhythm_detail?: string;
   bp?: BloodPressure;
   pulse?: number;
   resp?: number;
-  temperature?: string;
+  temperature?: number;
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;
-  additional_symptoms?: Array<number>;
-  medication_given?: Array<any>;
-  additional_symptoms_text?: string;
   action?: string;
   review_interval?: number;
   id?: string;
-  other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
-  output?: DailyRoundsOutput[];
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
   taken_at?: string;
-  consciousness_level?: (typeof CONSCIOUSNESS_LEVEL)[number]["id"];
+  consciousness_level?: (typeof CONSCIOUSNESS_LEVEL)[number]["value"];
   rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
   created_by?: PerformedByModel;
   last_edited_by?: PerformedByModel;
   bed?: string;
+  pain_scale_enhanced?: IPainScale[];
+  in_prone_position?: boolean;
+  left_pupil_size?: number;
+  left_pupil_size_detail?: string;
+  left_pupil_light_reaction?: string;
+  left_pupil_light_reaction_detail?: string;
+  right_pupil_size?: number;
+  right_pupil_size_detail?: string;
+  right_pupil_light_reaction?: string;
+  right_pupil_light_reaction_detail?: string;
+  glasgow_eye_open?: number;
+  glasgow_motor_response?: number;
+  glasgow_verbal_response?: number;
+  limb_response_upper_extremity_right?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_upper_extremity_left?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_lower_extremity_left?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_lower_extremity_right?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  glasgow_total_calculated?: number;
+  bilateral_air_entry?: boolean;
+  etco2?: number;
+  po2?: number;
+  pco2?: number;
+  ph?: number;
+  hco3?: number;
+  base_excess?: number;
+  lactate?: number;
+  sodium?: number;
+  potassium?: number;
+  blood_sugar_level?: number;
+  insulin_intake_dose?: number;
+  insulin_intake_frequency?: (typeof INSULIN_INTAKE_FREQUENCY_OPTIONS)[number];
+  dialysis_fluid_balance?: number;
+  dialysis_net_balance?: number;
+  nursing?: {
+    procedure: (typeof NURSING_CARE_PROCEDURES)[number];
+    description: string;
+  }[];
+  feeds?: NameQuantity[];
+  infusions?: NameQuantity[];
+  iv_fluids?: NameQuantity[];
+  output?: NameQuantity[];
+  total_intake_calculated?: number;
+  total_output_calculated?: number;
+  ventilator_spo2?: number;
+  ventilator_interface?: (typeof RESPIRATORY_SUPPORT)[number]["value"];
+  ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
+  ventilator_oxygen_modality_flow_rate?: number;
+  ventilator_oxygen_modality_oxygen_rate?: number;
+  ventilator_fio2?: number;
+  ventilator_mode?: (typeof VENTILATOR_MODE_OPTIONS)[number];
+  ventilator_peep?: number;
+  ventilator_pip?: number;
+  ventilator_mean_airway_pressure?: number;
+  ventilator_resp_rate?: number;
+  ventilator_pressure_support?: number;
+
+  ventilator_tidal_volume?: number;
+  pressure_sore?: IPressureSore[];
+  bowel_issue?: (typeof BOWEL_ISSUE_CHOICES)[number];
+  bladder_drainage?: (typeof BLADDER_DRAINAGE_CHOICES)[number];
+  bladder_issue?: (typeof BLADDER_ISSUE_CHOICES)[number];
+  is_experiencing_dysuria?: boolean;
+  urination_frequency?: (typeof URINATION_FREQUENCY_CHOICES)[number];
+  sleep?: (typeof SLEEP_CHOICES)[number];
+  nutrition_route?: (typeof NUTRITION_ROUTE_CHOICES)[number];
+  oral_issue?: (typeof ORAL_ISSUE_CHOICES)[number];
+  appetite?: (typeof APPETITE_CHOICES)[number];
 }
 
 export interface FacilityNameModel {
@@ -332,7 +402,7 @@ export interface FacilityNameModel {
 
 // File Upload Models
 
-type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
+export type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
 
 export interface CreateFileRequest {
   file_type: string | number;
@@ -354,6 +424,7 @@ export interface CreateFileResponse {
 export interface FileUploadModel {
   id?: string;
   name?: string;
+  associating_id?: string;
   created_date?: string;
   upload_completed?: boolean;
   uploaded_by?: PerformedByModel;

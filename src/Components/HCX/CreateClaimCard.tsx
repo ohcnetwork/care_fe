@@ -37,8 +37,6 @@ export default function CreateClaimCard({
   const [createdClaim, setCreatedClaim] = useState<HCXClaimModel>();
   const [use_, setUse_] = useState(use);
 
-  console.log(items);
-
   useEffect(() => {
     async function autoFill() {
       const latestApprovedPreAuthsRes = await dispatch(
@@ -184,7 +182,7 @@ export default function CreateClaimCard({
         <span
           className={classNames(
             policy ? "opacity-0" : "opacity-100",
-            "text-gray-700 transition-opacity duration-300 ease-in-out",
+            "text-secondary-700 transition-opacity duration-300 ease-in-out",
           )}
         >
           Select a policy to add items

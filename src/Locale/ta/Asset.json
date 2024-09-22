@@ -1,0 +1,20 @@
+{
+  "create_asset": "சொத்தை உருவாக்கவும்",
+  "edit_history": "வரலாற்றைத் திருத்தவும்",
+  "update_record_for_asset": "சொத்துக்கான பதிவைப் புதுப்பிக்கவும்",
+  "edited_on": "அன்று திருத்தப்பட்டது",
+  "edited_by": "திருத்தியது",
+  "serviced_on": "சேவை செய்யப்பட்டது",
+  "notes": "குறிப்புகள்",
+  "back": "மீண்டும்",
+  "close": "மூடு",
+  "update_asset_service_record": "சொத்து சேவை பதிவை புதுப்பிக்கவும்",
+  "eg_details_on_functionality_service_etc": "எ.கா. செயல்பாடு, சேவை போன்றவை பற்றிய விவரங்கள்.",
+  "updating": "புதுப்பிக்கிறது",
+  "update": "புதுப்பிக்கவும்",
+  "are_you_still_watching": "நீங்கள் இன்னும் பார்க்கிறீர்களா?",
+  "stream_stop_due_to_inativity": "லைவ் ஃபீட் செயல்படாததால் ஸ்ட்ரீமிங் நிறுத்தப்படும்",
+  "stream_stopped_due_to_inativity": "லைவ் ஃபீட் செயல்படாததால் ஸ்ட்ரீமிங் நிறுத்தப்பட்டது",
+  "continue_watching": "தொடர்ந்து பார்க்கவும்",
+  "resume": "ரெஸ்யூம்"
+}

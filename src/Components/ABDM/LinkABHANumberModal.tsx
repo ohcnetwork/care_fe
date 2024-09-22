@@ -158,7 +158,9 @@ const ScanABHAQRSection = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2">
-        <span className="text-3xl font-semibold text-gray-700">Loading</span>
+        <span className="text-3xl font-semibold text-secondary-700">
+          Loading
+        </span>
         <CircularProgress className="text-green-500" />
       </div>
     );
@@ -200,7 +202,7 @@ const ScanABHAQRSection = ({
                 dob: abha?.dob.replace(/\//g, "-"),
                 address: abha?.address,
                 "dist name": abha?.["dist name"] ?? abha?.district_name,
-                "state name": abha?.["state name"],
+                "state name": abha?.["state name"] ?? abha?.state_name,
               },
             });
 
@@ -233,14 +235,14 @@ const ScanABHAQRSection = ({
       />
       {!txnId && (
         <div>
-          <span className="items-center text-xs text-gray-800">
+          <span className="items-center text-xs text-secondary-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer}
               onChange={(e) => {
                 setAcceptedDisclaimer(e.target.checked);
               }}
-              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
+              className="mr-2 rounded border-secondary-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that the ABHA No. of the patient is voluntarily provided
             by the patient (or guardian or nominee of the patient).
@@ -524,7 +526,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
         />
         <span
           className={classNames(
-            "ml-2 text-sm font-medium text-gray-600",
+            "ml-2 text-sm font-medium text-secondary-600",
             !aadhaarNumberError && "-mt-4",
           )}
         >
@@ -534,14 +536,14 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
 
       {!otpSent && (
         <div className="flex flex-col gap-2">
-          <span className="items-center text-xs text-gray-800">
+          <span className="items-center text-xs text-secondary-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer1}
               onChange={(e) => {
                 setAcceptedDisclaimer1(e.target.checked);
               }}
-              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
+              className="mr-2 rounded border-secondary-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that consent of the patient (or guardian or nominee of the
             patient) is obtained for generation of such ABHA Number as per the{" "}
@@ -551,14 +553,14 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
             .
           </span>
 
-          <span className="items-center text-xs text-gray-800">
+          <span className="items-center text-xs text-secondary-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer2}
               onChange={(e) => {
                 setAcceptedDisclaimer2(e.target.checked);
               }}
-              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
+              className="mr-2 rounded border-secondary-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that the Aadhaar Number and demographic details of the
             patient are shared voluntarily by the patient (or guardian or
@@ -838,7 +840,7 @@ const CreateHealthIDSection = ({
       </p>
 
       {isHealthIdInputInFocus && (
-        <div className="mb-2 pl-2 text-sm text-gray-500">
+        <div className="mb-2 pl-2 text-sm text-secondary-500">
           {validateRule(
             healthId.length >= 4,
             "Should be atleast 4 character long",

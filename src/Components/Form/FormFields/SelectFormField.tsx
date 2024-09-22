@@ -14,6 +14,8 @@ type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
+  inputClassName?: string;
 };
 
 export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
@@ -30,10 +32,12 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
         position={props.position}
         placeholder={props.placeholder}
         optionLabel={props.optionLabel}
+        inputClassName={props.inputClassName}
         optionSelectedLabel={props.optionSelectedLabel}
         optionDescription={props.optionDescription}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
+        optionDisabled={props.optionDisabled}
         requiredError={field.error ? props.required : false}
       />
     </FormField>
@@ -42,12 +46,13 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
 
 type MultiSelectFormFieldProps<T, V = T> = FormFieldBaseProps<V[]> & {
   placeholder?: React.ReactNode;
-  options: T[];
+  options: readonly T[];
   optionLabel: OptionCallback<T, React.ReactNode>;
   optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
 };
 
 export const MultiSelectFormField = <T, V>(
@@ -67,6 +72,7 @@ export const MultiSelectFormField = <T, V>(
         optionSelectedLabel={props.optionSelectedLabel}
         optionDescription={props.optionDescription}
         optionIcon={props.optionIcon}
+        optionDisabled={props.optionDisabled}
         optionValue={props.optionValue}
       />
     </FormField>

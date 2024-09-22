@@ -7,6 +7,10 @@ export class PatientPrescription {
     );
   }
 
+  clickAddPrnPrescriptionButton() {
+    cy.contains("button", "Add PRN Prescription").click();
+  }
+
   interceptMedibase() {
     cy.intercept("GET", "**/api/v1/medibase/**").as("getMedibase");
   }
@@ -23,8 +27,17 @@ export class PatientPrescription {
   }
 
   clickAdministerButton() {
-    cy.get("#administer-medicine").should("be.visible");
+    cy.get("#administer-medicine").scrollIntoView().should("be.visible");
     cy.verifyAndClickElement("#administer-medicine", "Administer");
+  }
+
+  clickAdministerBulkMedicine() {
+    cy.get("#bulk-administer").should("be.visible");
+    cy.get("#bulk-administer").click();
+  }
+
+  clickAllVisibleAdministration() {
+    cy.get("#should_administer").should("be.visible").click();
   }
 
   selectMedicinebox() {
@@ -38,7 +51,18 @@ export class PatientPrescription {
   }
 
   enterDosage(doseAmount: string) {
+    cy.get("#base_dosage").clear({ force: true });
+    cy.get("#base_dosage").click({ force: true });
     cy.get("#base_dosage").type(doseAmount, { force: true });
+  }
+
+  enterIndicator(indicator: string) {
+    cy.get("#indicator").type(indicator);
+  }
+
+  enterDiscontinueReason(reason: string) {
+    cy.wait(2000);
+    cy.get("#discontinuedReason").type(reason);
   }
 
   enterAdministerDosage(dosage: string) {
@@ -64,14 +88,9 @@ export class PatientPrescription {
     );
   }
 
-  discontinuePreviousPrescription() {
-    cy.intercept(
-      "POST",
-      "**/api/v1/consultation/*/prescriptions/*/discontinue/",
-    ).as("deletePrescription");
-    cy.get("button").contains("Discontinue").click();
-    cy.get("#submit").contains("Discontinue").click();
-    cy.wait("@deletePrescription").its("response.statusCode").should("eq", 200);
+  clickAdministerSelectedMedicine() {
+    cy.get("#administer-selected-medicine").should("be.visible");
+    cy.get("#administer-selected-medicine").click();
   }
 
   visitMedicineTab() {

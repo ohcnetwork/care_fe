@@ -6,32 +6,45 @@ on:
   pull_request:
     branches:
       - develop
-      - master
+      - staging
   workflow_dispatch:
 
 jobs:
   cypress-run:
     permissions: write-all
-    if: github.repository == 'coronasafe/care_fe'
+    if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         containers: [1, 2, 3, 4, 5, 6, 7, 8]
+    env:
+      REACT_CARE_API_URL: http://localhost:9000
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
 
+      - name: Set backend branch
+        id: backend-branch
+        run: |
+          if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then
+            echo "branch=staging" >> $GITHUB_OUTPUT
+          else
+            echo "branch=develop" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout care 📥
         uses: actions/checkout@v3
         with:
-          repository: coronasafe/care
+          repository: ohcnetwork/care
           path: care
+          ref: ${{ steps.backend-branch.outputs.branch }}
 
       - name: Start care docker containers 🐳
         run: |
           cd care
           echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
+          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
           make docker_config_file=docker-compose.pre-built.yaml up 
           make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
           cd ..
@@ -56,7 +69,7 @@ jobs:
       - name: Install dependencies 📦
         run: npm install
 
-      - name: Build & Compile rescript files ⚙️
+      - name: Build ⚙️
         run: npm run build
 
       - name: Install Specific Chrome Version
@@ -79,7 +92,6 @@ jobs:
           parallel: true
           group: "UI-Chrome"
         env:
-          CARE_API: http://localhost:9000
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
@@ -101,7 +113,6 @@ jobs:
           group: "UI-Chrome"
         env:
           CYPRESS_SPLIT_TESTS: "true"
-          CARE_API: http://localhost:9000
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096

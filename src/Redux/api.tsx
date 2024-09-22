@@ -1,4 +1,3 @@
-import { IConfig } from "../Common/hooks/useConfig";
 import {
   ConsentRequestModel,
   CreateConsentTBody,
@@ -65,6 +64,7 @@ import {
   LocalBodyModel,
   LocationModel,
   MinimumQuantityItemResponse,
+  PatientConsentModel,
   PatientNotesEditModel,
   PatientNotesModel,
   PatientStatsModel,
@@ -97,7 +97,10 @@ import {
 import { PaginatedResponse } from "../Utils/request/types";
 
 import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
-import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
+import {
+  EventGeneric,
+  type Type,
+} from "../Components/Facility/ConsultationDetails/Events/types";
 import {
   InvestigationGroup,
   InvestigationType,
@@ -107,6 +110,7 @@ import { Investigation } from "../Components/Facility/Investigations/Reports/typ
 import { HCXPolicyModel } from "../Components/HCX/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
+import { AbhaNumberModel } from "../Components/ABDM/types/abha";
 import { ScribeModel } from "../Components/Scribe/Scribe";
 
 /**
@@ -128,13 +132,6 @@ export interface LoginCredentials {
 }
 
 const routes = {
-  config: {
-    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
-    method: "GET",
-    noAuth: true,
-    TRes: Type<IConfig>(),
-  },
-
   createScribe: {
     path: "/api/care_scribe/scribe/",
     method: "POST",
@@ -603,6 +600,8 @@ const routes = {
   updateDailyRound: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
     method: "PATCH",
+    TBody: Type<Partial<DailyRoundsModel>>(),
+    TRes: Type<DailyRoundsModel>(),
   },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
@@ -626,6 +625,14 @@ const routes = {
     method: "POST",
     TBody: Type<DailyRoundsBody>(),
     TRes: Type<DailyRoundsRes>(),
+  },
+
+  // Event Types
+
+  listEventTypes: {
+    path: "/api/v1/event_types/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<Type>>(),
   },
 
   // Hospital Beds
@@ -992,6 +999,30 @@ const routes = {
     TRes: Type<PaginatedResponse<PatientModel>>(),
   },
 
+  // Consents
+  listConsents: {
+    path: "/api/v1/consultation/{consultationId}/consents/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientConsentModel>>(),
+  },
+  getConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/{id}/",
+    method: "GET",
+    TRes: Type<PatientConsentModel>(),
+  },
+  createConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/",
+    method: "POST",
+    TRes: Type<PatientConsentModel>(),
+    TBody: Type<Partial<PatientConsentModel>>(),
+  },
+  partialUpdateConsent: {
+    path: "/api/v1/consultation/{consultationId}/consents/{id}/",
+    method: "PATCH",
+    TRes: Type<PatientConsentModel>(),
+    TBody: Type<Partial<PatientConsentModel>>(),
+  },
+
   //Profile
   checkUsername: {
     path: "/api/v1/users/{username}/check_availability/",
@@ -1278,6 +1309,11 @@ const routes = {
     method: "GET",
     TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
   },
+  listAssetQR: {
+    path: "/api/v1/public/asset_qr/{qr_code_id}/",
+    method: "GET",
+    TRes: Type<AssetData>(),
+  },
 
   // Asset transaction endpoints
 
@@ -1310,6 +1346,12 @@ const routes = {
   },
 
   abha: {
+    getAbhaNumber: {
+      path: "/api/v1/abdm/abha_numbers/{abhaNumberId}/",
+      method: "GET",
+      TRes: Type<AbhaNumberModel>(),
+    },
+
     // ABDM HealthID endpoints
     generateAadhaarOtp: {
       path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
@@ -1359,6 +1401,13 @@ const routes = {
       method: "POST",
       TRes: Type<ICreateHealthIdResponse>(),
       TBody: Type<ICreateHealthIdRequest>(),
+    },
+
+    linkPatient: {
+      path: "/api/v1/abdm/healthid/link_patient/",
+      method: "POST",
+      TBody: Type<{ abha_number: string; patient: string }>(),
+      TRes: Type<AbhaNumberModel>(),
     },
 
     searchByHealthId: {

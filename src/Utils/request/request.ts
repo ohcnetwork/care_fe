@@ -1,10 +1,20 @@
+import careConfig from "@careConfig";
 import handleResponse from "./handleResponse";
 import { RequestOptions, RequestResult, Route } from "./types";
 import { makeHeaders, makeUrl } from "./utils";
 
-interface Options<TData, TBody> extends RequestOptions<TData, TBody> {
-  controller?: AbortController;
-}
+type ControllerXORControllerRef =
+  | {
+      controller?: AbortController;
+      controllerRef?: undefined;
+    }
+  | {
+      controller?: undefined;
+      controllerRef: React.MutableRefObject<AbortController | undefined>;
+    };
+
+type Options<TData, TBody> = RequestOptions<TData, TBody> &
+  ControllerXORControllerRef;
 
 export default async function request<TData, TBody>(
   { path, method, noAuth }: Route<TData, TBody>,
@@ -13,13 +23,19 @@ export default async function request<TData, TBody>(
     body,
     pathParams,
     controller,
+    controllerRef,
     onResponse,
     silent,
     reattempts = 3,
   }: Options<TData, TBody> = {},
 ): Promise<RequestResult<TData>> {
-  const signal = controller?.signal;
-  const url = makeUrl(path, query, pathParams);
+  if (controllerRef) {
+    controllerRef.current?.abort();
+    controllerRef.current = new AbortController();
+  }
+
+  const signal = controller?.signal ?? controllerRef?.current?.signal;
+  const url = `${careConfig.apiUrl}${makeUrl(path, query, pathParams)}`;
 
   const options: RequestInit = { method, signal };
 

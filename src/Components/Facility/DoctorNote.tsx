@@ -49,7 +49,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
           ))}
         </InfiniteScroll>
       ) : (
-        <div className="mt-2 flex h-full items-center justify-center text-2xl font-bold text-gray-500">
+        <div className="mt-2 flex h-full items-center justify-center text-2xl font-bold text-secondary-500">
           No Notes Found
         </div>
       )}

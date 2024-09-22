@@ -7,6 +7,7 @@ import {
   formatPhoneNumber as formatPhoneNumberUtil,
   getCountryCode,
   CountryData,
+  humanizeStrings,
 } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
 import {
@@ -14,8 +15,9 @@ import {
   PhoneNumberValidator,
   PhoneNumberType,
 } from "../FieldValidators";
-import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
-import { Popover } from "@headlessui/react";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
+import { useTranslation } from "react-i18next";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -27,7 +29,7 @@ interface Props extends FormFieldBaseProps<string> {
 }
 
 export default function PhoneNumberFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
   const [error, setError] = useState<FieldError | undefined>();
   const [country, setCountry] = useState<CountryData>({
     flag: "🇮🇳",
@@ -109,7 +111,7 @@ export default function PhoneNumberFormField(props: Props) {
           {({ open }: { open: boolean }) => {
             return (
               <>
-                <Popover.Button className="absolute h-full">
+                <PopoverButton className="absolute h-full">
                   <div className="absolute inset-y-0 left-0 m-0.5 flex w-[4.5rem] cursor-pointer items-center justify-around bg-slate-100">
                     <span className="rounded-md pl-4">
                       {country?.flag ?? "🇮🇳"}
@@ -119,14 +121,14 @@ export default function PhoneNumberFormField(props: Props) {
                       className={`text-2xl font-bold ${open && "rotate-180"}`}
                     />
                   </div>
-                </Popover.Button>
+                </PopoverButton>
                 <input
                   type="tel"
                   id={field.id}
                   name={field.name}
                   autoComplete={props.autoComplete ?? "tel"}
                   className={classNames(
-                    "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
+                    "cui-input-base h-full pl-20 tracking-widest sm:leading-6",
                     field.error && "border-danger-500",
                     field.className,
                   )}
@@ -137,14 +139,14 @@ export default function PhoneNumberFormField(props: Props) {
                   disabled={field.disabled}
                   onBlur={() => setError(validate(field.value, "blur"))}
                 />
-                <Popover.Panel className="w-full">
+                <PopoverPanel className="w-full">
                   {({ close }) => (
                     <CountryCodesList
                       handleCountryChange={handleCountryChange}
                       onClose={close}
                     />
                   )}
-                </Popover.Panel>
+                </PopoverPanel>
               </>
             );
           }}
@@ -154,37 +156,33 @@ export default function PhoneNumberFormField(props: Props) {
   );
 }
 
-const phoneNumberTypeIcons: Record<PhoneNumberType, IconName> = {
-  international_mobile: "l-globe",
-  indian_mobile: "l-mobile-android",
-  mobile: "l-mobile-android",
-  landline: "l-phone",
-  support: "l-headset",
-};
+const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
+  const { t } = useTranslation();
 
-const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
-  <div className="flex gap-1">
-    {types.map((type) => (
-      <span key={type} className="tooltip mt-1">
-        <CareIcon
-          icon={phoneNumberTypeIcons[type]}
-          className="text-lg text-gray-500"
-        />
-        <span className="tooltip-text tooltip-bottom -translate-x-1/2 translate-y-1 text-xs capitalize">
-          {type.replace("_", " ")}
-        </span>
-      </span>
-    ))}
-  </div>
-);
+  return (
+    <div className="tooltip mt-1 pr-1 text-secondary-500">
+      <CareIcon icon="l-question-circle" className="text-lg" />
+      <div className="tooltip-text tooltip-bottom w-64 -translate-x-full whitespace-pre-wrap text-sm">
+        Supports only{" "}
+        <span className="font-bold lowercase">
+          {humanizeStrings(props.types.map((item) => t(item)))}
+        </span>{" "}
+        numbers.
+      </div>
+    </div>
+  );
+};
 
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
   return code.startsWith("+") ? code : "+" + code;
 };
 
-const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
-  if (value === undefined || value === null) {
+const formatPhoneNumber = (
+  value: string | undefined,
+  types: PhoneNumberType[],
+) => {
+  if (value == null) {
     return "+91 ";
   }
 
@@ -206,7 +204,7 @@ const CountryCodesList = ({
   const [searchValue, setSearchValue] = useState<string>("");
 
   return (
-    <div className="absolute z-10 w-full rounded-md border border-gray-300 bg-white shadow-lg transition-all duration-300">
+    <div className="absolute z-10 w-full rounded-md border border-secondary-300 bg-white shadow-lg transition-all duration-300">
       <div className="relative m-2">
         <CareIcon
           icon="l-search"
@@ -215,7 +213,7 @@ const CountryCodesList = ({
         <input
           type="search"
           placeholder="Search"
-          className="w-full border-b border-gray-400 p-2 pl-10 focus:outline-none focus:ring-0"
+          className="w-full border-b border-secondary-400 p-2 pl-10 focus:outline-none focus:ring-0"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
         />
@@ -245,7 +243,7 @@ const CountryCodesList = ({
             >
               <span>{flag}</span>
               <span>{name}</span>
-              <span className="text-gray-600">
+              <span className="text-secondary-600">
                 {" "}
                 ({conditionPhoneCode(code)})
               </span>
@@ -261,7 +259,7 @@ const CountryCodesList = ({
         >
           <span>📞</span>
           <span>Support</span>
-          <span className="text-gray-600"> (1800)</span>
+          <span className="text-secondary-600"> (1800)</span>
         </li>
         <li
           key={"other"}
@@ -273,7 +271,7 @@ const CountryCodesList = ({
         >
           <span>🌍</span>
           <span>Other</span>
-          <span className="text-gray-600"> (+)</span>
+          <span className="text-secondary-600"> (+)</span>
         </li>
       </ul>
     </div>

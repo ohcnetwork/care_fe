@@ -6,14 +6,14 @@ export class PatientConsultationPage {
     cy.clickAndSelectOption("#route_to_facility", status);
   }
 
-  selectSymptoms(symptoms) {
-    cy.clickAndMultiSelectOption("#symptoms", symptoms);
-  }
   typeAndMultiSelectSymptoms(input, symptoms) {
-    cy.typeAndMultiSelectOption("#symptoms", input, symptoms);
+    cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
   }
-  selectSymptomsDate(selector: string, date: string) {
-    cy.clickAndTypeDate(selector, date);
+  selectSymptomsDate(date: string) {
+    cy.clickAndTypeDate("#symptoms_onset_date", date);
+  }
+  clickAddSymptom() {
+    cy.get("#add-symptom").click();
   }
 
   verifyConsultationPatientName(patientName: string) {
@@ -26,6 +26,10 @@ export class PatientConsultationPage {
 
   selectPatientReferance(referance: string) {
     cy.searchAndSelectOption("#referred_to", referance);
+  }
+
+  selectBed(bedNo: string) {
+    cy.searchAndSelectOption("#bed", bedNo);
   }
 
   selectPatientWard(ward: string) {
@@ -48,7 +52,7 @@ export class PatientConsultationPage {
     cy.searchAndSelectOption("#icd11-search", icdCode);
     cy.get("#diagnosis-list")
       .contains("Add as")
-      .focus()
+      .scrollIntoView()
       .click()
       .then(() => {
         cy.get(`#${statusId}`).click();
@@ -105,31 +109,5 @@ export class PatientConsultationPage {
       "Edit Consultation Details",
     );
     cy.wait(3000);
-  }
-
-  visitShiftRequestPage() {
-    cy.get("#create_shift_request").click();
-  }
-
-  createShiftRequest() {
-    cy.intercept("POST", "**/api/v1/shift/").as("createShiftRequest");
-    cy.get("#submit").click();
-    cy.wait("@createShiftRequest").its("response.statusCode").should("eq", 201);
-  }
-
-  visitDoctorNotesPage() {
-    cy.get("#patient_doctor_notes").scrollIntoView();
-    cy.get("#patient_doctor_notes").click();
-  }
-
-  addDoctorsNotes(notes: string) {
-    cy.get("#doctor_notes_textarea").scrollIntoView();
-    cy.get("#doctor_notes_textarea").click().type(notes);
-  }
-
-  postDoctorNotes() {
-    cy.intercept("POST", "**/api/v1/patient/*/notes").as("postDoctorNotes");
-    cy.get("#add_doctor_note_button").click();
-    cy.wait("@postDoctorNotes").its("response.statusCode").should("eq", 201);
   }
 }
