@@ -24,7 +24,7 @@ export default function useExport() {
     const filename = `${filenamePrefix}_${getTimestamp()}.csv`;
 
     const res = await dispatch(action);
-    if (res.status === 200) {
+    if (res?.status === 200) {
       const a = document.createElement("a");
       const blob = new Blob([parse(res.data)], {
         type: "text/csv",
@@ -45,7 +45,7 @@ export default function useExport() {
     setIsExporting(true);
 
     const res = await dispatch(action);
-    if (res.status === 200) {
+    if (res?.status === 200) {
       const a = document.createElement("a");
       const blob = new Blob([parse(JSON.stringify(res.data.results))], {
         type: "application/json",
