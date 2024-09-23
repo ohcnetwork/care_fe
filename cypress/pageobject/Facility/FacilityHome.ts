@@ -6,6 +6,7 @@ class FacilityHome {
 
   // Operations
   clickExportButton() {
+    cy.get(this.exportButton).scrollIntoView();
     cy.get(this.exportButton).click();
   }
 
