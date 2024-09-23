@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { calculateVideoDelay } from "./utils";
 import NetworkSignal from "../../CAREUI/display/NetworkSignal";
-import { StreamStatus } from "./usePlayer";
+import { StreamStatus } from "./FeedAlert";
 
 interface Props {
   playerRef: React.RefObject<HTMLVideoElement>;
@@ -23,7 +23,9 @@ export default function FeedNetworkSignal(props: Props) {
       // 2. This value may become negative when the web-socket stream
       //    disconnects while the tab was not in focus.
       if (-5 > delay || delay > 5) {
-        props.onReset();
+        if (document.hasFocus() && props.status !== "loading") {
+          props.onReset();
+        }
       }
     }, 1000);
 

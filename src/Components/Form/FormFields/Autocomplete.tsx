@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Combobox,
   ComboboxButton,
@@ -6,12 +5,14 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { DropdownTransition } from "../../Common/components/HelperComponents";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import { useEffect, useState } from "react";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { DropdownTransition } from "../../Common/components/HelperComponents";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
+import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
 
 type OptionCallback<T, R> = (option: T) => R;
@@ -162,13 +163,15 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       id={props.id}
     >
       <Combobox
+        immediate
         disabled={props.disabled}
         value={(value ?? props.placeholder ?? "Select") as T}
-        onChange={(selection: any) => props.onChange(selection.value)}
+        onChange={(selection: any) => props.onChange(selection?.value)}
       >
         <div className="relative">
           <div className="flex">
             <ComboboxInput
+              name={props.id}
               className="cui-input-base truncate pr-16"
               placeholder={props.placeholder ?? "Select"}
               displayValue={(value: any) => value?.label || ""}
@@ -209,6 +212,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
           <DropdownTransition>
             <ComboboxOptions
+              modal={false}
               as="ul"
               className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right"
             >

@@ -180,7 +180,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
       );
       setIsLoading(false);
       if (data) {
-        const updatedBedTypes = bedTypes.map((type: OptionsType) => {
+        const updatedBedTypes = bedTypes.map((type) => {
           return {
             ...type,
             disabled: data.room_type !== type.id ? type.disabled : true,
