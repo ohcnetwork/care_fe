@@ -364,7 +364,7 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         )}
       </div>
-      {(fileQuery?.data?.results || []).length > RESULTS_PER_PAGE_LIMIT && (
+      {(fileQuery?.data?.count ?? 0) > RESULTS_PER_PAGE_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination
             cPage={currentPage}
