@@ -90,29 +90,26 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify Facility Export Functionality", () => {
+    // Verify Facility Export
     facilityHome.csvDownloadIntercept(facilitiesAlias, "");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Facilities");
     facilityHome.verifyDownload(facilitiesAlias);
+    // Verify Doctor Export
+    facilityHome.csvDownloadIntercept(doctorsAlias, "&doctors");
+    facilityHome.clickExportButton();
+    facilityHome.clickMenuItem("Doctors");
+    facilityHome.verifyDownload(doctorsAlias);
+    // Verify Triage Export
+    facilityHome.csvDownloadIntercept(triagesAlias, "&triage");
+    facilityHome.clickExportButton();
+    facilityHome.clickMenuItem("Triages");
+    facilityHome.verifyDownload(triagesAlias);
   });
 
   it("Verify Capacity Export Functionality", () => {
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
-  });
-
-  it("Verify Doctor Export Functionality", () => {
-    facilityHome.csvDownloadIntercept(doctorsAlias, "&doctors");
-    facilityHome.clickExportButton();
-    facilityHome.clickMenuItem("Doctors");
-    facilityHome.verifyDownload(doctorsAlias);
-  });
-
-  it("Verify Triage Export Functionality", () => {
-    facilityHome.csvDownloadIntercept(triagesAlias, "&triage");
-    facilityHome.clickExportButton();
-    facilityHome.clickMenuItem("Triages");
-    facilityHome.verifyDownload(triagesAlias);
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
