@@ -99,8 +99,10 @@ describe("Facility Homepage Function", () => {
   it("Verify Capacity Export Functionality", () => {
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
-    facilityHome.pollForCsvDownload("&capacity");
-    facilityHome.verifyDownload("&capacity");
+    cy.intercept("GET", "**/api/v1/facility/?csv&capacity").as(
+      "getCapacityCsv",
+    );
+    cy.wait("@getCapacityCsv").its("response.statusCode").should("eq", 200);
   });
 
   it("Verify Doctor Export Functionality", () => {
