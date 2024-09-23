@@ -8,7 +8,6 @@ import {
   UserRole,
 } from "../../Common/constants";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-
 import {
   AssignedToObjectModel,
   BloodPressure,
