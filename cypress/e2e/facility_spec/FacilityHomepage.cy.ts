@@ -97,7 +97,6 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify Capacity Export Functionality", () => {
-    facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
     facilityHome.pollForCsvDownload("&capacity");
