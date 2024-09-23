@@ -22,6 +22,25 @@ class FacilityHome {
     cy.intercept("GET", `**/api/v1/facility/?csv${queryParam}`).as(alias);
   }
 
+  pollForCsvDownload(queryParam: string, retries = 10, delay = 5000) {
+    cy.log(`Polling for API status, retries left: ${retries}`);
+    // Make a GET request to the API
+    cy.request({
+      method: "GET",
+      url: `/api/v1/facility/?csv${queryParam}`,
+      failOnStatusCode: false, // Allow Cypress to proceed even if the status is not 200
+    }).then((response) => {
+      if (response.status === 200) {
+        cy.log("API returned 200! File is ready for download.");
+      } else if (retries > 0) {
+        cy.wait(delay); // Wait for a delay before retrying
+        this.pollForCsvDownload(queryParam, retries - 1, delay); // Retry
+      } else {
+        throw new Error("API did not return 200 within the allowed retries");
+      }
+    });
+  }
+
   clickViewCnsButton() {
     cy.get("#view-cns-button").first().click();
   }

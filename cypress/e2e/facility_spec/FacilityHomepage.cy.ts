@@ -15,7 +15,6 @@ describe("Facility Homepage Function", () => {
   const userPage = new UserPage();
   const assetPagination = new AssetPagination();
   const facilitiesAlias = "downloadFacilitiesCSV";
-  const capacitiesAlias = "downloadCapacitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
   const facilityName = "Dummy Facility 40";
@@ -100,9 +99,8 @@ describe("Facility Homepage Function", () => {
   it("Verify Capacity Export Functionality", () => {
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
-    cy.wait(3000);
-    facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
-    facilityHome.verifyDownload(capacitiesAlias);
+    facilityHome.pollForCsvDownload("&capacity");
+    facilityHome.verifyDownload("&capacity");
   });
 
   it("Verify Doctor Export Functionality", () => {
