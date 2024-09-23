@@ -127,6 +127,7 @@ const DischargeModal = ({
 
   const initialDiagnoses = useQuery(routes.getConsultation, {
     pathParams: { id: consultationData.id ?? "" },
+    prefetch: !!consultationData.id,
   }).data?.diagnoses;
 
   const discharge_reason =
