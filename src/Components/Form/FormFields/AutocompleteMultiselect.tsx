@@ -21,7 +21,7 @@ type OptionCallback<T, R> = (option: T) => R;
 
 type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
   placeholder?: string;
-  options: T[];
+  options: readonly T[];
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
   optionDisabled?: OptionCallback<T, boolean>;
@@ -52,7 +52,7 @@ export default AutocompleteMultiSelectFormField;
 
 type AutocompleteMutliSelectProps<T, V = T> = {
   id?: string;
-  options: T[];
+  options: readonly T[];
   disabled?: boolean | undefined;
   value: V[];
   placeholder?: string;
