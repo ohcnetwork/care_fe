@@ -101,7 +101,7 @@
   "consent_request_waiting_approval": "Waiting for the Patient to approve the consent request",
   "consent_request_rejected": "Patient has rejected the consent request",
   "hi__page_title": "Health Information",
-  "hi__record_archived_title": "This record has been archived",
+  "hi__record_archived__title": "This record has been archived",
   "hi__record_archived_description": "This record has been archived and is no longer available for viewing.",
   "hi__record_archived_on": " This record was archived on",
   "hi__record_not_fetched_title": "This record hasn't been fetched yet",
