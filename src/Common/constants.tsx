@@ -8,7 +8,6 @@ import {
   ConsentHIType,
   ConsentPurpose,
 } from "../Components/ABDM/types/consent";
-import careConfig from "@careConfig";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
