@@ -9,6 +9,34 @@ class PatientInsurance {
     });
   }
 
+  selectInsurer(insurer: string) {
+    cy.intercept("GET", "**/api/v1/hcx/payors/**", {
+      statusCode: 200,
+      body: [
+        {
+          name: "test payor 2",
+          code: "testpayor2.swasthmock@swasth-hcx-staging",
+        },
+        {
+          name: "Care Payor",
+          code: "khavinshankar.gmail@swasth-hcx-staging",
+        },
+        {
+          name: "Alliance",
+          code: "hcxdemo.yopmail@swasth-hcx-staging",
+        },
+      ],
+    }).as("getInsurer");
+    cy.get("[name='insurer']")
+      .last()
+      .click()
+      .type(insurer)
+      .then(() => {
+        cy.wait("@getInsurer");
+        cy.get("[role='option']").contains(insurer).click();
+      });
+  }
+
   clickPatientInsuranceViewDetail() {
     cy.get("#insurance-view-details").scrollIntoView();
     cy.get("#insurance-view-details").click();
@@ -18,13 +46,21 @@ class PatientInsurance {
     cy.get("[data-testid=add-insurance-button]").click();
   }
 
-  verifyPatientPolicyDetails(subscriberId, policyId, insurerId, insurerName) {
+  verifyPatientPolicyDetails(
+    subscriberId,
+    policyId,
+    insurerId,
+    insurerName,
+    isHcxEnabled,
+  ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");
       expect($dashboard).to.contain(subscriberId);
       expect($dashboard).to.contain(policyId);
-      expect($dashboard).to.contain(insurerId);
-      expect($dashboard).to.contain(insurerName);
+      if (!isHcxEnabled) {
+        expect($dashboard).to.contain(insurerId);
+        expect($dashboard).to.contain(insurerName);
+      }
     });
   }
 }

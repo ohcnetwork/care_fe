@@ -250,15 +250,15 @@ export const FileUpload = (props: FileUploadProps) => {
             isAuthorized ? (
               <>
                 <h4 className="mb-6 text-2xl">{UPLOAD_HEADING[type]}</h4>
-                {fileUpload.file ? (
+                {fileUpload.files[0] ? (
                   <div className="mb-8 rounded-lg border border-secondary-300 bg-white p-4">
                     <div className="mb-4 flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
                       <span>
                         <CareIcon icon="l-paperclip" className="mr-2" />
-                        {fileUpload.file.name}
+                        {fileUpload.files[0].name}
                       </span>
                       <button
-                        onClick={fileUpload.clearFile}
+                        onClick={fileUpload.clearFiles}
                         disabled={!!fileUpload.progress}
                         className="text-lg"
                       >
@@ -271,7 +271,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       label={t("enter_file_name")}
                       id="upload-file-name"
                       required
-                      value={fileUpload.fileName}
+                      value={fileUpload.fileNames[0]}
                       disabled={!!fileUpload.progress}
                       onChange={(e) => fileUpload.setFileName(e.value)}
                       error={fileUpload.error || undefined}
@@ -290,7 +290,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       </ButtonV2>
                       <ButtonV2
                         variant="danger"
-                        onClick={fileUpload.clearFile}
+                        onClick={fileUpload.clearFiles}
                         disabled={!!fileUpload.progress}
                       >
                         <CareIcon icon="l-trash-alt" className="" />
