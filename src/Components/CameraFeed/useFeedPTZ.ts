@@ -17,31 +17,9 @@ interface PTZPayload {
   zoom: number;
 }
 
-export interface PTZState {
-  x: number;
-  y: number;
-  zoom: number;
-  precision: number;
-}
-
 interface UseMSEMediaPlayerOption {
   config: IAsset;
   dispatch: any;
-}
-
-export interface ICameraAssetState {
-  id: string;
-  username: string;
-  password: string;
-  hostname: string;
-  port: number;
-}
-
-export enum StreamStatus {
-  Playing,
-  Stop,
-  Loading,
-  Offline,
 }
 
 interface UseMSEMediaPlayerReturnType {
@@ -53,6 +31,7 @@ interface UseMSEMediaPlayerReturnType {
     value?: number,
   ) => PTZPayload;
   getCameraStatus: (options: IOptions) => void;
+  getStreamToken: (options: IOptions) => void;
   getPresets: (options: IOptions) => void;
   gotoPreset: (payload: IGotoPresetPayload, options: IOptions) => void;
 }
@@ -79,6 +58,23 @@ const getCameraStatus =
       operateAsset(config.id, {
         action: {
           type: "get_status",
+        },
+      }),
+    );
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
+  };
+
+const getStreamToken =
+  (config: IAsset, dispatch: any) =>
+  async (options: IOptions = {}) => {
+    if (!config.id) return;
+    const resp = await dispatch(
+      operateAsset(config.id, {
+        action: {
+          type: "get_stream_token",
         },
       }),
     );
@@ -205,6 +201,7 @@ export const useFeedPTZ = ({
     relativeMove: relativeMove(config, dispatch),
     getPTZPayload,
     getCameraStatus: getCameraStatus(config, dispatch),
+    getStreamToken: getStreamToken(config, dispatch),
     getPresets: getPresets(config, dispatch),
     gotoPreset: gotoPreset(config, dispatch),
   };

@@ -14,7 +14,7 @@ export const IOBalanceSections = [
         name: "Infusions",
         options: [
           "Adrenalin",
-          "Nor-adrenalin",
+          "Noradrenalin",
           "Vasopressin",
           "Dopamine",
           "Dobutamine",

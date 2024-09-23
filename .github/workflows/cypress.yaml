@@ -45,9 +45,12 @@ jobs:
           cd care
           echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
           echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
+          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
           make docker_config_file=docker-compose.pre-built.yaml up 
           make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
           cd ..
+        env:
+          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Wait for care to be up ♻
         uses: nick-fields/retry@v2

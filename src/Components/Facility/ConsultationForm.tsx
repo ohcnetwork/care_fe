@@ -404,9 +404,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             cause_of_death: data?.discharge_notes || "",
             death_datetime: data?.death_datetime || "",
             death_confirmed_doctor: data?.death_confirmed_doctor || "",
-            InvestigationAdvice: Array.isArray(data.investigation)
-              ? data.investigation
-              : [],
+            InvestigationAdvice: data.investigation ?? [],
             diagnoses: data.diagnoses?.sort(
               (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
                 ConditionVerificationStatuses.indexOf(a.verification_status) -

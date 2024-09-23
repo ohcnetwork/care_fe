@@ -1,3 +1,4 @@
+import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
@@ -6,18 +7,17 @@ import {
   PATIENT_NOTES_THREADS,
   UserRole,
 } from "../../Common/constants";
-import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
-import { RouteToFacility } from "../Common/RouteToFacilitySelect";
-import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import {
   AssignedToObjectModel,
+  BloodPressure,
   DailyRoundsModel,
   FileUploadModel,
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
+import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
@@ -132,8 +132,6 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   new_discharge_reason?: (typeof DISCHARGE_REASONS)[number]["id"];
-  discharge_prescription?: NormalPrescription;
-  discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
@@ -275,8 +273,6 @@ export interface CurrentBed {
   meta: Record<string, any>;
 }
 
-// Voluntarily made as `type` for it to achieve type-safety when used with
-// `useAsyncOptions<ICD11DiagnosisModel>`
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
@@ -427,11 +423,7 @@ export const PrimaryParametersPlotFields = [
 ] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PrimaryParametersPlotRes = {
-  bp: {
-    mean?: number;
-    systolic?: number;
-    diastolic?: number;
-  };
+  bp: BloodPressure;
   pulse: number;
   temperature: string;
   resp: number;

@@ -8,7 +8,6 @@ import {
   ConsentHIType,
   ConsentPurpose,
 } from "../Components/ABDM/types/consent";
-import careConfig from "@careConfig";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -217,30 +216,7 @@ export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-name" },
 ];
 
-const { kasp } = careConfig;
-
-const KASP_BED_TYPES = kasp.enabled
-  ? [
-      { id: 40, text: kasp.string + " Ordinary Beds" },
-      { id: 60, text: kasp.string + " Oxygen beds" },
-      { id: 50, text: kasp.string + " ICU (ICU without ventilator)" },
-      { id: 70, text: kasp.string + " ICU (ICU with ventilator)" },
-    ]
-  : [];
-
-export const BED_TYPES: OptionsType[] = [
-  { id: 1, text: "Ordinary Beds" },
-  { id: 150, text: "Oxygen beds" },
-  { id: 10, text: "ICU (ICU without ventilator)" },
-  { id: 20, text: "Ventilator (ICU with ventilator)" },
-  { id: 30, text: "Covid Ordinary Beds" },
-  { id: 120, text: "Covid Oxygen beds" },
-  { id: 110, text: "Covid ICU (ICU without ventilator)" },
-  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  ...KASP_BED_TYPES,
-  { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom" },
-];
+export const BED_TYPES = [100, 200, 300, 400, 500];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine" },
@@ -735,10 +711,23 @@ export const HEARTBEAT_RHYTHM_CHOICES = [
 ] as const;
 
 export const NURSING_CARE_PROCEDURES = [
+  "oral_care",
+  "hair_care",
+  "bed_bath",
+  "eye_care",
+  "perineal_care",
+  "skin_care",
+  "pre_enema",
+  "wound_dressing",
+  "lymphedema_care",
+  "ascitic_tapping",
+  "colostomy_care",
+  "colostomy_change",
   "personal_hygiene",
   "positioning",
   "suctioning",
   "ryles_tube_care",
+  "ryles_tube_change",
   "iv_sitecare",
   "nubulisation",
   "dressing",
@@ -746,8 +735,10 @@ export const NURSING_CARE_PROCEDURES = [
   "restrain",
   "chest_tube_care",
   "tracheostomy_care",
+  "tracheostomy_tube_change",
   "stoma_care",
   "catheter_care",
+  "catheter_change",
 ] as const;
 
 export const EYE_OPEN_SCALE = [
@@ -1400,6 +1391,20 @@ export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 3, text: "Comfort Care Only" },
   { id: 4, text: "Active treatment" },
 ];
+
+export const SOCIOECONOMIC_STATUS_CHOICES = [
+  "MIDDLE_CLASS",
+  "POOR",
+  "VERY_POOR",
+  "WELL_OFF",
+] as const;
+
+export const DOMESTIC_HEALTHCARE_SUPPORT_CHOICES = [
+  "FAMILY_MEMBER",
+  "PAID_CAREGIVER",
+  "NO_SUPPORT",
+] as const;
+
 export const OCCUPATION_TYPES = [
   {
     id: 27,
