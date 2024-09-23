@@ -8,16 +8,16 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants.js";
 import { ConsultationModel, PatientCategory } from "../Facility/models.js";
-import { Switch, Menu } from "@headlessui/react";
+import { Switch, MenuItem, Field, Label } from "@headlessui/react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import useConfig from "../../Common/hooks/useConfig.js";
 import dayjs from "../../Utils/dayjs.js";
 import {
   classNames,
   formatDate,
   formatDateTime,
+  formatName,
   formatPatientAge,
   humanizeStrings,
 } from "../../Utils/utils.js";
@@ -40,8 +40,10 @@ import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
+import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
+import careConfig from "@careConfig";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -56,6 +58,7 @@ const formatSkills = (arr: SkillModel[]) => {
 export default function PatientInfoCard(props: {
   patient: PatientModel;
   consultation?: ConsultationModel;
+  abhaNumber?: AbhaNumberModel;
   fetchPatientData?: (state: { aborted: boolean }) => void;
   activeShiftingData: any;
   consultationId: string;
@@ -72,8 +75,6 @@ export default function PatientInfoCard(props: {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
-
-  const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
@@ -145,7 +146,6 @@ export default function PatientInfoCard(props: {
         {patient?.facility && patient?.id && consultation?.id ? (
           <Beds
             facilityId={patient?.facility}
-            patientId={patient?.id}
             discharged={!!consultation?.discharge_date}
             consultationId={consultation?.id ?? ""}
             setState={setOpen}
@@ -202,7 +202,7 @@ export default function PatientInfoCard(props: {
                     <p className="w-full truncate px-2 text-center text-base font-bold">
                       {consultation?.current_bed?.bed_object.name}
                     </p>
-                    <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
+                    <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm">
                       <span>
                         {
                           consultation?.current_bed?.bed_object?.location_object
@@ -336,7 +336,7 @@ export default function PatientInfoCard(props: {
                           className={
                             "inline-flex w-full items-center justify-center rounded border border-secondary-500 p-1 text-xs font-semibold leading-4 " +
                             (dayjs().isBefore(patient.review_time)
-                              ? " bg-secondary-100 "
+                              ? " bg-secondary-100"
                               : " bg-red-400 text-white")
                           }
                         >
@@ -380,7 +380,7 @@ export default function PatientInfoCard(props: {
                       "Respiratory Support",
                       RESPIRATORY_SUPPORT.find(
                         (resp) =>
-                          resp.text ===
+                          resp.value ===
                           consultation?.last_daily_round?.ventilator_interface,
                       )?.id ?? "UNKNOWN",
                       consultation?.last_daily_round?.ventilator_interface,
@@ -486,7 +486,7 @@ export default function PatientInfoCard(props: {
                       {t("treating_doctor")}:{" "}
                     </span>
                     {consultation?.treating_physician_object
-                      ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
+                      ? formatName(consultation.treating_physician_object)
                       : consultation?.deprecated_verified_by}
                     <CareIcon
                       icon="l-check"
@@ -665,7 +665,7 @@ export default function PatientInfoCard(props: {
                   ],
                 ]
                   .concat(
-                    enable_hcx
+                    careConfig.hcx.enabled
                       ? [
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
@@ -735,10 +735,10 @@ export default function PatientInfoCard(props: {
               </div>
 
               <div>
-                {enable_abdm &&
-                  (patient.abha_number ? (
+                {careConfig.abdm.enabled &&
+                  (props.abhaNumber ? (
                     <>
-                      <Menu.Item>
+                      <MenuItem>
                         {({ close }) => (
                           <>
                             <div
@@ -797,10 +797,10 @@ export default function PatientInfoCard(props: {
                             </div>
                           </>
                         )}
-                      </Menu.Item>
+                      </MenuItem>
                     </>
                   ) : (
-                    <Menu.Item>
+                    <MenuItem>
                       {({ close }) => (
                         <div
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -818,12 +818,12 @@ export default function PatientInfoCard(props: {
                           </span>
                         </div>
                       )}
-                    </Menu.Item>
+                    </MenuItem>
                   ))}
               </div>
               <div>
                 {!consultation?.discharge_date && (
-                  <Menu.Item>
+                  <MenuItem>
                     {({ close }) => (
                       <>
                         {hasActiveShiftingRequest() ? (
@@ -869,9 +869,9 @@ export default function PatientInfoCard(props: {
                         )}
                       </>
                     )}
-                  </Menu.Item>
+                  </MenuItem>
                 )}
-                <Menu.Item>
+                <MenuItem>
                   {({ close }) => (
                     <div
                       className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -889,8 +889,8 @@ export default function PatientInfoCard(props: {
                       </span>
                     </div>
                   )}
-                </Menu.Item>
-                <Menu.Item>
+                </MenuItem>
+                <MenuItem>
                   {({ close }) => (
                     <div
                       className={`dropdown-item-primary pointer-events-auto ${
@@ -917,10 +917,10 @@ export default function PatientInfoCard(props: {
                       </span>
                     </div>
                   )}
-                </Menu.Item>
+                </MenuItem>
               </div>
               <div className="px-4 py-2">
-                <Switch.Group as="div" className="flex items-center">
+                <Field as="div" className="flex items-center">
                   <Switch
                     checked={medicoLegalCase}
                     onChange={(checked) => {
@@ -934,7 +934,7 @@ export default function PatientInfoCard(props: {
                     }}
                     className={classNames(
                       medicoLegalCase ? "bg-primary" : "bg-secondary-200",
-                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ",
+                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
                     )}
                   >
                     <span
@@ -945,12 +945,12 @@ export default function PatientInfoCard(props: {
                       )}
                     />
                   </Switch>
-                  <Switch.Label as="span" className="ml-3 text-sm">
+                  <Label as="span" className="ml-3 text-sm">
                     <span className="font-medium text-secondary-900">
                       Medico-Legal Case
                     </span>{" "}
-                  </Switch.Label>
-                </Switch.Group>
+                  </Label>
+                </Field>
               </div>
             </DropdownMenu>
           </div>
@@ -966,18 +966,18 @@ export default function PatientInfoCard(props: {
       />
       <ABHAProfileModal
         patientId={patient.id}
-        abha={patient.abha_number_object}
+        abha={props.abhaNumber}
         show={showABHAProfile}
         onClose={() => setShowABHAProfile(false)}
       />
       <LinkCareContextModal
         consultationId={props.consultationId}
-        patient={patient}
+        abha={props.abhaNumber}
         show={showLinkCareContext}
         onClose={() => setShowLinkCareContext(false)}
       />
       <FetchRecordsModal
-        patient={patient}
+        abha={props.abhaNumber}
         show={showFetchABDMRecords}
         onClose={() => setShowFetchABDMRecords(false)}
       />

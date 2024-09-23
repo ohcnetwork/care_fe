@@ -473,3 +473,62 @@ export const humanizeStrings = (strings: readonly string[], empty = "") => {
   const [last, ...items] = [...strings].reverse();
   return `${items.reverse().join(", ")} and ${last}`;
 };
+
+export type ValueDescription = {
+  till?: number;
+  text: React.ReactNode;
+  className?: string;
+  color?: string;
+};
+
+export const getValueDescription = (
+  valueDescriptions: ValueDescription[],
+  value: number,
+) => {
+  return valueDescriptions.find((vd) => (vd.till || 0) >= (value || 0));
+};
+
+export const rangeValueDescription = (range: {
+  low?: number;
+  high?: number;
+}) => {
+  const results: ValueDescription[] = [];
+
+  if (range.low != null) {
+    results.push({
+      till: range.low,
+      text: "Low",
+      className: "text-red-500",
+    });
+  }
+
+  results.push({
+    till: range.high,
+    text: "Normal",
+    className: "text-green-500",
+  });
+
+  if (range.high != null) {
+    results.push({
+      text: "High",
+      className: "text-red-500",
+    });
+  }
+
+  return results;
+};
+
+export const celsiusToFahrenheit = (celsius: number) => {
+  return (celsius * 9) / 5 + 32;
+};
+
+export const fahrenheitToCelsius = (fahrenheit: number) => {
+  return ((fahrenheit - 32) * 5) / 9;
+};
+
+/**
+ * Although same as `Objects.keys(...)`, this provides better type-safety.
+ */
+export const keysOf = <T extends object>(obj: T) => {
+  return Object.keys(obj) as (keyof T)[];
+};

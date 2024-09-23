@@ -1,4 +1,3 @@
-import { cy } from "local-cypress";
 export class PatientPrescription {
   clickAddPrescription() {
     cy.get("#add-prescription").scrollIntoView();

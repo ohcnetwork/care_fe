@@ -66,7 +66,7 @@ export default function ResultList() {
     page: qParams.page || 1,
     name: qParams.name || "",
     mobile_number: qParams.mobile_number
-      ? parsePhoneNumber(qParams.mobile_number) ?? ""
+      ? (parsePhoneNumber(qParams.mobile_number) ?? "")
       : "",
     wards: qParams.wards || undefined,
     local_bodies: qParams.local_bodies || undefined,
@@ -209,7 +209,7 @@ export default function ResultList() {
       <tr className="bg-white">
         <td colSpan={5}>
           <div className="w-full rounded-lg bg-white p-3">
-            <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-secondary-600">
+            <div className="mt-4 flex w-full justify-center text-2xl font-bold text-secondary-600">
               No Results Found
             </div>
           </div>

@@ -1,17 +1,17 @@
-import { LegacyRef, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AssetData } from "../Assets/AssetTypes";
 import useOperateCamera, { PTZPayload } from "./useOperateCamera";
-import usePlayer from "./usePlayer";
 import { getStreamUrl } from "./utils";
-import ReactPlayer from "react-player";
 import { classNames, isIOS } from "../../Utils/utils";
-import FeedAlert, { FeedAlertState } from "./FeedAlert";
+import FeedAlert, { FeedAlertState, StreamStatus } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
 import useFullscreen from "../../Common/hooks/useFullscreen";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import { GetPresetsResponse } from "./routes";
+import VideoPlayer from "./videoPlayer";
 
 interface Props {
   children?: React.ReactNode;
@@ -30,17 +30,15 @@ interface Props {
 }
 
 export default function CameraFeed(props: Props) {
-  const playerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
+  const playerRef = useRef<HTMLVideoElement | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
-  const streamUrl = getStreamUrl(props.asset);
+  const [streamUrl, setStreamUrl] = useState<string>("");
   const inlineControls = useBreakpoints({ default: false, sm: true });
-
-  const player = usePlayer(streamUrl, playerRef);
 
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [state, setState] = useState<FeedAlertState>();
-  useEffect(() => setState(player.status), [player.status, setState]);
-
+  const [playedOn, setPlayedOn] = useState<Date>();
+  const [playerStatus, setPlayerStatus] = useState<StreamStatus>("stop");
   // Move camera when selected preset has changed
   useEffect(() => {
     async function move(preset: PTZPayload) {
@@ -66,27 +64,35 @@ export default function CameraFeed(props: Props) {
     async function getPresets(cb: (presets: Record<string, number>) => void) {
       const { res, data } = await props.operate({ type: "get_presets" });
       if (res?.ok && data) {
-        cb((data as { result: Record<string, number> }).result);
+        cb((data as GetPresetsResponse).result);
       }
     }
     getPresets(props.onCameraPresetsObtained);
   }, [props.operate, props.onCameraPresetsObtained]);
 
-  const initializeStream = useCallback(() => {
-    player.initializeStream({
-      onSuccess: async () => {
-        props.onStreamSuccess?.();
-        const { res } = await props.operate({ type: "get_status" });
-        if (res?.status === 500) {
-          setState("host_unreachable");
+  const initializeStream = useCallback(async () => {
+    if (!playerRef.current) return;
+    setPlayerStatus("loading");
+    await props
+      .operate({ type: "get_stream_token" })
+      .then(({ res, data }) => {
+        if (res?.status != 200) {
+          setState("authentication_error");
+          return props.onStreamError?.();
         }
-      },
-      onError: props.onStreamError,
-    });
-  }, [player.initializeStream]);
+        const result = data?.result as { token: string };
+        return setStreamUrl(getStreamUrl(props.asset, result.token));
+      })
+      .catch(() => {
+        setState("host_unreachable");
+        return props.onStreamError?.();
+      });
+  }, []);
 
   // Start stream on mount
-  useEffect(() => initializeStream(), [initializeStream]);
+  useEffect(() => {
+    initializeStream();
+  }, []);
 
   const resetStream = () => {
     setState("loading");
@@ -125,9 +131,9 @@ export default function CameraFeed(props: Props) {
       }}
       onReset={resetStream}
       onMove={async (data) => {
-        props.onMove?.();
         setState("moving");
         const { res } = await props.operate({ type: "relative_move", data });
+        props.onMove?.();
         setTimeout(() => {
           setState((state) => (state === "moving" ? undefined : state));
         }, 4000);
@@ -153,7 +159,7 @@ export default function CameraFeed(props: Props) {
             isFullscreen ? "hidden lg:flex" : "flex",
             "items-center justify-between px-4 py-0.5 transition-all duration-500 ease-in-out lg:py-1",
             (() => {
-              if (player.status !== "playing") {
+              if (playerStatus !== "playing") {
                 return "bg-black text-zinc-400";
               }
 
@@ -167,7 +173,7 @@ export default function CameraFeed(props: Props) {
         >
           <div
             className={classNames(
-              player.status !== "playing"
+              playerStatus !== "playing"
                 ? "pointer-events-none opacity-10"
                 : "opacity-100",
               "transition-all duration-200 ease-in-out",
@@ -188,8 +194,8 @@ export default function CameraFeed(props: Props) {
               >
                 <FeedNetworkSignal
                   playerRef={playerRef as any}
-                  playedOn={player.playedOn}
-                  status={player.status}
+                  playedOn={playedOn}
+                  status={playerStatus}
                   onReset={resetStream}
                 />
               </div>
@@ -199,75 +205,74 @@ export default function CameraFeed(props: Props) {
         <div className="group relative aspect-video bg-black">
           {/* Notifications */}
           <FeedAlert state={state} />
-          {player.status === "playing" && <FeedWatermark />}
+          {playerStatus === "playing" && <FeedWatermark />}
 
           {/* No Feed informations */}
-          {state === "host_unreachable" && (
-            <NoFeedAvailable
-              message="Host Unreachable"
-              className="text-warning-500"
-              icon="l-exclamation-triangle"
-              streamUrl={streamUrl}
-              asset={props.asset}
-              onResetClick={resetStream}
-            />
-          )}
-          {player.status === "offline" && (
-            <NoFeedAvailable
-              message="Offline"
-              className="text-secondary-500"
-              icon="l-exclamation-triangle"
-              streamUrl={streamUrl}
-              asset={props.asset}
-              onResetClick={resetStream}
-            />
-          )}
+          {(() => {
+            switch (state) {
+              case "host_unreachable":
+                return (
+                  <NoFeedAvailable
+                    message="Host Unreachable"
+                    className="text-warning-500"
+                    icon="l-exclamation-triangle"
+                    streamUrl=""
+                    asset={props.asset}
+                    onResetClick={resetStream}
+                  />
+                );
+              case "authentication_error":
+                return (
+                  <NoFeedAvailable
+                    message="Authentication Error"
+                    className="text-warning-500"
+                    icon="l-exclamation-triangle"
+                    streamUrl=""
+                    asset={props.asset}
+                    onResetClick={resetStream}
+                  />
+                );
+              case "offline":
+                return (
+                  <NoFeedAvailable
+                    message="Offline"
+                    className="text-secondary-500"
+                    icon="l-exclamation-triangle"
+                    streamUrl=""
+                    asset={props.asset}
+                    onResetClick={resetStream}
+                  />
+                );
+            }
+          })()}
 
           {/* Video Player */}
-          {isIOS ? (
-            <div className="absolute inset-0">
-              <ReactPlayer
-                url={streamUrl}
-                ref={playerRef.current as LegacyRef<ReactPlayer>}
-                controls={false}
-                pip={false}
-                playsinline
-                playing
-                muted
-                width="100%"
-                height="100%"
-                onPlay={player.onPlayCB}
-                onEnded={() => player.setStatus("stop")}
-                onError={(e, _, hlsInstance) => {
-                  if (e === "hlsError") {
-                    const recovered = hlsInstance.recoverMediaError();
-                    console.info(recovered);
-                  }
-                }}
-              />
-            </div>
-          ) : (
-            <video
-              onContextMenu={(e) => e.preventDefault()}
-              className="absolute inset-x-0 mx-auto aspect-video max-h-full w-full"
-              id="mse-video"
-              autoPlay
-              muted
-              disablePictureInPicture
-              playsInline
-              onPlay={player.onPlayCB}
-              onEnded={() => player.setStatus("stop")}
-              ref={playerRef as LegacyRef<HTMLVideoElement>}
-            />
-          )}
-
-          {inlineControls && player.status === "playing" && controls}
+          <VideoPlayer
+            playerRef={playerRef}
+            streamUrl={streamUrl}
+            className="absolute inset-x-0 mx-auto aspect-video max-h-full w-full"
+            onPlay={() => {
+              setPlayedOn(new Date());
+              setState("playing");
+              setPlayerStatus("playing");
+            }}
+            onEnded={() => setPlayerStatus("stop")}
+            onSuccess={async () => {
+              props.onStreamSuccess?.();
+              const { res } = await props.operate({ type: "get_status" });
+              if (res?.status === 500) {
+                setState("host_unreachable");
+              }
+            }}
+            onError={props.onStreamError}
+          />
+          {inlineControls && playerStatus === "playing" && controls}
         </div>
         {!inlineControls && (
           <div
             className={classNames(
               "py-4 transition-all duration-500 ease-in-out",
-              player.status !== "playing"
+              playerStatus !== "playing"
                 ? "pointer-events-none px-6 opacity-30"
                 : "px-12 opacity-100",
             )}

@@ -17,6 +17,7 @@ import { dateQueryString, scrollTo } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import { useTranslation } from "react-i18next";
 
 interface Props extends PatientStatsModel {
   facilityId: string;
@@ -57,6 +58,7 @@ const triageFormReducer = (state = initialState, action: any) => {
 };
 
 export const TriageForm = ({ facilityId, id }: Props) => {
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(triageFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +100,7 @@ export const TriageForm = ({ facilityId, id }: Props) => {
       switch (field) {
         case "entry_date":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;

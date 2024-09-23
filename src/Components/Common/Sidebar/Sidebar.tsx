@@ -4,11 +4,11 @@ import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
 import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
-import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
+import careConfig from "@careConfig";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -62,10 +62,8 @@ const StatelessSidebar = ({
     { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
   ];
 
-  const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
-  const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const activeLinkRef = useRef<HTMLAnchorElement>(null);
@@ -75,7 +73,7 @@ const StatelessSidebar = ({
   useEffect(() => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
-    const navItemCount = NavItems.length + (dashboard_url ? 2 : 1); // +2 for notification and dashboard
+    const navItemCount = NavItems.length + (careConfig.urls.dashboard ? 2 : 1); // +2 for notification and dashboard
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
@@ -108,8 +106,8 @@ const StatelessSidebar = ({
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
-          ? " overflow-visible "
-          : " overflow-y-auto overflow-x-hidden "
+          ? "overflow-visible"
+          : "overflow-y-auto overflow-x-hidden"
       }`}
     >
       <div className="h-3" /> {/* flexible spacing */}
@@ -118,7 +116,7 @@ const StatelessSidebar = ({
           className={`${
             shrinked ? "mx-auto" : "ml-5"
           } mb-2 h-5 self-start transition md:mb-5 md:h-8`}
-          src={shrinked ? LOGO_COLLAPSE : main_logo.light}
+          src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
         />
       </Link>
       <div className="h-3" /> {/* flexible spacing */}
@@ -151,10 +149,10 @@ const StatelessSidebar = ({
             handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
-          {dashboard_url && (
+          {careConfig.urls.dashboard && (
             <Item
               text="Dashboard"
-              to={dashboard_url}
+              to={careConfig.urls.dashboard}
               icon={<CareIcon icon="l-dashboard" className="text-lg" />}
               external
               handleOverflow={handleOverflow}

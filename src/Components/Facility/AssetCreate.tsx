@@ -32,10 +32,10 @@ import { validateEmailAddress } from "../../Common/validation";
 import { dateQueryString, parsePhoneNumber } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 import DateFormField from "../Form/FormFields/DateFormField.js";
-import { t } from "i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -101,6 +101,7 @@ type AssetFormSection =
 
 const AssetCreate = (props: AssetProps) => {
   const { goBack } = useAppHistory();
+  const { t } = useTranslation();
   const { facilityId, assetId } = props;
 
   let assetClassInitial: AssetClass;
@@ -212,7 +213,7 @@ const AssetCreate = (props: AssetProps) => {
           return;
         case "is_working":
           if (is_working === undefined) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -224,7 +225,7 @@ const AssetCreate = (props: AssetProps) => {
           return;
         case "support_phone": {
           if (!support_phone) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           // eslint-disable-next-line no-case-declarations

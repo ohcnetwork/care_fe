@@ -37,13 +37,13 @@ export default function ResponsiveMedicineTable(props: {
             <tr>
               {props.theads.map((item) => {
                 return (
-                  <th className="bg-secondary-50 whitespace-nowrap border-b border-secondary-200 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-800">
+                  <th className="whitespace-nowrap border-b border-secondary-200 bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-800">
                     {item}
                   </th>
                 );
               })}
               {props.actions && (
-                <th className="bg-secondary-50 border-b border-secondary-200 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-800">
+                <th className="border-b border-secondary-200 bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-800">
                   {props.actionLabel || ""}
                 </th>
               )}
@@ -109,7 +109,7 @@ export default function ResponsiveMedicineTable(props: {
               }
               className={
                 props.list.length - 1 === index
-                  ? "bg-white p-5 "
+                  ? "bg-white p-5"
                   : "border-b border-b-secondary-400 bg-white p-5"
               }
               key={index}

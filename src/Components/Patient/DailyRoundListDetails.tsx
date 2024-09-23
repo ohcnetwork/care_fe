@@ -1,28 +1,24 @@
 import { lazy, useState } from "react";
-import { CONSCIOUSNESS_LEVEL } from "../../Common/constants";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { formatDateTime } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export const DailyRoundListDetails = (props: any) => {
+  const { t } = useTranslation();
   const { facilityId, patientId, consultationId, id } = props;
   const [dailyRoundListDetailsData, setDailyRoundListDetails] =
     useState<DailyRoundsModel>({});
 
   const { loading: isLoading } = useQuery(routes.getDailyReport, {
     pathParams: { consultationId, id },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        const tdata: DailyRoundsModel = {
-          ...data,
-          temperature: Number(data.temperature) ? data.temperature : "",
-          medication_given: data.medication_given ?? [],
-        };
-        setDailyRoundListDetails(tdata);
+    onResponse: ({ data }) => {
+      if (data) {
+        setDailyRoundListDetails(data);
       }
     },
   });
@@ -98,7 +94,7 @@ export const DailyRoundListDetails = (props: any) => {
             <span className="font-semibold leading-relaxed">Pulse(bpm): </span>
             {dailyRoundListDetailsData.pulse ?? "-"}
           </div>
-          <div className="md:col-span-2 ">
+          <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">BP</span>
             <div className="flex flex-row space-x-20">
               <div className="flex">
@@ -139,9 +135,9 @@ export const DailyRoundListDetails = (props: any) => {
               Level Of Consciousness:{" "}
             </span>
             {(dailyRoundListDetailsData.consciousness_level &&
-              CONSCIOUSNESS_LEVEL.find(
-                (i) => i.id === dailyRoundListDetailsData.consciousness_level,
-              )?.text) ||
+              t(
+                `CONSCIOUSNESS_LEVEL__${dailyRoundListDetailsData.consciousness_level}`,
+              )) ||
               "-"}
           </div>
           <div>

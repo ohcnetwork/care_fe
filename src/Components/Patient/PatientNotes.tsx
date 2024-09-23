@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
@@ -12,7 +11,9 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import { classNames } from "../../Utils/utils.js";
+import { classNames, keysOf } from "../../Utils/utils.js";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
+import { t } from "i18next";
 
 interface PatientNotesProps {
   patientId: any;
@@ -105,23 +106,19 @@ const PatientNotes = (props: PatientNotesProps) => {
     >
       <div className="relative mx-3 my-2 flex grow flex-col rounded-lg border border-secondary-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
         <div className="absolute inset-x-0 top-0 flex bg-secondary-200 text-sm shadow-md">
-          {Object.values(PATIENT_NOTES_THREADS).map((current) => (
+          {keysOf(PATIENT_NOTES_THREADS).map((current) => (
             <button
+              id={`patient-note-tab-${current}`}
               key={current}
               className={classNames(
                 "flex flex-1 justify-center border-b-2 py-2",
-                thread === current
+                thread === PATIENT_NOTES_THREADS[current]
                   ? "border-primary-500 font-bold text-secondary-800"
                   : "border-secondary-300 text-secondary-800",
               )}
-              onClick={() => setThread(current)}
+              onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
             >
-              {
-                {
-                  10: "Doctor's Discussions",
-                  20: "Nurse's Discussions",
-                }[current]
-              }
+              {t(`patient_notes_thread__${current}`)}
             </button>
           ))}
         </div>
@@ -136,14 +133,16 @@ const PatientNotes = (props: PatientNotesProps) => {
         />
 
         <div className="relative mx-4 flex items-center">
-          <TextFormField
+          <AutoExpandingTextInputFormField
+            maxHeight={160}
+            rows={2}
             name="note"
             value={noteField}
             onChange={(e) => setNoteField(e.value)}
-            className="grow"
-            type="text"
+            className="w-full grow"
             errorClassName="hidden"
-            placeholder="Type your Note"
+            innerClassName="pr-10"
+            placeholder={t("notes_placeholder")}
             disabled={!patientActive}
           />
           <ButtonV2

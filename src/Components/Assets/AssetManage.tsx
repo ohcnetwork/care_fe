@@ -10,7 +10,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
-import { formatDate, formatDateTime } from "../../Utils/utils";
+import { formatDate, formatDateTime, formatName } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -110,7 +110,7 @@ const AssetManage = (props: AssetManageProps) => {
 
   const PrintPreview = () => (
     <div className="">
-      <div className="my-4 flex justify-end ">
+      <div className="my-4 flex justify-end">
         <button
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
@@ -148,8 +148,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-secondary-500">
               <span className="font-medium text-secondary-900">
-                {transaction.performed_by.first_name}{" "}
-                {transaction.performed_by.last_name}
+                {formatName(transaction.performed_by)}
               </span>
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-right text-sm leading-5 text-secondary-500">
@@ -537,7 +536,7 @@ const AssetManage = (props: AssetManageProps) => {
               <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Last Updated
               </th>
-              <th className="bg-secondary-50 relative right-10 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
+              <th className="relative right-10 bg-secondary-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Edit
               </th>
             </tr>
@@ -564,7 +563,7 @@ const AssetManage = (props: AssetManageProps) => {
               <th className="bg-secondary-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Moved By
               </th>
-              <th className="bg-secondary-50 relative right-5 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
+              <th className="relative right-5 bg-secondary-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                 Moved On
               </th>
             </tr>

@@ -14,8 +14,11 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatDateTime, formatPatientAge } from "../../Utils/utils";
-import useConfig from "../../Common/hooks/useConfig";
+import {
+  formatDateTime,
+  formatName,
+  formatPatientAge,
+} from "../../Utils/utils";
 
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
@@ -24,19 +27,17 @@ import request from "../../Utils/request/request.js";
 import { ConsultationModel } from "../Facility/models.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import { PatientModel } from "../Patient/models.js";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const { header_logo, kasp_full_string, wartime_shifting, kasp_enabled } =
-    useConfig();
-
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = useState(false);
   const { t } = useTranslation();
 
-  const shiftStatusOptions = wartime_shifting
+  const shiftStatusOptions = careConfig.wartimeShifting
     ? SHIFTING_CHOICES_WARTIME
     : SHIFTING_CHOICES_PEACETIME;
 
@@ -109,7 +110,7 @@ export default function ShiftDetails(props: { id: string }) {
       t("reason") +
       ":" +
       data?.reason;
-    if (wartime_shifting) {
+    if (careConfig.wartimeShifting) {
       formattedText +=
         t("facility_preference") + ": " + data?.assigned_facility_type + "\n";
     }
@@ -299,8 +300,10 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <div id="section-to-print" className="print bg-white ">
-        <div>{data.is_kasp && <img alt="logo" src={header_logo.dark} />}</div>
+      <div id="section-to-print" className="print bg-white">
+        <div>
+          {data.is_kasp && <img alt="logo" src={careConfig.headerLogo?.dark} />}
+        </div>
         <div className="mx-2">
           <div className="mt-6">
             <span className="mt-4 font-semibold leading-relaxed">
@@ -535,9 +538,8 @@ export default function ShiftDetails(props: { id: string }) {
                 <div className="pr-16 sm:px-16 sm:text-center">
                   <p className="font-bold text-primary-800">
                     <span className="inline">
-                      {t("assigned_to")}: {data?.assigned_to_object.first_name}{" "}
-                      {data.assigned_to_object.last_name} -{" "}
-                      {data.assigned_to_object.user_type}
+                      {t("assigned_to")}: {formatName(data.assigned_to_object)}{" "}
+                      - {data.assigned_to_object.user_type}
                     </span>
                   </p>
                 </div>
@@ -568,7 +570,7 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 {data?.origin_facility_object?.name || "--"}
               </div>
-              {wartime_shifting && (
+              {careConfig.wartimeShifting && (
                 <div>
                   <span className="font-semibold leading-relaxed">
                     {t("shifting_approving_facility")}:{" "}
@@ -632,10 +634,10 @@ export default function ShiftDetails(props: { id: string }) {
                     data?.patient_object.last_consultation?.category}
                 </span>
               </div>
-              {kasp_enabled && (
+              {careConfig.kasp.enabled && (
                 <div>
                   <span className="font-semibold leading-relaxed">
-                    {kasp_full_string}:{" "}
+                    {careConfig.kasp.fullString}:{" "}
                   </span>
                   <span className="badge badge-pill badge-warning px-2 py-1">
                     {" "}
@@ -643,11 +645,11 @@ export default function ShiftDetails(props: { id: string }) {
                   </span>
                 </div>
               )}
-              {wartime_shifting && (
+              {careConfig.wartimeShifting && (
                 <>
                   <div>
                     <span className="font-semibold leading-relaxed">
-                      {kasp_full_string}:{" "}
+                      {careConfig.kasp.fullString}:{" "}
                     </span>
                     <span className="badge badge-pill badge-warning px-2 py-1">
                       {" "}
@@ -810,7 +812,7 @@ export default function ShiftDetails(props: { id: string }) {
                   {showFacilityCard(data?.assigned_facility_object)}
                 </div>
               )}
-              {wartime_shifting && (
+              {careConfig.wartimeShifting && (
                 <div>
                   <h4 className="mt-8">
                     {t("details_of_shifting_approving_facility")}

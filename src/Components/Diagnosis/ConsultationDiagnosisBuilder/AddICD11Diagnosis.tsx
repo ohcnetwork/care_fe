@@ -17,6 +17,8 @@ interface AddICD11DiagnosisProps {
   onAdd: (object: CreateDiagnosis) => Promise<boolean>;
   disallowed: ICD11DiagnosisModel[];
   disabled?: boolean;
+  prefill?: ICD11DiagnosisModel;
+  onSelect?: (selected: ICD11DiagnosisModel) => unknown;
 }
 
 export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
@@ -26,6 +28,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   const hasError = !!props.disallowed.find((d) => d?.id === selected?.id);
 
   const { res, data, loading, refetch } = useQuery(routes.listICD11Diagnosis, {
+    prefetch: false,
     silent: true,
   });
 
@@ -34,6 +37,8 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
       Error({ msg: "ICD-11 Diagnosis functionality is facing issues." });
     }
   }, [res?.status]);
+
+  useEffect(() => props.prefill && setSelected(props.prefill), [props.prefill]);
 
   const handleAdd = async (status: CreateDiagnosis["verification_status"]) => {
     if (!selected) return;
@@ -63,7 +68,10 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
         disabled={props.disabled || adding}
         placeholder={t("search_icd11_placeholder")}
         value={selected}
-        onChange={(e) => setSelected(e.value)}
+        onChange={(e) => {
+          setSelected(e.value);
+          props.onSelect?.(e.value);
+        }}
         options={mergeQueryOptions(
           selected ? [selected] : [],
           data ?? [],
@@ -71,6 +79,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
         )}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
+        minQueryLength={2}
         onQuery={(query) => refetch({ query: { query } })}
         isLoading={loading}
         error={hasError ? t("diagnosis_already_added") : undefined}

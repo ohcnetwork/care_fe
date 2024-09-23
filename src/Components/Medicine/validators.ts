@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
 import { FormErrors } from "../Form/Utils";
 import { Prescription } from "./models";
@@ -5,25 +6,48 @@ import { Prescription } from "./models";
 export const PrescriptionFormValidator = () => {
   return (form: Prescription): FormErrors<Prescription> => {
     const errors: Partial<Record<keyof Prescription, FieldError>> = {};
+
     errors.medicine_object = RequiredFieldValidator()(form.medicine_object);
+
     if (form.dosage_type === "TITRATED") {
       errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
       errors.target_dosage = RequiredFieldValidator()(form.target_dosage);
+
       if (
         form.base_dosage &&
         form.target_dosage &&
         form.base_dosage.split(" ")[1] !== form.target_dosage.split(" ")[1]
       ) {
-        errors.base_dosage = "Unit must be same as target dosage's unit";
-        errors.target_dosage = "Unit must be same as base dosage's unit";
+        errors.base_dosage = t("inconsistent_dosage_units_error");
+        errors.target_dosage = t("inconsistent_dosage_units_error");
       }
-    } else errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
-    if (form.dosage_type === "PRN")
+    } else {
+      errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
+    }
+
+    if (form.dosage_type === "PRN") {
       errors.indicator = RequiredFieldValidator()(form.indicator);
-    if (form.dosage_type !== "PRN")
+
+      const baseDosageValue = getDosageValue(form.base_dosage);
+      const maxDosageValue = getDosageValue(form.max_dosage);
+
+      if (
+        baseDosageValue &&
+        maxDosageValue &&
+        baseDosageValue > maxDosageValue
+      ) {
+        errors.max_dosage = t("max_dosage_in_24hrs_gte_base_dosage_error");
+      }
+    } else {
       errors.frequency = RequiredFieldValidator()(form.frequency);
+    }
+
     return errors;
   };
+};
+
+const getDosageValue = (dosage: string | undefined) => {
+  return dosage ? Number(dosage.split(" ")[0]) : undefined;
 };
 
 export const EditPrescriptionFormValidator = (old: Prescription) => {
@@ -31,7 +55,7 @@ export const EditPrescriptionFormValidator = (old: Prescription) => {
     const errors = PrescriptionFormValidator()(form);
 
     if (comparePrescriptions(old, form)) {
-      errors.$all = "No changes made";
+      errors.$all = t("no_changes_made");
     }
 
     return errors;
@@ -65,24 +89,20 @@ export const AdministrationDosageValidator = (
   target_dosage: Prescription["target_dosage"],
 ) => {
   return (value: Prescription["base_dosage"]) => {
-    const getDosageValue = (dosage: string | undefined) => {
-      return dosage ? Number(dosage.split(" ")[0]) : undefined;
-    };
-
     const valueDosage = getDosageValue(value);
     const baseDosage = getDosageValue(base_dosage);
     const targetDosage = getDosageValue(target_dosage);
 
-    if (!valueDosage) return "This field is required";
+    if (!valueDosage) return t("field_required");
 
     if (value?.split(" ")[1] !== base_dosage?.split(" ")[1])
-      return "Unit must be the same as start and target dosage's unit";
+      return t("inconsistent_dosage_units_error");
 
     if (baseDosage && targetDosage) {
       const [min, max] = [baseDosage, targetDosage].sort((a, b) => a - b);
 
       if (!(min <= valueDosage && valueDosage <= max)) {
-        return "Dosage should be between start and target dosage";
+        return t("administration_dosage_range_error");
       }
     }
   };
