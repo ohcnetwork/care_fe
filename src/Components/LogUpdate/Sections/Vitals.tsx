@@ -2,61 +2,31 @@ import { useTranslation } from "react-i18next";
 import {
   celsiusToFahrenheit,
   fahrenheitToCelsius,
-  properRoundOf,
   rangeValueDescription,
 } from "../../../Utils/utils";
 import { meanArterialPressure } from "../../Common/BloodPressureFormField";
-
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import { FieldChangeEvent } from "../../Form/FormFields/Utils";
 import PainChart from "../components/PainChart";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { HEARTBEAT_RHYTHM_CHOICES } from "../../../Common/constants";
+import { BloodPressure } from "../../Patient/models";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();
-  const handleBloodPressureChange = (event: FieldChangeEvent<number>) => {
-    const bp = {
-      ...(log.bp ?? {}),
-      [event.name]: event.value,
-    };
-    bp.mean = meanArterialPressure(bp);
-    onChange({ bp });
-  };
 
   return (
     <div className="space-y-8">
       <div className="flex items-end justify-between">
-        <h2 className="text-lg">{t("blood_pressure")}</h2>
+        <h2 className="text-lg">{t("LOG_UPDATE_FIELD_LABEL__bp")}</h2>
         <span>
-          {t("map_acronym")}:{" "}
-          {(log.bp?.mean && properRoundOf(log.bp.mean)) || "--"}
+          {t("map_acronym")}: {meanArterialPressure(log.bp)?.toFixed() ?? "--"}{" "}
+          mmHg
         </span>
       </div>
-      <RangeFormField
-        label={t("systolic")}
-        name="systolic"
-        onChange={handleBloodPressureChange}
-        value={log.bp?.systolic}
-        min={0}
-        max={250}
-        step={1}
-        unit="mmHg"
-        valueDescriptions={rangeValueDescription({ low: 99, high: 139 })}
-      />
-      <RangeFormField
-        label={t("diastolic")}
-        name="diastolic"
-        onChange={handleBloodPressureChange}
-        value={log.bp?.diastolic}
-        min={30}
-        max={180}
-        step={1}
-        unit="mmHg"
-        valueDescriptions={rangeValueDescription({ low: 49, high: 89 })}
-      />
+      <BPAttributeEditor attribute="systolic" log={log} onChange={onChange} />
+      <BPAttributeEditor attribute="diastolic" log={log} onChange={onChange} />
       <hr />
       <RangeFormField
         label={t("ventilator_spo2")}
@@ -152,6 +122,41 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         onChange={(c) => onChange({ rhythm_detail: c.value })}
       />
     </div>
+  );
+};
+
+const BPAttributeEditor = ({
+  attribute,
+  log,
+  onChange,
+}: LogUpdateSectionProps & { attribute: "systolic" | "diastolic" }) => {
+  const { t } = useTranslation();
+
+  return (
+    <RangeFormField
+      name={attribute}
+      label={t(attribute)}
+      onChange={(event) => {
+        const bp = log.bp ?? {};
+        bp[event.name as keyof BloodPressure] = event.value;
+        onChange({
+          bp: Object.values(bp).filter(Boolean).length ? bp : undefined,
+        });
+      }}
+      value={log.bp?.[attribute] ?? undefined}
+      min={0}
+      max={400}
+      sliderMin={30}
+      sliderMax={270}
+      step={1}
+      unit="mmHg"
+      valueDescriptions={rangeValueDescription(
+        attribute === "systolic"
+          ? { low: 99, high: 139 }
+          : { low: 49, high: 89 },
+      )}
+      hideUnitInLabel
+    />
   );
 };
 

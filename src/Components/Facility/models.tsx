@@ -11,9 +11,9 @@ import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import {
   AssignedToObjectModel,
+  BloodPressure,
   DailyRoundsModel,
   FileUploadModel,
 } from "../Patient/models";
@@ -132,8 +132,6 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   new_discharge_reason?: (typeof DISCHARGE_REASONS)[number]["id"];
-  discharge_prescription?: NormalPrescription;
-  discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
@@ -427,11 +425,7 @@ export const PrimaryParametersPlotFields = [
 ] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PrimaryParametersPlotRes = {
-  bp: {
-    mean?: number;
-    systolic?: number;
-    diastolic?: number;
-  };
+  bp: BloodPressure;
   pulse: number;
   temperature: string;
   resp: number;
