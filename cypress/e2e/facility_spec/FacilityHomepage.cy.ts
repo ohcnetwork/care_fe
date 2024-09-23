@@ -96,25 +96,30 @@ describe("Facility Homepage Function", () => {
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Facilities");
     facilityHome.verifyDownload(facilitiesAlias);
-    facilityHome.clickSearchButton(); // to avoid flaky test, as sometimes, the test is unable to focus on the object
+    facilityHome.clickSearchButton();
+    cy.wait(2000);
+    // to avoid flaky test, as sometimes, the test is unable to focus on the object
     // Download the Capacities CSV
     facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
     facilityHome.verifyDownload(capacitiesAlias);
     facilityHome.clickSearchButton();
+    cy.wait(2000);
     // Download the Doctors CSV
     facilityHome.csvDownloadIntercept(doctorsAlias, "&doctors");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Doctors");
     facilityHome.verifyDownload(doctorsAlias);
     facilityHome.clickSearchButton();
+    cy.wait(2000);
     // Download the Triages CSV
     facilityHome.csvDownloadIntercept(triagesAlias, "&triage");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Triages");
     facilityHome.verifyDownload(triagesAlias);
     facilityHome.clickSearchButton();
+    cy.wait(2000);
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
