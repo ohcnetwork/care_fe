@@ -16,7 +16,7 @@ const TableHeads = [
   "consent__patient",
   "consent__status",
   "created_on",
-  "granted_on",
+  "updated_on",
   "consent__hi_range",
   "expires_on",
   "consent__hi_types",
@@ -100,11 +100,27 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
-                          {consent.consent_artefacts.length
-                            ? formatDateTime(
-                                consent.consent_artefacts[0].created_date,
-                              )
-                            : "-"}
+                          {consent.status === "EXPIRED" ||
+                          new Date(
+                            consent.consent_artefacts?.[0]?.expiry ??
+                              consent.expiry,
+                          ) < new Date() ? (
+                            <p className="flex flex-col items-center gap-1">
+                              {formatDateTime(consent.expiry)}
+                              <span className="text-sm text-secondary-600">
+                                {t("expired_on")}
+                              </span>
+                            </p>
+                          ) : consent.status === "REQUESTED" ? (
+                            "-"
+                          ) : (
+                            <p className="flex flex-col items-center gap-1">
+                              {formatDateTime(consent.modified_date)}
+                              <span className="text-sm text-secondary-600">
+                                {t(`${consent.status.toLowerCase()}_on`)}
+                              </span>
+                            </p>
+                          )}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
