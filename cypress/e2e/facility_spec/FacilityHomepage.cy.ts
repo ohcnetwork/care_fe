@@ -98,9 +98,10 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify Capacity Export Functionality", () => {
-    facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
+    cy.wait(3000);
+    facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
     facilityHome.verifyDownload(capacitiesAlias);
   });
 
