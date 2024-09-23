@@ -28,11 +28,9 @@ import { useTranslation } from "react-i18next";
 import useConfirmedAction from "../../Common/hooks/useConfirmedAction";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
 import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
 import Loading from "../Common/Loading";
 import careConfig from "@careConfig";
-import routes from "../../Redux/api";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
