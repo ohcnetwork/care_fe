@@ -90,8 +90,9 @@ class FacilityHome {
   }
 
   verifyDownload(alias: string) {
-    cy.wait(`@${alias}`).its("response.statusCode").should("eq", 200);
-    cy.wait(5000);
+    cy.wait(`@${alias}`, { timeout: 60000 })
+      .its("response.statusCode")
+      .should("eq", 200);
   }
 
   getURL() {
