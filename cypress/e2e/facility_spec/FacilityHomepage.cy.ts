@@ -91,31 +91,31 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify Facility Export Functionality", () => {
-    // Download the Facilities CSV
     facilityHome.csvDownloadIntercept(facilitiesAlias, "");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Facilities");
     facilityHome.verifyDownload(facilitiesAlias);
-    facilityHome.clickSearchButton();
-    // to avoid flaky test, as sometimes, the test is unable to focus on the object
-    // Download the Capacities CSV
+  });
+
+  it("Verify Capacity Export Functionality", () => {
     facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
     facilityHome.verifyDownload(capacitiesAlias);
-    facilityHome.clickSearchButton();
-    // Download the Doctors CSV
+  });
+
+  it("Verify Doctor Export Functionality", () => {
     facilityHome.csvDownloadIntercept(doctorsAlias, "&doctors");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Doctors");
     facilityHome.verifyDownload(doctorsAlias);
-    facilityHome.clickSearchButton();
-    // Download the Triages CSV
+  });
+
+  it("Verify Triage Export Functionality", () => {
     facilityHome.csvDownloadIntercept(triagesAlias, "&triage");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Triages");
     facilityHome.verifyDownload(triagesAlias);
-    facilityHome.clickSearchButton();
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
