@@ -102,6 +102,7 @@ describe("Facility Homepage Function", () => {
     facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
+    facilityHome.verifyDownload(capacitiesAlias);
     facilityHome.clickSearchButton();
     // Download the Doctors CSV
     facilityHome.csvDownloadIntercept(doctorsAlias, "&doctors");

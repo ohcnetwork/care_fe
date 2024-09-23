@@ -91,6 +91,7 @@ class FacilityHome {
 
   verifyDownload(alias: string) {
     cy.wait(`@${alias}`).its("response.statusCode").should("eq", 200);
+    cy.wait(5000);
   }
 
   getURL() {
