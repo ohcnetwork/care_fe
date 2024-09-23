@@ -23,14 +23,14 @@ class FacilityHome {
   }
 
   pollForCsvDownload(queryParam: string, retries = 10, delay = 5000) {
-    cy.log(`Polling for API status, retries left: ${retries}`);
     // Make a GET request to the API
     cy.request({
       method: "GET",
       url: `/api/v1/facility/?csv${queryParam}`,
       failOnStatusCode: false, // Allow Cypress to proceed even if the status is not 200
     }).then((response) => {
-      if (response.status === 200) {
+      if (response && response.status === 200) {
+        // Success, CSV is ready
         cy.log("API returned 200! File is ready for download.");
       } else if (retries > 0) {
         cy.wait(delay); // Wait for a delay before retrying
