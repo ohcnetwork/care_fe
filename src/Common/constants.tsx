@@ -1,4 +1,7 @@
-import { PatientCategory } from "../Components/Facility/models";
+import {
+  PatientCategory,
+  SpokeRelationship,
+} from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
 import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
@@ -1515,6 +1518,17 @@ export const DEFAULT_ALLOWED_EXTENSIONS = [
   "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.oasis.opendocument.spreadsheet,application/pdf",
+];
+
+export const SPOKE_RELATION_TYPES = [
+  {
+    text: "Regular",
+    value: SpokeRelationship.REGULAR,
+  },
+  {
+    text: "Tele ICU",
+    value: SpokeRelationship.TELE_ICU,
+  },
 ];
 
 export const HumanBodyPaths = {

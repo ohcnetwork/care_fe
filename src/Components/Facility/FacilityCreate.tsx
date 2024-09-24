@@ -62,6 +62,7 @@ import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { RequestResult } from "../../Utils/request/types.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
 import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -247,7 +248,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
   );
 
-  useQuery(routes.getPermittedFacility, {
+  const facilityQuery = useQuery(routes.getPermittedFacility, {
     pathParams: {
       id: facilityId!,
     },
@@ -850,6 +851,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
+                  <div className="py-4 md:col-span-2">
+                    <h4 className="mb-4">{t("spokes")}</h4>
+                    {facilityId && (
+                      <SpokeFacilityEditor
+                        facility={{ ...facilityQuery.data, id: facilityId }}
+                      />
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}

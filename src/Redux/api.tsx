@@ -26,6 +26,8 @@ import {
   DoctorModal,
   FacilityModel,
   FacilityRequest,
+  FacilitySpokeModel,
+  FacilitySpokeRequest,
   IFacilityNotificationRequest,
   IFacilityNotificationResponse,
   IUserFacilityRequest,
@@ -366,7 +368,7 @@ const routes = {
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
-    TRes: Type<FacilityRequest>(),
+    TRes: Type<FacilityModel>(),
   },
 
   getAnyFacility: {
@@ -387,6 +389,38 @@ const routes = {
     method: "PATCH",
     TRes: Type<FacilityModel>(),
     TBody: Type<Partial<FacilityModel>>(),
+  },
+
+  getFacilitySpokes: {
+    path: "/api/v1/facility/{id}/spokes/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
+  },
+
+  updateFacilitySpokes: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "PATCH",
+    TRes: Type<FacilitySpokeModel>(),
+    TBody: Type<FacilitySpokeRequest>(),
+  },
+
+  getFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "GET",
+    TRes: Type<FacilitySpokeModel>(),
+  },
+
+  createFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/",
+    method: "POST",
+    TRes: Type<FacilitySpokeModel>(),
+    TBody: Type<Partial<FacilitySpokeRequest>>(),
+  },
+
+  deleteFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   deleteFacilityCoverImage: {
@@ -774,7 +808,10 @@ const routes = {
     method: "POST",
     TRes: Type<PatientNotesModel>(),
     TBody: Type<
-      Pick<PatientNotesModel, "note" | "thread"> & { consultation?: string }
+      Pick<PatientNotesModel, "note" | "thread"> & {
+        consultation?: string;
+        reply_to?: string;
+      }
     >(),
   },
   updatePatientNote: {
