@@ -1,14 +1,14 @@
 import { useEffect, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
-import { CapacityModal } from "./models";
+import { CapacityModal, OptionsType } from "./models";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { BED_TYPES } from "../../Common/constants";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
-import { BED_TYPES } from "../../Common/constants.js";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;
@@ -52,8 +52,10 @@ export const BedCapacity = (props: BedCapacityProps) => {
   const { t } = useTranslation();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
-  const [bedTypes, setBedTypes] = useState(BED_TYPES);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
+  const [bedTypes, setBedTypes] = useState<OptionsType[]>(
+    BED_TYPES.map((o) => ({ id: o, text: t(`bed_type__${o}`) })),
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
@@ -77,10 +79,11 @@ export const BedCapacity = (props: BedCapacityProps) => {
         // disable existing bed types
         const updatedBedTypes = BED_TYPES.map((type) => {
           const isExisting = existingData.find(
-            (i: CapacityModal) => i.room_type === type.id,
+            (i: CapacityModal) => i.room_type === type,
           );
           return {
-            ...type,
+            id: type,
+            text: t(`bed_type__${type}`),
             disabled: !!isExisting,
           };
         });
@@ -111,7 +114,8 @@ export const BedCapacity = (props: BedCapacityProps) => {
 
   useEffect(() => {
     const lastBedType =
-      bedTypes.filter((i) => i.disabled).length === BED_TYPES.length - 1;
+      bedTypes.filter((i: OptionsType) => i.disabled).length ===
+      BED_TYPES.length - 1;
     setIsLastOptionType(lastBedType);
   }, [bedTypes]);
 

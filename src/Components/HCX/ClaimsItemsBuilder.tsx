@@ -1,20 +1,24 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import PMJAYProcedurePackageAutocomplete from "../Common/PMJAYProcedurePackageAutocomplete";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import FormField, { FieldLabel } from "../Form/FormFields/FormField";
-import TextFormField from "../Form/FormFields/TextFormField";
 import {
   FieldChangeEvent,
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
-import { ITEM_CATEGORIES } from "./constants";
+import FormField, { FieldLabel } from "../Form/FormFields/FormField";
+
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXItemModel } from "./models";
+import { ITEM_CATEGORIES } from "./constants";
+import PMJAYProcedurePackageAutocomplete from "../Common/PMJAYProcedurePackageAutocomplete";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { useTranslation } from "react-i18next";
 
 type Props = FormFieldBaseProps<HCXItemModel[]>;
 
 export default function ClaimsItemsBuilder(props: Props) {
+  const { t } = useTranslation();
+
   const field = useFormFieldPropsResolver(props);
 
   const handleUpdate = (index: number) => {
@@ -59,7 +63,7 @@ export default function ClaimsItemsBuilder(props: Props) {
             >
               <div className="flex items-center justify-between">
                 <FieldLabel className="my-auto !font-bold">
-                  Item {index + 1}
+                  {t("claim__item")} {index + 1}
                 </FieldLabel>
                 {!props.disabled && (
                   <ButtonV2
@@ -69,18 +73,18 @@ export default function ClaimsItemsBuilder(props: Props) {
                     onClick={handleRemove(index)}
                     disabled={props.disabled}
                   >
-                    Delete
+                    {t("remove")}
                     <CareIcon icon="l-trash-alt" className="text-lg" />
                   </ButtonV2>
                 )}
               </div>
 
-              <div className="flex flex-row gap-2 p-2">
+              <div className="p-2">
                 <AutocompleteFormField
-                  className="flex-[2]"
+                  className="w-full"
                   required
                   name="category"
-                  label="Category"
+                  label={t("claim__item__category")}
                   options={ITEM_CATEGORIES}
                   optionLabel={(o) => o.display}
                   optionValue={(o) => o.code}
@@ -89,71 +93,66 @@ export default function ClaimsItemsBuilder(props: Props) {
                   disabled={props.disabled}
                   errorClassName="hidden"
                 />
-                {obj.category === "HBP" && !obj.id ? (
-                  <>
-                    <PMJAYProcedurePackageAutocomplete
-                      required
-                      className="flex-[7]"
-                      labelClassName="text-sm text-secondary-700"
-                      label="Procedure"
-                      name="hbp"
-                      value={obj}
-                      onChange={handleUpdate(index)}
-                      errorClassName="hidden"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <TextFormField
-                      className="flex-[2]"
-                      required
-                      name="id"
-                      label="ID"
-                      placeholder="Eg. PROCEDURE-001"
-                      // options={PROCEDURES}
-                      // optionLabel={(o) => o.code}
-                      // optionDescription={(o) => o.name || ""}
-                      // optionValue={(o) => o.code}
-                      onChange={handleUpdate(index)}
-                      value={obj.id}
-                      disabled={props.disabled}
-                      errorClassName="hidden"
-                    />
-                    <TextFormField
-                      className="flex-[3]"
-                      required
-                      name="name"
-                      label="Name"
-                      placeholder="Eg. Knee Replacement"
-                      value={obj.name}
-                      onChange={handleUpdate(index)}
-                      // optionLabel={(o) => o.name || o.code}
-                      // optionDescription={(o) => o.code}
-                      // optionValue={(o) => o.name || o.code}
-                      disabled={props.disabled}
-                      errorClassName="hidden"
-                      // options={PROCEDURES}
-                    />
-                    <TextFormField
-                      className="flex-[2]"
-                      required
-                      type="number"
-                      name="price"
-                      min={0}
-                      label="Price"
-                      placeholder="0.00"
-                      value={obj.price?.toString()}
-                      onChange={(event) =>
-                        handleUpdate(index)({
-                          name: event.name,
-                          value: parseFloat(event.value),
-                        })
-                      }
-                      disabled={props.disabled}
-                      errorClassName="hidden"
-                    />
-                  </>
-                )}
+
+                <div className="mt-2 grid grid-cols-4 gap-2 max-sm:grid-cols-1">
+                  {obj.category === "HBP" && !obj.id ? (
+                    <>
+                      <PMJAYProcedurePackageAutocomplete
+                        required
+                        className="col-span-full"
+                        labelClassName="text-sm text-secondary-700"
+                        label={t("claim__item__procedure")}
+                        name="hbp"
+                        value={obj}
+                        onChange={handleUpdate(index)}
+                        errorClassName="hidden"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <TextFormField
+                        className="col-span-1"
+                        required
+                        name="id"
+                        label={t("claim__item__id")}
+                        placeholder={t("claim__item__id__example")}
+                        onChange={handleUpdate(index)}
+                        value={obj.id}
+                        disabled={props.disabled}
+                        errorClassName="hidden"
+                      />
+                      <TextFormField
+                        className="col-span-2"
+                        required
+                        name="name"
+                        label={t("claim__item__name")}
+                        placeholder={t("claim__item__name__example")}
+                        value={obj.name}
+                        onChange={handleUpdate(index)}
+                        disabled={props.disabled}
+                        errorClassName="hidden"
+                      />
+                      <TextFormField
+                        className="col-span-1"
+                        required
+                        type="number"
+                        name="price"
+                        min={0}
+                        label={t("claim__item__price")}
+                        placeholder={t("claim__item__price__example")}
+                        value={obj.price?.toString()}
+                        onChange={(event) =>
+                          handleUpdate(index)({
+                            name: event.name,
+                            value: parseFloat(event.value),
+                          })
+                        }
+                        disabled={props.disabled}
+                        errorClassName="hidden"
+                      />
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           );
