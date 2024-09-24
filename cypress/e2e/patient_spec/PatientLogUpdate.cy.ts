@@ -38,7 +38,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const bedTwo = "Dummy Bed 2";
   const patientThree = "Dummy Patient 8";
   const bedThree = "Dummy Bed 3";
-  const patientFour = "Dummy Patient 12";
   const domicilaryPatient = "Dummy Patient 11";
 
   before(() => {
@@ -50,6 +49,33 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
+  });
+
+  it("Create a new TeleIcu log update for a domicilary care patient", () => {
+    patientPage.visitPatient(domicilaryPatient);
+    patientConsultationPage.clickEditConsultationButton();
+    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
+    cy.submitButton("Update Consultation");
+    cy.verifyNotification("Consultation updated successfully");
+    cy.closeNotification();
+    patientLogupdate.clickLogupdate();
+    patientLogupdate.typePhysicalExamination(physicalExamination);
+    patientLogupdate.selectRoundType("Tele-medicine Log");
+    patientLogupdate.typeOtherDetails(otherExamination);
+    patientLogupdate.selectSymptomsDate("01012024");
+    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
+    patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.typeSystolic(patientSystolic);
+    patientLogupdate.typeDiastolic(patientDiastolic);
+    patientLogupdate.typePulse(patientPulse);
+    patientLogupdate.typeTemperature(patientTemperature);
+    patientLogupdate.typeRespiratory(patientRespiratory);
+    patientLogupdate.typeSpo2(patientSpo2);
+    patientLogupdate.selectRhythm(patientRhythmType);
+    patientLogupdate.typeRhythm(patientRhythm);
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
+    cy.submitButton("Save");
+    cy.verifyNotification("Tele-medicine Log created successfully");
   });
 
   it("Create a new Progress log update for a admitted patient and edit it", () => {
@@ -230,33 +256,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
     cy.verifyContentPresence("#encounter-symptoms", [additionalSymptoms]);
-  });
-
-  it("Create a new TeleIcu log update for a domicilary care patient", () => {
-    patientPage.visitPatient(patientFour);
-    patientConsultationPage.clickEditConsultationButton();
-    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
-    cy.submitButton("Update Consultation");
-    cy.verifyNotification("Consultation updated successfully");
-    cy.closeNotification();
-    patientLogupdate.clickLogupdate();
-    patientLogupdate.typePhysicalExamination(physicalExamination);
-    patientLogupdate.selectRoundType("Tele-medicine Log");
-    patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.selectSymptomsDate("01012024");
-    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
-    patientLogupdate.selectPatientCategory(patientCategory);
-    patientLogupdate.typeSystolic(patientSystolic);
-    patientLogupdate.typeDiastolic(patientDiastolic);
-    patientLogupdate.typePulse(patientPulse);
-    patientLogupdate.typeTemperature(patientTemperature);
-    patientLogupdate.typeRespiratory(patientRespiratory);
-    patientLogupdate.typeSpo2(patientSpo2);
-    patientLogupdate.selectRhythm(patientRhythmType);
-    patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.submitButton("Save");
-    cy.verifyNotification("Tele-medicine Log created successfully");
   });
 
   it("Create a new Normal Log update for a domicilary care patient and edit it", () => {
