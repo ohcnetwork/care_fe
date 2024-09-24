@@ -5,7 +5,7 @@ import {
   NURSING_CARE_PROCEDURES,
   PAGINATION_LIMIT,
 } from "../../../Common/constants";
-
+import SharedSectionTable from "./components/SharedTable";
 import Pagination from "../../Common/Pagination";
 import { formatDateTime } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
@@ -71,50 +71,42 @@ export const NursingPlot = ({ consultationId }: any) => {
     else return false;
   };
 
+  const rows = NURSING_CARE_PROCEDURES.filter((f) => filterEmpty(f)).map(
+    (procedure) => ({
+      field: procedure,
+      title: t(`NURSING_CARE_PROCEDURE__${procedure}`),
+    }),
+  );
+
+  const mappedData = dataToDisplay.reduce(
+    (acc: Record<string, any>, item: any) => {
+      if (!acc[item.date]) acc[item.date] = {};
+      acc[item.date][item.procedure] = item.description;
+      return acc;
+    },
+    {},
+  );
+
   return (
     <div>
       <div className="">
         <div>
-          <div className="flex flex-row overflow-x-scroll">
-            {areFieldsEmpty() && (
-              <div className="mt-1 w-full rounded-lg border bg-white p-4 shadow">
-                <div className="flex items-center justify-center text-2xl font-bold text-secondary-500">
-                  {t("no_data_found")}
-                </div>
+          {areFieldsEmpty() && (
+            <div className="mt-1 w-full rounded-lg border bg-white p-4 shadow">
+              <div className="flex items-center justify-center text-2xl font-bold text-secondary-500">
+                {t("no_data_found")}
               </div>
-            )}
-            {NURSING_CARE_PROCEDURES.map(
-              (f) =>
-                filterEmpty(f) && (
-                  <div key={f} className="m-2 w-3/4">
-                    <div className="sticky top-0 z-10 rounded pt-2">
-                      <div className="mx-2 flex items-center justify-between rounded border bg-secondary-200 p-4">
-                        <h3 className="flex h-8 items-center text-sm">
-                          {t(`NURSING_CARE_PROCEDURE__${f}`)}
-                        </h3>
-                      </div>
-                    </div>
-                    <div className="m-2">
-                      {dataToDisplay
-                        .filter((i: any) => i.procedure === f)
-                        .map((care: any, index: number) => (
-                          <div
-                            key={index}
-                            className="my-2 w-full divide-y rounded-lg border bg-white p-4 shadow"
-                          >
-                            <div className="text-xs font-semibold">
-                              {care.date}
-                            </div>
-                            <div className="py-2 text-sm">
-                              {care.description}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                ),
-            )}
-          </div>
+            </div>
+          )}
+
+          {!areFieldsEmpty() && (
+            <SharedSectionTable
+              data={mappedData}
+              rows={rows}
+              translateKey="NURSING_CARE_PROCEDURE"
+              t={t}
+            />
+          )}
         </div>
       </div>
 
