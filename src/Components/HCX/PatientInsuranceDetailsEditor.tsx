@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXActions } from "../../Redux/actions";
-import * as Notifications from "../../Utils/Notifications";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import InsuranceDetailsBuilder from "./InsuranceDetailsBuilder";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXPolicyModel } from "./models";
 import HCXPolicyValidator from "./validators";
+import InsuranceDetailsBuilder from "./InsuranceDetailsBuilder";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   patient: string;
@@ -19,34 +21,24 @@ export default function PatientInsuranceDetailsEditor({
   onSubmitted,
   onCancel,
 }: Props) {
-  const dispatch = useDispatch<any>();
-  const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>();
+  const { t } = useTranslation();
+
+  const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
+    [],
+  );
   const [insuranceDetailsError, setInsuranceDetailsError] = useState<string>();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  useEffect(() => {
-    const fetchPatientInsuranceDetails = async () => {
-      const res = await dispatch(HCXActions.policies.list({ patient }));
-      if (res && res.data) {
+  useQuery(routes.hcx.policies.list, {
+    query: { patient },
+    onResponse(res) {
+      if (res?.res?.ok && res.data) {
         if (res.data.results.length) {
           setInsuranceDetails(res.data.results);
-        } else {
-          setInsuranceDetails([
-            {
-              subscriber_id: "",
-              policy_id: "",
-              insurer_id: "",
-              insurer_name: "",
-            },
-          ]);
         }
-      } else {
-        Notifications.Error({ msg: "Something went wrong " });
       }
-    };
-
-    fetchPatientInsuranceDetails();
-  }, [dispatch, patient]);
+    },
+  });
 
   const handleSubmit = async () => {
     // Validate
@@ -62,22 +54,19 @@ export default function PatientInsuranceDetailsEditor({
     await Promise.all(
       insuranceDetails.map(async (obj) => {
         const policy: HCXPolicyModel = { ...obj, patient };
-        const policyRes = await (policy.id
-          ? dispatch(HCXActions.policies.update(policy.id, policy))
-          : dispatch(HCXActions.policies.create(policy)));
-
-        const eligibilityCheckRes = await dispatch(
-          HCXActions.checkEligibility(policyRes.data.id),
-        );
-        if (eligibilityCheckRes.status === 200) {
-          Notifications.Success({ msg: "Checking Policy Eligibility..." });
-        } else {
-          Notifications.Error({ msg: "Something Went Wrong..." });
-        }
+        policy.id
+          ? await request(routes.hcx.policies.update, {
+              pathParams: { external_id: policy.id },
+              body: policy,
+            })
+          : await request(routes.hcx.policies.create, {
+              body: policy,
+            });
       }),
     );
     setIsUpdating(false);
     onSubmitted?.();
+    onCancel?.();
   };
 
   return (
@@ -112,7 +101,7 @@ export default function PatientInsuranceDetailsEditor({
           }
         >
           <CareIcon icon="l-plus" className="text-lg" />
-          <span>Add Insurance Details</span>
+          <span>{t("add_policy")}</span>
         </ButtonV2>
         <div className="md:flex-1" />
         <Cancel border disabled={isUpdating} onClick={onCancel} />
@@ -120,10 +109,10 @@ export default function PatientInsuranceDetailsEditor({
           {isUpdating ? (
             <>
               <CareIcon icon="l-spinner" className="animate-spin text-lg" />
-              <span>Updating...</span>
+              <span>{t("updating")}</span>
             </>
           ) : (
-            "Update"
+            <span>{t("update")}</span>
           )}
         </Submit>
       </div>
