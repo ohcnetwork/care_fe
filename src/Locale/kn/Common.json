@@ -203,5 +203,21 @@
   "deleted_successfully": "{{name}} ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಅಳಿಸಲಾಗಿದೆ",
   "delete_item": "{{name}}ಅಳಿಸಿ",
   "unsupported_browser": "ಬೆಂಬಲಿತವಲ್ಲದ ಬ್ರೌಸರ್",
-  "unsupported_browser_description": "ನಿಮ್ಮ ಬ್ರೌಸರ್ ({{name}} ಆವೃತ್ತಿ {{version}}) ಬೆಂಬಲಿತವಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಅನ್ನು ಇತ್ತೀಚಿನ ಆವೃತ್ತಿಗೆ ನವೀಕರಿಸಿ ಅಥವಾ ಉತ್ತಮ ಅನುಭವಕ್ಕಾಗಿ ಬೆಂಬಲಿತ ಬ್ರೌಸರ್‌ಗೆ ಬದಲಿಸಿ."
+  "SORT_OPTIONS__unsupported_browser_description": "ನಿಮ್ಮ ಬ್ರೌಸರ್ ({{name}} ಆವೃತ್ತಿ {{version}}) ಬೆಂಬಲಿತವಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಅನ್ನು ಇತ್ತೀಚಿನ ಆವೃತ್ತಿಗೆ ನವೀಕರಿಸಿ ಅಥವಾ ಉತ್ತಮ ಅನುಭವಕ್ಕಾಗಿ ಬೆಂಬಲಿತ ಬ್ರೌಸರ್‌ಗೆ ಬದಲಿಸಿ.",
+  "SORT_OPTIONS__-created_date": "ಇತ್ತೀಚಿಗೆ ರಚಿಸಿದ ದಿನಾಂಕ ಮೊದಲು",
+  "SORT_OPTIONS__created_date": "ಮೊದಲು ರಚಿಸಿದ ಹಳೆಯ ದಿನಾಂಕ",
+  "SORT_OPTIONS__-category_severity": "ಅತ್ಯಧಿಕ ತೀವ್ರತೆಯ ವಿಭಾಗ ಮೊದಲು",
+  "SORT_OPTIONS__category_severity": "ಕಡಿಮೆ ತೀವ್ರತೆಯ ವರ್ಗ ಮೊದಲು",
+  "SORT_OPTIONS__-modified_date": "ಮೊದಲು ಇತ್ತೀಚಿನ ನವೀಕರಿಸಿದ ದಿನಾಂಕ",
+  "SORT_OPTIONS__modified_date": "ಹಳೆಯ ನವೀಕರಿಸಿದ ದಿನಾಂಕ ಮೊದಲು",
+  "SORT_OPTIONS__facility__name,last_consultation__current_bed__bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ 1-N",
+  "SORT_OPTIONS__facility__name,-last_consultation__current_bed__bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ N-1",
+  "SORT_OPTIONS__-review_time": "ಇತ್ತೀಚಿನ ವಿಮರ್ಶೆ ದಿನಾಂಕ ಮೊದಲು",
+  "SORT_OPTIONS__review_time": "ಹಳೆಯ ವಿಮರ್ಶೆ ದಿನಾಂಕ ಮೊದಲು",
+  "SORT_OPTIONS__taken_at": "ಹಳೆಯ ತೆಗೆದ ದಿನಾಂಕ ಮೊದಲು",
+  "SORT_OPTIONS__-taken_at": "ಇತ್ತೀಚೆಗೆ ತೆಗೆದುಕೊಂಡ ದಿನಾಂಕ ಮೊದಲು",
+  "SORT_OPTIONS__name": "ರೋಗಿಯ ಹೆಸರು AZ",
+  "SORT_OPTIONS__-name": "ರೋಗಿಯ ಹೆಸರು ZA",
+  "SORT_OPTIONS__bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ 1-N",
+  "SORT_OPTIONS__-bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ N-1"
 }
