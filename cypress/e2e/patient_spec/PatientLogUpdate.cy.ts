@@ -61,10 +61,10 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectRoundType("Tele-medicine Log");
+    patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.selectSymptomsDate("01012024");
     patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
-    patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
     patientLogupdate.typePulse(patientPulse);
