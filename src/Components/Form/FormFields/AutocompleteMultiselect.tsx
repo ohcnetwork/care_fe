@@ -110,6 +110,7 @@ export const AutocompleteMutliSelect = <T, V>(
   return (
     <div className={props.className} id={props.id}>
       <Combobox
+        immediate
         disabled={props.disabled}
         value={value}
         multiple

@@ -132,7 +132,6 @@ describe("Manage User", () => {
     manageUserPage.clickLinkFacility();
     manageUserPage.clickUnlinkFacilityButton();
     manageUserPage.clickSubmit();
-    manageUserPage.assertnotLinkedFacility;
     manageUserPage.linkedfacilitylistnotvisible();
     manageUserPage.clickCloseSlideOver();
     //  Go to particular facility doctor connect and all user-id are reflected based on there access

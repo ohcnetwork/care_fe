@@ -93,6 +93,7 @@ const AutoCompleteAsync = (props: Props) => {
         onChange={onChange}
         by={compareBy}
         multiple={multiple as any}
+        immediate
       >
         <div className="relative mt-1">
           <div className="flex">

@@ -92,12 +92,7 @@ export const DailyRounds = (props: any) => {
     rhythm_detail: "",
     ventilator_spo2: null,
     consciousness_level: undefined,
-    bp: {
-      systolic: undefined,
-      diastolic: undefined,
-      mean: undefined,
-    },
-    // bed: null,
+    bp: undefined,
   };
 
   const initError = Object.assign(
@@ -255,7 +250,7 @@ export const DailyRounds = (props: any) => {
           }
           return;
         case "bp": {
-          const error = BloodPressureValidator(state.form.bp);
+          const error = state.form.bp && BloodPressureValidator(state.form.bp);
           if (error) {
             errors.bp = error;
             invalidForm = true;
@@ -351,7 +346,7 @@ export const DailyRounds = (props: any) => {
       if (state.form.rounds_type !== "VENTILATOR") {
         data = {
           ...data,
-          bp: state.form.bp ?? {},
+          bp: state.form.bp,
           pulse: state.form.pulse ?? null,
           resp: state.form.resp ?? null,
           temperature: state.form.temperature ?? null,
@@ -442,6 +437,10 @@ export const DailyRounds = (props: any) => {
 
     if (event.name === "investigations") {
       form["investigations_dirty"] = true;
+    }
+
+    if (event.name === "nutrition_route" && event.value !== "ORAL") {
+      form["oral_issue"] = undefined;
     }
 
     dispatch({ type: "set_form", form });
