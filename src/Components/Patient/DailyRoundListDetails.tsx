@@ -16,13 +16,9 @@ export const DailyRoundListDetails = (props: any) => {
 
   const { loading: isLoading } = useQuery(routes.getDailyReport, {
     pathParams: { consultationId, id },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        const tdata: DailyRoundsModel = {
-          ...data,
-          medication_given: data.medication_given ?? [],
-        };
-        setDailyRoundListDetails(tdata);
+    onResponse: ({ data }) => {
+      if (data) {
+        setDailyRoundListDetails(data);
       }
     },
   });
