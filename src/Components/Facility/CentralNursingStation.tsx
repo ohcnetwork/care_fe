@@ -145,7 +145,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       value={qParams.ordering || "bed__name"}
                       onChange={({ value }) => updateQuery({ ordering: value })}
                       options={SORT_OPTIONS}
-                      optionLabel={({ value }) => t("SortOptions." + value)}
+                      optionLabel={({ value }) => t("SORT_OPTIONS__" + value)}
                       optionIcon={({ isAscending }) => (
                         <CareIcon
                           icon={
