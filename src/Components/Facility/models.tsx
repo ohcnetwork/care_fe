@@ -12,6 +12,7 @@ import {
   AssignedToObjectModel,
   BloodPressure,
   DailyRoundsModel,
+  FacilityNameModel,
   FileUploadModel,
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
@@ -79,7 +80,31 @@ export interface FacilityModel {
   local_body?: number;
   ward?: number;
   pincode?: string;
+  latitude?: string;
+  longitude?: string;
+  kasp_empanelled?: boolean;
+  patient_count?: string;
+  bed_count?: string;
 }
+
+export enum SpokeRelationship {
+  REGULAR = 1,
+  TELE_ICU = 2,
+}
+
+export interface FacilitySpokeModel {
+  id: string;
+  hub_object: FacilityNameModel;
+  spoke_object: FacilityNameModel;
+  relationship: SpokeRelationship;
+}
+
+export interface FacilitySpokeRequest {
+  spoke?: string;
+  relationship?: SpokeRelationship;
+}
+
+export interface FacilitySpokeErrors {}
 
 export interface CapacityModal {
   id?: number;
@@ -588,13 +613,7 @@ export type IUserFacilityRequest = {
   facility: string;
 };
 
-export type FacilityRequest = Omit<FacilityModel, "location"> & {
-  latitude?: string;
-  longitude?: string;
-  kasp_empanelled?: boolean;
-  patient_count?: string;
-  bed_count?: string;
-};
+export type FacilityRequest = Omit<FacilityModel, "location" | "id">;
 
 export type InventorySummaryResponse = {
   id: string;
