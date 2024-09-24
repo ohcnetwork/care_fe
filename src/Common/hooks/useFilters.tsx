@@ -109,7 +109,7 @@ export default function useFilters({
       return {
         name,
         paramKey,
-        value: qParams[paramKey] && t("SortOptions." + qParams[paramKey]),
+        value: qParams[paramKey] && t("SORT_OPTIONS__" + qParams[paramKey]),
       };
     },
     value(name: string, paramKey: FilterBadgeProps["paramKey"], value: string) {
