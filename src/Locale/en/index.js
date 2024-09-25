@@ -18,7 +18,6 @@ import Notifications from "./Notifications.json";
 import Patient from "./Patient.json";
 import Resource from "./Resource.json";
 import Shifting from "./Shifting.json";
-import SortOptions from "./SortOptions.json";
 import Users from "./Users.json";
 
 export default {
@@ -43,5 +42,4 @@ export default {
   ...LogUpdate,
   ...FileUpload,
   ...HCX,
-  ...SortOptions,
 };

@@ -230,6 +230,7 @@ export default function PatientInfoCard(props: {
               )}
               {consultation?.admitted && (
                 <ButtonV2
+                  id="switch-bed"
                   ghost
                   onClick={() => setOpen(true)}
                   className="mt-1 px-[10px] py-1"
