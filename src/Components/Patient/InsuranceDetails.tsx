@@ -1,11 +1,9 @@
-import { lazy } from "react";
-
-import Page from "../Common/components/Page";
-
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
 import { HCXPolicyModel } from "../HCX/models";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
+import Page from "../Common/components/Page";
+import { lazy } from "react";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -17,11 +15,14 @@ interface IProps {
 export const InsuranceDetails = (props: IProps) => {
   const { facilityId, id } = props;
 
-  const { data: insuranceDetials, loading } = useQuery(routes.listHCXPolicies, {
-    query: {
-      patient: id,
+  const { data: insuranceDetials, loading } = useQuery(
+    routes.hcx.policies.list,
+    {
+      query: {
+        patient: id,
+      },
     },
-  });
+  );
 
   if (loading) {
     return <Loading />;

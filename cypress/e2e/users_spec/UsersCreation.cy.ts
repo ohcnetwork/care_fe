@@ -183,6 +183,7 @@ describe("User Creation", () => {
   it("create new user form throwing mandatory field error", () => {
     userCreationPage.clickElementById("addUserButton");
     userCreationPage.clickElementById("submit");
+    cy.wait(2000);
     userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
   });
 

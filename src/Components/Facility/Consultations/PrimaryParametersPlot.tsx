@@ -10,6 +10,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
 import PageTitle from "../../Common/PageTitle";
 import dayjs from "../../../Utils/dayjs";
+import { meanArterialPressure } from "../../Common/BloodPressureFormField";
 import { PrimaryParametersPlotFields } from "../models";
 
 interface PrimaryParametersPlotProps {
@@ -17,17 +18,6 @@ interface PrimaryParametersPlotProps {
   patientId: string;
   consultationId: string;
 }
-
-const sanitizeBPAttribute = (value: number | undefined) => {
-  // Temp. hack until the cleaning of daily rounds as a db migration is done.
-  // TODO: remove once migration is merged.
-
-  if (value == null || value < 0) {
-    return;
-  }
-
-  return value;
-};
 
 export const PrimaryParametersPlot = ({
   consultationId,
@@ -77,19 +67,19 @@ export const PrimaryParametersPlot = ({
     {
       name: "diastolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.diastolic))
+        .map((p: any) => p.bp?.diastolic)
         .reverse(),
     },
     {
       name: "systolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.systolic))
+        .map((p: any) => p.bp?.systolic)
         .reverse(),
     },
     {
       name: "mean",
       data: Object.values(results)
-        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.mean))
+        .map((p: any) => meanArterialPressure(p.bp))
         .reverse(),
     },
   ];
