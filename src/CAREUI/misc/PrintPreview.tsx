@@ -20,7 +20,13 @@ export default function PrintPreview(props: Props) {
 
   return (
     <Page title={props.title}>
-      <div className="mx-auto my-8 w-[50rem]">
+      {/* INCREASED WIDTH TO REMOVE SCROLLBAR  */}
+
+      {/* PREVIOUS WIDTH = 50REM
+
+      UPDATED WIDTH = 57REM */}
+
+      <div className="mx-auto my-8 lg:w-[64rem]">
         <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
           <ButtonV2 disabled={props.disabled} onClick={print}>
             <CareIcon icon="l-print" className="text-lg" />
