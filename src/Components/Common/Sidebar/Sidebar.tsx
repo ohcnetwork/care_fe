@@ -70,7 +70,7 @@ const StatelessSidebar = ({
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
   const [isOverflowVisible, setOverflowVisisble] = useState(false);
 
-  useEffect(() => {
+  const updateIndicator = () => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
     const navItemCount = NavItems.length + (careConfig.urls.dashboard ? 2 : 1); // +2 for notification and dashboard
@@ -94,7 +94,16 @@ const StatelessSidebar = ({
     } else {
       indicatorRef.current.style.display = "none";
     }
+  };
+
+  useEffect(() => {
+    updateIndicator();
   }, [activeLink, lastIndicatorPosition]);
+
+  useEffect(() => {
+    addEventListener("resize", updateIndicator);
+    return () => removeEventListener("resize", updateIndicator);
+  }, []);
 
   const handleOverflow = (value: boolean) => {
     setOverflowVisisble(value);
