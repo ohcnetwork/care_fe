@@ -12,6 +12,7 @@ import useFullscreen from "../../Common/hooks/useFullscreen";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
 import VideoPlayer from "./videoPlayer";
+import MonitorAssetPopover from "../Common/MonitorAssetPopover";
 
 interface Props {
   children?: React.ReactNode;
@@ -185,6 +186,10 @@ export default function CameraFeed(props: Props) {
             <span className="text-xs font-bold md:text-sm">
               {props.asset.name}
             </span>
+            <MonitorAssetPopover
+              asset={props.asset}
+              className="absolute z-[100] mt-2 w-56 -translate-x-full -translate-y-4 rounded-md bg-white md:w-[350px] md:-translate-x-full md:-translate-y-2"
+            />
             {!isIOS && (
               <div
                 className={classNames(
