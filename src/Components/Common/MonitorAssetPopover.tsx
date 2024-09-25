@@ -54,7 +54,7 @@ const MonitorAssetPopover = ({
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-sm text-black md:text-base">
-                Middleware Hostname:
+                {t("middleware_hostname")}:
               </p>
               <p className="break-words text-secondary-600">
                 {asset?.resolved_middleware?.hostname}
@@ -62,7 +62,7 @@ const MonitorAssetPopover = ({
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-sm text-black md:text-base">
-                Local IP Address:
+                {t("local_ipaddress")}:
               </p>
               <p className="break-words text-secondary-600">
                 {asset?.meta?.local_ip_address}
