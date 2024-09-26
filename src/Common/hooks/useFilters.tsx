@@ -44,7 +44,10 @@ export default function useFilters({
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, options);
     Object.keys(query).forEach((filter) =>
-      triggerGoal("Advanced filter applied", { filter }),
+      triggerGoal("Advanced filter applied", {
+        filter,
+        location: location.pathname,
+      }),
     );
     updateCache(query);
   };
