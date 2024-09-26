@@ -230,5 +230,11 @@
   "SORT_OPTIONS__name": "Patient name A-Z",
   "SORT_OPTIONS__-name": "Patient name Z-A",
   "SORT_OPTIONS__bed__name": "Bed No. 1-N",
-  "SORT_OPTIONS__-bed__name": "Bed No. N-1"
+  "SORT_OPTIONS__-bed__name": "Bed No. N-1",
+  "open_in_full_window": "Open in full window",
+  "minimize_screen":"Minimize",
+  "close_screen":"Close",
+  "send_discussion_message":"Send",
+  "resume": "Resume",
+  "reply":"Reply"
 }

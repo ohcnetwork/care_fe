@@ -15,7 +15,5 @@
   "are_you_still_watching": "Are you still watching?",
   "stream_stop_due_to_inativity": "The live feed will stop streaming due to inactivity",
   "stream_stopped_due_to_inativity": "The live feed has stopped streaming due to inactivity",
-  "continue_watching": "Continue watching",
-  "resume": "Resume",
-  "reply":"Reply"
+  "continue_watching": "Continue watching"
 }
