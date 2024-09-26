@@ -77,7 +77,7 @@ const PatientNoteCard = ({
       {" "}
       <div
         className={classNames(
-          "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-3 text-secondary-800",
+          "br mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-3 text-secondary-800",
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
@@ -144,12 +144,19 @@ const PatientNoteCard = ({
                 </ButtonV2>
               )}
             <ButtonV2
+              className="tooltip"
               ghost
               onClick={() => {
                 setReplyTo && setReplyTo(note);
               }}
             >
-              <CareIcon icon="l-corner-up-left-alt" className="h-5 w-5" />
+              <CareIcon
+                icon="l-corner-up-left-alt"
+                className="tooltip h-5 w-5"
+              />
+              <span className="tooltip-text tooltip-bottom -translate-x-11 -translate-y-1 text-xs">
+                Reply
+              </span>
             </ButtonV2>
           </div>
         </div>
