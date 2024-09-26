@@ -204,7 +204,7 @@ export default function PatientConsentRecords(props: {
                       handleUpload();
                     }
                   }}
-                  loading={!!fileUpload.progress}
+                  loading={fileUpload.uploading}
                   disabled={
                     newConsent.type === 2 &&
                     newConsent.patient_code_status === 0
@@ -217,7 +217,7 @@ export default function PatientConsentRecords(props: {
                 <ButtonV2
                   variant="danger"
                   onClick={fileUpload.clearFiles}
-                  disabled={!!fileUpload.progress}
+                  disabled={fileUpload.uploading}
                 >
                   <CareIcon icon="l-trash-alt" className="" />
                 </ButtonV2>

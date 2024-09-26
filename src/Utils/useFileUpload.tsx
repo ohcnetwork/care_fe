@@ -57,6 +57,7 @@ export type FileUploadReturn = {
   setFileNames: (names: string[]) => void;
   removeFile: (index: number) => void;
   clearFiles: () => void;
+  uploading: boolean;
 };
 
 // Array of image extensions
@@ -87,6 +88,7 @@ export default function useFileUpload(
   const [progress, setProgress] = useState<null | number>(null);
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
   const [audioModalOpen, setAudioModalOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [files, setFiles] = useState<File[]>([]);
 
@@ -220,6 +222,7 @@ export default function useFileUpload(
         setError(t("file_error__single_file_name"));
         return;
       }
+      setUploading(true);
 
       const { data } = await request(routes.createUpload, {
         body: {
@@ -238,6 +241,7 @@ export default function useFileUpload(
       }
     }
 
+    setUploading(false);
     setFiles([]);
     setUploadFileNames([]);
   };
@@ -247,17 +251,15 @@ export default function useFileUpload(
       <CameraCaptureDialog
         show={cameraModalOpen}
         onHide={() => setCameraModalOpen(false)}
-        onCapture={(file, fileName) => {
+        onCapture={(file) => {
           setFiles((prev) => [...prev, file]);
-          setUploadFileNames((prev) => [...prev, fileName]);
         }}
       />
       <AudioCaptureDialog
         show={audioModalOpen}
         onHide={() => setAudioModalOpen(false)}
-        onCapture={(file, fileName) => {
+        onCapture={(file) => {
           setFiles((prev) => [...prev, file]);
-          setUploadFileNames((prev) => [...prev, fileName]);
         }}
         autoRecord
       />
@@ -308,5 +310,6 @@ export default function useFileUpload(
       setFiles([]);
       setUploadFileNames([]);
     },
+    uploading,
   };
 }
