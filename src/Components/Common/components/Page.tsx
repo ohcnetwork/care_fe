@@ -37,7 +37,7 @@ export default function Page(props: PageProps) {
 
   return (
     <div className={classNames(padding, props.className)} ref={props.ref}>
-      <div className="flex flex-col justify-between gap-2 border md:flex-row md:items-center md:gap-6">
+      <div className="flex flex-col justify-between gap-2  md:flex-row md:items-center md:gap-6">
         <PageTitle
           changePageMetadata={props.changePageMetadata}
           title={props.title}
