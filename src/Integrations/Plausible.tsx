@@ -72,6 +72,5 @@ const plausible = (event: string, data: object = {}) => {
  *
  */
 export const triggerGoal = (name: string, props: object) => {
-  console.debug("triggerGoal", { name, props });
   plausible(name, { props });
 };
