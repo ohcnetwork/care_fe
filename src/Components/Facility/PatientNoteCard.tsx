@@ -77,7 +77,7 @@ const PatientNoteCard = ({
       {" "}
       <div
         className={classNames(
-          "br mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-3 text-secondary-800",
+          "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-3 text-secondary-800",
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
