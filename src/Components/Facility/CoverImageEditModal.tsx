@@ -92,30 +92,11 @@ const CoverImageEditModal = ({
     onClose?.();
   };
 
-  const maxWidth = 1024;
-  const maxHeight = 1024;
-
   useEffect(() => {
     if (selectedFile) {
-      const img = new Image();
       const objectUrl = URL.createObjectURL(selectedFile);
-      img.onload = () => {
-        const width = img.width;
-        const height = img.height;
-        if (width > maxWidth || height > maxHeight) {
-          Notification.Error({
-            msg: `Image dimensions (${width}x${height}) exceed allowed size of ${maxWidth}x${maxHeight} pixels.`,
-          });
-        } else {
-          setPreview(objectUrl);
-        }
-      };
-
-      img.src = objectUrl;
-
-      return () => {
-        URL.revokeObjectURL(objectUrl);
-      };
+      setPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
     }
   }, [selectedFile]);
 
@@ -149,6 +130,7 @@ const CoverImageEditModal = ({
           "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
       },
       async (xhr: XMLHttpRequest) => {
+        const errorResponse = JSON.parse(xhr.responseText);
         if (xhr.status === 200) {
           Success({ msg: "Cover image updated." });
           setIsProcessing(false);
@@ -158,7 +140,8 @@ const CoverImageEditModal = ({
           closeModal();
         } else {
           Notification.Error({
-            msg: "Something went wrong!",
+            msg:
+              errorResponse?.cover_image?.join(" ") || "Something went wrong!",
           });
           setIsProcessing(false);
         }
