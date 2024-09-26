@@ -1,13 +1,16 @@
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { listPMJYPackages } from "../../Redux/actions";
-import { Autocomplete } from "../Form/FormFields/Autocomplete";
-import FormField from "../Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 
-type PMJAYPackageItem = {
+import { Autocomplete } from "../Form/FormFields/Autocomplete";
+import FormField from "../Form/FormFields/FormField";
+import routes from "../../Redux/api";
+import { useState } from "react";
+import useQuery from "../../Utils/request/useQuery";
+import { mergeQueryOptions } from "../../Utils/utils";
+
+export type PMJAYPackageItem = {
   name?: string;
   code?: string;
   price?: number;
@@ -19,8 +22,11 @@ type Props = FormFieldBaseProps<PMJAYPackageItem>;
 export default function PMJAYProcedurePackageAutocomplete(props: Props) {
   const field = useFormFieldPropsResolver(props);
 
-  const { fetchOptions, isLoading, options } =
-    useAsyncOptions<PMJAYPackageItem>("code");
+  const [query, setQuery] = useState("");
+
+  const { data, loading } = useQuery(routes.hcx.claims.listPMJYPackages, {
+    query: { query, limit: 10 },
+  });
 
   return (
     <FormField field={field}>
@@ -30,19 +36,20 @@ export default function PMJAYProcedurePackageAutocomplete(props: Props) {
         disabled={field.disabled}
         value={field.value}
         onChange={field.handleChange}
-        options={options(field.value ? [field.value] : []).map((o) => {
-          // TODO: update backend to return price as number instead
-          return {
+        options={mergeQueryOptions(
+          (field.value ? [field.value] : []).map((o) => ({
             ...o,
             price:
               o.price && parseFloat(o.price?.toString().replaceAll(",", "")),
-          };
-        })}
+          })),
+          data ?? [],
+          (obj) => obj.code,
+        )}
         optionLabel={optionLabel}
         optionDescription={optionDescription}
         optionValue={(option) => option}
-        onQuery={(query) => fetchOptions(listPMJYPackages(query))}
-        isLoading={isLoading}
+        onQuery={setQuery}
+        isLoading={loading}
       />
     </FormField>
   );

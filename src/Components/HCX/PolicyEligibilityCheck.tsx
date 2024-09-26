@@ -1,12 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXActions } from "../../Redux/actions";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { HCXPolicyModel } from "./models";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import * as Notification from "../../Utils/Notifications.js";
+
+import { useEffect, useState } from "react";
+
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { HCXPolicyModel } from "./models";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import useQuery from "../../Utils/request/useQuery";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   className?: string;
@@ -19,128 +23,107 @@ export default function HCXPolicyEligibilityCheck({
   patient,
   onEligiblePolicySelected,
 }: Props) {
-  const dispatch = useDispatch<any>();
-  const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>();
-  const [policy, setPolicy] = useState<string>();
-  const [eligibility, setEligibility] = useState<
-    Record<string, boolean | undefined>
-  >({});
-  const [isChecking, setIsChecking] = useState(false);
+  const { t } = useTranslation();
 
-  const fetchPatientInsuranceDetails = useCallback(async () => {
-    setInsuranceDetails(undefined);
-    setEligibility({});
+  const [selectedPolicy, setSelectedPolicy] = useState<HCXPolicyModel>();
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
 
-    const res = await dispatch(HCXActions.policies.list({ patient }));
-
-    if (res.data?.results) {
-      const results = res.data.results as HCXPolicyModel[];
-      setInsuranceDetails(results);
-      setEligibility(
-        results.reduce?.((acc: any, policy: HCXPolicyModel) => {
-          if (policy.outcome)
-            acc[policy.id ?? ""] =
-              !policy.error_text && policy.outcome === "Processing Complete";
-          return acc;
-        }, {}),
-      );
-      setIsChecking(false);
-    }
-  }, [patient, dispatch]);
-
-  useEffect(() => {
-    fetchPatientInsuranceDetails();
-  }, [fetchPatientInsuranceDetails]);
+  const {
+    refetch,
+    data: policiesResponse,
+    loading,
+  } = useQuery(routes.hcx.policies.list, { query: { patient } });
 
   useMessageListener((data) => {
     if (
       data.type === "MESSAGE" &&
       data.from === "coverageelegibility/on_check"
     ) {
-      fetchPatientInsuranceDetails();
+      refetch();
     }
   });
 
   useEffect(() => {
-    if (policy && eligibility[policy]) {
-      const eligiblePolicy = insuranceDetails?.find((p) => p.id === policy);
-      onEligiblePolicySelected(eligiblePolicy);
-    } else {
-      onEligiblePolicySelected(undefined);
-    }
-  }, [policy, insuranceDetails, eligibility, onEligiblePolicySelected]);
+    onEligiblePolicySelected(
+      isPolicyEligible(selectedPolicy) ? selectedPolicy : undefined,
+    );
+  }, [selectedPolicy]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkEligibility = async () => {
-    if (!policy) return;
+    if (!selectedPolicy || isPolicyEligible()) return;
 
-    // Skip checking eligibility if we already know the policy is eligible
-    if (eligibility[policy]) return;
+    setIsCheckingEligibility(true);
 
-    setIsChecking(true);
+    const { res } = await request(routes.hcx.policies.checkEligibility, {
+      body: { policy: selectedPolicy.id },
+    });
 
-    const res = await dispatch(HCXActions.checkEligibility(policy));
-    if (res.status === 200) {
-      Notification.Success({ msg: "Checking Policy Eligibility..." });
-    } else {
-      Notification.Error({ msg: "Something Went Wrong..." });
+    if (res?.ok) {
+      Notification.Success({ msg: t("checking_policy_eligibility") });
     }
+
+    setIsCheckingEligibility(false);
   };
 
   return (
     <div className={className}>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 max-sm:flex-col">
         <SelectFormField
           required
           name="policy"
           labelClassName="hidden"
           errorClassName="hidden"
           className="w-full"
-          options={insuranceDetails || []}
-          optionValue={(option) => option.id as string}
+          options={policiesResponse?.results ?? []}
+          optionValue={(option) => option.id}
           optionLabel={(option) => option.policy_id}
           optionSelectedLabel={(option) =>
-            option.id && eligibility[option.id] !== undefined ? (
+            option.outcome ? (
               <div className="flex items-center gap-3">
                 {option.policy_id}
-                <EligibilityChip eligible={!!eligibility[option.id]} />
+                <EligibilityChip eligible={isPolicyEligible(option) ?? false} />
               </div>
             ) : (
               option.policy_id
             )
           }
           optionIcon={(option) =>
-            eligibility[option.id!] !== undefined && (
-              <EligibilityChip eligible={!!eligibility[option.id ?? ""]} />
+            option.outcome && (
+              <EligibilityChip eligible={isPolicyEligible(option) ?? false} />
             )
           }
-          onChange={({ value }) => setPolicy(value)}
-          value={policy}
+          onChange={({ value }) => {
+            setSelectedPolicy(
+              policiesResponse?.results.find((policy) => policy.id === value),
+            );
+          }}
+          value={selectedPolicy?.id}
           placeholder={
-            insuranceDetails
-              ? insuranceDetails.length
-                ? "Select a policy to check eligibility"
-                : "No policies for the patient"
-              : "Loading..."
+            loading
+              ? t("loading")
+              : policiesResponse?.results.length
+                ? t("select_policy")
+                : t("no_policy_found")
           }
-          disabled={!insuranceDetails}
+          disabled={!policiesResponse?.results.length}
           optionDescription={(option) => (
             <div>
               <div className="flex flex-col">
-                <span className="flex w-full gap-2">
-                  <span className="w-24">Member ID</span>
-                  <span className="font-medium tracking-wide">
+                <span className="grid grid-cols-[100px_auto] gap-2">
+                  <span>{t("policy__subscriber_id")}</span>
+                  <span className="truncate font-medium">
                     {option.subscriber_id}
                   </span>
                 </span>
-                <span className="flex w-full gap-2">
-                  <span className="w-24">Insurer ID</span>
-                  <span className="font-medium tracking-wide">
+                <span className="grid grid-cols-[100px_auto] gap-2">
+                  <span>{t("policy__insurer_id")}</span>
+                  <span className="truncate font-medium">
                     {option.insurer_id}
                   </span>
                 </span>
-                <span className="flex w-full gap-2">
-                  <span className="w-24">Insurer Name</span>
-                  <span className="font-medium tracking-wide">
+                <span className="grid grid-cols-[100px_auto] gap-2">
+                  <span>{t("policy__insurer_name")}</span>
+                  <span className="truncate font-medium">
                     {option.insurer_name}
                   </span>
                 </span>
@@ -154,17 +137,21 @@ export default function HCXPolicyEligibilityCheck({
           )}
         />
         <ButtonV2
-          className="whitespace-nowrap py-3"
+          className="whitespace-nowrap py-3 max-sm:w-full"
           onClick={checkEligibility}
-          disabled={!policy || (policy && eligibility[policy]) || isChecking}
+          disabled={
+            !selectedPolicy ||
+            isPolicyEligible(selectedPolicy) ||
+            isCheckingEligibility
+          }
         >
-          {isChecking ? (
+          {isCheckingEligibility ? (
             <>
               <CareIcon icon="l-spinner" className="animate-spin text-lg" />
-              <span>Checking ...</span>
+              <span>{t("checking_eligibility")}</span>
             </>
           ) : (
-            "Check Eligibility"
+            t("check_eligibility")
           )}
         </ButtonV2>
       </div>
@@ -173,6 +160,8 @@ export default function HCXPolicyEligibilityCheck({
 }
 
 const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
+  const { t } = useTranslation();
+
   return (
     <div
       className={`flex items-center gap-1 rounded-full px-1.5 py-0.5 tracking-wider ${
@@ -181,8 +170,11 @@ const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
     >
       <CareIcon icon={eligible ? "l-check" : "l-times"} className="text-base" />
       <span className="text-xs uppercase">
-        {eligible ? "Eligible" : "Not Eligible"}
+        {eligible ? t("eligible") : t("not_eligible")}
       </span>
     </div>
   );
 };
+
+const isPolicyEligible = (policy?: HCXPolicyModel) =>
+  policy && !policy.error_text && policy.outcome === "Complete";

@@ -1,19 +1,12 @@
-import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import * as Notification from "../../Utils/Notifications";
 
 import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
-  SAMPLE_TEST_STATUS,
   OCCUPATION_TYPES,
+  SAMPLE_TEST_STATUS,
 } from "../../Common/constants";
-
-import * as Notification from "../../Utils/Notifications";
-import { ConsultationCard } from "../Facility/ConsultationCard";
-import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
-import { SampleTestCard } from "./SampleTestCard";
-import Chip from "../../CAREUI/display/Chip";
 import {
   classNames,
   formatDate,
@@ -23,23 +16,30 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
+import { lazy, useEffect, useState } from "react";
+
 import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useTranslation } from "react-i18next";
+import Chip from "../../CAREUI/display/Chip";
 import CircularProgress from "../Common/components/CircularProgress";
-import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import { ConsultationCard } from "../Facility/ConsultationCard";
+import { ConsultationModel } from "../Facility/models";
+import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import Page from "../Common/components/Page";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import { SampleTestCard } from "./SampleTestCard";
 import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
+import { navigate } from "raviger";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
-import request from "../../Utils/request/request";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -87,7 +87,7 @@ export const PatientHome = (props: any) => {
     );
   };
 
-  const { data: insuranceDetials } = useQuery(routes.listHCXPolicies, {
+  const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
     query: {
       patient: id,
       limit: 1,
@@ -515,24 +515,50 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   )}
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Occupation
+                {patientData.meta_info?.occupation && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      {t("occupation")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {parseOccupation(patientData.meta_info.occupation)}
+                    </div>
                   </div>
-                  <div className="mt-1 text-sm font-medium leading-5">
-                    {parseOccupation(patientData.meta_info?.occupation) || "-"}
+                )}
+                {patientData.ration_card_category && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      {t("ration_card_category")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {t(`ration_card__${patientData.ration_card_category}`)}
+                    </div>
                   </div>
-                </div>
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Ration Card Category
+                )}
+                {patientData.meta_info?.socioeconomic_status && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      {t("socioeconomic_status")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {t(
+                        `SOCIOECONOMIC_STATUS__${patientData.meta_info.socioeconomic_status}`,
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData.ration_card_category
-                      ? t(`ration_card__${patientData.ration_card_category}`)
-                      : "-"}
+                )}
+                {patientData.meta_info?.domestic_healthcare_support && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      {t("domestic_healthcare_support")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {t(
+                        `DOMESTIC_HEALTHCARE_SUPPORT__${patientData.meta_info.domestic_healthcare_support}`,
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
