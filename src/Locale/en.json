@@ -1028,8 +1028,7 @@
   "width": "Width ({{unit}})",
   "length": "Length ({{unit}})",
   "open_in_full_window": "Open in full window",
-  "minimize_screen":"Minimize",
-  "close_screen":"Close",
-  "send_message":"Send",
+  "minimize":"Minimize",
+  "send":"Send",
    "reply":"Reply"
 }
