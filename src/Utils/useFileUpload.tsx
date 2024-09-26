@@ -2,6 +2,7 @@ import {
   ChangeEvent,
   DetailedHTMLProps,
   InputHTMLAttributes,
+  useEffect,
   useState,
 } from "react";
 import {
@@ -104,6 +105,11 @@ export default function useFileUpload(
     });
   };
 
+  useEffect(() => {
+    const blanks = Array(files.length).fill("");
+    setUploadFileNames((names) => [...names, ...blanks].slice(0, files.length));
+  }, [files]);
+
   const validateFileUpload = () => {
     if (files.length === 0) {
       setError(t("file_error__choose_file"));
@@ -198,10 +204,11 @@ export default function useFileUpload(
     setProgress(0);
 
     for (const [index, file] of files.entries()) {
-      const filename =
-        uploadFileNames[index] === "" && file
-          ? file.name
-          : uploadFileNames[index];
+      const filename = uploadFileNames[index];
+      if (!filename) {
+        setError(t("file_error__single_file_name"));
+        return;
+      }
 
       const { data } = await request(routes.createUpload, {
         body: {

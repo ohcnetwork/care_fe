@@ -181,7 +181,7 @@ export default function PatientConsentRecords(props: {
           <TextFormField
             name="filename"
             label="File Name"
-            value={fileUpload.fileNames[0]}
+            value={fileUpload.fileNames[0] || ""}
             onChange={(e) => fileUpload.setFileName(e.value)}
           />
           <div className="flex gap-2">

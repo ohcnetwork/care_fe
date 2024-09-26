@@ -271,7 +271,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       label={t("enter_file_name")}
                       id="upload-file-name"
                       required
-                      value={fileUpload.fileNames[0]}
+                      value={fileUpload.fileNames[0] || ""}
                       disabled={!!fileUpload.progress}
                       onChange={(e) => fileUpload.setFileName(e.value)}
                       error={fileUpload.error || undefined}
