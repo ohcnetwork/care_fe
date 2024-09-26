@@ -155,7 +155,7 @@ const PatientNoteCard = ({
                 className="tooltip h-5 w-5"
               />
               <span className="tooltip-text tooltip-bottom -translate-x-11 -translate-y-1 text-xs">
-                Reply
+                {t("reply")}
               </span>
             </ButtonV2>
           </div>

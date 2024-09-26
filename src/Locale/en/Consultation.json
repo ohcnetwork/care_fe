@@ -75,5 +75,9 @@
   "consultation_notes": "General Instructions (Advice)",
   "procedure_suggestions": "Procedure Suggestions",
   "patient_notes_thread__Doctors": "Doctor's Discussions",
-  "patient_notes_thread__Nurses": "Nurse's Discussions"
+  "patient_notes_thread__Nurses": "Nurse's Discussions",
+  "open_in_full_window": "Open in full window",
+  "minimize_screen":"Minimize",
+  "close_screen":"Close",
+  "send_message":"Send"
 }
