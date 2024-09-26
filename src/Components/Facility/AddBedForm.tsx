@@ -127,7 +127,9 @@ export const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
       const { res } = await request(routes.createFacilityBed, {
         body: { ...data, facility: facilityId, location: locationId },
       });
-      res?.ok && onSuccess("Bed(s) created successfully");
+      res?.ok && numberOfBeds>1 
+        ? onSuccess("Beds created successfully")
+        : onSuccess("Bed created successfully");
     }
   };
 
