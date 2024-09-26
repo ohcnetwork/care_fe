@@ -6,6 +6,7 @@ import PaginationComponent from "../../Components/Common/Pagination";
 import { classNames, humanizeStrings } from "../../Utils/utils";
 import FiltersCache from "../../Utils/FiltersCache";
 import careConfig from "@careConfig";
+import { triggerGoal } from "../../Integrations/Plausible";
 
 export type FilterState = Record<string, unknown>;
 
@@ -42,6 +43,9 @@ export default function useFilters({
   ) => {
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, options);
+    Object.keys(query).forEach((filter) =>
+      triggerGoal("Advanced filter applied", { filter }),
+    );
     updateCache(query);
   };
 
