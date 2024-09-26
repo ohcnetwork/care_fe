@@ -24,7 +24,7 @@ export default function PrintPreview(props: Props) {
 
       {/* PREVIOUS WIDTH = 50REM
 
-      UPDATED WIDTH = 57REM */}
+      UPDATED WIDTH = 64REM */}
 
       <div className="mx-auto my-8 lg:w-[64rem]">
         <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
