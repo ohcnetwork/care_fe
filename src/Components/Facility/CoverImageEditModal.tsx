@@ -92,11 +92,30 @@ const CoverImageEditModal = ({
     onClose?.();
   };
 
+  const maxWidth = 1024;
+  const maxHeight = 1024;
+
   useEffect(() => {
     if (selectedFile) {
+      const img = new Image();
       const objectUrl = URL.createObjectURL(selectedFile);
-      setPreview(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+      img.onload = () => {
+        const width = img.width;
+        const height = img.height;
+        if (width > maxWidth || height > maxHeight) {
+          Notification.Error({
+            msg: `Image dimensions (${width}x${height}) exceed allowed size of ${maxWidth}x${maxHeight} pixels.`,
+          });
+        } else {
+          setPreview(objectUrl);
+        }
+      };
+
+      img.src = objectUrl;
+
+      return () => {
+        URL.revokeObjectURL(objectUrl);
+      };
     }
   }, [selectedFile]);
 
