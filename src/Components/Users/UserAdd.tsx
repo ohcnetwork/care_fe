@@ -325,7 +325,11 @@ export const UserAdd = (props: UserProps) => {
   }, [state.form.phone_number_is_whatsapp, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
-    const newSelectedFacilities = selected ? (Array.isArray(selected) ? selected : [selected]) : [];
+    const newSelectedFacilities = selected
+      ? Array.isArray(selected)
+        ? selected
+        : [selected]
+      : [];
     setSelectedFacility(newSelectedFacilities as FacilityModel[]);
     const form = { ...state.form };
     form.facilities = selected
