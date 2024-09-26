@@ -1,22 +1,20 @@
 import React from "react";
 import { formatDate, formatTime } from "../../../../Utils/utils";
 import { classNames } from "../../../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 interface SharedSectionTableProps {
   data: Record<string, any>;
   rows: Array<{ title?: string; field?: string; subField?: boolean }>;
   choices?: Record<string, Record<number | string, string>>;
-  translateKey: string;
-  t: (key: string) => string;
 }
 
-const SharedSectionTable: React.FC<SharedSectionTableProps> = ({
+const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
   data,
   rows,
   choices = {},
-  translateKey,
-  t,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="m-2 w-full overflow-hidden overflow-x-auto rounded-lg border border-black shadow md:w-fit">
       <table className="border-collapse overflow-hidden rounded-lg border bg-secondary-100">
@@ -48,7 +46,7 @@ const SharedSectionTable: React.FC<SharedSectionTableProps> = ({
                   row.subField ? "pl-4 font-medium" : "font-bold",
                 )}
               >
-                {row.title ?? t(`${translateKey}__${row.field}`)}
+                {row.title ?? t(`LOG_UPDATE_FIELD_LABEL__${row.field!}`)}
               </td>
               {Object.values(data).map((obj, idx) => (
                 <td
@@ -57,7 +55,10 @@ const SharedSectionTable: React.FC<SharedSectionTableProps> = ({
                 >
                   {row.field
                     ? choices[row.field]
-                      ? (choices[row.field][obj[row.field]] ?? "-")
+                      ? t(
+                          `${row.field.toUpperCase()}__${choices[row.field][obj[row.field]]}` ??
+                            "-",
+                        )
                       : (obj[row.field] ?? "-")
                     : "-"}
                 </td>
@@ -70,4 +71,4 @@ const SharedSectionTable: React.FC<SharedSectionTableProps> = ({
   );
 };
 
-export default SharedSectionTable;
+export default LogUpdateAnalayseTable;
