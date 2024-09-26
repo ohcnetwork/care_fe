@@ -195,6 +195,7 @@ export const FileUpload = (props: FileUploadProps) => {
       "ods",
       "pdf",
     ],
+    allowNameFallback: false,
     onUpload: refetchAll,
   });
 

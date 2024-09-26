@@ -38,6 +38,7 @@ export default function PatientConsentRecords(props: {
   const fileUpload = useFileUpload({
     type: "CONSENT_RECORD",
     allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
+    allowNameFallback: false,
   });
 
   const fileManager = useFileManager({

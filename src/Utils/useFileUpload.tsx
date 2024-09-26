@@ -25,6 +25,8 @@ export type FileUploadOptions = {
   type: string;
   category?: FileCategory;
   onUpload?: (file: FileUploadModel) => void;
+  // if allowed, will fallback to the name of the file if a seperate filename is not defined.
+  allowNameFallback?: boolean;
 } & (
   | {
       allowedExtensions?: string[];
@@ -72,7 +74,13 @@ const ExtImage: string[] = [
 export default function useFileUpload(
   options: FileUploadOptions,
 ): FileUploadReturn {
-  const { type, onUpload, category = "UNSPECIFIED", multiple } = options;
+  const {
+    type,
+    onUpload,
+    category = "UNSPECIFIED",
+    multiple,
+    allowNameFallback = true,
+  } = options;
 
   const [uploadFileNames, setUploadFileNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -204,7 +212,10 @@ export default function useFileUpload(
     setProgress(0);
 
     for (const [index, file] of files.entries()) {
-      const filename = uploadFileNames[index];
+      const filename =
+        allowNameFallback && uploadFileNames[index] === "" && file
+          ? file.name
+          : uploadFileNames[index];
       if (!filename) {
         setError(t("file_error__single_file_name"));
         return;
