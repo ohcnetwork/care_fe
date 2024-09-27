@@ -15,17 +15,37 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
   choices = {},
 }) => {
   const { t } = useTranslation();
+
+  // Helper function to get the display value
+  const getDisplayValue = (value: any, field?: string): string => {
+    if (value == null) {
+      return "-";
+    }
+    if (typeof value === "boolean") {
+      return t(value ? "yes" : "no");
+    }
+    if (field && choices[field]) {
+      const choice =
+        choices[field][value as keyof (typeof choices)[typeof field]];
+      return choice ? t(`${field.toUpperCase()}__${choice}`) : "-";
+    }
+    if (value) return value;
+
+    return "-";
+  };
+
   return (
     <div className="m-2 w-full overflow-hidden overflow-x-auto rounded-lg border border-black shadow md:w-fit">
-      <table className="border-collapse overflow-hidden rounded-lg border bg-secondary-100">
-        <thead className="bg-white shadow">
+      <table className="border-collapse rounded-lg border bg-secondary-100">
+        <thead className="sticky top-0 bg-white shadow">
           <tr>
-            <th className="border-b-2 border-r-2 border-black" />
+            <th className="sticky left-0 border-b-2 border-r-2 border-black bg-white"></th>
             {Object.keys(data).map((date) => (
               <th
                 key={date}
                 className="w-40 border border-b-2 border-secondary-500 border-b-black p-1 text-sm font-semibold"
               >
+                {date}
                 <p>{formatDate(date)}</p>
                 <p>{formatTime(date)}</p>
               </th>
@@ -40,29 +60,25 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
                 row.title && "border-t-2 border-t-secondary-600",
               )}
             >
-              <td
+              <th
                 className={classNames(
-                  "border border-r-2 border-secondary-500 border-r-black bg-white p-2",
+                  "sticky left-0 border border-r-2 border-secondary-500 border-r-black bg-white p-2",
                   row.subField ? "pl-4 font-medium" : "font-bold",
                 )}
               >
                 {row.title ?? t(`LOG_UPDATE_FIELD_LABEL__${row.field!}`)}
-              </td>
-              {Object.values(data).map((obj, idx) => (
-                <td
-                  key={`${row.field}-${idx}`}
-                  className="border border-secondary-500 bg-secondary-100 p-2 text-center font-medium"
-                >
-                  {row.field
-                    ? choices[row.field]
-                      ? t(
-                          `${row.field.toUpperCase()}__${choices[row.field][obj[row.field]]}` ??
-                            "-",
-                        )
-                      : (obj[row.field] ?? "-")
-                    : "-"}
-                </td>
-              ))}
+              </th>
+              {Object.values(data).map((obj, idx) => {
+                const value = obj[row.field!];
+                return (
+                  <td
+                    key={`${row.field}-${idx}`}
+                    className="border border-l-2 border-secondary-500 bg-secondary-100 p-2 text-center font-medium"
+                  >
+                    {getDisplayValue(value, row.field)}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
