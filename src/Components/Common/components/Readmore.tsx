@@ -25,10 +25,7 @@ export default function ReadMore(props: { text: string; minChars: number }) {
       {props.text.length > props.minChars && (
         <button
           className="m-0 w-full bg-white p-0 text-left font-bold text-blue-500"
-          onClick={(e) => {
-            e.stopPropagation();
-            setExpanded(!isExpanded);
-          }}
+          onClick={(_) => setExpanded(!isExpanded)}
         >
           {isExpanded ? "Read Less" : "Read More"}
         </button>
