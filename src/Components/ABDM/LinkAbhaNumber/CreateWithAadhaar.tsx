@@ -68,7 +68,12 @@ type IEnterAadhaarProps = InjectedStepProps<Memory>;
 
 function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
   const { t } = useTranslation();
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState([false, false]);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState([
+    false,
+    false,
+    false,
+    false,
+  ]);
 
   const validateAadhaar = () => {
     if (
@@ -147,52 +152,22 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        <CheckBoxFormField
-          name="abha_create_disclaimer_1"
-          label={
-            <>
-              {t("create_abha__disclaimer_1.1")}
-              <a
-                target="_blank"
-                rel="noreferrer"
-                href="https://docs.coronasafe.network/coronasafe-care-documentation/privacy-policy/privacy-policy-as-per-abdm-guidelines"
-              >
-                {t("create_abha__disclaimer_1.2")}
-              </a>
-            </>
-          }
-          value={disclaimerAccepted[0]}
-          onChange={(e) => {
-            setDisclaimerAccepted([e.value, disclaimerAccepted[1]]);
-          }}
-          className="mr-2 rounded border-gray-700"
-          labelClassName="text-xs text-gray-800"
-          errorClassName="hidden"
-        />
-
-        <CheckBoxFormField
-          name="abha_create_disclaimer_2"
-          label={
-            <>
-              {t("create_abha__disclaimer_2.1")}
-              <a
-                target="_blank"
-                rel="noreferrer"
-                href="https://abdm.gov.in/publications/policies_regulations/health_data_management_policy"
-              >
-                {t("create_abha__disclaimer_2.2")}
-              </a>
-              {t("create_abha__disclaimer_2.3")}
-            </>
-          }
-          value={disclaimerAccepted[1]}
-          onChange={(e) => {
-            setDisclaimerAccepted([disclaimerAccepted[0], e.value]);
-          }}
-          className="mr-2 rounded border-gray-700"
-          labelClassName="text-xs text-gray-800"
-          errorClassName="hidden"
-        />
+        {disclaimerAccepted.map((isAccepted, i) => (
+          <CheckBoxFormField
+            key={`abha_disclaimer_${i + 1}`}
+            name={`abha_disclaimer_${i + 1}`}
+            label={t(`abha__disclaimer_${i + 1}`)}
+            value={isAccepted}
+            onChange={(e) => {
+              setDisclaimerAccepted(
+                disclaimerAccepted.map((v, j) => (j === i ? e.value : v)),
+              );
+            }}
+            className="mr-2 rounded border-gray-700"
+            labelClassName="text-xs text-gray-800"
+            errorClassName="hidden"
+          />
+        ))}
       </div>
 
       <div className="mt-4 flex items-center">

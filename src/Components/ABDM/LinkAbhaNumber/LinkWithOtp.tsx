@@ -59,7 +59,11 @@ const supportedAuthMethods = ["AADHAAR_OTP", "MOBILE_OTP"];
 
 function EnterId({ memory, setMemory, next }: IEnterIdProps) {
   const { t } = useTranslation();
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState([
+    false,
+    false,
+    false,
+  ]);
   const [authMethods, setAuthMethods] = useState<string[]>([]);
 
   const valueType = useMemo(() => {
@@ -175,17 +179,22 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        <CheckBoxFormField
-          name="abha_link_disclaimer_1"
-          label={<>{t("link_abha_disclaimer")}</>}
-          value={disclaimerAccepted}
-          onChange={(e) => {
-            setDisclaimerAccepted(e.value);
-          }}
-          className="mr-2 rounded border-gray-700"
-          labelClassName="text-xs text-gray-800"
-          errorClassName="hidden"
-        />
+        {disclaimerAccepted.map((isAccepted, i) => (
+          <CheckBoxFormField
+            key={`abha_disclaimer_${i + 2}`}
+            name={`abha_disclaimer_${i + 2}`}
+            label={t(`abha__disclaimer_${i + 2}`)}
+            value={isAccepted}
+            onChange={(e) => {
+              setDisclaimerAccepted(
+                disclaimerAccepted.map((v, j) => (j === i ? e.value : v)),
+              );
+            }}
+            className="mr-2 rounded border-gray-700"
+            labelClassName="text-xs text-gray-800"
+            errorClassName="hidden"
+          />
+        ))}
       </div>
 
       <div className="mt-4 flex items-center">
@@ -193,7 +202,9 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
           <ButtonV2
             className="w-full"
             loading={memory?.isLoading}
-            disabled={!disclaimerAccepted || memory?.id.length === 0}
+            disabled={
+              disclaimerAccepted.some((v) => !v) || memory?.id.length === 0
+            }
             onClick={handleGetAuthMethods}
           >
             {t("get_auth_methods")}
