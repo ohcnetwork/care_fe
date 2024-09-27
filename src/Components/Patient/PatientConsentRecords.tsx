@@ -38,6 +38,7 @@ export default function PatientConsentRecords(props: {
   const fileUpload = useFileUpload({
     type: "CONSENT_RECORD",
     allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
+    allowNameFallback: false,
   });
 
   const fileManager = useFileManager({
@@ -181,7 +182,7 @@ export default function PatientConsentRecords(props: {
           <TextFormField
             name="filename"
             label="File Name"
-            value={fileUpload.fileNames[0]}
+            value={fileUpload.fileNames[0] || ""}
             onChange={(e) => fileUpload.setFileName(e.value)}
           />
           <div className="flex gap-2">
@@ -203,7 +204,7 @@ export default function PatientConsentRecords(props: {
                       handleUpload();
                     }
                   }}
-                  loading={!!fileUpload.progress}
+                  loading={fileUpload.uploading}
                   disabled={
                     newConsent.type === 2 &&
                     newConsent.patient_code_status === 0
@@ -216,7 +217,7 @@ export default function PatientConsentRecords(props: {
                 <ButtonV2
                   variant="danger"
                   onClick={fileUpload.clearFiles}
-                  disabled={!!fileUpload.progress}
+                  disabled={fileUpload.uploading}
                 >
                   <CareIcon icon="l-trash-alt" className="" />
                 </ButtonV2>
