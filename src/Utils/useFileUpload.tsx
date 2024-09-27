@@ -2,6 +2,7 @@ import {
   ChangeEvent,
   DetailedHTMLProps,
   InputHTMLAttributes,
+  useEffect,
   useState,
 } from "react";
 import {
@@ -24,6 +25,8 @@ export type FileUploadOptions = {
   type: string;
   category?: FileCategory;
   onUpload?: (file: FileUploadModel) => void;
+  // if allowed, will fallback to the name of the file if a seperate filename is not defined.
+  allowNameFallback?: boolean;
 } & (
   | {
       allowedExtensions?: string[];
@@ -54,6 +57,7 @@ export type FileUploadReturn = {
   setFileNames: (names: string[]) => void;
   removeFile: (index: number) => void;
   clearFiles: () => void;
+  uploading: boolean;
 };
 
 // Array of image extensions
@@ -71,13 +75,20 @@ const ExtImage: string[] = [
 export default function useFileUpload(
   options: FileUploadOptions,
 ): FileUploadReturn {
-  const { type, onUpload, category = "UNSPECIFIED", multiple } = options;
+  const {
+    type,
+    onUpload,
+    category = "UNSPECIFIED",
+    multiple,
+    allowNameFallback = true,
+  } = options;
 
   const [uploadFileNames, setUploadFileNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<null | number>(null);
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
   const [audioModalOpen, setAudioModalOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [files, setFiles] = useState<File[]>([]);
 
@@ -103,6 +114,11 @@ export default function useFileUpload(
       }
     });
   };
+
+  useEffect(() => {
+    const blanks = Array(files.length).fill("");
+    setUploadFileNames((names) => [...names, ...blanks].slice(0, files.length));
+  }, [files]);
 
   const validateFileUpload = () => {
     if (files.length === 0) {
@@ -199,9 +215,14 @@ export default function useFileUpload(
 
     for (const [index, file] of files.entries()) {
       const filename =
-        uploadFileNames[index] === "" && file
+        allowNameFallback && uploadFileNames[index] === "" && file
           ? file.name
           : uploadFileNames[index];
+      if (!filename) {
+        setError(t("file_error__single_file_name"));
+        return;
+      }
+      setUploading(true);
 
       const { data } = await request(routes.createUpload, {
         body: {
@@ -220,6 +241,7 @@ export default function useFileUpload(
       }
     }
 
+    setUploading(false);
     setFiles([]);
     setUploadFileNames([]);
   };
@@ -229,17 +251,15 @@ export default function useFileUpload(
       <CameraCaptureDialog
         show={cameraModalOpen}
         onHide={() => setCameraModalOpen(false)}
-        onCapture={(file, fileName) => {
+        onCapture={(file) => {
           setFiles((prev) => [...prev, file]);
-          setUploadFileNames((prev) => [...prev, fileName]);
         }}
       />
       <AudioCaptureDialog
         show={audioModalOpen}
         onHide={() => setAudioModalOpen(false)}
-        onCapture={(file, fileName) => {
+        onCapture={(file) => {
           setFiles((prev) => [...prev, file]);
-          setUploadFileNames((prev) => [...prev, fileName]);
         }}
         autoRecord
       />
@@ -290,5 +310,6 @@ export default function useFileUpload(
       setFiles([]);
       setUploadFileNames([]);
     },
+    uploading,
   };
 }
