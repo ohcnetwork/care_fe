@@ -13,7 +13,6 @@ import Webcam from "react-webcam";
 import { FacilityModel } from "./models";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
@@ -130,26 +129,17 @@ const CoverImageEditModal = ({
           "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
       },
       async (xhr: XMLHttpRequest) => {
+        setIsProcessing(false);
         if (xhr.status === 200) {
           Success({ msg: "Cover image updated." });
-          setIsProcessing(false);
           setIsCaptureImgBeingUploaded(false);
           await sleep(1000);
           onSave?.();
           closeModal();
-        } else {
-          const error = JSON.parse(xhr.responseText);
-          Notification.Error({
-            msg: error?.cover_image?.join(" ") || "Something went wrong!",
-          });
-          setIsProcessing(false);
         }
       },
       null,
       () => {
-        Notification.Error({
-          msg: "Network Failure. Please check your internet connectivity.",
-        });
         setIsProcessing(false);
       },
     );
