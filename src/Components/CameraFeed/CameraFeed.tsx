@@ -157,7 +157,7 @@ export default function CameraFeed(props: Props) {
         <div
           className={classNames(
             isFullscreen ? "hidden lg:flex" : "flex",
-            "items-center justify-between px-4 py-0.5 transition-all duration-500 ease-in-out lg:py-1",
+            "shrink-0 items-center justify-between px-4 py-0.5 transition-all duration-500 ease-in-out lg:py-1",
             (() => {
               if (playerStatus !== "playing") {
                 return "bg-black text-zinc-400";
@@ -202,7 +202,7 @@ export default function CameraFeed(props: Props) {
             )}
           </div>
         </div>
-        <div className="group relative aspect-video bg-black">
+        <div className="group relative flex-1 bg-black">
           {/* Notifications */}
           <FeedAlert state={state} />
           {playerStatus === "playing" && <FeedWatermark />}
@@ -250,7 +250,7 @@ export default function CameraFeed(props: Props) {
           <VideoPlayer
             playerRef={playerRef}
             streamUrl={streamUrl}
-            className="absolute inset-x-0 mx-auto aspect-video max-h-full w-full"
+            className="max-h-[calc(100vh-40px)] w-full object-contain"
             onPlay={() => {
               setPlayedOn(new Date());
               setState("playing");
@@ -266,6 +266,7 @@ export default function CameraFeed(props: Props) {
             }}
             onError={props.onStreamError}
           />
+
           {inlineControls && playerStatus === "playing" && controls}
         </div>
         {!inlineControls && (
