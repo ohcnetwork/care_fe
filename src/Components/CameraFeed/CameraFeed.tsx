@@ -148,7 +148,7 @@ export default function CameraFeed(props: Props) {
     <div ref={playerWrapperRef} className="flex flex-col justify-center">
       <div
         className={classNames(
-          "flex max-h-screen flex-col justify-center",
+          "max-w-screen flex flex-col justify-center",
           props.className,
           isFullscreen ? "bg-black" : "bg-zinc-100",
           isIOS && isFullscreen && "px-20",
