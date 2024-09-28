@@ -3,7 +3,6 @@ import { ConsultationModel } from "../models";
 import {
   getConsultation,
   getPatient,
-  listAssetBeds,
   listShiftRequests,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -36,7 +35,6 @@ import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologica
 import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
-import { AssetBedModel } from "../../Assets/AssetTypes";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
 import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
@@ -130,20 +128,24 @@ export const ConsultationDetails = (props: any) => {
             );
           }
           setConsultationData(data);
-          const assetRes = data?.current_bed?.bed_object?.id
-            ? await dispatch(
-                listAssetBeds({
-                  bed: data?.current_bed?.bed_object?.id,
-                }),
-              )
-            : null;
-          const isCameraAttachedRes =
-            assetRes != null
-              ? assetRes.data.results.some((asset: AssetBedModel) => {
-                  return asset?.asset_object?.asset_class === "ONVIF";
-                })
-              : false;
-          setIsCameraAttached(isCameraAttachedRes);
+
+          setIsCameraAttached(
+            await (async () => {
+              const bedId = data?.current_bed?.bed_object?.id;
+              if (!bedId) {
+                return false;
+              }
+              const { data: assetBeds } = await request(routes.listAssetBeds, {
+                query: { bed: bedId },
+              });
+              if (!assetBeds) {
+                return false;
+              }
+              return assetBeds.results.some(
+                (a) => a.asset_object.asset_class === "ONVIF",
+              );
+            })(),
+          );
 
           // Get patient data
           const id = res.data.patient;

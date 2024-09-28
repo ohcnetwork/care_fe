@@ -1,29 +1,4 @@
 import { fireRequest } from "./fireRequest";
-
-// asset bed
-export const listAssetBeds = (params: object, altKey?: string) =>
-  fireRequest("listAssetBeds", [], params, {}, altKey);
-
-export const partialUpdateAssetBed = (params: object, asset_id: string) =>
-  fireRequest(
-    "partialUpdateAssetBed",
-    [],
-    { ...params },
-    {
-      external_id: asset_id,
-    },
-  );
-
-export const deleteAssetBed = (asset_id: string) =>
-  fireRequest(
-    "deleteAssetBed",
-    [],
-    {},
-    {
-      external_id: asset_id,
-    },
-  );
-
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
@@ -89,5 +64,3 @@ export const downloadResourceRequests = (params: object) => {
 
 export const listAssets = (params: object) =>
   fireRequest("listAssets", [], params);
-export const operateAsset = (id: string, params: object) =>
-  fireRequest("operateAsset", [], params, { external_id: id });
