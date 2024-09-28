@@ -203,5 +203,21 @@
   "deleted_successfully": "{{name}} வெற்றிகரமாக நீக்கப்பட்டது",
   "delete_item": "{{name}}ஐ நீக்கவும்",
   "unsupported_browser": "ஆதரிக்கப்படாத உலாவி",
-  "unsupported_browser_description": "உங்கள் உலாவி ({{name}} பதிப்பு {{version}}) ஆதரிக்கப்படவில்லை. உங்கள் உலாவியை சமீபத்திய பதிப்பிற்கு புதுப்பிக்கவும் அல்லது சிறந்த அனுபவத்திற்காக ஆதரிக்கப்படும் உலாவிக்கு மாறவும்."
+  "unsupported_browser_description": "உங்கள் உலாவி ({{name}} பதிப்பு {{version}}) ஆதரிக்கப்படவில்லை. உங்கள் உலாவியை சமீபத்திய பதிப்பிற்கு புதுப்பிக்கவும் அல்லது சிறந்த அனுபவத்திற்காக ஆதரிக்கப்படும் உலாவிக்கு மாறவும்.",
+  "SORT_OPTIONS__-created_date": "புதிதாக உருவாக்கப்பட்ட தேதி முதலில்",
+  "SORT_OPTIONS__created_date": "பழைய உருவாக்கப்பட்ட தேதி முதலில்",
+  "SORT_OPTIONS__-category_severity": "அதிக தீவிரத்தன்மை பிரிவு முதலில்",
+  "SORT_OPTIONS__category_severity": "குறைந்த தீவிரத்தன்மை வகை முதலில்",
+  "SORT_OPTIONS__-modified_date": "முதலில் புதுப்பிக்கப்பட்ட தேதி",
+  "SORT_OPTIONS__modified_date": "பழைய புதுப்பிக்கப்பட்ட தேதி முதலில்",
+  "SORT_OPTIONS__facility__name,last_consultation__current_bed__bed__name": "படுக்கை எண் 1-N",
+  "SORT_OPTIONS__facility__name,-last_consultation__current_bed__bed__name": "படுக்கை எண். N-1",
+  "SORT_OPTIONS__-review_time": "சமீபத்திய மதிப்பாய்வு தேதி முதலில்",
+  "SORT_OPTIONS__review_time": "பழைய மதிப்பாய்வு தேதி முதலில்",
+  "SORT_OPTIONS__taken_at": "முதலில் எடுக்கப்பட்ட பழைய தேதி",
+  "SORT_OPTIONS__-taken_at": "சமீபத்தில் எடுக்கப்பட்ட தேதி முதலில்",
+  "SORT_OPTIONS__name": "நோயாளியின் பெயர் AZ",
+  "SORT_OPTIONS__-name": "நோயாளியின் பெயர் ZA",
+  "SORT_OPTIONS__bed__name": "படுக்கை எண் 1-N",
+  "SORT_OPTIONS__-bed__name": "படுக்கை எண். N-1"
 }

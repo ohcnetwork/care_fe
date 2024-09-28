@@ -113,6 +113,7 @@ describe("Patient Medicine Administration", () => {
     cy.closeNotification();
     // Administer the medicine in edit form
     patientPrescription.clickAdministerButton();
+    cy.wait(2000);
     patientPrescription.enterAdministerDosage(medicineBaseDosage);
     patientPrescription.enterAdministerNotes(medicineAdministerNote);
     cy.submitButton("Administer Medicine");

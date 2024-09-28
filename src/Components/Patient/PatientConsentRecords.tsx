@@ -181,11 +181,11 @@ export default function PatientConsentRecords(props: {
           <TextFormField
             name="filename"
             label="File Name"
-            value={fileUpload.fileName}
+            value={fileUpload.fileNames[0]}
             onChange={(e) => fileUpload.setFileName(e.value)}
           />
           <div className="flex gap-2">
-            {fileUpload.file ? (
+            {fileUpload.files[0] ? (
               <>
                 <ButtonV2
                   onClick={() => {
@@ -215,7 +215,7 @@ export default function PatientConsentRecords(props: {
                 </ButtonV2>
                 <ButtonV2
                   variant="danger"
-                  onClick={fileUpload.clearFile}
+                  onClick={fileUpload.clearFiles}
                   disabled={!!fileUpload.progress}
                 >
                   <CareIcon icon="l-trash-alt" className="" />
