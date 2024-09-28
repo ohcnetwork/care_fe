@@ -559,12 +559,18 @@ const routes = {
     TRes: Type<PaginatedResponse<CurrentBed>>(),
   },
   getConsultationBed: {
-    path: "/api/v1/consultationbed/{external_id}/",
+    path: "/api/v1/consultationbed/{externalId}/",
     method: "GET",
+    TRes: Type<CurrentBed>(),
   },
   updateConsultationBed: {
     path: "/api/v1/consultationbed/{external_id}/",
     method: "PUT",
+  },
+  toggleConsultationBedPrivacy: {
+    path: "/api/v1/consultationbed/{externalId}/toggle_privacy/",
+    method: "PATCH",
+    TRes: Type<CurrentBed>(),
   },
 
   // Download Api

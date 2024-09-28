@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AssetData } from "../Assets/AssetTypes";
-import useOperateCamera, { PTZPayload } from "./useOperateCamera";
-import { getStreamUrl } from "./utils";
-import { classNames, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState, StreamStatus } from "./FeedAlert";
-import FeedNetworkSignal from "./FeedNetworkSignal";
-import NoFeedAvailable from "./NoFeedAvailable";
+import { classNames, isIOS } from "../../Utils/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import useOperateCamera, { PTZPayload } from "./useOperateCamera";
+
+import { AssetData } from "../Assets/AssetTypes";
 import FeedControls from "./FeedControls";
+import FeedNetworkSignal from "./FeedNetworkSignal";
 import FeedWatermark from "./FeedWatermark";
-import useFullscreen from "../../Common/hooks/useFullscreen";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
+import NoFeedAvailable from "./NoFeedAvailable";
 import VideoPlayer from "./videoPlayer";
+import { getStreamUrl } from "./utils";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import useFullscreen from "../../Common/hooks/useFullscreen";
 
 interface Props {
   children?: React.ReactNode;
@@ -27,6 +28,7 @@ interface Props {
   shortcutsDisabled?: boolean;
   onMove?: () => void;
   operate: ReturnType<typeof useOperateCamera>["operate"];
+  feedDisabled?: boolean | string | React.ReactNode;
 }
 
 export default function CameraFeed(props: Props) {
@@ -56,7 +58,7 @@ export default function CameraFeed(props: Props) {
     if (props.preset) {
       move(props.preset);
     }
-  }, [props.preset]);
+  }, [props.preset]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Get camera presets (only if onCameraPresetsObtained is provided)
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function CameraFeed(props: Props) {
       }
     }
     getPresets(props.onCameraPresetsObtained);
-  }, [props.operate, props.onCameraPresetsObtained]);
+  }, [props.operate, props.onCameraPresetsObtained]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const initializeStream = useCallback(async () => {
     if (!playerRef.current) return;
@@ -87,12 +89,14 @@ export default function CameraFeed(props: Props) {
         setState("host_unreachable");
         return props.onStreamError?.();
       });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Start stream on mount
   useEffect(() => {
-    initializeStream();
-  }, []);
+    if (!props.feedDisabled) {
+      initializeStream();
+    }
+  }, [props.feedDisabled, initializeStream]);
 
   const resetStream = () => {
     setState("loading");
@@ -176,12 +180,12 @@ export default function CameraFeed(props: Props) {
               playerStatus !== "playing"
                 ? "pointer-events-none opacity-10"
                 : "opacity-100",
-              "transition-all duration-200 ease-in-out",
+              "transition-all duration-200 ease-in-out flex-1",
             )}
           >
             {props.children}
           </div>
-          <div className="flex w-full flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
+          <div className="flex flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
             <span className="text-xs font-bold md:text-sm">
               {props.asset.name}
             </span>
@@ -246,11 +250,30 @@ export default function CameraFeed(props: Props) {
             }
           })()}
 
+          {props.feedDisabled &&
+            (["string", "boolean"].includes(typeof props.feedDisabled) ? (
+              <NoFeedAvailable
+                message={
+                  typeof props.feedDisabled === "string"
+                    ? props.feedDisabled
+                    : "Feed Disabled"
+                }
+                className="text-warning-500"
+                icon="l-exclamation-triangle"
+                streamUrl=""
+              />
+            ) : (
+              props.feedDisabled
+            ))}
+
           {/* Video Player */}
           <VideoPlayer
             playerRef={playerRef}
             streamUrl={streamUrl}
-            className="max-h-[calc(100vh-40px)] w-full object-contain"
+            className={classNames(
+              "max-h-[calc(100vh-40px)] w-full object-contain",
+              !!props.feedDisabled && "opacity-10",
+            )}
             onPlay={() => {
               setPlayedOn(new Date());
               setState("playing");

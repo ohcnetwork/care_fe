@@ -295,6 +295,7 @@ export interface CurrentBed {
   modified_date: string;
   start_date: string;
   end_date: string;
+  is_privacy_enabled: boolean;
   meta: Record<string, any>;
 }
 

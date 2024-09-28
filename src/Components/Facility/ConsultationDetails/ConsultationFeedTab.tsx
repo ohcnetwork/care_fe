@@ -22,6 +22,10 @@ import { Warn } from "../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
 import { GetStatusResponse } from "../../CameraFeed/routes";
 import StillWatching from "../../CameraFeed/StillWatching";
+import PrivacyToggle, {
+  TogglePrivacyButton,
+} from "../../CameraFeed/PrivacyToggle";
+import NoFeedAvailable from "../../CameraFeed/NoFeedAvailable";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { t } = useTranslation();
@@ -29,6 +33,9 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const facility = useSlug("facility");
   const bed = props.consultationData.current_bed?.bed_object;
   const feedStateSessionKey = `encounterFeedState[${props.consultationId}]`;
+  const [isPrivacyEnabled, setIsPrivacyEnabled] = useState(
+    props.consultationData.current_bed?.is_privacy_enabled ?? false,
+  );
 
   const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<AssetBedModel>();
@@ -200,8 +207,34 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
               result: "success",
             });
           }}
+          feedDisabled={
+            isPrivacyEnabled && (
+              <NoFeedAvailable
+                message={"The feed is disabled for privacy reasons"}
+                className="text-warning-500"
+                icon="l-exclamation-triangle"
+                streamUrl=""
+                customActions={
+                  props.consultationData.current_bed && (
+                    <TogglePrivacyButton
+                      value={isPrivacyEnabled}
+                      consultationBedId={props.consultationData.current_bed.id}
+                      onChange={setIsPrivacyEnabled}
+                    />
+                  )
+                }
+              />
+            )
+          }
         >
           <div className="flex items-center">
+            {props.consultationData.current_bed && (
+              <PrivacyToggle
+                initalValue={isPrivacyEnabled}
+                onChange={setIsPrivacyEnabled}
+                consultationBedId={props.consultationData.current_bed.id}
+              />
+            )}
             {presets ? (
               <>
                 <AssetBedSelect

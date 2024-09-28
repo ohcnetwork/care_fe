@@ -1,15 +1,17 @@
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
+
 import { AssetData } from "../Assets/AssetTypes";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { classNames } from "../../Utils/utils";
 
 interface Props {
   className?: string;
   icon: IconName;
   message: string;
   streamUrl: string;
-  onResetClick: () => void;
-  asset: AssetData;
+  onResetClick?: () => void;
+  asset?: AssetData;
+  customActions?: React.ReactNode;
 }
 
 export default function NoFeedAvailable(props: Props) {
@@ -32,26 +34,31 @@ export default function NoFeedAvailable(props: Props) {
         {redactedURL}
       </span>
       <div className="mt-4 flex items-center gap-2">
-        <ButtonV2
-          variant="secondary"
-          className="bg-black text-white hover:bg-white/30"
-          border
-          size="small"
-          onClick={props.onResetClick}
-        >
-          <CareIcon icon="l-redo" className="text-base" />
-          Retry
-        </ButtonV2>
-        <ButtonV2
-          variant="secondary"
-          className="bg-black text-white hover:bg-white/30"
-          border
-          size="small"
-          href={`/facility/${props.asset.location_object.facility?.id}/assets/${props.asset.id}/configure`}
-        >
-          <CareIcon icon="l-cog" className="text-base" />
-          Configure
-        </ButtonV2>
+        {props.onResetClick && (
+          <ButtonV2
+            variant="secondary"
+            className="bg-black text-white hover:bg-white/30"
+            border
+            size="small"
+            onClick={props.onResetClick}
+          >
+            <CareIcon icon="l-redo" className="text-base" />
+            Retry
+          </ButtonV2>
+        )}
+        {props.asset && (
+          <ButtonV2
+            variant="secondary"
+            className="bg-black text-white hover:bg-white/30"
+            border
+            size="small"
+            href={`/facility/${props.asset.location_object.facility?.id}/assets/${props.asset.id}/configure`}
+          >
+            <CareIcon icon="l-cog" className="text-base" />
+            Configure
+          </ButtonV2>
+        )}
+        {props.customActions}
       </div>
     </div>
   );
