@@ -19,8 +19,9 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
   // Helper function to get the display value
   const getDisplayValue = (value: any, field?: string): string => {
     if (value == null) {
-      return "-";
+      return " ";
     }
+
     if (typeof value === "boolean") {
       return t(value ? "yes" : "no");
     }
@@ -29,9 +30,32 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
         choices[field][value as keyof (typeof choices)[typeof field]];
       return choice ? t(`${field.toUpperCase()}__${choice}`) : "-";
     }
-    if (value) return value;
+    if (value && typeof value == "string") return value;
 
     return "-";
+  };
+
+  const isddm_mm = (str: string) => {
+    let ct = 0;
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] == "/") ct++;
+    }
+
+    if (ct == 2) return true;
+    return false;
+  };
+
+  const ddmm_mmdd = (str: string) => {
+    const time = str.split(";")[0].trim();
+
+    const date = str.split(";")[1].trim();
+
+    const dd = date.split("/")[0];
+    const mm = date.split("/")[1];
+
+    const yyyy = date.split("/")[2];
+
+    return time + ";" + mm + "/" + dd + "/" + yyyy;
   };
 
   return (
@@ -41,14 +65,24 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
           <tr>
             <th className="sticky left-0 border-b-2 border-r-2 border-black bg-white"></th>
             {Object.keys(data).map((date) => (
-              <th
-                key={date}
-                className="w-40 border border-b-2 border-secondary-500 border-b-black p-1 text-sm font-semibold"
-              >
-                {date}
-                <p>{formatDate(date)}</p>
-                <p>{formatTime(date)}</p>
-              </th>
+              <>
+                <th
+                  key={date}
+                  className="w-40 border border-b-2 border-secondary-500 border-b-black p-1 text-sm font-semibold"
+                >
+                  {/*   DD/MM/YYYY ->  MM/DD/YYYY */}
+                  <p>
+                    {isddm_mm(date)
+                      ? formatDate(ddmm_mmdd(date))
+                      : formatDate(date)}
+                  </p>
+                  <p>
+                    {isddm_mm(date)
+                      ? formatTime(ddmm_mmdd(date))
+                      : formatTime(date)}
+                  </p>
+                </th>
+              </>
             ))}
           </tr>
         </thead>
@@ -73,7 +107,7 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
                 return (
                   <td
                     key={`${row.field}-${idx}`}
-                    className="border border-l-2 border-secondary-500 bg-secondary-100 p-2 text-center font-medium"
+                    className="w-80 border border-l-2 border-secondary-500 bg-secondary-100 p-2 text-center font-medium"
                   >
                     {getDisplayValue(value, row.field)}
                   </td>
