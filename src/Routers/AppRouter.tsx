@@ -75,7 +75,20 @@ export default function AppRouter() {
   }
 
   useRedirect("/user", "/users");
-  const pages = useRoutes(routes) || <Error404 />;
+  // Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => JSX.Element>
+  const pluginRoutes = {};
+  // plugins.reduce((acc, plugin) => {
+  //   if (typeof plugin === "string") return acc;
+  //   return { ...acc, ...plugin.routes };
+  // }, {});
+
+  const allRoutes = {
+    ...routes,
+    ...pluginRoutes,
+  };
+
+  const pages = useRoutes(allRoutes) || <Error404 />;
+
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

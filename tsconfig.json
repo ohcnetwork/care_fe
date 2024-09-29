@@ -16,10 +16,13 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["vite/client", "vite-plugin-pwa/client"],
+    "baseUrl": ".",
     "paths": {
+      "@core/*": ["src/*"],
+      "@apps/*": ["apps/*/src"],
       "@careConfig": ["./care.config.ts"]
     }
   },
-  "include": ["src", "care.config.ts"],
+  "include": ["src/**/*", "apps/**/*", "care.config.ts"],
   "exclude": ["src/**/*.gen.tsx"]
 }

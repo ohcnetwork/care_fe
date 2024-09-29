@@ -5,6 +5,8 @@ import react from "@vitejs/plugin-react-swc";
 import checker from "vite-plugin-checker";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+import path from "path";
+import fs from "fs";
 
 const pdfWorkerPath = path.join(
   path.dirname(
@@ -21,6 +23,42 @@ const cdnUrls =
     "https://egov-s3-patient-data-10bedicu.s3.amazonaws.com",
     "http://localhost:4566",
   ].join(" ");
+
+function getPluginAliases() {
+  const pluginsDir = path.resolve(__dirname, "apps");
+  const pluginFolders = fs.readdirSync(pluginsDir);
+
+  const aliases = {};
+
+  pluginFolders.forEach((pluginFolder) => {
+    const pluginSrcPath = path.join(pluginsDir, pluginFolder, "src");
+    if (fs.existsSync(pluginSrcPath)) {
+      aliases[`@apps/${pluginFolder}`] = pluginSrcPath;
+    }
+  });
+
+  return aliases;
+}
+
+function getPluginDependencies() {
+  const pluginsDir = path.resolve(__dirname, "plugins");
+  const pluginFolders = fs.readdirSync(pluginsDir);
+
+  const dependencies = new Set();
+
+  pluginFolders.forEach((pluginFolder) => {
+    const packageJsonPath = path.join(pluginsDir, pluginFolder, "package.json");
+    if (fs.existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      const pluginDependencies = packageJson.dependencies
+        ? Object.keys(packageJson.dependencies)
+        : [];
+      pluginDependencies.forEach((dep) => dependencies.add(dep));
+    }
+  });
+
+  return Array.from(dependencies);
+}
 
 /** @type {import('vite').UserConfig} */
 export default {
@@ -86,8 +124,13 @@ export default {
   ],
   resolve: {
     alias: {
+      ...getPluginAliases(),
       "@careConfig": path.resolve(__dirname, "./care.config.ts"),
+      "@core": path.resolve(__dirname, "src/"),
     },
+  },
+  optimizeDeps: {
+    include: getPluginDependencies(),
   },
   build: {
     outDir: "build",
