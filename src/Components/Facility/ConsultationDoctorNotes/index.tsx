@@ -128,7 +128,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
       <div className="relative mx-3 my-2 flex grow flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <div className="absolute inset-x-0 top-0 flex bg-secondary-200 text-sm shadow-md">
+        <div className="absolute inset-x-0 top-0 z-10 flex bg-secondary-200 text-sm shadow-md">
           {keysOf(PATIENT_NOTES_THREADS).map((current) => (
             <button
               id={`patient-note-tab-${current}`}
@@ -176,7 +176,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             <ButtonV2
               onClick={onAddNote}
               border={false}
-              className="absolute right-2"
+              className="absolute right-2 border-2 border-transparent focus:border-green-500 focus:shadow-md focus:shadow-green-400"
               ghost
               size="small"
               disabled={!patientActive}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { PaitentNotesReplyModel } from "./models";
 import { USER_TYPES_MAP } from "../../Common/constants";
 import { formatDateTime, relativeDate } from "../../Utils/utils";
@@ -14,8 +14,12 @@ const DoctorNoteReplyPreviewCard = ({
   children,
   cancelReply,
 }: Props) => {
+  useEffect(() => {
+    const pages = window.document.getElementById("pages");
+    pages?.scrollTo(0, pages.scrollHeight);
+  }, [parentNote?.note]);
   return (
-    <div className="">
+    <div>
       {parentNote ? (
         <div className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-gray-200 p-2 text-gray-800">
           <div className="flex flex-col px-2">
@@ -50,7 +54,9 @@ const DoctorNoteReplyPreviewCard = ({
                 </div>
               )}
             </div>
-            <div className="pb-2 text-sm text-gray-700">{parentNote.note}</div>
+            <div className="max-h-[100px] overflow-auto break-words pb-2 text-sm text-gray-700">
+              {parentNote.note}
+            </div>
           </div>
           <div>{children}</div>
         </div>

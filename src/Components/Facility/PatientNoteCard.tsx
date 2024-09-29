@@ -18,6 +18,7 @@ import dayjs from "dayjs";
 import Spinner from "../Common/Spinner";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useSlug from "../../Common/hooks/useSlug";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 const PatientNoteCard = ({
   note,
@@ -71,6 +72,16 @@ const PatientNoteCard = ({
       setReload(true);
     }
   };
+
+  useKeyboardShortcut(
+    ["Escape"],
+    () => {
+      setIsEditing(false);
+    },
+    {
+      ignoreInputFields: false,
+    },
+  );
 
   return (
     <>
@@ -161,6 +172,7 @@ const PatientNoteCard = ({
                   rows={2}
                   className="h-20 w-full resize-none rounded-lg border border-secondary-300 p-2"
                   value={noteField}
+                  autoFocus={isEditing}
                   onChange={(e) => setNoteField(e.target.value)}
                 ></textarea>
                 <div className="mt-2 flex justify-end gap-2">
@@ -176,6 +188,11 @@ const PatientNoteCard = ({
                   >
                     <CareIcon icon="l-times-circle" className="h-5 w-5" />
                     Cancel
+                    <div className="inset-y-0 hidden gap-1 md:flex">
+                      <kbd className="inline-flex items-center rounded border border-secondary-200 bg-white px-2 font-sans text-sm font-medium text-secondary-500">
+                        Esc
+                      </kbd>
+                    </div>
                   </ButtonV2>
                   <ButtonV2
                     className="py-1"
@@ -188,7 +205,9 @@ const PatientNoteCard = ({
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-secondary-700">{noteField}</div>
+              <div className="break-words text-sm text-secondary-700">
+                {noteField}
+              </div>
             )}
           </div>
         }
@@ -217,7 +236,7 @@ const PatientNoteCard = ({
                 return (
                   <div
                     key={index}
-                    className="my-2 flex flex-col justify-between rounded-lg border border-secondary-300 p-4 py-2 transition-colors duration-200 hover:bg-secondary-100"
+                    className="my-2 flex w-fit flex-col justify-between rounded-lg border border-secondary-300 p-4 py-2 transition-colors duration-200 hover:bg-secondary-100"
                   >
                     <div className="flex">
                       <div className="grow">
