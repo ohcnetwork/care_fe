@@ -143,6 +143,15 @@ export interface LoginCredentials {
 }
 
 const routes = {
+  livekit: {
+    create_room: {
+      path: "/api/livekit/create_room/",
+      method: "POST",
+      TBody: Type<{ source: string; target: string }>(),
+      TRes: Type<{ room_code: string; access: string }>(),
+    },
+  },
+
   createScribe: {
     path: "/api/care_scribe/scribe/",
     method: "POST",

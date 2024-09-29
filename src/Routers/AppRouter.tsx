@@ -1,33 +1,33 @@
-import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
-import { useState, useEffect } from "react";
-
-import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
-import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
-import Error404 from "../Components/ErrorPages/404";
 import {
   DesktopSidebar,
   MobileSidebar,
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
 } from "../Components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS } from "../Common/constants";
-import SessionExpired from "../Components/ErrorPages/SessionExpired";
-import HealthInformation from "../Components/ABDM/HealthInformation";
-import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
+import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { useEffect, useState } from "react";
 
-import UserRoutes from "./routes/UserRoutes";
-import PatientRoutes from "./routes/PatientRoutes";
-import SampleRoutes from "./routes/SampleRoutes";
-import FacilityRoutes from "./routes/FacilityRoutes";
-import ConsultationRoutes from "./routes/ConsultationRoutes";
-import HCXRoutes from "./routes/HCXRoutes";
-import ShiftingRoutes from "./routes/ShiftingRoutes";
+import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
 import AssetRoutes from "./routes/AssetRoutes";
-import ResourceRoutes from "./routes/ResourceRoutes";
-import ExternalResultRoutes from "./routes/ExternalResultRoutes";
+import { BLACKLISTED_PATHS } from "../Common/constants";
+import ConsultationRoutes from "./routes/ConsultationRoutes";
 import { DetailRoute } from "./types";
-import useAuthUser from "../Common/hooks/useAuthUser";
+import DoctorLiveConnect from "../Components/Facility/DoctorLiveConnect";
+import Error404 from "../Components/ErrorPages/404";
+import ExternalResultRoutes from "./routes/ExternalResultRoutes";
+import FacilityRoutes from "./routes/FacilityRoutes";
+import HCXRoutes from "./routes/HCXRoutes";
+import HealthInformation from "../Components/ABDM/HealthInformation";
+import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
+import PatientRoutes from "./routes/PatientRoutes";
+import ResourceRoutes from "./routes/ResourceRoutes";
+import SampleRoutes from "./routes/SampleRoutes";
+import SessionExpired from "../Components/ErrorPages/SessionExpired";
+import ShiftingRoutes from "./routes/ShiftingRoutes";
+import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
+import UserRoutes from "./routes/UserRoutes";
 import careConfig from "@careConfig";
+import useAuthUser from "../Common/hooks/useAuthUser";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
@@ -52,6 +52,13 @@ const Routes = {
   "/facility/:facilityId/abdm": ({ facilityId }: any) => (
     <ABDMFacilityRecords facilityId={facilityId} />
   ),
+  "/facility/:facilityId/live_connect/:userId": ({
+    facilityId,
+    userId,
+  }: {
+    facilityId: string;
+    userId: string;
+  }) => <DoctorLiveConnect facilityId={facilityId} userId={userId} />,
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,

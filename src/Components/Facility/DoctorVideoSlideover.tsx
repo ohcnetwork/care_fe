@@ -1,21 +1,23 @@
-import React, { useState } from "react";
-import SlideOver from "../../CAREUI/interactive/SlideOver";
-import { UserAssignedModel } from "../Users/models";
-import { SkillObjectModel } from "../Users/models";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
+import React, { useState } from "react";
 import {
   classNames,
   formatName,
   isUserOnline,
   relativeTime,
 } from "../../Utils/utils";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import { triggerGoal } from "../../Integrations/Plausible";
-import { Warn } from "../../Utils/Notifications";
-import Switch from "../../CAREUI/interactive/Switch";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+
+import { Link } from "raviger";
 import Loading from "../Common/Loading";
+import { SkillObjectModel } from "../Users/models";
+import SlideOver from "../../CAREUI/interactive/SlideOver";
+import Switch from "../../CAREUI/interactive/Switch";
+import { UserAssignedModel } from "../Users/models";
+import { Warn } from "../../Utils/Notifications";
+import routes from "../../Redux/api";
+import { triggerGoal } from "../../Integrations/Plausible";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
 
 const UserGroups = {
   ALL: "All",
@@ -97,24 +99,31 @@ export default function DoctorVideoSlideover(props: {
           <UserGroupList
             group="DOCTOR"
             users={annotatedUsers}
+            facilityId={facilityId}
             showGroupHeading
           />
 
           <UserGroupList
             group="NURSE"
             users={annotatedUsers}
+            facilityId={facilityId}
             showGroupHeading
           />
 
           <UserGroupList
             group="TELEICU"
             users={annotatedUsers}
+            facilityId={facilityId}
             showGroupHeading
           />
         </div>
       ) : (
         <div className="py-6">
-          <UserGroupList group={filter} users={annotatedUsers} />
+          <UserGroupList
+            group={filter}
+            users={annotatedUsers}
+            facilityId={facilityId}
+          />
         </div>
       )}
     </SlideOver>
@@ -124,6 +133,7 @@ export default function DoctorVideoSlideover(props: {
 const UserGroupList = (props: {
   users: UserAnnotatedWithGroup[];
   group: UserGroup;
+  facilityId: string;
   showGroupHeading?: boolean;
 }) => {
   const users = props.users.filter((user) => user.group === props.group);
@@ -155,7 +165,7 @@ const UserGroupList = (props: {
                 user.group !== "TELEICU" ? "home" : "remote"
               }-${user.user_type.toLowerCase()}`}
             >
-              <UserListItem user={user} />
+              <UserListItem user={user} facilityId={props.facilityId} />
             </li>
           ))}
         </ul>
@@ -170,7 +180,13 @@ type MSLaunchURI = (
   noHandlerCB?: null | (() => void),
 ) => void;
 
-function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
+function UserListItem({
+  user,
+  facilityId,
+}: {
+  user: UserAnnotatedWithGroup;
+  facilityId: string;
+}) {
   const icon: IconName =
     user.user_type === "Doctor" ? "l-user-md" : "l-user-nurse";
 
@@ -267,6 +283,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
             <DoctorConnectButtons
               user={user}
               connectOnWhatsApp={connectOnWhatsApp}
+              facilityId={facilityId}
             />
           </div>
           {!!user.skills.length && (
@@ -317,6 +334,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
 function DoctorConnectButtons(props: {
   user: UserAssignedModel;
   connectOnWhatsApp: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  facilityId: string;
 }) {
   const user = props.user;
   const authUser = useAuthUser();
@@ -350,6 +368,19 @@ function DoctorConnectButtons(props: {
           <CareIcon icon="l-whatsapp" className="h-5 w-5" />
         </div>
       </a>
+      <Link
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        href={`/facility/${props.facilityId}/live_connect/${user.id}/`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <div className="tooltip">
+          <span className="tooltip-text tooltip-left">Connect on Care</span>
+          <CareIcon icon="l-video" className="w-5 h-5" />
+        </div>
+      </Link>
       <a
         href={user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"}
         onClick={(e) => {

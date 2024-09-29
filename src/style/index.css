@@ -28,6 +28,9 @@
     }
 }
 
+.react-tiny-popover-container {
+    color: white !important;
+}
 .indeterminate {
     animation: indeterminateAnimation 1s infinite linear;
     transform-origin: 0% 50%;
