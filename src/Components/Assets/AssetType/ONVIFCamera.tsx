@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { AssetData, ResolvedMiddleware } from "../AssetTypes";
+import { ResolvedMiddleware } from "../AssetTypes";
 import * as Notification from "../../../Utils/Notifications.js";
-import { BedModel } from "../../Facility/models";
 import { getCameraConfig } from "../../../Utils/transformUtils";
-import CameraConfigure from "../configure/CameraConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import TextFormField from "../../Form/FormFields/TextFormField";
@@ -14,9 +12,9 @@ import useAuthUser from "../../../Common/hooks/useAuthUser";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
-
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useOperateCamera from "../../CameraFeed/useOperateCamera";
+import CameraFeed from "../../CameraFeed/CameraFeed";
 
 interface Props {
   assetId: string;
@@ -36,16 +34,11 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [streamUuid, setStreamUuid] = useState("");
-  const [bed, setBed] = useState<BedModel>({});
-  const [newPreset, setNewPreset] = useState("");
-  const [loadingAddPreset, setLoadingAddPreset] = useState(false);
   const [loadingSetConfiguration, setLoadingSetConfiguration] = useState(false);
   const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
   });
   const authUser = useAuthUser();
-
-  const { operate } = useOperateCamera(assetId ?? "", true);
 
   useEffect(() => {
     if (asset) {
@@ -90,49 +83,18 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     }
   };
 
-  const addPreset = async (e: SyntheticEvent) => {
-    e.preventDefault();
-    const data = {
-      bed_id: bed.id,
-      preset_name: newPreset,
-    };
-    try {
-      setLoadingAddPreset(true);
+  const { operate, key } = useOperateCamera(asset.id);
 
-      const { data: presetData } = await operate({ type: "get_status" });
-
-      const { res } = await request(routes.createAssetBed, {
-        body: {
-          meta: { ...data, ...presetData },
-          asset: assetId,
-          bed: bed?.id as string,
-        },
-      });
-      if (res?.status === 201) {
-        Notification.Success({
-          msg: "Preset Added Successfully",
-        });
-        setBed({});
-        setNewPreset("");
-      } else {
-        Notification.Error({
-          msg: "Something went wrong..!",
-        });
-      }
-    } catch (e) {
-      Notification.Error({
-        msg: "Something went wrong..!",
-      });
-    }
-    setLoadingAddPreset(false);
-  };
   if (isLoading || loading || !facility) return <Loading />;
 
   return (
-    <div className="space-y-6">
+    <div className="flex w-full flex-col gap-4 p-4 pr-0 md:flex-row md:items-start">
       {["DistrictAdmin", "StateAdmin"].includes(authUser.user_type) && (
-        <form className="rounded bg-white p-8 shadow" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
+        <form
+          className="w-full max-w-xs rounded-lg bg-white p-4 shadow"
+          onSubmit={handleSubmit}
+        >
+          <div className="flex flex-col">
             <TextFormField
               name="middleware_hostname"
               label={
@@ -201,15 +163,9 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       )}
 
       {assetType === "ONVIF" ? (
-        <CameraConfigure
-          asset={asset as AssetData}
-          bed={bed}
-          setBed={setBed}
-          newPreset={newPreset}
-          setNewPreset={setNewPreset}
-          addPreset={addPreset}
-          isLoading={loadingAddPreset}
-        />
+        <div className="w-full overflow-hidden rounded-lg bg-white shadow">
+          <CameraFeed asset={asset} key={key} operate={operate} />
+        </div>
       ) : null}
     </div>
   );

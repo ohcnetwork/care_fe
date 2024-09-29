@@ -30,8 +30,8 @@ export type GetPresetsResponse = {
 export type CameraPreset = {
   readonly id: string;
   name: string;
-  readonly asset_bed_object: AssetBedModel;
-  position?: { x: number; y: number; z: number };
+  readonly asset_bed: AssetBedModel;
+  position?: PTZPayload;
   boundary?: { x0: number; y0: number; x1: number; y1: number };
   readonly created_by: PerformedByModel;
   readonly updated_by: PerformedByModel;
@@ -50,8 +50,13 @@ export const FeedRoutes = {
     TBody: Type<{ action: OperationAction }>(),
   },
 
-  listPresets: {
+  listAssetBedPresets: {
     path: "/api/v1/assetbed/{assetbed_id}/camera_presets/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<CameraPreset>>(),
+  },
+  listPresets: {
+    path: "/api/v1/camera_presets/",
     method: "GET",
     TRes: Type<PaginatedResponse<CameraPreset>>(),
   },
