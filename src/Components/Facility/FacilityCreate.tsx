@@ -62,6 +62,7 @@ import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { RequestResult } from "../../Utils/request/types.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
 import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -247,7 +248,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
   );
 
-  useQuery(routes.getPermittedFacility, {
+  const facilityQuery = useQuery(routes.getPermittedFacility, {
     pathParams: {
       id: facilityId!,
     },
@@ -454,7 +455,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
-    console.log(state.form);
     if (validated) {
       setIsLoading(true);
       const data: FacilityRequest = {
@@ -565,7 +565,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         />
         {BED_TYPES.map((x) => {
           const res = capacityData.find((data) => {
-            return data.room_type === x.id;
+            return data.room_type === x;
           });
           if (res) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
@@ -580,7 +580,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 bedCapacityId={res.id}
                 key={`bed_${res.id}`}
                 room_type={res.room_type}
-                label={x.text}
+                label={t(`bed_type__${x}`)}
                 used={res.current_capacity || 0}
                 total={res.total_capacity || 0}
                 lastUpdated={res.modified_date}
@@ -851,6 +851,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
+                  <div className="py-4 md:col-span-2">
+                    <h4 className="mb-4">{t("spokes")}</h4>
+                    {facilityId && (
+                      <SpokeFacilityEditor
+                        facility={{ ...facilityQuery.data, id: facilityId }}
+                      />
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}
@@ -929,7 +937,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("kasp_empanelled")}
                       label={`Is this facility ${careConfig.kasp.string} empanelled?`}
                       options={[true, false]}
-                      optionDisplay={(o) => (o ? "Yes" : "No")}
+                      optionLabel={(o) => (o ? "Yes" : "No")}
                       optionValue={(o) => String(o)}
                     />
                   )}

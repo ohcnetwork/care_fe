@@ -23,6 +23,8 @@ interface FacilitySelectProps {
   selected?: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
   allowNone?: boolean;
+  placeholder?: string;
+  filter?: (facilities: FacilityModel) => boolean;
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
@@ -44,6 +46,8 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     allowNone = false,
     freeText = false,
     errors = "",
+    placeholder,
+    filter,
   } = props;
 
   const facilitySearch = useCallback(
@@ -82,6 +86,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
   return (
     <AutoCompleteAsync
+      placeholder={placeholder}
       name={name}
       required={required}
       multiple={multiple}
@@ -97,6 +102,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
       compareBy="id"
       className={className}
       error={errors}
+      filter={filter}
     />
   );
 };

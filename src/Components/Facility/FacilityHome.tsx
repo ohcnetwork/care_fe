@@ -18,7 +18,6 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import Table from "../Common/components/Table";
 
 import { navigate } from "raviger";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import request from "../../Utils/request/request.js";
@@ -37,6 +36,7 @@ import { FieldLabel } from "../Form/FormFields/FormField.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
 import { FacilityStaffList } from "./FacilityStaffList.js";
+import FacilityBlock from "./FacilityBlock.js";
 
 type Props = {
   facilityId: string;
@@ -60,8 +60,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [coverImageEdited, setCoverImageEdited] = useState(false);
   const authUser = useAuthUser();
-
-  useMessageListener((data) => console.log(data));
 
   const {
     data: facilityData,
@@ -96,6 +94,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
     });
   };
 
+  const spokesQuery = useQuery(routes.getFacilitySpokes, {
+    pathParams: {
+      id: facilityId,
+    },
+    silent: true,
+  });
+
   if (isLoading) {
     return <Loading />;
   }
@@ -116,7 +121,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     <div
       id="facility-coverimage"
       className={
-        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-t-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60"
       }
       onClick={() => setEditCoverImage(true)}
     >
@@ -292,6 +297,20 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           />
                         </div>
                       </div>
+                      {!!spokesQuery.data?.results.length && (
+                        <div className="mt-4 flex items-center gap-3">
+                          <div id="spokes-view">
+                            <h1 className="text-base font-semibold text-[#B9B9B9]">
+                              {t("spokes")}
+                            </h1>
+                            <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+                              {spokesQuery.data?.results.map((spoke) => (
+                                <FacilityBlock facility={spoke.spoke_object} />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
