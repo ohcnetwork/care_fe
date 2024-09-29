@@ -88,7 +88,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   if (isLoading || loading || !facility) return <Loading />;
 
   return (
-    <div className="flex w-full flex-col gap-4 p-4 pr-0 md:flex-row md:items-start">
+    <div className="flex w-full flex-col gap-4 px-0 py-4 md:flex-row md:items-start">
       {["DistrictAdmin", "StateAdmin"].includes(authUser.user_type) && (
         <form
           className="w-full max-w-xs rounded-lg bg-white p-4 shadow"
