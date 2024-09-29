@@ -9,41 +9,40 @@ import CentralNursingStation from "../../Components/Facility/CentralNursingStati
 import FacilityLocationRoutes from "./FacilityLocationRoutes";
 import FacilityInventoryRoutes from "./FacilityInventoryRoutes";
 import DischargedPatientsList from "../../Components/Facility/DischargedPatientsList";
+import { AppRoutes } from "../AppRouter";
 
-export default {
+const FacilityRoutes: AppRoutes = {
   "/facility": () => <HospitalList />,
   "/facility/create": () => <FacilityCreate />,
-  "/facility/:facilityId/update": ({ facilityId }: any) => (
+  "/facility/:facilityId/update": ({ facilityId }) => (
     <FacilityCreate facilityId={facilityId} />
   ),
-  "/facility/:facilityId/configure": ({ facilityId }: any) => (
+  "/facility/:facilityId/configure": ({ facilityId }) => (
     <FacilityConfigure facilityId={facilityId} />
   ),
-  "/facility/:facilityId/cns": ({ facilityId }: any) => (
+  "/facility/:facilityId/cns": ({ facilityId }) => (
     <CentralNursingStation facilityId={facilityId} />
   ),
-  "/facility/:facilityId": ({ facilityId }: any) => (
+  "/facility/:facilityId": ({ facilityId }) => (
     <FacilityHome facilityId={facilityId} />
   ),
-  "/facility/:id/discharged-patients": ({ id }: any) => (
+  "/facility/:id/discharged-patients": ({ id }) => (
     <DischargedPatientsList facility_external_id={id} />
   ),
-
-  "/facility/:facilityId/users": ({ facilityId }: any) => (
+  "/facility/:facilityId/users": ({ facilityId }) => (
     <FacilityUsers facilityId={facilityId} />
   ),
-  "/facility/:facilityId/resource/new": ({ facilityId }: any) => (
+  "/facility/:facilityId/resource/new": ({ facilityId }) => (
     <ResourceCreate facilityId={facilityId} />
   ),
-
-  // Triage related routes
-  "/facility/:facilityId/triage": ({ facilityId }: any) => (
+  "/facility/:facilityId/triage": ({ facilityId }) => (
     <TriageForm facilityId={facilityId} />
   ),
-  "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
+  "/facility/:facilityId/triage/:id": ({ facilityId, id }) => (
     <TriageForm facilityId={facilityId} id={id} />
   ),
-
   ...FacilityLocationRoutes,
   ...FacilityInventoryRoutes,
 };
+
+export default FacilityRoutes;

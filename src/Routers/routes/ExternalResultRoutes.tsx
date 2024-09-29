@@ -1,12 +1,12 @@
 import ResultItem from "../../Components/ExternalResult/ResultItem";
 import ResultList from "../../Components/ExternalResult/ResultList";
 import ResultUpdate from "../../Components/ExternalResult/ResultUpdate";
-import { DetailRoute } from "../types";
+import { AppRoutes } from "../AppRouter";
 
-export default {
+const ExternalResultRoutes: AppRoutes = {
   "/external_results": () => <ResultList />,
-  "/external_results/:id": ({ id }: DetailRoute) => <ResultItem id={id} />,
-  "/external_results/:id/update": ({ id }: DetailRoute) => (
-    <ResultUpdate id={id} />
-  ),
+  "/external_results/:id": ({ id }) => <ResultItem id={id} />,
+  "/external_results/:id/update": ({ id }) => <ResultUpdate id={id} />,
 };
+
+export default ExternalResultRoutes;
