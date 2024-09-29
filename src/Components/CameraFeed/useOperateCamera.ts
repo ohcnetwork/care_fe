@@ -1,6 +1,6 @@
-import { useState } from "react";
-import request from "../../Utils/request/request";
 import { FeedRoutes } from "./routes";
+import request from "../../Utils/request/request";
+import { useState } from "react";
 
 export interface PTZPayload {
   x: number;
@@ -41,6 +41,18 @@ interface ResetFeedOperation {
   type: "reset";
 }
 
+interface LockCameraOperation {
+  type: "lock_camera";
+}
+
+interface UnlockCameraOperation {
+  type: "unlock_camera";
+}
+
+interface RequestAccessOperation {
+  type: "request_access";
+}
+
 export type OperationAction =
   | GetStatusOperation
   | GetPresetsOperation
@@ -48,7 +60,10 @@ export type OperationAction =
   | AbsoluteMoveOperation
   | RelativeMoveOperation
   | GetStreamToken
-  | ResetFeedOperation;
+  | ResetFeedOperation
+  | LockCameraOperation
+  | UnlockCameraOperation
+  | RequestAccessOperation;
 
 /**
  * This hook is used to control the PTZ of a camera asset and retrieve other related information.

@@ -1,18 +1,29 @@
+import * as Notification from "../../Utils/Notifications";
+
 import FeedAlert, { FeedAlertState, StreamStatus } from "./FeedAlert";
+import {
+  GetLockCameraResponse,
+  GetPresetsResponse,
+  GetRequestAccessResponse,
+} from "./routes";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { classNames, isIOS } from "../../Utils/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useOperateCamera, { PTZPayload } from "./useOperateCamera";
 
 import { AssetData } from "../Assets/AssetTypes";
+import ButtonV2 from "../Common/components/ButtonV2";
 import FeedControls from "./FeedControls";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import FeedWatermark from "./FeedWatermark";
-import { GetPresetsResponse } from "./routes";
 import NoFeedAvailable from "./NoFeedAvailable";
+import { UserBareMinimum } from "../Users/models";
 import VideoPlayer from "./videoPlayer";
 import { getStreamUrl } from "./utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import useFullscreen from "../../Common/hooks/useFullscreen";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
 
 interface Props {
   children?: React.ReactNode;
@@ -41,6 +52,60 @@ export default function CameraFeed(props: Props) {
   const [state, setState] = useState<FeedAlertState>();
   const [playedOn, setPlayedOn] = useState<Date>();
   const [playerStatus, setPlayerStatus] = useState<StreamStatus>("stop");
+
+  const [cameraUser, setCameraUser] = useState<UserBareMinimum>();
+  const user = useAuthUser();
+
+  const lockCamera = useCallback(async () => {
+    const { res, data, error } = await props.operate({ type: "lock_camera" });
+
+    const successData = data as GetLockCameraResponse;
+    const errorData = error as GetLockCameraResponse["result"];
+
+    if (res?.status === 200 && successData?.result) {
+      Notification.Success({
+        msg: successData.result.message,
+      });
+      setCameraUser(successData.result.camera_user);
+    } else if (res?.status === 409 && errorData) {
+      Notification.Warn({
+        msg: errorData.message,
+      });
+      setCameraUser(errorData.camera_user);
+    } else {
+      Notification.Error({
+        msg: "An error occurred while locking the camera",
+      });
+    }
+  }, []);
+
+  const unlockCamera = useCallback(async () => {
+    await props.operate({ type: "unlock_camera" });
+  }, []);
+
+  useEffect(() => {
+    lockCamera();
+
+    return () => {
+      unlockCamera();
+    };
+  }, [lockCamera, unlockCamera]);
+
+  useMessageListener((data) => {
+    if (data?.action === "CAMERA_ACCESS_REQUEST") {
+      Notification.Warn({
+        msg: data?.message,
+      });
+    }
+
+    if (data?.action === "CAMERA_AVAILABILITY") {
+      Notification.Success({
+        msg: data?.message,
+      });
+      lockCamera();
+    }
+  });
+
   // Move camera when selected preset has changed
   useEffect(() => {
     async function move(preset: PTZPayload) {
@@ -203,6 +268,72 @@ export default function CameraFeed(props: Props) {
                   onReset={resetStream}
                 />
               </div>
+            )}
+            {cameraUser && (
+              <Menu>
+                <MenuButton className="h-8 w-8 rounded-full bg-primary-500 text-white flex items-center justify-center uppercase text-sm shadow">
+                  <span>{cameraUser.username[0]}</span>
+                </MenuButton>
+
+                <MenuItems
+                  transition
+                  anchor="bottom end"
+                  className="z-30 w-52 origin-top-right rounded-xl border  p-4 text-sm/6 transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 mt-2 min-w-full  bg-white py-1 shadow-lg ring-1 ring-black/5 sm:min-w-[250px] md:w-max "
+                >
+                  <MenuItem>
+                    <div className="flex items-end justify-end flex-col w-full">
+                      <p className="font-semibold">
+                        {[
+                          cameraUser.first_name,
+                          cameraUser.last_name,
+                          `(${cameraUser.username})`,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      </p>
+                      <p className="text-sm text-secondary-500">
+                        {cameraUser.user_type}
+                      </p>
+                      <p className="text-sm text-secondary-500">
+                        {cameraUser.email}
+                      </p>
+                    </div>
+                  </MenuItem>
+
+                  {cameraUser.username !== user.username && (
+                    <MenuItem>
+                      <div className="flex items-center justify-between flex-col w-full mt-3">
+                        <p>Need access to move camera?</p>
+                        <ButtonV2
+                          size="small"
+                          variant="primary"
+                          onClick={async () => {
+                            const { res, data } = await props.operate({
+                              type: "request_access",
+                            });
+
+                            const successData =
+                              data as GetRequestAccessResponse;
+
+                            if (res?.status === 200) {
+                              Notification.Success({
+                                msg: successData.result.message,
+                              });
+                              setCameraUser(successData.result.camera_user);
+                            } else {
+                              Notification.Error({
+                                msg: "An error occurred while requesting access",
+                              });
+                            }
+                          }}
+                        >
+                          Request Access
+                        </ButtonV2>
+                      </div>
+                    </MenuItem>
+                  )}
+                </MenuItems>
+              </Menu>
             )}
           </div>
         </div>
