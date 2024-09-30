@@ -129,7 +129,7 @@ const RegionEditor = (props: RegionEditorProps) => {
         <br />
         <div className="grid grid-cols-2 gap-2">
           <TextFormField
-            label="Width"
+            label="Width (cm)"
             name="width"
             disabled={isReadOnly}
             labelClassName="text-xs"
@@ -141,7 +141,7 @@ const RegionEditor = (props: RegionEditorProps) => {
             onChange={(e) => update({ width: parseFloat(e.value) })}
           />
           <TextFormField
-            label="Length"
+            label="Length (cm)"
             name="length"
             disabled={isReadOnly}
             labelClassName="text-xs"
