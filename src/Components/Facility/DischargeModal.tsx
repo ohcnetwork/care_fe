@@ -349,7 +349,10 @@ const DischargeModal = ({
             DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
             <div id="diagnoses">
               <FieldLabel>{t("diagnosis_at_discharge")}</FieldLabel>
-              <EditDiagnosesBuilder value={initialDiagnoses} />
+              <EditDiagnosesBuilder
+                consultationId={consultationData.id}
+                value={initialDiagnoses}
+              />
             </div>
           )}
 
