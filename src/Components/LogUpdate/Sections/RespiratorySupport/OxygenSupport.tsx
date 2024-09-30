@@ -13,7 +13,7 @@ const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
       <RadioFormField
         label={<h4>Oxygen Modality</h4>}
         options={OXYGEN_MODALITY_OPTIONS}
-        optionDisplay={(c) => t(`OXYGEN_MODALITY__${c.value}`)}
+        optionLabel={(c) => t(`OXYGEN_MODALITY__${c.value}`)}
         optionValue={(c) => c.value}
         name="ventilator_oxygen_modality"
         value={log.ventilator_oxygen_modality}

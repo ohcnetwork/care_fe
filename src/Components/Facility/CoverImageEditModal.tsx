@@ -13,13 +13,14 @@ import Webcam from "react-webcam";
 import { FacilityModel } from "./models";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import uploadFile from "../../Utils/request/uploadFile";
+import careConfig from "@careConfig";
+
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -116,7 +117,7 @@ const CoverImageEditModal = ({
 
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
-    const url = `/api/v1/facility/${facility.id}/cover_image/`;
+    const url = `${careConfig.apiUrl}/api/v1/facility/${facility.id}/cover_image/`;
     setIsProcessing(true);
 
     uploadFile(
@@ -128,25 +129,17 @@ const CoverImageEditModal = ({
           "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
       },
       async (xhr: XMLHttpRequest) => {
+        setIsProcessing(false);
         if (xhr.status === 200) {
           Success({ msg: "Cover image updated." });
-          setIsProcessing(false);
           setIsCaptureImgBeingUploaded(false);
           await sleep(1000);
           onSave?.();
           closeModal();
-        } else {
-          Notification.Error({
-            msg: "Something went wrong!",
-          });
-          setIsProcessing(false);
         }
       },
       null,
       () => {
-        Notification.Error({
-          msg: "Network Failure. Please check your internet connectivity.",
-        });
         setIsProcessing(false);
       },
     );

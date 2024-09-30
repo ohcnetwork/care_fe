@@ -20,5 +20,5 @@ fs.writeFile(
       return console.log(err);
     }
     return null;
-  }
+  },
 );

@@ -12,7 +12,6 @@ import { Switch, MenuItem, Field, Label } from "@headlessui/react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import useConfig from "../../Common/hooks/useConfig.js";
 import dayjs from "../../Utils/dayjs.js";
 import {
   classNames,
@@ -41,8 +40,10 @@ import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
+import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
+import careConfig from "@careConfig";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -57,6 +58,7 @@ const formatSkills = (arr: SkillModel[]) => {
 export default function PatientInfoCard(props: {
   patient: PatientModel;
   consultation?: ConsultationModel;
+  abhaNumber?: AbhaNumberModel;
   fetchPatientData?: (state: { aborted: boolean }) => void;
   activeShiftingData: any;
   consultationId: string;
@@ -73,8 +75,6 @@ export default function PatientInfoCard(props: {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
-
-  const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
@@ -230,6 +230,7 @@ export default function PatientInfoCard(props: {
               )}
               {consultation?.admitted && (
                 <ButtonV2
+                  id="switch-bed"
                   ghost
                   onClick={() => setOpen(true)}
                   className="mt-1 px-[10px] py-1"
@@ -665,7 +666,7 @@ export default function PatientInfoCard(props: {
                   ],
                 ]
                   .concat(
-                    enable_hcx
+                    careConfig.hcx.enabled
                       ? [
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
@@ -735,8 +736,8 @@ export default function PatientInfoCard(props: {
               </div>
 
               <div>
-                {enable_abdm &&
-                  (patient.abha_number ? (
+                {careConfig.abdm.enabled &&
+                  (props.abhaNumber ? (
                     <>
                       <MenuItem>
                         {({ close }) => (
@@ -966,18 +967,18 @@ export default function PatientInfoCard(props: {
       />
       <ABHAProfileModal
         patientId={patient.id}
-        abha={patient.abha_number_object}
+        abha={props.abhaNumber}
         show={showABHAProfile}
         onClose={() => setShowABHAProfile(false)}
       />
       <LinkCareContextModal
         consultationId={props.consultationId}
-        patient={patient}
+        abha={props.abhaNumber}
         show={showLinkCareContext}
         onClose={() => setShowLinkCareContext(false)}
       />
       <FetchRecordsModal
-        patient={patient}
+        abha={props.abhaNumber}
         show={showFetchABDMRecords}
         onClose={() => setShowFetchABDMRecords(false)}
       />

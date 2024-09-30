@@ -1,5 +1,3 @@
-import { cy } from "local-cypress";
-
 export class PatientFileUpload {
   clickFileUploadIcon() {
     cy.get("#patient-details").click();
@@ -42,7 +40,7 @@ export class PatientFileUpload {
 
   uploadFile() {
     cy.get("#file_upload_patient").selectFile(
-      "cypress/fixtures/sampleAsset.xlsx",
+      "cypress/fixtures/sample-asset.xlsx",
       { force: true },
     );
   }

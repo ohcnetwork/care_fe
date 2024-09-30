@@ -202,10 +202,6 @@ export const PatientManager = () => {
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
     is_declared_positive: qParams.is_declared_positive || undefined,
-    last_consultation_symptoms_onset_date_before:
-      qParams.last_consultation_symptoms_onset_date_before || undefined,
-    last_consultation_symptoms_onset_date_after:
-      qParams.last_consultation_symptoms_onset_date_after || undefined,
     last_vaccinated_date_before:
       qParams.last_vaccinated_date_before || undefined,
     last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
@@ -257,10 +253,6 @@ export const PatientManager = () => {
     [
       params.last_consultation_discharge_date_before,
       params.last_consultation_discharge_date_after,
-    ],
-    [
-      params.last_consultation_symptoms_onset_date_before,
-      params.last_consultation_symptoms_onset_date_after,
     ],
   ];
 
@@ -725,7 +717,8 @@ export const PatientManager = () => {
             {patient.last_consultation?.last_daily_round
               ?.ventilator_interface &&
               patient.last_consultation?.last_daily_round
-                ?.ventilator_interface !== "UNKNOWN" && (
+                ?.ventilator_interface !== "UNKNOWN" &&
+              !patient.last_consultation?.discharge_date && (
                 <div className="mb-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary-600 bg-primary-100 text-xs font-semibold text-primary-600">
                   {
                     RESPIRATORY_SUPPORT.find(
@@ -850,7 +843,7 @@ export const PatientManager = () => {
                 { text: t("discharged"), value: 1 },
               ]}
               onTabChange={(tab) => {
-                if (tab === "LIVE") {
+                if (tab === 0) {
                   updateQuery({ is_active: "True" });
                 } else {
                   const id = qParams.facility || onlyAccessibleFacility?.id;
@@ -1121,10 +1114,6 @@ export const PatientManager = () => {
             ),
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Declared positive", "date_declared_positive"),
-            ...dateRange(
-              "Symptoms onset",
-              "last_consultation_symptoms_onset_date",
-            ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
               name: "Telemedicine",

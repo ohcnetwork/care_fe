@@ -1,5 +1,3 @@
-// cypress/support/pageObjects/FacilityHome.ts
-
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";
@@ -8,6 +6,7 @@ class FacilityHome {
 
   // Operations
   clickExportButton() {
+    cy.get(this.exportButton).scrollIntoView();
     cy.get(this.exportButton).click();
   }
 
@@ -91,7 +90,9 @@ class FacilityHome {
   }
 
   verifyDownload(alias: string) {
-    cy.wait(`@${alias}`).its("response.statusCode").should("eq", 200);
+    cy.wait(`@${alias}`, { timeout: 60000 })
+      .its("response.statusCode")
+      .should("eq", 200);
   }
 
   getURL() {

@@ -8,7 +8,7 @@ import { t } from "i18next";
 export interface AudioCaptureDialogProps {
   show: boolean;
   onHide: () => void;
-  onCapture: (file: File) => void;
+  onCapture: (file: File, fileName: string) => void;
   autoRecord?: boolean;
 }
 
@@ -56,14 +56,11 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   const handleSubmit = async () => {
     const response = await fetch(audioURL);
     const blob = await response.blob();
-    const file = new File(
-      [blob],
-      `recording_${new Date().toISOString().replaceAll(".", "_").replaceAll(":", "_")}.mp3`,
-      { type: "audio/mpeg" },
-    );
+    const fileName = `recording_${new Date().toISOString().replaceAll(".", "_").replaceAll(":", "_")}.mp3`;
+    const file = new File([blob], fileName, { type: "audio/mpeg" });
     resetRecording();
     onHide();
-    onCapture(file);
+    onCapture(file, fileName);
   };
 
   useEffect(() => {

@@ -12,9 +12,12 @@ import { SelectFormField } from "./SelectFormField";
 type BaseProps = FormFieldBaseProps<number> & {
   min: number;
   max: number;
+  sliderMin?: number;
+  sliderMax?: number;
   step?: number;
   valueDescriptions?: ValueDescription[];
   hideInput?: boolean;
+  hideUnitInLabel?: boolean;
 };
 
 type PropsWithUnit = BaseProps & {
@@ -75,18 +78,20 @@ export default function RangeFormField(props: Props) {
       ? props.valueDescriptions?.find((vd) => (vd.till || props.max) >= value)
       : undefined;
 
-  const roundedValue =
-    Math.round(((value || min) + Number.EPSILON) * 100) / 100;
-
   const allValueColors = props.valueDescriptions?.every((vd) => vd.color);
 
-  const trailPercent = ((roundedValue - min) / ((max || 0) - (min || 0))) * 100;
+  const [sliderMin, sliderMax] = [
+    props.sliderMin ?? props.min,
+    props.sliderMax ?? props.max,
+  ].map(unit.conversionFn);
 
-  const snapStopLength = Math.min(
-    (props.max - props.min) / (props.step || 1),
-    props.max - props.min,
-    20,
-  );
+  const sliderDelta = sliderMax - sliderMin;
+
+  const trailPercent =
+    ((Math.round(((value || sliderMin) + Number.EPSILON) * 100) / 100 -
+      sliderMin) /
+      sliderDelta) *
+    100;
 
   const handleChange = (v: number) => field.handleChange(unit.inversionFn(v));
 
@@ -98,7 +103,10 @@ export default function RangeFormField(props: Props) {
         ...field,
         label: (
           <>
-            {field.label} {unit.label && <span>({unit.label})</span>}
+            {field.label}{" "}
+            {!props.hideUnitInLabel && unit.label && (
+              <span>({unit.label})</span>
+            )}
           </>
         ),
         labelSuffix: (
@@ -115,7 +123,7 @@ export default function RangeFormField(props: Props) {
             {!props.hideInput && (
               <>
                 <TextFormField
-                  name="range"
+                  name={`${props.name}-range-input`}
                   type="number"
                   value={displayValue}
                   placeholder="--.--"
@@ -124,6 +132,7 @@ export default function RangeFormField(props: Props) {
                   max={max}
                   errorClassName="hidden"
                   inputClassName="py-1.5 mr-4"
+                  disabled={props.disabled}
                 />
                 {props.units?.length ? (
                   <SelectFormField
@@ -166,7 +175,11 @@ export default function RangeFormField(props: Props) {
         <input
           type="range"
           id={field.id}
-          className={classNames("cui-range-slider", field.className)}
+          className={classNames(
+            "cui-range-slider",
+            field.className,
+            props.disabled && "opacity-50",
+          )}
           style={
             allValueColors
               ? {
@@ -179,22 +192,25 @@ export default function RangeFormField(props: Props) {
           disabled={field.disabled}
           name={field.name}
           value={displayValue}
-          min={min}
-          max={max}
+          min={sliderMin}
+          max={sliderMax}
           step={props.step}
           onChange={(e) => handleChange(e.target.valueAsNumber)}
         />
       </div>
 
       <div className="flex justify-between">
-        {Array.from({ length: snapStopLength + 1 }).map((_, index) => (
+        {Array.from({
+          length:
+            1 + Math.min(sliderDelta / (props.step || 1), sliderDelta, 20),
+        }).map((_, index) => (
           <div key={index} className="h-1 w-px bg-black/20" />
         ))}
       </div>
 
       <div className="flex justify-between text-xs text-black/30">
-        <span>{properRoundOf(min)}</span>
-        <span>{properRoundOf(max)}</span>
+        <span>{properRoundOf(sliderMin)}</span>
+        <span>{properRoundOf(sliderMax)}</span>
       </div>
     </FormField>
   );

@@ -5,8 +5,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { getBedTypes } from "../../Common/constants";
+import { BED_TYPES } from "../../Common/constants";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
@@ -51,11 +50,12 @@ const bedCountReducer = (state = initialState, action: any) => {
 
 export const BedCapacity = (props: BedCapacityProps) => {
   const { t } = useTranslation();
-  const config = useConfig();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
-  const [bedTypes, setBedTypes] = useState<OptionsType[]>(getBedTypes(config));
+  const [bedTypes, setBedTypes] = useState<OptionsType[]>(
+    BED_TYPES.map((o) => ({ id: o, text: t(`bed_type__${o}`) })),
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
@@ -73,16 +73,17 @@ export const BedCapacity = (props: BedCapacityProps) => {
       if (capacityQuery?.data) {
         const existingData = capacityQuery.data?.results;
         // if all options are diabled
-        if (existingData.length === getBedTypes(config).length) {
+        if (existingData.length === BED_TYPES.length) {
           return;
         }
         // disable existing bed types
-        const updatedBedTypes = getBedTypes(config).map((type: OptionsType) => {
+        const updatedBedTypes = BED_TYPES.map((type) => {
           const isExisting = existingData.find(
-            (i: CapacityModal) => i.room_type === type.id,
+            (i: CapacityModal) => i.room_type === type,
           );
           return {
-            ...type,
+            id: type,
+            text: t(`bed_type__${type}`),
             disabled: !!isExisting,
           };
         });
@@ -114,7 +115,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
   useEffect(() => {
     const lastBedType =
       bedTypes.filter((i: OptionsType) => i.disabled).length ===
-      getBedTypes(config).length - 1;
+      BED_TYPES.length - 1;
     setIsLastOptionType(lastBedType);
   }, [bedTypes]);
 
@@ -179,7 +180,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
       );
       setIsLoading(false);
       if (data) {
-        const updatedBedTypes = bedTypes.map((type: OptionsType) => {
+        const updatedBedTypes = bedTypes.map((type) => {
           return {
             ...type,
             disabled: data.room_type !== type.id ? type.disabled : true,

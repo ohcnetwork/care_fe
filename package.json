@@ -28,8 +28,8 @@
   "license": "MIT",
   "scripts": {
     "build:react": "cross-env NODE_ENV=production vite build",
-    "build": "npm run generate-build-meta && npm run build:react",
-    "dev": "vite",
+    "build": "npm run generate-build-meta && npm run supported-browsers && npm run build:react",
+    "dev": "npm run supported-browsers && vite",
     "preview": "cross-env NODE_ENV=production vite preview",
     "generate-build-meta": "node ./scripts/generate-build-version.js",
     "test": "snyk test",
@@ -40,19 +40,22 @@
     "prepare": "husky install",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write"
+    "format": "prettier ./src --write",
+    "supported-browsers": "node ./scripts/generate-supported-browsers.mjs"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.0.18",
+    "@fontsource/inter": "^5.0.21",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.3",
     "@headlessui/react": "^2.1.2",
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
-    "@sentry/browser": "^8.12.0",
+    "@sentry/browser": "^8.29.0",
     "@yudiel/react-qr-scanner": "^2.0.0-beta.3",
-    "axios": "^1.6.8",
+    "axios": "^1.7.7",
+    "bowser": "^2.11.0",
     "browser-image-compression": "^2.0.2",
+    "browserslist-useragent-regexp": "^4.1.3",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.11",
     "echarts": "^5.5.0",
@@ -76,7 +79,6 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^8.0.7",
     "react-pdf": "^9.1.0",
-    "react-player": "^2.16.0",
     "react-redux": "^8.1.1",
     "react-webcam": "^7.2.0",
     "redux": "^4.2.1",
@@ -89,6 +91,7 @@
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.13",
+    "@types/cypress": "^1.1.3",
     "@types/events": "^3.0.3",
     "@types/google.maps": "^3.55.8",
     "@types/lodash-es": "^4.17.12",
@@ -101,7 +104,7 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@vitejs/plugin-react-swc": "^3.6.0",
     "autoprefixer": "^10.4.19",
-    "cypress": "^13.13.1",
+    "cypress": "^13.14.2",
     "cypress-localstorage-commands": "^2.2.5",
     "cypress-split": "^1.23.2",
     "eslint-config-prettier": "^9.1.0",
@@ -143,7 +146,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "prettier --write --ignore-unknown",
+      "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss",
       "eslint --fix",
       "git update-index --again"
     ]
