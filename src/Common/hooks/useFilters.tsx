@@ -6,6 +6,7 @@ import PaginationComponent from "../../Components/Common/Pagination";
 import { classNames, humanizeStrings } from "../../Utils/utils";
 import FiltersCache from "../../Utils/FiltersCache";
 import careConfig from "@careConfig";
+import { triggerGoal } from "../../Integrations/Plausible";
 
 export type FilterState = Record<string, unknown>;
 
@@ -42,6 +43,17 @@ export default function useFilters({
   ) => {
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, options);
+
+    // For each of the newly applied filters (additional filters compared to
+    // previously applied ones), trigger a plausible goal "Advanced filter
+    // applied" with the applied filter's query key and current location as tags.
+    Object.keys(query).forEach((filter) =>
+      triggerGoal("Advanced filter applied", {
+        filter,
+        location: location.pathname,
+      }),
+    );
+
     updateCache(query);
   };
 
