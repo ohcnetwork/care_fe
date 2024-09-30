@@ -1,9 +1,7 @@
 import dayjs from "../../Utils/dayjs";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 
 export default function useExport() {
-  const dispatch: any = useDispatch();
   const [isExporting, setIsExporting] = useState(false);
 
   const getTimestamp = () => {
@@ -16,17 +14,17 @@ export default function useExport() {
 
   const exportCSV = async (
     filenamePrefix: string,
-    action: any,
+    getData: () => Promise<string | null>,
     parse = (data: string) => data,
   ) => {
     setIsExporting(true);
 
     const filename = `${filenamePrefix}_${getTimestamp()}.csv`;
 
-    const res = await dispatch(action);
-    if (res.status === 200) {
+    const data = await getData();
+    if (data) {
       const a = document.createElement("a");
-      const blob = new Blob([parse(res.data)], {
+      const blob = new Blob([parse(data)], {
         type: "text/csv",
       });
       a.href = URL.createObjectURL(blob);
@@ -39,15 +37,15 @@ export default function useExport() {
 
   const exportJSON = async (
     filenamePrefix: string,
-    action: any,
+    getData: () => Promise<{ results: object[] } | null>,
     parse = (data: string) => data,
   ) => {
     setIsExporting(true);
 
-    const res = await dispatch(action);
-    if (res.status === 200) {
+    const data = await getData();
+    if (data?.results.length) {
       const a = document.createElement("a");
-      const blob = new Blob([parse(JSON.stringify(res.data.results))], {
+      const blob = new Blob([parse(JSON.stringify(data.results))], {
         type: "application/json",
       });
       a.href = URL.createObjectURL(blob);
@@ -59,7 +57,7 @@ export default function useExport() {
   };
 
   const exportFile = (
-    action: any,
+    action: () => Promise<{ results: object[] } | string | null>,
     filePrefix = "export",
     type = "csv",
     parse = (data: string) => data,
@@ -68,13 +66,17 @@ export default function useExport() {
 
     switch (type) {
       case "csv":
-        exportCSV(filePrefix, action(), parse);
+        exportCSV(filePrefix, action as Parameters<typeof exportCSV>[1], parse);
         break;
       case "json":
-        exportJSON(filePrefix, action(), parse);
+        exportJSON(
+          filePrefix,
+          action as Parameters<typeof exportJSON>[1],
+          parse,
+        );
         break;
       default:
-        exportCSV(filePrefix, action(), parse);
+        exportCSV(filePrefix, action as Parameters<typeof exportCSV>[1], parse);
     }
   };
 
