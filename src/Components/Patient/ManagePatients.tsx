@@ -108,7 +108,7 @@ export const PatientManager = () => {
   const [phoneNumber, _setPhoneNumber] = useState("");
   const [emergencyPhoneNumber, _setEmergencyPhoneNumber] = useState("");
 
-  const setPhoneNum = (value: string) => {
+  const setPhoneNumber = (value: string) => {
     _setPhoneNumber(value);
     const error = PhoneNumberValidator()(value);
     if (value.length >= 13 && !error) {
@@ -119,7 +119,7 @@ export const PatientManager = () => {
     }
   };
 
-  const setEmergencyPhoneNum = (value: string) => {
+  const setEmergencyPhoneNumber = (value: string) => {
     _setEmergencyPhoneNumber(value);
     const error = PhoneNumberValidator()(value);
     if (value.length >= 13 && !error) {
@@ -979,7 +979,7 @@ export const PatientManager = () => {
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
                 value={phoneNumber}
-                onChange={(e) => setPhoneNum(e.value)}
+                onChange={(e) => setPhoneNumber(e.value)}
                 types={["mobile", "landline"]}
                 className="w-full grow"
                 error={((phoneNumber || "+91") === "+91" && "") || undefined}
@@ -988,7 +988,7 @@ export const PatientManager = () => {
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
                 value={emergencyPhoneNumber}
-                onChange={(e) => setEmergencyPhoneNum(e.value)}
+                onChange={(e) => setEmergencyPhoneNumber(e.value)}
                 types={["mobile", "landline"]}
                 className="w-full"
                 error={
