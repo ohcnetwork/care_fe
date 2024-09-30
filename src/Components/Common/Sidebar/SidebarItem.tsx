@@ -10,11 +10,12 @@ type SidebarItemProps = {
   ref?: React.Ref<HTMLAnchorElement>;
   text: string;
   icon: SidebarIcon;
+  onItemClick?: () => void;
   external?: true | undefined;
   badgeCount?: number | undefined;
   selected?: boolean | undefined;
   handleOverflow?: any;
-} & ({ to: string; do?: undefined } | { to?: string; do: () => void });
+} & ({ to?: string; do?: undefined } | { to?: string; do: () => void });
 
 type SidebarItemBaseProps = SidebarItemProps & {
   shrinked?: boolean;
@@ -32,15 +33,21 @@ const SidebarItemBase = forwardRef(
     return (
       <Link
         ref={ref}
-        className={`tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-white transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
+        className={`${props.to ? "to" : ""} ${props.do ? "do" : ""} tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-white transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
           props.selected
             ? "bg-primary-900 font-bold"
-            : "bg-primary-800 font-normal hover:bg-primary-700"
+            : "bg-primary-800 font-normal" +
+              (props.to || props.do ? " hover:bg-primary-700" : "")
         }`}
         target={external && "_blank"}
         rel={external && "noreferrer"}
         href={props.to ?? ""}
-        onClick={props.do ?? resetHistory}
+        onClick={() => {
+          // On Review: Check if resetHistory is working as intended.
+          props.do?.();
+          props.onItemClick?.();
+          resetHistory();
+        }}
         onMouseEnter={() => {
           props.handleOverflow(true);
         }}

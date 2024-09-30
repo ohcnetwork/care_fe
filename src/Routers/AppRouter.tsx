@@ -27,6 +27,7 @@ import ResourceRoutes from "./routes/ResourceRoutes";
 import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import useAuthUser from "../Common/hooks/useAuthUser";
 import careConfig from "@careConfig";
+import { usePluginRoutes } from "@core/Common/hooks/useCareApps";
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -72,6 +73,8 @@ const Routes: AppRoutes = {
 export default function AppRouter() {
   const authUser = useAuthUser();
 
+  const pluginRoutes = usePluginRoutes();
+
   let routes = Routes;
 
   if (careConfig.hcx.enabled) {
@@ -87,12 +90,6 @@ export default function AppRouter() {
   }
 
   useRedirect("/user", "/users");
-  // Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => JSX.Element>
-  const pluginRoutes = {};
-  // plugins.reduce((acc, plugin) => {
-  //   if (typeof plugin === "string") return acc;
-  //   return { ...acc, ...plugin.routes };
-  // }, {});
 
   const allRoutes = {
     ...routes,

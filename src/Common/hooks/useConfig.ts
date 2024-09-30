@@ -1,3 +1,5 @@
+import { INavItem } from "@core/Components/Common/Sidebar/Sidebar";
+import { AppRoutes } from "@core/Routers/AppRouter";
 import { createContext, useContext } from "react";
 
 export const AppConfigContext = createContext<IConfig | null>(null);
@@ -93,7 +95,8 @@ export interface IBaseConfig {
 
 export interface PluginConfig {
   plugin: string;
-  routes: Record<string, () => JSX.Element>;
+  routes: AppRoutes;
+  navItems: INavItem[];
 }
 
 export type PluginConfigType = string | PluginConfig;

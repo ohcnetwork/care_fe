@@ -9,10 +9,17 @@ import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import careConfig from "@careConfig";
+import { useCareAppNavItems } from "@core/Common/hooks/useCareApps";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
 const LOGO_COLLAPSE = "/images/logo_collapsed.svg";
+
+export interface INavItem {
+  text: string;
+  to?: string;
+  icon: IconName;
+}
 
 type StatelessSidebarProps =
   | {
@@ -36,11 +43,7 @@ const StatelessSidebar = ({
 }: StatelessSidebarProps) => {
   const authUser = useAuthUser();
 
-  const NavItems: {
-    text: string;
-    to: string;
-    icon: IconName;
-  }[] = [
+  const BaseNavItems: INavItem[] = [
     { text: "Facilities", to: "/facility", icon: "l-hospital" },
     { text: "Patients", to: "/patients", icon: "l-user-injured" },
     { text: "Assets", to: "/assets", icon: "l-shopping-cart-alt" },
@@ -61,6 +64,10 @@ const StatelessSidebar = ({
     { text: "Users", to: "/users", icon: "l-users-alt" },
     { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
   ];
+
+  const PluginNavItems = useCareAppNavItems();
+
+  const NavItems = [...BaseNavItems, ...PluginNavItems];
 
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
@@ -147,7 +154,7 @@ const StatelessSidebar = ({
                 {...i}
                 icon={<CareIcon icon={i.icon} className="h-5" />}
                 selected={i.to === activeLink}
-                do={() => onItemClick && onItemClick(false)}
+                onItemClick={() => onItemClick && onItemClick(false)}
                 handleOverflow={handleOverflow}
               />
             );

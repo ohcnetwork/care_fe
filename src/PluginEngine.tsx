@@ -1,8 +1,9 @@
 /* eslint-disable i18next/no-literal-string */
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { PluginConfigType } from "./Common/hooks/useConfig";
+import { CareAppsContext } from "./Common/hooks/useCareApps";
 
-type PluginComponentType = React.ComponentType<any>;
+// type PluginComponentType = React.ComponentType<any>;
 
 export default function PluginEngine({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -15,18 +16,17 @@ export default function PluginEngine({
   setPlugins: React.Dispatch<React.SetStateAction<PluginConfigType[]>>;
   children: React.ReactNode;
 }) {
-  const [pluginComponents, setPluginComponents] = useState<
-    PluginComponentType[]
-  >([]);
-
   useEffect(() => {
     const loadPlugins = async () => {
       try {
-        const module = await import("@apps/care-scribe-alpha-plug");
-        setPluginComponents([module.Scribe]);
-        setPlugins((plugins) => [
-          ...plugins,
-          { plugin: "care-scribe-alpha-plug", routes: module.routes },
+        const module = await import("@apps/care-livekit");
+        setPlugins((prevPlugins) => [
+          ...prevPlugins,
+          {
+            plugin: "care-livekit",
+            routes: module.routes,
+            navItems: module.manifest.navItems,
+          },
         ]);
 
         console.log("Loaded plugins", module);
@@ -40,11 +40,12 @@ export default function PluginEngine({
 
   return (
     <>
-      <>Dynamic Plugins here:</>
-      {pluginComponents.map((PluginComponent, index) => (
-        <PluginComponent key={index} />
-      ))}
-      {children}
+      <CareAppsContext.Provider value={plugins}>
+        {children}
+        <span className="absolute left-0 top-0 z-50 w-screen bg-green-800 text-center text-sm text-white">
+          CareApps Enabled
+        </span>
+      </CareAppsContext.Provider>
     </>
   );
 }

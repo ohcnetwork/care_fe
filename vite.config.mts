@@ -1,11 +1,10 @@
-import path from "node:path";
+import path from "path";
 import { createRequire } from "node:module";
 import { VitePWA } from "vite-plugin-pwa";
 import react from "@vitejs/plugin-react-swc";
 import checker from "vite-plugin-checker";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
-import path from "path";
 import fs from "fs";
 
 const pdfWorkerPath = path.join(
