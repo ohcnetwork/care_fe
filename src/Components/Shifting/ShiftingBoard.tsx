@@ -7,7 +7,6 @@ import {
   useState,
 } from "react";
 import { classNames, formatDateTime, formatName } from "../../Utils/utils";
-import { downloadShiftRequests } from "../../Redux/actions";
 import { useDrag, useDrop } from "react-dnd";
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
