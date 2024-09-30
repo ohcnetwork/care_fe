@@ -5,7 +5,7 @@ import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 const patientPrescription = new PatientPrescription();
 const loginPage = new LoginPage();
 const patientPage = new PatientPage();
-const medicineNameOne = "DOLO";
+const medicineNameOne = "AGCON";
 const medicineNameTwo = "FDEP PLUS";
 const medicineBaseDosage = "4";
 const medicineTargetDosage = "9";
@@ -113,6 +113,7 @@ describe("Patient Medicine Administration", () => {
     cy.closeNotification();
     // Administer the medicine in edit form
     patientPrescription.clickAdministerButton();
+    cy.wait(2000);
     patientPrescription.enterAdministerDosage(medicineBaseDosage);
     patientPrescription.enterAdministerNotes(medicineAdministerNote);
     cy.submitButton("Administer Medicine");

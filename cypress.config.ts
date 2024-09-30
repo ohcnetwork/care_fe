@@ -34,5 +34,6 @@ export default defineConfig({
   },
   env: {
     API_URL: process.env.REACT_CARE_API_URL ?? "http://localhost:9000",
+    ENABLE_HCX: process.env.REACT_ENABLE_HCX ?? false,
   },
 });

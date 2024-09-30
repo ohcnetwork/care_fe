@@ -14,12 +14,13 @@ interface PatientNotesProps {
   reload?: boolean;
   setReload?: any;
   thread: PatientNotesModel["thread"];
+  setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientNotesList = (props: PatientNotesProps) => {
-  const { state, setState, reload, setReload, thread } = props;
+  const { state, setState, reload, setReload, thread, setReplyTo } = props;
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -83,7 +84,12 @@ const PatientNotesList = (props: PatientNotesProps) => {
   }
 
   return (
-    <DoctorNote state={state} handleNext={handleNext} setReload={setReload} />
+    <DoctorNote
+      state={state}
+      handleNext={handleNext}
+      setReload={setReload}
+      setReplyTo={setReplyTo}
+    />
   );
 };
 
