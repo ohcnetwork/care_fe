@@ -3,6 +3,7 @@ import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
+import { LOCATION_BED_TYPES } from "../../Common/constants";
 import routes from "../../Redux/api";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { LocationModel } from "./models";
@@ -13,18 +14,16 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import DialogModal from "../Common/Dialog";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
-// import useQuery from "../../Utils/request/useQuery";
+import useQuery from "../../Utils/request/useQuery";
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface Props {
   facilityId: string;
-  // locationId: string;
 }
 
 interface LocationProps extends LocationModel {
   facilityId: string;
   disabled: boolean;
-  // locationId: string;
   setShowDeletePopup: (e: { open: boolean; name: string; id: string }) => void;
 }
 
@@ -119,7 +118,6 @@ export default function LocationManagement({ facilityId }: Props) {
                 <Location
                   setShowDeletePopup={setShowDeletePopup}
                   facilityId={facilityId}
-                  // locationId={locationId}
                   {...item}
                   disabled={
                     ["DistrictAdmin", "StateAdmin"].includes(authUser.user_type)
@@ -227,16 +225,24 @@ const Location = ({
   disabled,
   setShowDeletePopup,
   facilityId,
-  // locationId
 }: LocationProps) => {
-  // const { loading, data, refetch } = useQuery(routes.listFacilityBeds, {
-  //   query: {
-  //     facility: facilityId,
-  //     // location: locationId,
-  //     // limit: resultsPerPage,
-  //     // offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-  //   },
-  // });
+  const { loading, data } = useQuery(routes.listFacilityBeds, {
+    query: {
+      facility: facilityId,
+      location: id,
+    },
+  });
+  let bedCountsByType: Record<string, number> = {};
+
+  if (!loading && data?.results?.length) {
+    bedCountsByType = data.results.reduce(
+      (acc: Record<string, number>, bed: any) => {
+        acc[bed.bed_type] = (acc[bed.bed_type] ?? 0) + 1;
+        return acc;
+      },
+      {},
+    );
+  }
 
   return (
     <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
@@ -287,22 +293,12 @@ const Location = ({
       </div>
       <p className="mt-3 text-sm font-semibold text-gray-700">Beds</p>
       <div className="grid grid-cols-4 gap-3 rounded-md bg-gray-100 p-3 text-center text-sm text-gray-700">
-        <div>
-          <p className="font-semibold">Isolation</p>
-          <p>8 beds</p>
-        </div>
-        <div>
-          <p className="font-semibold">ICU</p>
-          <p>5 beds</p>
-        </div>
-        <div>
-          <p className="font-semibold">Oxygen Support</p>
-          <p> 8 beds</p>
-        </div>
-        <div>
-          <p className="font-semibold">Regular</p>
-          <p>20 beds</p>
-        </div>
+        {LOCATION_BED_TYPES.map((type) => (
+          <div key={type.id}>
+            <p className="font-semibold">{type.name}</p>
+            <p>{bedCountsByType[type.id] || 0} beds</p>
+          </div>
+        ))}
       </div>
       <ButtonV2
         id="manage-bed-button"
