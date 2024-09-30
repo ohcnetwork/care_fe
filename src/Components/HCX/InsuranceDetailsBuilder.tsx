@@ -44,17 +44,25 @@ export default function InsuranceDetailsBuilder(props: Props) {
   };
 
   const handleRemove = (index: number) => {
-    return () => {
-      field.handleChange(
-        (props.value || [])?.filter(async (obj, i) => {
-          if (obj.id && i === index) {
-            await request(routes.hcx.policies.delete, {
-              pathParams: { external_id: obj.id },
-            });
-          }
-          return i !== index;
-        }),
-      );
+    return async () => {
+      const updatedPolicies = [...(props.value || [])];
+      const policyToRemove = updatedPolicies[index];
+
+      if (policyToRemove?.id) {
+        try {
+          await request(routes.hcx.policies.delete, {
+            pathParams: { external_id: policyToRemove.id },
+          });
+
+          updatedPolicies.splice(index, 1);
+          field.handleChange(updatedPolicies);
+        } catch (error) {
+          console.error("Failed to delete the policy", error);
+        }
+      } else {
+        updatedPolicies.splice(index, 1);
+        field.handleChange(updatedPolicies);
+      }
     };
   };
 
