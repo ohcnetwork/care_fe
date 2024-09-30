@@ -53,6 +53,7 @@ import {
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import Tabs from "../Common/components/Tabs.js";
+import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -104,40 +105,28 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [phone_number, setPhoneNumber] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState("");
-  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
-  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
-    useState("");
+  const [phoneNumber, _setPhoneNumber] = useState("");
+  const [emergencyPhoneNumber, _setEmergencyPhoneNumber] = useState("");
 
-  const setPhoneNum = (phone_number: string) => {
-    setPhoneNumber(phone_number);
-    if (phone_number.length >= 13) {
-      setPhoneNumberError("");
-      updateQuery({ phone_number });
-      return;
+  const setPhoneNum = (value: string) => {
+    _setPhoneNumber(value);
+    const error = PhoneNumberValidator()(value);
+    if (value.length >= 13 && !error) {
+      updateQuery({ phone_number: value });
     }
-
-    if (phone_number === "+91" || phone_number === "") {
-      setPhoneNumberError("");
-      qParams.phone_number && updateQuery({ phone_number: null });
-      return;
+    if ((value === "+91" || value === "") && qParams.phone_number) {
+      updateQuery({ phone_number: null });
     }
   };
 
-  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
-    setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length >= 13) {
-      setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number });
-      return;
+  const setEmergencyPhoneNum = (value: string) => {
+    _setEmergencyPhoneNumber(value);
+    const error = PhoneNumberValidator()(value);
+    if (value.length >= 13 && !error) {
+      updateQuery({ emergency_phone_number: value });
     }
-
-    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
-      setEmergencyPhoneNumberError("");
-      qParams.emergency_phone_number &&
-        updateQuery({ emergency_phone_number: null });
-      return;
+    if ((value === "+91" || value === "") && qParams.emergency_phone_number) {
+      updateQuery({ emergency_phone_number: null });
     }
   };
 
@@ -335,10 +324,10 @@ export const PatientManager = () => {
     query: params,
     onResponse: () => {
       if (!params.phone_number) {
-        setPhoneNumber("+91");
+        _setPhoneNumber("+91");
       }
       if (!params.emergency_phone_number) {
-        setEmergencyPhoneNumber("+91");
+        _setEmergencyPhoneNumber("+91");
       }
     },
   });
@@ -989,43 +978,27 @@ export const PatientManager = () => {
               <PhoneNumberFormField
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
-                value={phone_number}
+                value={phoneNumber}
                 onChange={(e) => setPhoneNum(e.value)}
-                error={phoneNumberError}
                 types={["mobile", "landline"]}
                 className="w-full grow"
+                error={((phoneNumber || "+91") === "+91" && "") || undefined}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
-                value={emergency_phone_number}
+                value={emergencyPhoneNumber}
                 onChange={(e) => setEmergencyPhoneNum(e.value)}
-                error={emergencyPhoneNumberError}
                 types={["mobile", "landline"]}
                 className="w-full"
+                error={
+                  ((emergencyPhoneNumber || "+91") === "+91" && "") || undefined
+                }
               />
             </div>
           </div>
         </div>
       </div>
-      {/*!qParams.last_consultation__consent_types &&
-        (patientsWithNoConsents || 0) > 0 && (
-          <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
-            <CareIcon icon="l-info-circle" className="text-xl" />
-            <p className="font-semibold">
-              {patientsWithNoConsents} patients admitted missing consent
-              records&nbsp;
-              <button
-                onClick={() =>
-                  updateQuery({ last_consultation__consent_types: "None" })
-                }
-                className="underline"
-              >
-                Click to view
-              </button>
-            </p>
-          </div>
-        )*/}
       <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({
