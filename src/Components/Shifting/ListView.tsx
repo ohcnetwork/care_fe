@@ -240,9 +240,6 @@ export default function ListView() {
             });
             return data ?? null;
           }}
-          // action={() =>
-          //   downloadShiftRequests({ , csv: 1 })
-          // }
           filenamePrefix="shift_requests"
         />
       }
