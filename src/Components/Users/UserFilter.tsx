@@ -43,7 +43,7 @@ export default function UserFilter(props: any) {
 
   useQuery(routes.getAnyFacility, {
     pathParams: { id: filter.home_facility },
-    prefetch: !!filter.home_facility,
+    prefetch: !!filter.home_facility && filter.home_facility !== "NONE",
     onResponse: ({ data }) => setFilterState({ home_facility_ref: data }),
   });
 
@@ -134,6 +134,7 @@ export default function UserFilter(props: any) {
       <div className="w-full flex-none">
         <FieldLabel>Home Facility</FieldLabel>
         <FacilitySelect
+          allowNone
           name="home_facility"
           setSelected={(selected) =>
             setFilterState({
@@ -142,7 +143,11 @@ export default function UserFilter(props: any) {
               home_facility_ref: selected,
             })
           }
-          selected={filterState.home_facility_ref}
+          selected={
+            filterState.home_facility === "NONE"
+              ? { name: t("no_home_facility"), id: "NONE" }
+              : filterState.home_facility_ref
+          }
           errors=""
           multiple={false}
         />

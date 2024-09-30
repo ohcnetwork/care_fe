@@ -1,14 +1,21 @@
-import { useEffect, useState, useMemo } from "react";
-import { Combobox } from "@headlessui/react";
-import { debounce } from "lodash-es";
-import { DropdownTransition } from "../Common/components/HelperComponents";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
 import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
 } from "./MultiSelectMenuV2";
-import { useTranslation } from "react-i18next";
+import { useEffect, useMemo, useState } from "react";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { DropdownTransition } from "../Common/components/HelperComponents";
 import { classNames } from "../../Utils/utils";
+import { debounce } from "lodash-es";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   id?: string;
@@ -29,6 +36,7 @@ interface Props {
   required?: boolean;
   onBlur?: () => void;
   onFocus?: () => void;
+  filter?: (data: any) => boolean;
 }
 
 const AutoCompleteAsync = (props: Props) => {
@@ -49,6 +57,7 @@ const AutoCompleteAsync = (props: Props) => {
     disabled = false,
     required = false,
     error,
+    filter,
   } = props;
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
@@ -62,7 +71,9 @@ const AutoCompleteAsync = (props: Props) => {
     () =>
       debounce(async (query: string) => {
         setLoading(true);
-        const data = (await fetchData(query)) || [];
+        const data = ((await fetchData(query)) || [])?.filter((d: any) =>
+          filter ? filter(d) : true,
+        );
 
         if (showNOptions !== undefined) {
           setData(data.slice(0, showNOptions));
@@ -86,10 +97,11 @@ const AutoCompleteAsync = (props: Props) => {
         onChange={onChange}
         by={compareBy}
         multiple={multiple as any}
+        immediate
       >
         <div className="relative mt-1">
           <div className="flex">
-            <Combobox.Input
+            <ComboboxInput
               id={id}
               name={name}
               className={classNames(
@@ -112,7 +124,7 @@ const AutoCompleteAsync = (props: Props) => {
               autoComplete="off"
             />
             {!disabled && (
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+              <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
                   {hasSelection && !loading && !required && (
                     <div className="tooltip" id="clear-button">
@@ -135,14 +147,22 @@ const AutoCompleteAsync = (props: Props) => {
                       className="-mb-1.5 animate-spin"
                     />
                   ) : (
-                    <CareIcon icon="l-angle-down" className="-mb-1.5" />
+                    <CareIcon
+                      id="dropdown-toggle"
+                      icon="l-angle-down"
+                      className="-mb-1.5"
+                    />
                   )}
                 </div>
-              </Combobox.Button>
+              </ComboboxButton>
             )}
           </div>
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 text-sm">
+            <ComboboxOptions
+              modal={false}
+              as="ul"
+              className="cui-dropdown-base absolute top-12 z-10 text-sm"
+            >
               {data?.length === 0 ? (
                 <div className="relative cursor-default select-none px-4 py-2 text-secondary-700">
                   {query !== ""
@@ -151,7 +171,8 @@ const AutoCompleteAsync = (props: Props) => {
                 </div>
               ) : (
                 data?.map((item: any) => (
-                  <Combobox.Option
+                  <ComboboxOption
+                    as="li"
                     key={item.id}
                     className={dropdownOptionClassNames}
                     value={item}
@@ -171,10 +192,10 @@ const AutoCompleteAsync = (props: Props) => {
                         )}
                       </div>
                     )}
-                  </Combobox.Option>
+                  </ComboboxOption>
                 ))
               )}
-            </Combobox.Options>
+            </ComboboxOptions>
           </DropdownTransition>
           {multiple && selected?.length > 0 && (
             <div className="flex flex-wrap gap-2 p-2">

@@ -44,6 +44,9 @@ export class UserCreationPage {
   selectFacility(name: string) {
     this.typeIntoInputByName("facilities", name);
     this.selectOptionContainingText(name);
+    cy.get("input[name='facilities'] + button")
+      .find("#dropdown-toggle")
+      .click();
   }
 
   selectHomeFacility(name: string) {

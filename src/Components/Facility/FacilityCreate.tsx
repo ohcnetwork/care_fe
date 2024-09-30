@@ -9,16 +9,21 @@ import {
 } from "./models";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
+  BED_TYPES,
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
-  getBedTypes,
 } from "../../Common/constants";
 import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import { Popover, Transition } from "@headlessui/react";
-import { Fragment, lazy, useEffect, useState } from "react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
+import { lazy, useEffect, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   getPincodeDetails,
@@ -50,7 +55,6 @@ import TextFormField from "../Form/FormFields/TextFormField";
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
 import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 import request from "../../Utils/request/request.js";
@@ -58,6 +62,8 @@ import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { RequestResult } from "../../Utils/request/types.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
+import careConfig from "@careConfig";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -138,7 +144,6 @@ const facilityCreateReducer = (state = initialState, action: FormAction) => {
 
 export const FacilityCreate = (props: FacilityProps) => {
   const { t } = useTranslation();
-  const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
   const { facilityId } = props;
 
   const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
@@ -243,7 +248,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
   );
 
-  useQuery(routes.getPermittedFacility, {
+  const facilityQuery = useQuery(routes.getPermittedFacility, {
     pathParams: {
       id: facilityId!,
     },
@@ -322,7 +327,10 @@ export const FacilityCreate = (props: FacilityProps) => {
 
     if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
+    const pincodeDetails = await getPincodeDetails(
+      e.value,
+      careConfig.govDataApiKey,
+    );
     if (!pincodeDetails) return;
 
     const matchedState = (stateData ? stateData.results : []).find((state) => {
@@ -447,7 +455,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
-    console.log(state.form);
     if (validated) {
       setIsLoading(true);
       const data: FacilityRequest = {
@@ -556,9 +563,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             return;
           }}
         />
-        {getBedTypes({ kasp_string, kasp_enabled }).map((x) => {
+        {BED_TYPES.map((x) => {
           const res = capacityData.find((data) => {
-            return data.room_type === x.id;
+            return data.room_type === x;
           });
           if (res) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
@@ -573,7 +580,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                 bedCapacityId={res.id}
                 key={`bed_${res.id}`}
                 room_type={res.room_type}
-                label={x.text}
+                label={t(`bed_type__${x}`)}
                 used={res.current_capacity || 0}
                 total={res.total_capacity || 0}
                 lastUpdated={res.modified_date}
@@ -709,7 +716,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             />
           </div>
           <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-            <div className="justify-between md:flex  md:border-b md:pb-2">
+            <div className="justify-between md:flex md:border-b md:pb-2">
               <div className="mb-2 text-xl font-semibold">
                 {t("bed_capacity")}
               </div>
@@ -844,6 +851,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
+                  <div className="py-4 md:col-span-2">
+                    <h4 className="mb-4">{t("spokes")}</h4>
+                    {facilityId && (
+                      <SpokeFacilityEditor
+                        facility={{ ...facilityQuery.data, id: facilityId }}
+                      />
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}
@@ -917,12 +932,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                     />
                   </div>
 
-                  {kasp_enabled && (
+                  {careConfig.kasp.enabled && (
                     <RadioFormField
                       {...field("kasp_empanelled")}
-                      label={`Is this facility ${kasp_string} empanelled?`}
+                      label={`Is this facility ${careConfig.kasp.string} empanelled?`}
                       options={[true, false]}
-                      optionDisplay={(o) => (o ? "Yes" : "No")}
+                      optionLabel={(o) => (o ? "Yes" : "No")}
                       optionValue={(o) => String(o)}
                     />
                   )}
@@ -939,7 +954,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <div className="flex flex-col justify-center md:block">
                     <Popover id="map-popover" className="relative">
                       <>
-                        <Popover.Button>
+                        <PopoverButton>
                           <ButtonV2
                             circle
                             type="button"
@@ -951,10 +966,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                               Select location from map
                             </span>
                           </ButtonV2>
-                        </Popover.Button>
+                        </PopoverButton>
 
                         <Transition
-                          as={Fragment}
                           enter="transition ease-out duration-200"
                           enterFrom="opacity-0 translate-y-1"
                           enterTo="opacity-100 translate-y-0"
@@ -962,7 +976,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                           leaveFrom="opacity-100 translate-y-0"
                           leaveTo="opacity-0 translate-y-1"
                         >
-                          <Popover.Panel className="absolute -right-40 bottom-10 sm:-right-48">
+                          <PopoverPanel className="absolute -right-40 bottom-10 sm:-right-48">
                             <GLocationPicker
                               lat={Number(state.form.latitude)}
                               lng={Number(state.form.longitude)}
@@ -972,7 +986,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                                 handleSelectCurrentLocation
                               }
                             />
-                          </Popover.Panel>
+                          </PopoverPanel>
                         </Transition>
                       </>
                     </Popover>

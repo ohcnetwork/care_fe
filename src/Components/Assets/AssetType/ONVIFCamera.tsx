@@ -16,6 +16,7 @@ import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import useOperateCamera from "../../CameraFeed/useOperateCamera";
 
 interface Props {
   assetId: string;
@@ -46,6 +47,8 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     pathParams: { id: facilityId },
   });
   const authUser = useAuthUser();
+
+  const { operate } = useOperateCamera(assetId ?? "", true);
 
   useEffect(() => {
     if (asset) {
@@ -92,7 +95,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
 
   const addPreset = async (e: SyntheticEvent) => {
     e.preventDefault();
-    const config = getCameraConfig(asset as AssetData);
     const data = {
       bed_id: bed.id,
       preset_name: newPreset,
@@ -100,13 +102,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     try {
       setLoadingAddPreset(true);
 
-      const response = await fetch(
-        `https://${resolvedMiddleware?.hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`,
-      );
-      if (!response.ok) {
-        throw new Error("Network error");
-      }
-      const presetData = await response.json();
+      const { data: presetData } = await operate({ type: "get_status" });
 
       const { res } = await request(routes.createAssetBed, {
         body: {

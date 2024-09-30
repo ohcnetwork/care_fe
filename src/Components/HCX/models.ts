@@ -8,7 +8,7 @@ export type HCXPolicyStatus =
   | "Active"
   | "Cancelled"
   | "Draft"
-  | "Entered in Error";
+  | "Entered In Error";
 export type HCXPolicyPurpose =
   | "Auth Requirements"
   | "Benefits"
@@ -16,12 +16,12 @@ export type HCXPolicyPurpose =
   | "Validation";
 export type HCXPolicyOutcome =
   | "Queued"
-  | "Processing Complete"
+  | "Complete"
   | "Error"
   | "Partial Processing";
 
 export interface HCXPolicyModel {
-  id?: string;
+  id: string;
   patient?: string;
   patient_object?: PatientModel;
   subscriber_id: string;
@@ -29,10 +29,22 @@ export interface HCXPolicyModel {
   insurer_id?: string;
   insurer_name?: string;
   status?: HCXPolicyStatus;
-  priority?: "Immediate" | "Normal" | "Deferred";
-  purpose?: "Auth Requirements" | "Benefits" | "Discovery" | "Validation";
-  outcome?: "Queued" | "Processing Complete" | "Error" | "Partial Processing";
+  priority?: HCXPriority;
+  purpose?: HCXPolicyPurpose;
+  outcome?: HCXPolicyOutcome;
   error_text?: string;
+  created_date?: string;
+  modified_date?: string;
+}
+
+export interface HCXCommunicationModel {
+  id?: string;
+  identifier?: string;
+  claim?: string;
+  claim_object?: HCXClaimModel;
+  content?: { type: string; data: string }[];
+  created_by?: string | null;
+  last_modified_by?: string | null;
   created_date?: string;
   modified_date?: string;
 }
@@ -44,7 +56,7 @@ export interface HCXItemModel {
   category?: string;
 }
 
-export type HCXClaimUse = "Claim" | "Pre-Authorization" | "Pre-Determination";
+export type HCXClaimUse = "Claim" | "Pre Authorization" | "Pre Determination";
 export type HCXClaimStatus = HCXPolicyStatus;
 export type HCXClaimType =
   | "Institutional"

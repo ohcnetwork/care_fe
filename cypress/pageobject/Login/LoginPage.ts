@@ -1,5 +1,4 @@
 // LoginPage.ts
-import { cy } from "local-cypress";
 
 class LoginPage {
   loginAsDisctrictAdmin(): void {
@@ -17,6 +16,12 @@ class LoginPage {
   loginManuallyAsDistrictAdmin(): void {
     cy.get("input[id='username']").type("devdistrictadmin");
     cy.get("input[id='password']").type("Coronasafe@123");
+    cy.get("button").contains("Login").click();
+  }
+
+  loginManuallyAsNurse(): void {
+    cy.get("input[id='username']").click().type("dummynurse1");
+    cy.get("input[id='password']").click().type("Coronasafe@123");
     cy.get("button").contains("Login").click();
   }
 

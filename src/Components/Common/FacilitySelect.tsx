@@ -3,6 +3,7 @@ import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { t } from "i18next";
 
 interface FacilitySelectProps {
   name: string;
@@ -21,6 +22,9 @@ interface FacilitySelectProps {
   freeText?: boolean;
   selected?: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
+  allowNone?: boolean;
+  placeholder?: string;
+  filter?: (facilities: FacilityModel) => boolean;
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
@@ -39,8 +43,11 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     facilityType,
     district,
     state,
+    allowNone = false,
     freeText = false,
     errors = "",
+    placeholder,
+    filter,
   } = props;
 
   const facilitySearch = useCallback(
@@ -66,6 +73,12 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
           name: text,
         });
 
+      if (allowNone)
+        return [
+          { name: t("no_home_facility"), id: "NONE" },
+          ...(data?.results || []),
+        ];
+
       return data?.results;
     },
     [searchAll, showAll, facilityType, district, exclude_user, freeText],
@@ -73,6 +86,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
   return (
     <AutoCompleteAsync
+      placeholder={placeholder}
       name={name}
       required={required}
       multiple={multiple}
@@ -88,6 +102,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
       compareBy="id"
       className={className}
       error={errors}
+      filter={filter}
     />
   );
 };

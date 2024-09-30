@@ -41,7 +41,7 @@ export class ManageUserPage {
   }
 
   clickCloseSlideOver() {
-    cy.get("#close-slide-over").click();
+    cy.get("#close-slide-over").click({ force: true });
   }
 
   clickHomeFacilityIcon() {
@@ -142,8 +142,14 @@ export class ManageUserPage {
   }
 
   assertDoctorConnectVisibility(realName) {
-    cy.get("#doctor-connect-home-doctor").should("contain.text", realName);
-    cy.get("#doctor-connect-remote-doctor").should("contain.text", realName);
+    cy.get('*[id="doctor-connect-home-doctor"]').should(
+      "contain.text",
+      realName,
+    );
+    cy.get('*[id="doctor-connect-remote-doctor"]').should(
+      "contain.text",
+      realName,
+    );
   }
 
   assertVideoConnectLink(docName: string, link: string) {

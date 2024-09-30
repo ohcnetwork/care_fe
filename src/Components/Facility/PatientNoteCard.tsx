@@ -1,4 +1,9 @@
-import { relativeDate, formatDateTime, classNames } from "../../Utils/utils";
+import {
+  relativeDate,
+  formatDateTime,
+  classNames,
+  formatName,
+} from "../../Utils/utils";
 import { USER_TYPES_MAP } from "../../Common/constants";
 import { PatientNotesEditModel, PatientNotesModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -18,10 +23,12 @@ const PatientNoteCard = ({
   note,
   setReload,
   disableEdit,
+  setReplyTo,
 }: {
   note: PatientNotesModel;
   setReload: any;
   disableEdit?: boolean;
+  setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
 }) => {
   const patientId = useSlug("patient");
   const [isEditing, setIsEditing] = useState(false);
@@ -78,8 +85,7 @@ const PatientNoteCard = ({
           <div>
             <div>
               <span className="text-sm font-semibold text-secondary-700">
-                {note.created_by_object?.first_name || "Unknown"}{" "}
-                {note.created_by_object?.last_name}
+                {formatName(note.created_by_object)}
               </span>
               {note.user_type && (
                 <span className="pl-2 text-sm text-secondary-700">
@@ -124,19 +130,28 @@ const PatientNoteCard = ({
               )
             }
           </div>
-
-          {!disableEdit &&
-            note.created_by_object.id === authUser.id &&
-            !isEditing && (
-              <ButtonV2
-                ghost
-                onClick={() => {
-                  setIsEditing(true);
-                }}
-              >
-                <CareIcon icon="l-pen" className="h-5 w-5" />
-              </ButtonV2>
-            )}
+          <div className="flex gap-2">
+            {!disableEdit &&
+              note.created_by_object.id === authUser.id &&
+              !isEditing && (
+                <ButtonV2
+                  ghost
+                  onClick={() => {
+                    setIsEditing(true);
+                  }}
+                >
+                  <CareIcon icon="l-pen" className="h-5 w-5" />
+                </ButtonV2>
+              )}
+            <ButtonV2
+              ghost
+              onClick={() => {
+                setReplyTo && setReplyTo(note);
+              }}
+            >
+              <CareIcon icon="l-corner-up-left-alt" className="h-5 w-5" />
+            </ButtonV2>
+          </div>
         </div>
         {
           <div className="mt-2">

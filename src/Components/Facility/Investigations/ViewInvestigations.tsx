@@ -34,7 +34,7 @@ export default function ViewInvestigations(props: {
           <Loading />
         </div>
       ) : (
-        <div className="mt-4 space-y-2 ">
+        <div className="mt-4 space-y-2">
           {investigations.length > 0 && (
             <div>
               <h4 className="-mb-14 text-secondary-700">{t("summary")}</h4>

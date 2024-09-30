@@ -27,7 +27,6 @@ import BedActivityTimeline from "./BedActivityTimeline";
 
 interface BedsProps {
   facilityId: string;
-  patientId: string;
   consultationId: string;
   smallLoader?: boolean;
   discharged?: boolean;
@@ -83,7 +82,7 @@ const Beds = (props: BedsProps) => {
       Notification.Success({
         msg: "Bed allocated successfully",
       });
-      if (props.fetchPatientData) props.fetchPatientData({ aborted: false });
+      props.fetchPatientData?.({ aborted: false });
       if (props.setState) props.setState(false);
       setKey(key + 1);
     }
@@ -232,7 +231,7 @@ const Beds = (props: BedsProps) => {
           </div>
           <div className="mt-4 flex flex-row justify-end">
             <div>
-              <ButtonV2 variant="primary" type="submit">
+              <ButtonV2 variant="primary" type="submit" id="update-switchbed">
                 <CareIcon icon="l-bed" className="text-xl" />
                 Update
               </ButtonV2>

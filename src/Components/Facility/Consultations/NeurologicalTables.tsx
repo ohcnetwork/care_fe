@@ -5,12 +5,17 @@ import request from "../../../Utils/request/request";
 
 import Pagination from "../../Common/Pagination";
 import {
+  CONSCIOUSNESS_LEVEL,
   EYE_OPEN_SCALE,
+  LIMB_RESPONSE_OPTIONS,
   MOTOR_RESPONSE_SCALE,
   PAGINATION_LIMIT,
+  PUPIL_REACTION_OPTIONS,
   VERBAL_RESPONSE_SCALE,
 } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
+import { useTranslation } from "react-i18next";
+import { NeurologicalTablesFields } from "../models";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
@@ -34,15 +39,15 @@ const DataTable = (props: any) => {
             return (
               <div
                 key={`${title}_${i}`}
-                className="flex flex-col divide-x divide-secondary-200"
+                className="flex flex-col justify-between divide-x divide-secondary-200"
               >
-                <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-900">
+                <div className="w-20 bg-secondary-50 px-2 py-4 text-center text-xs font-medium leading-4 text-secondary-900">
                   {x.date}
                 </div>
-                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
+                <div className="whitespace-nowrap bg-white px-2 py-5 text-center text-xs leading-4 text-secondary-900">
                   {x.left}
                 </div>
-                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-secondary-900">
+                <div className="whitespace-nowrap bg-white px-2 py-5 text-center text-xs leading-4 text-secondary-900">
                   {x.right}
                 </div>
               </div>
@@ -56,7 +61,6 @@ const DataTable = (props: any) => {
 
 const DataDescription = (props: any) => {
   const { title, data } = props;
-  console.log("Data Description", title, data);
 
   return (
     <div>
@@ -87,38 +91,22 @@ const DataDescription = (props: any) => {
 };
 
 export const NeurologicalTable = (props: any) => {
+  const { t } = useTranslation();
   const { consultationId } = props;
   // const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const LOC_OPTIONS = [
-    { id: 0, value: "Unknown" },
-    { id: 5, value: "Alert" },
-    { id: 10, value: "Drowsy" },
-    { id: 15, value: "Stuporous" },
-    { id: 20, value: "Comatose" },
-    { id: 25, value: "Cannot Be Assessed" },
-  ];
+  const REACTION_OPTIONS = PUPIL_REACTION_OPTIONS.map(({ id, value }) => ({
+    id,
+    value: t(`PUPIL_REACTION__${value}`),
+  }));
 
-  const REACTION_OPTIONS = [
-    { id: 0, value: "Unknown" },
-    { id: 5, value: "Brisk" },
-    { id: 10, value: "Sluggish" },
-    { id: 15, value: "Fixed" },
-    { id: 20, value: "Cannot Be Assessed" },
-  ];
-
-  const LIMP_OPTIONS = [
-    { id: 0, value: "Unknown" },
-    { id: 5, value: "Strong" },
-    { id: 10, value: "Moderate" },
-    { id: 15, value: "Weak" },
-    { id: 20, value: "Flexion" },
-    { id: 25, value: "Extension" },
-    { id: 30, value: "None" },
-  ];
+  const LIMP_OPTIONS = LIMB_RESPONSE_OPTIONS.map(({ id, value }) => ({
+    id,
+    value: t(`LIMB_RESPONSE__${value}`),
+  }));
 
   useEffect(() => {
     const fetchDailyRounds = async (
@@ -126,29 +114,7 @@ export const NeurologicalTable = (props: any) => {
       consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: {
-          page: currentPage,
-          fields: [
-            "consciousness_level",
-            "consciousness_level_detail",
-            "left_pupil_size",
-            "left_pupil_size_detail",
-            "right_pupil_size",
-            "right_pupil_size_detail",
-            "left_pupil_light_reaction",
-            "left_pupil_light_reaction_detail",
-            "right_pupil_light_reaction",
-            "right_pupil_light_reaction_detail",
-            "limb_response_upper_extremity_right",
-            "limb_response_upper_extremity_left",
-            "limb_response_lower_extremity_left",
-            "limb_response_lower_extremity_right",
-            "glasgow_eye_open",
-            "glasgow_verbal_response",
-            "glasgow_motor_response",
-            "glasgow_total_calculated",
-          ],
-        },
+        body: { page: currentPage, fields: NeurologicalTablesFields },
         pathParams: {
           consultationId,
         },
@@ -168,7 +134,6 @@ export const NeurologicalTable = (props: any) => {
   };
 
   const locData: any = [];
-  const locDescription: any = [];
   const sizeData: any = [];
   const sizeDescription: any = [];
   const reactionData: any = [];
@@ -179,11 +144,12 @@ export const NeurologicalTable = (props: any) => {
   Object.entries(results).map((x: any) => {
     const value: any = x[1];
     if (x[1].consciousness_level) {
+      const loc = CONSCIOUSNESS_LEVEL.find(
+        (item) => item.id === x[1].consciousness_level,
+      );
       locData.push({
         date: formatDateTime(x[0]),
-        loc:
-          LOC_OPTIONS.find((item) => item.id === x[1].consciousness_level)
-            ?.value || "--",
+        loc: (loc && t(`CONSCIOUSNESS_LEVEL__${loc.value}`)) || "--",
       });
     }
 
@@ -198,13 +164,6 @@ export const NeurologicalTable = (props: any) => {
         verbal: value.glasgow_verbal_response || "-",
         motor: value.glasgow_motor_response || "-",
         total: value.glasgow_total_calculated || "-",
-      });
-    }
-
-    if (x[1].consciousness_level_detail) {
-      locDescription.push({
-        date: formatDateTime(x[0]),
-        loc: x[1].consciousness_level_detail,
       });
     }
 
@@ -283,8 +242,6 @@ export const NeurologicalTable = (props: any) => {
     }
   });
 
-  console.log("locDes", locDescription);
-
   return (
     <div className="mt-2">
       <div className="mb-6">
@@ -294,7 +251,7 @@ export const NeurologicalTable = (props: any) => {
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
-                className="min-w-max-content flex  flex-col  divide-x divide-secondary-200"
+                className="min-w-max-content flex flex-col divide-x divide-secondary-200 whitespace-nowrap"
               >
                 <div className="border-r bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-700">
                   {x.date}
@@ -304,25 +261,6 @@ export const NeurologicalTable = (props: any) => {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-        <div>
-          <div className="text-xl font-semibold">
-            Level Of Consciousness Description
-          </div>
-          <div className="rounded-lg border bg-white p-4 shadow">
-            {locDescription.length ? (
-              locDescription.map((x: any, i: any) => (
-                <div key={`loc_desc_${i}`} className="mb-2">
-                  <div className="text-sm font-semibold">{`- ${x.date}`}</div>
-                  <div className="pl-2 text-secondary-800">{x.loc}</div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-sm font-semibold text-secondary-800">
-                No Data Available!
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -349,7 +287,7 @@ export const NeurologicalTable = (props: any) => {
         <div className="text-xl font-semibold">Glasgow Coma Scale</div>
         <div className="mb-6 mt-2">
           <div className="w-max-content mb-4 flex max-w-full flex-row divide-y divide-secondary-200 overflow-hidden shadow sm:rounded-lg">
-            <div className="flex flex-col ">
+            <div className="flex flex-col">
               <div className="bg-secondary-50 px-2 py-7 text-center text-sm font-medium uppercase leading-4 tracking-wider text-secondary-700">
                 Time
               </div>
@@ -362,7 +300,7 @@ export const NeurologicalTable = (props: any) => {
               <div className="bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
                 Motor
               </div>
-              <div className="bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
+              <div className="border-t-2 bg-secondary-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-secondary-700">
                 Total
               </div>
             </div>
@@ -373,7 +311,7 @@ export const NeurologicalTable = (props: any) => {
                     key={`glascow_${i}`}
                     className="flex flex-col divide-x divide-secondary-200"
                   >
-                    <div className="w-20 bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-800">
+                    <div className="w-20 bg-secondary-50 px-2 py-4 text-center text-xs font-medium leading-5 text-secondary-800">
                       {x.date}
                     </div>
                     <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-secondary-800">

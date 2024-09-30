@@ -15,9 +15,10 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import useFileUpload from "../../Utils/useFileUpload";
 import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import useFileManager from "../../Utils/useFileManager";
 import { PatientConsentModel } from "../Facility/models";
+import Tabs from "../Common/components/Tabs";
+import { t } from "i18next";
 
 export default function PatientConsentRecords(props: {
   facilityId: string;
@@ -37,6 +38,7 @@ export default function PatientConsentRecords(props: {
   const fileUpload = useFileUpload({
     type: "CONSENT_RECORD",
     allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
+    allowNameFallback: false,
   });
 
   const fileManager = useFileManager({
@@ -140,13 +142,14 @@ export default function PatientConsentRecords(props: {
         title="Archive Previous Records"
         className="w-auto"
       />
-      <SwitchTabs
-        tab1="Active"
-        tab2="Archived"
+      <Tabs
+        tabs={[
+          { text: t("active"), value: 0 },
+          { text: t("archived"), value: 1 },
+        ]}
         className="my-4"
-        onClickTab1={() => setShowArchived(false)}
-        onClickTab2={() => setShowArchived(true)}
-        isTab2Active={showArchived}
+        onTabChange={(v) => setShowArchived(!!v)}
+        currentTab={showArchived ? 1 : 0}
       />
       <div className="mt-8 flex flex-col gap-4 lg:flex-row-reverse">
         <div className="shrink-0 lg:w-[350px]">
@@ -179,11 +182,11 @@ export default function PatientConsentRecords(props: {
           <TextFormField
             name="filename"
             label="File Name"
-            value={fileUpload.fileName}
+            value={fileUpload.fileNames[0] || ""}
             onChange={(e) => fileUpload.setFileName(e.value)}
           />
           <div className="flex gap-2">
-            {fileUpload.file ? (
+            {fileUpload.files[0] ? (
               <>
                 <ButtonV2
                   onClick={() => {
@@ -201,7 +204,7 @@ export default function PatientConsentRecords(props: {
                       handleUpload();
                     }
                   }}
-                  loading={!!fileUpload.progress}
+                  loading={fileUpload.uploading}
                   disabled={
                     newConsent.type === 2 &&
                     newConsent.patient_code_status === 0
@@ -213,15 +216,23 @@ export default function PatientConsentRecords(props: {
                 </ButtonV2>
                 <ButtonV2
                   variant="danger"
-                  onClick={fileUpload.clearFile}
-                  disabled={!!fileUpload.progress}
+                  onClick={fileUpload.clearFiles}
+                  disabled={fileUpload.uploading}
                 >
                   <CareIcon icon="l-trash-alt" className="" />
                 </ButtonV2>
               </>
             ) : (
               <>
-                <fileUpload.UploadButton />
+                <label
+                  className={
+                    "button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out"
+                  }
+                >
+                  <CareIcon icon={"l-file-upload-alt"} className="text-lg" />
+                  {t("choose_file")}
+                  <fileUpload.Input />
+                </label>
                 <button
                   type="button"
                   className="flex aspect-square h-9 shrink-0 items-center justify-center rounded text-xl transition-all hover:bg-black/10"
@@ -256,10 +267,7 @@ export default function PatientConsentRecords(props: {
                 key={index}
                 consultationId={consultationId}
                 consentRecord={record}
-                previewFile={fileManager.viewFile}
-                archiveFile={fileManager.archiveFile}
-                editFile={fileManager.editFile}
-                showArchive={showArchived}
+                fileManager={fileManager}
                 files={record.files?.filter(
                   (f) =>
                     f.associating_id === record.id &&

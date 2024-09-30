@@ -3,7 +3,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
-import { isUserOnline, relativeTime } from "../../Utils/utils";
+import { formatName, isUserOnline, relativeTime } from "../../Utils/utils";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -27,7 +27,6 @@ export default function FacilityUsers(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   const [expandFacilityList, setExpandFacilityList] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
 
   const [linkFacility, setLinkFacility] = useState<{
@@ -103,7 +102,7 @@ export default function FacilityUsers(props: any) {
       onResponse: ({ res }) => {
         if (res?.status === 204) {
           Notification.Success({
-            msg: "User deleted successfully",
+            msg: t("user_deleted_successfuly"),
           });
         }
       },
@@ -137,7 +136,7 @@ export default function FacilityUsers(props: any) {
       return (
         <div
           key={`usr_${user.id}`}
-          className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
+          className="mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
         >
           <div className="block h-full cursor-pointer overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between">
@@ -152,7 +151,7 @@ export default function FacilityUsers(props: any) {
                     </div>
                   )}
                   <div className="min-width-50 shrink-0 text-sm text-secondary-600">
-                    Last Online:{" "}
+                    {t("last_online")}{" "}
                     <span
                       aria-label="Online"
                       className={
@@ -165,7 +164,7 @@ export default function FacilityUsers(props: any) {
                     <span className="pl-2">
                       {user.last_login
                         ? relativeTime(user.last_login)
-                        : "Never"}
+                        : t("never")}
                     </span>
                   </div>
                 </div>
@@ -173,7 +172,7 @@ export default function FacilityUsers(props: any) {
                   id="name"
                   className="mt-2 flex gap-3 text-2xl font-bold capitalize"
                 >
-                  {`${user.first_name} ${user.last_name}`}
+                  {formatName(user)}
                 </div>
 
                 <div className="flex justify-between">
@@ -189,7 +188,7 @@ export default function FacilityUsers(props: any) {
                       <div className="flex justify-between py-4">
                         <div>
                           <div className="leading-relaxed text-secondary-500">
-                            Phone:
+                            {t("phone_number")}
                           </div>
                           <a
                             href={`tel:${user.phone_number}`}
@@ -214,7 +213,7 @@ export default function FacilityUsers(props: any) {
                       }}
                     >
                       <CareIcon icon="l-hospital" className="text-lg" />
-                      <p>Linked Facilities</p>
+                      <p>{t("linked_facilities")}</p>
                     </ButtonV2>
                   </UserDetails>
                 )}
@@ -250,7 +249,7 @@ export default function FacilityUsers(props: any) {
     manageUsers = (
       <div>
         <div>
-          <h5> No Users Found</h5>
+          <h5>{t("no_users_found")}</h5>
         </div>
       </div>
     );
@@ -258,9 +257,8 @@ export default function FacilityUsers(props: any) {
 
   return (
     <Page
-      title={`Users - ${facilityData?.name}`}
+      title={`${t("users")} - ${facilityData?.name}`}
       hideBack={true}
-      className="mx-3 md:mx-8"
       breadcrumbs={false}
     >
       {linkFacility.show && (
@@ -271,10 +269,10 @@ export default function FacilityUsers(props: any) {
         />
       )}
 
-      <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-4">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5">
         {facilityUserData && (
           <CountBlock
-            text="Total Users"
+            text={t("total_users")}
             count={facilityUserData.count}
             loading={isLoading}
             icon="l-user-injured"
@@ -291,7 +289,7 @@ export default function FacilityUsers(props: any) {
       >
         <UserFacilities user={selectedUser} />
       </SlideOverCustom>
-      <div className="px-3 md:px-8">
+      <div>
         <div>{manageUsers}</div>
       </div>
       {userData.show && (

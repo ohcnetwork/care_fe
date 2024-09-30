@@ -1,5 +1,4 @@
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment } from "react";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
 import Loading from "../Common/Loading";
@@ -8,7 +7,12 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
-import { Popover, Transition } from "@headlessui/react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
@@ -79,7 +83,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       options={
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
           <Popover className="relative">
-            <Popover.Button>
+            <PopoverButton>
               <ButtonV2
                 variant={
                   qParams.location ||
@@ -92,9 +96,8 @@ export default function CentralNursingStation({ facilityId }: Props) {
                 <CareIcon icon="l-setting" className="text-lg" />
                 {t("settings_and_filters")}
               </ButtonV2>
-            </Popover.Button>
+            </PopoverButton>
             <Transition
-              as={Fragment}
               enter="transition ease-out duration-200"
               enterFrom="opacity-0 translate-y-1"
               enterTo="opacity-100 translate-y-0"
@@ -102,12 +105,12 @@ export default function CentralNursingStation({ facilityId }: Props) {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
+              <PopoverPanel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
                 <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
                   <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                     <div className="flow-root rounded-md">
                       <span className="block text-sm text-secondary-800">
-                        <span className="font-bold ">{totalCount}</span> Vitals
+                        <span className="font-bold">{totalCount}</span> Vitals
                         Monitor present
                       </span>
                     </div>
@@ -142,7 +145,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       value={qParams.ordering || "bed__name"}
                       onChange={({ value }) => updateQuery({ ordering: value })}
                       options={SORT_OPTIONS}
-                      optionLabel={({ value }) => t("SortOptions." + value)}
+                      optionLabel={({ value }) => t("SORT_OPTIONS__" + value)}
                       optionIcon={({ isAscending }) => (
                         <CareIcon
                           icon={
@@ -184,7 +187,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     </ButtonV2>
                   </div>
                 </div>
-              </Popover.Panel>
+              </PopoverPanel>
             </Transition>
           </Popover>
 

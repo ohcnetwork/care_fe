@@ -11,7 +11,6 @@ import {
   SidebarShrinkContext,
 } from "../Components/Common/Sidebar/Sidebar";
 import { BLACKLISTED_PATHS } from "../Common/constants";
-import useConfig from "../Common/hooks/useConfig";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import HealthInformation from "../Components/ABDM/HealthInformation";
 import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
@@ -28,6 +27,7 @@ import ResourceRoutes from "./routes/ResourceRoutes";
 import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
 import useAuthUser from "../Common/hooks/useAuthUser";
+import careConfig from "@careConfig";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
@@ -59,12 +59,11 @@ const Routes = {
 
 export default function AppRouter() {
   const authUser = useAuthUser();
-  const { main_logo, enable_hcx } = useConfig();
 
   let routes = Routes;
 
-  if (enable_hcx) {
-    routes = { ...routes, ...HCXRoutes };
+  if (careConfig.hcx.enabled) {
+    routes = { ...HCXRoutes, ...routes };
   }
 
   if (
@@ -144,7 +143,7 @@ export default function AppRouter() {
             >
               <img
                 className="h-6 w-auto"
-                src={main_logo.dark}
+                src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />
             </a>

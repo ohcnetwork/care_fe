@@ -5,6 +5,7 @@ import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
+import { ABGPlotsFields } from "../models";
 
 export const ABGPlots = (props: any) => {
   const { consultationId } = props;
@@ -15,20 +16,7 @@ export const ABGPlots = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (currentPage: number) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: {
-          page: currentPage,
-          fields: [
-            "ph",
-            "pco2",
-            "po2",
-            "hco3",
-            "base_excess",
-            "lactate",
-            "sodium",
-            "potassium",
-            "ventilator_fi02",
-          ],
-        },
+        body: { page: currentPage, fields: ABGPlotsFields },
         pathParams: {
           consultationId,
         },
@@ -144,7 +132,7 @@ export const ABGPlots = (props: any) => {
             title="FIO2(Ventilator)(%)"
             name="fio2"
             xData={dates}
-            yData={yAxisData("ventilator_fi02")}
+            yData={yAxisData("ventilator_fio2")}
             low={21}
             high={60}
           />

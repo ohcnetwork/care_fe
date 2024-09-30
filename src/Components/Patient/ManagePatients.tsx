@@ -31,7 +31,6 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
-import SwitchTabs from "../Common/components/SwitchTabs";
 import {
   formatPatientAge,
   humanizeStrings,
@@ -53,6 +52,7 @@ import {
 } from "./DiagnosesFilter.js";
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
+import Tabs from "../Common/components/Tabs.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -206,10 +206,6 @@ export const PatientManager = () => {
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
     is_declared_positive: qParams.is_declared_positive || undefined,
-    last_consultation_symptoms_onset_date_before:
-      qParams.last_consultation_symptoms_onset_date_before || undefined,
-    last_consultation_symptoms_onset_date_after:
-      qParams.last_consultation_symptoms_onset_date_after || undefined,
     last_vaccinated_date_before:
       qParams.last_vaccinated_date_before || undefined,
     last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
@@ -261,10 +257,6 @@ export const PatientManager = () => {
     [
       params.last_consultation_discharge_date_before,
       params.last_consultation_discharge_date_after,
-    ],
-    [
-      params.last_consultation_symptoms_onset_date_before,
-      params.last_consultation_symptoms_onset_date_after,
     ],
   ];
 
@@ -514,7 +506,9 @@ export const PatientManager = () => {
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
           >
-            <span className="absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100">
+            <span
+              className={`absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center ${category === "Actively Dying" ? "text-[10px]" : "text-xs"} font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100`}
+            >
               {category || "UNKNOWN"}
             </span>
           </div>
@@ -727,12 +721,13 @@ export const PatientManager = () => {
             {patient.last_consultation?.last_daily_round
               ?.ventilator_interface &&
               patient.last_consultation?.last_daily_round
-                ?.ventilator_interface !== "UNKNOWN" && (
+                ?.ventilator_interface !== "UNKNOWN" &&
+              !patient.last_consultation?.discharge_date && (
                 <div className="mb-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary-600 bg-primary-100 text-xs font-semibold text-primary-600">
                   {
                     RESPIRATORY_SUPPORT.find(
                       (resp) =>
-                        resp.text ===
+                        resp.value ===
                         patient.last_consultation?.last_daily_round
                           ?.ventilator_interface,
                     )?.id
@@ -846,32 +841,36 @@ export const PatientManager = () => {
             </ButtonV2>
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-            <SwitchTabs
-              tab1="Live"
-              tab2="Discharged"
-              onClickTab1={() => updateQuery({ is_active: "True" })}
-              onClickTab2={() => {
-                // Navigate to dedicated discharged list page if filtered by a facility or user has access only to one facility.
-                const id = qParams.facility || onlyAccessibleFacility?.id;
-                if (id) {
-                  navigate(`facility/${id}/discharged-patients`);
-                  return;
-                }
+            <Tabs
+              tabs={[
+                { text: t("live"), value: 0 },
+                { text: t("discharged"), value: 1 },
+              ]}
+              onTabChange={(tab) => {
+                if (tab === 0) {
+                  updateQuery({ is_active: "True" });
+                } else {
+                  const id = qParams.facility || onlyAccessibleFacility?.id;
+                  if (id) {
+                    navigate(`facility/${id}/discharged-patients`);
+                    return;
+                  }
 
-                if (
-                  authUser.user_type === "StateAdmin" ||
-                  authUser.user_type === "StateReadOnlyAdmin"
-                ) {
-                  updateQuery({ is_active: "False" });
-                  return;
-                }
+                  if (
+                    authUser.user_type === "StateAdmin" ||
+                    authUser.user_type === "StateReadOnlyAdmin"
+                  ) {
+                    updateQuery({ is_active: "False" });
+                    return;
+                  }
 
-                Notification.Warn({
-                  msg: "Facility needs to be selected to view discharged patients.",
-                });
-                setShowDialog("list-discharged");
+                  Notification.Warn({
+                    msg: t("select_facility_for_discharged_patients_warning"),
+                  });
+                  setShowDialog("list-discharged");
+                }
               }}
-              isTab2Active={!!tabValue}
+              currentTab={tabValue}
             />
             {!!params.facility && (
               <ButtonV2
@@ -1092,7 +1091,7 @@ export const PatientManager = () => {
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
+                t(`RESPIRATORY_SUPPORT_SHORT__${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",
@@ -1119,10 +1118,6 @@ export const PatientManager = () => {
             ),
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Declared positive", "date_declared_positive"),
-            ...dateRange(
-              "Symptoms onset",
-              "last_consultation_symptoms_onset_date",
-            ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
               name: "Telemedicine",
