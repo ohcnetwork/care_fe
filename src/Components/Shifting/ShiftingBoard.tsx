@@ -6,14 +6,9 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  classNames,
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-} from "../../Utils/utils";
+import { classNames, formatDateTime, formatName } from "../../Utils/utils";
+import { downloadShiftRequests } from "../../Redux/actions";
 import { useDrag, useDrop } from "react-dnd";
-
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { navigate } from "raviger";
@@ -73,8 +68,7 @@ const ShiftCard = ({ shift, filter }: any) => {
           <div>
             <div className="flex justify-between">
               <div className="mb-2 text-xl font-bold capitalize">
-                {shift.patient_object.name} -{" "}
-                {formatPatientAge(shift.patient_object, true)}
+                {shift.patient_object.name} - {shift.patient_object.age}
               </div>
               <div>
                 {shift.emergency && (
