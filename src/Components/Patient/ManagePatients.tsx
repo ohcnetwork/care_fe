@@ -917,12 +917,14 @@ export const PatientManager = () => {
                     {
                       label: "Export Live patients",
                       action: async () => {
+                        const query = {
+                          ...params,
+                          csv: true,
+                          facility: qParams.facility,
+                        };
+                        delete qParams.is_active;
                         const { data } = await request(routes.patientList, {
-                          query: {
-                            ...params,
-                            csv: true,
-                            facility: qParams.facility,
-                          },
+                          query,
                         });
                         return data ?? null;
                       },
