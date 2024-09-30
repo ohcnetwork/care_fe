@@ -24,8 +24,11 @@ import routes from "../../../Redux/api";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import EncounterSymptomsCard from "../../Symptoms/SymptomsCard";
 import Tabs from "../../Common/components/Tabs";
-
+import { QueryParams } from "../../../Utils/request/types";
+import SortDropdownMenu from "../../Common/SortDropdown";
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import { EVENTS_SORT_OPTIONS } from "../../../Common/constants";
+import DailyRoundsFilter from "../Consultations/DailyRoundsFilter";
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
@@ -33,6 +36,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
   const [showEvents, setShowEvents] = useState(true);
+  const [eventsQuery, setEventsQuery] = useState<QueryParams>();
+  const [dailyRoundsQuery, setDailyRoundsQuery] = useState<QueryParams>();
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -670,13 +675,60 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             onTabChange={(v) => setShowEvents(!!v)}
             currentTab={showEvents ? 1 : 0}
           />
+
           {showEvents ? (
-            <EventsList />
+            <EventListSortDropdown
+              eventsQuery={eventsQuery!}
+              setEventsQuery={setEventsQuery}
+            />
           ) : (
-            <DailyRoundsList consultation={props.consultationData} />
+            <DailyRoundsSortDropdown
+              dailyRoundsQuery={dailyRoundsQuery!}
+              setDailyRoundsQuery={setDailyRoundsQuery}
+            />
+          )}
+
+          {showEvents ? (
+            <EventsList query={eventsQuery!} />
+          ) : (
+            <DailyRoundsList
+              consultation={props.consultationData}
+              query={dailyRoundsQuery!}
+            />
           )}
         </div>
       </div>
     </div>
   );
 };
+
+function EventListSortDropdown({
+  eventsQuery,
+  setEventsQuery,
+}: {
+  eventsQuery: QueryParams;
+  setEventsQuery: (query: QueryParams) => void;
+}) {
+  return (
+    <SortDropdownMenu
+      options={EVENTS_SORT_OPTIONS}
+      selected={eventsQuery?.ordering?.toString()}
+      onSelect={setEventsQuery}
+    />
+  );
+}
+
+function DailyRoundsSortDropdown({
+  setDailyRoundsQuery,
+}: {
+  dailyRoundsQuery: QueryParams;
+  setDailyRoundsQuery: (query: QueryParams) => void;
+}) {
+  return (
+    <DailyRoundsFilter
+      onApply={(query) => {
+        setDailyRoundsQuery(query);
+      }}
+    />
+  );
+}
