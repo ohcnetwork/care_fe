@@ -1,0 +1,19 @@
+Care is a React Typescript Project, built with Vite and styled with TailwindCSS.
+
+Care uses a custom useQuery hook to fetch data from the API. APIs are defined in the api.tsx file
+
+Here's an example of how to use the useQuery hook to fetch data from the API:
+
+```
+useQuery from "@core/Common/hooks/useQuery";
+const { data, loading, error } = useQuery(routes.getFacilityUsers, {
+  facility_id: "1",
+});
+
+request from "@core/Common/utils/request";
+const { res } = await request(routes.partialUpdateAsset, {
+  pathParams: { external_id: assetId },
+  body: data,
+});
+```
+

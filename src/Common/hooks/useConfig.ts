@@ -1,5 +1,4 @@
-import { INavItem } from "@core/Components/Common/Sidebar/Sidebar";
-import { AppRoutes } from "@core/Routers/AppRouter";
+import { PluginManifest } from "@core/PluginEngine";
 import { createContext, useContext } from "react";
 
 export const AppConfigContext = createContext<IConfig | null>(null);
@@ -93,10 +92,8 @@ export interface IBaseConfig {
   min_encounter_date: string;
 }
 
-export interface PluginConfig {
+export interface PluginConfig extends PluginManifest {
   plugin: string;
-  routes: AppRoutes;
-  navItems: INavItem[];
 }
 
 export type PluginConfigType = string | PluginConfig;

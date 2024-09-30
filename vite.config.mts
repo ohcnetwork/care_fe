@@ -6,6 +6,7 @@ import checker from "vite-plugin-checker";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 import fs from "fs";
+import { defineConfig } from "vite";
 
 const pdfWorkerPath = path.join(
   path.dirname(
@@ -33,6 +34,10 @@ function getPluginAliases() {
     const pluginSrcPath = path.join(pluginsDir, pluginFolder, "src");
     if (fs.existsSync(pluginSrcPath)) {
       aliases[`@apps/${pluginFolder}`] = pluginSrcPath;
+      aliases[`@app-manifest/${pluginFolder}`] = path.join(
+        pluginSrcPath,
+        "manifest.ts",
+      );
     }
   });
 
@@ -60,7 +65,7 @@ function getPluginDependencies() {
 }
 
 /** @type {import('vite').UserConfig} */
-export default {
+export default defineConfig({
   envPrefix: "REACT_",
   plugins: [
     viteStaticCopy({
@@ -159,4 +164,4 @@ export default {
     },
     port: 4000,
   },
-};
+});
