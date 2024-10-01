@@ -219,5 +219,7 @@
   "SORT_OPTIONS__name": "രോഗിയുടെ പേര് AZ",
   "SORT_OPTIONS__-name": "രോഗിയുടെ പേര് ZA",
   "SORT_OPTIONS__bed__name": "ബെഡ് നമ്പർ 1-N",
-  "SORT_OPTIONS__-bed__name": "കിടക്ക നമ്പർ N-1"
+  "SORT_OPTIONS__-bed__name": "കിടക്ക നമ്പർ N-1",
+  "middleware_hostname": "മിഡിൽവെയർ ഹോസ്റ്റ്നാമം",
+  "local_ipaddress": "പ്രാദേശിക ഐപി വിലാസം"
 }
