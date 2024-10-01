@@ -14,7 +14,6 @@ import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
 import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
 import CriticalCarePreview from "../../Components/LogUpdate/CriticalCarePreview";
 import FileUploadPage from "../../Components/Patient/FileUploadPage";
-import { DiscussionNotesFiles } from "../../Components/Patient/DiscussionNotesFiles";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -48,22 +47,6 @@ export default {
       type="CONSULTATION"
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/discussion_notes_files/":
-    ({
-      facilityId,
-      patientId,
-      id,
-    }: {
-      facilityId: string;
-      patientId: string;
-      id: string;
-    }) => (
-      <DiscussionNotesFiles
-        facilityId={facilityId}
-        patientId={patientId}
-        consultationId={id}
-      />
-    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
     (path: any) => <ManagePrescriptions {...path} />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions/print":

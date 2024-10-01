@@ -130,8 +130,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           onTabChange={(tab) => setMode(tab as "thread-view" | "default-view")}
         />
       </div>
-      <div className="relative mx-3 my-2 flex grow flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <div className="absolute inset-x-0 top-0 flex bg-secondary-200 text-sm shadow-md">
+      <div className="relative flex h-full flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white">
+        <div className="sticky top-0 z-10 flex bg-secondary-200 text-sm shadow-md">
           {keysOf(PATIENT_NOTES_THREADS).map((current) => (
             <button
               id={`patient-note-tab-${current}`}
@@ -148,8 +148,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             </button>
           ))}
         </div>
-        <div className="flex">
-          <div className="flex-1">
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 flex-col">
             <PatientConsultationNotesList
               state={state}
               setState={setState}
@@ -160,19 +160,20 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
               mode={mode}
               setThreadViewNote={setThreadViewNote}
             />
-
-            <DoctorNoteReplyPreviewCard
-              parentNote={reply_to}
-              cancelReply={() => setReplyTo(undefined)}
-            >
-              <RichTextEditor
-                initialMarkdown={noteField}
-                onChange={setNoteField}
-                onAddNote={onAddNote}
-                isAuthorized={patientActive}
-                onRefetch={() => setReload(true)}
-              />
-            </DoctorNoteReplyPreviewCard>
+            <div className="mt-2">
+              <DoctorNoteReplyPreviewCard
+                parentNote={reply_to}
+                cancelReply={() => setReplyTo(undefined)}
+              >
+                <RichTextEditor
+                  initialMarkdown={noteField}
+                  onChange={setNoteField}
+                  onAddNote={onAddNote}
+                  isAuthorized={patientActive}
+                  onRefetch={() => setReload(true)}
+                />
+              </DoctorNoteReplyPreviewCard>
+            </div>
           </div>
 
           {threadViewNote && (

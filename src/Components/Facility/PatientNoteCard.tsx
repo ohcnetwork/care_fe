@@ -172,80 +172,79 @@ const PatientNoteCard = ({
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-lg font-semibold text-white">
             {note.created_by_object?.first_name[0]}
           </div>
-          <div>
-            <div>
-              <span className="text-sm font-semibold text-secondary-700">
-                {formatName(note.created_by_object)}
-              </span>
-              {note.user_type && (
-                <span className="pl-2 text-sm text-secondary-700">
-                  {`(${USER_TYPES_MAP[note.user_type]})`}
+          <div className="flex-grow">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-sm font-semibold text-secondary-700">
+                  {formatName(note.created_by_object)}
                 </span>
-              )}
-            </div>
-            {
-              // If last edited date is same as created date, then it is not edited
-              note.last_edited_date &&
-              !dayjs(note.last_edited_date).isSame(
-                note.created_date,
-                "second",
-              ) ? (
-                <div className="flex">
-                  <div
-                    className="cursor-pointer text-xs text-secondary-600"
+                {note.user_type && (
+                  <span className="ml-2 text-sm text-secondary-700">
+                    {`(${USER_TYPES_MAP[note.user_type]})`}
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {!disableEdit &&
+                  note.created_by_object.id === authUser.id &&
+                  !isEditing && (
+                    <ButtonV2
+                      ghost
+                      onClick={() => {
+                        setIsEditing(true);
+                      }}
+                      className="bg-gray-100 p-2"
+                    >
+                      <CareIcon icon="l-pen" className="h-4 w-4" />
+                    </ButtonV2>
+                  )}
+                {allowReply && (
+                  <ButtonV2
+                    ghost
                     onClick={() => {
-                      fetchEditHistory();
-                      setShowEditHistory(true);
+                      setReplyTo && setReplyTo(note);
                     }}
+                    className="bg-gray-100 p-2"
                   >
-                    <div className="tooltip inline">
-                      <span className="tooltip-text tooltip-bottom">
-                        {formatDateTime(note.last_edited_date)}
-                      </span>
-                      Edited {relativeDate(note.last_edited_date, true)}
-                    </div>
-                    <CareIcon
-                      icon="l-history"
-                      className="ml-1 h-4 w-4 pt-[3px] text-primary-600"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="text-xs text-gray-600">
+                    <CareIcon icon="l-corner-up-left-alt" className="h-4 w-4" />
+                  </ButtonV2>
+                )}
+              </div>
+            </div>
+            {note.last_edited_date &&
+            !dayjs(note.last_edited_date).isSame(
+              note.created_date,
+              "second",
+            ) ? (
+              <div className="flex">
+                <div
+                  className="cursor-pointer text-xs text-secondary-600"
+                  onClick={() => {
+                    fetchEditHistory();
+                    setShowEditHistory(true);
+                  }}
+                >
                   <div className="tooltip inline">
                     <span className="tooltip-text tooltip-bottom">
-                      {formatDateTime(note.created_date)}
+                      {formatDateTime(note.last_edited_date)}
                     </span>
-                    Created {relativeDate(note.created_date, true)}
+                    Edited {relativeDate(note.last_edited_date, true)}
                   </div>
+                  <CareIcon
+                    icon="l-history"
+                    className="ml-1 h-4 w-4 pt-[3px] text-primary-600"
+                  />
                 </div>
-              )
-            }
-          </div>
-          <div className="right-0 top-0 z-10 flex gap-2 transition-opacity duration-100 group-hover:opacity-100 max-sm:flex-col sm:absolute sm:opacity-0">
-            {!disableEdit &&
-              note.created_by_object.id === authUser.id &&
-              !isEditing && (
-                <ButtonV2
-                  ghost
-                  onClick={() => {
-                    setIsEditing(true);
-                  }}
-                  className="bg-gray-100 p-2"
-                >
-                  <CareIcon icon="l-pen" className="h-4 w-4" />
-                </ButtonV2>
-              )}
-            {allowReply && (
-              <ButtonV2
-                ghost
-                onClick={() => {
-                  setReplyTo && setReplyTo(note);
-                }}
-                className="bg-gray-100 p-2"
-              >
-                <CareIcon icon="l-corner-up-left-alt" className="h-4 w-4" />
-              </ButtonV2>
+              </div>
+            ) : (
+              <div className="text-xs text-gray-600">
+                <div className="tooltip inline">
+                  <span className="tooltip-text tooltip-bottom">
+                    {formatDateTime(note.created_date)}
+                  </span>
+                  Created {relativeDate(note.created_date, true)}
+                </div>
+              </div>
             )}
           </div>
         </div>

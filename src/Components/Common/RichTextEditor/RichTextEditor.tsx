@@ -19,6 +19,7 @@ import uploadFile from "../../../Utils/request/uploadFile";
 import * as Notification from "../../../Utils/Notifications.js";
 import { CreateFileResponse } from "../../Patient/models";
 import MarkdownPreview from "./MarkdownPreview";
+import { classNames } from "../../../Utils/utils";
 
 interface RichTextEditorProps {
   initialMarkdown?: string;
@@ -52,7 +53,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const [mentionFilter, setMentionFilter] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showPreview, setShowPreview] = useState(false);
   const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
   const [modalOpenForAudio, setModalOpenForAudio] = useState(false);
   const [linkDialogState, setLinkDialogState] = useState({
@@ -63,6 +63,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   });
 
   const [tempFiles, setTempFiles] = useState<File[]>([]);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   const insertMarkdown = (prefix: string, suffix: string = prefix) => {
     if (!editorRef.current) return;
@@ -454,18 +455,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         modalOpenForAudio={modalOpenForAudio}
         setModalOpenForAudio={setModalOpenForAudio}
       />
-      <DialogModal
-        show={showPreview}
-        title="Preview"
-        onClose={() => setShowPreview(false)}
-      >
-        <div className="flex flex-col gap-4">
-          <MarkdownPreview markdown={markdown} />
-        </div>
-      </DialogModal>
 
       {/* toolbar */}
-      <div className="flex items-center space-x-2 rounded-t-md border border-gray-300 bg-gray-100 p-1">
+      <div className="flex items-center space-x-2 rounded-t-md border border-gray-300 bg-gray-100 pl-1">
         <button
           onClick={() => insertMarkdown("**")}
           className="tooltip rounded bg-gray-200 p-1"
@@ -535,34 +527,60 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </button>
 
         <div className="flex-1" />
-        <div
-          className="flex cursor-pointer items-center gap-2 rounded-t-md border border-gray-300 bg-gray-100 p-1"
-          onClick={() => setShowPreview(true)}
-        >
-          <CareIcon icon="l-eye" className="text-lg" />
-          preview
+        <div className="flex rounded-md border border-gray-300 bg-white">
+          <button
+            className={classNames(
+              "rounded-md px-3 py-1 text-sm font-medium transition-colors duration-200",
+              !isPreviewMode && "bg-primary-500 text-white",
+              isPreviewMode && "text-gray-500 hover:bg-gray-100",
+            )}
+            onClick={() => setIsPreviewMode(false)}
+          >
+            Edit
+          </button>
+          <button
+            className={classNames(
+              "rounded-md px-3 py-1 text-sm font-medium transition-colors duration-200",
+              isPreviewMode && "bg-primary-500 text-white",
+              !isPreviewMode && "text-gray-500 hover:bg-gray-100",
+            )}
+            onClick={() => setIsPreviewMode(true)}
+          >
+            Preview
+          </button>
         </div>
       </div>
 
-      {/* editor */}
-      <div className="overflow-y-auto border border-x-gray-300 bg-white focus:outline-none">
-        <textarea
-          id="doctor_notes_textarea"
-          ref={editorRef}
-          className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 m-0 max-h-36 min-h-10 w-full resize-y overflow-auto border-none p-2 text-sm outline-none focus:border-none focus:ring-0"
-          value={markdown}
-          onChange={(e) => {
-            setMarkdown(e.target.value);
-          }}
-          onInput={handleInput}
-          onKeyDown={onKeyDown}
-        />
+      {/* editor/preview */}
+      <div
+        className={classNames(
+          "border border-x-gray-300 bg-white",
+          isPreviewMode && "bg-gray-50",
+        )}
+      >
+        {isPreviewMode ? (
+          <div className="max-h-[400px] min-h-[70px] overflow-y-auto p-4">
+            <MarkdownPreview markdown={markdown} />
+          </div>
+        ) : (
+          <textarea
+            id="doctor_notes_textarea"
+            ref={editorRef}
+            className="max-h-[300px] min-h-[70px] w-full resize-none overflow-y-auto border-none p-2 align-middle text-sm outline-none focus:outline-none focus:ring-0"
+            value={markdown}
+            onChange={(e) => {
+              setMarkdown(e.target.value);
+            }}
+            onInput={handleInput}
+            onKeyDown={onKeyDown}
+          />
+        )}
         {tempFiles.length > 0 && (
-          <div className="flex gap-2 px-2 pb-1">
+          <div className="flex flex-wrap gap-2 border-t border-gray-200 p-2">
             {tempFiles.map((file, index) => (
               <div
                 key={index}
-                className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
+                className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm transition-colors duration-200 hover:bg-gray-200"
               >
                 <button
                   onClick={(e) => {
@@ -571,7 +589,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                       prevFiles.filter((f, i) => i !== index),
                     );
                   }}
-                  className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 hover:bg-gray-400"
+                  className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
                 >
                   <CareIcon
                     icon="l-times-circle"

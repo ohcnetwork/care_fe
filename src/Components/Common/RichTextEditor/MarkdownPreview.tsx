@@ -89,11 +89,7 @@ const MarkdownPreview = ({
   return (
     <ReactMarkdown
       className="prose text-sm prose-p:m-0"
-      rehypePlugins={[
-        rehypeRaw,
-        // Todo: Sanitize but keep custom styles
-        // rehypeSanitize
-      ]}
+      rehypePlugins={[rehypeRaw]}
       components={{
         a: CustomLink,
       }}
