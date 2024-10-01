@@ -128,9 +128,7 @@ export const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
         body: { ...data, facility: facilityId, location: locationId },
       });
       res?.ok &&
-        (numberOfBeds > 1
-          ? onSuccess(t("multiple_bed_created_notification"))
-          : onSuccess(t("single_bed_created_notification")));
+        onSuccess(t("bed_created_notification", { count: numberOfBeds }));
     }
   };
 
