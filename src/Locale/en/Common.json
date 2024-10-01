@@ -235,5 +235,7 @@
   "minimize_screen":"Minimize",
   "close_screen":"Close",
   "send_discussion_message":"Send",
-  "reply":"Reply"
+  "reply":"Reply",
+  "middleware_hostname": "Middleware Hostname",
+  "local_ipaddress": "Local IP Address"
 }

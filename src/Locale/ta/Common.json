@@ -219,5 +219,7 @@
   "SORT_OPTIONS__name": "நோயாளியின் பெயர் AZ",
   "SORT_OPTIONS__-name": "நோயாளியின் பெயர் ZA",
   "SORT_OPTIONS__bed__name": "படுக்கை எண் 1-N",
-  "SORT_OPTIONS__-bed__name": "படுக்கை எண். N-1"
+  "SORT_OPTIONS__-bed__name": "படுக்கை எண். N-1",
+  "middleware_hostname": "மிடில்வேர் ஹோஸ்ட்பெயர்",
+  "local_ipaddress": "உள்ளூர் ஐபி முகவரி"
 }
