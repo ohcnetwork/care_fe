@@ -13,6 +13,7 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import DialogModal from "../Common/Dialog";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -23,6 +24,7 @@ interface Props {
 interface LocationProps extends LocationModel {
   facilityId: string;
   disabled: boolean;
+  totalBeds?: number;
   setShowDeletePopup: (e: { open: boolean; name: string; id: string }) => void;
 }
 
@@ -73,6 +75,20 @@ export default function LocationManagement({ facilityId }: Props) {
     setShowDeletePopup({ ...showDeletePopup, open: false });
   };
 
+  function BedsData(facilityId: string, locationId: string) {
+    const { loading, data } = useQuery(routes.listFacilityBeds, {
+      query: {
+        facility: facilityId,
+        location: locationId,
+      },
+    });
+
+    return {
+      loading,
+      totalBeds: data?.results.length || 0,
+    };
+  }
+
   return (
     <PaginatedList
       route={routes.listFacilityAssetLocation}
@@ -113,18 +129,28 @@ export default function LocationManagement({ facilityId }: Props) {
               <Loading />
             </PaginatedList.WhenLoading>
             <PaginatedList.Items<LocationModel> className="my-8 grid gap-3 @4xl:grid-cols-2 @6xl:grid-cols-3 @[100rem]:grid-cols-4 lg:mx-8">
-              {(item) => (
-                <Location
-                  setShowDeletePopup={setShowDeletePopup}
-                  facilityId={facilityId}
-                  {...item}
-                  disabled={
-                    ["DistrictAdmin", "StateAdmin"].includes(authUser.user_type)
-                      ? false
-                      : true
-                  }
-                />
-              )}
+              {(item) => {
+                const { loading, totalBeds } = BedsData(facilityId, item.id);
+
+                if (loading) {
+                  return <Loading />;
+                }
+                return (
+                  <Location
+                    setShowDeletePopup={setShowDeletePopup}
+                    facilityId={facilityId}
+                    {...item}
+                    totalBeds={totalBeds}
+                    disabled={
+                      ["DistrictAdmin", "StateAdmin"].includes(
+                        authUser.user_type,
+                      )
+                        ? false
+                        : true
+                    }
+                  />
+                );
+              }}
             </PaginatedList.Items>
           </div>
 
@@ -216,6 +242,7 @@ export default function LocationManagement({ facilityId }: Props) {
 const Location = ({
   name,
   description,
+  totalBeds,
   middleware_address,
   location_type,
   created_date,
@@ -273,11 +300,14 @@ const Location = ({
       id="manage-bed-button"
       variant="secondary"
       border
-      className="mt-3 w-full"
+      className="mt-3 flex w-full justify-between"
       href={`location/${id}/beds`}
     >
-      <CareIcon icon="l-bed" className="text-lg" />
       Manage Beds
+      <span className="flex gap-2">
+        <CareIcon icon="l-bed" className="text-lg" />
+        {totalBeds}
+      </span>
     </ButtonV2>
     <div className="mt-2 flex w-full flex-col gap-2 md:flex-row">
       <div className="w-full md:w-1/2">
