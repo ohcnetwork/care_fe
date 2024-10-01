@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { formatDateTime } from "../../../Utils/utils";
 import { InvestigationResponse } from "./Reports/types";
 import { InvestigationSessionType } from "./investigationsTab";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 
@@ -58,16 +60,31 @@ export default function ViewInvestigations(props: {
                 <div>
                   {formatDateTime(investigationSession.session_created_date)}
                 </div>
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}`,
-                    )
-                  }
-                  className="btn btn-default"
-                >
-                  View
-                </button>
+                <div className="space-x-2">
+                  <ButtonV2
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}`,
+                      )
+                    }
+                    ghost
+                    border
+                  >
+                    View
+                  </ButtonV2>
+                  <ButtonV2
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}/print`,
+                      )
+                    }
+                    ghost
+                    border
+                  >
+                    <CareIcon icon="l-print" className="text-lg" />
+                    Print
+                  </ButtonV2>
+                </div>
               </div>
             );
           })}

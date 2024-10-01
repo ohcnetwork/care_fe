@@ -15,10 +15,19 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
       )}
       x-description="Even row"
     >
-      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-secondary-900">
-        {data?.investigation_object?.name || "---"}
+      <td className="whitespace-nowrap px-6 py-4 text-xs">
+        <p className="text-sm font-medium text-secondary-900">
+          {data?.investigation_object.name || "---"}
+        </p>
+        <p className="flex flex-row gap-x-2">
+          <span>Min: {data?.investigation_object.min_value || "---"}</span>
+          <span> Max: {data?.investigation_object.max_value || "---"}</span>
+        </p>
+        <p className="text-secondary-600">
+          Units: {data?.investigation_object.unit || "---"}
+        </p>
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
+      <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-secondary-700">
         {showForm ? (
           data?.investigation_object?.investigation_type === "Choice" ? (
             <SelectFormField
@@ -46,16 +55,7 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
           value || "---"
         )}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
-        {data.investigation_object.unit || "---"}
-      </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
-        {data.investigation_object.min_value || "---"}
-      </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
-        {data.investigation_object.max_value || "---"}
-      </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
+      <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-secondary-700">
         {data.investigation_object.ideal_value || "---"}
       </td>
     </tr>
@@ -127,17 +127,15 @@ export const InvestigationTable = ({
           <table className="min-w-full divide-y divide-secondary-200 print:min-w-0 print:divide-none">
             <thead className="bg-secondary-50 print:bg-white">
               <tr>
-                {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map(
-                  (heading) => (
-                    <th
-                      key={heading}
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800 print:text-sm print:font-normal print:tracking-normal print:text-black"
-                    >
-                      {heading}
-                    </th>
-                  ),
-                )}
+                {["Name", "Value", "Ideal"].map((heading) => (
+                  <th
+                    key={heading}
+                    scope="col"
+                    className={`px-6 py-3 ${heading == "Ideal" ? "text-center" : "text-left"} text-xs font-semibold uppercase tracking-wider text-secondary-800 print:text-sm print:font-normal print:tracking-normal print:text-black`}
+                  >
+                    {heading}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="print:divide-none">

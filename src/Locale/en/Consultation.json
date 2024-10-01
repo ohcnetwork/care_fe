@@ -75,5 +75,6 @@
   "consultation_notes": "General Instructions (Advice)",
   "procedure_suggestions": "Procedure Suggestions",
   "patient_notes_thread__Doctors": "Doctor's Discussions",
-  "patient_notes_thread__Nurses": "Nurse's Discussions"
+  "patient_notes_thread__Nurses": "Nurse's Discussions",
+  "investigation_report": "Investigation Report"
 }

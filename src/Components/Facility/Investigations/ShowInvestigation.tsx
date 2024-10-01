@@ -6,8 +6,10 @@ import * as Notification from "../../../Utils/Notifications.js";
 import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
-import PrintPreview from "../../../CAREUI/misc/PrintPreview";
 import { useTranslation } from "react-i18next";
+import Page from "../../Common/components/Page";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
@@ -146,22 +148,36 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
     return <Loading />;
   }
   return (
-    <PrintPreview
-      title={t("investigation_report_for_{{name}}", {
+    <Page
+      title={t("investigation_report", {
         name: patientData?.name,
       })}
+      options={
+        <ButtonV2
+          onClick={() =>
+            navigate(
+              `/facility/${props.facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${sessionId}/print`,
+            )
+          }
+        >
+          <CareIcon icon="l-print" className="text-lg" />
+          Print
+        </ButtonV2>
+      }
     >
-      <InvestigationTable
-        title={t("investigation_report_of_{{name}}", {
-          name: patientData?.name,
-        })}
-        data={state.initialValues}
-        isDischargedPatient={!!consultation?.discharge_date}
-        changedFields={state.changedFields}
-        handleValueChange={handleValueChange}
-        handleUpdateCancel={handleUpdateCancel}
-        handleSave={handleSubmit}
-      />
-    </PrintPreview>
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12">
+        <InvestigationTable
+          title={t("investigation_report_for_{{name}}", {
+            name: patientData?.name,
+          })}
+          data={state.initialValues}
+          isDischargedPatient={!!consultation?.discharge_date}
+          changedFields={state.changedFields}
+          handleValueChange={handleValueChange}
+          handleUpdateCancel={handleUpdateCancel}
+          handleSave={handleSubmit}
+        />
+      </div>
+    </Page>
   );
 }
