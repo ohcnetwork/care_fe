@@ -583,24 +583,29 @@ const routes = {
   downloadFacility: {
     path: "/api/v1/facility/?csv",
     method: "GET",
+    TRes: Type<string>(),
   },
   downloadFacilityCapacity: {
     path: "/api/v1/facility/?csv&capacity",
     method: "GET",
+    TRes: Type<string>(),
   },
   downloadFacilityDoctors: {
     path: "/api/v1/facility/?csv&doctors",
     method: "GET",
+    TRes: Type<string>(),
   },
 
   downloadFacilityTriage: {
     path: "/api/v1/facility/?csv&triage",
     method: "GET",
+    TRes: Type<string>(),
   },
 
   downloadPatients: {
     path: "/api/v1/patient/?csv",
     method: "GET",
+    TRes: Type<string>(),
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
@@ -1126,6 +1131,7 @@ const routes = {
   downloadShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
+    TRes: Type<string>(),
   },
   getShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
@@ -1297,6 +1303,7 @@ const routes = {
   downloadResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
+    TRes: Type<string>(),
   },
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",

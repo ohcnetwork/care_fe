@@ -7,7 +7,6 @@ import {
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
-import { downloadSampleTests } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
@@ -314,7 +313,12 @@ export default function SampleViewAdmin() {
       breadcrumbs={false}
       componentRight={
         <ExportButton
-          action={() => downloadSampleTests({ ...qParams })}
+          action={async () => {
+            const { data } = await request(routes.getTestSampleList, {
+              query: { ...qParams, csv: true },
+            });
+            return data ?? null;
+          }}
           parse={parseExportData}
           filenamePrefix="samples"
         />
