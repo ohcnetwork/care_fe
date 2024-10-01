@@ -1,27 +1,22 @@
 /* eslint-disable i18next/no-literal-string */
-import React, { useEffect, lazy, Suspense } from "react";
+import React, { useEffect, Suspense } from "react";
 import { PluginConfigType } from "./Common/hooks/useConfig";
 import { CareAppsContext, useCareApps } from "./Common/hooks/useCareApps";
 import { AppRoutes } from "./Routers/AppRouter";
 import { INavItem } from "./Components/Common/Sidebar/Sidebar";
-import { pluginManifests } from "./pluginMap";
+import { EnabledPluginConfig, pluginMap } from "./pluginMap";
 import { UserAssignedModel } from "./Components/Users/models";
 import ErrorBoundary from "./Components/Common/ErrorBoundary";
 
 type SupportedPluginExtensions =
   | "DoctorConnectButtons"
-  | "PatientContactButtons";
+  | "PatientExternalRegistration";
 
 export type PluginManifest = {
+  plugin: string;
   routes: AppRoutes;
   extends: SupportedPluginExtensions[];
   navItems: INavItem[];
-  components?: {
-    [K in SupportedPluginExtensions]?: () => Promise<{
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      default: React.ComponentType<any>;
-    }>;
-  };
 };
 
 export default function PluginEngine({
@@ -37,14 +32,14 @@ export default function PluginEngine({
     const loadPlugins = async () => {
       try {
         const loadedPlugins = await Promise.all(
-          pluginManifests.map(async (pluginManifest, index) => {
-            const manifest = await pluginManifest;
-            if (!manifest) {
+          pluginMap.map(async (pluginMap, _index) => {
+            const plugin = await pluginMap.manifest;
+            if (!plugin) {
               throw new Error(`Unable to Load Plugin not found`);
             }
+            console.log("Plugin", plugin.plugin, Promise.resolve(plugin));
             return {
-              ...manifest,
-              plugin: `plugin-${index}`,
+              ...plugin,
             }; // Cast to PluginConfigType
           }),
         );
@@ -81,31 +76,46 @@ export default function PluginEngine({
   );
 }
 
-const CareLivekitDoctorConnectButtons = lazy(() =>
-  import("@apps/care-livekit").then((module) => ({
-    default: module.DoctorConnectButtons,
-  })),
-);
-
 export function PLUGIN_DoctorConnectButtons({
   user,
 }: {
   user: UserAssignedModel;
 }) {
   const plugins = useCareApps();
-  const activePlugins = plugins.filter(
-    (plugin): plugin is PluginManifest & { plugin: string } =>
-      typeof plugin === "object" &&
-      "extends" in plugin &&
-      plugin.extends.includes("DoctorConnectButtons"),
+  const loadedPlugins: PluginManifest[] = plugins.filter(
+    (plugin): plugin is PluginManifest => typeof plugin === "object",
   );
-
+  const loadedPluginNames = loadedPlugins.map((plugin) => plugin.plugin);
+  console.log("Loaded plugins", loadedPluginNames);
+  const loadedPluginMaps = pluginMap.filter((plugin) =>
+    loadedPluginNames.includes(plugin.plugin),
+  );
+  console.log(
+    "Scanning through ",
+    loadedPluginMaps.map((plugin) => Object.keys(plugin.components)),
+    " plugins",
+  );
+  const activePlugins = loadedPluginMaps
+    .filter((plugin): plugin is EnabledPluginConfig =>
+      Object.keys(plugin.components).includes("DoctorConnectButtons"),
+    )
+    .map((plugin) => plugin.plugin);
+  const activePluginMaps = pluginMap.filter((plugin) =>
+    activePlugins.includes(plugin.plugin),
+  );
   return (
     <div>
-      {" "}
-      <div className="sr-only">{activePlugins.length} plugins</div>
-      {activePlugins.map((plugin, index) => {
-        return <CareLivekitDoctorConnectButtons user={user} key={index} />;
+      {activePluginMaps.map((plugin, index) => {
+        const DoctorConnectButtons = plugin.components.DoctorConnectButtons;
+        if (!DoctorConnectButtons) {
+          return null;
+        }
+        return (
+          <div key={index}>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <DoctorConnectButtons user={user} />
+          </div>
+        );
       })}
     </div>
   );

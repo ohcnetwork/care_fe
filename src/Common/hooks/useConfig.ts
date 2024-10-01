@@ -92,11 +92,7 @@ export interface IBaseConfig {
   min_encounter_date: string;
 }
 
-export interface PluginConfig extends PluginManifest {
-  plugin: string;
-}
-
-export type PluginConfigType = string | PluginConfig;
+export type PluginConfigType = string | PluginManifest;
 
 export interface IConfig extends IBaseConfig {
   /*

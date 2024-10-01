@@ -1,5 +1,6 @@
-import { PluginConfig } from "./Common/hooks/useConfig";
+import { LazyExoticComponent } from "react";
 import { PluginManifest } from "./PluginEngine";
+import { UserAssignedModel } from "./Components/Users/models";
 
 // Define the available plugins
 export type AvailablePlugin =
@@ -12,18 +13,38 @@ export type AvailablePluginManifest =
   | "@app-manifest/care-ohif"
   | "@app-manifest/care-scribe";
 
+export type DoctorConnectButtonComponentType = React.FC<{
+  user: UserAssignedModel;
+}>;
+
+// Define supported plugin components
+export type SupportedPluginComponents = {
+  DoctorConnectButtons: DoctorConnectButtonComponentType;
+};
+
+// Create a type for lazy-loaded components
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LazyComponent<T extends React.FC<any>> = LazyExoticComponent<T>;
+
+// Define PluginComponentMap with lazy-loaded components
+export type PluginComponentMap = {
+  [K in keyof SupportedPluginComponents]?: LazyComponent<
+    SupportedPluginComponents[K]
+  >;
+};
+
 // Create a type that ensures only available plugins can be used
 export type EnabledPluginConfig = {
   plugin: string;
   manifestPath: AvailablePluginManifest;
   path: AvailablePlugin;
   manifest: Promise<PluginManifest>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  components: Promise<any>;
+  // Components are a dictionary, with the key being the component name, and the value being the component type
+  components: PluginComponentMap;
 };
 
 // Export a type for the fully loaded plugin
-export type LoadedPlugin = PluginConfig;
+export type LoadedPlugin = PluginManifest;
 
 // Export a function to get only the enabled plugins
 export function getEnabledPlugins(): EnabledPluginConfig[] {
@@ -33,44 +54,47 @@ export function getEnabledPlugins(): EnabledPluginConfig[] {
 // const careLivekitM = import("@app-manifest/care-livekit").then(
 //   (module) => module.default,
 // ) as Promise<PluginManifest>;
-// const careLivekitComponents = import("@apps/care-livekit");
+// const LiveKitDoctorConnectButtons = lazy(() =>
+//   import("@apps/care-livekit").then((module) => ({
+//     default: module.DoctorConnectButtons,
+//   })),
+// );
 
 // const careOhifM = import("@app-manifest/care-ohif").then(
 //   (module) => module.default,
 // ) as Promise<PluginManifest>;
-// const careOhifComponents = import("@apps/care-ohif");
 
 // const careScribeM = import("@app-manifest/care-scribe").then(
 //   (module) => module.default,
 // ) as Promise<PluginManifest>;
-// const careScribeComponents = import("@apps/care-scribe");
+
+const pluginMap: EnabledPluginConfig[] = [];
 
 // careLivekitM, careOhifM, careScribeM
-const pluginManifests: EnabledPluginConfig[] = [];
+// const pluginMap: EnabledPluginConfig[] = [
+//   {
+//     plugin: "care-livekit",
+//     path: "@apps/care-livekit",
+//     manifestPath: "@app-manifest/care-livekit",
+//     manifest: careLivekitM,
+//     components: {
+//       DoctorConnectButtons: LiveKitDoctorConnectButtons,
+//     },
+//   },
+//   {
+//     plugin: "care-ohif",
+//     path: "@apps/care-ohif",
+//     manifestPath: "@app-manifest/care-ohif",
+//     manifest: careOhifM,
+//     components: {},
+//   },
+//   {
+//     plugin: "care-scribe",
+//     path: "@apps/care-scribe",
+//     manifestPath: "@app-manifest/care-scribe",
+//     manifest: careScribeM,
+//     components: {},
+//   },
+// ];
 
-// {
-//   plugin: "care-livekit",
-//   path: "@apps/care-livekit",
-//   manifestPath: "@app-manifest/care-livekit",
-//   manifest: careLivekitM,
-//   components: careLivekitComponents,
-// },
-// {
-//   plugin: "care-ohif",
-//   path: "@apps/care-ohif",
-//   manifestPath: "@app-manifest/care-ohif",
-//   manifest: careOhifM,
-//   components: careOhifComponents,
-// },
-// {
-//   plugin: "care-scribe",
-//   path: "@apps/care-scribe",
-//   manifestPath: "@app-manifest/care-scribe",
-//   manifest: careScribeM,
-//   components: careScribeComponents,
-// },
-
-// Define the enabled plugins
-export const pluginMap: EnabledPluginConfig[] = [];
-
-export { pluginManifests };
+export { pluginMap };
