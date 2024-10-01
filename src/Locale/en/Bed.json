@@ -10,6 +10,6 @@
   "make_multiple_beds_label": "Do you want to make multiple beds?",
   "number_of_beds": "Number of beds",
   "number_of_beds_out_of_range_error": "Number of beds cannot be greater than 100",
-  "single_bed_created_notification": "Bed created successfully",
-  "multiple_bed_created_notification": "Beds created successfully"
+  "bed_created_notification_one": "{{count}} Bed created successfully",
+  "bed_created_notification_other": "{{count}} Beds created successfully"
 }
