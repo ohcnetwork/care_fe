@@ -4,6 +4,8 @@
   "mark_as_unread": "अपठित के रूप में चिह्नित करें",
   "subscribe": "सदस्यता लें",
   "subscribe_on_this_device": "इस डिवाइस पर सदस्यता लें",
+  "notification_permission_denied": "सूचना अनुमति नामंजूर",
+  "notification_permission_granted": "सूचना अनुमति प्रदान की गई",
   "show_unread_notifications": "अपठित दिखाएँ",
   "show_all_notifications": "सब दिखाएं",
   "filter_by_category": "श्रेणी के अनुसार फ़िल्टर करें",
