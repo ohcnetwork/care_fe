@@ -15,6 +15,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { useTranslation } from "react-i18next";
 import careConfig from "@careConfig";
+import { FieldError } from "../Form/FieldValidators";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
@@ -73,6 +74,7 @@ export default function InsuranceDetailsBuilder(props: Props) {
           >
             <InsuranceDetailEditCard
               policy={policy}
+              error={props.error}
               handleUpdate={handleUpdate(index)}
               handleUpdates={handleUpdates(index)}
               handleRemove={handleRemove(index)}
@@ -91,12 +93,14 @@ const InsuranceDetailEditCard = ({
   handleUpdates,
   handleRemove,
   gridView,
+  error,
 }: {
   policy: HCXPolicyModel;
   handleUpdate: (event: FieldChangeEvent<unknown>) => void;
   handleUpdates: (diffs: object) => void;
   handleRemove: () => void;
   gridView?: boolean;
+  error: FieldError;
 }) => {
   const { t } = useTranslation();
   const seletedInsurer =
@@ -124,6 +128,7 @@ const InsuranceDetailEditCard = ({
       >
         <TextFormField
           required
+          error={error}
           name="subscriber_id"
           label={t("policy__subscriber_id")}
           placeholder={t("policy__subscriber_id__example")}
@@ -133,6 +138,7 @@ const InsuranceDetailEditCard = ({
         <TextFormField
           required
           name="policy_id"
+          error={error}
           label={t("policy__policy_id")}
           placeholder={t("policy__policy_id__example")}
           value={policy.policy_id}
@@ -142,6 +148,7 @@ const InsuranceDetailEditCard = ({
           <InsurerAutocomplete
             required
             name="insurer"
+            error={error}
             label={t("policy__insurer")}
             placeholder={t("policy__insurer__example")}
             value={seletedInsurer}
@@ -156,6 +163,7 @@ const InsuranceDetailEditCard = ({
           <>
             <TextFormField
               name="insurer_id"
+              error={error}
               label={t("policy__insurer_id")}
               placeholder={t("policy__insurer_id__example")}
               value={policy.insurer_id}
@@ -163,6 +171,7 @@ const InsuranceDetailEditCard = ({
             />
             <TextFormField
               name="insurer_name"
+              error={error}
               label={t("policy__insurer_name")}
               placeholder={t("policy__insurer_name__example")}
               value={policy.insurer_name}
