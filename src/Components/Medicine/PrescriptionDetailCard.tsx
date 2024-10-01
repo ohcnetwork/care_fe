@@ -226,7 +226,7 @@ export default function PrescriptionDetailCard({
 
             {prescription.notes && (
               <Detail className="col-span-10" label={t("notes")}>
-                <ReadMore text={prescription.notes} minChars={120} />
+                {prescription.notes}
               </Detail>
             )}
 
