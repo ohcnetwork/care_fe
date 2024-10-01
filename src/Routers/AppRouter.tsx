@@ -63,7 +63,7 @@ export default function AppRouter() {
   let routes = Routes;
 
   if (careConfig.hcx.enabled) {
-    routes = { ...routes, ...HCXRoutes };
+    routes = { ...HCXRoutes, ...routes };
   }
 
   if (

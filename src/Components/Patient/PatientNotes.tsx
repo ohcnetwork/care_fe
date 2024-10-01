@@ -11,6 +11,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
 import { classNames, keysOf } from "../../Utils/utils.js";
 import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
 import TextFormField from "../Form/FormFields/TextFormField.js";
@@ -142,14 +143,16 @@ const PatientNotes = (props: PatientNotesProps) => {
           cancelReply={() => setReplyTo(undefined)}
         >
           <div className="relative mx-4 flex items-center">
-            <TextFormField
+            <AutoExpandingTextInputFormField
+              maxHeight={160}
+              rows={2}
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
-              className="grow"
-              type="text"
+              className="w-full grow"
               errorClassName="hidden"
-              placeholder="Type your Note"
+              innerClassName="pr-10"
+              placeholder={t("notes_placeholder")}
               disabled={!patientActive}
             />
             <ButtonV2

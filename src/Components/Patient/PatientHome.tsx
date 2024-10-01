@@ -1,19 +1,12 @@
-import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import * as Notification from "../../Utils/Notifications";
 
 import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
-  SAMPLE_TEST_STATUS,
   OCCUPATION_TYPES,
+  SAMPLE_TEST_STATUS,
 } from "../../Common/constants";
-
-import * as Notification from "../../Utils/Notifications";
-import { ConsultationCard } from "../Facility/ConsultationCard";
-import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
-import { SampleTestCard } from "./SampleTestCard";
-import Chip from "../../CAREUI/display/Chip";
 import {
   classNames,
   formatDate,
@@ -23,23 +16,30 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
+import { lazy, useEffect, useState } from "react";
+
 import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useTranslation } from "react-i18next";
+import Chip from "../../CAREUI/display/Chip";
 import CircularProgress from "../Common/components/CircularProgress";
-import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import { ConsultationCard } from "../Facility/ConsultationCard";
+import { ConsultationModel } from "../Facility/models";
+import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import Page from "../Common/components/Page";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import { SampleTestCard } from "./SampleTestCard";
 import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
+import { navigate } from "raviger";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
-import request from "../../Utils/request/request";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -87,7 +87,7 @@ export const PatientHome = (props: any) => {
     );
   };
 
-  const { data: insuranceDetials } = useQuery(routes.listHCXPolicies, {
+  const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
     query: {
       patient: id,
       limit: 1,

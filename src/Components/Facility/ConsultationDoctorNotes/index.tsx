@@ -79,6 +79,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       Notification.Success({ msg: "Note added successfully" });
       setState({ ...state, cPage: 1 });
       setNoteField("");
+      setReload(true);
       setReplyTo(undefined);
     }
 

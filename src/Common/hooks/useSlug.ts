@@ -31,6 +31,9 @@ export const useSlugs = (...prefix: string[]) => {
 const findSlug = (segments: string[], prefix: string, fallback?: string) => {
   const index = segments.findIndex((segment) => segment === prefix);
   if (index === -1) {
+    if (fallback) {
+      return fallback;
+    }
     throw new Error(
       `Prefix "${prefix}" not found in path "${segments.join("/")}"`,
     );

@@ -138,7 +138,7 @@ describe("Facility Manage Functions", () => {
   it("Modify bed capacity in Facility detail page", () => {
     // add multiple new bed capacity
     facilityManage.clickFacilityAddBedTypeButton();
-    facilityPage.selectBedType("Oxygen beds");
+    facilityPage.selectBedType("Isolation Bed");
     facilityPage.fillTotalCapacity(totalCapacity);
     facilityPage.fillCurrentlyOccupied(currentOccupied);
     facilityPage.saveAndExitBedCapacityForm();

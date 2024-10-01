@@ -13,7 +13,6 @@ import {
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
 import { ReactNode, lazy, useEffect, useState } from "react";
-import { getAllPatient } from "../../Redux/actions";
 import { parseOptionId } from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -53,6 +52,7 @@ import {
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import Tabs from "../Common/components/Tabs.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -276,13 +276,6 @@ export const PatientManager = () => {
     !durations.every((x) => x === 0);
 
   let managePatients: any = null;
-
-  const exportPatients = (isFiltered: boolean) => {
-    const filters = { ...params, csv: true, facility: qParams.facility };
-    if (!isFiltered) delete filters.is_active;
-    return () => getAllPatient(filters, "downloadPatients");
-  };
-
   const preventDuplicatePatientsDuetoPolicyId = (data: any) => {
     // Generate a array which contains imforamation of duplicate patient IDs and there respective linenumbers
     const lines = data.split("\n"); // Split the data into individual lines
@@ -721,7 +714,8 @@ export const PatientManager = () => {
             {patient.last_consultation?.last_daily_round
               ?.ventilator_interface &&
               patient.last_consultation?.last_daily_round
-                ?.ventilator_interface !== "UNKNOWN" && (
+                ?.ventilator_interface !== "UNKNOWN" &&
+              !patient.last_consultation?.discharge_date && (
                 <div className="mb-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary-600 bg-primary-100 text-xs font-semibold text-primary-600">
                   {
                     RESPIRATORY_SUPPORT.find(
@@ -922,7 +916,18 @@ export const PatientManager = () => {
                   exportItems={[
                     {
                       label: "Export Live patients",
-                      action: exportPatients(true),
+                      action: async () => {
+                        const query = {
+                          ...params,
+                          csv: true,
+                          facility: qParams.facility,
+                        };
+                        delete qParams.is_active;
+                        const { data } = await request(routes.patientList, {
+                          query,
+                        });
+                        return data ?? null;
+                      },
                       parse: preventDuplicatePatientsDuetoPolicyId,
                     },
                   ]}

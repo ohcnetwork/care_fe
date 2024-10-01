@@ -1,35 +1,45 @@
 import { classNames, formatCurrency, formatDateTime } from "../../Utils/utils";
-import { HCXClaimModel } from "../HCX/models";
+
+import { HCXClaimModel } from "./models";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   claim: HCXClaimModel;
 }
 
-export default function ClaimDetailCard({ claim }: IProps) {
+const claimStatus = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+};
+
+export default function ClaimCardInfo({ claim }: IProps) {
+  const { t } = useTranslation();
+
   const status =
-    claim.outcome === "Processing Complete"
+    claim.outcome === "Complete"
       ? claim.error_text
-        ? "Rejected"
-        : "Approved"
-      : "Pending";
+        ? claimStatus.REJECTED
+        : claimStatus.APPROVED
+      : claimStatus.PENDING;
 
   return (
-    <div className="px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
+    <>
+      <div className="sm:flex sm:items-end">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-secondary-700">
             #{claim.id?.slice(0, 5)}
           </h1>
 
           <p className="mt-2 text-sm text-secondary-700">
-            Created on{" "}
-            <time dateTime="2022-08-01">
+            {t("created_on")}{" "}
+            <time dateTime={claim.created_date}>
               {formatDateTime(claim.created_date ?? "")}
             </time>
             .
           </p>
         </div>
-        <div className="mt-4 flex items-center justify-center gap-3 sm:ml-16 sm:mt-0">
+        <div className="mt-4 flex flex-row-reverse items-center justify-center gap-3 max-sm:justify-end sm:ml-16 sm:mt-0">
           {claim.use && (
             <span className="rounded bg-primary-100 p-1 px-2 text-sm font-bold text-primary-500 shadow">
               {claim.use}
@@ -38,39 +48,45 @@ export default function ClaimDetailCard({ claim }: IProps) {
           <span
             className={classNames(
               "rounded p-1 px-2 text-sm font-bold text-white shadow",
-              status === "Approved" && "bg-primary-400",
-              status === "Rejected" && "bg-danger-400",
-              status === "Pending" && "bg-yellow-400",
+              status === claimStatus.APPROVED && "bg-primary-400",
+              status === claimStatus.REJECTED && "bg-danger-400",
+              status === claimStatus.PENDING && "bg-yellow-400",
             )}
           >
-            {status}
+            {t(`claim__status__${status}`)}
           </span>
         </div>
       </div>
-      <div className="mt-6 grid grid-cols-2 gap-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div className="text-center">
           <h2 className="text-lg font-bold text-secondary-800">
             {claim.policy_object?.policy_id || "NA"}
           </h2>
-          <p className="text-sm text-secondary-500">Policy ID</p>
+          <p className="text-sm text-secondary-500">{t("policy__policy_id")}</p>
         </div>
         <div className="text-center">
           <h2 className="text-lg font-bold text-secondary-800">
             {claim.policy_object?.subscriber_id || "NA"}
           </h2>
-          <p className="text-sm text-secondary-500">Subscriber ID</p>
+          <p className="text-sm text-secondary-500">
+            {t("policy__subscriber_id")}
+          </p>
         </div>
         <div className="text-center">
           <h2 className="text-lg font-bold text-secondary-800">
-            {claim.policy_object?.insurer_id || "NA"}
+            {claim.policy_object?.insurer_id?.split("@").shift() || "NA"}
           </h2>
-          <p className="text-sm text-secondary-500">Insurer ID</p>
+          <p className="text-sm text-secondary-500">
+            {t("policy__insurer_id")}
+          </p>
         </div>
         <div className="text-center">
           <h2 className="text-lg font-bold text-secondary-800">
             {claim.policy_object?.insurer_name || "NA"}
           </h2>
-          <p className="text-sm text-secondary-500">Insurer Name</p>
+          <p className="text-sm text-secondary-500">
+            {t("policy__insurer_name")}
+          </p>
         </div>
       </div>
       <div className="-mx-6 mt-8 flow-root sm:mx-0">
@@ -81,7 +97,7 @@ export default function ClaimDetailCard({ claim }: IProps) {
                 scope="col"
                 className="py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-secondary-900 sm:pl-0"
               >
-                Items
+                {t("claim__items")}
               </th>
               <th></th>
               <th></th>
@@ -89,7 +105,7 @@ export default function ClaimDetailCard({ claim }: IProps) {
                 scope="col"
                 className="py-3.5 pl-3 pr-6 text-right text-sm font-semibold text-secondary-900 sm:pr-0"
               >
-                Price
+                {t("claim__item__price")}
               </th>
             </tr>
           </thead>
@@ -115,15 +131,9 @@ export default function ClaimDetailCard({ claim }: IProps) {
               <th
                 scope="row"
                 colSpan={3}
-                className="hidden pl-6 pr-3 pt-6 text-right text-sm font-normal text-secondary-500 sm:table-cell sm:pl-0"
+                className="table-cell pl-6 pr-3 pt-6 text-right text-sm font-normal text-secondary-500 sm:pl-0"
               >
-                Total Claim Amount
-              </th>
-              <th
-                scope="row"
-                className="pl-6 pr-3 pt-6 text-left text-sm font-normal text-secondary-500 sm:hidden"
-              >
-                Total Claim Amount
+                {t("claim__total_claim_amount")}
               </th>
               <td className="pl-3 pr-6 pt-6 text-right text-sm text-secondary-500 sm:pr-0">
                 {claim.total_claim_amount &&
@@ -135,15 +145,9 @@ export default function ClaimDetailCard({ claim }: IProps) {
               <th
                 scope="row"
                 colSpan={3}
-                className="hidden pl-6 pr-3 pt-4 text-right text-sm font-semibold text-secondary-900 sm:table-cell sm:pl-0"
+                className="table-cell pl-6 pr-3 pt-4 text-right text-sm font-semibold text-secondary-900 sm:pl-0"
               >
-                Total Amount Approved
-              </th>
-              <th
-                scope="row"
-                className="pl-6 pr-3 pt-4 text-left text-sm font-semibold text-secondary-900 sm:hidden"
-              >
-                Total Amount Approved
+                {t("claim__total_approved_amount")}
               </th>
               <td className="pl-3 pr-6 pt-4 text-right text-sm font-semibold text-secondary-900 sm:pr-0">
                 {claim.total_amount_approved
@@ -159,6 +163,6 @@ export default function ClaimDetailCard({ claim }: IProps) {
           {claim.error_text}
         </div>
       )}
-    </div>
+    </>
   );
 }

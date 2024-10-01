@@ -2,6 +2,7 @@ import {
   ChangeEvent,
   DetailedHTMLProps,
   InputHTMLAttributes,
+  useEffect,
   useState,
 } from "react";
 import {
@@ -20,9 +21,12 @@ import AudioCaptureDialog from "../Components/Files/AudioCaptureDialog";
 import { t } from "i18next";
 
 export type FileUploadOptions = {
+  multiple?: boolean;
   type: string;
   category?: FileCategory;
   onUpload?: (file: FileUploadModel) => void;
+  // if allowed, will fallback to the name of the file if a seperate filename is not defined.
+  allowNameFallback?: boolean;
 } & (
   | {
       allowedExtensions?: string[];
@@ -41,15 +45,19 @@ export interface FileInputProps
 export type FileUploadReturn = {
   progress: null | number;
   error: null | string;
+  validateFiles: () => boolean;
   handleCameraCapture: () => void;
   handleAudioCapture: () => void;
   handleFileUpload: (associating_id: string) => Promise<void>;
   Dialogues: JSX.Element;
   Input: (_: FileInputProps) => JSX.Element;
-  fileName: string;
-  file: File | null;
-  setFileName: (name: string) => void;
-  clearFile: () => void;
+  fileNames: string[];
+  files: File[];
+  setFileName: (names: string, index?: number) => void;
+  setFileNames: (names: string[]) => void;
+  removeFile: (index: number) => void;
+  clearFiles: () => void;
+  uploading: boolean;
 };
 
 // Array of image extensions
@@ -67,73 +75,82 @@ export const ExtImage: string[] = [
 export default function useFileUpload(
   options: FileUploadOptions,
 ): FileUploadReturn {
-  const { type, onUpload, category = "UNSPECIFIED" } = options;
+  const {
+    type,
+    onUpload,
+    category = "UNSPECIFIED",
+    multiple,
+    allowNameFallback = true,
+  } = options;
 
-  const [uploadFileName, setUploadFileName] = useState<string>("");
+  const [uploadFileNames, setUploadFileNames] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<null | number>(null);
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
   const [audioModalOpen, setAudioModalOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (!e.target.files?.length) {
       return;
     }
-    const f = e.target.files[0];
-    const fileName = f.name;
-    setFile(e.target.files[0]);
+    const selectedFiles = Array.from(e.target.files);
+    setFiles((prev) => [...prev, ...selectedFiles]);
 
-    // This is commented out to prompt users to input valid file names. See https://github.com/ohcnetwork/care_fe/issues/7942#issuecomment-2324391329
-    //setUploadFileName(
-    //  uploadFileName ||
-    //    fileName.substring(0, fileName.lastIndexOf(".")) ||
-    //    fileName,
-    //);
-
-    const ext: string = fileName.split(".")[1];
-
-    if (ExtImage.includes(ext)) {
-      const options = {
-        initialQuality: 0.6,
-        alwaysKeepResolution: true,
-      };
-      imageCompression(f, options).then((compressedFile: File) => {
-        setFile(compressedFile);
-      });
-      return;
-    }
-    setFile(f);
+    selectedFiles.forEach((file) => {
+      const ext: string = file.name.split(".")[1];
+      if (ExtImage.includes(ext)) {
+        const options = {
+          initialQuality: 0.6,
+          alwaysKeepResolution: true,
+        };
+        imageCompression(file, options).then((compressedFile: File) => {
+          setFiles((prev) =>
+            prev.map((f) => (f.name === file.name ? compressedFile : f)),
+          );
+        });
+      }
+    });
   };
 
+  useEffect(() => {
+    const blanks = Array(files.length).fill("");
+    setUploadFileNames((names) => [...names, ...blanks].slice(0, files.length));
+  }, [files]);
+
   const validateFileUpload = () => {
-    const filenameLength = uploadFileName.trim().length;
-    const f = file;
-    if (f === undefined || f === null) {
+    if (files.length === 0) {
       setError(t("file_error__choose_file"));
       return false;
     }
-    if (filenameLength === 0) {
-      setError(t("file_error__file_name"));
-      return false;
-    }
-    if (f.size > 10e7) {
-      setError(t("file_error__file_size"));
-      return false;
-    }
-    const extension = f.name.split(".").pop();
-    if (
-      "allowedExtensions" in options &&
-      !options.allowedExtensions?.includes(extension || "")
-    ) {
-      setError(
-        t("file_error__file_type", {
-          extension,
-          allowedExtensions: options.allowedExtensions?.join(", "),
-        }),
-      );
-      return false;
+
+    for (const file of files) {
+      const filenameLength = file.name.trim().length;
+      if (filenameLength === 0) {
+        setError(t("file_error__file_name"));
+        return false;
+      }
+      if (file.size > 10e7) {
+        setError(t("file_error__file_size"));
+        return false;
+      }
+      const extension = file.name.split(".").pop();
+      if (
+        "allowedExtensions" in options &&
+        !options.allowedExtensions
+          ?.map((extension) => extension.replace(".", ""))
+          ?.includes(extension || "")
+      ) {
+        setError(
+          t("file_error__file_type", {
+            extension,
+            allowedExtensions: options.allowedExtensions?.join(", "),
+          }),
+        );
+        return false;
+      }
     }
     return true;
   };
@@ -151,23 +168,20 @@ export default function useFileUpload(
     });
   };
 
-  const uploadfile = async (data: CreateFileResponse) => {
+  const uploadfile = async (data: CreateFileResponse, file: File) => {
     const url = data.signed_url;
     const internal_name = data.internal_name;
-    const f = file;
-    if (!f) return;
-    const newFile = new File([f], `${internal_name}`);
+    const newFile = new File([file], `${internal_name}`);
+
     return new Promise<void>((resolve, reject) => {
       uploadFile(
         url,
         newFile,
         "PUT",
-        { "Content-Type": file?.type },
+        { "Content-Type": file.type },
         (xhr: XMLHttpRequest) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setProgress(null);
-            setFile(null);
-            setUploadFileName("");
             Notification.Success({
               msg: t("file_uploaded"),
             });
@@ -196,27 +210,40 @@ export default function useFileUpload(
 
   const handleUpload = async (associating_id: string) => {
     if (!validateFileUpload()) return;
-    const f = file;
 
-    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
-    const name = f?.name;
     setProgress(0);
 
-    const { data } = await request(routes.createUpload, {
-      body: {
-        original_name: name ?? "",
-        file_type: type,
-        name: filename,
-        associating_id,
-        file_category: category,
-        mime_type: f?.type ?? "",
-      },
-    });
+    for (const [index, file] of files.entries()) {
+      const filename =
+        allowNameFallback && uploadFileNames[index] === "" && file
+          ? file.name
+          : uploadFileNames[index];
+      if (!filename) {
+        setError(t("file_error__single_file_name"));
+        return;
+      }
+      setUploading(true);
 
-    if (data) {
-      await uploadfile(data);
-      await markUploadComplete(data, associating_id);
+      const { data } = await request(routes.createUpload, {
+        body: {
+          original_name: file.name ?? "",
+          file_type: type,
+          name: filename,
+          associating_id,
+          file_category: category,
+          mime_type: file.type ?? "",
+        },
+      });
+
+      if (data) {
+        await uploadfile(data, file);
+        await markUploadComplete(data, associating_id);
+      }
     }
+
+    setUploading(false);
+    setFiles([]);
+    setUploadFileNames([]);
   };
 
   const Dialogues = (
@@ -224,17 +251,15 @@ export default function useFileUpload(
       <CameraCaptureDialog
         show={cameraModalOpen}
         onHide={() => setCameraModalOpen(false)}
-        onCapture={(f) => {
-          setFile(f);
-          setUploadFileName(uploadFileName || "");
+        onCapture={(file) => {
+          setFiles((prev) => [...prev, file]);
         }}
       />
       <AudioCaptureDialog
         show={audioModalOpen}
         onHide={() => setAudioModalOpen(false)}
-        onCapture={(f) => {
-          setFile(f);
-          setUploadFileName(uploadFileName || "");
+        onCapture={(file) => {
+          setFiles((prev) => [...prev, file]);
         }}
         autoRecord
       />
@@ -245,9 +270,10 @@ export default function useFileUpload(
     <input
       {...props}
       id="file_upload_patient"
-      title="changeFile"
+      title={t("change_file")}
       onChange={onFileChange}
       type="file"
+      multiple={multiple}
       accept={
         "allowedExtensions" in options
           ? options.allowedExtensions?.map((e) => "." + e).join(",")
@@ -262,18 +288,28 @@ export default function useFileUpload(
   return {
     progress,
     error,
+    validateFiles: validateFileUpload,
     handleCameraCapture: () => setCameraModalOpen(true),
     handleAudioCapture: () => setAudioModalOpen(true),
     handleFileUpload: handleUpload,
     Dialogues,
     Input,
-    fileName: uploadFileName,
-    file: file,
-    setFileName: setUploadFileName,
-    clearFile: () => {
-      setFile(null);
-      setError(null);
-      setUploadFileName("");
+    fileNames: uploadFileNames,
+    files: files,
+    setFileNames: setUploadFileNames,
+    setFileName: (name: string, index = 0) => {
+      setUploadFileNames((prev) =>
+        prev.map((n, i) => (i === index ? name : n)),
+      );
     },
+    removeFile: (index = 0) => {
+      setFiles((prev) => prev.filter((_, i) => i !== index));
+      setUploadFileNames((prev) => prev.filter((_, i) => i !== index));
+    },
+    clearFiles: () => {
+      setFiles([]);
+      setUploadFileNames([]);
+    },
+    uploading,
   };
 }

@@ -1,11 +1,14 @@
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { HCXActions } from "../../Redux/actions";
-import { Autocomplete } from "../Form/FormFields/Autocomplete";
-import FormField from "../Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
+
+import { Autocomplete } from "../Form/FormFields/Autocomplete";
+import FormField from "../Form/FormFields/FormField";
+import routes from "../../Redux/api";
+import { mergeQueryOptions } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import { useState } from "react";
 
 export type InsurerOptionModel = {
   name: string;
@@ -18,8 +21,12 @@ type Props = FormFieldBaseProps<InsurerOptionModel> & {
 
 export default function InsurerAutocomplete(props: Props) {
   const field = useFormFieldPropsResolver(props);
-  const { fetchOptions, isLoading, options } =
-    useAsyncOptions<InsurerOptionModel>("code");
+
+  const [query, setQuery] = useState("");
+
+  const { data, loading } = useQuery(routes.hcx.policies.listPayors, {
+    query: { query, limit: 10 },
+  });
 
   return (
     <FormField field={field}>
@@ -31,12 +38,16 @@ export default function InsurerAutocomplete(props: Props) {
         placeholder={props.placeholder}
         value={field.value}
         onChange={field.handleChange}
-        options={options(props.value && [props.value])}
+        options={mergeQueryOptions(
+          field.value ? [field.value] : [],
+          data ?? [],
+          (obj) => obj.code,
+        )}
         optionLabel={(option) => option.name}
         optionDescription={(option) => option.code}
         optionValue={(option) => option}
-        onQuery={(query) => fetchOptions(HCXActions.payors.list(query))}
-        isLoading={isLoading}
+        onQuery={setQuery}
+        isLoading={loading}
       />
     </FormField>
   );
