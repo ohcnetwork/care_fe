@@ -136,8 +136,8 @@ const InsuranceDetailEditCard = ({
       >
         <TextFormField
           required
-          error={error}
           name="subscriber_id"
+          error={error}
           label={t("policy__subscriber_id")}
           placeholder={t("policy__subscriber_id__example")}
           value={policy.subscriber_id}
@@ -156,7 +156,6 @@ const InsuranceDetailEditCard = ({
           <InsurerAutocomplete
             required
             name="insurer"
-            error={error}
             label={t("policy__insurer")}
             placeholder={t("policy__insurer__example")}
             value={seletedInsurer}
@@ -171,7 +170,6 @@ const InsuranceDetailEditCard = ({
           <>
             <TextFormField
               name="insurer_id"
-              error={error}
               label={t("policy__insurer_id")}
               placeholder={t("policy__insurer_id__example")}
               value={policy.insurer_id}
@@ -179,8 +177,9 @@ const InsuranceDetailEditCard = ({
             />
             <TextFormField
               name="insurer_name"
-              error={error}
+              required
               label={t("policy__insurer_name")}
+              error={error}
               placeholder={t("policy__insurer_name__example")}
               value={policy.insurer_name}
               onChange={handleUpdate}
