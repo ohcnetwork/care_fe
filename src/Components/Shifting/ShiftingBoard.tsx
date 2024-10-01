@@ -7,7 +7,6 @@ import {
   useState,
 } from "react";
 import { classNames, formatDateTime, formatName } from "../../Utils/utils";
-import { downloadShiftRequests } from "../../Redux/actions";
 import { useDrag, useDrop } from "react-dnd";
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
@@ -346,12 +345,15 @@ export default function ShiftingBoard({
           <h3 className="flex h-8 items-center text-xs">
             {title || board}{" "}
             <ExportButton
-              action={() =>
-                downloadShiftRequests({
-                  ...formatFilter({ ...filterProp, status: board }),
-                  csv: 1,
-                })
-              }
+              action={async () => {
+                const { data } = await request(routes.downloadShiftRequests, {
+                  query: {
+                    ...formatFilter({ ...filterProp, status: board }),
+                    csv: true,
+                  },
+                });
+                return data ?? null;
+              }}
               filenamePrefix={`shift_requests_${board}`}
             />
           </h3>

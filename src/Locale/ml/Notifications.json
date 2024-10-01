@@ -4,6 +4,8 @@
   "mark_as_unread": "വായിക്കാത്തതായി അടയാളപ്പെടുത്തുക",
   "subscribe": "സബ്സ്ക്രൈബ് ചെയ്യുക",
   "subscribe_on_this_device": "ഈ ഉപകരണത്തിൽ സബ്സ്ക്രൈബ് ചെയ്യുക",
+  "notification_permission_denied": "അറിയിപ്പ് അനുമതി നിഷേധിച്ചു",
+  "notification_permission_granted": "അറിയിപ്പ് അനുമതി നൽകി",
   "show_unread_notifications": "വായിക്കാത്തത് കാണിക്കുക",
   "show_all_notifications": "എല്ലാം കാണിക്കുക",
   "filter_by_category": "വിഭാഗം അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
