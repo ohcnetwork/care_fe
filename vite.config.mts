@@ -26,6 +26,10 @@ const cdnUrls =
 
 function getPluginAliases() {
   const pluginsDir = path.resolve(__dirname, "apps");
+  // Make sure the `apps` folder exists
+  if (!fs.existsSync(pluginsDir)) {
+    return {};
+  }
   const pluginFolders = fs.readdirSync(pluginsDir);
 
   const aliases = {};
@@ -45,7 +49,11 @@ function getPluginAliases() {
 }
 
 function getPluginDependencies() {
-  const pluginsDir = path.resolve(__dirname, "plugins");
+  const pluginsDir = path.resolve(__dirname, "apps");
+  // Make sure the `apps` folder exists
+  if (!fs.existsSync(pluginsDir)) {
+    return [];
+  }
   const pluginFolders = fs.readdirSync(pluginsDir);
 
   const dependencies = new Set();
