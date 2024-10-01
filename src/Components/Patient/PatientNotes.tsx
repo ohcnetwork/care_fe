@@ -13,9 +13,8 @@ import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
 import { classNames, keysOf } from "../../Utils/utils.js";
-import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
-import TextFormField from "../Form/FormFields/TextFormField.js";
 import { useTranslation } from "react-i18next";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
 
 interface PatientNotesProps {
   patientId: string;
