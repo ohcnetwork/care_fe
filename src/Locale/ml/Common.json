@@ -137,6 +137,8 @@
   "retake": "വീണ്ടും എടുക്കുക",
   "submit": "സമർപ്പിക്കുക",
   "camera": "ക്യാമറ",
+  "user_media_is_ready": "ഉപയോക്താവിന്റെ മീഡിയ സജ്ജമാണ്",
+  "camera_permission_denied": "ക്യാമറ അനുമതി നിഷേധിച്ചു",
   "submitting": "സമർപ്പിക്കുന്നു",
   "view_details": "വിശദാംശങ്ങൾ കാണുക",
   "type_to_search": "തിരയാൻ ടൈപ്പ് ചെയ്യുക",
