@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Chip from "../../../CAREUI/display/Chip";
 import Timeline, {
   TimelineEvent,
@@ -204,6 +205,7 @@ const BedTitleSuffix = ({
   isLastNode?: boolean;
   prevBed?: CurrentBed;
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col">
       <div className="flex gap-x-2">
@@ -215,7 +217,7 @@ const BedTitleSuffix = ({
         {bed.bed_object.id === prevBed?.bed_object.id
           ? "Asset changed in" + " "
           : "Transferred to" + " "}
-        <span className="font-semibold">{`${bed.bed_object.name} (${bed.bed_object.bed_type}) in ${bed.bed_object.location_object?.name}`}</span>
+        <span className="font-semibold">{`${bed.bed_object.name} (${t(bed.bed_object.bed_type!)}) in ${bed.bed_object.location_object?.name}`}</span>
         {bed.end_date === null && (
           <Chip
             text="In Use"
