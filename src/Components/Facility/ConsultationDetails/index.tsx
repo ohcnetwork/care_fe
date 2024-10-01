@@ -1,10 +1,6 @@
 import { GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
-import {
-  getConsultation,
-  getPatient,
-  listShiftRequests,
-} from "../../../Redux/actions";
+import { getConsultation, getPatient } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
@@ -181,12 +177,11 @@ export const ConsultationDetails = (props: any) => {
           setAbhaNumberData(abhaNumberData);
 
           // Get shifting data
-          const shiftingRes = await dispatch(
-            listShiftRequests({ patient: id }, "shift-list-call"),
-          );
-          if (shiftingRes?.data?.results) {
-            const data = shiftingRes.data.results;
-            setActiveShiftingData(data);
+          const shiftRequestsQuery = await request(routes.listShiftRequests, {
+            query: { patient: id },
+          });
+          if (shiftRequestsQuery.data?.results) {
+            setActiveShiftingData(shiftRequestsQuery.data.results);
           }
         } else {
           navigate("/not-found");

@@ -12,6 +12,7 @@ import useFullscreen from "../../Common/hooks/useFullscreen";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
 import VideoPlayer from "./videoPlayer";
+import MonitorAssetPopover from "../Common/MonitorAssetPopover";
 
 interface Props {
   children?: React.ReactNode;
@@ -145,10 +146,10 @@ export default function CameraFeed(props: Props) {
   );
 
   return (
-    <div ref={playerWrapperRef} className="flex flex-col justify-center">
+    <div ref={playerWrapperRef} className="flex h-full flex-col justify-center">
       <div
         className={classNames(
-          "flex max-h-screen flex-col justify-center",
+          "flex max-h-screen min-h-full flex-col justify-center",
           props.className,
           isFullscreen ? "bg-black" : "bg-zinc-100",
           isIOS && isFullscreen && "px-20",
@@ -157,7 +158,7 @@ export default function CameraFeed(props: Props) {
         <div
           className={classNames(
             isFullscreen ? "hidden lg:flex" : "flex",
-            "items-center justify-between px-4 py-0.5 transition-all duration-500 ease-in-out lg:py-1",
+            "shrink-0 items-center justify-between px-4 py-0.5 transition-all duration-500 ease-in-out lg:py-1",
             (() => {
               if (playerStatus !== "playing") {
                 return "bg-black text-zinc-400";
@@ -185,6 +186,10 @@ export default function CameraFeed(props: Props) {
             <span className="text-xs font-bold md:text-sm">
               {props.asset.name}
             </span>
+            <MonitorAssetPopover
+              asset={props.asset}
+              className="absolute z-[100] mt-2 w-56 -translate-x-full -translate-y-4 rounded-md bg-white md:w-[350px] md:-translate-x-full md:-translate-y-2"
+            />
             {!isIOS && (
               <div
                 className={classNames(
@@ -202,7 +207,7 @@ export default function CameraFeed(props: Props) {
             )}
           </div>
         </div>
-        <div className="group relative aspect-video bg-black">
+        <div className="group relative flex-1 bg-black">
           {/* Notifications */}
           <FeedAlert state={state} />
           {playerStatus === "playing" && <FeedWatermark />}
@@ -239,7 +244,7 @@ export default function CameraFeed(props: Props) {
           <VideoPlayer
             playerRef={playerRef}
             streamUrl={streamUrl}
-            className="absolute inset-x-0 mx-auto aspect-video max-h-full w-full"
+            className="max-h-[calc(100vh-40px)] w-full object-contain"
             onPlay={() => {
               setPlayedOn(new Date());
               setState("playing");
@@ -255,6 +260,7 @@ export default function CameraFeed(props: Props) {
             }}
             onError={props.onStreamError}
           />
+
           {inlineControls && playerStatus === "playing" && controls}
         </div>
         {!inlineControls && (

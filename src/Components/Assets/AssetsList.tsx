@@ -1,6 +1,5 @@
 import { Scanner } from "@yudiel/react-qr-scanner";
 import * as Notification from "../../Utils/Notifications.js";
-import { listAssets } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
 import { useState, useEffect, lazy } from "react";
 import { Link, navigate } from "raviger";
@@ -317,13 +316,12 @@ const AssetsList = () => {
                   },
                   {
                     label: "Export Assets (JSON)",
-                    action: () =>
-                      authorizedForImportExport &&
-                      listAssets({
-                        ...qParams,
-                        json: true,
-                        limit: totalCount,
-                      }),
+                    action: async () => {
+                      const { data } = await request(routes.listAssets, {
+                        query: { ...qParams, json: true, limit: totalCount },
+                      });
+                      return data ?? null;
+                    },
                     type: "json",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
@@ -334,13 +332,12 @@ const AssetsList = () => {
                   },
                   {
                     label: "Export Assets (CSV)",
-                    action: () =>
-                      authorizedForImportExport &&
-                      listAssets({
-                        ...qParams,
-                        csv: true,
-                        limit: totalCount,
-                      }),
+                    action: async () => {
+                      const { data } = await request(routes.listAssets, {
+                        query: { ...qParams, csv: true, limit: totalCount },
+                      });
+                      return data ?? null;
+                    },
                     type: "csv",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {

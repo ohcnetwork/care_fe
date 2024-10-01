@@ -3,7 +3,6 @@ import { navigate } from "raviger";
 import ListFilter from "./ListFilter";
 import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
-import { downloadResourceRequests } from "../../Redux/actions";
 import withScrolling from "react-dnd-scrolling";
 import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
@@ -15,6 +14,8 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import SearchInput from "../Form/SearchInput";
 import Tabs from "../Common/components/Tabs";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -50,9 +51,15 @@ export default function BoardView() {
             className="mx-3 md:mx-5"
             componentRight={
               <ExportButton
-                action={() =>
-                  downloadResourceRequests({ ...appliedFilters, csv: 1 })
-                }
+                action={async () => {
+                  const { data } = await request(
+                    routes.downloadResourceRequests,
+                    {
+                      query: { ...appliedFilters, csv: true },
+                    },
+                  );
+                  return data ?? null;
+                }}
                 filenamePrefix="resource_requests"
               />
             }
