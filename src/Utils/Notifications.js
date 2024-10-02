@@ -28,6 +28,7 @@ const notify = (text, type) => {
       sticker: false,
     },
     stack: notifyStack,
+    delay: 2500,
   });
   notification.refs.elem.addEventListener("click", () => {
     notification.close();
