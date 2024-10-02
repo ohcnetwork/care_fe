@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { LANGUAGE_NAMES } from "../../Locale/config";
 import { classNames } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import careConfig from "@careConfig";
 
 export const LanguageSelector = (props: any) => {
   const { i18n } = useTranslation();
@@ -19,6 +20,10 @@ export const LanguageSelector = (props: any) => {
     }
   };
 
+  const availableLocales = Object.keys(LANGUAGE_NAMES).filter(
+    (l) => l === "en" || careConfig.availableLocales?.includes(l),
+  );
+
   return (
     <div className="relative flex w-full items-center justify-end">
       <select
@@ -31,7 +36,7 @@ export const LanguageSelector = (props: any) => {
         value={i18n.language}
         onChange={(e: any) => handleLanguage(e.target.value)}
       >
-        {Object.keys(LANGUAGE_NAMES).map((e: string) => (
+        {availableLocales.map((e: string) => (
           <option key={e} value={e}>
             {LANGUAGE_NAMES[e]}
           </option>

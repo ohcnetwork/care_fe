@@ -4,4 +4,5 @@ export const LANGUAGE_NAMES: { [key: string]: any } = {
   ml: "മലയാളം",
   mr: "मराठी",
   kn: "ಕನ್ನಡ",
+  hi: "हिन्दी",
 };

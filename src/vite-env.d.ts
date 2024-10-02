@@ -31,6 +31,7 @@ interface ImportMetaEnv {
   readonly REACT_STILL_WATCHING_PROMPT_DURATION?: string;
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_MIN_ENCOUNTER_DATE?: string;
+  readonly REACT_AVAILABLE_LOCALES?: string;
 
   // Plugins related envs...
   readonly REACT_PLAUSIBLE_SERVER_URL?: string;
