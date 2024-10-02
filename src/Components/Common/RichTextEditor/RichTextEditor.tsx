@@ -397,7 +397,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       body: {
         original_name: file.name,
         file_type: "NOTES",
-        name: file.name,
+        name: file.name.split(".")[0],
         associating_id: noteId,
         file_category: category,
         mime_type: file.type,
@@ -576,7 +576,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           />
         )}
         {tempFiles.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-t border-gray-200 p-2">
+          <div className="flex flex-wrap gap-2 p-2">
             {tempFiles.map((file, index) => (
               <div
                 key={index}
