@@ -1,9 +1,11 @@
-const modules = import.meta.glob("./*.json");
+import Auth from "./Auth.json";
+import Common from "./Common.json";
+import Entities from "./Entities.json";
+import Facility from "./Facility.json";
 
-let translations = {};
-for (const path in modules) {
-  const module = (await modules[path]()) as { [key: string]: string };
-  translations = { ...translations, ...module };
-}
-
-export default translations;
+export default {
+  ...Auth,
+  ...Common,
+  ...Entities,
+  ...Facility,
+};
