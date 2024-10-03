@@ -346,9 +346,6 @@ const CoverImageEditModal = ({
                     width={1280}
                     ref={webRef}
                     videoConstraints={constraint}
-                    onUserMedia={() => {
-                      Success({ msg: t("user_media_is_ready") });
-                    }}
                     onUserMediaError={(_e) => {
                       setIsCameraOpen(false);
                       Warn({ msg: t("camera_permission_denied") });
