@@ -19,7 +19,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
     <div className="my-2 flex flex-col">
       <Link
         href="/user/profile"
-        className="tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:h-11 md:flex-none"
+        className="tooltip relative ml-1 mr-2 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:h-11 md:flex-none"
       >
         <div
           className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
@@ -36,7 +36,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
       </Link>
       <div
         onClick={signOut}
-        className="tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:h-11 md:flex-none"
+        className="tooltip relative ml-1 mr-2 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:h-11 md:flex-none"
       >
         <div
           className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}

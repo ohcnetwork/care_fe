@@ -180,7 +180,7 @@ export const Login = (props: { forgot?: boolean }) => {
               rel="noopener noreferrer"
             >
               <img
-                src={customLogoAlt?.light ?? mainLogo?.light}
+                src={customLogoAlt?.light ?? "/images/care_logo_gray.svg"}
                 className="h-8"
                 alt="Open Healthcare Network logo"
               />
@@ -223,7 +223,7 @@ export const Login = (props: { forgot?: boolean }) => {
               <div className="ml-2 h-8 w-px rounded-full bg-white/50" />
               <a href={urls.ohcn} rel="noopener noreferrer" target="_blank">
                 <img
-                  src="https://cdn.ohc.network/ohc_logo_light.png"
+                  src="/images/ohc_logo_light.svg"
                   className="inline-block h-10"
                   alt="Open Healthcare Network logo"
                 />

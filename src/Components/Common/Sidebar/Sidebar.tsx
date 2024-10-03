@@ -119,16 +119,15 @@ const StatelessSidebar = ({
       }`}
     >
       {shrinked && (
-        <div className="ml-1">
+        <div>
           <ToggleShrink
             shrinked={shrinked}
             toggle={() => setShrinked && setShrinked(!shrinked)}
           />
         </div>
       )}
-      <div className="h-3" /> {/* flexible spacing */}
       <div
-        className={`flex items-center ${shrinked ? "justify-center" : "justify-between"}`}
+        className={`flex items-center ${shrinked ? "mt-2 justify-center" : "justify-between"}`}
       >
         <Link href="/" className="flex items-center justify-between">
           <img
