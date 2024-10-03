@@ -144,8 +144,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             icon="l-window-maximize"
             className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
           />
-          <span className="tooltip-text tooltip-bottom -translate-x-[7.3rem] text-xs">
-            {t(`open_in_full_window`)}
+          <span className="tooltip-text tooltip-bottom -translate-x-[4.9rem] text-xs">
+            {t(`full_screen`)}
           </span>
         </Link>
       )}
@@ -265,7 +265,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               >
                 <CareIcon icon="l-message" className="tooltip text-lg" />
                 <span className="tooltip-text tooltip-bottom -translate-x-11 -translate-y-1 text-xs">
-                  {t("send_message")}
+                  {t("send")}
                 </span>
               </ButtonV2>
             </div>
