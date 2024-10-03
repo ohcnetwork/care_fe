@@ -16,6 +16,7 @@ const secondary = {
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  important: true,
   darkMode: ["class"],
   theme: {
     extend: {
