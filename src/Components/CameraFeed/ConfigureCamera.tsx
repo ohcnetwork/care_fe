@@ -27,6 +27,7 @@ import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
 import Loading from "../Common/Loading";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import { checkIfValidIP } from "../../Common/validation";
 
 interface Props {
   asset: AssetData;
@@ -63,17 +64,21 @@ export default function ConfigureCamera(props: Props) {
     compareBy("created_date"),
   );
 
-  const firstAssetBedId = linkedAssetBeds?.[0]?.bed_object.id;
-  useEffect(() => {
-    if (!query.bed && firstAssetBedId) {
-      setQuery({ bed: firstAssetBedId });
-    }
-  }, [query.bed, firstAssetBedId]);
-
   const linkedBedIDs = linkedAssetBeds?.map((a) => a.bed_object.id!);
   const unlinkedBeds =
     linkedBedIDs &&
-    bedsQuery.data?.results.filter((bed) => !linkedBedIDs.includes(bed.id!));
+    bedsQuery.data?.results
+      .filter((bed) => !linkedBedIDs.includes(bed.id!))
+      .sort(compareBy("created_date"));
+
+  const firstBedId =
+    linkedAssetBeds?.[0]?.bed_object.id ?? unlinkedBeds?.[0]?.id;
+  useEffect(() => {
+    if (!query.bed && firstBedId) {
+      setQuery({ bed: firstBedId });
+    }
+  }, [query.bed, firstBedId]);
+
   const selectedAssetBed = linkedAssetBeds?.find(
     (a) => a.bed_object.id === query.bed,
   );
@@ -106,9 +111,6 @@ export default function ConfigureCamera(props: Props) {
           className="rounded-lg bg-white p-4 shadow md:w-full"
           onSubmit={async (e) => {
             e.preventDefault();
-
-            // TODO: perform validations
-
             const { res } = await request(routes.partialUpdateAsset, {
               pathParams: { external_id: props.asset.id },
               body: { meta },
@@ -120,28 +122,33 @@ export default function ConfigureCamera(props: Props) {
             }
           }}
         >
-          <h4 className="pb-3">Feed Configurations</h4>
+          <h4 className="pb-3">{t("feed_configurations")}</h4>
           <div className="grid gap-x-3 lg:grid-cols-2">
             <TextFormField
               name="middleware_hostname"
               label={
                 <div className="flex flex-row gap-1">
-                  <p>Middleware Hostname</p>
-                  {props.asset.resolved_middleware?.source != "asset" && (
-                    <div className="tooltip">
-                      <CareIcon
-                        icon="l-info-circle"
-                        className="tooltip text-indigo-500 hover:text-indigo-600"
-                      />
-                      <span className="tooltip-text w-56 whitespace-normal">
-                        Middleware hostname sourced from asset{" "}
-                        {props.asset.resolved_middleware?.source}
-                      </span>
-                    </div>
-                  )}
+                  <p>{t("middleware_hostname")}</p>
+                  {!!props.asset.resolved_middleware &&
+                    props.asset.resolved_middleware.source != "asset" && (
+                      <div className="tooltip">
+                        <CareIcon
+                          icon="l-info-circle"
+                          className="tooltip text-indigo-500 hover:text-indigo-600"
+                        />
+                        <span className="tooltip-text w-56 whitespace-normal">
+                          {t("middleware_hostname_sourced_from", {
+                            source: props.asset.resolved_middleware?.source,
+                          })}
+                        </span>
+                      </div>
+                    )}
                 </div>
               }
-              placeholder={props.asset.resolved_middleware?.hostname}
+              placeholder={
+                props.asset.resolved_middleware?.hostname ??
+                t("middleware_hostname_example")
+              }
               value={meta?.middleware_hostname}
               onChange={({ value }) =>
                 setMeta({ ...meta, middleware_hostname: value })
@@ -149,17 +156,22 @@ export default function ConfigureCamera(props: Props) {
             />
             <TextFormField
               name="camera_address"
-              label="Local IP Address"
+              label={t("local_ip_address")}
+              placeholder={t("local_ip_address_example")}
               autoComplete="off"
               value={meta?.local_ip_address}
               onChange={({ value }) =>
                 setMeta({ ...meta, local_ip_address: value })
               }
-              // error={ipadrdress_error}
+              error={
+                meta?.local_ip_address && !checkIfValidIP(meta.local_ip_address)
+                  ? t("invalid_ip_address")
+                  : undefined
+              }
             />
             <TextFormField
               name="username"
-              label="Username"
+              label={t("username")}
               autoComplete="off"
               value={accessKeyAttributes.username}
               onChange={({ value }) =>
@@ -174,7 +186,7 @@ export default function ConfigureCamera(props: Props) {
             />
             <TextFormField
               name="password"
-              label="Password"
+              label={t("password")}
               autoComplete="off"
               type="password"
               value={accessKeyAttributes.password}
@@ -190,7 +202,7 @@ export default function ConfigureCamera(props: Props) {
             />
             <TextFormField
               name="stream_uuid"
-              label="Stream UUID"
+              label={t("stream_uuid")}
               autoComplete="off"
               type="password"
               className="tracking-widest"
@@ -246,9 +258,9 @@ export default function ConfigureCamera(props: Props) {
                   <ListboxButton className="button-size-small button-shape-square button-secondary-default button-secondary-border relative inline-flex h-min min-w-32 cursor-pointer items-center gap-2 whitespace-pre pr-12 text-left text-sm font-medium outline-offset-1 transition-all duration-200 ease-in-out enabled:hover:shadow-md disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 md:min-w-40">
                     <span className="block truncate">
                       {!onvifPresets?.length
-                        ? "No presets"
+                        ? t("no_presets")
                         : (currentOnvifPreset?.name ??
-                          "Move to an ONVIF Preset")}
+                          t("move_to_onvif_preset"))}
                     </span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 mr-1 mt-1 flex items-center">
                       <CareIcon
@@ -285,12 +297,19 @@ export default function ConfigureCamera(props: Props) {
         </div>
       </div>
 
-      {linkedAssetBeds && (
+      {!linkedAssetBeds?.length && !unlinkedBeds?.length ? (
+        <div className="flex w-full items-center justify-center rounded-lg border-4 border-dashed border-secondary-500/50 py-24">
+          <span className="text-center text-lg font-semibold text-secondary-500">
+            <p>{t("location_beds_empty")}</p>
+            <p>{t("add_beds_to_configure_presets")}</p>
+          </span>
+        </div>
+      ) : (
         <div>
-          <h4 className="p-2">Manage Presets of Bed</h4>
+          <h4 className="p-2">{t("manage_bed_presets")}</h4>
           <div className="rounded-lg bg-secondary-100 pt-2 shadow">
             <nav className="flex overflow-x-auto bg-white">
-              {linkedAssetBeds.map((obj) => (
+              {linkedAssetBeds?.map((obj) => (
                 <span
                   key={obj.id}
                   className={classNames(
@@ -326,8 +345,8 @@ export default function ConfigureCamera(props: Props) {
               <>
                 <ConfirmDialog
                   show={showUnlinkConfirmation}
-                  title="Delete linked presets and unlink bed"
-                  description="This action will also delete all presets that are associated to this camera and bed."
+                  title={t("unlink_asset_bed_and_presets")}
+                  description={t("unlink_asset_bed_caution")}
                   action="Confirm"
                   variant="danger"
                   onClose={() => setShowUnlinkConfirmation(false)}
@@ -347,8 +366,8 @@ export default function ConfigureCamera(props: Props) {
                 />
                 <DialogModal
                   show={!!createPreset}
-                  title="Create new position preset"
-                  description="Creates a new position preset in Care from the current position of the camera for the given name"
+                  title={t("create_preset", { type: "position" })}
+                  description={t("create_position_preset_description")}
                   onClose={() => {
                     setCreatePreset(undefined);
                     setPresetName("");
@@ -360,7 +379,7 @@ export default function ConfigureCamera(props: Props) {
                     value={presetName}
                     onChange={({ value }) => setPresetName(value)}
                     errorClassName="hidden"
-                    placeholder="Specify an identifiable name for the new preset"
+                    placeholder={t("preset_name_placeholder")}
                   />
                   <div className="cui-form-button-group">
                     <Submit
@@ -391,7 +410,7 @@ export default function ConfigureCamera(props: Props) {
                       onClick={async () => {
                         const { data } = await operate({ type: "get_status" });
                         if (!data) {
-                          Error({ msg: "Unable to get current position." });
+                          Error({ msg: t("unable_to_get_current_position") });
                           return;
                         }
                         setCreatePreset(
@@ -400,7 +419,7 @@ export default function ConfigureCamera(props: Props) {
                       }}
                     >
                       <CareIcon icon="l-plus-circle" className="text-lg" />
-                      Add a preset
+                      {t("add_preset")}
                     </li>
                     {cameraPresetsQuery.data?.results.map((preset) => (
                       <li
@@ -409,7 +428,7 @@ export default function ConfigureCamera(props: Props) {
                       >
                         <DialogModal
                           show={editPreset?.preset === preset.id}
-                          title={`Manage preset ${preset.name}`}
+                          title={t("manage_preset", { name: preset.name })}
                           onClose={() => {
                             setEditPreset(undefined);
                             setPresetName("");
@@ -418,13 +437,13 @@ export default function ConfigureCamera(props: Props) {
                           <div className="py-2" />
                           <TextFormField
                             name="name"
-                            label="Name"
+                            label={t("name")}
                             className="w-full"
                             value={presetName || preset.name}
                             onChange={({ value }) => setPresetName(value)}
-                            placeholder="Specify an identifiable name for the new preset"
+                            placeholder={t("preset_name_placeholder")}
                           />
-                          <FieldLabel>Position</FieldLabel>
+                          <FieldLabel>{t("position")}</FieldLabel>
                           {editPreset?.position ? (
                             <>
                               <div className="grid grid-cols-3 p-1 font-mono text-sm line-through">
@@ -447,7 +466,7 @@ export default function ConfigureCamera(props: Props) {
                               </div>
                               <div className="flex items-center justify-between gap-4">
                                 <span className="text-sm text-secondary-700">
-                                  Unchanged
+                                  {t("unchanged")}
                                 </span>
                                 <ButtonV2
                                   size="small"
@@ -460,7 +479,9 @@ export default function ConfigureCamera(props: Props) {
                                     });
                                     if (!data) {
                                       Error({
-                                        msg: "Unable to get current position.",
+                                        msg: t(
+                                          "unable_to_get_current_position",
+                                        ),
                                       });
                                       return;
                                     }
@@ -501,7 +522,7 @@ export default function ConfigureCamera(props: Props) {
                                 if (!res?.ok) {
                                   return;
                                 }
-                                Success({ msg: "Preset deleted" });
+                                Success({ msg: t("preset_deleted") });
                                 cameraPresetsQuery.refetch();
                                 setEditPreset(undefined);
                                 setPresetName("");
@@ -512,12 +533,12 @@ export default function ConfigureCamera(props: Props) {
                                 icon="l-trash-alt"
                                 className="text-lg"
                               />
-                              Delete
+                              {t("delete")}
                             </ButtonV2>
                             <Submit
                               shadow={false}
                               border
-                              label="Update"
+                              label={t("update")}
                               onClick={async () => {
                                 const { res } = await request(
                                   FeedRoutes.updatePreset,
@@ -535,7 +556,7 @@ export default function ConfigureCamera(props: Props) {
                                 if (!res?.ok) {
                                   return;
                                 }
-                                Success({ msg: "Preset updated" });
+                                Success({ msg: t("preset_updated") });
                                 setEditPreset(undefined);
                                 setPresetName("");
                                 cameraPresetsQuery.refetch();
@@ -560,7 +581,7 @@ export default function ConfigureCamera(props: Props) {
                                 }
                               >
                                 <CareIcon icon="l-eye" />
-                                View
+                                {t("view")}
                               </ButtonV2>
                               <ButtonV2
                                 size="small"
@@ -572,14 +593,14 @@ export default function ConfigureCamera(props: Props) {
                                 }}
                               >
                                 <CareIcon icon="l-edit-alt" />
-                                Update
+                                {t("update")}
                               </ButtonV2>
                             </div>
                           </div>
                           {preset.position && (
                             <div>
                               <span className="rounded bg-primary-100 px-1 py-0.5 text-xs font-medium text-primary-500">
-                                Position
+                                {t("position")}
                               </span>
                               <div className="flex gap-4 p-1 font-mono text-xs">
                                 <span>X: {preset.position?.x}</span>
@@ -591,10 +612,10 @@ export default function ConfigureCamera(props: Props) {
                           {preset.boundary && (
                             <div>
                               <span className="rounded bg-primary-100 px-1 py-0.5 text-xs font-medium text-primary-500">
-                                Boundary
+                                {t("boundary")}
                               </span>
                               <div className="flex gap-4 p-1 font-mono text-xs">
-                                <span>X-: {preset.boundary.x0}</span>
+                                <span>X0: {preset.boundary.x0}</span>
                                 <span>Y0: {preset.boundary.y0}</span>
                                 <span>X1: {preset.boundary.x1}</span>
                                 <span>Y1: {preset.boundary.y1}</span>
@@ -616,7 +637,7 @@ export default function ConfigureCamera(props: Props) {
                   <div className="flex flex-col gap-2 pt-4 text-sm md:flex-row md:items-center md:gap-4">
                     <RecordMeta
                       time={selectedAssetBed.created_date}
-                      prefix="This camera was linked to this bed"
+                      prefix={t("camera_was_linked_to_bed")}
                     />
                     <ButtonV2
                       size="small"
@@ -625,7 +646,7 @@ export default function ConfigureCamera(props: Props) {
                       border
                       onClick={() => setShowUnlinkConfirmation(true)}
                     >
-                      Unlink this bed from this camera
+                      {t("unlink_camera_and_bed")}
                     </ButtonV2>
                   </div>
                 </div>
@@ -634,11 +655,8 @@ export default function ConfigureCamera(props: Props) {
             {selectedUnlinkedBed && (
               <div className="flex w-full items-center justify-center p-10 py-20 text-secondary-500">
                 <span className="text-center font-semibold">
-                  <p>This bed has not been linked to this camera.</p>
-                  <p>
-                    To create presets for this bed, you'll need to link the
-                    camera to the bed first.
-                  </p>
+                  <p>{t("bed_not_linked_to_camera")}</p>
+                  <p>{t("create_preset_prerequisite")}</p>
                   <ButtonV2
                     onClick={async () => {
                       const { res } = await request(routes.createAssetBed, {
@@ -648,13 +666,13 @@ export default function ConfigureCamera(props: Props) {
                         },
                       });
                       if (res?.ok) {
-                        Success({ msg: "Camera linked to bed successfully." });
+                        Success({ msg: t("camera_bed_link_success") });
                         assetBedsQuery.refetch();
                       }
                     }}
                     className="mt-6"
                   >
-                    Link bed to Camera
+                    {t("link_camera_and_bed")}
                   </ButtonV2>
                 </span>
               </div>

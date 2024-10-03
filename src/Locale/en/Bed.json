@@ -8,6 +8,9 @@
   "update_bed": "Update Bed",
   "bed_type": "Bed Type",
   "make_multiple_beds_label": "Do you want to make multiple beds?",
+  "location_beds_empty": "No beds available in this location",
+  "add_beds_to_configure_presets": "Add beds to this location to configure presets for them.",
   "number_of_beds": "Number of beds",
-  "number_of_beds_out_of_range_error": "Number of beds cannot be greater than 100"
+  "number_of_beds_out_of_range_error": "Number of beds cannot be greater than 100",
+  "manage_bed_presets": "Manage Presets of Bed"
 }

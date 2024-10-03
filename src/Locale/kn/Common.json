@@ -221,5 +221,5 @@
   "SORT_OPTIONS__bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ 1-N",
   "SORT_OPTIONS__-bed__name": "ಹಾಸಿಗೆ ಸಂಖ್ಯೆ N-1",
   "middleware_hostname": "ಮಿಡಲ್ವೇರ್ ಹೋಸ್ಟ್ ಹೆಸರು",
-  "local_ipaddress": "ಸ್ಥಳೀಯ IP ವಿಳಾಸ"
+  "local_ip_address": "ಸ್ಥಳೀಯ IP ವಿಳಾಸ"
 }
