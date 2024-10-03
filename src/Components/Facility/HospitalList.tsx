@@ -1,9 +1,3 @@
-import {
-  downloadFacility,
-  downloadFacilityCapacity,
-  downloadFacilityDoctors,
-  downloadFacilityTriage,
-} from "../../Redux/actions";
 import { lazy, useEffect } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
@@ -160,22 +154,22 @@ export const HospitalList = () => {
           exportItems={[
             {
               label: "Facilities",
-              action: downloadFacility,
+              route: routes.downloadFacility,
               filePrefix: "facilities",
             },
             {
               label: "Capacities",
-              action: downloadFacilityCapacity,
+              route: routes.downloadFacilityCapacity,
               filePrefix: "capacities",
             },
             {
               label: "Doctors",
-              action: downloadFacilityDoctors,
+              route: routes.downloadFacilityDoctors,
               filePrefix: "doctors",
             },
             {
               label: "Triages",
-              action: downloadFacilityTriage,
+              route: routes.downloadFacilityTriage,
               filePrefix: "triages",
             },
           ]}

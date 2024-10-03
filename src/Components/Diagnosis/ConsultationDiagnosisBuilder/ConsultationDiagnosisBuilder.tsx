@@ -80,11 +80,12 @@ interface EditDiagnosesProps {
   className?: string;
   value: ConsultationDiagnosis[];
   suggestions?: ICD11DiagnosisModel[];
+  consultationId?: string;
   onUpdate?: (diagnoses: ConsultationDiagnosis[]) => void;
 }
 
 export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
-  const consultation = useSlug("consultation");
+  const consultation = useSlug("consultation", props.consultationId);
   const [diagnoses, setDiagnoses] = useState(props.value);
   const [prefill, setPrefill] = useState<ICD11DiagnosisModel>();
 
