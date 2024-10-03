@@ -75,7 +75,7 @@ const SidebarItemBase = forwardRef(
               shrinked
                 ? "right-3 top-0.5 h-4 w-5 rounded-md text-xs"
                 : "inset-y-0 right-4 my-auto h-6 rounded-md px-2 text-xs"
-            } z-10 animate-pulse transition-all duration-200 ease-in-out`}
+            } duration-400 z-10 animate-pulse transition-all ease-in-out`}
           >
             {props.badgeCount > 9 ? "9+" : props.badgeCount}
           </span>
