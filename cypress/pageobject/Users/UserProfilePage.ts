@@ -42,8 +42,8 @@ export default class UserProfilePage {
     cy.get("#weekly_working_hours").click().clear().type(workinghours);
   }
 
-  typeDoctorQualification = (doctorQualification: string) => {
-    cy.get("#doctor_qualification").click().clear().type(doctorQualification);
+  typeQualification = (Qualification: string) => {
+    cy.get("#qualification").click().clear().type(Qualification);
   };
 
   typeDoctorYoE = (doctorYoE: string) => {
