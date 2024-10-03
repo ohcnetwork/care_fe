@@ -663,8 +663,8 @@ export const UserAdd = (props: UserProps) => {
               <TextFormField
                 {...field("qualification")}
                 required
-                label="Qualification"
-                placeholder="Qualification"
+                label={t("qualification")}
+                placeholder={t("qualification")}
               />
             )}
             {state.form.user_type === "Doctor" && (

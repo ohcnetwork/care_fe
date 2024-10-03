@@ -744,8 +744,8 @@ export default function UserProfile() {
                             {...fieldProps("qualification")}
                             required
                             className="col-span-6 sm:col-span-3"
-                            label="Qualification"
-                            placeholder="Qualification"
+                            label={t("qualification")}
+                            placeholder={t("qualification")}
                           />
                         )}
                         {states.form.user_type === "Doctor" && (

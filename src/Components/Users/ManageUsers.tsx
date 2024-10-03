@@ -281,7 +281,10 @@ export default function ManageUsers() {
                   {user.user_type === "Doctor" && (
                     <>
                       <div className="col-span-1">
-                        <UserDetails id="qualification" title="Qualification">
+                        <UserDetails
+                          id="qualification"
+                          title={t("qualification")}
+                        >
                           {user.qualification ? (
                             <span className="font-semibold">
                               {user.qualification}
@@ -345,7 +348,10 @@ export default function ManageUsers() {
                 >
                   {user.user_type === "Nurse" && (
                     <div className="row-span-1">
-                      <UserDetails id="qualification" title="Qualification">
+                      <UserDetails
+                        id="qualification"
+                        title={t("qualification")}
+                      >
                         {user.qualification ? (
                           <span className="font-semibold">
                             {user.qualification}
