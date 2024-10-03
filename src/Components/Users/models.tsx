@@ -1,4 +1,5 @@
 import { GENDER_TYPES, UserRole } from "../../Common/constants";
+import { FeatureFlag } from "../../Utils/featureFlags";
 import { DistrictModel, LocalBodyModel, StateModel } from "../Facility/models";
 
 interface HomeFacilityObjectModel {
@@ -44,6 +45,7 @@ export type UserModel = UserBareMinimum & {
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;
   weekly_working_hours?: string | null;
+  user_flags?: FeatureFlag[];
 };
 
 export type UserBaseModel = {
