@@ -103,10 +103,6 @@ const careConfig = {
   abdm: {
     enabled: (env.REACT_ENABLE_ABDM ?? "true") === "true",
   },
-
-  scribe: {
-    enabled: env.REACT_ENABLE_SCRIBE === "true",
-  },
 } as const;
 
 export default careConfig;
