@@ -142,7 +142,7 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
     cy.closeNotification();
     // create multiple bed capacity and verify card reflection
-    facilityPage.selectBedType("Oxygen beds");
+    facilityPage.selectBedType("Oxygen Supported Bed");
     facilityPage.fillTotalCapacity(bedCapacity);
     facilityPage.fillCurrentlyOccupied(bedOccupancy);
     facilityPage.clickbedcapcityaddmore();
@@ -216,7 +216,7 @@ describe("Facility Creation", () => {
     facilityPage.fillPhoneNumber(facilityNumber);
     facilityPage.submitForm();
     // add the bed capacity
-    facilityPage.selectBedType("Oxygen beds");
+    facilityPage.selectBedType("Oxygen Supported Bed");
     facilityPage.fillTotalCapacity(oxygenCapacity);
     facilityPage.fillCurrentlyOccupied(oxygenExpected);
     facilityPage.saveAndExitBedCapacityForm();

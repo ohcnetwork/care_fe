@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { handleUploadPercentage } from "./utils";
+import * as Notification from "../../Utils/Notifications.js";
 
 const uploadFile = (
   url: string,
@@ -19,6 +20,16 @@ const uploadFile = (
 
   xhr.onload = () => {
     onLoad(xhr);
+    if (400 <= xhr.status && xhr.status <= 499) {
+      const error = JSON.parse(xhr.responseText);
+      if (typeof error === "object" && !Array.isArray(error)) {
+        Object.values(error).forEach((msg) => {
+          Notification.Error({ msg: msg || "Something went wrong!" });
+        });
+      } else {
+        Notification.Error({ msg: error || "Something went wrong!" });
+      }
+    }
   };
 
   if (setUploadPercent != null) {
@@ -28,6 +39,9 @@ const uploadFile = (
   }
 
   xhr.onerror = () => {
+    Notification.Error({
+      msg: "Network Failure. Please check your internet connectivity.",
+    });
     onError();
   };
   xhr.send(file);

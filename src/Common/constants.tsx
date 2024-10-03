@@ -1,4 +1,7 @@
-import { PatientCategory } from "../Components/Facility/models";
+import {
+  PatientCategory,
+  SpokeRelationship,
+} from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
 import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
@@ -8,7 +11,6 @@ import {
   ConsentHIType,
   ConsentPurpose,
 } from "../Components/ABDM/types/consent";
-import careConfig from "@careConfig";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -217,30 +219,7 @@ export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-name" },
 ];
 
-const { kasp } = careConfig;
-
-const KASP_BED_TYPES = kasp.enabled
-  ? [
-      { id: 40, text: kasp.string + " Ordinary Beds" },
-      { id: 60, text: kasp.string + " Oxygen beds" },
-      { id: 50, text: kasp.string + " ICU (ICU without ventilator)" },
-      { id: 70, text: kasp.string + " ICU (ICU with ventilator)" },
-    ]
-  : [];
-
-export const BED_TYPES: OptionsType[] = [
-  { id: 1, text: "Ordinary Beds" },
-  { id: 150, text: "Oxygen beds" },
-  { id: 10, text: "ICU (ICU without ventilator)" },
-  { id: 20, text: "Ventilator (ICU with ventilator)" },
-  { id: 30, text: "Covid Ordinary Beds" },
-  { id: 120, text: "Covid Oxygen beds" },
-  { id: 110, text: "Covid ICU (ICU without ventilator)" },
-  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  ...KASP_BED_TYPES,
-  { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom" },
-];
+export const BED_TYPES = [100, 200, 300, 400, 500];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine" },
@@ -1539,6 +1518,17 @@ export const DEFAULT_ALLOWED_EXTENSIONS = [
   "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.oasis.opendocument.spreadsheet,application/pdf",
+];
+
+export const SPOKE_RELATION_TYPES = [
+  {
+    text: "Regular",
+    value: SpokeRelationship.REGULAR,
+  },
+  {
+    text: "Tele ICU",
+    value: SpokeRelationship.TELE_ICU,
+  },
 ];
 
 export const HumanBodyPaths = {

@@ -4,21 +4,24 @@ import {
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 import FormField, { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXPolicyModel } from "./models";
+
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { useDispatch } from "react-redux";
-import { HCXActions } from "../../Redux/actions";
-import { classNames } from "../../Utils/utils";
+import { HCXPolicyModel } from "./models";
 import InsurerAutocomplete from "./InsurerAutocomplete";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { classNames } from "../../Utils/utils";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import { useTranslation } from "react-i18next";
 import careConfig from "@careConfig";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
 export default function InsuranceDetailsBuilder(props: Props) {
+  const { t } = useTranslation();
+
   const field = useFormFieldPropsResolver(props);
-  const dispatch = useDispatch<any>();
 
   const handleUpdate = (index: number) => {
     return (event: FieldChangeEvent<unknown>) => {
@@ -41,15 +44,25 @@ export default function InsuranceDetailsBuilder(props: Props) {
   };
 
   const handleRemove = (index: number) => {
-    return () => {
-      field.handleChange(
-        (props.value || [])?.filter((obj, i) => {
-          if (obj.id && i === index) {
-            dispatch(HCXActions.policies.delete(obj.id));
-          }
-          return i !== index;
-        }),
-      );
+    return async () => {
+      const updatedPolicies = [...(props.value || [])];
+      const policyToRemove = updatedPolicies[index];
+
+      if (policyToRemove?.id) {
+        try {
+          await request(routes.hcx.policies.delete, {
+            pathParams: { external_id: policyToRemove.id },
+          });
+
+          updatedPolicies.splice(index, 1);
+          field.handleChange(updatedPolicies);
+        } catch (error) {
+          console.error("Failed to delete the policy", error);
+        }
+      } else {
+        updatedPolicies.splice(index, 1);
+        field.handleChange(updatedPolicies);
+      }
     };
   };
 
@@ -58,7 +71,7 @@ export default function InsuranceDetailsBuilder(props: Props) {
       <ul className="flex flex-col gap-3">
         {props.value?.length === 0 && (
           <span className="py-16 text-center text-secondary-500">
-            No insurance details added
+            {t("no_policy_added")}
           </span>
         )}
         {props.value?.map((policy, index) => (
@@ -93,6 +106,7 @@ const InsuranceDetailEditCard = ({
   handleRemove: () => void;
   gridView?: boolean;
 }) => {
+  const { t } = useTranslation();
   const seletedInsurer =
     policy.insurer_id && policy.insurer_name
       ? { code: policy.insurer_id, name: policy.insurer_name }
@@ -101,9 +115,9 @@ const InsuranceDetailEditCard = ({
   return (
     <div className="rounded-lg border-2 border-dashed border-secondary-200 p-4">
       <div className="flex items-center justify-between">
-        <FieldLabel className="my-auto !font-bold">Policy</FieldLabel>
+        <FieldLabel className="my-auto !font-bold">{t("policy")}</FieldLabel>
         <ButtonV2 variant="danger" type="button" ghost onClick={handleRemove}>
-          Delete
+          <span>{t("remove")}</span>
           <CareIcon icon="l-trash-alt" className="text-lg" />
         </ButtonV2>
       </div>
@@ -119,25 +133,25 @@ const InsuranceDetailEditCard = ({
         <TextFormField
           required
           name="subscriber_id"
-          label="Member ID"
-          placeholder="Eg. SUB001"
+          label={t("policy__subscriber_id")}
+          placeholder={t("policy__subscriber_id__example")}
           value={policy.subscriber_id}
           onChange={handleUpdate}
         />
         <TextFormField
           required
           name="policy_id"
-          label="Policy ID / Policy Name"
-          placeholder="Eg. P001"
+          label={t("policy__policy_id")}
+          placeholder={t("policy__policy_id__example")}
           value={policy.policy_id}
           onChange={handleUpdate}
         />
         {careConfig.hcx.enabled ? (
           <InsurerAutocomplete
             required
-            name="insurer_"
-            label="Insurer"
-            placeholder="Eg. GICOFINDIA"
+            name="insurer"
+            label={t("policy__insurer")}
+            placeholder={t("policy__insurer__example")}
             value={seletedInsurer}
             onChange={({ value }) =>
               handleUpdates({
@@ -150,15 +164,15 @@ const InsuranceDetailEditCard = ({
           <>
             <TextFormField
               name="insurer_id"
-              label="Insurer ID"
-              placeholder="Eg. GICOFINDIA"
+              label={t("policy__insurer_id")}
+              placeholder={t("policy__insurer_id__example")}
               value={policy.insurer_id}
               onChange={handleUpdate}
             />
             <TextFormField
               name="insurer_name"
-              label="Insurer Name"
-              placeholder="Eg. GICOFINDIA"
+              label={t("policy__insurer_name")}
+              placeholder={t("policy__insurer_name__example")}
               value={policy.insurer_name}
               onChange={handleUpdate}
             />
