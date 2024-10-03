@@ -162,7 +162,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
         <span className="tooltip-text tooltip-top rotate-[-180deg] text-xs">
-          {t(`minimize_screen`)}
+          {t(`minimize`)}
         </span>
       </div>
       <div
@@ -174,7 +174,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
         <span className="tooltip-text tooltip-bottom -translate-x-11 text-xs">
-          {t(`close_screen`)}
+          {t(`close`)}
         </span>
       </div>
     </div>
