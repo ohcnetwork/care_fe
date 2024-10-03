@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { AssetData } from "./AssetTypes";
+import { AssetData } from "../Assets/AssetTypes";
 import { getCameraConfig, makeAccessKey } from "../../Utils/transformUtils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import useOperateCamera from "../CameraFeed/useOperateCamera";
-import CameraFeed from "../CameraFeed/CameraFeed";
+import useOperateCamera from "./useOperateCamera";
+import CameraFeed from "./CameraFeed";
 import { useTranslation } from "react-i18next";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
@@ -15,11 +15,7 @@ import { useQueryParams } from "raviger";
 import useQuery from "../../Utils/request/useQuery";
 import { classNames, compareBy } from "../../Utils/utils";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import {
-  CameraPreset,
-  FeedRoutes,
-  GetStatusResponse,
-} from "../CameraFeed/routes";
+import { CameraPreset, FeedRoutes, GetStatusResponse } from "./routes";
 import DialogModal from "../Common/Dialog";
 import {
   Listbox,
@@ -39,7 +35,7 @@ interface Props {
 
 type OnvifPreset = { name: string; value: number };
 
-export default function ConfigureONVIFCamera(props: Props) {
+export default function ConfigureCamera(props: Props) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
 

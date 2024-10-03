@@ -6,7 +6,6 @@ import LocationManagement from "../../Components/Facility/LocationManagement";
 import CentralLiveMonitoring from "../../Components/CameraFeed/CentralLiveMonitoring";
 import { AuthorizeUserRoute } from "../../Utils/AuthorizeFor";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions";
-import CameraPresetsConfigure from "../../Components/CameraFeed/CameraPresetsConfigure";
 
 export default {
   "/facility/:facilityId/location": ({ facilityId }: any) => (
@@ -39,10 +38,6 @@ export default {
   }: any) => (
     <AddBedForm facilityId={facilityId} locationId={locationId} bedId={bedId} />
   ),
-  "/facility/:facilityId/location/:locationId/beds/:bedId/cameras": ({
-    locationId,
-    bedId,
-  }: any) => <CameraPresetsConfigure locationId={locationId} bedId={bedId} />,
   "/facility/:facilityId/live-monitoring": (props: any) => (
     <AuthorizeUserRoute userTypes={CameraFeedPermittedUserTypes}>
       <CentralLiveMonitoring {...props} />

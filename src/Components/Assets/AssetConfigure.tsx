@@ -1,6 +1,6 @@
 import Loading from "../Common/Loading";
 import HL7Monitor from "./AssetType/HL7Monitor";
-import ConfigureONVIFCamera from "./ConfigureONVIFCamera";
+import ConfigureCamera from "../CameraFeed/ConfigureCamera";
 import Page from "../Common/components/Page";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
@@ -61,7 +61,7 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
       }}
       backUrl={`/facility/${facilityId}/assets/${assetId}`}
     >
-      <ConfigureONVIFCamera asset={asset} onUpdated={() => refetch()} />
+      <ConfigureCamera asset={asset} onUpdated={() => refetch()} />
     </Page>
   );
 };

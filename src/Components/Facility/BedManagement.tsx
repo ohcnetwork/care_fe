@@ -117,18 +117,6 @@ const BedRow = (props: BedRowProps) => {
         </div>
         <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:flex-row">
           <ButtonV2
-            id="configure-linked-cameras"
-            href={`/facility/${facilityId}/location/${locationId}/beds/${id}/cameras`}
-            authorizeFor={NonReadOnlyUsers}
-            className="w-full lg:w-auto"
-            variant="secondary"
-            border
-            ghost
-          >
-            <CareIcon icon="l-video" className="text-lg" />
-            Manage linked cameras
-          </ButtonV2>
-          <ButtonV2
             id="edit-bed-button"
             href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
             authorizeFor={NonReadOnlyUsers}
