@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { LANGUAGE_NAMES } from "../../Locale/config";
 import { classNames } from "../../Utils/utils";
 import careConfig from "@careConfig";
+import { LANGUAGES } from "../../i18n";
 
 export const LanguageSelectorLogin = () => {
   const { i18n, t } = useTranslation();
@@ -18,7 +18,7 @@ export const LanguageSelectorLogin = () => {
     }
   };
 
-  const availableLocales = Object.keys(LANGUAGE_NAMES).filter(
+  const availableLocales = Object.keys(LANGUAGES).filter(
     (l) => l === "en" || careConfig.availableLocales?.includes(l),
   );
 
@@ -38,7 +38,7 @@ export const LanguageSelectorLogin = () => {
                 "text-primary-600 underline",
             )}
           >
-            {LANGUAGE_NAMES[e]}
+            {LANGUAGES[e]}
           </button>
         ))}
       </div>

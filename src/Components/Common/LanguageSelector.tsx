@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { LANGUAGE_NAMES } from "../../Locale/config";
 import { classNames } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import careConfig from "@careConfig";
+import { LANGUAGES } from "../../i18n";
 
 export const LanguageSelector = (props: any) => {
   const { i18n } = useTranslation();
@@ -20,7 +20,7 @@ export const LanguageSelector = (props: any) => {
     }
   };
 
-  const availableLocales = Object.keys(LANGUAGE_NAMES).filter(
+  const availableLocales = Object.keys(LANGUAGES).filter(
     (l) => l === "en" || careConfig.availableLocales?.includes(l),
   );
 
@@ -38,7 +38,7 @@ export const LanguageSelector = (props: any) => {
       >
         {availableLocales.map((e: string) => (
           <option key={e} value={e}>
-            {LANGUAGE_NAMES[e]}
+            {LANGUAGES[e]}
           </option>
         ))}
       </select>

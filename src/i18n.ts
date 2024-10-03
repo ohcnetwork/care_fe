@@ -8,6 +8,15 @@ import mr from "./Locale/mr";
 import kn from "./Locale/kn";
 import hi from "./Locale/hi";
 
+export const LANGUAGES: { [key: string]: any } = {
+  en: "English",
+  ta: "தமிழ்",
+  ml: "മലയാളം",
+  mr: "मराठी",
+  kn: "ಕನ್ನಡ",
+  hi: "हिन्दी",
+};
+
 const resources = {
   en: { translation: en },
   ta: { translation: ta },
