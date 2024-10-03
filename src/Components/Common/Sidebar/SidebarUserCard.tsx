@@ -36,7 +36,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
       </Link>
       <div
         onClick={signOut}
-        className="tooltip relative ml-1 mr-2 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:flex-none"
+        className="tooltip relative ml-1 mr-2 mt-4 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:mt-0 md:flex-none"
       >
         <div
           className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
