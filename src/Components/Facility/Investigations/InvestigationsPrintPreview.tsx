@@ -44,6 +44,7 @@ const InvestigationEntry = ({
 }: {
   investigation: Investigation;
 }) => {
+  const { t } = useTranslation();
   return (
     <tr className="border-y border-y-secondary-400 text-center text-xs transition-all duration-200 ease-in-out even:bg-secondary-100">
       <td className="whitespace px-6 py-4 text-left">
@@ -52,15 +53,15 @@ const InvestigationEntry = ({
         </p>
         <p className="flex flex-row gap-x-2">
           <span>
-            Min: {investigation.investigation_object.min_value || "---"}
-          </span>
-          <span>
-            {" "}
-            Max: {investigation.investigation_object.max_value || "---"}
+            {t("investigations__range")}:{" "}
+            {investigation.investigation_object.min_value || ""}
+            {investigation.investigation_object.min_value ? " - " : ""}
+            {investigation.investigation_object.max_value || ""}
           </span>
         </p>
         <p className="text-secondary-600">
-          Units: {investigation.investigation_object.unit || "---"}
+          {t("investigations__unit")}:{" "}
+          {investigation.investigation_object.unit || "---"}
         </p>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-xs text-secondary-700">
@@ -90,13 +91,15 @@ const InvestigationsPreviewTable = ({
   return (
     <table className="mb-8 mt-4 w-full border-collapse border-2 border-secondary-400">
       <caption className="mb-2 caption-top text-lg font-bold">
-        Investigations
+        {t("investigations")}
       </caption>
       <thead className="border-b-2 border-secondary-400 bg-secondary-50 px-6 text-center">
         <tr>
-          <th className="max-w-52 px-6 py-1 text-left">Name</th>
-          <th className="p-1">Value</th>
-          <th className="max-w-32 p-1">Ideal</th>
+          <th className="max-w-52 px-6 py-1 text-left">
+            {t("investigations__name")}
+          </th>
+          <th className="p-1">{t("investigations__result")}</th>
+          <th className="max-w-32 p-1"> {t("investigations__ideal_value")}</th>
         </tr>
       </thead>
       <tbody className="border-b-2 border-secondary-400">
@@ -166,7 +169,7 @@ export default function InvestigationPrintPreview(
             <>
               <span className="uppercase">{patient.name}</span> -{" "}
               {t(`GENDER__${patient.gender}`)},{" "}
-              {patientAgeInYears(patient).toString()}yrs
+              {patientAgeInYears(patient).toString()} {t("years")}
             </>
           )}
         </PatientDetail>

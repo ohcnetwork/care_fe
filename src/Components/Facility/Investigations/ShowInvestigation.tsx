@@ -119,9 +119,28 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
         Notification.Success({
           msg: "Investigation Updated successfully!",
         });
-        navigate(
-          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`,
+        const changedDict: any = {};
+        Object.values(state.changedFields).forEach(
+          (field: any) =>
+            (changedDict[field.id] = {
+              id: field.id,
+              value: field?.value || null,
+              notes: field?.notes || null,
+            }),
         );
+        const changedInitialValues: any = {};
+        Object.values(state.initialValues).forEach(
+          (field: any) =>
+            (changedInitialValues[field.id] = {
+              ...field,
+              value: changedDict[field.id].value,
+              notes: changedDict[field.id].notes,
+            }),
+        );
+        dispatch({
+          type: "set_initial_values",
+          initialValues: changedInitialValues,
+        });
       }
       return;
     } else {

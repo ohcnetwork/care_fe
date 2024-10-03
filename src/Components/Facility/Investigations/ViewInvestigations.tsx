@@ -70,7 +70,7 @@ export default function ViewInvestigations(props: {
                     ghost
                     border
                   >
-                    View
+                    {t("view")}
                   </ButtonV2>
                   <ButtonV2
                     onClick={() =>
@@ -82,7 +82,7 @@ export default function ViewInvestigations(props: {
                     border
                   >
                     <CareIcon icon="l-print" className="text-lg" />
-                    Print
+                    {t("print")}
                   </ButtonV2>
                 </div>
               </div>

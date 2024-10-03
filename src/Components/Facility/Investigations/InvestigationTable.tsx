@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
+  const { t } = useTranslation();
   return (
     <tr
       className={classNames(
@@ -20,11 +21,16 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
           {data?.investigation_object.name || "---"}
         </p>
         <p className="flex flex-row gap-x-2">
-          <span>Min: {data?.investigation_object.min_value || "---"}</span>
-          <span> Max: {data?.investigation_object.max_value || "---"}</span>
+          <span>
+            {t("investigations__range")}:{" "}
+            {data?.investigation_object.min_value || ""}
+            {data?.investigation_object.min_value ? " - " : ""}
+            {data?.investigation_object.max_value || ""}
+          </span>
         </p>
         <p className="text-secondary-600">
-          Units: {data?.investigation_object.unit || "---"}
+          {t("investigations__unit")}:{" "}
+          {data?.investigation_object.unit || "---"}
         </p>
       </td>
       <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-secondary-700">
@@ -58,6 +64,37 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
       <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-secondary-700">
         {data.investigation_object.ideal_value || "---"}
       </td>
+    </tr>
+  );
+};
+
+const HeadingRow = () => {
+  const { t } = useTranslation();
+  const commonClass =
+    "px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-800 print:text-sm print:font-normal print:tracking-normal print:text-black";
+  return (
+    <tr>
+      <th
+        key={t("investigations__name")}
+        scope="col"
+        className={`w-1/6 text-left ${commonClass}`}
+      >
+        {t("investigations__name")}
+      </th>
+      <th
+        key={t("investigations__result")}
+        scope="col"
+        className={`w-1/6 text-center ${commonClass}`}
+      >
+        {t("investigations__result")}
+      </th>
+      <th
+        key={t("investigations__ideal_value")}
+        scope="col"
+        className={`w-4/6 text-center ${commonClass}`}
+      >
+        {t("investigations__ideal_value")}
+      </th>
     </tr>
   );
 };
@@ -105,10 +142,13 @@ export const InvestigationTable = ({
           {showForm && (
             <ButtonV2
               variant="primary"
-              onClick={() => handleSave()}
+              onClick={() => {
+                handleSave();
+                setShowForm((prev) => !prev);
+              }}
               className="my-2 mr-2"
             >
-              Save
+              {t("save")}
             </ButtonV2>
           )}
         </div>
@@ -126,17 +166,7 @@ export const InvestigationTable = ({
         <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg print:overflow-visible print:border-none print:shadow-none">
           <table className="min-w-full divide-y divide-secondary-200 print:min-w-0 print:divide-none">
             <thead className="bg-secondary-50 print:bg-white">
-              <tr>
-                {["Name", "Value", "Ideal"].map((heading) => (
-                  <th
-                    key={heading}
-                    scope="col"
-                    className={`px-6 py-3 ${heading == "Ideal" ? "text-center" : "text-left"} text-xs font-semibold uppercase tracking-wider text-secondary-800 print:text-sm print:font-normal print:tracking-normal print:text-black`}
-                  >
-                    {heading}
-                  </th>
-                ))}
-              </tr>
+              <HeadingRow />
             </thead>
             <tbody className="print:divide-none">
               {filterTests.length > 0 ? (
