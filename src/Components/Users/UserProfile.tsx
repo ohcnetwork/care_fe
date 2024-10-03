@@ -149,7 +149,6 @@ export default function UserProfile() {
   } = useQuery(routes.currentUser, {
     onResponse: (result) => {
       if (!result || !result.res || !result.data) return;
-      console.log(result);
 
       const formData: EditForm = {
         firstName: result.data.first_name,

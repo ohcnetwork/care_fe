@@ -287,7 +287,9 @@ export default function ManageUsers() {
                               {user.qualification}
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -303,7 +305,9 @@ export default function ManageUsers() {
                               years
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -317,7 +321,9 @@ export default function ManageUsers() {
                               {user.doctor_medical_council_registration}
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -345,7 +351,9 @@ export default function ManageUsers() {
                             {user.qualification}
                           </span>
                         ) : (
-                          <span className="text-secondary-600">Unknown</span>
+                          <span className="text-secondary-600">
+                            {t("unknown")}
+                          </span>
                         )}
                       </UserDetails>
                     </div>
