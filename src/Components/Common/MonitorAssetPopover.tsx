@@ -10,13 +10,15 @@ import {
   Transition,
 } from "@headlessui/react";
 
-interface VitalsMonitorAssetPopoverProps {
+interface MonitorAssetPopoverProps {
   asset?: AssetData;
+  className?: string;
 }
 
-const VitalsMonitorAssetPopover = ({
+const MonitorAssetPopover = ({
   asset,
-}: VitalsMonitorAssetPopoverProps) => {
+  className,
+}: MonitorAssetPopoverProps) => {
   const { t } = useTranslation();
 
   return (
@@ -35,9 +37,9 @@ const VitalsMonitorAssetPopover = ({
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <PopoverPanel className="absolute z-[100] mt-2 w-56 -translate-x-1/3 translate-y-[-280px] rounded-md bg-white md:w-[350px] md:-translate-y-full md:translate-x-6">
+        <PopoverPanel className={className}>
           <div className="flex flex-col gap-3 p-5">
-            <div className="flex items-center gap-2 text-lg font-bold">
+            <div className="flex items-center gap-2 text-lg font-bold text-black">
               <CareIcon
                 icon={
                   (
@@ -51,13 +53,17 @@ const VitalsMonitorAssetPopover = ({
               <p>{asset?.name}</p>
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-sm md:text-base">Middleware Hostname:</p>
+              <p className="text-sm text-black md:text-base">
+                {t("middleware_hostname")}:
+              </p>
               <p className="break-words text-secondary-600">
                 {asset?.resolved_middleware?.hostname}
               </p>
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-sm md:text-base">Local IP Address:</p>
+              <p className="text-sm text-black md:text-base">
+                {t("local_ipaddress")}:
+              </p>
               <p className="break-words text-secondary-600">
                 {asset?.meta?.local_ip_address}
               </p>
@@ -81,4 +87,4 @@ const VitalsMonitorAssetPopover = ({
   );
 };
 
-export default VitalsMonitorAssetPopover;
+export default MonitorAssetPopover;
