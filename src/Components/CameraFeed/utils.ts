@@ -21,7 +21,7 @@ export const getStreamUrl = (asset: AssetData, token?: string) => {
     throw "getStreamUrl can be invoked only for ONVIF Assets";
   }
 
-  const config = getCameraConfig(asset);
+  const config = getCameraConfig(asset.meta);
   const host = asset.resolved_middleware?.hostname;
   const uuid = config.accessKey;
 
