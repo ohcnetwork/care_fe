@@ -232,8 +232,7 @@
   "SORT_OPTIONS__bed__name": "Bed No. 1-N",
   "SORT_OPTIONS__-bed__name": "Bed No. N-1",
   "full_screen": "Full screen",
-  "minimize_screen":"Minimize",
-  "close_screen":"Close",
+  "minimize":"Minimize",
   "send":"Send",
   "reply":"Reply"
 }
