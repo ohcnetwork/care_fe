@@ -158,10 +158,6 @@ const CoverImageEditModal = ({
     closeModal();
   };
 
-  const hasImage = !!(preview || facility.read_cover_image_url);
-  const imgSrc =
-    preview || `${facility.read_cover_image_url}?requested_on=${Date.now()}`;
-
   const dragProps = useDragAndDrop();
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -191,11 +187,11 @@ const CoverImageEditModal = ({
       <div className="flex h-full w-full items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
           <form className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
-            {hasImage ? (
+            {preview || facility.read_cover_image_url ? (
               <>
                 <div className="flex flex-1 items-center justify-center rounded-lg">
                   <img
-                    src={imgSrc}
+                    src={preview || facility.read_cover_image_url}
                     alt={facility.name}
                     className="h-full w-full object-cover"
                   />

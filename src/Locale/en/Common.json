@@ -232,4 +232,6 @@
   "SORT_OPTIONS__bed__name": "Bed No. 1-N",
   "SORT_OPTIONS__-bed__name": "Bed No. N-1",
   "years": "years"
+  "middleware_hostname": "Middleware Hostname",
+  "local_ipaddress": "Local IP Address"
 }
