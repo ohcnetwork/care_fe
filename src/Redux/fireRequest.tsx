@@ -142,7 +142,6 @@ export const fireRequest = (
 
           // 400 Bad Request Error
           if (error.response.status === 400 || error.response.status === 406) {
-            console.log(error.response.data.detaillocal_ip_address);
             Notification.BadRequest({
               errs: error.response.data,
             });
