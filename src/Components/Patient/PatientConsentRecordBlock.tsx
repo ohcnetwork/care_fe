@@ -103,6 +103,7 @@ export default function PatientConsentRecordBlockGroup(props: {
           file={file}
           editable={hasEditPermission(file)}
           associating_id={consentRecord.id}
+          archivable
         />
       ))}
     </div>

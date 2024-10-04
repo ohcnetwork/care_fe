@@ -12,7 +12,7 @@ describe("Manage User Profile", () => {
   const email = "test@example.com";
   const phone = "+918899887788";
   const workinghours = "8";
-  const doctorQualification = "MBBS";
+  const qualification = "MBBS";
   const doctorYoE = "10";
   const medicalCouncilRegistration = "1234567890";
 
@@ -40,7 +40,7 @@ describe("Manage User Profile", () => {
     userProfilePage.typePhone(phone);
     userProfilePage.typeWhatsApp(phone);
     userProfilePage.typeWorkingHours(workinghours);
-    userProfilePage.typeDoctorQualification(doctorQualification);
+    userProfilePage.typeQualification(qualification);
     userProfilePage.typeDoctorYoE(doctorYoE);
     userProfilePage.typeMedicalCouncilRegistration(medicalCouncilRegistration);
 

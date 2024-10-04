@@ -1,24 +1,28 @@
+import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
   ConsultationSuggestionValue,
   DISCHARGE_REASONS,
   PATIENT_NOTES_THREADS,
+  SHIFTING_CHOICES_PEACETIME,
   UserRole,
 } from "../../Common/constants";
-import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
-import { RouteToFacility } from "../Common/RouteToFacilitySelect";
-import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { FeatureFlag } from "../../Utils/featureFlags";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import {
   AssignedToObjectModel,
   BloodPressure,
   DailyRoundsModel,
+  FacilityNameModel,
   FileUploadModel,
+  PatientModel,
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
-import { UserBareMinimum } from "../Users/models";
+import { UserBareMinimum, UserModel } from "../Users/models";
+import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 
 export interface LocalBodyModel {
   id: number;
@@ -79,7 +83,32 @@ export interface FacilityModel {
   local_body?: number;
   ward?: number;
   pincode?: string;
+  facility_flags?: FeatureFlag[];
+  latitude?: string;
+  longitude?: string;
+  kasp_empanelled?: boolean;
+  patient_count?: string;
+  bed_count?: string;
 }
+
+export enum SpokeRelationship {
+  REGULAR = 1,
+  TELE_ICU = 2,
+}
+
+export interface FacilitySpokeModel {
+  id: string;
+  hub_object: FacilityNameModel;
+  spoke_object: FacilityNameModel;
+  relationship: SpokeRelationship;
+}
+
+export interface FacilitySpokeRequest {
+  spoke?: string;
+  relationship?: SpokeRelationship;
+}
+
+export interface FacilitySpokeErrors {}
 
 export interface CapacityModal {
   id?: number;
@@ -273,8 +302,6 @@ export interface CurrentBed {
   meta: Record<string, any>;
 }
 
-// Voluntarily made as `type` for it to achieve type-safety when used with
-// `useAsyncOptions<ICD11DiagnosisModel>`
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
@@ -548,6 +575,14 @@ export interface PatientNotesEditModel {
   note: string;
 }
 
+export interface PaitentNotesReplyModel {
+  id: string;
+  note: string;
+  user_type?: UserRole | "RemoteSpecialist";
+  created_by_object: BaseUserModel;
+  created_date: string;
+}
+
 export interface PatientNotesModel {
   id: string;
   note: string;
@@ -558,6 +593,7 @@ export interface PatientNotesModel {
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
+  reply_to_object?: PaitentNotesReplyModel;
 }
 
 export interface PatientNoteStateType {
@@ -581,13 +617,7 @@ export type IUserFacilityRequest = {
   facility: string;
 };
 
-export type FacilityRequest = Omit<FacilityModel, "location"> & {
-  latitude?: string;
-  longitude?: string;
-  kasp_empanelled?: boolean;
-  patient_count?: string;
-  bed_count?: string;
-};
+export type FacilityRequest = Omit<FacilityModel, "location" | "id">;
 
 export type InventorySummaryResponse = {
   id: string;
@@ -648,3 +678,50 @@ export type PatientTransferResponse = {
   date_of_birth: string;
   facility_object: BaseFacilityModel;
 };
+
+export interface ShiftingModel {
+  assigned_facility: string;
+  assigned_facility_external: string | null;
+  assigned_facility_object: FacilityModel;
+  created_date: string;
+  emergency: boolean;
+  external_id: string;
+  id: string;
+  modified_date: string;
+  origin_facility_object: FacilityModel;
+  patient: string;
+  patient_object: PatientModel;
+  shifting_approving_facility_object: FacilityModel | null;
+  status: (typeof SHIFTING_CHOICES_PEACETIME)[number]["text"];
+  assigned_to_object?: UserModel;
+}
+
+export interface ResourceModel {
+  approving_facility: string | null;
+  approving_facility_object: FacilityModel | null;
+  assigned_facility: string | null;
+  assigned_facility_object: FacilityModel | null;
+  assigned_quantity: number;
+  assigned_to: string | null;
+  assigned_to_object: UserModel | null;
+  category: string;
+  created_by: number;
+  created_by_object: UserModel;
+  created_date: string;
+  emergency: boolean;
+  id: string;
+  is_assigned_to_user: boolean;
+  last_edited_by: number;
+  last_edited_by_object: UserModel;
+  modified_date: string;
+  origin_facility: string;
+  origin_facility_object: FacilityModel;
+  priority: number | null;
+  reason: string;
+  refering_facility_contact_name: string;
+  refering_facility_contact_number: string;
+  requested_quantity: number;
+  status: string;
+  sub_category: string;
+  title: string;
+}

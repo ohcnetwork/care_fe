@@ -14,12 +14,21 @@ interface PatientNotesProps {
   setReload?: (value: boolean) => void;
   disableEdit?: boolean;
   thread: PatientNotesModel["thread"];
+  setReplyTo?: (value: PatientNotesModel | undefined) => void;
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
-  const { state, setState, reload, setReload, disableEdit, thread } = props;
+  const {
+    state,
+    setState,
+    reload,
+    setReload,
+    disableEdit,
+    thread,
+    setReplyTo,
+  } = props;
   const consultationId = useSlug("consultation") ?? "";
 
   const [isLoading, setIsLoading] = useState(true);
@@ -95,6 +104,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
       handleNext={handleNext}
       setReload={setReload}
       disableEdit={disableEdit}
+      setReplyTo={setReplyTo}
     />
   );
 };

@@ -1,10 +1,7 @@
 import { lazy, useState } from "react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import ListFilter from "./ListFilter";
-import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
-import { downloadResourceRequests } from "../../Redux/actions";
-import withScrolling from "react-dnd-scrolling";
 import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
 import useFilters from "../../Common/hooks/useFilters";
@@ -15,10 +12,14 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import SearchInput from "../Form/SearchInput";
 import Tabs from "../Common/components/Tabs";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import KanbanBoard from "../Kanban/Board";
+import { ResourceModel } from "../Facility/models";
+import { classNames, formatDateTime, formatName } from "../../Utils/utils";
+import dayjs from "dayjs";
 
-const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
-const ScrollingComponent = withScrolling("div");
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const COMPLETED = ["COMPLETED", "REJECTED"];
@@ -31,7 +32,6 @@ export default function BoardView() {
   });
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   // eslint-disable-next-line
-  const [isLoading, setIsLoading] = useState(false);
   const appliedFilters = formatFilter(qParams);
   const { t } = useTranslation();
 
@@ -41,18 +41,24 @@ export default function BoardView() {
   };
 
   return (
-    <div className="max-h[95vh] flex min-h-full max-w-[100vw] flex-col px-2 pb-2">
+    <div className="flex-col px-2 pb-2">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
-            title="Resource"
+            title={t("resource")}
             hideBack
             className="mx-3 md:mx-5"
             componentRight={
               <ExportButton
-                action={() =>
-                  downloadResourceRequests({ ...appliedFilters, csv: 1 })
-                }
+                action={async () => {
+                  const { data } = await request(
+                    routes.downloadResourceRequests,
+                    {
+                      query: { ...appliedFilters, csv: true },
+                    },
+                  );
+                  return data ?? null;
+                }}
                 filenamePrefix="resource_requests"
               />
             }
@@ -87,23 +93,135 @@ export default function BoardView() {
         </div>
       </div>
 
-      <BadgesList {...{ appliedFilters, FilterBadges }} />
-      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-0 pb-2 @container">
-        <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-0 pb-2">
-          {isLoading ? (
-            <Loading />
-          ) : (
-            boardFilter.map((board) => (
-              <ResourceBoard
-                key={board}
-                filterProp={qParams}
-                board={board}
-                formatFilter={formatFilter}
+      <KanbanBoard<ResourceModel>
+        title={<BadgesList {...{ appliedFilters, FilterBadges }} />}
+        sections={boardFilter.map((board) => ({
+          id: board,
+          title: (
+            <h3 className="flex h-8 items-center text-xs">
+              {board}{" "}
+              <ExportButton
+                action={async () => {
+                  const { data } = await request(
+                    routes.downloadResourceRequests,
+                    {
+                      query: {
+                        ...formatFilter({ ...qParams, status: board }),
+                        csv: true,
+                      },
+                    },
+                  );
+                  return data ?? null;
+                }}
+                filenamePrefix={`resource_requests_${board}`}
               />
-            ))
-          )}
-        </div>
-      </ScrollingComponent>
+            </h3>
+          ),
+          fetchOptions: (id) => ({
+            route: routes.listResourceRequests,
+            options: {
+              query: formatFilter({
+                ...qParams,
+                status: id,
+              }),
+            },
+          }),
+        }))}
+        onDragEnd={(result) => {
+          if (result.source.droppableId !== result.destination?.droppableId)
+            navigate(
+              `/resource/${result.draggableId}/update?status=${result.destination?.droppableId}`,
+            );
+        }}
+        itemRender={(resource) => (
+          <div className="flex flex-col justify-between gap-4">
+            <div>
+              <div className="flex justify-between p-4">
+                <div>
+                  <div className="text-xl font-bold capitalize">
+                    {resource.title}
+                  </div>
+                </div>
+                <div>
+                  {resource.emergency && (
+                    <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
+                      {t("emergency")}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <dl className="flex flex-wrap gap-1">
+                {(
+                  [
+                    {
+                      title: "origin_facility",
+                      icon: "l-plane-departure",
+                      data: resource.origin_facility_object.name,
+                    },
+                    {
+                      title: "resource_approving_facility",
+                      icon: "l-user-check",
+                      data: resource.approving_facility_object?.name,
+                    },
+                    {
+                      title: "assigned_facility",
+                      icon: "l-plane-arrival",
+                      data:
+                        resource.assigned_facility_object?.name ||
+                        t("yet_to_be_decided"),
+                    },
+                    {
+                      title: "last_modified",
+                      icon: "l-stopwatch",
+                      data: formatDateTime(resource.modified_date),
+                      className: dayjs()
+                        .subtract(2, "hours")
+                        .isBefore(resource.modified_date)
+                        ? "text-secondary-900"
+                        : "rounded bg-red-500 border border-red-600 text-white w-full font-bold",
+                    },
+                    {
+                      title: "assigned_to",
+                      icon: "l-user",
+                      data: resource.assigned_to_object
+                        ? formatName(resource.assigned_to_object) +
+                          " - " +
+                          resource.assigned_to_object.user_type
+                        : undefined,
+                    },
+                  ] as const
+                )
+                  .filter((d) => d.data)
+                  .map((datapoint, i) => (
+                    <div
+                      className={classNames(
+                        "mx-2 flex items-center gap-2 px-2 py-1",
+                        "className" in datapoint ? datapoint.className : "",
+                      )}
+                      title={t(datapoint.title)}
+                      key={i}
+                    >
+                      <dt className={""}>
+                        <CareIcon icon={datapoint.icon} className="text-xl" />
+                      </dt>
+                      <dd className="text-sm font-semibold">
+                        {datapoint.data}
+                      </dd>
+                    </div>
+                  ))}
+              </dl>
+            </div>
+            <div className="flex flex-col gap-2 px-4 pb-4">
+              <Link
+                href={`/resource/${resource.id}`}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-secondary-300 bg-secondary-200 p-2 text-sm font-semibold text-inherit transition-all hover:bg-secondary-300"
+              >
+                <CareIcon icon="l-eye" className="text-lg" /> {t("all_details")}
+              </Link>
+            </div>
+          </div>
+        )}
+      />
       <ListFilter {...advancedFilter} key={window.location.search} />
     </div>
   );
