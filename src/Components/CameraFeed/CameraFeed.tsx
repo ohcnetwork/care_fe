@@ -40,7 +40,6 @@ interface Props {
   shortcutsDisabled?: boolean;
   onMove?: () => void;
   operate: ReturnType<typeof useOperateCamera>["operate"];
-  feedDisabled?: boolean | string | React.ReactNode;
 }
 
 export default function CameraFeed(props: Props) {
@@ -159,10 +158,8 @@ export default function CameraFeed(props: Props) {
 
   // Start stream on mount
   useEffect(() => {
-    if (!props.feedDisabled) {
-      initializeStream();
-    }
-  }, [props.feedDisabled, initializeStream]);
+    initializeStream();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetStream = () => {
     setState("loading");
@@ -246,7 +243,7 @@ export default function CameraFeed(props: Props) {
               playerStatus !== "playing"
                 ? "pointer-events-none opacity-10"
                 : "opacity-100",
-              "transition-all duration-200 ease-in-out flex-1",
+              "flex-1 transition-all duration-200 ease-in-out",
             )}
           >
             {props.children}
@@ -276,17 +273,17 @@ export default function CameraFeed(props: Props) {
             )}
             {cameraUser && (
               <Menu>
-                <MenuButton className="h-8 w-8 rounded-full bg-primary-500 text-white flex items-center justify-center uppercase text-sm shadow">
+                <MenuButton className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-sm uppercase text-white shadow">
                   <span>{cameraUser.username[0]}</span>
                 </MenuButton>
 
                 <MenuItems
                   transition
                   anchor="bottom end"
-                  className="z-30 w-52 origin-top-right rounded-xl border  p-4 text-sm/6 transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 mt-2 min-w-full  bg-white py-1 shadow-lg ring-1 ring-black/5 sm:min-w-[250px] md:w-max "
+                  className="z-30 mt-2 w-52 min-w-full origin-top-right rounded-xl border bg-white p-4 py-1 text-sm/6 shadow-lg ring-1 ring-black/5 transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 sm:min-w-[250px] md:w-max"
                 >
                   <MenuItem>
-                    <div className="flex items-end justify-end flex-col w-full">
+                    <div className="flex w-full flex-col items-end justify-end">
                       <p className="font-semibold">
                         {[
                           cameraUser.first_name,
@@ -307,7 +304,7 @@ export default function CameraFeed(props: Props) {
 
                   {cameraUser.username !== user.username && (
                     <MenuItem>
-                      <div className="flex items-center justify-between flex-col w-full mt-3">
+                      <div className="mt-3 flex w-full flex-col items-center justify-between">
                         <p>Need access to move camera?</p>
                         <ButtonV2
                           size="small"
@@ -386,30 +383,11 @@ export default function CameraFeed(props: Props) {
             }
           })()}
 
-          {props.feedDisabled &&
-            (["string", "boolean"].includes(typeof props.feedDisabled) ? (
-              <NoFeedAvailable
-                message={
-                  typeof props.feedDisabled === "string"
-                    ? props.feedDisabled
-                    : "Feed Disabled"
-                }
-                className="text-warning-500"
-                icon="l-exclamation-triangle"
-                streamUrl=""
-              />
-            ) : (
-              props.feedDisabled
-            ))}
-
           {/* Video Player */}
           <VideoPlayer
             playerRef={playerRef}
             streamUrl={streamUrl}
-            className={classNames(
-              "max-h-[calc(100vh-40px)] w-full object-contain",
-              !!props.feedDisabled && "opacity-10",
-            )}
+            className="max-h-[calc(100vh-40px)] w-full object-contain"
             onPlay={() => {
               setPlayedOn(new Date());
               setState("playing");

@@ -59,7 +59,7 @@ export function TogglePrivacyButton({
   return (
     <ButtonV2
       size="small"
-      variant="secondary"
+      variant={isPrivacyEnabled ? "primary" : "secondary"}
       border
       tooltip={
         !iconOnly
@@ -89,7 +89,7 @@ export function TogglePrivacyButton({
         </span>
       )}
       <CareIcon
-        icon={isPrivacyEnabled ? "l-unlock" : "l-lock"}
+        icon={isPrivacyEnabled ? "l-eye" : "l-eye-slash"}
         className="text-lg"
       />
     </ButtonV2>

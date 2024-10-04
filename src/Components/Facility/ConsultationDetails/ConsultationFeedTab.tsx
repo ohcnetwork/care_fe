@@ -25,7 +25,6 @@ import StillWatching from "../../CameraFeed/StillWatching";
 import PrivacyToggle, {
   TogglePrivacyButton,
 } from "../../CameraFeed/PrivacyToggle";
-import NoFeedAvailable from "../../CameraFeed/NoFeedAvailable";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { t } = useTranslation();
@@ -155,6 +154,21 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
   const cannotSaveToPreset = !hasMoved || !preset?.id;
 
+  if (isPrivacyEnabled && props.consultationData.current_bed) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 rounded-lg border-4 border-dashed border-secondary-400">
+        <span className="text-center text-xl font-bold text-secondary-700">
+          The camera feed is currently disabled due to privacy settings.
+        </span>
+        <TogglePrivacyButton
+          value={isPrivacyEnabled}
+          consultationBedId={props.consultationData.current_bed.id}
+          onChange={setIsPrivacyEnabled}
+        />
+      </div>
+    );
+  }
+
   return (
     <StillWatching>
       <ConfirmDialog
@@ -207,25 +221,6 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
               result: "success",
             });
           }}
-          feedDisabled={
-            isPrivacyEnabled && (
-              <NoFeedAvailable
-                message={"The feed is disabled for privacy reasons"}
-                className="text-warning-500"
-                icon="l-exclamation-triangle"
-                streamUrl=""
-                customActions={
-                  props.consultationData.current_bed && (
-                    <TogglePrivacyButton
-                      value={isPrivacyEnabled}
-                      consultationBedId={props.consultationData.current_bed.id}
-                      onChange={setIsPrivacyEnabled}
-                    />
-                  )
-                }
-              />
-            )
-          }
         >
           <div className="flex items-center">
             {props.consultationData.current_bed && (
