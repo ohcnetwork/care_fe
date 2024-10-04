@@ -1,43 +1,12 @@
 import _ from "lodash-es";
-import { lazy, ReactNode } from "react";
+import { lazy } from "react";
 import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
 import PrintPreview from "../../../CAREUI/misc/PrintPreview";
 import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../../Common/Loading"));
-import {
-  classNames,
-  formatDate,
-  patientAgeInYears,
-} from "../../../Utils/utils";
 import { Investigation } from "./Reports/types";
 import careConfig from "@careConfig";
-
-const PatientDetail = ({
-  name,
-  children,
-  className,
-}: {
-  name: string;
-  children?: ReactNode;
-  className?: string;
-}) => {
-  return (
-    <div
-      className={classNames(
-        "inline-flex items-center whitespace-nowrap text-sm tracking-wide",
-        className,
-      )}
-    >
-      <div className="font-medium text-secondary-800">{name}: </div>
-      {children != null ? (
-        <span className="pl-2 font-bold">{children}</span>
-      ) : (
-        <div className="h-5 w-48 animate-pulse bg-secondary-200" />
-      )}
-    </div>
-  );
-};
 
 const InvestigationEntry = ({
   investigation,
@@ -162,40 +131,6 @@ export default function InvestigationPrintPreview(
           src={careConfig.mainLogo?.dark}
           alt="care logo"
         />
-      </div>
-      <div className="mb-6 grid grid-cols-8 gap-y-1.5 border-2 border-secondary-400 p-2">
-        <PatientDetail name="Patient" className="col-span-5">
-          {patient && (
-            <>
-              <span className="uppercase">{patient.name}</span> -{" "}
-              {t(`GENDER__${patient.gender}`)},{" "}
-              {patientAgeInYears(patient).toString()} {t("years")}
-            </>
-          )}
-        </PatientDetail>
-        <PatientDetail name="IP/OP No." className="col-span-3">
-          {consultation?.patient_no}
-        </PatientDetail>
-
-        <PatientDetail
-          name={
-            consultation
-              ? `${t(`encounter_suggestion__${consultation.suggestion}`)} on`
-              : ""
-          }
-          className="col-span-5"
-        >
-          {formatDate(consultation?.encounter_date)}
-        </PatientDetail>
-        <PatientDetail name="Bed" className="col-span-3">
-          {consultation?.current_bed?.bed_object.location_object?.name}
-          {" - "}
-          {consultation?.current_bed?.bed_object.name}
-        </PatientDetail>
-
-        <PatientDetail name="Allergy to medication" className="col-span-8">
-          {patient?.allergies ?? "None"}
-        </PatientDetail>
       </div>
       <InvestigationsPreviewTable investigations={investigations?.results} />
     </PrintPreview>
