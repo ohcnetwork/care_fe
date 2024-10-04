@@ -21,7 +21,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Figtree", "Inter", "sans-serif"],
       },
       colors: {
         green: colors.emerald,
