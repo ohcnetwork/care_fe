@@ -52,8 +52,8 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
             ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
               round.rounds_type!,
             )
-              ? `${consultationUrl}/daily-rounds/${round.id}`
-              : `${consultationUrl}/daily_rounds/${round.id}`
+              ? `${consultationUrl}/Log Update/${round.id}`
+              : `${consultationUrl}/Log Update/${round.id}`
           }
         >
           <CareIcon icon="l-eye" className="text-lg" />
@@ -74,8 +74,8 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
               "DOCTORS_LOG",
               "COMMUNITY_NURSES_LOG",
             ].includes(round.rounds_type!)
-              ? `${consultationUrl}/daily-rounds/${round.id}/update`
-              : `${consultationUrl}/daily_rounds/${round.id}/update`
+              ? `${consultationUrl}/Log Update/${round.id}/update`
+              : `${consultationUrl}/Log Update/${round.id}/update`
           }
         >
           <CareIcon icon="l-pen" className="text-lg" />

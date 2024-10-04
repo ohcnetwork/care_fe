@@ -665,7 +665,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 ),
                 value: 1,
               },
-              { text: "Daily Rounds", value: 0 },
+              { text: "Log Updates", value: 0 },
             ]}
             onTabChange={(v) => setShowEvents(!!v)}
             currentTab={showEvents ? 1 : 0}

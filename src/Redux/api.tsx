@@ -629,25 +629,25 @@ const routes = {
     method: "DELETE",
   },
   createDailyRounds: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    path: "/api/v1/consultation/{consultationId}/Log Update/",
     TBody: Type<DailyRoundsModel>(),
     TRes: Type<DailyRoundsModel>(),
     method: "POST",
   },
   updateDailyReport: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    path: "/api/v1/consultation/{consultationId}/Log Update/{id}/",
     TBody: Type<DailyRoundsModel>(),
     TRes: Type<DailyRoundsModel>(),
     method: "PUT",
   },
   updateDailyRound: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    path: "/api/v1/consultation/{consultationId}/Log Update/{id}/",
     method: "PATCH",
     TBody: Type<Partial<DailyRoundsModel>>(),
     TRes: Type<DailyRoundsModel>(),
   },
   getDailyReports: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    path: "/api/v1/consultation/{consultationId}/Log Update/",
     method: "GET",
     TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
   },
@@ -659,12 +659,12 @@ const routes = {
   },
 
   getDailyReport: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    path: "/api/v1/consultation/{consultationId}/Log Update/{id}/",
     method: "GET",
     TRes: Type<DailyRoundsModel>(),
   },
   dailyRoundsAnalyse: {
-    path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
+    path: "/api/v1/consultation/{consultationId}/Log Update/analyse/",
     method: "POST",
     TBody: Type<DailyRoundsBody>(),
     TRes: Type<DailyRoundsRes>(),

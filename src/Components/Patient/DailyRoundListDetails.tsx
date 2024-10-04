@@ -29,8 +29,8 @@ export const DailyRoundListDetails = (props: any) => {
 
   return (
     <Page
-      title={`Consultation Update #${id}`}
-      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
+      title={`Log Update #${id}`}
+      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/Log Updates`}
     >
       <div
         className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500"
@@ -49,7 +49,7 @@ export const DailyRoundListDetails = (props: any) => {
           <div>
             <div className="mt-2">
               <ButtonV2
-                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}
+                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/Log Update/${id}/update`}
               >
                 Update Details
               </ButtonV2>

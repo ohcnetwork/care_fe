@@ -129,7 +129,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Progress Note Log Update filed successfully");
     cy.closeNotification();
     // Verify the data reflection
-    cy.contains("button", "Daily Rounds").click();
+    cy.contains("button", "Log Updates").click();
     patientLogupdate.clickLogUpdateViewDetails(
       "#dailyround-entry",
       patientCategory,
@@ -179,7 +179,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.submitButton("Complete");
     cy.verifyNotification("Detailed Log Update filed successfully");
     cy.closeNotification();
-    cy.contains("button", "Daily Rounds").click();
+    cy.contains("button", "Log Update").click();
     patientLogupdate.clickLogUpdateViewDetails(
       "#dailyround-entry",
       patientCategory,
@@ -194,7 +194,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
     // Go back and edit the data on a third section
     patientLogupdate.clickGoBackConsultation();
-    cy.contains("button", "Daily Rounds").click();
+    cy.contains("button", "Log Update").click();
     patientLogupdate.clickLogUpdateUpdateLog(
       "#dailyround-entry",
       patientCategory,
@@ -209,7 +209,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Detailed Log Update filed successfully");
     cy.closeNotification();
     //Reverify the editted and newly added data
-    cy.contains("button", "Daily Rounds").click();
+    cy.contains("button", "Log Update").click();
     patientLogupdate.clickLogUpdateViewDetails(
       "#dailyround-entry",
       patientCategory,
@@ -284,7 +284,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Brief Update created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
-    cy.contains("button", "Daily Rounds").click();
+    cy.contains("button", "Log Update").click();
     patientLogupdate.clickLogUpdateViewDetails(
       "#dailyround-entry",
       patientCategory,
@@ -308,7 +308,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
     cy.verifyNotification("Brief Update updated successfully");
-    cy.contains("button", "Daily Rounds").click();
+    cy.contains("button", "Log Update").click();
     patientLogupdate.clickLogUpdateViewDetails(
       "#dailyround-entry",
       patientCategory,

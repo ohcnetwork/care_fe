@@ -101,14 +101,14 @@ export default {
       />
     ),
 
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/Log Update/:id":
     (params: {
       facilityId: string;
       patientId: string;
       consultationId: string;
       id: string;
     }) => <CriticalCarePreview {...params} />,
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/Log Update/:id/update":
     (params: {
       facilityId: string;
       patientId: string;

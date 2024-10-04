@@ -197,7 +197,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   setOpen(true);
                 } else {
                   navigate(
-                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`,
+                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/Log Update`,
                   );
                 }
               }}
