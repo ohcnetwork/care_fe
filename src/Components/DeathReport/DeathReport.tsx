@@ -113,7 +113,7 @@ export default function PrintDeathReport(props: { id: string }) {
         const data = {
           ...res.data,
           age:
-            patientAgeInYears(res.data!) == 0
+            patientAgeInYears(res.data!) === 0
               ? formatPatientAge(res.data!, true)
               : patientAgeInYears(res.data!),
           gender: patientGender,
@@ -376,7 +376,7 @@ export default function PrintDeathReport(props: { id: string }) {
                     <div>
                       <TextFormField
                         {...field("age")}
-                        type="text"
+                        type={field("age").value === 0 ? "number" : "text"}
                         label={t("age")}
                       />
                     </div>
