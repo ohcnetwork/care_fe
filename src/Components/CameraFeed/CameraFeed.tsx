@@ -16,6 +16,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import FeedControls from "./FeedControls";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import FeedWatermark from "./FeedWatermark";
+import MonitorAssetPopover from "../Common/MonitorAssetPopover";
 import NoFeedAvailable from "./NoFeedAvailable";
 import { UserBareMinimum } from "../Users/models";
 import VideoPlayer from "./videoPlayer";
@@ -24,7 +25,6 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import useFullscreen from "../../Common/hooks/useFullscreen";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import MonitorAssetPopover from "../Common/MonitorAssetPopover";
 
 interface Props {
   children?: React.ReactNode;
@@ -199,13 +199,26 @@ export default function CameraFeed(props: Props) {
       onReset={resetStream}
       onMove={async (data) => {
         setState("moving");
-        const { res } = await props.operate({ type: "relative_move", data });
+        const { res, error } = await props.operate({
+          type: "relative_move",
+          data,
+        });
         props.onMove?.();
         setTimeout(() => {
           setState((state) => (state === "moving" ? undefined : state));
         }, 4000);
+
         if (res?.status === 500) {
           setState("host_unreachable");
+        }
+
+        if (res?.status === 409 && error) {
+          const errorData = error as GetLockCameraResponse["result"];
+
+          Notification.Warn({
+            msg: errorData?.message,
+          });
+          setCameraUser(errorData?.camera_user);
         }
       }}
     />
