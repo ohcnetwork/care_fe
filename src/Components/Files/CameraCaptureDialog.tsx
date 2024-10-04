@@ -9,7 +9,7 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 export interface CameraCaptureDialogProps {
   show: boolean;
   onHide: () => void;
-  onCapture: (file: File) => void;
+  onCapture: (file: File, fileName: string) => void;
 }
 
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
@@ -41,7 +41,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       const myFile = new File([blob], `capture.${extension}`, {
         type: blob.type,
       });
-      onCapture(myFile);
+      onCapture(myFile, `capture.${extension}`);
     });
   };
 

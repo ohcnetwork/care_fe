@@ -35,7 +35,7 @@ describe("Patient Consultation in multiple combination", () => {
   const patientWeight = "70";
   const patientHeight = "170";
   const medicineOne = "DOLOLUP";
-  const patientIpNumber = Math.random().toString(36).substring(7);
+  const patientIpNumber = `${Math.floor(Math.random() * 90 + 10)}/${Math.floor(Math.random() * 9000 + 1000)}`;
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -94,7 +94,7 @@ describe("Patient Consultation in multiple combination", () => {
     cy.submitButton("Create Consultation");
     // the above submit should fail as IP number is missing
     patientConsultationPage.typePatientNumber(patientIpNumber);
-    patientConsultationPage.selectBed("Dummy Bed 1");
+    patientConsultationPage.selectBed("Dummy Bed 6");
     cy.submitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // Below code for the prescription module only present while creating a new consultation

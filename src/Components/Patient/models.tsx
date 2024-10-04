@@ -6,6 +6,7 @@ import {
   BLADDER_ISSUE_CHOICES,
   BOWEL_ISSUE_CHOICES,
   CONSCIOUSNESS_LEVEL,
+  DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
   HEARTBEAT_RHYTHM_CHOICES,
   HumanBodyRegion,
   INSULIN_INTAKE_FREQUENCY_OPTIONS,
@@ -20,6 +21,7 @@ import {
   RATION_CARD_CATEGORY,
   RESPIRATORY_SUPPORT,
   SLEEP_CHOICES,
+  SOCIOECONOMIC_STATUS_CHOICES,
   URINATION_FREQUENCY_CHOICES,
   VENTILATOR_MODE_OPTIONS,
 } from "../../Common/constants";
@@ -45,6 +47,13 @@ export interface AssignedToObjectModel {
   last_login?: string;
   alt_phone_number?: string;
   user_type: string;
+}
+
+export interface PatientMeta {
+  readonly id: number;
+  occupation?: Occupation;
+  socioeconomic_status?: (typeof SOCIOECONOMIC_STATUS_CHOICES)[number];
+  domestic_healthcare_support?: (typeof DOMESTIC_HEALTHCARE_SUPPORT_CHOICES)[number];
 }
 
 export interface PatientModel {
@@ -125,11 +134,7 @@ export interface PatientModel {
   created_by?: PerformedByModel;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
-  occupation?: Occupation;
-  meta_info?: {
-    id: number;
-    occupation: Occupation;
-  };
+  meta_info?: PatientMeta;
 }
 
 export interface SampleTestModel {
@@ -272,11 +277,10 @@ export const DailyRoundTypes = [
   "TELEMEDICINE",
 ] as const;
 
-export interface BloodPressure {
-  diastolic?: number;
-  mean?: number;
+export type BloodPressure = {
   systolic?: number;
-}
+  diastolic?: number;
+};
 
 export interface IPainScale {
   description: string;
@@ -306,7 +310,6 @@ export interface DailyRoundsModel {
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;
-  medication_given?: Array<any>;
   action?: string;
   review_interval?: number;
   id?: string;

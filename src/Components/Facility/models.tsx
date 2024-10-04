@@ -1,3 +1,4 @@
+import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
@@ -6,18 +7,19 @@ import {
   PATIENT_NOTES_THREADS,
   UserRole,
 } from "../../Common/constants";
-import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
-import { RouteToFacility } from "../Common/RouteToFacilitySelect";
-import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { FeatureFlag } from "../../Utils/featureFlags";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import {
   AssignedToObjectModel,
+  BloodPressure,
   DailyRoundsModel,
+  FacilityNameModel,
   FileUploadModel,
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
+import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
@@ -79,7 +81,32 @@ export interface FacilityModel {
   local_body?: number;
   ward?: number;
   pincode?: string;
+  facility_flags?: FeatureFlag[];
+  latitude?: string;
+  longitude?: string;
+  kasp_empanelled?: boolean;
+  patient_count?: string;
+  bed_count?: string;
 }
+
+export enum SpokeRelationship {
+  REGULAR = 1,
+  TELE_ICU = 2,
+}
+
+export interface FacilitySpokeModel {
+  id: string;
+  hub_object: FacilityNameModel;
+  spoke_object: FacilityNameModel;
+  relationship: SpokeRelationship;
+}
+
+export interface FacilitySpokeRequest {
+  spoke?: string;
+  relationship?: SpokeRelationship;
+}
+
+export interface FacilitySpokeErrors {}
 
 export interface CapacityModal {
   id?: number;
@@ -132,8 +159,6 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   new_discharge_reason?: (typeof DISCHARGE_REASONS)[number]["id"];
-  discharge_prescription?: NormalPrescription;
-  discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
@@ -275,8 +300,6 @@ export interface CurrentBed {
   meta: Record<string, any>;
 }
 
-// Voluntarily made as `type` for it to achieve type-safety when used with
-// `useAsyncOptions<ICD11DiagnosisModel>`
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
@@ -427,11 +450,7 @@ export const PrimaryParametersPlotFields = [
 ] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PrimaryParametersPlotRes = {
-  bp: {
-    mean?: number;
-    systolic?: number;
-    diastolic?: number;
-  };
+  bp: BloodPressure;
   pulse: number;
   temperature: string;
   resp: number;
@@ -554,6 +573,14 @@ export interface PatientNotesEditModel {
   note: string;
 }
 
+export interface PaitentNotesReplyModel {
+  id: string;
+  note: string;
+  user_type?: UserRole | "RemoteSpecialist";
+  created_by_object: BaseUserModel;
+  created_date: string;
+}
+
 export interface PatientNotesModel {
   id: string;
   note: string;
@@ -564,6 +591,7 @@ export interface PatientNotesModel {
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
+  reply_to_object?: PaitentNotesReplyModel;
 }
 
 export interface PatientNoteStateType {
@@ -587,13 +615,7 @@ export type IUserFacilityRequest = {
   facility: string;
 };
 
-export type FacilityRequest = Omit<FacilityModel, "location"> & {
-  latitude?: string;
-  longitude?: string;
-  kasp_empanelled?: boolean;
-  patient_count?: string;
-  bed_count?: string;
-};
+export type FacilityRequest = Omit<FacilityModel, "location" | "id">;
 
 export type InventorySummaryResponse = {
   id: string;

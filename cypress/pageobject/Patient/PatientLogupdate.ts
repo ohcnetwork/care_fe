@@ -5,13 +5,17 @@ class PatientLogupdate {
     cy.wait(2000);
   }
 
+  clickSwitchBed() {
+    cy.get("#switch-bed").click();
+  }
+
   selectRoundType(roundType: string) {
     cy.clickAndSelectOption("#rounds_type", roundType);
   }
 
   selectBed(bed: string) {
     cy.searchAndSelectOption("input[name='bed']", bed);
-    cy.submitButton("Update");
+    cy.get("#update-switchbed").click();
     cy.wait(2000);
   }
 

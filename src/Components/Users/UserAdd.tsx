@@ -44,7 +44,6 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
-
 interface UserProps {
   userId?: number;
 }
@@ -72,7 +71,7 @@ type UserForm = {
   state: number;
   district: number;
   local_body: number;
-  doctor_qualification: string | undefined;
+  qualification: string | undefined;
   doctor_experience_commenced_on: string | undefined;
   doctor_medical_council_registration: string | undefined;
 };
@@ -95,7 +94,7 @@ const initForm: UserForm = {
   state: 0,
   district: 0,
   local_body: 0,
-  doctor_qualification: undefined,
+  qualification: undefined,
   doctor_experience_commenced_on: undefined,
   doctor_medical_council_registration: undefined,
 };
@@ -325,7 +324,12 @@ export const UserAdd = (props: UserProps) => {
   }, [state.form.phone_number_is_whatsapp, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
-    setSelectedFacility(selected as FacilityModel[]);
+    const newSelectedFacilities = selected
+      ? Array.isArray(selected)
+        ? selected
+        : [selected]
+      : [];
+    setSelectedFacility(newSelectedFacilities as FacilityModel[]);
     const form = { ...state.form };
     form.facilities = selected
       ? (selected as FacilityModel[]).map((i) => i.id!)
@@ -367,7 +371,16 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
+        case "qualification":
+          if (
+            (state.form.user_type === "Doctor" ||
+              state.form.user_type === "Nurse") &&
+            !state.form[field]
+          ) {
+            errors[field] = t("field_required");
+            invalidForm = true;
+          }
+          return;
         case "doctor_medical_council_registration":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
             errors[field] = t("field_required");
@@ -548,9 +561,9 @@ export const UserAdd = (props: UserProps) => {
                 : state.form.alt_phone_number,
           ) ?? "",
         date_of_birth: dateQueryString(state.form.date_of_birth),
-        doctor_qualification:
-          state.form.user_type === "Doctor"
-            ? state.form.doctor_qualification
+        qualification:
+          state.form.user_type === "Doctor" || state.form.user_type == "Nurse"
+            ? state.form.qualification
             : undefined,
         doctor_experience_commenced_on:
           state.form.user_type === "Doctor"
@@ -645,15 +658,17 @@ export const UserAdd = (props: UserProps) => {
               optionValue={(o) => o.id}
             />
 
+            {(state.form.user_type === "Doctor" ||
+              state.form.user_type === "Nurse") && (
+              <TextFormField
+                {...field("qualification")}
+                required
+                label={t("qualification")}
+                placeholder={t("qualification")}
+              />
+            )}
             {state.form.user_type === "Doctor" && (
               <>
-                <TextFormField
-                  {...field("doctor_qualification")}
-                  required
-                  label="Qualification"
-                  placeholder="Qualification of the Doctor"
-                />
-
                 <TextFormField
                   {...field("doctor_experience_commenced_on")}
                   required

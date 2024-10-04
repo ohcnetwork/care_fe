@@ -35,12 +35,6 @@
 ```sh
 npm install
 ```
-#### Run the following command to generate the `supportedBrowsers.ts` file:
-
-```bash
-npm run supported-browsers
-```
-This script just generates regex expression for matching the list of compatible browsers, so that we can show a warning notification for unsupported browsers.
 
 #### 🏃 Run the app in development mode
 
@@ -75,6 +69,10 @@ Authenticate to staging API with any of the following credentials
 - Ensure the issue number is mentioned in the PR with a closing tag by following the PR body template. (Refer: [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword))
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
+
+### Translations
+
+All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 
 ### Testing
 

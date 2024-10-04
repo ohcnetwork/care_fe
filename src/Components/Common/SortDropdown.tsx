@@ -42,7 +42,7 @@ export default function SortDropdownMenu(props: Props) {
             />
           }
         >
-          <span>{t("SortOptions." + value)}</span>
+          <span>{t("SORT_OPTIONS__" + value)}</span>
         </DropdownItem>
       ))}
     </DropdownMenu>

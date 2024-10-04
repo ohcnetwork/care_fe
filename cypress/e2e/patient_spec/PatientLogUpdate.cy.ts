@@ -12,15 +12,14 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const patientLogupdate = new PatientLogupdate();
   const patientInvestigation = new PatientInvestigation();
   const patientPrescription = new PatientPrescription();
-  const domicilaryPatient = "Dummy Patient 11";
   const patientCategory = "Moderate";
   const additionalSymptoms = "Fever";
   const physicalExamination = "physical examination details";
   const otherExamination = "Other";
-  const patientSystolic = "119";
-  const patientDiastolic = "150";
-  const patientModifiedSystolic = "120";
-  const patientModifiedDiastolic = "145";
+  const patientSystolic = "149";
+  const patientDiastolic = "119";
+  const patientModifiedSystolic = "145";
+  const patientModifiedDiastolic = "120";
   const patientPulse = "152";
   const patientTemperature = "96.6";
   const patientRespiratory = "140";
@@ -33,6 +32,13 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const patientInsulinDosage = "56";
   const patientFluidBalance = "500";
   const patientNetBalance = "1000";
+  const patientOne = "Dummy Patient 9";
+  const bedOne = "Dummy Bed 5";
+  const patientTwo = "Dummy Patient 10";
+  const bedTwo = "Dummy Bed 2";
+  const patientThree = "Dummy Patient 8";
+  const bedThree = "Dummy Bed 3";
+  const domicilaryPatient = "Dummy Patient 11";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -45,15 +51,110 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Create a basic critical care log update for a admitted patient and edit it", () => {
-    patientPage.visitPatient("Dummy Patient 10");
-    patientLogupdate.clickLogupdate();
-    cy.verifyNotification("Please assign a bed to the patient");
-    patientLogupdate.selectBed("Dummy Bed 2");
+  it("Create a new TeleIcu log update for a domicilary care patient", () => {
+    patientPage.visitPatient(domicilaryPatient);
+    patientConsultationPage.clickEditConsultationButton();
+    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
+    cy.submitButton("Update Consultation");
+    cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
+    patientLogupdate.typePhysicalExamination(physicalExamination);
+    patientLogupdate.selectRoundType("Tele-medicine Log");
     patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.typeOtherDetails(otherExamination);
+    patientLogupdate.selectSymptomsDate("01012024");
+    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
+    patientLogupdate.typeSystolic(patientSystolic);
+    patientLogupdate.typeDiastolic(patientDiastolic);
+    patientLogupdate.typePulse(patientPulse);
+    patientLogupdate.typeTemperature(patientTemperature);
+    patientLogupdate.typeRespiratory(patientRespiratory);
+    patientLogupdate.typeSpo2(patientSpo2);
+    patientLogupdate.selectRhythm(patientRhythmType);
+    patientLogupdate.typeRhythm(patientRhythm);
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
+    cy.submitButton("Save");
+    cy.verifyNotification("Tele-medicine Log created successfully");
+  });
+
+  it("Create a new Progress log update for a admitted patient and edit it", () => {
+    patientPage.visitPatient(patientOne);
+    patientLogupdate.clickLogupdate();
+    cy.verifyNotification("Please assign a bed to the patient");
+    patientLogupdate.selectBed(bedOne);
+    cy.closeNotification();
+    patientLogupdate.clickLogupdate();
+    // Only will be using random non-unique progress note fields
+    patientLogupdate.selectRoundType("Progress Note");
+    patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.selectSymptomsDate("01012024");
+    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
+    patientLogupdate.typeTemperature(patientTemperature);
+    // add diagnosis
+    patientConsultationPage.selectPatientDiagnosis(
+      "1A06",
+      "add-icd11-diagnosis-as-differential",
+    );
+    // add a investigation for the patient
+    patientInvestigation.clickAddInvestigation();
+    patientInvestigation.selectInvestigation("Vitals (GROUP)");
+    patientInvestigation.clickInvestigationCheckbox();
+    patientInvestigation.selectInvestigationFrequency("6");
+    // add a medicine for the patient
+    patientPrescription.clickAddPrescription();
+    patientPrescription.interceptMedibase();
+    patientPrescription.selectMedicinebox();
+    patientPrescription.selectMedicine("DOLO");
+    patientPrescription.enterDosage("4");
+    patientPrescription.selectDosageFrequency("Twice daily");
+    cy.submitButton("Submit");
+    cy.verifyNotification("Medicine prescribed");
+    cy.closeNotification();
+    // Submit the doctors log update
+    cy.submitButton("Save and Continue");
+    cy.verifyNotification("Progress Note created successfully");
+    cy.closeNotification();
+    // modify the relevant critical care log update
+    patientLogupdate.selectCriticalCareSection("Neurological Monitoring");
+    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
+    cy.get("#left_pupil_light_reaction-option-FIXED").click();
+    cy.submitButton("Update Details");
+    cy.verifyNotification(
+      "Neurological Monitoring details succesfully updated.",
+    );
+    cy.closeNotification();
+    // Final Submission of the form
+    cy.submitButton("Complete");
+    cy.verifyNotification("Progress Note Log Update filed successfully");
+    cy.closeNotification();
+    // Verify the data reflection
+    cy.contains("button", "Daily Rounds").click();
+    patientLogupdate.clickLogUpdateViewDetails(
+      "#dailyround-entry",
+      patientCategory,
+    );
+    cy.verifyContentPresence("#consultation-preview", [
+      patientCategory,
+      patientTemperature,
+    ]);
+    // verify the edit functionality
+    patientLogupdate.clickUpdateDetail();
+    patientLogupdate.typeSystolic(patientModifiedSystolic);
+    patientLogupdate.typeDiastolic(patientModifiedDiastolic);
+    cy.submitButton("Continue");
+    cy.verifyNotification("Progress Note updated successfully");
+  });
+
+  it("Create a basic critical care log update for a admitted patient and edit it", () => {
+    patientPage.visitPatient(patientTwo);
+    patientLogupdate.clickLogupdate();
+    cy.verifyNotification("Please assign a bed to the patient");
+    patientLogupdate.selectBed(bedTwo);
+    cy.closeNotification();
+    patientLogupdate.clickLogupdate();
     patientLogupdate.selectRoundType("Detailed Update");
+    patientLogupdate.selectPatientCategory(patientCategory);
     cy.submitButton("Save and Continue");
     cy.verifyNotification("Detailed Update created successfully");
     cy.closeNotification();
@@ -127,88 +228,19 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
   });
 
-  it("Create a new Progress log update for a admitted patient and edit it", () => {
-    patientPage.visitPatient("Dummy Patient 12");
+  it("Create a new Normal update for a admission patient and verify its reflection in cards", () => {
+    patientPage.visitPatient(patientThree);
     patientLogupdate.clickLogupdate();
     cy.verifyNotification("Please assign a bed to the patient");
-    patientLogupdate.selectBed("Dummy Bed 4");
-    cy.closeNotification();
-    patientLogupdate.clickLogupdate();
-    // Only will be using random non-unique progress note fields
-    patientLogupdate.selectPatientCategory(patientCategory);
-    patientLogupdate.selectRoundType("Progress Note");
-    patientLogupdate.selectSymptomsDate("01/01/2024");
-    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
-    patientLogupdate.typeTemperature(patientTemperature);
-    // add diagnosis
-    patientConsultationPage.selectPatientDiagnosis(
-      "1A06",
-      "add-icd11-diagnosis-as-differential",
-    );
-    // add a investigation for the patient
-    patientInvestigation.clickAddInvestigation();
-    patientInvestigation.selectInvestigation("Vitals (GROUP)");
-    patientInvestigation.clickInvestigationCheckbox();
-    patientInvestigation.selectInvestigationFrequency("6");
-    // add a medicine for the patient
-    patientPrescription.clickAddPrescription();
-    patientPrescription.interceptMedibase();
-    patientPrescription.selectMedicinebox();
-    patientPrescription.selectMedicine("DOLO");
-    patientPrescription.enterDosage("4");
-    patientPrescription.selectDosageFrequency("Twice daily");
-    cy.submitButton("Submit");
-    cy.verifyNotification("Medicine prescribed");
-    cy.closeNotification();
-    // Submit the doctors log update
-    cy.submitButton("Save and Continue");
-    cy.verifyNotification("Progress Note created successfully");
-    cy.closeNotification();
-    // modify the relevant critical care log update
-    patientLogupdate.selectCriticalCareSection("Neurological Monitoring");
-    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.get("#left_pupil_light_reaction-option-FIXED").click();
-    cy.submitButton("Update Details");
-    cy.verifyNotification(
-      "Neurological Monitoring details succesfully updated.",
-    );
-    cy.closeNotification();
-    // Final Submission of the form
-    cy.submitButton("Complete");
-    cy.verifyNotification("Progress Note Log Update filed successfully");
-    cy.closeNotification();
-    // Verify the data reflection
-    cy.contains("button", "Daily Rounds").click();
-    patientLogupdate.clickLogUpdateViewDetails(
-      "#dailyround-entry",
-      patientCategory,
-    );
-    cy.verifyContentPresence("#consultation-preview", [
-      patientCategory,
-      patientTemperature,
-    ]);
-    // verify the edit functionality
-    patientLogupdate.clickUpdateDetail();
-    patientLogupdate.typeSystolic(patientModifiedSystolic);
-    patientLogupdate.typeDiastolic(patientModifiedDiastolic);
-    cy.submitButton("Continue");
-    cy.verifyNotification("Progress Note updated successfully");
-  });
-
-  it("Create a new TeleIcu log update for a domicilary care patient", () => {
-    patientPage.visitPatient("Dummy Patient 11");
-    patientConsultationPage.clickEditConsultationButton();
-    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
-    cy.submitButton("Update Consultation");
-    cy.verifyNotification("Consultation updated successfully");
+    patientLogupdate.selectBed(bedThree);
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
-    patientLogupdate.selectRoundType("Tele-medicine Log");
+    patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.selectSymptomsDate("01/01/2024");
     patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
-    patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.clickAddSymptom();
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
     patientLogupdate.typePulse(patientPulse);
@@ -219,7 +251,11 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Tele-medicine Log created successfully");
+    cy.wait(2000);
+    cy.verifyNotification("Brief Update created successfully");
+    // Verify the card content
+    cy.get("#basic-information").scrollIntoView();
+    cy.verifyContentPresence("#encounter-symptoms", [additionalSymptoms]);
   });
 
   it("Create a new Normal Log update for a domicilary care patient and edit it", () => {
@@ -281,36 +317,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
       patientModifiedDiastolic,
       patientModifiedSystolic,
     ]);
-  });
-
-  it("Create a new Normal update for a admission patient and verify its reflection in cards", () => {
-    patientPage.visitPatient("Dummy Patient 13");
-    patientLogupdate.clickLogupdate();
-    cy.verifyNotification("Please assign a bed to the patient");
-    patientLogupdate.selectBed("Dummy Bed 6");
-    cy.closeNotification();
-    patientLogupdate.clickLogupdate();
-    patientLogupdate.typePhysicalExamination(physicalExamination);
-    patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.selectSymptomsDate("01/01/2024");
-    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
-    patientLogupdate.clickAddSymptom();
-    patientLogupdate.selectPatientCategory(patientCategory);
-    patientLogupdate.typeSystolic(patientSystolic);
-    patientLogupdate.typeDiastolic(patientDiastolic);
-    patientLogupdate.typePulse(patientPulse);
-    patientLogupdate.typeTemperature(patientTemperature);
-    patientLogupdate.typeRespiratory(patientRespiratory);
-    patientLogupdate.typeSpo2(patientSpo2);
-    patientLogupdate.selectRhythm(patientRhythmType);
-    patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.submitButton("Save");
-    cy.wait(2000);
-    cy.verifyNotification("Brief Update created successfully");
-    // Verify the card content
-    cy.get("#basic-information").scrollIntoView();
-    cy.verifyContentPresence("#encounter-symptoms", [additionalSymptoms]);
   });
 
   it("Create a Normal Log update to verify MEWS Score Functionality", () => {

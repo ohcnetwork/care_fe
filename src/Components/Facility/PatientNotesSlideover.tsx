@@ -8,11 +8,12 @@ import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { PatientNoteStateType } from "./models";
+import { PatientNoteStateType, PaitentNotesReplyModel } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
+import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard.js";
 import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
 import { Link } from "raviger";
 import { t } from "i18next";
@@ -36,6 +37,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (notificationSubscriptionState === "unsubscribed") {
@@ -79,6 +83,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         note: noteField,
         consultation: consultationId,
         thread,
+        reply_to: reply_to?.id,
       },
     });
     if (res?.status === 201) {
@@ -86,6 +91,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setNoteField("");
       setState({ ...state, cPage: 1 });
       setReload(true);
+      setReplyTo(undefined);
     }
   };
 
@@ -216,36 +222,42 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             setReload={setReload}
             disableEdit={!patientActive}
             thread={thread}
+            setReplyTo={setReplyTo}
           />
-          <div className="relative mx-4 flex items-center">
-            <AutoExpandingTextInputFormField
-              id="discussion_notes_textarea"
-              maxHeight={160}
-              rows={2}
-              name="note"
-              value={noteField}
-              onChange={(e) => setNoteField(e.value)}
-              className="w-full grow"
-              errorClassName="hidden"
-              innerClassName="pr-10"
-              placeholder={t("notes_placeholder")}
-              disabled={!patientActive}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-            />
-            <ButtonV2
-              id="add_doctor_note_button"
-              onClick={onAddNote}
-              border={false}
-              className="absolute right-2"
-              ghost
-              size="small"
-              disabled={!patientActive}
-              authorizeFor={NonReadOnlyUsers}
-            >
-              <CareIcon icon="l-message" className="text-lg" />
-            </ButtonV2>
-          </div>
+          <DoctorNoteReplyPreviewCard
+            parentNote={reply_to}
+            cancelReply={() => setReplyTo(undefined)}
+          >
+            <div className="relative mx-4 flex items-center">
+              <AutoExpandingTextInputFormField
+                id="discussion_notes_textarea"
+                maxHeight={160}
+                rows={2}
+                name="note"
+                value={noteField}
+                onChange={(e) => setNoteField(e.value)}
+                className="w-full grow"
+                errorClassName="hidden"
+                innerClassName="pr-10"
+                placeholder={t("notes_placeholder")}
+                disabled={!patientActive}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+              />
+              <ButtonV2
+                id="add_doctor_note_button"
+                onClick={onAddNote}
+                border={false}
+                className="absolute right-2"
+                ghost
+                size="small"
+                disabled={!patientActive}
+                authorizeFor={NonReadOnlyUsers}
+              >
+                <CareIcon icon="l-message" className="text-lg" />
+              </ButtonV2>
+            </div>
+          </DoctorNoteReplyPreviewCard>
         </div>
       )}
     </div>

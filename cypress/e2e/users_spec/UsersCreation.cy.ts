@@ -149,7 +149,7 @@ describe("User Creation", () => {
     userCreationPage.setInputDate("date_of_birth", "date-input", "25/08/1999");
     userCreationPage.selectDropdownOption("user_type", "Doctor");
     userCreationPage.typeIntoElementById("c_password", "Test@123");
-    userCreationPage.typeIntoElementById("doctor_qualification", "MBBS");
+    userCreationPage.typeIntoElementById("qualification", "MBBS");
     userCreationPage.typeIntoElementById("doctor_experience_commenced_on", "2");
     userCreationPage.typeIntoElementById(
       "doctor_medical_council_registration",
@@ -172,7 +172,7 @@ describe("User Creation", () => {
       "home_facility",
       "Dummy Shifting Center",
     );
-    userCreationPage.verifyElementContainsText("doctor-qualification", "MBBS");
+    userCreationPage.verifyElementContainsText("qualification", "MBBS");
     userCreationPage.verifyElementContainsText("doctor-experience", "2");
     userCreationPage.verifyElementContainsText(
       "medical-council-registration",
@@ -183,6 +183,7 @@ describe("User Creation", () => {
   it("create new user form throwing mandatory field error", () => {
     userCreationPage.clickElementById("addUserButton");
     userCreationPage.clickElementById("submit");
+    cy.wait(2000);
     userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
   });
 

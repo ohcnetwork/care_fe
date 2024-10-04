@@ -234,7 +234,7 @@ const Beds = (props: BedsProps) => {
           </div>
           <div className="mt-4 flex flex-row justify-end">
             <div>
-              <ButtonV2 variant="primary" type="submit">
+              <ButtonV2 variant="primary" type="submit" id="update-switchbed">
                 <CareIcon icon="l-bed" className="text-xl" />
                 Update
               </ButtonV2>

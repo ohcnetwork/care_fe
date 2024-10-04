@@ -98,6 +98,7 @@ describe("Asset Tab", () => {
 
   it("Export asset", () => {
     assetPage.selectassetimportbutton();
+    cy.wait(2000);
     assetPage.selectjsonexportbutton();
     assetPage.selectassetimportbutton();
     assetPage.selectcsvexportbutton();
