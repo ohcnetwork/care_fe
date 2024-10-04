@@ -180,7 +180,7 @@ export const Login = (props: { forgot?: boolean }) => {
               rel="noopener noreferrer"
             >
               <img
-                src={customLogoAlt?.light ?? "/images/care_logo_gray.svg"}
+                src={customLogoAlt?.light ?? "/images/ohc_logo_light.svg"}
                 className="h-8"
                 alt="Open Healthcare Network logo"
               />
