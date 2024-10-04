@@ -8,6 +8,7 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import {
   formatDateTime,
+  formatPatientAge,
   humanizeStrings,
   patientAgeInYears,
 } from "../../Utils/utils";
@@ -111,7 +112,10 @@ export default function PrintDeathReport(props: { id: string }) {
         const patientComorbidities = getPatientComorbidities(res.data);
         const data = {
           ...res.data,
-          age: patientAgeInYears(res.data!),
+          age:
+            patientAgeInYears(res.data!) == 0
+              ? formatPatientAge(res.data!, true)
+              : patientAgeInYears(res.data!),
           gender: patientGender,
           address: patientAddress,
           comorbidities: patientComorbidities,
@@ -372,7 +376,7 @@ export default function PrintDeathReport(props: { id: string }) {
                     <div>
                       <TextFormField
                         {...field("age")}
-                        type="number"
+                        type="text"
                         label={t("age")}
                       />
                     </div>
