@@ -38,9 +38,9 @@ const careConfig = {
   customLogo: logo(env.REACT_CUSTOM_LOGO),
   customLogoAlt: logo(env.REACT_CUSTOM_LOGO_ALT),
   customDescription: env.REACT_CUSTOM_DESCRIPTION,
-  availableLocales: (env.REACT_AVAILABLE_LOCALES || "")
+  availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
-    .map((l) => l.trim().toLowerCase()),
+    .map((l) => l.trim()),
 
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",

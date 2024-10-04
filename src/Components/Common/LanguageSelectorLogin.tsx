@@ -18,8 +18,8 @@ export const LanguageSelectorLogin = () => {
     }
   };
 
-  const availableLocales = Object.keys(LANGUAGES).filter(
-    (l) => l === "en" || careConfig.availableLocales?.includes(l),
+  const availableLocales = Object.keys(LANGUAGES).filter((l) =>
+    careConfig.availableLocales?.includes(l),
   );
 
   return (
