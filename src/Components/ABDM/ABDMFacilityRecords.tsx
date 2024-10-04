@@ -106,7 +106,10 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               consent.expiry,
                           ) < new Date() ? (
                             <p className="flex flex-col items-center gap-1">
-                              {formatDateTime(consent.expiry)}
+                              {formatDateTime(
+                                consent.consent_artefacts?.[0]?.expiry ??
+                                  consent.expiry,
+                              )}
                               <span className="text-sm text-secondary-600">
                                 {t("expired_on")}
                               </span>
