@@ -177,7 +177,7 @@
   "treating_doctor": "Treating Doctor",
   "hubs": "Hub Facilities",
   "spokes": "Spoke Facilities",
-  "add_spoke" : "Add Spoke Facility",
+  "add_spoke": "Add Spoke Facility",
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
   "ration_card__APL": "APL",
@@ -233,5 +233,6 @@
   "SORT_OPTIONS__-bed__name": "Bed No. N-1",
   "years": "years",
   "middleware_hostname": "Middleware Hostname",
-  "local_ipaddress": "Local IP Address"
+  "local_ipaddress": "Local IP Address",
+  "qualification": "Qualification"
 }
