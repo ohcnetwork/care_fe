@@ -75,7 +75,7 @@ const Form = <T extends FormDetails>({
     <form
       onSubmit={handleSubmit}
       className={classNames(
-        "mx-auto w-full rounded bg-white",
+        "mx-auto w-full",
         !props.noPadding && "px-8 py-5 md:px-16 md:py-11",
         props.className,
       )}

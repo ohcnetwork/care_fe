@@ -4,6 +4,7 @@ import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Button } from "@/Components/ui/button";
 
 export interface PageTitleProps {
   title: string;
@@ -44,6 +45,7 @@ export default function PageTitle({
   changePageMetadata = true,
 }: PageTitleProps) {
   const divRef = useRef<any>();
+  const { goBack } = useAppHistory();
 
   useEffect(() => {
     if (divRef.current && focusOnLoad) {
@@ -51,18 +53,18 @@ export default function PageTitle({
     }
   }, [divRef, focusOnLoad]);
 
-  const { goBack } = useAppHistory();
-
   return (
     <div
       ref={divRef}
-      className={isInsidePage ? "" : `mb-2 pt-4 md:mb-4 ${className}`}
+      className={isInsidePage ? "" : `mb-2 md:mb-4 ${className}`}
     >
-      {changePageMetadata && <PageHeadTitle title={title} />}
-      <div className={classNames("flex items-center", justifyContents)}>
-        <div className="flex items-center">
-          {!hideBack && (
-            <button
+      <div className="flex flex-col items-start md:flex-row md:items-center">
+        {!hideBack && (
+          <>
+            <Button
+              variant="link"
+              className="px-1 text-sm font-light text-gray-500 underline underline-offset-2"
+              size="xs"
               onClick={() => {
                 if (onBackClick && onBackClick() === false) return;
                 goBack(backUrl);
@@ -70,16 +72,29 @@ export default function PageTitle({
             >
               <CareIcon
                 icon="l-angle-left"
-                className="border-box mr-1 rounded-md text-5xl hover:bg-secondary-200"
-              />{" "}
-            </button>
-          )}
-          <h2 className="ml-0 text-2xl font-semibold leading-tight">{title}</h2>
+                className="-ml-2 h-4 text-gray-400"
+              />
+              <span className="pr-1">Back</span>
+            </Button>
+            <span className="hidden pr-1 text-xs font-light text-gray-400 no-underline md:block">
+              |
+            </span>
+          </>
+        )}
+        {breadcrumbs && (
+          <Breadcrumbs
+            replacements={crumbsReplacements}
+            className="flex-grow"
+          />
+        )}
+      </div>
+      {changePageMetadata && <PageHeadTitle title={title} />}
+
+      <div className={classNames("mt-2 flex items-center", justifyContents)}>
+        <div className="flex items-center">
+          <h2 className="ml-0 text-2xl leading-tight">{title}</h2>
         </div>
         {componentRight}
-      </div>
-      <div className={hideBack ? "my-2" : "my-2 ml-8"}>
-        {breadcrumbs && <Breadcrumbs replacements={crumbsReplacements} />}
       </div>
     </div>
   );
