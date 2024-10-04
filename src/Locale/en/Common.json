@@ -235,5 +235,6 @@
   "local_ip_address": "Local IP Address",
   "unchanged": "Unchanged",
   "position": "Position",
-  "boundary": "Boundary"
+  "boundary": "Boundary",
+  "qualification": "Qualification"
 }

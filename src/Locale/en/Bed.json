@@ -12,5 +12,7 @@
   "add_beds_to_configure_presets": "Add beds to this location to configure presets for them.",
   "number_of_beds": "Number of beds",
   "number_of_beds_out_of_range_error": "Number of beds cannot be greater than 100",
-  "manage_bed_presets": "Manage Presets of Bed"
+  "manage_bed_presets": "Manage Presets of Bed",
+  "bed_created_notification_one": "{{count}} Bed created successfully",
+  "bed_created_notification_other": "{{count}} Beds created successfully"
 }
