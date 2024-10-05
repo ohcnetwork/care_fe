@@ -76,6 +76,6 @@
   "procedure_suggestions": "Procedure Suggestions",
   "patient_notes_thread__Doctors": "Doctor's Discussions",
   "patient_notes_thread__Nurses": "Nurse's Discussions",
-  "width_label__cm": "Width (cm)",
-  "length_label__cm": "Length (cm)"
+  "width": "Width ({{unit}})",
+  "length": "Length ({{unit}})"
 }
