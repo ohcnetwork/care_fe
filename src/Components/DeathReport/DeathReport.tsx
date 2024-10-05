@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from "react";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useState } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -10,7 +9,6 @@ import {
   formatDateTime,
   formatPatientAge,
   humanizeStrings,
-  patientAgeInYears,
 } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
@@ -112,10 +110,7 @@ export default function PrintDeathReport(props: { id: string }) {
         const patientComorbidities = getPatientComorbidities(res.data);
         const data = {
           ...res.data,
-          age:
-            patientAgeInYears(res.data!) === 0
-              ? formatPatientAge(res.data!, true)
-              : patientAgeInYears(res.data!),
+          age: formatPatientAge(res.data!, true),
           gender: patientGender,
           address: patientAddress,
           comorbidities: patientComorbidities,
@@ -376,7 +371,7 @@ export default function PrintDeathReport(props: { id: string }) {
                     <div>
                       <TextFormField
                         {...field("age")}
-                        type={field("age").value === 0 ? "number" : "text"}
+                        type="text"
                         label={t("age")}
                       />
                     </div>
