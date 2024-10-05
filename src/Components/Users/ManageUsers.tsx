@@ -188,7 +188,6 @@ export default function ManageUsers() {
   };
 
   let userList: any[] = [];
-
   userListData?.results &&
     userListData.results.length &&
     (userList = userListData.results.map((user: any, idx) => {
@@ -283,15 +282,17 @@ export default function ManageUsers() {
                     <>
                       <div className="col-span-1">
                         <UserDetails
-                          id="doctor-qualification"
-                          title="Qualification"
+                          id="qualification"
+                          title={t("qualification")}
                         >
-                          {user.doctor_qualification ? (
+                          {user.qualification ? (
                             <span className="font-semibold">
-                              {user.doctor_qualification}
+                              {user.qualification}
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -307,7 +308,9 @@ export default function ManageUsers() {
                               years
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -321,7 +324,9 @@ export default function ManageUsers() {
                               {user.doctor_medical_council_registration}
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -335,11 +340,30 @@ export default function ManageUsers() {
                     </div>
                   </UserDetails>
                 )}
+
                 <div
                   className={`${
                     isExtremeSmallScreen ? "flex flex-wrap" : "grid grid-cols-2"
                   }`}
                 >
+                  {user.user_type === "Nurse" && (
+                    <div className="row-span-1">
+                      <UserDetails
+                        id="qualification"
+                        title={t("qualification")}
+                      >
+                        {user.qualification ? (
+                          <span className="font-semibold">
+                            {user.qualification}
+                          </span>
+                        ) : (
+                          <span className="text-secondary-600">
+                            {t("unknown")}
+                          </span>
+                        )}
+                      </UserDetails>
+                    </div>
+                  )}
                   {user.created_by && (
                     <div className="col-span-1">
                       <UserDetails id="created_by" title="Created by">

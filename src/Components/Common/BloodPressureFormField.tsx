@@ -17,7 +17,10 @@ export default function BloodPressureFormField(props: Props) {
   const map = meanArterialPressure(props.value)?.toFixed();
 
   const handleChange = (event: FieldChangeEvent<number>) => {
-    const bp = field.value ?? {};
+    const bp = {
+      systolic: field.value?.systolic,
+      diastolic: field.value?.diastolic,
+    };
     bp[event.name as keyof BloodPressure] = event.value;
     field.handleChange(Object.values(bp).filter(Boolean).length ? bp : null);
   };
