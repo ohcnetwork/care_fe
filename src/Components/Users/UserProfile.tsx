@@ -40,7 +40,7 @@ type EditForm = {
   phoneNumber: string;
   altPhoneNumber: string;
   user_type: string | undefined;
-  doctor_qualification: string | undefined;
+  qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
   weekly_working_hours: string | null | undefined;
@@ -55,7 +55,7 @@ type ErrorForm = {
   phoneNumber: string;
   altPhoneNumber: string;
   user_type: string | undefined;
-  doctor_qualification: string | undefined;
+  qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
   weekly_working_hours: string | undefined;
@@ -78,7 +78,7 @@ const initForm: EditForm = {
   phoneNumber: "",
   altPhoneNumber: "",
   user_type: "",
-  doctor_qualification: undefined,
+  qualification: undefined,
   doctor_experience_commenced_on: undefined,
   doctor_medical_council_registration: undefined,
   weekly_working_hours: undefined,
@@ -151,6 +151,7 @@ export default function UserProfile() {
   } = useQuery(routes.currentUser, {
     onResponse: (result) => {
       if (!result || !result.res || !result.data) return;
+
       const formData: EditForm = {
         firstName: result.data.first_name,
         lastName: result.data.last_name,
@@ -161,7 +162,7 @@ export default function UserProfile() {
         phoneNumber: result.data.phone_number?.toString() || "",
         altPhoneNumber: result.data.alt_phone_number?.toString() || "",
         user_type: result.data.user_type,
-        doctor_qualification: result.data.doctor_qualification,
+        qualification: result.data.qualification,
         doctor_experience_commenced_on: dayjs().diff(
           dayjs(result.data.doctor_experience_commenced_on),
           "years",
@@ -279,7 +280,16 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
+        case "qualification":
+          if (
+            (states.form.user_type === "Doctor" ||
+              states.form.user_type === "Nurse") &&
+            !states.form[field]
+          ) {
+            errors[field] = t("field_required");
+            invalidForm = true;
+          }
+          return;
         case "doctor_medical_council_registration":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
             errors[field] = t("field_required");
@@ -346,9 +356,10 @@ export default function UserProfile() {
         alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
         date_of_birth: dateQueryString(states.form.date_of_birth),
-        doctor_qualification:
-          states.form.user_type === "Doctor"
-            ? states.form.doctor_qualification
+        qualification:
+          states.form.user_type === "Doctor" ||
+          states.form.user_type === "Nurse"
+            ? states.form.qualification
             : undefined,
         doctor_experience_commenced_on:
           states.form.user_type === "Doctor"
@@ -764,15 +775,18 @@ export default function UserProfile() {
                           required
                           type="email"
                         />
+                        {(states.form.user_type === "Doctor" ||
+                          states.form.user_type === "Nurse") && (
+                          <TextFormField
+                            {...fieldProps("qualification")}
+                            required
+                            className="col-span-6 sm:col-span-3"
+                            label={t("qualification")}
+                            placeholder={t("qualification")}
+                          />
+                        )}
                         {states.form.user_type === "Doctor" && (
                           <>
-                            <TextFormField
-                              {...fieldProps("doctor_qualification")}
-                              required
-                              className="col-span-6 sm:col-span-3"
-                              label="Qualification"
-                              placeholder="Doctor's Qualification"
-                            />
                             <TextFormField
                               {...fieldProps("doctor_experience_commenced_on")}
                               required
