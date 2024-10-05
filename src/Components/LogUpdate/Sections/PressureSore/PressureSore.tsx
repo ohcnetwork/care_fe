@@ -14,6 +14,7 @@ import { IPressureSore } from "../../../Patient/models";
 import { Error } from "../../../../Utils/Notifications";
 import { classNames, getValueDescription } from "../../../../Utils/utils";
 import { calculatePushScore } from "./utils";
+import { useTranslation } from "react-i18next";
 
 const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
   const value = log.pressure_sore ?? [];
@@ -104,6 +105,8 @@ const RegionEditor = (props: RegionEditorProps) => {
 
   const isReadOnly = !props.onSave;
 
+  const { t } = useTranslation();
+
   return (
     <PopupModal
       show={props.show}
@@ -129,7 +132,7 @@ const RegionEditor = (props: RegionEditorProps) => {
         <br />
         <div className="grid grid-cols-2 gap-2">
           <TextFormField
-            label="Width (cm)"
+            label={t("width_label__cm")}
             name="width"
             disabled={isReadOnly}
             labelClassName="text-xs"
@@ -141,7 +144,7 @@ const RegionEditor = (props: RegionEditorProps) => {
             onChange={(e) => update({ width: parseFloat(e.value) })}
           />
           <TextFormField
-            label="Length (cm)"
+            label={t("length_label__cm")}
             name="length"
             disabled={isReadOnly}
             labelClassName="text-xs"
