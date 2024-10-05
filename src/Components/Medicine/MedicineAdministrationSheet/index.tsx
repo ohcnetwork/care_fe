@@ -27,7 +27,8 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const consultation = useSlug("consultation");
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
-
+  const queryParams = new URLSearchParams(window.location.search);
+  const dcParam = queryParams.get("dc");
   const filters = {
     dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
     prescription_type: "REGULAR",
@@ -53,6 +54,8 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   });
 
   const discontinuedCount = discontinuedPrescriptions.data?.count;
+
+  console.log(MedicineRoutes);
 
   const prescriptionList = [
     ...(data?.results ?? []),
@@ -98,7 +101,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
                   id="edit-prescription"
                   variant="secondary"
                   border
-                  href="prescriptions"
+                  href={`prescriptions${dcParam ? "?dc=true" : ""}`}
                   className="w-full"
                 >
                   <CareIcon icon="l-pen" className="text-lg" />

@@ -408,7 +408,7 @@ export const ConsultationDetails = (props: any) => {
                     <Link
                       key={p}
                       className={tabButtonClasses(tab === p)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
+                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}${p === "MEDICINES" && consultationData.suggestion === "DC" ? "?dc=true" : ""}`}
                     >
                       {t(`CONSULTATION_TAB__${p}`)}
                     </Link>

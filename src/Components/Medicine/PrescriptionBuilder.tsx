@@ -19,6 +19,7 @@ interface Props {
   is_prn?: boolean;
   disabled?: boolean;
   discontinued?: boolean;
+  dcParam?: string | undefined | null;
   actions?: ("discontinue" | "administer")[];
 }
 
@@ -26,6 +27,7 @@ export default function PrescriptionBuilder({
   prescription_type,
   is_prn = false,
   disabled,
+  dcParam,
   discontinued,
   actions = ["administer", "discontinue"],
 }: Props) {
@@ -44,6 +46,12 @@ export default function PrescriptionBuilder({
       limit: 100,
     },
   });
+
+  const defaultPrescription = {
+    ...(is_prn ? DefaultPRNPrescription : DefaultPrescription),
+    prescription_type,
+    ...(dcParam ? { route: "ORAL" } : {}), // Add "Oral" route if dcParam is true
+  };
 
   return (
     <div>
@@ -130,12 +138,7 @@ export default function PrescriptionBuilder({
           className="w-full max-w-4xl lg:min-w-[768px]"
         >
           <CreatePrescriptionForm
-            prescription={
-              {
-                ...(is_prn ? DefaultPRNPrescription : DefaultPrescription),
-                prescription_type,
-              } as Prescription
-            }
+            prescription={defaultPrescription as Prescription} // Pass modified default prescription
             onDone={() => {
               setShowCreate(false);
               refetch();

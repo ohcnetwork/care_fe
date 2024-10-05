@@ -9,6 +9,9 @@ export default function ManagePrescriptions() {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
 
+  const queryParams = new URLSearchParams(window.location.search);
+  const dcParam = queryParams.get("dc");
+
   return (
     <Page
       title={t("manage_prescriptions")}
@@ -28,7 +31,7 @@ export default function ManagePrescriptions() {
             <h3 className="mb-4 text-lg font-semibold">
               {t("prescription_medications")}
             </h3>
-            <PrescriptionBuilder />
+            <PrescriptionBuilder dcParam={dcParam} />
           </div>
           <div>
             <h3 className="mb-4 mt-8 text-lg font-semibold">
