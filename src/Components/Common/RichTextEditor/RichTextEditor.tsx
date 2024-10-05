@@ -564,7 +564,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </div>
         ) : (
           <textarea
-            id="doctor_notes_textarea"
+            id="discussion_notes_textarea"
             ref={editorRef}
             className="max-h-[300px] min-h-[70px] w-full resize-none overflow-y-auto border-none p-2 align-middle text-sm outline-none focus:outline-none focus:ring-0"
             value={markdown}
