@@ -35,15 +35,19 @@ type ErrorProps = {
 
 export const FieldErrorText = (props: ErrorProps) => {
   return (
-    <span
-      className={classNames(
-        "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
-        props.error ? "opacity-100" : "opacity-0",
-        props.className,
+    <>
+      {props.error && (
+        <span
+          className={classNames(
+            "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
+            props.error ? "opacity-100" : "opacity-0",
+            props.className,
+          )}
+        >
+          {props.error}
+        </span>
       )}
-    >
-      {props.error}
-    </span>
+    </>
   );
 };
 

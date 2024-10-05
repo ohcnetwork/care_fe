@@ -59,8 +59,8 @@ const Loading = lazy(() => import("../Common/Loading"));
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;
-  index: any;
-  value: any;
+  index: number | string;
+  value: number | string;
 }
 
 function TabPanel(props: TabPanelProps) {
@@ -90,12 +90,7 @@ export const PatientManager = () => {
     resultsPerPage,
   } = useFilters({
     limit: 12,
-    cacheBlacklist: [
-      "name",
-      "patient_no",
-      "phone_number",
-      "emergency_phone_number",
-    ],
+    cacheBlacklist: ["name", "patient_no", "phone_number"],
   });
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
@@ -106,9 +101,9 @@ export const PatientManager = () => {
   const [showDoctors, setShowDoctors] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
-  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
-  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
-    useState("");
+  const searchByValues = ["phoneNumber", "uhid", "patientName"] as const;
+  const [searchBy, setSearchBy] =
+    useState<(typeof searchByValues)[number]>("phoneNumber");
 
   const setPhoneNum = (phone_number: string) => {
     setPhoneNumber(phone_number);
@@ -127,24 +122,6 @@ export const PatientManager = () => {
     setPhoneNumberError("Enter a valid number");
   };
 
-  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
-    setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length >= 13) {
-      setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number });
-      return;
-    }
-
-    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
-      setEmergencyPhoneNumberError("");
-      qParams.emergency_phone_number &&
-        updateQuery({ emergency_phone_number: null });
-      return;
-    }
-
-    setEmergencyPhoneNumberError("Enter a valid number");
-  };
-
   const tabValue =
     qParams.last_consultation__new_discharge_reason ||
     qParams.is_active === "False"
@@ -161,9 +138,6 @@ export const PatientManager = () => {
       (qParams.is_active || "True"),
     phone_number: qParams.phone_number
       ? parsePhoneNumber(qParams.phone_number)
-      : undefined,
-    emergency_phone_number: qParams.emergency_phone_number
-      ? parsePhoneNumber(qParams.emergency_phone_number)
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: qParams.facility,
@@ -333,9 +307,6 @@ export const PatientManager = () => {
     onResponse: () => {
       if (!params.phone_number) {
         setPhoneNumber("+91");
-      }
-      if (!params.emergency_phone_number) {
-        setEmergencyPhoneNumber("+91");
       }
     },
   });
@@ -978,22 +949,16 @@ export const PatientManager = () => {
         </div>
         <div className="col-span-3 w-full">
           <div className="mt-2">
-            <div className="mb-4 mt-1 md:flex md:gap-4">
+            {searchBy === "patientName" && (
               <SearchInput
                 label="Search by Patient"
                 placeholder="Enter patient name"
                 {...queryField("name")}
                 className="w-full grow"
               />
-              <SearchInput
-                label="Search by IP/OP Number"
-                placeholder="Enter IP/OP Number"
-                secondary
-                {...queryField("patient_no")}
-                className="w-full grow"
-              />
-            </div>
-            <div className="mb-4 md:flex md:gap-4">
+            )}
+
+            {searchBy === "phoneNumber" && (
               <PhoneNumberFormField
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
@@ -1003,16 +968,30 @@ export const PatientManager = () => {
                 types={["mobile", "landline"]}
                 className="w-full grow"
               />
-              <PhoneNumberFormField
-                label="Search by Emergency Number"
-                {...queryField("emergency_phone_number", "+91")}
-                value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNum(e.value)}
-                error={emergencyPhoneNumberError}
-                types={["mobile", "landline"]}
-                className="w-full"
+            )}
+
+            {searchBy === "uhid" && (
+              <SearchInput
+                label="Search by IP/OP Number"
+                placeholder="Enter IP/OP Number"
+                secondary
+                {...queryField("patient_no")}
+                className="w-full grow"
               />
-            </div>
+            )}
+          </div>
+          <div className="flex gap-4 px-6 pt-6">
+            {["Phone Number", "UHID", "Name"].map((searchByTag, i) => (
+              <button
+                key={searchByTag}
+                className={`rounded px-2 py-1 ${searchBy === searchByValues[i] ? "bg-primary-500 text-white" : "bg-gray-200"}`}
+                onClick={() => {
+                  setSearchBy(searchByValues[i]);
+                }}
+              >
+                {searchByTag}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -1046,7 +1025,6 @@ export const PatientManager = () => {
             ordering,
           }) => [
             phoneNumber("Primary number", "phone_number"),
-            phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
             badge("IP/OP number", "patient_no"),
             ...dateRange("Modified", "modified_date"),
