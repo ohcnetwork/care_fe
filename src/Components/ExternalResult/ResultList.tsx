@@ -1,7 +1,6 @@
 import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
 import { lazy, useState } from "react";
-import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
@@ -19,6 +18,7 @@ import { parsePhoneNumber } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ExternalResultImportModal from "./ExternalResultImportModal";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -254,11 +254,12 @@ export default function ResultList() {
                 : []),
               {
                 label: "Export Results",
-                action: () =>
-                  externalResultList(
-                    { ...qParams, csv: true },
-                    "externalResultList",
-                  ),
+                action: async () => {
+                  const { data } = await request(routes.externalResultList, {
+                    query: { ...qParams, csv: true },
+                  });
+                  return data ?? null;
+                },
                 filePrefix: "external_results",
                 options: {
                   icon: <CareIcon icon="l-export" />,

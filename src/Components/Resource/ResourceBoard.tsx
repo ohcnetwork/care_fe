@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { downloadResourceRequests } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { classNames, formatName } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
@@ -241,12 +240,18 @@ export default function ResourceBoard({
           <h3 className="flex h-8 items-center text-xs">
             {renderBoardTitle(board)}{" "}
             <ExportButton
-              action={() =>
-                downloadResourceRequests({
-                  ...formatFilter({ ...filterProp, status: board }),
-                  csv: 1,
-                })
-              }
+              action={async () => {
+                const { data } = await request(
+                  routes.downloadResourceRequests,
+                  {
+                    query: {
+                      ...formatFilter({ ...filterProp, status: board }),
+                      csv: true,
+                    },
+                  },
+                );
+                return data ?? null;
+              }}
               filenamePrefix={`resource_requests_${board}`}
             />
           </h3>

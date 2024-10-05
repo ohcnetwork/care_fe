@@ -6,6 +6,8 @@ import DropdownMenu, {
 import ButtonV2 from "../../Components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useExport from "../../Common/hooks/useExport";
+import { Route } from "../../Utils/request/types";
+import request from "../../Utils/request/request";
 
 interface ExportItem {
   options?: DropdownItemProps;
@@ -13,7 +15,8 @@ interface ExportItem {
   filePrefix?: string;
   label: string;
   parse?: (data: string) => string;
-  action?: any;
+  action?: Parameters<ReturnType<typeof useExport>["exportFile"]>[0];
+  route?: Route<string | { results: object[] }, unknown>;
 }
 
 interface ExportMenuProps {
@@ -27,7 +30,8 @@ interface ExportButtonProps {
   tooltip?: string | undefined;
   tooltipClassName?: string;
   type?: "csv" | "json";
-  action?: any;
+  action?: Parameters<ReturnType<typeof useExport>["exportFile"]>[0];
+  route?: Route<string | { results: object[] }, unknown>;
   parse?: (data: string) => string;
   filenamePrefix: string;
 }
@@ -45,9 +49,18 @@ export const ExportMenu = ({
     return (
       <ButtonV2
         disabled={isExporting || disabled}
-        onClick={() =>
-          exportFile(item.action, item.filePrefix, item.type, item.parse)
-        }
+        onClick={() => {
+          let action = item.action;
+          if (item.route) {
+            action = async () => {
+              const { data } = await request(item.route!);
+              return data ?? null;
+            };
+          }
+          if (action) {
+            exportFile(action, item.filePrefix, item.type, item.parse);
+          }
+        }}
         border
         ghost
         className="py-2.5"
@@ -69,9 +82,18 @@ export const ExportMenu = ({
         {exportItems.map((item) => (
           <DropdownItem
             key={item.label}
-            onClick={() =>
-              exportFile(item.action, item.filePrefix, item.type, item.parse)
-            }
+            onClick={() => {
+              let action = item.action;
+              if (item.route) {
+                action = async () => {
+                  const { data } = await request(item.route!);
+                  return data ?? null;
+                };
+              }
+              if (action) {
+                exportFile(action, item.filePrefix, item.type, item.parse);
+              }
+            }}
             {...item.options}
           >
             {item.label}
@@ -94,9 +116,18 @@ export const ExportButton = ({
     <>
       <ButtonV2
         disabled={isExporting || props.disabled}
-        onClick={() =>
-          exportFile(props.action, props.filenamePrefix, type, parse)
-        }
+        onClick={() => {
+          let action = props.action;
+          if (props.route) {
+            action = async () => {
+              const { data } = await request(props.route!);
+              return data ?? null;
+            };
+          }
+          if (action) {
+            exportFile(action, props.filenamePrefix, type, parse);
+          }
+        }}
         className="tooltip mx-2 p-4 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
         variant="secondary"
         ghost

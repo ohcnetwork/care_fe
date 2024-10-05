@@ -4,6 +4,8 @@
   "mark_as_unread": "படிக்காதது எனக் குறி",
   "subscribe": "குழுசேர்",
   "subscribe_on_this_device": "இந்தச் சாதனத்தில் குழுசேரவும்",
+  "notification_permission_denied": "அறிவிப்பு அனுமதி நிராகரிக்கப்பட்டது",
+  "notification_permission_granted": "அறிவிப்பு அனுமதி அளிக்கப்பட்டது",
   "show_unread_notifications": "படிக்காததைக் காட்டு",
   "show_all_notifications": "அனைத்தையும் காட்டு",
   "filter_by_category": "வகையின்படி வடிகட்டவும்",
