@@ -10,6 +10,7 @@ import { useState } from "react";
 import DialogModal from "../Common/Dialog.js";
 import Beds from "./Consultations/Beds";
 import careConfig from "@careConfig";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -20,6 +21,8 @@ interface ConsultationProps {
 export const ConsultationCard = (props: ConsultationProps) => {
   const { itemData, isLastConsultation, refetch } = props;
   const [open, setOpen] = useState(false);
+  const { user_type } = useAuthUser();
+  const authuser = user_type == "Nurse";
   const bedDialogTitle = itemData.discharge_date
     ? "Bed History"
     : !itemData.current_bed
@@ -165,6 +168,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
           </div>
         </div>
         <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
+          {/* {user_type == "Nurse" && ( */}
           <ButtonV2
             id="view_consulation_updates"
             className="h-auto whitespace-pre-wrap border border-secondary-500 bg-white text-black hover:bg-secondary-300"
@@ -173,9 +177,11 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`,
               )
             }
+            disabled={!!authuser}
           >
             View Consultation / Consultation Updates
           </ButtonV2>
+          {/* )} */}
           <ButtonV2
             className="h-auto whitespace-pre-wrap border border-secondary-500 bg-white text-black hover:bg-secondary-300"
             onClick={() =>
@@ -183,6 +189,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`,
               )
             }
+            disabled={!!authuser}
           >
             View / Upload Consultation Files
           </ButtonV2>
