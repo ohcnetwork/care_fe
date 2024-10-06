@@ -1,14 +1,5 @@
 import { navigate } from "raviger";
-
-import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-// import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-// import ButtonV2 from "./components/ButtonV2";
-import {
-  celsiusToFahrenheit,
-  classNames,
-  fahrenheitToCelsius,
-} from "../../Utils/utils";
+import { celsiusToFahrenheit } from "../../Utils/utils";
 import dayjs from "dayjs";
 import { lazy, useCallback, useEffect, useState } from "react";
 import {
@@ -34,7 +25,7 @@ import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
 import TemperatureFormField from "../Common/TemperatureFormField";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -75,7 +66,6 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
-  const [tempInputFocus, setTempInputFocus] = useState(false);
   const [diagnosisSuggestions, setDiagnosisSuggestions] = useState<
     ICD11DiagnosisModel[]
   >([]);
@@ -274,10 +264,15 @@ export const DailyRounds = (props: any) => {
         case "temperature":
           const value = state.form["temperature"];
           const val = unit === "celsius" ? celsiusToFahrenheit(value) : value;
+
           if (val && (val < 95 || val > 106)) {
-            errors[field] = "temrepwrewr";
+            const tempRange =
+              unit === "celsius" ? "35°C to 41.1°C" : "95°F to 106°F";
+
+            errors[field] = `Temperature must be between ${tempRange}.`;
+
             invalidForm = true;
-            break;
+            scrollTo("temperature");
           }
           return;
 
@@ -803,33 +798,13 @@ export const DailyRounds = (props: any) => {
             state.form.rounds_type,
           ) && (
             <>
-              <div className="relative">
-                <TextFormField
-                  {...field("temperature")}
-                  autoComplete="off"
-                  type="number"
-                  min={`${unit === "celsius" ? 35 : 95}`}
-                  max={`${unit === "celsius" ? 41.1 : 106}`}
-                  step={0.1}
-                />
-
-                <ButtonV2
-                  type="button"
-                  variant="primary"
-                  className="absolute top-0 right-0 text-xs w-[24px] h-full flex items-center justify-center"
-                  size="small"
-                  ghost
-                  border
-                  onClick={() =>
-                    setUnit(unit === "celsius" ? "fahrenheit" : "celsius")
-                  }
-                >
-                  <CareIcon
-                    icon={unit === "celsius" ? "l-celsius" : "l-fahrenheit"}
-                    className="text-sm"
-                  />
-                </ButtonV2>
-              </div>
+              <TemperatureFormField
+                {...field("temperature")}
+                onChange={handleFormFieldChange}
+                id="temperature"
+                unit={unit}
+                setUnit={setUnit}
+              />
 
               <RangeAutocompleteFormField
                 {...field("resp")}

@@ -1,77 +1,53 @@
-import { useState } from "react";
 import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
+
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "./components/ButtonV2";
-import { fahrenheitToCelsius } from "../../Utils/utils";
 
-type TemperatureUnit = "celsius" | "fahrenheit";
+import TextFormField from "../Form/FormFields/TextFormField";
 
-type Props = FormFieldBaseProps<number> & {
-  placeholder?: string;
+type TemperatureFormFieldProps = FormFieldBaseProps<string> & {
+  unit: "celsius" | "fahrenheit";
+  setUnit: (unit: "celsius" | "fahrenheit") => void;
 };
-
-export default function TemperatureFormField(props: Props) {
-  const [unit, setUnit] = useState<TemperatureUnit>("fahrenheit");
-
+export default function TemperatureFormField({
+  onChange,
+  unit,
+  setUnit,
+  id,
+  label,
+  error,
+  value,
+}: TemperatureFormFieldProps) {
   return (
-    <RangeAutocompleteFormField
-      {...props}
-      start={95}
-      end={106}
-      step={0.1}
-      thresholds={[
-        {
-          value: 95,
-          label: "Low",
-          icon: <CareIcon icon="l-temperature-empty" />,
-          className: "text-danger-500",
-        },
-        {
-          value: 96.6,
-          label: "Low",
-          icon: <CareIcon icon="l-temperature-quarter" />,
-          className: "text-warning-500",
-        },
-        {
-          value: 97.6,
-          label: "Normal",
-          icon: <CareIcon icon="l-temperature-half" />,
-          className: "text-primary-500",
-        },
-        {
-          value: 99.6,
-          label: "High",
-          icon: <CareIcon icon="l-temperature-three-quarter" />,
-          className: "text-warning-500",
-        },
-        {
-          value: 101.6,
-          label: "High",
-          icon: <CareIcon icon="l-temperature" />,
-          className: "text-danger-500",
-        },
-      ]}
-      optionLabel={(value) => {
-        const val = unit === "celsius" ? fahrenheitToCelsius(value) : value;
-        return val.toFixed(1);
-      }}
-      labelSuffix={
-        <ButtonV2
-          type="button"
-          variant="primary"
-          className="text-xs"
-          size="small"
-          ghost
-          border
-          onClick={() => setUnit(unit === "celsius" ? "fahrenheit" : "celsius")}
-        >
-          <CareIcon
-            icon={unit === "celsius" ? "l-celsius" : "l-fahrenheit"}
-            className="text-sm"
-          />
-        </ButtonV2>
-      }
-    />
+    <div className="relative">
+      <TextFormField
+        id={id}
+        label={label}
+        type="number"
+        value={value !== undefined && value !== null ? value : ""}
+        name="temperature"
+        min={`${unit === "celsius" ? 35 : 95}`}
+        max={`${unit === "celsius" ? 41.1 : 106}`}
+        step={0.1}
+        onChange={onChange}
+        autoComplete="off"
+        error={error}
+      />
+
+      <ButtonV2
+        type="button"
+        variant="primary"
+        className="absolute top-0 right-0 text-xs w-[24px] h-full flex items-center justify-center"
+        size="small"
+        ghost
+        border
+        onClick={() => setUnit(unit === "celsius" ? "fahrenheit" : "celsius")}
+      >
+        <CareIcon
+          icon={unit === "celsius" ? "l-celsius" : "l-fahrenheit"}
+          className="text-sm"
+        />
+      </ButtonV2>
+    </div>
   );
 }
