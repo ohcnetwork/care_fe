@@ -69,25 +69,6 @@ import NursingCare from "../LogUpdate/Sections/NursingCare";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-export const validateRule = (
-  condition: boolean,
-  content: JSX.Element | string,
-) => {
-  return (
-    <div>
-      {condition ? (
-        <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
-      ) : (
-        <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
-      )}{" "}
-      <span
-        className={classNames(condition ? "text-primary-500" : "text-red-500")}
-      >
-        {content}
-      </span>
-    </div>
-  );
-};
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -281,7 +262,6 @@ export const DailyRounds = (props: any) => {
           return;
         case "bp": {
           const error = state.form.bp && BloodPressureValidator(state.form.bp);
-          console.log(error);
 
           if (error) {
             errors.bp = error;
@@ -292,11 +272,8 @@ export const DailyRounds = (props: any) => {
         }
 
         case "temperature":
-          // console.log('fsdfdsfdsf');
-          // console.log(state.form["temperature"]);
           const value = state.form["temperature"];
           const val = unit === "celsius" ? celsiusToFahrenheit(value) : value;
-          // console.log("dfasf   " +val);
           if (val && (val < 95 || val > 106)) {
             errors[field] = "temrepwrewr";
             invalidForm = true;
