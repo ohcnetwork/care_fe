@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { FACILITY_FEATURE_TYPES } from "../../Common/constants";
+import {
+  FACILITY_FEATURE_TYPES,
+  SPOKE_RELATION_TYPES,
+} from "../../Common/constants";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Chip from "../../CAREUI/display/Chip";
@@ -13,12 +16,16 @@ import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import careConfig from "@careConfig";
+import { FacilityModel } from "./models";
 
-export const FacilityCard = (props: { facility: any; userType: any }) => {
+export const FacilityCard = (props: {
+  facility: FacilityModel;
+  userType: string;
+}) => {
   const { facility, userType } = props;
 
   const { t } = useTranslation();
-  const [notifyModalFor, setNotifyModalFor] = useState(undefined);
+  const [notifyModalFor, setNotifyModalFor] = useState<string>();
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
 
@@ -120,12 +127,70 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       <Chip
-                        text={facility.facility_type}
+                        text={facility.facility_type || ""}
                         variant="custom"
                         className="bg-blue-100 text-blue-900"
                         hideBorder
                         size="small"
                       />
+                      {SPOKE_RELATION_TYPES.map((srt) => ({
+                        ...srt,
+                        spokes: facility.hubs?.filter(
+                          (hub) => hub.relationship === srt.value,
+                        ),
+                      }))
+                        .filter((srt) => srt.spokes?.length)
+                        .map((srt) => (
+                          <div className="tooltip">
+                            <Chip
+                              hideBorder
+                              text={
+                                (srt.text !== "Regular" ? srt.text + " " : "") +
+                                "Spoke"
+                              }
+                              size="small"
+                              className="bg-sky-100 text-sky-900"
+                            />
+                            <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
+                              Linked with{" "}
+                              {srt.spokes
+                                ?.map(
+                                  (relationship) =>
+                                    relationship.hub_object.name,
+                                )
+                                .join(", ")}
+                            </span>
+                          </div>
+                        ))}
+                      {SPOKE_RELATION_TYPES.map((srt) => ({
+                        ...srt,
+                        spokes: facility.spokes?.filter(
+                          (hub) => hub.relationship === srt.value,
+                        ),
+                      }))
+                        .filter((srt) => srt.spokes?.length)
+                        .map((srt) => (
+                          <div className="tooltip">
+                            <Chip
+                              hideBorder
+                              text={
+                                (srt.text !== "Regular" ? srt.text + " " : "") +
+                                "Hub"
+                              }
+                              size="small"
+                              className="bg-purple-100 text-indigo-900"
+                            />
+                            <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
+                              Linked with{" "}
+                              {srt.spokes
+                                ?.map(
+                                  (relationship) =>
+                                    relationship.spoke_object.name,
+                                )
+                                .join(", ")}
+                            </span>
+                          </div>
+                        ))}
                       {facility.features?.map(
                         (feature: number) =>
                           FACILITY_FEATURE_TYPES.some(
@@ -176,7 +241,9 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     <div
                       id="occupany-badge"
                       className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${
-                        facility.patient_count / facility.bed_count > 0.85
+                        (facility.patient_count || 0) /
+                          (facility.bed_count || 0) >
+                        0.85
                           ? "button-danger-border bg-red-500"
                           : "button-primary-border bg-primary-100"
                       }`}
@@ -188,14 +255,18 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         icon="l-bed"
                         className={classNames(
                           "mr-2",
-                          facility.patient_count / facility.bed_count > 0.85
+                          (facility.patient_count || 0) /
+                            (facility.bed_count || 0) >
+                            0.85
                             ? "text-white"
                             : "text-primary-600",
                         )}
                       />{" "}
                       <dt
                         className={`text-sm font-semibold ${
-                          facility.patient_count / facility.bed_count > 0.85
+                          (facility.patient_count || 0) /
+                            (facility.bed_count || 0) >
+                          0.85
                             ? "text-white"
                             : "text-secondary-700"
                         }`}
