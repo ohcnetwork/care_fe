@@ -16,5 +16,10 @@
   "stream_stop_due_to_inativity": "The live feed will stop streaming due to inactivity",
   "stream_stopped_due_to_inativity": "The live feed has stopped streaming due to inactivity",
   "continue_watching": "Continue watching",
-  "resume": "Resume"
+  "resume": "Resume",
+  "camera_preset__boundary_x0": "Left Boundary",
+  "camera_preset__boundary_x1": "Right Boundary",
+  "camera_preset__boundary_y0": "Top Boundary",
+  "camera_preset__boundary_y1": "Bottom Boundary",
+  "reset_to_preset": "Reset to Preset Position"
 }

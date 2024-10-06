@@ -1,22 +1,20 @@
-import { useEffect, useState } from "react";
-import { AssetData, ResolvedMiddleware } from "../AssetTypes";
 import * as Notification from "../../../Utils/Notifications.js";
-import { BedModel } from "../../Facility/models";
-import { getCameraConfig } from "../../../Utils/transformUtils";
+
+import { AssetData, ResolvedMiddleware } from "../AssetTypes";
+import { useEffect, useState } from "react";
+
 import CameraConfigure from "../configure/CameraConfigure";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import Loading from "../../Common/Loading";
-import { checkIfValidIP } from "../../../Common/validation";
-import TextFormField from "../../Form/FormFields/TextFormField";
 import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
-
+import TextFormField from "../../Form/FormFields/TextFormField";
+import { checkIfValidIP } from "../../../Common/validation";
+import { getCameraConfig } from "../../../Utils/transformUtils";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 import useQuery from "../../../Utils/request/useQuery";
-
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import useOperateCamera from "../../CameraFeed/useOperateCamera";
 
 interface Props {
   assetId: string;
@@ -36,16 +34,11 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [streamUuid, setStreamUuid] = useState("");
-  const [bed, setBed] = useState<BedModel>({});
-  const [newPreset, setNewPreset] = useState("");
-  const [loadingAddPreset, setLoadingAddPreset] = useState(false);
   const [loadingSetConfiguration, setLoadingSetConfiguration] = useState(false);
   const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
   });
   const authUser = useAuthUser();
-
-  const { operate } = useOperateCamera(assetId ?? "", true);
 
   useEffect(() => {
     if (asset) {
@@ -90,42 +83,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     }
   };
 
-  const addPreset = async (e: SyntheticEvent) => {
-    e.preventDefault();
-    const data = {
-      bed_id: bed.id,
-      preset_name: newPreset,
-    };
-    try {
-      setLoadingAddPreset(true);
-
-      const { data: presetData } = await operate({ type: "get_status" });
-
-      const { res } = await request(routes.createAssetBed, {
-        body: {
-          meta: { ...data, ...presetData },
-          asset: assetId,
-          bed: bed?.id as string,
-        },
-      });
-      if (res?.status === 201) {
-        Notification.Success({
-          msg: "Preset Added Successfully",
-        });
-        setBed({});
-        setNewPreset("");
-      } else {
-        Notification.Error({
-          msg: "Something went wrong..!",
-        });
-      }
-    } catch (e) {
-      Notification.Error({
-        msg: "Something went wrong..!",
-      });
-    }
-    setLoadingAddPreset(false);
-  };
   if (isLoading || loading || !facility) return <Loading />;
 
   return (
@@ -201,15 +158,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       )}
 
       {assetType === "ONVIF" ? (
-        <CameraConfigure
-          asset={asset as AssetData}
-          bed={bed}
-          setBed={setBed}
-          newPreset={newPreset}
-          setNewPreset={setNewPreset}
-          addPreset={addPreset}
-          isLoading={loadingAddPreset}
-        />
+        <CameraConfigure asset={asset as AssetData} />
       ) : null}
     </div>
   );

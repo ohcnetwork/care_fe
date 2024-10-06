@@ -1,17 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AssetData } from "../Assets/AssetTypes";
-import useOperateCamera, { PTZPayload } from "./useOperateCamera";
-import { getStreamUrl } from "./utils";
-import { classNames, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState, StreamStatus } from "./FeedAlert";
+import FeedControls, {
+  FeedControlKeys,
+  FeedControlsProps,
+} from "./FeedControls";
+import { classNames, isIOS } from "../../Utils/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import useOperateCamera, { PTZPayload } from "./useOperateCamera";
+
+import { AssetData } from "../Assets/AssetTypes";
 import FeedNetworkSignal from "./FeedNetworkSignal";
-import NoFeedAvailable from "./NoFeedAvailable";
-import FeedControls from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
-import useFullscreen from "../../Common/hooks/useFullscreen";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
+import NoFeedAvailable from "./NoFeedAvailable";
 import VideoPlayer from "./videoPlayer";
+import { getStreamUrl } from "./utils";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import useFullscreen from "../../Common/hooks/useFullscreen";
 
 interface Props {
   children?: React.ReactNode;
@@ -23,10 +27,11 @@ interface Props {
   onStreamSuccess?: () => void;
   onStreamError?: () => void;
   // Controls
-  constrolsDisabled?: boolean;
+  constrolsDisabled?: true | { [key in FeedControlKeys]?: boolean };
   shortcutsDisabled?: boolean;
   onMove?: () => void;
   operate: ReturnType<typeof useOperateCamera>["operate"];
+  additionalControls?: FeedControlsProps["additionalControls"];
 }
 
 export default function CameraFeed(props: Props) {
@@ -99,50 +104,54 @@ export default function CameraFeed(props: Props) {
     initializeStream();
   };
 
-  const controls = !props.constrolsDisabled && (
-    <FeedControls
-      inlineView={inlineControls}
-      shortcutsDisabled={props.shortcutsDisabled}
-      isFullscreen={isFullscreen}
-      setFullscreen={(value) => {
-        if (!value) {
-          setFullscreen(false);
-          return;
-        }
-
-        if (isIOS) {
-          const element = document.querySelector("video");
-          if (!element) {
+  const controls =
+    typeof props.constrolsDisabled === "boolean" &&
+    props.constrolsDisabled === true ? null : (
+      <FeedControls
+        inlineView={inlineControls}
+        controlsDisabled={props.constrolsDisabled}
+        shortcutsDisabled={props.shortcutsDisabled}
+        isFullscreen={isFullscreen}
+        setFullscreen={(value) => {
+          if (!value) {
+            setFullscreen(false);
             return;
           }
-          setFullscreen(true, element, true);
-          return;
-        }
 
-        if (!playerRef.current) {
-          return;
-        }
+          if (isIOS) {
+            const element = document.querySelector("video");
+            if (!element) {
+              return;
+            }
+            setFullscreen(true, element, true);
+            return;
+          }
 
-        setFullscreen(
-          true,
-          playerWrapperRef.current || (playerRef.current as HTMLElement),
-          true,
-        );
-      }}
-      onReset={resetStream}
-      onMove={async (data) => {
-        setState("moving");
-        const { res } = await props.operate({ type: "relative_move", data });
-        props.onMove?.();
-        setTimeout(() => {
-          setState((state) => (state === "moving" ? undefined : state));
-        }, 4000);
-        if (res?.status === 500) {
-          setState("host_unreachable");
-        }
-      }}
-    />
-  );
+          if (!playerRef.current) {
+            return;
+          }
+
+          setFullscreen(
+            true,
+            playerWrapperRef.current || (playerRef.current as HTMLElement),
+            true,
+          );
+        }}
+        onReset={resetStream}
+        onMove={async (data) => {
+          setState("moving");
+          const { res } = await props.operate({ type: "relative_move", data });
+          props.onMove?.();
+          setTimeout(() => {
+            setState((state) => (state === "moving" ? undefined : state));
+          }, 4000);
+          if (res?.status === 500) {
+            setState("host_unreachable");
+          }
+        }}
+        additionalControls={props.additionalControls}
+      />
+    );
 
   return (
     <div ref={playerWrapperRef} className="flex flex-col justify-center">

@@ -1,8 +1,22 @@
-import { useState } from "react";
-import FeedButton from "./FeedButton";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import FeedButton from "./FeedButton";
 import { PTZPayload } from "./useOperateCamera";
 import { isAppleDevice } from "../../Utils/utils";
+import { useState } from "react";
+
+export type FeedControlKeys =
+  | "up"
+  | "down"
+  | "left"
+  | "right"
+  | "upRight"
+  | "downRight"
+  | "upLeft"
+  | "downLeft"
+  | "zoomIn"
+  | "zoomOut"
+  | "reset"
+  | "fullscreen";
 
 const Actions = {
   UP: 1 << 0,
@@ -45,16 +59,23 @@ const payload = (action: number, precision: number) => {
   return { x, y, zoom };
 };
 
-interface Props {
+export interface FeedControlsProps {
+  controlsDisabled?: { [key in FeedControlKeys]?: boolean };
   shortcutsDisabled?: boolean;
   onMove: (payload: PTZPayload) => void;
   isFullscreen: boolean;
   setFullscreen: (state: boolean) => void;
   onReset: () => void;
   inlineView: boolean;
+  additionalControls?: (
+    props: Omit<FeedControlsProps, "additionalControls">,
+  ) => React.ReactNode;
 }
 
-export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
+export default function FeedControls({
+  shortcutsDisabled,
+  ...props
+}: FeedControlsProps) {
   const [precision, setPrecision] = useState(1);
   const togglePrecision = () => setPrecision((p) => (p === 16 ? 1 : p << 1));
 
@@ -66,6 +87,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     position: (
       <>
         <FeedButton
+          disabled={props.controlsDisabled?.upLeft}
           onTrigger={move(Actions.UP | Actions.LEFT)}
           shortcuts={[["Shift", "7"]]}
           shortcutsDisabled={shortcutsDisabled}
@@ -76,6 +98,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
+          disabled={props.controlsDisabled?.up}
           onTrigger={move(Actions.UP)}
           shortcuts={[
             [metaKey, "Shift", "8"],
@@ -89,6 +112,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
+          disabled={props.controlsDisabled?.upRight}
           onTrigger={move(Actions.UP | Actions.RIGHT)}
           shortcuts={[[metaKey, "Shift", "9"]]}
           shortcutsDisabled={shortcutsDisabled}
@@ -99,6 +123,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
+          disabled={props.controlsDisabled?.left}
           onTrigger={move(Actions.LEFT)}
           shortcuts={[
             [metaKey, "Shift", "4"],
@@ -111,6 +136,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
+          disabled={props.controlsDisabled?.right}
           shortcuts={[["Shift", "P"]]}
           onTrigger={togglePrecision}
           helpText="Toggle Precision"
@@ -121,6 +147,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
+          disabled={props.controlsDisabled?.right}
           onTrigger={move(Actions.RIGHT)}
           shortcuts={[
             [metaKey, "Shift", "6"],
@@ -134,6 +161,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
+          disabled={props.controlsDisabled?.downLeft}
           onTrigger={move(Actions.DOWN | Actions.LEFT)}
           shortcuts={[[metaKey, "Shift", "1"]]}
           shortcutsDisabled={shortcutsDisabled}
@@ -144,6 +172,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
+          disabled={props.controlsDisabled?.down}
           onTrigger={move(Actions.DOWN)}
           shortcuts={[
             [metaKey, "Shift", "2"],
@@ -157,6 +186,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
+          disabled={props.controlsDisabled?.downRight}
           onTrigger={move(Actions.DOWN | Actions.RIGHT)}
           shortcuts={[[metaKey, "Shift", "3"]]}
           shortcutsDisabled={shortcutsDisabled}
@@ -170,6 +200,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     zoom: (
       <>
         <FeedButton
+          disabled={props.controlsDisabled?.zoomIn}
           onTrigger={move(Actions.ZOOM_IN)}
           shortcuts={[[metaKey, "I"]]}
           shortcutsDisabled={shortcutsDisabled}
@@ -179,6 +210,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
           <CareIcon icon="l-search-plus" />
         </FeedButton>
         <FeedButton
+          disabled={props.controlsDisabled?.zoomOut}
           onTrigger={move(Actions.ZOOM_OUT)}
           shortcuts={[[metaKey, "O"]]}
           shortcutsDisabled={shortcutsDisabled}
@@ -189,9 +221,9 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
       </>
     ),
-
     reset: (
       <FeedButton
+        disabled={props.controlsDisabled?.reset}
         onTrigger={props.onReset}
         shortcuts={[["Shift", "R"]]}
         shortcutsDisabled={shortcutsDisabled}
@@ -203,6 +235,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     ),
     fullscreen: (
       <FeedButton
+        disabled={props.controlsDisabled?.fullscreen}
         onTrigger={() => props.setFullscreen(!props.isFullscreen)}
         shortcuts={[["Shift", "F"]]}
         shortcutsDisabled={shortcutsDisabled}
@@ -231,18 +264,23 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
             {controls.fullscreen}
           </div>
         </div>
+        {props.additionalControls?.(props)}
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex flex-col gap-2">{controls.zoom}</div>
-      <div className="grid grid-cols-3 gap-2">{controls.position}</div>
-      <div className="flex flex-col gap-2">
-        {controls.reset}
-        {controls.fullscreen}
+    <div className="h-full">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-2">{controls.zoom}</div>
+        <div className="grid grid-cols-3 gap-2">{controls.position}</div>
+        <div className="flex flex-col gap-2">
+          {controls.reset}
+          {controls.fullscreen}
+        </div>
       </div>
+
+      {props.additionalControls?.(props)}
     </div>
   );
 }

@@ -9,6 +9,7 @@ interface Props {
   helpText?: string;
   shortcutsDisabled?: boolean;
   tooltipClassName?: string;
+  disabled?: boolean;
 }
 
 export default function FeedButton(props: Props) {
@@ -16,9 +17,10 @@ export default function FeedButton(props: Props) {
     <button
       className={classNames(
         "flex h-10 w-10 items-center justify-center rounded-lg border shadow-sm transition hover:backdrop-blur-xl sm:shadow-none sm:hover:shadow sm:active:shadow-2xl md:backdrop-blur-md",
-        "border-zinc-500/30 text-zinc-500 sm:border-zinc-700/50 sm:bg-zinc-800/40 sm:text-zinc-200 sm:hover:bg-zinc-50 sm:hover:text-zinc-800",
+        "border-zinc-500/30 text-zinc-500 sm:border-zinc-700/50 sm:bg-zinc-800/40 sm:text-zinc-200 sm:hover:bg-zinc-50 sm:hover:text-zinc-800 disabled:opacity-30",
         props.className,
       )}
+      disabled={props.disabled}
       type="button"
       onClick={props.onTrigger}
     >
