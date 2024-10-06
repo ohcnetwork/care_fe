@@ -262,10 +262,16 @@ export const DailyRounds = (props: any) => {
         }
 
         case "temperature":
-          const value = state.form["temperature"];
-          const val = unit === "celsius" ? celsiusToFahrenheit(value) : value;
+          const temperatureInputValue = state.form["temperature"];
+          const convertedTemperature =
+            unit === "celsius"
+              ? celsiusToFahrenheit(temperatureInputValue)
+              : temperatureInputValue;
 
-          if (val && (val < 95 || val > 106)) {
+          if (
+            convertedTemperature &&
+            (convertedTemperature < 95 || convertedTemperature > 106)
+          ) {
             const tempRange =
               unit === "celsius" ? "35°C to 41.1°C" : "95°F to 106°F";
 
