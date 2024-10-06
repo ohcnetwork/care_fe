@@ -55,7 +55,7 @@ class PatientLogupdate {
   }
 
   typeTemperature(temperature: string) {
-    cy.searchAndSelectOption("#temperature", temperature);
+    cy.get("#temperature").click().type(temperature);
   }
 
   typeRespiratory(respiratory: string) {

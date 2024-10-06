@@ -1,5 +1,14 @@
 import { navigate } from "raviger";
 
+import { FormFieldBaseProps } from "../Form/FormFields/Utils";
+// import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+// import ButtonV2 from "./components/ButtonV2";
+import {
+  celsiusToFahrenheit,
+  classNames,
+  fahrenheitToCelsius,
+} from "../../Utils/utils";
 import dayjs from "dayjs";
 import { lazy, useCallback, useEffect, useState } from "react";
 import {
@@ -25,7 +34,7 @@ import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
 import TemperatureFormField from "../Common/TemperatureFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -60,12 +69,32 @@ import NursingCare from "../LogUpdate/Sections/NursingCare";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
+export const validateRule = (
+  condition: boolean,
+  content: JSX.Element | string,
+) => {
+  return (
+    <div>
+      {condition ? (
+        <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
+      ) : (
+        <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
+      )}{" "}
+      <span
+        className={classNames(condition ? "text-primary-500" : "text-red-500")}
+      >
+        {content}
+      </span>
+    </div>
+  );
+};
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
+  const [tempInputFocus, setTempInputFocus] = useState(false);
   const [diagnosisSuggestions, setDiagnosisSuggestions] = useState<
     ICD11DiagnosisModel[]
   >([]);
@@ -127,7 +156,8 @@ export const DailyRounds = (props: any) => {
         return state;
     }
   };
-
+  type TemperatureUnit = "celsius" | "fahrenheit";
+  const [unit, setUnit] = useState<TemperatureUnit>("fahrenheit");
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
     initialState,
@@ -251,6 +281,8 @@ export const DailyRounds = (props: any) => {
           return;
         case "bp": {
           const error = state.form.bp && BloodPressureValidator(state.form.bp);
+          console.log(error);
+
           if (error) {
             errors.bp = error;
             invalidForm = true;
@@ -258,6 +290,19 @@ export const DailyRounds = (props: any) => {
           }
           return;
         }
+
+        case "temperature":
+          // console.log('fsdfdsfdsf');
+          // console.log(state.form["temperature"]);
+          const value = state.form["temperature"];
+          const val = unit === "celsius" ? celsiusToFahrenheit(value) : value;
+          // console.log("dfasf   " +val);
+          if (val && (val < 95 || val > 106)) {
+            errors[field] = "temrepwrewr";
+            invalidForm = true;
+            break;
+          }
+          return;
 
         case "investigations": {
           for (const investigation of state.form.investigations) {
@@ -349,7 +394,10 @@ export const DailyRounds = (props: any) => {
           bp: state.form.bp,
           pulse: state.form.pulse ?? null,
           resp: state.form.resp ?? null,
-          temperature: state.form.temperature ?? null,
+          temperature:
+            (unit == "celsius"
+              ? celsiusToFahrenheit(state.form.temperature)
+              : state.form.temperature) ?? null,
           rhythm: state.form.rhythm || undefined,
           rhythm_detail: state.form.rhythm_detail,
           ventilator_spo2: state.form.ventilator_spo2 ?? null,
@@ -774,12 +822,37 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
-
           {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
             state.form.rounds_type,
           ) && (
             <>
-              <TemperatureFormField {...field("temperature")} />
+              <div className="relative">
+                <TextFormField
+                  {...field("temperature")}
+                  autoComplete="off"
+                  type="number"
+                  min={`${unit === "celsius" ? 35 : 95}`}
+                  max={`${unit === "celsius" ? 41.1 : 106}`}
+                  step={0.1}
+                />
+
+                <ButtonV2
+                  type="button"
+                  variant="primary"
+                  className="absolute top-0 right-0 text-xs w-[24px] h-full flex items-center justify-center"
+                  size="small"
+                  ghost
+                  border
+                  onClick={() =>
+                    setUnit(unit === "celsius" ? "fahrenheit" : "celsius")
+                  }
+                >
+                  <CareIcon
+                    icon={unit === "celsius" ? "l-celsius" : "l-fahrenheit"}
+                    className="text-sm"
+                  />
+                </ButtonV2>
+              </div>
 
               <RangeAutocompleteFormField
                 {...field("resp")}
