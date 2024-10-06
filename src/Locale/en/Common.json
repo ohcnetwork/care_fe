@@ -177,7 +177,7 @@
   "treating_doctor": "Treating Doctor",
   "hubs": "Hub Facilities",
   "spokes": "Spoke Facilities",
-  "add_spoke" : "Add Spoke Facility",
+  "add_spoke": "Add Spoke Facility",
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
   "ration_card__APL": "APL",
@@ -230,5 +230,8 @@
   "SORT_OPTIONS__name": "Patient name A-Z",
   "SORT_OPTIONS__-name": "Patient name Z-A",
   "SORT_OPTIONS__bed__name": "Bed No. 1-N",
-  "SORT_OPTIONS__-bed__name": "Bed No. N-1"
+  "SORT_OPTIONS__-bed__name": "Bed No. N-1",
+  "member_id_required": "Member Id is required",
+  "policy_id_required": "Policy Id or Policy Name is required",
+  "insurer_name_required": "Insurer Name is required"
 }

@@ -516,7 +516,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const errors: Partial<Record<keyof any, FieldError>> = {};
 
     const insuranceDetailsError = insuranceDetails
-      .map((policy) => HCXPolicyValidator(policy, careConfig.hcx.enabled))
+      .map((policy) => HCXPolicyValidator(policy, careConfig.hcx.enabled, t))
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
