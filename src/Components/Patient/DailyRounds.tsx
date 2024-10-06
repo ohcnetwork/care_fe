@@ -261,7 +261,7 @@ export const DailyRounds = (props: any) => {
           return;
         }
 
-        case "temperature":
+        case "temperature": {
           const temperatureInputValue = state.form["temperature"];
           const convertedTemperature =
             unit === "celsius"
@@ -281,6 +281,7 @@ export const DailyRounds = (props: any) => {
             scrollTo("temperature");
           }
           return;
+        }
 
         case "investigations": {
           for (const investigation of state.form.investigations) {
