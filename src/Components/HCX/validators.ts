@@ -4,15 +4,16 @@ import { HCXPolicyModel } from "./models";
 const HCXPolicyValidator: FieldValidator<HCXPolicyModel> = (
   value,
   enable_hcx,
+  t,
 ) => {
   if (!value.subscriber_id.trim()) {
-    return "Member Id is required";
+    return t("member_id_required");
   } else if (!value.policy_id.trim()) {
-    return "Policy Id or Policy Name is required";
+    return t("policy_id_required");
   }
   if (enable_hcx) {
     if (!value.insurer_id?.trim() || !value.insurer_name?.trim()) {
-      return "Insurer Name is required";
+      return t("insurer_name_required");
     }
   }
 };
