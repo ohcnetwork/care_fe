@@ -5,6 +5,36 @@ interface ILogo {
   dark: string;
 }
 
+// Function to validate environment variables
+const validateEnv = () => {
+  const errors: string[] = [];
+
+  // Check required environment variables
+  if (!env.REACT_CARE_API_URL) {
+    errors.push("REACT_CARE_API_URL is required.");
+  }
+  if (!env.REACT_GMAPS_API_KEY) {
+    errors.push("REACT_GMAPS_API_KEY is required.");
+  }
+  // Add more required fields as necessary
+
+  // Validate Sentry if configured
+  if (env.REACT_SENTRY_DSN && !env.REACT_SENTRY_ENVIRONMENT) {
+    errors.push(
+      "REACT_SENTRY_ENVIRONMENT must be defined if REACT_SENTRY_DSN is provided.",
+    );
+  }
+
+  // Validate Plausible if configured
+  if (env.REACT_PLAUSIBLE_SERVER_URL && !env.REACT_PLAUSIBLE_SITE_DOMAIN) {
+    errors.push(
+      "REACT_PLAUSIBLE_SITE_DOMAIN must be defined if REACT_PLAUSIBLE_SERVER_URL is provided.",
+    );
+  }
+
+  return errors;
+};
+
 const logo = (value?: string, fallback?: ILogo) => {
   if (!value) {
     return fallback;
@@ -17,6 +47,10 @@ const logo = (value?: string, fallback?: ILogo) => {
     return fallback;
   }
 };
+const errors = validateEnv();
+if (errors.length > 0) {
+  throw new Error(`Configuration validation errors:\n- ${errors.join("\n- ")}`);
+}
 const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
 
