@@ -142,7 +142,7 @@ export default function AppRouter() {
               className="flex h-full w-full items-center px-4 md:hidden"
             >
               <img
-                className="h-6 w-auto"
+                className="h-8 w-auto"
                 src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />

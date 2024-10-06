@@ -132,8 +132,8 @@ const StatelessSidebar = ({
         <Link href="/" className="flex items-center justify-between">
           <img
             className={`${
-              shrinked ? "mx-auto" : "ml-5"
-            } h-5 self-start transition md:h-8`}
+              shrinked ? "mx-auto" : "ml-4 md:ml-2"
+            } h-8 self-start transition md:h-12 lg:h-12`}
             src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
           />
         </Link>
