@@ -9,6 +9,7 @@ type AuthContextType = {
   user: UserModel | undefined;
   signIn: (creds: LoginCredentials) => Promise<SignInReturnType>;
   signOut: () => Promise<void>;
+  refetchUser: () => Promise<RequestResult<UserModel>>;
 };
 
 export const AuthUserContext = createContext<AuthContextType | null>(null);
