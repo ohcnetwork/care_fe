@@ -233,8 +233,6 @@
   "SORT_OPTIONS__-bed__name": "Bed No. N-1",
   "middleware_hostname": "Middleware Hostname",
   "local_ip_address": "Local IP Address",
-  "unchanged": "Unchanged",
   "position": "Position",
-  "boundary": "Boundary",
   "qualification": "Qualification"
 }

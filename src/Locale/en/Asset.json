@@ -40,5 +40,6 @@
   "camera_was_linked_to_bed": "This camera was linked to this bed",
   "bed_not_linked_to_camera": "This bed has not been linked to this camera.",
   "create_preset_prerequisite": "To create presets for this bed, you'll need to link the camera to the bed first.",
-  "camera_bed_link_success": "Camera linked to bed successfully."
+  "camera_bed_link_success": "Camera linked to bed successfully.",
+  "update_preset_position_to_current": "Update preset's position to camera's current position"
 }

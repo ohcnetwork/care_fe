@@ -28,6 +28,7 @@ import Loading from "../Common/Loading";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { checkIfValidIP } from "../../Common/validation";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 
 interface Props {
   asset: AssetData;
@@ -388,7 +389,7 @@ export default function ConfigureCamera(props: Props) {
                           pathParams: { assetbed_id: selectedAssetBed.id },
                           body: {
                             name: presetName,
-                            position: createPreset,
+                            position: createPreset!,
                           },
                         });
                         if (!res?.ok) {
@@ -404,7 +405,7 @@ export default function ConfigureCamera(props: Props) {
                   </div>
                 </DialogModal>
                 <div className="bg-white p-4">
-                  <ul className="grid gap-4 py-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                  <ul className="grid gap-4 py-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                     <li
                       className="flex h-full w-full cursor-pointer items-center justify-center gap-2 rounded border border-secondary-400 p-3 py-8 font-semibold text-secondary-700 transition-all duration-200 ease-in-out hover:bg-secondary-100"
                       onClick={async () => {
@@ -444,60 +445,36 @@ export default function ConfigureCamera(props: Props) {
                             placeholder={t("preset_name_placeholder")}
                           />
                           <FieldLabel>{t("position")}</FieldLabel>
-                          {editPreset?.position ? (
-                            <>
-                              <div className="grid grid-cols-3 p-1 font-mono text-sm line-through">
-                                <span>X: {preset.position?.x}</span>
-                                <span>Y: {preset.position?.y}</span>
-                                <span>Zoom: {preset.position?.zoom}</span>
-                              </div>
-                              <div className="grid grid-cols-3 p-1 font-mono text-sm">
-                                <span>X: {editPreset.position?.x}</span>
-                                <span>Y: {editPreset.position?.y}</span>
-                                <span>Zoom: {editPreset.position?.zoom}</span>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="grid grid-cols-3 p-1 font-mono text-sm">
-                                <span>X: {preset.position?.x}</span>
-                                <span>Y: {preset.position?.y}</span>
-                                <span>Zoom: {preset.position?.zoom}</span>
-                              </div>
-                              <div className="flex items-center justify-between gap-4">
-                                <span className="text-sm text-secondary-700">
-                                  {t("unchanged")}
-                                </span>
-                                <ButtonV2
-                                  size="small"
-                                  ghost
-                                  border
-                                  variant="secondary"
-                                  onClick={async () => {
-                                    const { data } = await operate({
-                                      type: "get_status",
-                                    });
-                                    if (!data) {
-                                      Error({
-                                        msg: t(
-                                          "unable_to_get_current_position",
-                                        ),
-                                      });
-                                      return;
-                                    }
-                                    setEditPreset({
-                                      ...editPreset!,
-                                      position: (data as GetStatusResponse)
-                                        .result.position!,
-                                    });
-                                  }}
-                                  shadow
-                                >
-                                  Change to camera's current position
-                                </ButtonV2>
-                              </div>
-                            </>
-                          )}
+                          <CheckBoxFormField
+                            name="update-position-to-current"
+                            label={t("update_preset_position_to_current")}
+                            value={!!editPreset?.position}
+                            labelClassName="text-sm"
+                            onChange={async ({ value }) => {
+                              if (!value) {
+                                setEditPreset({
+                                  ...editPreset!,
+                                  position: undefined,
+                                });
+                                return;
+                              }
+
+                              const { data } = await operate({
+                                type: "get_status",
+                              });
+                              if (!data) {
+                                Error({
+                                  msg: t("unable_to_get_current_position"),
+                                });
+                                return;
+                              }
+                              setEditPreset({
+                                ...editPreset!,
+                                position: (data as GetStatusResponse).result
+                                  .position!,
+                              });
+                            }}
+                          />
                           <div className="cui-form-button-group pt-6">
                             <Cancel
                               shadow={false}
@@ -538,7 +515,7 @@ export default function ConfigureCamera(props: Props) {
                             <Submit
                               shadow={false}
                               border
-                              label={t("update")}
+                              label={t("save")}
                               onClick={async () => {
                                 const { res } = await request(
                                   FeedRoutes.updatePreset,
@@ -564,64 +541,8 @@ export default function ConfigureCamera(props: Props) {
                             />
                           </div>
                         </DialogModal>
-                        <div className="flex flex-col gap-2">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold">{preset.name}</span>
-                            <div className="flex gap-1">
-                              <ButtonV2
-                                size="small"
-                                variant="secondary"
-                                ghost
-                                border
-                                onClick={() =>
-                                  operate({
-                                    type: "absolute_move",
-                                    data: preset.position!,
-                                  })
-                                }
-                              >
-                                <CareIcon icon="l-eye" />
-                                {t("view")}
-                              </ButtonV2>
-                              <ButtonV2
-                                size="small"
-                                variant="secondary"
-                                ghost
-                                border
-                                onClick={() => {
-                                  setEditPreset({ preset: preset.id });
-                                }}
-                              >
-                                <CareIcon icon="l-edit-alt" />
-                                {t("update")}
-                              </ButtonV2>
-                            </div>
-                          </div>
-                          {preset.position && (
-                            <div>
-                              <span className="rounded bg-primary-100 px-1 py-0.5 text-xs font-medium text-primary-500">
-                                {t("position")}
-                              </span>
-                              <div className="flex gap-4 p-1 font-mono text-xs">
-                                <span>X: {preset.position?.x}</span>
-                                <span>Y: {preset.position?.y}</span>
-                                <span>Zoom: {preset.position?.zoom}</span>
-                              </div>
-                            </div>
-                          )}
-                          {preset.boundary && (
-                            <div>
-                              <span className="rounded bg-primary-100 px-1 py-0.5 text-xs font-medium text-primary-500">
-                                {t("boundary")}
-                              </span>
-                              <div className="flex gap-4 p-1 font-mono text-xs">
-                                <span>X0: {preset.boundary.x0}</span>
-                                <span>Y0: {preset.boundary.y0}</span>
-                                <span>X1: {preset.boundary.x1}</span>
-                                <span>Y1: {preset.boundary.y1}</span>
-                              </div>
-                            </div>
-                          )}
+                        <div className="flex flex-col">
+                          <span className="font-semibold">{preset.name}</span>
                           <span className="text-xs">
                             <RecordMeta
                               prefix="last updated"
@@ -630,6 +551,35 @@ export default function ConfigureCamera(props: Props) {
                               inlineUser
                             />
                           </span>
+                          <div className="mt-3 flex justify-end gap-1">
+                            <ButtonV2
+                              size="small"
+                              variant="secondary"
+                              ghost
+                              border
+                              onClick={() =>
+                                operate({
+                                  type: "absolute_move",
+                                  data: preset.position!,
+                                })
+                              }
+                            >
+                              <CareIcon icon="l-eye" />
+                              {t("view")}
+                            </ButtonV2>
+                            <ButtonV2
+                              size="small"
+                              variant="secondary"
+                              ghost
+                              border
+                              onClick={() => {
+                                setEditPreset({ preset: preset.id });
+                              }}
+                            >
+                              <CareIcon icon="l-edit-alt" />
+                              {t("update")}
+                            </ButtonV2>
+                          </div>
                         </div>
                       </li>
                     ))}

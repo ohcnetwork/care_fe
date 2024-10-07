@@ -31,8 +31,7 @@ export type CameraPreset = {
   readonly id: string;
   name: string;
   readonly asset_bed: AssetBedModel;
-  position?: PTZPayload;
-  boundary?: { x0: number; y0: number; x1: number; y1: number };
+  position: PTZPayload;
   readonly created_by: PerformedByModel;
   readonly updated_by: PerformedByModel;
   readonly created_date: string;
