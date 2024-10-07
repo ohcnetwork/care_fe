@@ -6,6 +6,16 @@ import ta from "./Locale/ta";
 import ml from "./Locale/ml";
 import mr from "./Locale/mr";
 import kn from "./Locale/kn";
+import hi from "./Locale/hi";
+
+export const LANGUAGES: { [key: string]: any } = {
+  en: "English",
+  ta: "தமிழ்",
+  ml: "മലയാളം",
+  mr: "मराठी",
+  kn: "ಕನ್ನಡ",
+  hi: "हिन्दी",
+};
 
 const resources = {
   en: { translation: en },
@@ -13,6 +23,7 @@ const resources = {
   ml: { translation: ml },
   mr: { translation: mr },
   kn: { translation: kn },
+  hi: { translation: hi },
 };
 
 i18n
