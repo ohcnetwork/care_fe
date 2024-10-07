@@ -5,6 +5,7 @@ import TextFormField from "../../Form/FormFields/TextFormField";
 import { classNames } from "../../../Utils/utils";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { navigate } from "raviger";
 
 const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
   const { t } = useTranslation();
@@ -107,6 +108,10 @@ export const InvestigationTable = ({
   changedFields,
   handleUpdateCancel,
   handleSave,
+  facilityId,
+  patientId,
+  consultationId,
+  sessionId,
 }: any) => {
   const { t } = useTranslation();
   const [searchFilter, setSearchFilter] = useState("");
@@ -151,6 +156,17 @@ export const InvestigationTable = ({
               {t("save")}
             </ButtonV2>
           )}
+          <ButtonV2
+            className="my-2 mr-2"
+            onClick={() =>
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${sessionId}/print`,
+              )
+            }
+          >
+            <CareIcon icon="l-print" className="text-lg" />
+            {t("print")}
+          </ButtonV2>
         </div>
       </div>
       <TextFormField

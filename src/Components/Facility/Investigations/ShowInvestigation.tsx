@@ -1,5 +1,4 @@
 import _, { set } from "lodash-es";
-import { navigate } from "raviger";
 import { lazy, useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications.js";
@@ -8,8 +7,6 @@ import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
 import { useTranslation } from "react-i18next";
 import Page from "../../Common/components/Page";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
@@ -43,7 +40,7 @@ interface ShowInvestigationProps {
   facilityId: string;
 }
 export default function ShowInvestigation(props: ShowInvestigationProps) {
-  const { consultationId, patientId, sessionId } = props;
+  const { consultationId, patientId, sessionId, facilityId } = props;
   const { t } = useTranslation();
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
   const { loading: investigationLoading } = useQuery(routes.getInvestigation, {
@@ -171,18 +168,6 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
       title={t("investigation_report", {
         name: patientData?.name,
       })}
-      options={
-        <ButtonV2
-          onClick={() =>
-            navigate(
-              `/facility/${props.facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${sessionId}/print`,
-            )
-          }
-        >
-          <CareIcon icon="l-print" className="text-lg" />
-          Print
-        </ButtonV2>
-      }
     >
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12">
         <InvestigationTable
@@ -195,6 +180,10 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
           handleValueChange={handleValueChange}
           handleUpdateCancel={handleUpdateCancel}
           handleSave={handleSubmit}
+          consultationId={consultationId}
+          patientId={patientId}
+          sessionId={sessionId}
+          facilityId={facilityId}
         />
       </div>
     </Page>
