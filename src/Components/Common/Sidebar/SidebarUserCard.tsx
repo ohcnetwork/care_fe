@@ -1,56 +1,55 @@
-import { Link } from "raviger";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { formatName } from "../../../Utils/utils";
 import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
+import { ShrinkedSidebarItem, SidebarItem } from "./SidebarItem";
 
-const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
+interface SidebarUserCardProps {
+  shrinked: boolean;
+  handleOverflow: (value: boolean) => void;
+}
+
+const SidebarUserCard: React.FC<SidebarUserCardProps> = ({
+  shrinked,
+  handleOverflow,
+}) => {
   const { t } = useTranslation();
   const user = useAuthUser();
   const { signOut } = useAuthContext();
 
+  const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+
   return (
     <div
-      className={`my-2 flex ${
-        shrinked ? "mx-auto flex-col" : "mx-5"
-      } transition-all duration-200 ease-in-out`}
+      className={`flex flex-col bg-primary-800 py-3 transition-all duration-300 ease-in-out ${shrinked ? "w-14" : "w-60"}`}
     >
-      <Link href="/user/profile" className="flex-none py-3">
-        <CareIcon icon="l-user-circle" className="text-3xl text-white" />
-      </Link>
-      <div className="flex cursor-pointer justify-center" onClick={signOut}>
-        <CareIcon
-          icon="l-sign-out-alt"
-          className={`text-2xl text-secondary-400 ${
-            shrinked ? "visible" : "hidden"
-          }`}
-        />
-      </div>
-      <div
-        className={`${
-          shrinked ? "hidden" : "grow"
-        } flex min-w-0 flex-col pb-2 pl-3`}
-      >
-        <div className="flex min-h-6 items-center">
-          <Link
-            href="/user/profile"
-            className="flex-nowrap overflow-hidden break-words font-semibold text-white"
-            id="profilenamelink"
-          >
-            {formatName(user)}
-          </Link>
-        </div>
-        <div
-          className="flex min-h-6 cursor-pointer items-center"
-          onClick={signOut}
-        >
+      <Item
+        text={t(formatName(user))}
+        to="/user/profile"
+        icon={
+          <CareIcon
+            icon="l-user-circle"
+            className="text-3xl text-secondary-400"
+          />
+        }
+        selected={false}
+        handleOverflow={handleOverflow}
+      />
+
+      <Item
+        text={t("sign_out")}
+        to="#"
+        icon={
           <CareIcon
             icon="l-sign-out-alt"
-            className={`${shrinked ? "text-xl" : "mr-1"} text-secondary-400`}
+            className="text-2xl text-secondary-400"
           />
-          <p className="text-secondary-400 text-opacity-80">{t("sign_out")}</p>
-        </div>
-      </div>
+        }
+        selected={false}
+        do={signOut}
+        handleOverflow={handleOverflow}
+      />
     </div>
   );
 };

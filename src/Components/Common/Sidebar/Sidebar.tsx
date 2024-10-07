@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
-import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
 import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
+import SidebarUserCard from "./SidebarUserCard";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
@@ -13,7 +13,6 @@ import careConfig from "@careConfig";
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
 const LOGO_COLLAPSE = "/images/logo_collapsed.svg";
-
 type StatelessSidebarProps =
   | {
       shrinkable: true;
@@ -35,6 +34,7 @@ const StatelessSidebar = ({
   onItemClick,
 }: StatelessSidebarProps) => {
   const authUser = useAuthUser();
+  const activeLink = useActiveLink();
 
   const NavItems: {
     text: string;
@@ -62,21 +62,18 @@ const StatelessSidebar = ({
     { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
   ];
 
-  const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const activeLinkRef = useRef<HTMLAnchorElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
-  const [isOverflowVisible, setOverflowVisisble] = useState(false);
+  const [isOverflowVisible, setOverflowVisible] = useState(false);
 
   const updateIndicator = () => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
     const navItemCount = NavItems.length + (careConfig.urls.dashboard ? 2 : 1); // +2 for notification and dashboard
     if (index !== -1) {
-      // Haha math go brrrrrrrrr
-
       const e = indicatorRef.current;
       const itemHeight = activeLinkRef.current?.clientHeight || 0;
       if (lastIndicatorPosition > index) {
@@ -104,9 +101,8 @@ const StatelessSidebar = ({
     addEventListener("resize", updateIndicator);
     return () => removeEventListener("resize", updateIndicator);
   }, []);
-
   const handleOverflow = (value: boolean) => {
-    setOverflowVisisble(value);
+    setOverflowVisible(value);
   };
 
   return (
@@ -119,7 +115,7 @@ const StatelessSidebar = ({
           : "overflow-y-auto overflow-x-hidden"
       }`}
     >
-      <div className="h-3" /> {/* flexible spacing */}
+      <div className="h-3" />
       <Link href="/">
         <img
           className={`${
@@ -128,14 +124,13 @@ const StatelessSidebar = ({
           src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
         />
       </Link>
-      <div className="h-3" /> {/* flexible spacing */}
+      <div className="h-3" />
       <div className="relative flex h-full flex-col">
         <div className="relative flex flex-1 flex-col md:flex-none">
           <div
             ref={indicatorRef}
-            // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
-              "absolute left-2 z-10 block w-1 rounded bg-primary-400 transition-all",
+              "absolute left-2 z-10 block w-1 rounded transition-all",
               activeLink ? "opacity-0 md:opacity-100" : "opacity-0",
             )}
           />
@@ -167,25 +162,19 @@ const StatelessSidebar = ({
               handleOverflow={handleOverflow}
             />
           )}
-        </div>
-        <div className="hidden md:block md:flex-1" />
 
-        <div className="relative flex justify-end">
           {shrinkable && (
-            <div
-              className={`${
-                shrinked ? "mx-auto" : "self-end"
-              } flex h-12 translate-y-4 self-end opacity-0 transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100`}
-            >
-              <ToggleShrink
-                shrinked={shrinked}
-                toggle={() => setShrinked && setShrinked(!shrinked)}
-              />
-            </div>
+            <ToggleShrink
+              shrinked={shrinked}
+              toggle={() => setShrinked && setShrinked(!shrinked)}
+              handleOverflow={handleOverflow}
+            />
           )}
         </div>
-        <SidebarUserCard shrinked={shrinked} />
       </div>
+
+      <div className="hidden md:block md:flex-1" />
+      <SidebarUserCard shrinked={shrinked} handleOverflow={handleOverflow} />
     </nav>
   );
 };
@@ -195,7 +184,6 @@ export const SidebarShrinkContext = createContext<{
   setShrinked: (state: boolean) => void;
 }>({
   shrinked: false,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setShrinked: () => {},
 });
 
@@ -226,20 +214,32 @@ export const MobileSidebar = (props: MobileSidebarProps) => {
 interface ToggleShrinkProps {
   shrinked: boolean;
   toggle: () => void;
+  handleOverflow: (value: boolean) => void;
 }
+const ToggleShrink = ({
+  shrinked,
+  toggle,
+  handleOverflow,
+}: ToggleShrinkProps) => {
+  const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
 
-const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
-  <div
-    className={`flex h-10 w-10 cursor-pointer items-center justify-center self-end rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
-      shrinked ? "mx-auto" : "mr-4"
-    } transition-all duration-200 ease-in-out`}
-    onClick={toggle}
-  >
-    <CareIcon
-      icon="l-angle-up"
-      className={`text-3xl ${
-        shrinked ? "rotate-90" : "-rotate-90"
-      } transition-all delay-150 duration-300 ease-out`}
+  return (
+    <Item
+      text={shrinked ? "Expand" : ""}
+      icon={
+        <CareIcon
+          icon="l-angle-up"
+          className={`text-3xl ${
+            shrinked ? "rotate-90" : "-rotate-90"
+          } transition-all delay-150 duration-300 ease-out`}
+        />
+      }
+      do={() => {
+        toggle();
+        handleOverflow(!shrinked);
+      }}
+      handleOverflow={handleOverflow}
     />
-  </div>
-);
+  );
+};
+export default StatelessSidebar;
