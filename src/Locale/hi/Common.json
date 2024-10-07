@@ -219,5 +219,7 @@
   "SORT_OPTIONS__name": "मरीज़ का नाम AZ",
   "SORT_OPTIONS__-name": "मरीज का नाम ZA",
   "SORT_OPTIONS__bed__name": "बिस्तर नं. 1-एन",
-  "SORT_OPTIONS__-bed__name": "बिस्तर संख्या एन-1"
+  "SORT_OPTIONS__-bed__name": "बिस्तर संख्या एन-1",
+  "middleware_hostname": "मिडलवेयर होस्टनाम",
+  "local_ipaddress": "स्थानीय आईपी पता"
 }
