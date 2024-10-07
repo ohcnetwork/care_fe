@@ -13,11 +13,6 @@ const validateEnv = () => {
   if (!env.REACT_CARE_API_URL) {
     errors.push("REACT_CARE_API_URL is required.");
   }
-  if (!env.REACT_GMAPS_API_KEY) {
-    errors.push("REACT_GMAPS_API_KEY is required.");
-  }
-  // Add more required fields as necessary
-
   // Validate Sentry if configured
   if (env.REACT_SENTRY_DSN && !env.REACT_SENTRY_ENVIRONMENT) {
     errors.push(
