@@ -3,7 +3,6 @@ import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { generatePhoneNumber } from "../../pageobject/utils/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
-import PatientExternal from "../../pageobject/Patient/PatientExternal";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 
@@ -34,7 +33,6 @@ describe("Patient Creation with consultation", () => {
   const patientPage = new PatientPage();
   const facilityPage = new FacilityPage();
   const patientTransfer = new PatientTransfer();
-  const patientExternal = new PatientExternal();
   const patientInsurance = new PatientInsurance();
   const patientMedicalHistory = new PatientMedicalHistory();
   const phone_number = generatePhoneNumber();
@@ -70,7 +68,6 @@ describe("Patient Creation with consultation", () => {
   const patientTransferPhoneNumber = "9849511866";
   const patientTransferFacility = "Dummy Shifting Center";
   const patientTransferName = "Dummy Patient 10";
-  const patientExternalName = "Patient 20";
   const patientOccupation = "Student";
 
   before(() => {
