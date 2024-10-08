@@ -1,7 +1,9 @@
 import { usePath, Link } from "raviger";
 import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
+import { Button } from "@/Components/ui/button";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const MENU_TAGS: { [key: string]: string } = {
   facility: "Facilities",
@@ -15,137 +17,133 @@ const MENU_TAGS: { [key: string]: string } = {
   notice_board: "Notice Board",
 };
 
-const capitalize = (string: string) => {
-  return string
+const capitalize = (string: string) =>
+  string
     .replace(/[_-]/g, " ")
     .split(" ")
-    .reduce(
-      (acc, word) => acc + (word[0]?.toUpperCase() || "") + word.slice(1) + " ",
-      "",
-    )
-    .trim();
-};
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
-export default function Breadcrumbs(props: any) {
-  const { replacements } = props;
+interface BreadcrumbsProps {
+  replacements?: {
+    [key: string]: { name?: string; uri?: string; style?: string };
+  };
+  className?: string;
+  hideBack?: boolean;
+  backUrl?: string;
+  onBackClick?: () => boolean | void;
+}
+
+export default function Breadcrumbs({
+  replacements = {},
+  className = "",
+  hideBack = false,
+  backUrl,
+  onBackClick,
+}: BreadcrumbsProps) {
+  const { goBack } = useAppHistory();
   const path = usePath();
+  const [showFullPath, setShowFullPath] = useState(false);
+
   const crumbs = path
     ?.slice(1)
     .split("/")
-    .map((field, i) => {
-      return {
-        name:
-          replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
-        uri:
-          replacements[field]?.uri ||
-          path
-            .split("/")
-            .slice(0, i + 2)
-            .join("/"),
-        style: replacements[field]?.style || "",
-      };
-    });
+    .map((field, i) => ({
+      name: replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
+      uri:
+        replacements[field]?.uri ||
+        path
+          .split("/")
+          .slice(0, i + 2)
+          .join("/"),
+      style: replacements[field]?.style || "",
+    }));
 
-  const [showFullPath, setShowFullPath] = useState(false);
+  const renderCrumb = (crumb: any, index: number, array: any[]) => {
+    const isLastItem = index === array.length - 1;
+    return (
+      <li
+        key={crumb.name}
+        className={classNames("text-sm font-light", crumb.style)}
+      >
+        <div className="flex items-center">
+          <CareIcon icon="l-angle-right" className="h-4 text-gray-400" />
+          {isLastItem ? (
+            <span className="text-gray-500">{crumb.name}</span>
+          ) : (
+            <Button
+              asChild
+              variant="link"
+              className="p-1 font-light text-gray-500 underline underline-offset-2 hover:text-gray-700"
+            >
+              <Link href={crumb.uri}>{crumb.name}</Link>
+            </Button>
+          )}
+        </div>
+      </li>
+    );
+  };
 
   return (
-    <div className="w-full">
-      <nav className="flex" aria-label="Breadcrumb">
-        <ol className="flex flex-wrap items-center space-x-1">
-          <li>
-            <div>
-              <Link
-                href="/"
-                className="text-secondary-500 hover:text-secondary-700"
-              >
-                <CareIcon icon="l-estate" className="mr-1 text-lg" />
-                <span className="sr-only">Home</span>
-              </Link>
-            </div>
+    <nav className={classNames("w-full", className)} aria-label="Breadcrumb">
+      <ol className="flex flex-wrap items-center">
+        {!hideBack && (
+          <li className="mr-1 flex items-center">
+            <Button
+              variant="link"
+              className="px-1 text-sm font-light text-gray-500 underline underline-offset-2"
+              size="xs"
+              onClick={() => {
+                if (onBackClick && onBackClick() === false) return;
+                goBack(backUrl);
+              }}
+            >
+              <CareIcon
+                icon="l-angle-left"
+                className="-ml-2 h-4 text-gray-400"
+              />
+              <span className="pr-1">Back</span>
+            </Button>
+            <span className="text-xs font-light text-gray-400 no-underline">
+              |
+            </span>
           </li>
-          {!showFullPath && crumbs && crumbs.length > 2 && (
-            <li>
-              <div className="flex cursor-pointer items-center">
-                <svg
-                  className="h-5 w-5 shrink-0 text-secondary-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z"></path>
-                </svg>
-                <span
-                  onClick={() => setShowFullPath(true)}
-                  className="ml-1 mt-0.5 inline-flex items-center rounded-full bg-secondary-500 px-2.5 py-1 text-xs font-medium hover:bg-secondary-700"
-                >
-                  <svg
-                    className="mx-0.25 h-1.5 w-1.5 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 8 8"
+        )}
+        <li>
+          <Button
+            asChild
+            variant="link"
+            className="p-1 font-light text-gray-500 underline underline-offset-2 hover:text-gray-700"
+          >
+            <Link href="/">Home</Link>
+          </Button>
+        </li>
+        {crumbs && crumbs.length > 1 && (
+          <>
+            {!showFullPath && (
+              <li>
+                <div className="flex items-center">
+                  <CareIcon
+                    icon="l-angle-right"
+                    className="h-4 text-gray-400"
+                  />
+                  <Button
+                    variant="link"
+                    className="h-auto p-0 font-light text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowFullPath(true)}
                   >
-                    <circle cx="4" cy="4" r="3"></circle>
-                  </svg>
-                  <svg
-                    className="mx-0.25 h-1.5 w-1.5 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 8 8"
-                  >
-                    <circle cx="4" cy="4" r="3"></circle>
-                  </svg>
-                  <svg
-                    className="mx-0.25 h-1.5 w-1.5 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 8 8"
-                  >
-                    <circle cx="4" cy="4" r="3"></circle>
-                  </svg>
-                </span>
-              </div>
-            </li>
-          )}
-          {crumbs?.slice(showFullPath ? 0 : -2).map((crumb: any) => {
-            return (
-              crumb.name && (
-                <li
-                  key={crumb.name}
-                  className={classNames(
-                    "cursor-pointer text-sm font-medium text-secondary-500 hover:text-secondary-700",
-                    crumb.style,
-                  )}
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className="h-5 w-5 shrink-0 text-secondary-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z"></path>
-                    </svg>
-                    <Link
-                      href={crumb.uri}
-                      className="ml-1 block text-secondary-500 hover:text-secondary-700"
-                    >
-                      {crumb.name.match(/^\w{8}-(\w{4}-){3}\w{12}$/) ? (
-                        <div>
-                          <span className="mr-1 text-lg">#</span>
-                          <span>{crumb.name.slice(0, 13) + "..."}</span>
-                        </div>
-                      ) : (
-                        <div className="w-20 truncate md:w-full">
-                          <span>{crumb.name}</span>
-                        </div>
-                      )}
-                    </Link>
-                  </div>
-                </li>
-              )
-            );
-          })}
-        </ol>
-      </nav>
-    </div>
+                    •••
+                  </Button>
+                </div>
+              </li>
+            )}
+            {showFullPath && crumbs.slice(0, -1).map(renderCrumb)}
+          </>
+        )}
+        {crumbs &&
+          crumbs.length > 0 &&
+          renderCrumb(crumbs[crumbs.length - 1], crumbs.length - 1, crumbs)}
+      </ol>
+    </nav>
   );
 }

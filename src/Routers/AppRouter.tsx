@@ -28,6 +28,7 @@ import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
 import useAuthUser from "../Common/hooks/useAuthUser";
 import careConfig from "@careConfig";
+import IconIndex from "../CAREUI/icons/Index";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
@@ -55,6 +56,10 @@ const Routes = {
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
+  "/icons": () => <IconIndex />,
+
+  // Only include the icon route in development environment
+  ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
 };
 
 export default function AppRouter() {
