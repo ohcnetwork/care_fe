@@ -8,11 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  # 1. Setup Job: Backend and Frontend Setup
+  # Setup and keep the environment running
   setup:
     runs-on: ubuntu-latest
-    outputs:
-      api_url: http://localhost:9000
     steps:
       - name: Checkout Repository 📥
         uses: actions/checkout@v3
@@ -37,7 +35,7 @@ jobs:
         run: |
           cd care
           echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.pre-built.yaml up -d  # Detached mode to keep backend running
+          make docker_config_file=docker-compose.pre-built.yaml up -d
           cd ..
 
       - name: Wait for backend to be up ♻
@@ -56,26 +54,28 @@ jobs:
       - name: Wait for frontend to be up ♻
         run: npx wait-on http://localhost:4000
 
-      # Keep setup running without blocking Cypress processes
-      - name: Keep setup alive during tests
-        run: sleep 9999999 # Keeps backend and frontend alive
+      # Don't use sleep here as it will block other jobs
+      - name: Background setup complete
+        run: echo "Setup complete!"
 
-  # 2. Cypress Tests: Run in Parallel
+  # Cypress Tests in Parallel: Start at the same time as setup, but wait for it to complete
   cypress-test:
-    needs: setup # Cypress tests depend on setup job
+    needs: [setup] # Cypress jobs should depend on the setup job
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        parallel_processes: [1, 2, 3, 4, 5, 6] # Define the number of independent Cypress processes
+        parallel_processes: [1, 2, 3, 4, 5, 6]
     steps:
       - name: Checkout Repository 📥
         uses: actions/checkout@v3
 
-      - name: Wait for backend and frontend to be available
+      # Wait for backend and frontend services to be available
+      - name: Wait for frontend and backend to be up
         run: |
           npx wait-on http://localhost:9000 && npx wait-on http://localhost:4000
 
-      - name: Run Cypress tests 🥬
+      # Run Cypress Tests in Parallel
+      - name: Run Cypress Tests 🥬
         run: |
           CYPRESS_SPLIT_INDEX=${{ matrix.parallel_processes }} \
           CYPRESS_SPLIT_TOTAL=6 \
