@@ -7,7 +7,7 @@ import {
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { lazy, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -31,8 +31,7 @@ import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface patientShiftProps {
   facilityId: string;
   patientId: string;

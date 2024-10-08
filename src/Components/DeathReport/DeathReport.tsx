@@ -332,7 +332,7 @@ export default function PrintDeathReport(props: { id: string }) {
         previewData()
       ) : (
         <Page
-          title={"Covid-19 Death Reporting : Form 1"}
+          title={t("covid_19_death_reporting_form_1")}
           crumbsReplacements={{
             [props.id]: { name: patientName },
             death_report: { style: "pointer-events-none" },
@@ -402,7 +402,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       <TextFormField
                         {...field("is_declared_positive")}
                         type="text"
-                        label="Whether declared positive"
+                        label={t("is_declared_positive")}
                       />
                     </div>
                   </div>
@@ -410,7 +410,7 @@ export default function PrintDeathReport(props: { id: string }) {
                     <div>
                       <DateFormField
                         {...field("date_declared_positive")}
-                        label="Date of declaring positive"
+                        label={t("date_declared_positive")}
                         position="LEFT"
                         className="w-full"
                         disableFuture
@@ -420,7 +420,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       <TextFormField
                         {...field("test_type")}
                         type="text"
-                        label="Type of test done"
+                        label={t("test_type")}
                       />
                     </div>
                   </div>
@@ -428,14 +428,14 @@ export default function PrintDeathReport(props: { id: string }) {
                     <div>
                       <DateFormField
                         {...field("date_of_test")}
-                        label="Date of sample collection for Covid testing"
+                        label={t("date_of_test")}
                         position="LEFT"
                       />
                     </div>
                     <div>
                       <DateFormField
                         {...field("date_of_result")}
-                        label="Covid confirmation date"
+                        label={t("date_of_result")}
                         position="LEFT"
                         disableFuture
                       />
@@ -453,7 +453,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       <TextFormField
                         {...field("is_vaccinated")}
                         type="text"
-                        label="Whether vaccinated"
+                        label={t("is_vaccinated")}
                       />
                     </div>
                   </div>

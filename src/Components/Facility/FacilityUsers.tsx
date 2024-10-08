@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
@@ -17,8 +17,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { UserFacilities } from "../Users/ManageUsers";
 import { useTranslation } from "react-i18next";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function FacilityUsers(props: any) {
   const { t } = useTranslation();
   const { facilityId } = props;
