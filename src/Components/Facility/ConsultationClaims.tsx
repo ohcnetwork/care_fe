@@ -2,7 +2,7 @@ import * as Notification from "../../Utils/Notifications";
 
 import ClaimCard from "../HCX/ClaimCard";
 import CreateClaimCard from "../HCX/CreateClaimCard";
-import PageTitle from "../Common/PageTitle";
+import PageTitle from "@/Components/Common/PageTitle";
 import { navigate } from "raviger";
 import routes from "../../Redux/api";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";

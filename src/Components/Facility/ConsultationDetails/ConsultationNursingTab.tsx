@@ -1,4 +1,4 @@
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { NursingPlot } from "../Consultations/NursingPlot";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,7 @@ import { classNames, formatDate, formatTime } from "../../../Utils/utils";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import PageTitle from "@/Components/Common/PageTitle";
 
 export default function ConsultationNursingTab(props: ConsultationTabProps) {
   const { t } = useTranslation();

@@ -114,7 +114,7 @@ const ReportTable: FC<ReportTableProps> = ({
                 >
                   Name
                 </th>
-                {sessions.map((session) => (
+                {sessions.map((session: any) => (
                   <th
                     scope="col"
                     key={session.session_external_id}

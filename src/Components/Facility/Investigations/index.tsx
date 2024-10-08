@@ -1,5 +1,5 @@
 import { navigate, useQueryParams } from "raviger";
-import { lazy, useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import * as Notification from "../../../Utils/Notifications.js";
 import { TestTable } from "./Table";
 
@@ -12,8 +12,7 @@ import { Submit } from "../../Common/components/ButtonV2";
 import Page from "../../Common/components/Page";
 import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
 
-const Loading = lazy(() => import("../../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 const initialState = {
   form: {},
 };

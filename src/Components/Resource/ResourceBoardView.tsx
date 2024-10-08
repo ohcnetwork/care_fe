@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import { navigate } from "raviger";
 import ListFilter from "./ListFilter";
 import ResourceBoard from "./ResourceBoard";
@@ -17,8 +17,8 @@ import Tabs from "../Common/components/Tabs";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 
-const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 const ScrollingComponent = withScrolling("div");
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 

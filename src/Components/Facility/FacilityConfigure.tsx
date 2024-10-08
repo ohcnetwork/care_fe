@@ -1,4 +1,4 @@
-import { lazy, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Submit } from "../Common/components/ButtonV2";
@@ -10,8 +10,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 import { t } from "i18next";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 const initForm = {
   name: "",
   state: 0,

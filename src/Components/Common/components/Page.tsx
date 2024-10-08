@@ -31,8 +31,7 @@ export default function Page(props: PageProps) {
 
   let padding = "";
   if (!props.noImplicitPadding) {
-    if (!props.hideBack || props.componentRight)
-      padding = "md:px-6 px-3 py-3.5";
+    if (!props.hideBack || props.componentRight) padding = "md:px-6 px-3 py-1";
     else padding = "px-6 py-5";
   }
 
@@ -45,7 +44,6 @@ export default function Page(props: PageProps) {
           breadcrumbs={props.breadcrumbs}
           backUrl={props.backUrl}
           hideBack={props.hideBack}
-          justifyContents={props.justifyContents}
           componentRight={props.componentRight}
           crumbsReplacements={props.crumbsReplacements}
           focusOnLoad={props.focusOnLoad}

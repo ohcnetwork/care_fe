@@ -1,4 +1,4 @@
-import { useState, lazy, SyntheticEvent } from "react";
+import { useState, SyntheticEvent } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Submit, Cancel } from "../Common/components/ButtonV2";
@@ -11,8 +11,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface Props {
   facilityId: string;
   locationId?: string;

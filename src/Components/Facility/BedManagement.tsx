@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { BedModel } from "./models";
 import { ReactElement } from "react";
@@ -13,8 +13,7 @@ import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import useFilters from "../../Common/hooks/useFilters";
 import useAuthUser from "../../Common/hooks/useAuthUser";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface BedManagementProps {
   facilityId: string;
   locationId: string;

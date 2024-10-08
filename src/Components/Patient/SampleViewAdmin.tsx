@@ -1,6 +1,6 @@
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
-import { useState, lazy } from "react";
+import { useState } from "react";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -22,8 +22,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function SampleViewAdmin() {
   const {
     qParams,

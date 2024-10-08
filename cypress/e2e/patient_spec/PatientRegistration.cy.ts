@@ -3,7 +3,6 @@ import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { generatePhoneNumber } from "../../pageobject/utils/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
-import PatientExternal from "../../pageobject/Patient/PatientExternal";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 
@@ -34,7 +33,6 @@ describe("Patient Creation with consultation", () => {
   const patientPage = new PatientPage();
   const facilityPage = new FacilityPage();
   const patientTransfer = new PatientTransfer();
-  const patientExternal = new PatientExternal();
   const patientInsurance = new PatientInsurance();
   const patientMedicalHistory = new PatientMedicalHistory();
   const phone_number = generatePhoneNumber();
@@ -70,7 +68,6 @@ describe("Patient Creation with consultation", () => {
   const patientTransferPhoneNumber = "9849511866";
   const patientTransferFacility = "Dummy Shifting Center";
   const patientTransferName = "Dummy Patient 10";
-  const patientExternalName = "Patient 20";
   const patientOccupation = "Student";
 
   before(() => {
@@ -302,31 +299,6 @@ describe("Patient Creation with consultation", () => {
     cy.verifyNotification(
       "Patient - Patient transfer cannot be completed because the patient has an active consultation in the same facility",
     );
-  });
-
-  it("Patient Registration using External Result Import", () => {
-    // copy the patient external ID from external results
-    cy.awaitUrl("/external_results");
-    patientExternal.verifyExternalListPatientName(patientExternalName);
-    patientExternal.verifyExternalIdVisible();
-    // cypress have a limitation to work only asynchronously
-    // import the result and create a new patient
-    let extractedId = "";
-    cy.get("#patient-external-id")
-      .invoke("text")
-      .then((text) => {
-        extractedId = text.split("Care external results ID: ")[1];
-        cy.log(`Extracted Care external results ID: ${extractedId}`);
-        cy.awaitUrl("/patients");
-        patientPage.createPatient();
-        patientPage.selectFacility(patientFacility);
-        patientPage.patientformvisibility();
-        patientExternal.clickImportFromExternalResultsButton();
-        patientExternal.typeCareExternalResultId(extractedId);
-        patientExternal.clickImportPatientData();
-      });
-    // verify the patient is successfully created
-    patientExternal.verifyExternalPatientName(patientExternalName);
   });
 
   afterEach(() => {

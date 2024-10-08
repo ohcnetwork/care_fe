@@ -15,7 +15,6 @@ const activeLinkPriority = {
   "/sample": "/sample",
   "/shifting": "/shifting",
   "/resource": "/resource",
-  "/external_results": "/external_results",
   "/users": "/users",
   "/notice_board": "/notice_board",
   "/facility": "/facility",

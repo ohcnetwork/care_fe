@@ -16,7 +16,9 @@ import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import useOperateCamera from "../../CameraFeed/useOperateCamera";
+import useOperateCamera, {
+  PTZPayload,
+} from "../../CameraFeed/useOperateCamera";
 
 interface Props {
   assetId: string;
@@ -95,18 +97,20 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
 
   const addPreset = async (e: SyntheticEvent) => {
     e.preventDefault();
-    const data = {
+    const meta = {
       bed_id: bed.id,
       preset_name: newPreset,
     };
     try {
       setLoadingAddPreset(true);
 
-      const { data: presetData } = await operate({ type: "get_status" });
+      const { data } = await operate({ type: "get_status" });
+      const { position } = (data as { result: { position: PTZPayload } })
+        .result;
 
       const { res } = await request(routes.createAssetBed, {
         body: {
-          meta: { ...data, ...presetData },
+          meta: { ...meta, position },
           asset: assetId,
           bed: bed?.id as string,
         },

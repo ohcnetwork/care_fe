@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { LANGUAGE_NAMES } from "../../Locale/config";
 import { classNames } from "../../Utils/utils";
+import careConfig from "@careConfig";
+import { LANGUAGES } from "../../i18n";
 
 export const LanguageSelectorLogin = () => {
   const { i18n, t } = useTranslation();
@@ -17,12 +18,16 @@ export const LanguageSelectorLogin = () => {
     }
   };
 
+  const availableLocales = Object.keys(LANGUAGES).filter((l) =>
+    careConfig.availableLocales?.includes(l),
+  );
+
   return (
     <div className="mt-8 flex flex-col items-center text-sm text-secondary-800">
       {t("available_in")}
       <br />
-      <div className="inline-flex flex-wrap gap-3">
-        {Object.keys(LANGUAGE_NAMES).map((e: string) => (
+      <div className="inline-flex flex-wrap items-center justify-center gap-3">
+        {availableLocales.map((e: string) => (
           <button
             key={e}
             onClick={() => handleLanguage(e)}
@@ -33,7 +38,7 @@ export const LanguageSelectorLogin = () => {
                 "text-primary-600 underline",
             )}
           >
-            {LANGUAGE_NAMES[e]}
+            {LANGUAGES[e]}
           </button>
         ))}
       </div>

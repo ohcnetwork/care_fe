@@ -1,4 +1,4 @@
-import { useState, lazy } from "react";
+import { useState } from "react";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
 import { classNames } from "../../Utils/utils";
@@ -7,8 +7,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function InventoryList(props: any) {
   const { facilityId }: any = props;
   let inventoryItem: any = null;

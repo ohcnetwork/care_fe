@@ -6,7 +6,7 @@ import {
   SHIFTING_CHOICES_WARTIME,
 } from "../../Common/constants";
 import { Link, navigate } from "raviger";
-import { lazy, useState } from "react";
+import { useState } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CommentSection from "./CommentsSection";
 import ConfirmDialog from "../Common/ConfirmDialog.js";
@@ -29,8 +29,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import { PatientModel } from "../Patient/models.js";
 import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ShiftDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);

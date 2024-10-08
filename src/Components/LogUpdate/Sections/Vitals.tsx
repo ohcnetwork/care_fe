@@ -137,7 +137,7 @@ const BPAttributeEditor = ({
       name={attribute}
       label={t(attribute)}
       onChange={(event) => {
-        const bp = log.bp ?? {};
+        const bp = { systolic: log.bp?.systolic, diastolic: log.bp?.diastolic };
         bp[event.name as keyof BloodPressure] = event.value;
         onChange({
           bp: Object.values(bp).filter(Boolean).length ? bp : undefined,

@@ -1,4 +1,4 @@
-import { lazy, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Submit } from "../Common/components/ButtonV2";
@@ -8,8 +8,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 const initForm = {
   health_facility: null,
   hf_id: "",

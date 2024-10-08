@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import BadgesList from "./BadgesList";
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
@@ -20,8 +20,7 @@ import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ListView() {
   const {
     qParams,

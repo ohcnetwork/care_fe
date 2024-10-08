@@ -1,8 +1,7 @@
-import { lazy } from "react";
 import { ConsultationTabProps } from "./index";
 import { VentilatorPlot } from "../Consultations/VentilatorPlot";
 
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import PageTitle from "@/Components/Common/PageTitle";
 
 export const ConsultationVentilatorTab = (props: ConsultationTabProps) => {
   return (

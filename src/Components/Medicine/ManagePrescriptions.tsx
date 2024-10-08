@@ -10,24 +10,22 @@ export default function ManagePrescriptions() {
   const { goBack } = useAppHistory();
 
   return (
-    <Page
-      title={t("manage_prescriptions")}
-      options={
-        <ButtonV2 href="prescriptions/print">
-          <CareIcon icon="l-print" className="text-lg" />
-          Print
-        </ButtonV2>
-      }
-    >
+    <Page title={t("manage_prescriptions")}>
       <div
         className="mx-auto flex w-full max-w-5xl flex-col gap-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
         id="medicine-preview"
       >
         <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600">
           <div>
-            <h3 className="mb-4 text-lg font-semibold">
-              {t("prescription_medications")}
-            </h3>
+            <div className="mb-4 flex flex-col items-center justify-between gap-2 md:flex-row">
+              <h3 className="text-lg font-semibold">
+                {t("prescription_medications")}
+              </h3>
+              <ButtonV2 href="prescriptions/print">
+                <CareIcon icon="l-print" className="text-lg" />
+                {t("print")}
+              </ButtonV2>
+            </div>
             <PrescriptionBuilder />
           </div>
           <div>

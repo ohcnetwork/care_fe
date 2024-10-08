@@ -4,7 +4,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "./Dialog";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 import { useState } from "react";
-import { Scanner } from "@yudiel/react-qr-scanner";
+import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 
 interface IQRScannerModalProps {
   show: boolean;
@@ -33,15 +33,22 @@ const QRScannerModal = ({
           {description || "Scan QR code!"}
         </h2>
         <Scanner
-          onResult={onScan}
-          onError={(e) =>
-            Notification.Error({
-              msg: e.message,
-            })
-          }
-          options={{
-            delayBetweenScanAttempts: 300,
+          onScan={(detectedCodes: IDetectedBarcode[]) => {
+            if (detectedCodes.length > 0) {
+              const text = detectedCodes[0].rawValue;
+              if (text) {
+                onScan(text);
+              }
+            }
           }}
+          onError={(e: unknown) => {
+            const errorMessage =
+              e instanceof Error ? e.message : "Unknown error";
+            Notification.Error({
+              msg: errorMessage,
+            });
+          }}
+          scanDelay={3000}
         />
       </div>
     </DialogModal>

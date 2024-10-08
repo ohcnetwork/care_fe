@@ -1,8 +1,7 @@
-import { lazy } from "react";
 import { ConsultationTabProps } from "./index";
 import { ABGPlots } from "../Consultations/ABGPlots";
 
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import PageTitle from "@/Components/Common/PageTitle";
 
 export const ConsultationABGTab = (props: ConsultationTabProps) => {
   return (

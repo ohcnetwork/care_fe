@@ -1156,68 +1156,6 @@ export const AssetImportSchema: SchemaType = {
   },
 };
 
-export const ExternalResultImportSchema: SchemaType = {
-  District: { prop: "district", type: "any" },
-  "SRF ID": { prop: "srf_id", type: "string" },
-  Name: { prop: "name", type: "string" },
-  Age: { prop: "age", type: "number" },
-  "Age in": { prop: "age_in", type: "string" },
-  Gender: { prop: "gender", type: "string" },
-  "Mobile Number": { prop: "mobile_number", type: "any" },
-  Address: { prop: "address", type: "string" },
-  Ward: { prop: "ward", type: "number" },
-  "Local Body": { prop: "local_body", type: "string" },
-  "Local Body Type": { prop: "local_body_type", type: "string" },
-  Source: { prop: "source", type: "string" },
-  "Sample Collection Date": {
-    prop: "sample_collection_date",
-    type: "string",
-    parse: (date: string) => {
-      if (!date) return null;
-      if (isNaN(Date.parse(date))) {
-        const parsed = new Date(date);
-        if (String(parsed) === "Invalid Date") {
-          throw new Error("Invalid Date: " + date);
-        }
-        return dateQueryString(parsed);
-      } else {
-        const parsed = new Date(date);
-        if (String(parsed) === "Invalid Date") {
-          throw new Error("Invalid Date: " + date);
-        }
-        return dateQueryString(parsed);
-      }
-    },
-  },
-  "Result Date": {
-    prop: "result_date",
-    type: "string",
-    parse: (date: string) => {
-      if (!date) return null;
-      if (isNaN(Date.parse(date))) {
-        const parsed = new Date(date);
-        if (String(parsed) === "Invalid Date") {
-          throw new Error("Invalid Date: " + date);
-        }
-        return dateQueryString(parsed);
-      } else {
-        const parsed = new Date(date);
-        if (String(parsed) === "Invalid Date") {
-          throw new Error("Invalid Date: " + date);
-        }
-        return dateQueryString(parsed);
-      }
-    },
-  },
-  "Test Type": { prop: "test_type", type: "string" },
-  "Lab Name": { prop: "lab_name", type: "string" },
-  "Sample Type": { prop: "sample_type", type: "string" },
-  "Patient Status": { prop: "patient_status", type: "string" },
-  "Is Repeat": { prop: "is_repeat", type: "string" },
-  "Patient Category": { prop: "patient_category", type: "string" },
-  Result: { prop: "result", type: "string" },
-};
-
 // ABDM
 export const ABDM_CONSENT_PURPOSE = [
   { value: "CAREMGT", label: "Care Management" },

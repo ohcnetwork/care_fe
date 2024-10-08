@@ -7,12 +7,11 @@ import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
 import careConfig from "@careConfig";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
-const LOGO_COLLAPSE = "/images/logo_collapsed.svg";
+const LOGO_COLLAPSE = "/images/care_logo_mark.svg";
 
 type StatelessSidebarProps =
   | {
@@ -29,13 +28,10 @@ type StatelessSidebarProps =
     };
 
 const StatelessSidebar = ({
-  shrinkable = false,
   shrinked = false,
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
-  const authUser = useAuthUser();
-
   const NavItems: {
     text: string;
     to: string;
@@ -47,17 +43,6 @@ const StatelessSidebar = ({
     { text: "Sample Test", to: "/sample", icon: "l-medkit" },
     { text: "Shifting", to: "/shifting", icon: "l-ambulance" },
     { text: "Resource", to: "/resource", icon: "l-heart-medical" },
-    ...(!["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type,
-    )
-      ? ([
-          {
-            text: "External Results",
-            to: "/external_results",
-            icon: "l-clipboard-notes",
-          },
-        ] as const)
-      : []),
     { text: "Users", to: "/users", icon: "l-users-alt" },
     { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
   ];
@@ -111,7 +96,7 @@ const StatelessSidebar = ({
 
   return (
     <nav
-      className={`group flex h-full flex-col bg-primary-800 py-3 md:py-5 ${
+      className={`group flex h-full flex-col bg-gray-100 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
@@ -119,16 +104,35 @@ const StatelessSidebar = ({
           : "overflow-y-auto overflow-x-hidden"
       }`}
     >
-      <div className="h-3" /> {/* flexible spacing */}
-      <Link href="/">
-        <img
-          className={`${
-            shrinked ? "mx-auto" : "ml-5"
-          } mb-2 h-5 self-start transition md:mb-5 md:h-8`}
-          src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
-        />
-      </Link>
-      <div className="h-3" /> {/* flexible spacing */}
+      {shrinked && (
+        <div>
+          <ToggleShrink
+            shrinked={shrinked}
+            toggle={() => setShrinked && setShrinked(!shrinked)}
+          />
+        </div>
+      )}
+      <div
+        className={`flex items-center ${shrinked ? "mt-2 justify-center" : "justify-between"}`}
+      >
+        <Link href="/" className="flex items-center justify-between">
+          <img
+            className={`${
+              shrinked ? "mx-auto" : "ml-4 md:ml-2"
+            } h-8 self-start transition md:h-12 lg:h-12`}
+            src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
+          />
+        </Link>
+        {!shrinked && (
+          <div className="ml-1">
+            <ToggleShrink
+              shrinked={shrinked}
+              toggle={() => setShrinked && setShrinked(!shrinked)}
+            />
+          </div>
+        )}
+      </div>
+      <div className="h-4" /> {/* flexible spacing */}
       <div className="relative flex h-full flex-col">
         <div className="relative flex flex-1 flex-col md:flex-none">
           <div
@@ -170,20 +174,6 @@ const StatelessSidebar = ({
         </div>
         <div className="hidden md:block md:flex-1" />
 
-        <div className="relative flex justify-end">
-          {shrinkable && (
-            <div
-              className={`${
-                shrinked ? "mx-auto" : "self-end"
-              } flex h-12 translate-y-4 self-end opacity-0 transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100`}
-            >
-              <ToggleShrink
-                shrinked={shrinked}
-                toggle={() => setShrinked && setShrinked(!shrinked)}
-              />
-            </div>
-          )}
-        </div>
         <SidebarUserCard shrinked={shrinked} />
       </div>
     </nav>
@@ -230,7 +220,7 @@ interface ToggleShrinkProps {
 
 const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
   <div
-    className={`flex h-10 w-10 cursor-pointer items-center justify-center self-end rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
+    className={`flex h-5 w-5 cursor-pointer items-center justify-center self-end rounded bg-gray-300 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
       shrinked ? "mx-auto" : "mr-4"
     } transition-all duration-200 ease-in-out`}
     onClick={toggle}

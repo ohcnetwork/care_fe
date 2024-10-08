@@ -70,6 +70,10 @@ Authenticate to staging API with any of the following credentials
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
 
+### Translations
+
+All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
+
 ### Testing
 
 To ensure the quality of our pull requests, we use a variety of tools:

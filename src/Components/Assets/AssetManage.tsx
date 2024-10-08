@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactElement, lazy } from "react";
+import { useState, useEffect, ReactElement } from "react";
 import {
   AssetClass,
   assetClassProps,
@@ -18,7 +18,7 @@ import { UserRole, USER_TYPES } from "../../Common/constants";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
-const Loading = lazy(() => import("../Common/Loading"));
+import Loading from "@/Components/Common/Loading";
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";

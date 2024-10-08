@@ -1,6 +1,6 @@
 import Card from "../../CAREUI/display/Card";
 
-import { useState, lazy, SyntheticEvent } from "react";
+import { useState, SyntheticEvent } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -15,8 +15,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface Props {
   facilityId: string;
   locationId: string;
@@ -127,7 +126,8 @@ export const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
       const { res } = await request(routes.createFacilityBed, {
         body: { ...data, facility: facilityId, location: locationId },
       });
-      res?.ok && onSuccess("Bed(s) created successfully");
+      res?.ok &&
+        onSuccess(t("bed_created_notification", { count: numberOfBeds }));
     }
   };
 

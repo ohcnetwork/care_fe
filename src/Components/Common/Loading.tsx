@@ -1,4 +1,4 @@
-const img = "https://cdn.ohc.network/light-logo.svg";
+const img = "/images/care_logo_gray.svg";
 
 const Loading = () => {
   return (
