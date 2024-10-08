@@ -23,7 +23,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   getPincodeDetails,
@@ -65,8 +65,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
 import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface FacilityProps {
   facilityId?: string;
 }

@@ -12,7 +12,6 @@ const MENU_TAGS: { [key: string]: string } = {
   sample: "Sample Tests",
   shifting: "Shiftings",
   resource: "Resources",
-  external_results: "External Results",
   users: "Users",
   notice_board: "Notice Board",
 };
