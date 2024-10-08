@@ -16,6 +16,29 @@ describe("Patient Homepage present functionalities", () => {
     cy.awaitUrl("/patients");
   });
 
+  it("Patient Details based advance filters applied in the patient tab", () => {
+    // Patient Filtering based on data
+    patientHome.clickPatientAdvanceFilters();
+    cy.clickAndSelectOption("#gender-advancefilter", "Male");
+    cy.clickAndSelectOption("#category-advancefilter", "Moderate");
+    cy.get("#age_min").type("18");
+    cy.get("#age_max").type("24");
+    cy.clickAndMultiSelectOption(
+      "#last_consultation_admitted_bed_type_list",
+      "No bed assigned",
+    );
+    cy.clickAndMultiSelectOption(
+      "#last_consultation__consent_types",
+      "No consents",
+    );
+    cy.clickAndSelectOption("#telemedicine-advancefilter", "No");
+    cy.clickAndSelectOption("#review-advancefilter", "No");
+    cy.clickAndSelectOption("#medico-advancefilter", "Non-Medico-Legal");
+    patientHome.clickPatientFilterApply();
+    cy.get("a[data-cy='patient']").should("contain.text", "Dummy Patient");
+    // Verify the presence of badges
+  });
+
   it("Export the live patient list based on a date range", () => {
     patientHome.clickPatientExport();
     cy.verifyNotification("Please select a seven day period");

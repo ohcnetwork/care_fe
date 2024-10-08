@@ -41,5 +41,9 @@ class PatientHome {
   typePatientModifiedAfterDate(endDate: string) {
     cy.clickAndTypeDate("input[name='modified_date_end']", endDate);
   }
+
+  clickPatientAdvanceFilters() {
+    cy.get("#advanced-filter").click();
+  }
 }
 export default PatientHome;
