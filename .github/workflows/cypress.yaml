@@ -9,14 +9,16 @@ on:
 
 jobs:
   cypress-run:
-    if: github.repository == 'ohcnetwork/care_fe' # Ensures this runs only for care_fe repo
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Use GitHub-hosted runner, or self-hosted for more power if needed
+    strategy:
+      matrix:
+        parallel_processes: [1, 2, 3, 4, 5, 6] # Define the number of independent processes (parallel workers)
+    env:
+      REACT_CARE_API_URL: http://localhost:9000 # Set environment variables as needed
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository 📥
+      - name: Checkout Repository 📥
         uses: actions/checkout@v3
 
-      # Step 2: Set backend branch based on the target branch
       - name: Set backend branch
         id: backend-branch
         run: |
@@ -26,7 +28,6 @@ jobs:
             echo "branch=develop" >> $GITHUB_OUTPUT
           fi
 
-      # Step 3: Checkout the care backend repository
       - name: Checkout care backend 📥
         uses: actions/checkout@v3
         with:
@@ -34,8 +35,7 @@ jobs:
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
 
-      # Step 4: Start care docker containers 🐳
-      - name: Start care docker containers
+      - name: Start care docker containers 🐳
         run: |
           cd care
           echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
@@ -44,64 +44,57 @@ jobs:
           make docker_config_file=docker-compose.pre-built.yaml up 
           make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
           cd ..
+        env:
+          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
-      # Step 5: Wait for the backend to be ready
       - name: Wait for backend to be up ♻
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 5
-          max_attempts: 10
+          timeout_minutes: 1
+          max_attempts: 5
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
           on_retry_command: sleep 5
 
-      # Step 6: Determine PR origin (whether it's a fork or not)
-      - name: Determine PR Origin
-        id: pr_origin
-        run: echo "::set-output name=is_forked::$(echo ${{ github.event.pull_request.head.repo.fork }})"
-
-      # Step 7: Setup Node.js environment
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      # Step 8: Install dependencies using npm ci (faster for CI)
       - name: Install dependencies 📦
-        run: npm ci
+        run: npm ci # Use npm ci for faster and cleaner installations
 
-      # Step 9: Build the frontend using npm
       - name: Build frontend ⚙️
         run: npm run build
 
-      # Step 10: Start frontend using Vite
       - name: Start frontend server
         run: npm run preview -- --host &
         env:
           CARE_API: http://localhost:9000
 
-      # Step 11: Wait for the frontend to be up
       - name: Wait for frontend to be up ♻
         run: npx wait-on http://localhost:4000
 
-      # Step 12: Run Cypress tests in parallel using cypress-parallel
-      - name: Run Cypress tests in parallel
+      - name: Cypress Tests with Parallel Execution 🥬
         run: |
-          npx cypress-parallel -s 'cypress/e2e/**/*.cy.ts' -n 4 --ci-build-id ${{ github.sha }}-${{ github.run_id }} --browser chrome --record
+          CYPRESS_SPLIT_INDEX=${{ matrix.parallel_processes }} \
+          CYPRESS_SPLIT_TOTAL=6 \
+          CYPRESS_SPLIT_TESTS=true \
+          npx cypress run --browser chrome --record --parallel=false \
+          --ci-build-id ${{ github.sha }}-${{ github.run_id }}
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          CARE_API: http://localhost:9000
           NODE_OPTIONS: --max_old_space_size=4096
+          COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
+          COMMIT_INFO_SHA: ${{ github.event.pull_request.head.sha }}
 
-      # Step 13: Upload Cypress screenshots on failure 📸
-      - name: Upload Cypress screenshots on failure
+      - name: Upload Cypress screenshots on failure 📸
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
 
-      # Step 14: Upload Cypress videos 📹
-      - name: Upload Cypress videos on failure
+      - name: Upload Cypress videos 📹
         uses: actions/upload-artifact@v3
         if: failure()
         with:
