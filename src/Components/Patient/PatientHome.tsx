@@ -16,7 +16,7 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -43,8 +43,7 @@ import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
 import { Button } from "@/Components/ui/button";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
 };
@@ -319,11 +318,11 @@ export const PatientHome = (props: any) => {
               />
               <div>
                 <AlertTitle className="flex items-center">
-                  {t("consultation_not_filed")}
+                  {t("consultation_not_found")}
                 </AlertTitle>
                 <AlertDescription>
                   <span className="text-gray-700">
-                    {t("consultation_not_filed_description")}
+                    {t("consultation_not_found_description")}
                   </span>
                 </AlertDescription>
               </div>

@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 
-import { useReducer, useState, lazy } from "react";
+import { useReducer, useState } from "react";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
 import { SampleTestModel } from "./models";
@@ -17,8 +17,7 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 const initForm: SampleTestModel = {
   isFastTrack: false,
   fast_track: "",
