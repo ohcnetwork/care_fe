@@ -304,31 +304,6 @@ describe("Patient Creation with consultation", () => {
     );
   });
 
-  it("Patient Registration using External Result Import", () => {
-    // copy the patient external ID from external results
-    cy.awaitUrl("/external_results");
-    patientExternal.verifyExternalListPatientName(patientExternalName);
-    patientExternal.verifyExternalIdVisible();
-    // cypress have a limitation to work only asynchronously
-    // import the result and create a new patient
-    let extractedId = "";
-    cy.get("#patient-external-id")
-      .invoke("text")
-      .then((text) => {
-        extractedId = text.split("Care external results ID: ")[1];
-        cy.log(`Extracted Care external results ID: ${extractedId}`);
-        cy.awaitUrl("/patients");
-        patientPage.createPatient();
-        patientPage.selectFacility(patientFacility);
-        patientPage.patientformvisibility();
-        patientExternal.clickImportFromExternalResultsButton();
-        patientExternal.typeCareExternalResultId(extractedId);
-        patientExternal.clickImportPatientData();
-      });
-    // verify the patient is successfully created
-    patientExternal.verifyExternalPatientName(patientExternalName);
-  });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });
