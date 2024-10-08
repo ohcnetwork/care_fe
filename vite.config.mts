@@ -137,6 +137,7 @@ export default defineConfig({
   resolve: {
     alias: {
       ...getPluginAliases(),
+      "@": path.resolve(__dirname, "./src"),
       "@careConfig": path.resolve(__dirname, "./care.config.ts"),
       "@core": path.resolve(__dirname, "src/"),
     },

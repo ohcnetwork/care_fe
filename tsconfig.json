@@ -18,6 +18,7 @@
     "types": ["vite/client", "vite-plugin-pwa/client"],
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@core/*": ["src/*"],
       "@apps/*": ["apps/*/src"],
       "@app-manifest/*": ["apps/*/src/manifest.ts"],
