@@ -67,8 +67,9 @@ jobs:
       - name: Wait for frontend to be up ♻
         run: npx wait-on http://localhost:4000
 
-      - name: Keep the setup job alive until Cypress jobs finish
-        run: sleep 9999999 # Keeps the setup job alive (long enough for tests to finish)
+      # Remove the sleep here. Let the setup job complete now.
+      - name: Mark setup complete
+        run: echo "Setup complete, backend and frontend running in detached mode."
 
   # 2. Cypress Tests Job: Parallel Test Execution
   cypress-test:
