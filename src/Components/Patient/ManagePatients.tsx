@@ -53,6 +53,7 @@ import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import Tabs from "../Common/components/Tabs.js";
 import request from "../../Utils/request/request.js";
+import { Avatar } from "../Common/Avatar.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -542,9 +543,10 @@ export const PatientManager = () => {
                 </div>
               ) : (
                 <div className="flex min-h-20 items-center justify-center">
-                  <CareIcon
-                    icon="l-user-injured"
-                    className="text-3xl text-secondary-500"
+                  <Avatar
+                    name={patient.name}
+                    square={true}
+                    colors={["#F9FAFB", "#BFB8CB"]}
                   />
                 </div>
               )}
