@@ -4,6 +4,8 @@
   "mark_as_unread": "ಓದದಿರುವಂತೆ ಗುರುತಿಸಿ",
   "subscribe": "ಚಂದಾದಾರರಾಗಿ",
   "subscribe_on_this_device": "ಈ ಸಾಧನದಲ್ಲಿ ಚಂದಾದಾರರಾಗಿ",
+  "notification_permission_denied": "ಅಧಿಸೂಚನೆ ಅನುಮತಿ ನಿರಾಕರಿಸಲಾಗಿದೆ",
+  "notification_permission_granted": "ಅಧಿಸೂಚನೆ ಅನುಮತಿ ನೀಡಲಾಗಿದೆ",
   "show_unread_notifications": "ಓದದಿರುವುದನ್ನು ತೋರಿಸಿ",
   "show_all_notifications": "ಎಲ್ಲವನ್ನೂ ತೋರಿಸು",
   "filter_by_category": "ವರ್ಗದ ಪ್ರಕಾರ ಫಿಲ್ಟರ್ ಮಾಡಿ",
