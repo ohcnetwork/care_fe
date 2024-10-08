@@ -69,12 +69,12 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               )}
             </Link>
 
-            <div className="flex h-fit w-full flex-col flex-wrap justify-between md:h-full">
+            <div className="mx-auto flex h-fit w-full max-w-full flex-col flex-wrap justify-between md:h-full lg:max-w-3xl">
               <div className="w-full p-4">
-                <div className="flex gap-5">
+                <div className="flex flex-col gap-5 sm:flex-row">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-secondary-300 min-[425px]:flex"
+                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center rounded-md bg-secondary-300 sm:flex"
                   >
                     {(facility.read_cover_image_url && (
                       <img
@@ -102,7 +102,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     >
                       <Link
                         href={`/facility/${facility.id}`}
-                        className="float-left text-xl font-bold capitalize text-inherit hover:text-inherit"
+                        className="text-xl font-bold capitalize text-inherit hover:text-inherit"
                       >
                         {facility.name}
                       </Link>
@@ -111,6 +111,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         href={`/facility/${facility.id}/cns`}
                         border
                         ghost
+                        className="mt-2 sm:mt-0"
                       >
                         <CareIcon
                           icon="l-monitor-heart-rate"
