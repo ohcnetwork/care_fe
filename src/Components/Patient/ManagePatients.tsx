@@ -111,7 +111,7 @@ export const PatientManager = () => {
   const setPhoneNumber = (value: string) => {
     _setPhoneNumber(value);
     const error = PhoneNumberValidator()(value);
-    if (value.length >= 13 && !error) {
+    if (!error) {
       updateQuery({ phone_number: value });
     }
     if ((value === "+91" || value === "") && qParams.phone_number) {
@@ -122,7 +122,7 @@ export const PatientManager = () => {
   const setEmergencyPhoneNumber = (value: string) => {
     _setEmergencyPhoneNumber(value);
     const error = PhoneNumberValidator()(value);
-    if (value.length >= 13 && !error) {
+    if (!error) {
       updateQuery({ emergency_phone_number: value });
     }
     if ((value === "+91" || value === "") && qParams.emergency_phone_number) {
