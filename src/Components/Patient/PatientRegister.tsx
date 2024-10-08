@@ -957,16 +957,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             : navigate(`/facility/${facilityId}`);
         }}
         componentRight={
-          <Button
-            variant="outline_primary"
-            onClick={(e) => {
-              e.preventDefault();
-              setShowLinkAbhaNumberModal(true);
-            }}
-          >
-            <CareIcon icon="l-user-square" className="mr-2" />
-            <span>Generate/Link ABHA Number</span>
-          </Button>
+          !state.form.abha_number && (
+            <Button
+              variant="outline_primary"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowLinkAbhaNumberModal(true);
+              }}
+            >
+              <CareIcon icon="l-user-square" className="mr-2" />
+              <span>Generate/Link ABHA Number</span>
+            </Button>
+          )
         }
         crumbsReplacements={{
           [facilityId]: { name: facilityObject?.name },
@@ -1048,19 +1050,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             }}
                           />
                         )}
-                        {!state.form.abha_number ? (
-                          <Button
-                            variant="outline"
-                            className="border-green-700 text-green-700 hover:bg-green-700 hover:text-white"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setShowLinkAbhaNumberModal(true);
-                            }}
-                          >
-                            <CareIcon icon="l-user-square" className="mr-2" />
-                            <span>Generate/Link ABHA Number</span>
-                          </Button>
-                        ) : (
+                        {state.form.abha_number && (
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                             <div id="abha-number">
                               <TextFormField
