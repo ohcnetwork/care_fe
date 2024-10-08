@@ -58,6 +58,7 @@
     "axios": "^1.7.7",
     "bowser": "^2.11.0",
     "browser-image-compression": "^2.0.2",
+    "browserslist": "^4.24.0",
     "browserslist-useragent-regexp": "^4.1.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
