@@ -106,6 +106,16 @@ export const formatName = (user: { first_name: string; last_name: string }) => {
   return `${user.first_name} ${user.last_name}`;
 };
 
+export const formatDisplayName = (user: {
+  first_name: string;
+  last_name: string;
+  username: string;
+}) => {
+  return user.first_name && user.last_name
+    ? `${user.first_name} ${user.last_name}`
+    : user.first_name || user.username || "User";
+};
+
 export const relativeTime = (time?: DateLike) => {
   return `${dayjs(time).fromNow()}`;
 };
