@@ -1,48 +1,18 @@
 import React from "react";
 
-const colors: [string, boolean][] = [
-  ["#ff4040", false],
-  ["#7f2020", false],
-  ["#cc5c33", false],
-  ["#734939", false],
-  ["#bf9c8f", false],
-  ["#995200", false],
-  ["#4c2900", false],
-  ["#f2a200", false],
-  ["#ffd580", true],
-  ["#332b1a", false],
-  ["#4c3d00", false],
-  ["#ffee00", true],
-  ["#b0b386", false],
-  ["#64664d", false],
-  ["#6c8020", false],
-  ["#c3d96c", true],
-  ["#143300", false],
-  ["#19bf00", false],
-  ["#53a669", false],
-  ["#bfffd9", true],
-  ["#40ffbf", true],
-  ["#1a332e", false],
-  ["#00b3a7", false],
-  ["#165955", false],
-  ["#00b8e6", false],
-  ["#69818c", false],
-  ["#005ce6", false],
-  ["#6086bf", false],
-  ["#000e66", false],
-  ["#202440", false],
-  ["#393973", false],
-  ["#4700b3", false],
-  ["#2b0d33", false],
-  ["#aa86b3", false],
-  ["#ee00ff", false],
-  ["#bf60b9", false],
-  ["#4d3949", false],
-  ["#ff00aa", false],
-  ["#7f0044", false],
-  ["#f20061", false],
-  ["#330007", false],
-  ["#d96c7b", false],
+const colors: string[] = [
+  "#E6F3FF", // Light Blue
+  "#FFF0E6", // Light Peach
+  "#E6FFE6", // Light Green
+  "#FFE6E6", // Light Pink
+  "#F0E6FF", // Light Purple
+  "#FFFFE6", // Light Yellow
+  "#E6FFFF", // Light Cyan
+  "#FFE6F3", // Light Rose
+  "#F3FFE6", // Light Lime
+  "#E6E6FF", // Light Lavender
+  "#FFE6FF", // Light Magenta
+  "#E6FFF0", // Light Mint
 ];
 
 const stringToInt = (name: string): number => {
@@ -57,9 +27,9 @@ const stringToInt = (name: string): number => {
 };
 
 const toColor = (name: string): [string, string] => {
-  const index = stringToInt(name) % 42;
-  const [backgroundColor, blackText] = colors[index];
-  return [backgroundColor, blackText ? "#000000" : "#FFFFFF"];
+  const index = stringToInt(name) % colors.length;
+  const backgroundColor = colors[index];
+  return [backgroundColor, "#333333"]; // Using dark gray for text
 };
 
 const initials = (name: string): string => {
@@ -75,12 +45,14 @@ interface AvatarProps {
   colors?: [string, string];
   name: string;
   className?: string;
+  square?: boolean; // New prop to determine if the avatar should be square
 }
 
 const Avatar: React.FC<AvatarProps> = ({
   colors: propColors,
   name,
   className,
+  square = false, // Default to false for backwards compatibility
 }) => {
   const [bgColor, fgColor] = propColors || toColor(name);
 
@@ -91,7 +63,11 @@ const Avatar: React.FC<AvatarProps> = ({
       viewBox="0 0 100 100"
       className={className}
     >
-      <circle cx="50" cy="50" r="50" fill={bgColor} />
+      {square ? (
+        <rect width="100" height="100" fill={bgColor} />
+      ) : (
+        <circle cx="50" cy="50" r="50" fill={bgColor} />
+      )}
       <text
         fill={fgColor}
         fontSize="42"
