@@ -1,7 +1,8 @@
 import { useReducer, useEffect, useRef, useState, Dispatch } from "react";
-import ButtonV2 from "../Components/Common/components/ButtonV2";
+import { Button } from "../Components/ui/button";
 import { FormAction, FormReducer, FormState } from "../Components/Form/Utils";
 import { relativeTime } from "./utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 type Draft = {
   timestamp: number;
@@ -123,33 +124,29 @@ export function DraftSection(props: {
 
   return (
     <>
-      {drafts && (
+      {drafts && drafts.length > 0 && (
         <div className="my-2 flex flex-wrap justify-end">
-          {drafts?.length > 0 && (
-            <div className="mx-1 flex items-center">
-              <p className="text-secondary-500">
-                Last saved draft:{" "}
-                {relativeTime(
-                  draftStarted
-                    ? drafts[0].timestamp
-                    : drafts[drafts.length - 1].timestamp,
-                )}
-              </p>
-              <ButtonV2
-                type="button"
-                variant="primary"
-                onClick={() =>
-                  handleDraftSelect(
-                    (draftStarted ? drafts[0] : drafts[drafts.length - 1])
-                      .draft,
-                  )
-                }
-                className="ml-2"
-              >
-                Restore
-              </ButtonV2>
-            </div>
-          )}
+          <Button
+            variant="outline"
+            className="flex items-center space-x-2"
+            onClick={() =>
+              handleDraftSelect(
+                (draftStarted ? drafts[0] : drafts[drafts.length - 1]).draft,
+              )
+            }
+          >
+            <CareIcon icon="l-pen" />
+            <span>Restore draft</span>
+            <span className="text-sm text-secondary-500">
+              (
+              {relativeTime(
+                draftStarted
+                  ? drafts[0].timestamp
+                  : drafts[drafts.length - 1].timestamp,
+              )}
+              )
+            </span>
+          </Button>
         </div>
       )}
     </>
