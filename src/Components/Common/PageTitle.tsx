@@ -2,25 +2,12 @@ import { ReactNode, useEffect, useRef } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Button } from "@/Components/ui/button";
 
 export interface PageTitleProps {
   title: string;
-  hideBack?: boolean;
-  backUrl?: string;
   className?: string;
   componentRight?: ReactNode;
-  /**
-   * If `false` is returned, prevents from going back.
-   */
-  onBackClick?: () => boolean | void;
-  justifyContents?:
-    | "justify-center"
-    | "justify-start"
-    | "justify-end"
-    | "justify-between";
+  justifyContents?: string;
   breadcrumbs?: boolean;
   crumbsReplacements?: {
     [key: string]: { name?: string; uri?: string; style?: string };
@@ -28,14 +15,15 @@ export interface PageTitleProps {
   focusOnLoad?: boolean;
   isInsidePage?: boolean;
   changePageMetadata?: boolean;
+  // New props for Breadcrumbs
+  hideBack?: boolean;
+  backUrl?: string;
+  onBackClick?: () => boolean | void;
 }
 
 export default function PageTitle({
   title,
-  hideBack = false,
-  backUrl,
   className = "",
-  onBackClick,
   componentRight = <></>,
   breadcrumbs = true,
   crumbsReplacements = {},
@@ -43,9 +31,12 @@ export default function PageTitle({
   focusOnLoad = false,
   isInsidePage = false,
   changePageMetadata = true,
+  // New props passed to Breadcrumbs
+  hideBack = false,
+  backUrl,
+  onBackClick,
 }: PageTitleProps) {
   const divRef = useRef<any>();
-  const { goBack } = useAppHistory();
 
   useEffect(() => {
     if (divRef.current && focusOnLoad) {
@@ -59,32 +50,13 @@ export default function PageTitle({
       className={isInsidePage ? "" : `mb-2 md:mb-4 ${className}`}
     >
       <div className="flex flex-col items-start md:flex-row md:items-center">
-        {!hideBack && (
-          <>
-            <Button
-              variant="link"
-              className="px-1 text-sm font-light text-gray-500 underline underline-offset-2"
-              size="xs"
-              onClick={() => {
-                if (onBackClick && onBackClick() === false) return;
-                goBack(backUrl);
-              }}
-            >
-              <CareIcon
-                icon="l-angle-left"
-                className="-ml-2 h-4 text-gray-400"
-              />
-              <span className="pr-1">Back</span>
-            </Button>
-            <span className="hidden pr-1 text-xs font-light text-gray-400 no-underline md:block">
-              |
-            </span>
-          </>
-        )}
         {breadcrumbs && (
           <Breadcrumbs
             replacements={crumbsReplacements}
             className="flex-grow"
+            hideBack={hideBack}
+            backUrl={backUrl}
+            onBackClick={onBackClick}
           />
         )}
       </div>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { classNames } from "../../Utils/utils";
 import { Button } from "@/Components/ui/button";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const MENU_TAGS: { [key: string]: string } = {
   facility: "Facilities",
@@ -23,13 +24,24 @@ const capitalize = (string: string) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-export default function Breadcrumbs({
-  replacements,
-  className = "",
-}: {
-  replacements: any;
+interface BreadcrumbsProps {
+  replacements?: {
+    [key: string]: { name?: string; uri?: string; style?: string };
+  };
   className?: string;
-}) {
+  hideBack?: boolean;
+  backUrl?: string;
+  onBackClick?: () => boolean | void;
+}
+
+export default function Breadcrumbs({
+  replacements = {},
+  className = "",
+  hideBack = false,
+  backUrl,
+  onBackClick,
+}: BreadcrumbsProps) {
+  const { goBack } = useAppHistory();
   const path = usePath();
   const [showFullPath, setShowFullPath] = useState(false);
 
@@ -55,10 +67,7 @@ export default function Breadcrumbs({
         className={classNames("text-sm font-light", crumb.style)}
       >
         <div className="flex items-center">
-          <CareIcon
-            icon="l-angle-right"
-            className="mx-1 h-4 w-4 text-gray-400"
-          />
+          <CareIcon icon="l-angle-right" className="h-4 text-gray-400" />
           {isLastItem ? (
             <span className="text-gray-500">{crumb.name}</span>
           ) : (
@@ -78,6 +87,28 @@ export default function Breadcrumbs({
   return (
     <nav className={classNames("w-full", className)} aria-label="Breadcrumb">
       <ol className="flex flex-wrap items-center">
+        {!hideBack && (
+          <li className="mr-1 flex items-center">
+            <Button
+              variant="link"
+              className="px-1 text-sm font-light text-gray-500 underline underline-offset-2"
+              size="xs"
+              onClick={() => {
+                if (onBackClick && onBackClick() === false) return;
+                goBack(backUrl);
+              }}
+            >
+              <CareIcon
+                icon="l-angle-left"
+                className="-ml-2 h-4 text-gray-400"
+              />
+              <span className="pr-1">Back</span>
+            </Button>
+            <span className="text-xs font-light text-gray-400 no-underline">
+              |
+            </span>
+          </li>
+        )}
         <li>
           <Button
             asChild
@@ -94,7 +125,7 @@ export default function Breadcrumbs({
                 <div className="flex items-center">
                   <CareIcon
                     icon="l-angle-right"
-                    className="mx-1 h-4 w-4 text-gray-400"
+                    className="h-4 text-gray-400"
                   />
                   <Button
                     variant="link"
