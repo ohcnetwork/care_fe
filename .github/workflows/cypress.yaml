@@ -8,73 +8,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Setup and keep the environment running
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository 📥
-        uses: actions/checkout@v3
-
-      - name: Set backend branch
-        id: backend-branch
-        run: |
-          if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then
-            echo "branch=staging" >> $GITHUB_OUTPUT
-          else
-            echo "branch=develop" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Checkout care backend 📥
-        uses: actions/checkout@v3
-        with:
-          repository: ohcnetwork/care
-          path: care
-          ref: ${{ steps.backend-branch.outputs.branch }}
-
-      - name: Start backend services via Docker 🐳
-        run: |
-          cd care
-          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.pre-built.yaml up -d
-          cd ..
-
-      - name: Wait for backend to be up ♻
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 5
-          max_attempts: 10
-          command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
-          on_retry_command: sleep 5
-
-      - name: Start frontend server
-        run: npm run preview -- --host &
-        env:
-          CARE_API: http://localhost:9000
-
-      - name: Wait for frontend to be up ♻
-        run: npx wait-on http://localhost:4000
-
-      # Don't use sleep here as it will block other jobs
-      - name: Background setup complete
-        run: echo "Setup complete!"
-
-  # Cypress Tests in Parallel: Start at the same time as setup, but wait for it to complete
+  # Combined Setup and Test Execution in Parallel
   cypress-test:
-    needs: [setup] # Cypress jobs should depend on the setup job
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         parallel_processes: [1, 2, 3, 4, 5, 6]
     steps:
       - name: Checkout Repository 📥
         uses: actions/checkout@v3
 
-      # Wait for backend and frontend services to be available
-      - name: Wait for frontend and backend to be up
+      # Start backend services via Docker (Setup in the background)
+      - name: Start backend services via Docker 🐳
         run: |
-          npx wait-on http://localhost:9000 && npx wait-on http://localhost:4000
+          cd care
+          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
+          docker-compose -f docker-compose.pre-built.yaml up -d  # Detached mode to keep it running
+          cd ..
 
-      # Run Cypress Tests in Parallel
+      # Wait for backend to be up
+      - name: Wait for backend to be up
+        run: |
+          npx wait-on http://localhost:9000
+
+      # Start Frontend in the background (Setup)
+      - name: Start frontend server
+        run: npm run preview -- --host &
+        env:
+          CARE_API: http://localhost:9000
+
+      # Wait for frontend to be up
+      - name: Wait for frontend to be up
+        run: npx wait-on http://localhost:4000
+
+      # Parallel Cypress Test Execution
       - name: Run Cypress Tests 🥬
         run: |
           CYPRESS_SPLIT_INDEX=${{ matrix.parallel_processes }} \
