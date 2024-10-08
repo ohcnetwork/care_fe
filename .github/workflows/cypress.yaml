@@ -9,7 +9,7 @@ on:
 
 jobs:
   cypress-run:
-    if: github.repository == 'ohcnetwork/care_fe' # Ensure it runs only for care_fe repo
+    if: github.repository == 'ohcnetwork/care_fe' # Ensures this runs only for care_fe repo
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout the repository
@@ -34,8 +34,8 @@ jobs:
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
 
-      # Step 4: Start backend with Docker Compose
-      - name: Start care docker containers 🐳
+      # Step 4: Start care docker containers 🐳
+      - name: Start care docker containers
         run: |
           cd care
           mkdir -p docker  # Ensure the docker directory exists
@@ -56,31 +56,36 @@ jobs:
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
           on_retry_command: sleep 5
 
-      # Step 6: Setup Node.js environment
+      # Step 6: Determine PR origin (whether it's a fork or not)
+      - name: Determine PR Origin
+        id: pr_origin
+        run: echo "::set-output name=is_forked::$(echo ${{ github.event.pull_request.head.repo.fork }})"
+
+      # Step 7: Setup Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      # Step 7: Install dependencies using npm ci (faster for CI)
+      # Step 8: Install dependencies using npm ci (faster for CI)
       - name: Install dependencies 📦
         run: npm ci
 
-      # Step 8: Build the frontend using npm
+      # Step 9: Build the frontend using npm
       - name: Build frontend ⚙️
         run: npm run build
 
-      # Step 9: Start frontend using Vite
+      # Step 10: Start frontend using Vite
       - name: Start frontend server
         run: npm run preview -- --host &
         env:
           CARE_API: http://localhost:9000
 
-      # Step 10: Wait for the frontend to be up
+      # Step 11: Wait for the frontend to be up
       - name: Wait for frontend to be up ♻
         run: npx wait-on http://localhost:4000
 
-      # Step 11: Run Cypress tests in parallel using cypress-parallel
+      # Step 12: Run Cypress tests in parallel using cypress-parallel
       - name: Run Cypress tests in parallel
         run: |
           npx cypress-parallel -s 'cypress/e2e/**/*.cy.js' -n 4 \
@@ -92,7 +97,7 @@ jobs:
           CARE_API: http://localhost:9000
           NODE_OPTIONS: --max_old_space_size=4096
 
-      # Step 12: Upload Cypress screenshots on failure 📸
+      # Step 13: Upload Cypress screenshots on failure 📸
       - name: Upload Cypress screenshots on failure
         uses: actions/upload-artifact@v3
         if: failure()
@@ -100,7 +105,7 @@ jobs:
           name: cypress-screenshots
           path: cypress/screenshots
 
-      # Step 13: Upload Cypress videos 📹
+      # Step 14: Upload Cypress videos 📹
       - name: Upload Cypress videos on failure
         uses: actions/upload-artifact@v3
         if: failure()
