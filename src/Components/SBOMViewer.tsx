@@ -77,16 +77,24 @@ interface CycloneDXBOM {
   };
   components?: CycloneDXComponent[];
 }
+
 const BOMDisplay: React.FC = () => {
   const [bom, setBOM] = useState<CycloneDXBOM | null>(null);
+  const [beBom, setBeBOM] = useState<CycloneDXBOM | null>(null);
   const [copyStatus, setCopyStatus] = useState(false);
   const [showExternalRefs, setShowExternalRefs] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("bom");
 
   useEffect(() => {
     axios
       .get("/bom.json")
       .then((response) => setBOM(response.data))
       .catch((error) => console.error("Error fetching BOM:", error));
+
+    axios
+      .get("/be-sbom.json")
+      .then((response) => setBeBOM(response.data))
+      .catch((error) => console.error("Error fetching BE SBOM:", error));
   }, []);
 
   const handleCopy = () => {
@@ -94,98 +102,136 @@ const BOMDisplay: React.FC = () => {
     setTimeout(() => setCopyStatus(false), 2000);
   };
 
-  if (!bom) return <div>Loading BOM...</div>;
+  const renderBOM = (bomData: CycloneDXBOM | null) => {
+    if (!bomData) return <div>Loading BOM...</div>;
+
+    return (
+      <Card className="rounded-lg bg-white p-4 shadow-md transition-all duration-300">
+        <div className="mb-4">
+          <h2 className="mb-2 text-2xl font-semibold">
+            {bomData.bomFormat || "N/A"} BOM (Version:{" "}
+            {bomData.version || "N/A"})
+          </h2>
+          <p className="text-sm text-gray-500">
+            Created on:{" "}
+            {bomData.metadata?.timestamp
+              ? dayjs(bomData.metadata.timestamp).format("MMMM D, YYYY")
+              : "N/A"}
+          </p>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <h3 className="col-span-2 text-lg font-semibold">Components:</h3>
+          {bomData.components?.map((component, index) => (
+            <div
+              key={index}
+              className="block rounded-md border p-2 transition-all duration-300 hover:shadow-md"
+            >
+              <a
+                href={
+                  component.externalReferences?.[1]?.url ||
+                  component.externalReferences?.[0]?.url ||
+                  "#"
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-400 hover:text-primary-500"
+              >
+                <strong className="block text-lg">
+                  {component.name || "N/A"} v{component.version || "N/A"}
+                </strong>
+              </a>
+              {component.licenses && component.licenses[0]?.license?.id && (
+                <p className="text-base">
+                  License:{" "}
+                  <a
+                    href={
+                      getLicenseUrl(component.licenses[0].license.id) || "#"
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-400 hover:text-primary-500"
+                  >
+                    {component.licenses[0].license.id || "N/A"}
+                  </a>
+                </p>
+              )}
+              {component.description && (
+                <p className="text-base">
+                  Description: {component.description}
+                </p>
+              )}
+              <div>
+                <h5
+                  className="cursor-pointer font-semibold"
+                  onClick={() =>
+                    setShowExternalRefs(
+                      showExternalRefs === index ? null : index,
+                    )
+                  }
+                >
+                  External References:
+                </h5>
+                {showExternalRefs === index && (
+                  <ul className="list-inside list-disc pl-4 text-xs">
+                    {component.externalReferences?.map((ref, idx) => (
+                      <li key={idx}>
+                        <a
+                          href={ref.url || "#"}
+                          className="text-primary-400 hover:text-primary-500"
+                        >
+                          {ref.url || "N/A"}
+                        </a>
+                        {ref.comment && <p>Comment: {ref.comment}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4">
+          <CopyToClipboard
+            text={JSON.stringify(bomData, null, 2)}
+            onCopy={handleCopy}
+          >
+            <button className="text-md rounded-md bg-blue-400 px-4 py-2 text-white transition-all duration-300 hover:bg-blue-500 focus:outline-none">
+              Copy BOM JSON
+            </button>
+          </CopyToClipboard>
+          {copyStatus && (
+            <span className="mt-2 block text-sm text-gray-600">
+              Copied to clipboard!
+            </span>
+          )}
+        </div>
+      </Card>
+    );
+  };
 
   return (
-    <Card className="rounded-lg bg-white p-4 shadow-md transition-all duration-300">
-      <div className="mb-4">
-        <h2 className="mb-2 text-2xl font-semibold">
-          {bom.bomFormat || "N/A"} BOM (Version: {bom.version || "N/A"})
-        </h2>
-        <p className="text-sm text-gray-500">
-          Created on:{" "}
-          {bom.metadata?.timestamp
-            ? dayjs(bom.metadata.timestamp).format("MMMM D, YYYY")
-            : "N/A"}
-        </p>
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        <h3 className="col-span-2 text-lg font-semibold">Components:</h3>
-        {bom.components?.map((component, index) => (
-          <div
-            key={index}
-            className="block rounded-md border p-2 transition-all duration-300 hover:shadow-md"
-          >
-            <a
-              href={component.externalReferences?.[1]?.url || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-400 hover:text-primary-500"
-            >
-              <strong className="block text-lg">
-                {component.name || "N/A"} v{component.version || "N/A"}
-              </strong>
-            </a>
-            {component.licenses && component.licenses[0]?.license?.id && (
-              <p className="text-base">
-                License:{" "}
-                <a
-                  href={getLicenseUrl(component.licenses[0].license.id) || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-400 hover:text-primary-500"
-                >
-                  {component.licenses[0].license.id || "N/A"}
-                </a>
-              </p>
-            )}
-            {component.description && (
-              <p className="text-base">Description: {component.description}</p>
-            )}
-            <div>
-              <h5
-                className="cursor-pointer font-semibold"
-                onClick={() =>
-                  setShowExternalRefs(showExternalRefs === index ? null : index)
-                }
-              >
-                External References:
-              </h5>
-              {showExternalRefs === index && (
-                <ul className="list-inside list-disc pl-4 text-xs">
-                  {component.externalReferences?.map((ref, idx) => (
-                    <li key={idx}>
-                      <a
-                        href={ref.url || "#"}
-                        className="text-primary-400 hover:text-primary-500"
-                      >
-                        {ref.url || "N/A"}
-                      </a>
-                      {ref.comment && <p>Comment: {ref.comment}</p>}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4">
-        <CopyToClipboard
-          text={JSON.stringify(bom, null, 2)}
-          onCopy={handleCopy}
+    <div>
+      <div className="mb-4 flex space-x-4">
+        <button
+          className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
+            activeTab === "bom" ? "bg-blue-400 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setActiveTab("bom")}
         >
-          <button className="text-md rounded-md bg-blue-400 px-4 py-2 text-white transition-all duration-300 hover:bg-blue-500 focus:outline-none">
-            Copy BOM JSON
-          </button>
-        </CopyToClipboard>
-        {copyStatus && (
-          <span className="mt-2 block text-sm text-gray-600">
-            Copied to clipboard!
-          </span>
-        )}
+          Care Frontend
+        </button>
+        <button
+          className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
+            activeTab === "beBom" ? "bg-blue-400 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setActiveTab("beBom")}
+        >
+          Care Backend
+        </button>
       </div>
-    </Card>
+      {activeTab === "bom" ? renderBOM(bom) : renderBOM(beBom)}
+    </div>
   );
 };
+
 export default BOMDisplay;
