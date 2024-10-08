@@ -7,7 +7,6 @@ export interface PageTitleProps {
   title: string;
   className?: string;
   componentRight?: ReactNode;
-  justifyContents?: string;
   breadcrumbs?: boolean;
   crumbsReplacements?: {
     [key: string]: { name?: string; uri?: string; style?: string };
@@ -27,7 +26,6 @@ export default function PageTitle({
   componentRight = <></>,
   breadcrumbs = true,
   crumbsReplacements = {},
-  justifyContents = "justify-start",
   focusOnLoad = false,
   isInsidePage = false,
   changePageMetadata = true,
@@ -47,7 +45,7 @@ export default function PageTitle({
   return (
     <div
       ref={divRef}
-      className={isInsidePage ? "" : `mb-2 md:mb-4 ${className}`}
+      className={classNames(!isInsidePage && "mb-2 md:mb-4", className)}
     >
       <div className="flex flex-col items-start md:flex-row md:items-center">
         {breadcrumbs && (
@@ -62,7 +60,13 @@ export default function PageTitle({
       </div>
       {changePageMetadata && <PageHeadTitle title={title} />}
 
-      <div className={classNames("mt-2 flex items-center", justifyContents)}>
+      <div
+        className={classNames(
+          "mt-2 flex items-center",
+          !!componentRight &&
+            "flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0",
+        )}
+      >
         <div className="flex items-center">
           <h2 className="ml-0 text-2xl leading-tight">{title}</h2>
         </div>

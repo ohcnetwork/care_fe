@@ -44,7 +44,6 @@ export default function Page(props: PageProps) {
           breadcrumbs={props.breadcrumbs}
           backUrl={props.backUrl}
           hideBack={props.hideBack}
-          justifyContents={props.justifyContents}
           componentRight={props.componentRight}
           crumbsReplacements={props.crumbsReplacements}
           focusOnLoad={props.focusOnLoad}

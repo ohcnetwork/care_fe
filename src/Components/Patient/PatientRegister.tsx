@@ -66,6 +66,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import { useTranslation } from "react-i18next";
 import { validatePincode } from "../../Common/validation";
 import careConfig from "@careConfig";
+import { Button } from "@/Components/ui/button";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -949,12 +950,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       )}
       <PageTitle
         title={headerText}
-        className="mb-11"
+        className="border-b pb-4"
         onBackClick={() => {
           id
             ? navigate(`/facility/${facilityId}/patient/${id}`)
             : navigate(`/facility/${facilityId}`);
         }}
+        componentRight={
+          <Button
+            variant="outline_primary"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowLinkAbhaNumberModal(true);
+            }}
+          >
+            <CareIcon icon="l-user-square" className="mr-2" />
+            <span>Generate/Link ABHA Number</span>
+          </Button>
+        }
         crumbsReplacements={{
           [facilityId]: { name: facilityObject?.name },
           [id ?? "????"]: { name: patientName },
@@ -1019,9 +1032,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <>
                     {careConfig.abdm.enabled && (
                       <div className="mb-8 overflow-visible">
-                        <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
-                          ABHA Details
-                        </h1>
                         {showLinkAbhaNumberModal && (
                           <LinkABHANumberModal
                             show={showLinkAbhaNumberModal}
@@ -1039,15 +1049,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         )}
                         {!state.form.abha_number ? (
-                          <button
-                            className="btn btn-primary my-4"
+                          <Button
+                            variant="outline"
+                            className="border-green-700 text-green-700 hover:bg-green-700 hover:text-white"
                             onClick={(e) => {
                               e.preventDefault();
                               setShowLinkAbhaNumberModal(true);
                             }}
                           >
-                            Link Abha Number
-                          </button>
+                            <CareIcon icon="l-user-square" className="mr-2" />
+                            <span>Generate/Link ABHA Number</span>
+                          </Button>
                         ) : (
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                             <div id="abha-number">
