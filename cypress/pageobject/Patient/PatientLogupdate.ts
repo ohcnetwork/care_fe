@@ -93,8 +93,8 @@ class PatientLogupdate {
     cy.wait(3000);
   }
 
-  clickClearButtonInElement(elementId) {
-    cy.get(elementId).find("#clear-button").click();
+  clearIntoElementById(elementId) {
+    cy.get(elementId).click().clear();
   }
 
   clickVitals() {
