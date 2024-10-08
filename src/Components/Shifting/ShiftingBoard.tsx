@@ -6,15 +6,8 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  classNames,
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-} from "../../Utils/utils";
-import { downloadShiftRequests } from "../../Redux/actions";
+import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
-
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { navigate } from "raviger";
@@ -74,8 +67,7 @@ const ShiftCard = ({ shift, filter }: any) => {
           <div>
             <div className="flex justify-between">
               <div className="mb-2 text-xl font-bold capitalize">
-                {shift.patient_object.name} -{" "}
-                {formatPatientAge(shift.patient_object, true)}
+                {shift.patient_object.name} - {shift.patient_object.age}
               </div>
               <div>
                 {shift.emergency && (
@@ -353,12 +345,15 @@ export default function ShiftingBoard({
           <h3 className="flex h-8 items-center text-xs">
             {title || board}{" "}
             <ExportButton
-              action={() =>
-                downloadShiftRequests({
-                  ...formatFilter({ ...filterProp, status: board }),
-                  csv: 1,
-                })
-              }
+              action={async () => {
+                const { data } = await request(routes.downloadShiftRequests, {
+                  query: {
+                    ...formatFilter({ ...filterProp, status: board }),
+                    csv: true,
+                  },
+                });
+                return data ?? null;
+              }}
               filenamePrefix={`shift_requests_${board}`}
             />
           </h3>

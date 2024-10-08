@@ -31,13 +31,16 @@ const careConfig = {
     dark: "https://cdn.ohc.network/header_logo.png",
   }),
   mainLogo: logo(env.REACT_MAIN_LOGO, {
-    light: "https://cdn.ohc.network/light-logo.svg",
-    dark: "https://cdn.ohc.network/black-logo.svg",
+    light: "/images/care_logo.svg",
+    dark: "/images/care_logo.svg",
   }),
   stateLogo: logo(env.REACT_STATE_LOGO),
   customLogo: logo(env.REACT_CUSTOM_LOGO),
   customLogoAlt: logo(env.REACT_CUSTOM_LOGO_ALT),
   customDescription: env.REACT_CUSTOM_DESCRIPTION,
+  availableLocales: (env.REACT_ALLOWED_LOCALES || "")
+    .split(",")
+    .map((l) => l.trim()),
 
   gmapsApiKey:
     env.REACT_GMAPS_API_KEY || "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
@@ -102,10 +105,6 @@ const careConfig = {
 
   abdm: {
     enabled: (env.REACT_ENABLE_ABDM ?? "true") === "true",
-  },
-
-  scribe: {
-    enabled: env.REACT_ENABLE_SCRIBE === "true",
   },
 } as const;
 

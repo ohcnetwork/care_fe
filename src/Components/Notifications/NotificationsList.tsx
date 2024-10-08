@@ -2,7 +2,7 @@ import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
-import { Error } from "../../Utils/Notifications.js";
+import { Error, Success, Warn } from "../../Utils/Notifications.js";
 import { classNames, formatDateTime } from "../../Utils/utils";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import * as Sentry from "@sentry/browser";
@@ -194,6 +194,30 @@ export default function NotificationsList({
     if (open) document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open]);
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setTimeout>;
+    if (isSubscribing) {
+      const checkNotificationPermission = () => {
+        if (Notification.permission === "denied") {
+          Warn({
+            msg: t("notification_permission_denied"),
+          });
+          setIsSubscribing(false);
+          clearInterval(intervalId);
+        } else if (Notification.permission === "granted") {
+          Success({
+            msg: t("notification_permission_granted"),
+          });
+          setIsSubscribing(false);
+          clearInterval(intervalId);
+        }
+      };
+
+      checkNotificationPermission();
+      intervalId = setInterval(checkNotificationPermission, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [isSubscribing]);
 
   const intialSubscriptionState = async () => {
     try {
