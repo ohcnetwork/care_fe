@@ -2,7 +2,7 @@ import { GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
 import { getConsultation, getPatient } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { lazy, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { PatientModel } from "../../Patient/models";
 import {
@@ -41,8 +41,8 @@ import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 import Error404 from "../../ErrorPages/404";
 import { useTranslation } from "react-i18next";
 
-const Loading = lazy(() => import("../../Common/Loading"));
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 
 export interface ConsultationTabProps {
   consultationId: string;

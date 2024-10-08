@@ -1,4 +1,4 @@
-import { useState, lazy } from "react";
+import { useState } from "react";
 import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications.js";
@@ -10,8 +10,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ResourceDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =

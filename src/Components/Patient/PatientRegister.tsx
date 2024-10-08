@@ -25,7 +25,7 @@ import {
   parsePhoneNumber,
   scrollTo,
 } from "../../Utils/utils";
-import { lazy, useCallback, useReducer, useRef, useState } from "react";
+import { useCallback, useReducer, useRef, useState } from "react";
 import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 
@@ -68,8 +68,8 @@ import { validatePincode } from "../../Common/validation";
 import careConfig from "@careConfig";
 import { Button } from "@/Components/ui/button";
 
-const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 
 type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
