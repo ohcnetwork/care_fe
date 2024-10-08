@@ -142,7 +142,7 @@ export default function AppRouter() {
               className="flex h-full w-full items-center px-4 md:hidden"
             >
               <img
-                className="h-6 w-auto"
+                className="h-8 w-auto"
                 src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />
@@ -151,9 +151,11 @@ export default function AppRouter() {
 
           <main
             id="pages"
-            className="flex-1 overflow-y-scroll pb-4 focus:outline-none md:py-0"
+            className="flex-1 overflow-y-scroll bg-gray-100 pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto p-3">{pages}</div>
+            <div className="max-w-8xl mx-auto mt-4 rounded-t-lg border bg-gray-50 p-3 shadow-lg">
+              {pages}
+            </div>
           </main>
         </div>
       </div>

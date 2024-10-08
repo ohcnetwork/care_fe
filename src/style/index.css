@@ -1306,3 +1306,9 @@ input[type="number"] {
     color: #2856ff;
     font-size: 1rem;
 }
+
+@layer base {
+  :root {
+        --radius:  0.5rem;
+    }
+}

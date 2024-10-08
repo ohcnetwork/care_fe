@@ -31,8 +31,8 @@ const careConfig = {
     dark: "https://cdn.ohc.network/header_logo.png",
   }),
   mainLogo: logo(env.REACT_MAIN_LOGO, {
-    light: "https://cdn.ohc.network/light-logo.svg",
-    dark: "https://cdn.ohc.network/black-logo.svg",
+    light: "/images/care_logo.svg",
+    dark: "/images/care_logo.svg",
   }),
   stateLogo: logo(env.REACT_STATE_LOGO),
   customLogo: logo(env.REACT_CUSTOM_LOGO),
