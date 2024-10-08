@@ -399,7 +399,6 @@
   "Sample Test": "Sample Test",
   "Shifting": "Shifting",
   "Resource": "Resource",
-  "External Results": "External Results",
   "Users": "Users",
   "Profile": "Profile",
   "Dashboard": "Dashboard",
@@ -415,7 +414,6 @@
   "session_expired_msg": "It appears that your session has expired. This could be due to inactivity. Please login again to continue.",
   "invalid_reset": "Invalid Reset",
   "please_upload_a_csv_file": "Please Upload A CSV file",
-  "upload_external_results": "Upload External Results",
   "csv_file_in_the_specified_format": "Select a CSV file in the specified format",
   "sample_format": "Sample Format",
   "search_for_facility": "Search for Facility",
@@ -435,7 +433,6 @@
   "patient_status": "Patient Status",
   "mobile_number": "Mobile Number",
   "patient_created": "Patient Created",
-  "care_external_results_id": "Care external results ID",
   "update_record": "Update Record",
   "facility_search_placeholder": "Search by Facility / District Name",
   "advanced_filters": "Advanced Filters",
@@ -1024,7 +1021,5 @@
   "is_declared_positive": "Whether declared positive",
   "date_declared_positive": "Date of declaring positive",
   "date_of_result": "Covid confirmation date",
-  "is_vaccinated": "Whether vaccinated",
-  "consultation_not_filed": "You have not filed a consultation for this patient yet.",
-  "consultation_not_filed_description": "Please file a consultation for this patient to continue."
+  "is_vaccinated": "Whether vaccinated"
 }

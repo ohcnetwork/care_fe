@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -37,8 +37,7 @@ import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
 import { showUserDelete } from "../../Utils/permissions";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ManageUsers() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
