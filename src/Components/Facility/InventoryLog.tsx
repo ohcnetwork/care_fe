@@ -1,4 +1,4 @@
-import { useState, lazy } from "react";
+import { useState } from "react";
 
 import * as Notification from "../../Utils/Notifications.js";
 import Pagination from "../Common/Pagination";
@@ -10,8 +10,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function InventoryLog(props: any) {
   const { facilityId, inventoryId }: any = props;
   const [saving, setSaving] = useState(false);
