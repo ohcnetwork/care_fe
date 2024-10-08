@@ -1,5 +1,5 @@
-import _, { set } from "lodash-es";
-import { lazy, useCallback, useReducer } from "react";
+import * as _ from "lodash-es";
+import { useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications.js";
 import request from "../../../Utils/request/request";
@@ -7,8 +7,7 @@ import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
 import { useTranslation } from "react-i18next";
 import Page from "../../Common/components/Page";
-const Loading = lazy(() => import("../../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 const initialState = {
   changedFields: {},
   initialValues: {},
@@ -90,7 +89,7 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
 
   const handleValueChange = (value: any, name: string) => {
     const changedFields = { ...state.changedFields };
-    set(changedFields, name, value);
+    _.set(changedFields, name, value);
     dispatch({ type: "set_changed_fields", changedFields });
   };
 
