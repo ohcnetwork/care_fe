@@ -1,12 +1,3 @@
-name: Cypress Tests
-
-on:
-  pull_request:
-    branches:
-      - develop
-      - staging
-  workflow_dispatch:
-
 jobs:
   # 1. Setup Job: Backend and Frontend Setup
   setup:
@@ -37,13 +28,8 @@ jobs:
         run: |
           cd care
           echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.pre-built.yaml up -d  # Run in detached mode
-          make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
+          make docker_config_file=docker-compose.pre-built.yaml up -d  # Detached mode so it doesn't block
           cd ..
-        env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Wait for backend to be up ♻
         uses: nick-fields/retry@v2
@@ -53,12 +39,6 @@ jobs:
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
           on_retry_command: sleep 5
 
-      - name: Install dependencies 📦
-        run: npm ci # Install frontend dependencies
-
-      - name: Build frontend ⚙️
-        run: npm run build # Build frontend
-
       - name: Start frontend server
         run: npm run preview -- --host &
         env:
@@ -67,13 +47,13 @@ jobs:
       - name: Wait for frontend to be up ♻
         run: npx wait-on http://localhost:4000
 
-      # Remove the sleep here. Let the setup job complete now.
-      - name: Mark setup complete
-        run: echo "Setup complete, backend and frontend running in detached mode."
+      # Keep setup running
+      - name: Keep services running during tests
+        run: sleep 9999999 # Keeps the backend and frontend alive
 
   # 2. Cypress Tests Job: Parallel Test Execution
   cypress-test:
-    needs: setup # Cypress jobs depend on setup
+    needs: setup # Cypress jobs depend on setup job
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -81,6 +61,11 @@ jobs:
     steps:
       - name: Checkout Repository 📥
         uses: actions/checkout@v3
+
+      # Wait for frontend and backend to be up
+      - name: Wait for frontend and backend to be up
+        run: |
+          npx wait-on http://localhost:4000 && npx wait-on http://localhost:9000
 
       - name: Cypress Tests with Parallel Execution 🥬
         run: |

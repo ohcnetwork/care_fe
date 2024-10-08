@@ -11,5 +11,5 @@
     "**/*.ts",  // Include Cypress POM and helper files
     "support/commands.js",  // Include support commands if necessary
     "**/*.cy.ts"  // Include all Cypress test files
-  ]
+, "../cypress.config.ts"  ]
 }
