@@ -12,7 +12,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import { ReactNode, lazy, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { parseOptionId } from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -55,8 +55,7 @@ import Tabs from "../Common/components/Tabs.js";
 import request from "../../Utils/request/request.js";
 import { Avatar } from "../Common/Avatar.js";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;

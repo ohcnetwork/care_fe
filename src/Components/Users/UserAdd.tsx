@@ -1,5 +1,5 @@
 import { Link, navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   GENDER_TYPES,
   USER_TYPES,
@@ -43,7 +43,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 
-const Loading = lazy(() => import("../Common/Loading"));
+import Loading from "@/Components/Common/Loading";
 interface UserProps {
   userId?: number;
 }

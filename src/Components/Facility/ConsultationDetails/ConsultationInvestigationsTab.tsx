@@ -1,4 +1,3 @@
-import { lazy } from "react";
 import { ConsultationTabProps } from "./index";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
 import ButtonV2 from "../../Common/components/ButtonV2";
@@ -7,7 +6,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import InvestigationTab from "../Investigations/investigationsTab";
 import { t } from "i18next";
 
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import PageTitle from "@/Components/Common/PageTitle";
 export const ConsultationInvestigationsTab = (props: ConsultationTabProps) => {
   return (
     <div>
