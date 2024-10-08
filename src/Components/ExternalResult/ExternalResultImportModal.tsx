@@ -1,4 +1,4 @@
-import _ from "lodash-es";
+import * as _ from "lodash-es";
 import { navigate } from "raviger";
 import { useEffect, useState, lazy } from "react";
 import * as Notification from "../../Utils/Notifications.js";

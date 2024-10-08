@@ -18,7 +18,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import { LocationSelect } from "../Common/LocationSelect";
 import Page from "../Common/components/Page";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { Scanner } from "@yudiel/react-qr-scanner";
+import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import SwitchV2 from "../Common/components/Switch";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -420,15 +420,22 @@ const AssetCreate = (props: AssetProps) => {
           {t("close_scanner")}
         </button>
         <Scanner
-          onResult={(assetId) => (assetId ? parseAssetId(assetId) : null)}
-          onError={(e) =>
-            Notification.Error({
-              msg: e.message,
-            })
-          }
-          options={{
-            delayBetweenScanAttempts: 300,
+          onScan={(detectedCodes: IDetectedBarcode[]) => {
+            if (detectedCodes.length > 0) {
+              const text = detectedCodes[0].rawValue;
+              if (text) {
+                parseAssetId(text);
+              }
+            }
           }}
+          onError={(e: unknown) => {
+            const errorMessage =
+              e instanceof Error ? e.message : "Unknown error";
+            Notification.Error({
+              msg: errorMessage,
+            });
+          }}
+          scanDelay={3000}
         />
         <h2 className="self-center text-center text-lg">
           {t("scan_asset_qr")}

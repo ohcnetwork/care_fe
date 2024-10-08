@@ -1,4 +1,4 @@
-import _, { set } from "lodash-es";
+import * as _ from "lodash-es";
 import { navigate } from "raviger";
 import { lazy, useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
@@ -91,7 +91,7 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
 
   const handleValueChange = (value: any, name: string) => {
     const changedFields = { ...state.changedFields };
-    set(changedFields, name, value);
+    _.set(changedFields, name, value);
     dispatch({ type: "set_changed_fields", changedFields });
   };
 
