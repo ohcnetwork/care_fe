@@ -107,6 +107,13 @@ const careConfig = {
   scribe: {
     enabled: env.REACT_ENABLE_SCRIBE === "true",
   },
+
+  careApps: [
+    {
+      name: "care-livekit",
+      package: "./apps/care-livekit",
+    },
+  ],
 } as const;
 
 export default careConfig;
