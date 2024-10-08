@@ -682,6 +682,8 @@
   "LOG_UPDATE_FIELD_LABEL__temperature": "Temperature",
   "LOG_UPDATE_FIELD_LABEL__other_details": "Other details",
   "LOG_UPDATE_FIELD_LABEL__pulse": "Pulse",
+  "celsius_range": "35°C to 41.1°C",
+  "fahrenheit_range": "95°F to 106°F",
   "ROUNDS_TYPE__NORMAL": "Brief Update",
   "ROUNDS_TYPE__COMMUNITY_NURSES_LOG": "Community Nurse's Log",
   "ROUNDS_TYPE__VENTILATOR": "Detailed Update",

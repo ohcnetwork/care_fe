@@ -273,7 +273,7 @@ export const DailyRounds = (props: any) => {
             (convertedTemperature < 95 || convertedTemperature > 106)
           ) {
             const tempRange =
-              unit === "celsius" ? "35°C to 41.1°C" : "95°F to 106°F";
+              unit === "celsius" ? t("celsius_range") : t("fahrenheit_range");
 
             errors[field] = `Temperature must be between ${tempRange}.`;
 
