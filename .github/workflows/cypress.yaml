@@ -9,48 +9,76 @@ on:
 
 jobs:
   cypress-run:
-    if: github.repository == 'ohcnetwork/care_fe'
+    if: github.repository == 'ohcnetwork/care_fe' # Ensures this workflow runs only for care_fe
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Setup Node.js for building the frontend
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
+      # Step 3: Install dependencies using npm ci (faster for CI environments)
       - name: Install dependencies
-        run: npm ci
+        run: npm ci # Using npm ci for faster, deterministic dependency installation
 
+      # Step 4: Build the frontend
       - name: Build frontend
         run: npm run build
 
-      - name: Start backend (Docker)
+      # Step 5: Install Docker Compose
+      - name: Install Docker Compose
         run: |
-          docker-compose -f docker-compose.yaml up -d
-          docker-compose -f docker-compose.yaml exec backend wait-for-it.sh backend:9000 --timeout=120
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
 
+      # Step 6: Start the backend using Docker Compose
+      - name: Start backend (Docker Compose)
+        run: |
+          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
+          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
+          echo JWKS_BASE64=\"${{ secrets.JWKS_BASE64 }}\" >> docker/.prebuilt.env
+          docker-compose -f docker-compose.pre-built.yaml up -d
+          docker-compose -f docker-compose.pre-built.yaml exec backend load-dummy-data
+
+      # Step 7: Wait for the backend to be up and ready
+      - name: Wait for backend to be up
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 5
+          max_attempts: 10
+          command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+          on_retry_command: sleep 10
+
+      # Step 8: Start the frontend server
       - name: Start frontend server
         run: npm run start &
         env:
           CARE_API: http://localhost:9000
 
+      # Step 9: Wait for the frontend to be up
       - name: Wait for frontend to be up
         run: npx wait-on http://localhost:4000
 
-      - name: Run Cypress tests in parallel with Cypress Cloud
+      # Step 10: Run Cypress tests in parallel using cypress-parallel
+      - name: Run Cypress tests in parallel using cypress-parallel
         run: |
           npx cypress-parallel -s 'cypress/e2e/**/*.cy.js' -n 4 \
           --ci-build-id ${{ github.sha }}-${{ github.run_id }} \
           --group "UI-Chrome" \
-          --parallel \
+          --browser chrome \
           --record
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CARE_API: http://localhost:9000
           NODE_OPTIONS: --max_old_space_size=4096
 
+      # Step 11: Upload screenshots if tests fail
       - name: Upload Cypress screenshots on failure
         uses: actions/upload-artifact@v3
         if: failure()
@@ -58,6 +86,7 @@ jobs:
           name: cypress-screenshots
           path: cypress/screenshots
 
+      # Step 12: Upload videos if tests fail
       - name: Upload Cypress videos
         uses: actions/upload-artifact@v3
         if: failure()
