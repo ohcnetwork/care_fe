@@ -1,4 +1,4 @@
-import { useState, lazy } from "react";
+import { lazy, useState } from "react";
 import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "../Facility/models";
 import { AssetData } from "./AssetTypes";

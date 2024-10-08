@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { lazy, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import { navigate, useQueryParams } from "raviger";
 import Card from "../../CAREUI/display/Card";
 import CircularProgress from "../Common/components/CircularProgress";
@@ -20,8 +20,7 @@ import routes from "../../Redux/api.js";
 import { UserModel } from "../Users/models.js";
 import request from "../../Utils/request/request.js";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface resourceProps {
   id: string;
 }

@@ -1,6 +1,5 @@
 import { FlowModel } from "./models";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
-import { lazy } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
@@ -14,8 +13,7 @@ import { DetailRoute } from "../../Routers/types";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export const SampleDetails = ({ id }: DetailRoute) => {
   const { loading: isLoading, data: sampleDetails } = useQuery(
     routes.getTestSample,
