@@ -1,5 +1,4 @@
 import { navigate } from "raviger";
-import { celsiusToFahrenheit } from "../../Utils/utils";
 import dayjs from "dayjs";
 import { lazy, useCallback, useEffect, useState } from "react";
 import {
@@ -25,6 +24,7 @@ import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
 import TemperatureFormField from "../Common/TemperatureFormField";
+import { celsiusToFahrenheit } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";

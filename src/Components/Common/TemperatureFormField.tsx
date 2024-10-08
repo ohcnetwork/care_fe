@@ -37,7 +37,7 @@ export default function TemperatureFormField({
       <ButtonV2
         type="button"
         variant="primary"
-        className="absolute top-0 right-0 text-xs w-[24px] h-full flex items-center justify-center"
+        className="absolute top-0 right-0 text-xs  h-full flex items-center justify-center"
         size="small"
         ghost
         border
