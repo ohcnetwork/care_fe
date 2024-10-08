@@ -40,6 +40,8 @@ import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
+import { Button } from "@/Components/ui/button";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -252,7 +254,7 @@ export const PatientHome = (props: any) => {
 
   return (
     <Page
-      title={"Patient Details"}
+      title={t("patient details")}
       crumbsReplacements={{
         [facilityId]: { name: patientData?.facility_object?.name },
         [id]: { name: patientData?.name },
@@ -306,35 +308,42 @@ export const PatientHome = (props: any) => {
         {(patientData?.facility != patientData?.last_consultation?.facility ||
           (patientData.is_active &&
             patientData?.last_consultation?.discharge_date)) && (
-          <div className="relative mt-2">
-            <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
-              <div className="text-center">
-                <p className="font-bold text-red-800">
-                  <CareIcon icon="l-exclamation-triangle" className="mr-2" />
-                  <span className="inline">
-                    You have not created a consultation for the patient in{" "}
-                    <strong>{patientData.facility_object?.name || "-"} </strong>
+          <Alert
+            variant="destructive"
+            className="mb-4 flex flex-col items-center justify-between gap-2 md:flex-row"
+          >
+            <div className="flex items-center gap-2">
+              <CareIcon
+                icon="l-exclamation-triangle"
+                className="mr-2 hidden h-10 animate-pulse md:block"
+              />
+              <div>
+                <AlertTitle className="flex items-center">
+                  {t("consultation_not_found")}
+                </AlertTitle>
+                <AlertDescription>
+                  <span className="text-gray-700">
+                    {t("consultation_not_found_description")}
                   </span>
-                </p>
+                </AlertDescription>
               </div>
             </div>
-            <div className="mt-4 flex items-center">
-              <ButtonV2
-                className="mb-2 w-full"
-                disabled={!patientData.is_active}
-                onClick={() =>
-                  navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                  )
-                }
-              >
-                Create Consultation
-              </ButtonV2>
-            </div>
-          </div>
+            <Button
+              variant="outline_primary"
+              disabled={!patientData.is_active}
+              onClick={() =>
+                navigate(
+                  `/facility/${patientData?.facility}/patient/${id}/consultation`,
+                )
+              }
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              <span>{t("create_consultation")}</span>
+            </Button>
+          </Alert>
         )}
         <section className="lg:flex" data-testid="patient-dashboard">
-          <div className="mx-2 lg:w-2/3">
+          <div className="lg:w-2/3">
             <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">
               <div>
                 <div className="flex flex-row gap-4">
@@ -381,13 +390,6 @@ export const PatientHome = (props: any) => {
                           />
                         )}
                       </>
-                    )}
-                    {patientData.past_travel && (
-                      <Chip
-                        variant="warning"
-                        startIcon="l-exclamation-triangle"
-                        text="Travel (within last 28 days)"
-                      />
                     )}
                     {patientData.last_consultation?.is_telemedicine && (
                       <Chip
@@ -562,10 +564,10 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="mx-2 h-full lg:w-1/3">
+          <div className="h-full px-2 lg:w-1/3">
             <div
               id="actions"
-              className="flex h-full flex-col justify-between space-y-2"
+              className="flex h-full flex-col justify-between space-y-2 px-2"
             >
               <div>
                 {patientData.review_time &&
