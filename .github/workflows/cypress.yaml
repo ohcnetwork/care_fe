@@ -38,8 +38,6 @@ jobs:
       - name: Start care docker containers
         run: |
           cd care
-          mkdir -p docker  # Ensure the docker directory exists
-          touch docker/.prebuilt.env  # Ensure the .prebuilt.env file exists
           echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
           echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
@@ -88,10 +86,7 @@ jobs:
       # Step 12: Run Cypress tests in parallel using cypress-parallel
       - name: Run Cypress tests in parallel
         run: |
-          npx cypress-parallel -s 'cypress/e2e/**/*.cy.js' -n 4 \
-          --ci-build-id ${{ github.sha }}-${{ github.run_id }} \
-          --browser chrome \
-          --record
+          npx cypress-parallel -s 'cypress/e2e/**/*.cy.ts' -n 4 --ci-build-id ${{ github.sha }}-${{ github.run_id }} --browser chrome --record
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CARE_API: http://localhost:9000
