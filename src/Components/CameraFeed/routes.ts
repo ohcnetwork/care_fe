@@ -54,8 +54,13 @@ export const FeedRoutes = {
     method: "GET",
     TRes: Type<PaginatedResponse<CameraPreset>>(),
   },
-  listPresets: {
-    path: "/api/v1/camera_presets/",
+  listAssetPresets: {
+    path: "/api/v1/asset/{asset_id}/camera_presets/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<CameraPreset>>(),
+  },
+  listBedPresets: {
+    path: "/api/v1/bed/{bed_id}/camera_presets/",
     method: "GET",
     TRes: Type<PaginatedResponse<CameraPreset>>(),
   },

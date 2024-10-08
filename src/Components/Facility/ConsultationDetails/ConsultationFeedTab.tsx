@@ -55,8 +55,9 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
   const { key, operate } = useOperateCamera(asset?.id ?? "");
 
-  const presetsQuery = useQuery(FeedRoutes.listPresets, {
-    query: { bed: bed?.id, position: true, limit: 100 },
+  const presetsQuery = useQuery(FeedRoutes.listBedPresets, {
+    pathParams: { bed_id: bed?.id ?? "" },
+    query: { limit: 100 },
     prefetch: !!bed,
     onResponse: ({ data }) => {
       if (!data) {
