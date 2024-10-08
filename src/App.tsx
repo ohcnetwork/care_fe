@@ -8,6 +8,7 @@ import AuthUserProvider from "./Providers/AuthUserProvider";
 import PluginEngine from "./PluginEngine";
 import { PluginConfigType } from "./Common/hooks/useConfig";
 import { FeatureFlagsProvider } from "./Utils/featureFlags";
+import { Toaster } from "./Components/ui/toaster";
 
 const App = () => {
   const [plugins, setPlugins] = useState<PluginConfigType[]>(["care-livekit"]);
@@ -26,6 +27,7 @@ const App = () => {
           <Integrations.Sentry disabled={!import.meta.env.PROD} />
           <Integrations.Plausible />
         </HistoryAPIProvider>
+        <Toaster />
       </PluginEngine>
     </Suspense>
   );

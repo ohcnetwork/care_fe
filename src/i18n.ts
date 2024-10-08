@@ -1,12 +1,13 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-import en from "./Locale/en";
-import ta from "./Locale/ta";
-import ml from "./Locale/ml";
-import mr from "./Locale/mr";
-import kn from "./Locale/kn";
-import hi from "./Locale/hi";
+
+import en from "./Locale/en.json";
+import ta from "./Locale/ta.json";
+import ml from "./Locale/ml.json";
+import mr from "./Locale/mr.json";
+import kn from "./Locale/kn.json";
+import hi from "./Locale/hi.json";
 
 export const LANGUAGES: { [key: string]: any } = {
   en: "English",

@@ -24,10 +24,9 @@ import HCXRoutes from "./routes/HCXRoutes";
 import ShiftingRoutes from "./routes/ShiftingRoutes";
 import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
-import ExternalResultRoutes from "./routes/ExternalResultRoutes";
-import useAuthUser from "../Common/hooks/useAuthUser";
-import careConfig from "@careConfig";
 import { usePluginRoutes } from "@core/Common/hooks/useCareApps";
+import careConfig from "@careConfig";
+import IconIndex from "../CAREUI/icons/Index";
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -68,25 +67,19 @@ const Routes: AppRoutes = {
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
+  "/icons": () => <IconIndex />,
+
+  // Only include the icon route in development environment
+  ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
 };
 
 export default function AppRouter() {
-  const authUser = useAuthUser();
-
   const pluginRoutes = usePluginRoutes();
 
   let routes = Routes;
 
   if (careConfig.hcx.enabled) {
     routes = { ...HCXRoutes, ...routes };
-  }
-
-  if (
-    !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type,
-    )
-  ) {
-    routes = { ...routes, ...ExternalResultRoutes };
   }
 
   useRedirect("/user", "/users");

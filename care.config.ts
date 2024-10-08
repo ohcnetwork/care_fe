@@ -61,9 +61,6 @@ const careConfig = {
   sampleFormats: {
     assetImport:
       env.REACT_SAMPLE_FORMAT_ASSET_IMPORT || "/asset-import-template.xlsx",
-    externalResultImport:
-      env.REACT_SAMPLE_FORMAT_EXTERNAL_RESULT_IMPORT ||
-      "/External-Results-Template.csv",
   },
 
   wartimeShifting: env.REACT_WARTIME_SHIFTING === "true",
