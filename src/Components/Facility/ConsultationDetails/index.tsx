@@ -283,7 +283,10 @@ export const ConsultationDetails = (props: any) => {
               patient={patientData}
               abhaNumber={abhaNumberData}
               consultation={consultationData}
-              fetchPatientData={() => patientDataQuery.refetch()}
+              fetchPatientData={() => {
+                consultationQuery.refetch();
+                patientDataQuery.refetch();
+              }}
               consultationId={consultationId}
               activeShiftingData={activeShiftingData}
               showAbhaProfile={qParams["show-abha-profile"] === "true"}
