@@ -1,13 +1,3 @@
-@import "@fontsource/inter/100.css";
-@import "@fontsource/inter/200.css";
-@import "@fontsource/inter/300.css";
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
-@import "@fontsource/inter/800.css";
-@import "@fontsource/inter/900.css";
-
 @import "@fontsource/figtree/300.css";
 @import "@fontsource/figtree/400.css";
 @import "@fontsource/figtree/500.css";
@@ -47,7 +37,7 @@ html {
 }
 
 body {
-    font-family: "Figtree", "Inter", sans-serif;
+    font-family: "Figtree", sans-serif;
     color: #453c52;
     @apply font-sans text-secondary-900 w-full h-full antialiased;
 }
