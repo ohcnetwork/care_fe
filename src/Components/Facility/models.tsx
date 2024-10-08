@@ -7,11 +7,13 @@ import {
   PATIENT_NOTES_THREADS,
   UserRole,
 } from "../../Common/constants";
+import { FeatureFlag } from "../../Utils/featureFlags";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import {
   AssignedToObjectModel,
   BloodPressure,
   DailyRoundsModel,
+  FacilityNameModel,
   FileUploadModel,
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
@@ -79,7 +81,32 @@ export interface FacilityModel {
   local_body?: number;
   ward?: number;
   pincode?: string;
+  facility_flags?: FeatureFlag[];
+  latitude?: string;
+  longitude?: string;
+  kasp_empanelled?: boolean;
+  patient_count?: string;
+  bed_count?: string;
 }
+
+export enum SpokeRelationship {
+  REGULAR = 1,
+  TELE_ICU = 2,
+}
+
+export interface FacilitySpokeModel {
+  id: string;
+  hub_object: FacilityNameModel;
+  spoke_object: FacilityNameModel;
+  relationship: SpokeRelationship;
+}
+
+export interface FacilitySpokeRequest {
+  spoke?: string;
+  relationship?: SpokeRelationship;
+}
+
+export interface FacilitySpokeErrors {}
 
 export interface CapacityModal {
   id?: number;
@@ -546,6 +573,14 @@ export interface PatientNotesEditModel {
   note: string;
 }
 
+export interface PaitentNotesReplyModel {
+  id: string;
+  note: string;
+  user_type?: UserRole | "RemoteSpecialist";
+  created_by_object: BaseUserModel;
+  created_date: string;
+}
+
 export interface PatientNotesModel {
   id: string;
   note: string;
@@ -556,6 +591,7 @@ export interface PatientNotesModel {
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
+  reply_to_object?: PaitentNotesReplyModel;
 }
 
 export interface PatientNoteStateType {
@@ -579,13 +615,7 @@ export type IUserFacilityRequest = {
   facility: string;
 };
 
-export type FacilityRequest = Omit<FacilityModel, "location"> & {
-  latitude?: string;
-  longitude?: string;
-  kasp_empanelled?: boolean;
-  patient_count?: string;
-  bed_count?: string;
-};
+export type FacilityRequest = Omit<FacilityModel, "location" | "id">;
 
 export type InventorySummaryResponse = {
   id: string;

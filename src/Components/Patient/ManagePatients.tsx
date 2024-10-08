@@ -12,8 +12,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import { ReactNode, lazy, useEffect, useState } from "react";
-import { getAllPatient } from "../../Redux/actions";
+import { ReactNode, useEffect, useState } from "react";
 import { parseOptionId } from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -53,9 +52,10 @@ import {
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import Tabs from "../Common/components/Tabs.js";
+import request from "../../Utils/request/request.js";
+import { Avatar } from "../Common/Avatar.js";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;
@@ -276,13 +276,6 @@ export const PatientManager = () => {
     !durations.every((x) => x === 0);
 
   let managePatients: any = null;
-
-  const exportPatients = (isFiltered: boolean) => {
-    const filters = { ...params, csv: true, facility: qParams.facility };
-    if (!isFiltered) delete filters.is_active;
-    return () => getAllPatient(filters, "downloadPatients");
-  };
-
   const preventDuplicatePatientsDuetoPolicyId = (data: any) => {
     // Generate a array which contains imforamation of duplicate patient IDs and there respective linenumbers
     const lines = data.split("\n"); // Split the data into individual lines
@@ -549,9 +542,10 @@ export const PatientManager = () => {
                 </div>
               ) : (
                 <div className="flex min-h-20 items-center justify-center">
-                  <CareIcon
-                    icon="l-user-injured"
-                    className="text-3xl text-secondary-500"
+                  <Avatar
+                    name={patient.name}
+                    square={true}
+                    colors={["#F9FAFB", "#BFB8CB"]}
                   />
                 </div>
               )}
@@ -923,7 +917,18 @@ export const PatientManager = () => {
                   exportItems={[
                     {
                       label: "Export Live patients",
-                      action: exportPatients(true),
+                      action: async () => {
+                        const query = {
+                          ...params,
+                          csv: true,
+                          facility: qParams.facility,
+                        };
+                        delete qParams.is_active;
+                        const { data } = await request(routes.patientList, {
+                          query,
+                        });
+                        return data ?? null;
+                      },
                       parse: preventDuplicatePatientsDuetoPolicyId,
                     },
                   ]}

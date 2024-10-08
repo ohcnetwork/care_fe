@@ -4,10 +4,9 @@ import {
   getConsultation,
   getPatient,
   listAssetBeds,
-  listShiftRequests,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { lazy, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { PatientModel } from "../../Patient/models";
 import {
@@ -47,8 +46,8 @@ import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 import Error404 from "../../ErrorPages/404";
 import { useTranslation } from "react-i18next";
 
-const Loading = lazy(() => import("../../Common/Loading"));
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 
 export interface ConsultationTabProps {
   consultationId: string;
@@ -179,12 +178,11 @@ export const ConsultationDetails = (props: any) => {
           setAbhaNumberData(abhaNumberData);
 
           // Get shifting data
-          const shiftingRes = await dispatch(
-            listShiftRequests({ patient: id }, "shift-list-call"),
-          );
-          if (shiftingRes?.data?.results) {
-            const data = shiftingRes.data.results;
-            setActiveShiftingData(data);
+          const shiftRequestsQuery = await request(routes.listShiftRequests, {
+            query: { patient: id },
+          });
+          if (shiftRequestsQuery.data?.results) {
+            setActiveShiftingData(shiftRequestsQuery.data.results);
           }
         } else {
           navigate("/not-found");

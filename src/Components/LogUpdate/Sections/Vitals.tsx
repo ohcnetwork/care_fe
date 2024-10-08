@@ -29,7 +29,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
       <BPAttributeEditor attribute="diastolic" log={log} onChange={onChange} />
       <hr />
       <RangeFormField
-        label={t("ventilator_spo2")}
+        label={t("LOG_UPDATE_FIELD_LABEL__ventilator_spo2")}
         name="ventilator_spo2"
         onChange={(c) => onChange({ ventilator_spo2: c.value })}
         value={log.ventilator_spo2}
@@ -137,7 +137,7 @@ const BPAttributeEditor = ({
       name={attribute}
       label={t(attribute)}
       onChange={(event) => {
-        const bp = log.bp ?? {};
+        const bp = { systolic: log.bp?.systolic, diastolic: log.bp?.diastolic };
         bp[event.name as keyof BloodPressure] = event.value;
         onChange({
           bp: Object.values(bp).filter(Boolean).length ? bp : undefined,

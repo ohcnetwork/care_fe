@@ -1,6 +1,4 @@
-import { lazy } from "react";
 import { navigate } from "raviger";
-import { downloadResourceRequests } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
@@ -16,9 +14,9 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
+import request from "../../Utils/request/request";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ListView() {
   const {
     qParams,
@@ -161,7 +159,12 @@ export default function ListView() {
       hideBack
       componentRight={
         <ExportButton
-          action={() => downloadResourceRequests({ ...appliedFilters, csv: 1 })}
+          action={async () => {
+            const { data } = await request(routes.downloadResourceRequests, {
+              query: { ...appliedFilters, csv: true },
+            });
+            return data ?? null;
+          }}
           filenamePrefix="resource_requests"
         />
       }

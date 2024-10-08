@@ -195,6 +195,7 @@ export const FileUpload = (props: FileUploadProps) => {
       "ods",
       "pdf",
     ],
+    allowNameFallback: false,
     onUpload: refetchAll,
   });
 
@@ -259,7 +260,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       </span>
                       <button
                         onClick={fileUpload.clearFiles}
-                        disabled={!!fileUpload.progress}
+                        disabled={fileUpload.uploading}
                         className="text-lg"
                       >
                         <CareIcon icon="l-times" />
@@ -271,8 +272,8 @@ export const FileUpload = (props: FileUploadProps) => {
                       label={t("enter_file_name")}
                       id="upload-file-name"
                       required
-                      value={fileUpload.fileNames[0]}
-                      disabled={!!fileUpload.progress}
+                      value={fileUpload.fileNames[0] || ""}
+                      disabled={fileUpload.uploading}
                       onChange={(e) => fileUpload.setFileName(e.value)}
                       error={fileUpload.error || undefined}
                     />
@@ -281,7 +282,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         onClick={() =>
                           fileUpload.handleFileUpload(associatedId)
                         }
-                        loading={!!fileUpload.progress}
+                        loading={fileUpload.uploading}
                         className="w-full"
                         id="upload_file_button"
                       >
@@ -291,7 +292,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       <ButtonV2
                         variant="danger"
                         onClick={fileUpload.clearFiles}
-                        disabled={!!fileUpload.progress}
+                        disabled={fileUpload.uploading}
                       >
                         <CareIcon icon="l-trash-alt" className="" />
                         {t("discard")}

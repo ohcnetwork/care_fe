@@ -16,7 +16,7 @@ import {
 import LogUpdateAnalayseTable from "../Consultations/components/SharedTable";
 import { formatDateTime } from "../../../Utils/utils";
 
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import PageTitle from "@/Components/Common/PageTitle";
 
 const REVERSE_CHOICES = {
   appetite: {

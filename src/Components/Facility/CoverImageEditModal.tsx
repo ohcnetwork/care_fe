@@ -13,7 +13,6 @@ import Webcam from "react-webcam";
 import { FacilityModel } from "./models";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
@@ -130,25 +129,17 @@ const CoverImageEditModal = ({
           "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
       },
       async (xhr: XMLHttpRequest) => {
+        setIsProcessing(false);
         if (xhr.status === 200) {
           Success({ msg: "Cover image updated." });
-          setIsProcessing(false);
           setIsCaptureImgBeingUploaded(false);
           await sleep(1000);
           onSave?.();
           closeModal();
-        } else {
-          Notification.Error({
-            msg: "Something went wrong!",
-          });
-          setIsProcessing(false);
         }
       },
       null,
       () => {
-        Notification.Error({
-          msg: "Network Failure. Please check your internet connectivity.",
-        });
         setIsProcessing(false);
       },
     );
@@ -166,10 +157,6 @@ const CoverImageEditModal = ({
     onDelete?.();
     closeModal();
   };
-
-  const hasImage = !!(preview || facility.read_cover_image_url);
-  const imgSrc =
-    preview || `${facility.read_cover_image_url}?requested_on=${Date.now()}`;
 
   const dragProps = useDragAndDrop();
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -200,11 +187,11 @@ const CoverImageEditModal = ({
       <div className="flex h-full w-full items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
           <form className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
-            {hasImage ? (
+            {preview || facility.read_cover_image_url ? (
               <>
                 <div className="flex flex-1 items-center justify-center rounded-lg">
                   <img
-                    src={imgSrc}
+                    src={preview || facility.read_cover_image_url}
                     alt={facility.name}
                     className="h-full w-full object-cover"
                   />

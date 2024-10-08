@@ -26,6 +26,8 @@ import {
   DoctorModal,
   FacilityModel,
   FacilityRequest,
+  FacilitySpokeModel,
+  FacilitySpokeRequest,
   IFacilityNotificationRequest,
   IFacilityNotificationResponse,
   IUserFacilityRequest,
@@ -70,12 +72,8 @@ import {
 import { IComment, IResource } from "../Components/Resource/models";
 import {
   IDeleteBedCapacity,
-  IDeleteExternalResult,
-  IExternalResult,
-  IExternalResultCsv,
   ILocalBodies,
   ILocalBodyByDistrict,
-  IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
 import {
   InvestigationGroup,
@@ -366,7 +364,7 @@ const routes = {
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
-    TRes: Type<FacilityRequest>(),
+    TRes: Type<FacilityModel>(),
   },
 
   getAnyFacility: {
@@ -387,6 +385,38 @@ const routes = {
     method: "PATCH",
     TRes: Type<FacilityModel>(),
     TBody: Type<Partial<FacilityModel>>(),
+  },
+
+  getFacilitySpokes: {
+    path: "/api/v1/facility/{id}/spokes/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
+  },
+
+  updateFacilitySpokes: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "PATCH",
+    TRes: Type<FacilitySpokeModel>(),
+    TBody: Type<FacilitySpokeRequest>(),
+  },
+
+  getFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "GET",
+    TRes: Type<FacilitySpokeModel>(),
+  },
+
+  createFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/",
+    method: "POST",
+    TRes: Type<FacilitySpokeModel>(),
+    TBody: Type<Partial<FacilitySpokeRequest>>(),
+  },
+
+  deleteFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   deleteFacilityCoverImage: {
@@ -543,24 +573,29 @@ const routes = {
   downloadFacility: {
     path: "/api/v1/facility/?csv",
     method: "GET",
+    TRes: Type<string>(),
   },
   downloadFacilityCapacity: {
     path: "/api/v1/facility/?csv&capacity",
     method: "GET",
+    TRes: Type<string>(),
   },
   downloadFacilityDoctors: {
     path: "/api/v1/facility/?csv&doctors",
     method: "GET",
+    TRes: Type<string>(),
   },
 
   downloadFacilityTriage: {
     path: "/api/v1/facility/?csv&triage",
     method: "GET",
+    TRes: Type<string>(),
   },
 
   downloadPatients: {
     path: "/api/v1/patient/?csv",
     method: "GET",
+    TRes: Type<string>(),
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
@@ -774,7 +809,10 @@ const routes = {
     method: "POST",
     TRes: Type<PatientNotesModel>(),
     TBody: Type<
-      Pick<PatientNotesModel, "note" | "thread"> & { consultation?: string }
+      Pick<PatientNotesModel, "note" | "thread"> & {
+        consultation?: string;
+        reply_to?: string;
+      }
     >(),
   },
   updatePatientNote: {
@@ -802,42 +840,6 @@ const routes = {
     path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample/",
     method: "GET",
     TRes: Type<SampleReportModel>(),
-  },
-
-  // External Results
-  externalResultList: {
-    path: "/api/v1/external_result/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<IExternalResult>>(),
-  },
-  externalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "GET",
-    TRes: Type<IExternalResult>(),
-  },
-  externalResultUploadCsv: {
-    path: "/api/v1/external_result/bulk_upsert/",
-    method: "POST",
-    TBody: Type<IExternalResultCsv>(),
-    TRes: Type<IExternalResult[]>(),
-  },
-
-  deleteExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "DELETE",
-    TRes: Type<IDeleteExternalResult>(),
-  },
-
-  updateExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "PUT",
-  },
-
-  partialUpdateExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "PATCH",
-    TRes: Type<IPartialUpdateExternalResult>(),
-    TBody: Type<IPartialUpdateExternalResult>(),
   },
 
   // States
@@ -1083,6 +1085,7 @@ const routes = {
   downloadShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
+    TRes: Type<string>(),
   },
   getShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
@@ -1254,6 +1257,7 @@ const routes = {
   downloadResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
+    TRes: Type<string>(),
   },
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",

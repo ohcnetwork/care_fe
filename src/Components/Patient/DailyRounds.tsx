@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 
 import dayjs from "dayjs";
-import { lazy, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   APPETITE_CHOICES,
   BLADDER_DRAINAGE_CHOICES,
@@ -58,8 +58,7 @@ import { scrollTo } from "../../Utils/utils";
 import { ICD11DiagnosisModel } from "../Facility/models";
 import NursingCare from "../LogUpdate/Sections/NursingCare";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -542,6 +541,7 @@ export const DailyRounds = (props: any) => {
     >
       <div className="flex w-full justify-end md:m-4">
         <Scribe
+          facilityId={facilityId}
           form={SCRIBE_FORMS.daily_round}
           onFormUpdate={async (fields) => {
             setDiagnosisSuggestions([]);
