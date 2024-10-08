@@ -1,8 +1,6 @@
 name: Cypress Tests
 
 on:
-  schedule:
-    - cron: "30 22 * * *"
   pull_request:
     branches:
       - develop
@@ -11,129 +9,58 @@ on:
 
 jobs:
   cypress-run:
-    permissions: write-all
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2, 3, 4, 5, 6, 7, 8]
-    env:
-      REACT_CARE_API_URL: http://localhost:9000
     steps:
-      - name: Checkout 📥
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set backend branch
-        id: backend-branch
-        run: |
-          if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then
-            echo "branch=staging" >> $GITHUB_OUTPUT
-          else
-            echo "branch=develop" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Checkout care 📥
-        uses: actions/checkout@v3
-        with:
-          repository: ohcnetwork/care
-          path: care
-          ref: ${{ steps.backend-branch.outputs.branch }}
-
-      - name: Start care docker containers 🐳
-        run: |
-          cd care
-          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.pre-built.yaml up 
-          make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
-          cd ..
-        env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
-
-      - name: Wait for care to be up ♻
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 1
-          max_attempts: 5
-          command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
-          on_retry_command: sleep 5
-
-      - name: Determine PR Origin
-        id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
-
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install dependencies 📦
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build ⚙️
+      - name: Build frontend
         run: npm run build
 
-      - name: Install Specific Chrome Version
+      - name: Start backend (Docker)
         run: |
-          sudo apt-get install -y wget
-          sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt-get install ./google-chrome-stable_current_amd64.deb
+          docker-compose -f docker-compose.yaml up -d
+          docker-compose -f docker-compose.yaml exec backend wait-for-it.sh backend:9000 --timeout=120
 
-      - name: Cypress run for Non-Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'false'
-        uses: cypress-io/github-action@v5
-        with:
-          env: SKIP_PREFLIGHT_CHECK=true
-          install: false
-          start: "npx vite preview --host"
-          wait-on: "http://localhost:4000"
-          wait-on-timeout: 300
-          browser: chrome
-          record: true
-          parallel: true
-          group: "UI-Chrome"
+      - name: Start frontend server
+        run: npm run start &
+        env:
+          CARE_API: http://localhost:9000
+
+      - name: Wait for frontend to be up
+        run: npx wait-on http://localhost:4000
+
+      - name: Run Cypress tests in parallel with Cypress Cloud
+        run: |
+          npx cypress-parallel -s 'cypress/e2e/**/*.cy.js' -n 4 \
+          --ci-build-id ${{ github.sha }}-${{ github.run_id }} \
+          --group "UI-Chrome" \
+          --parallel \
+          --record
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARE_API: http://localhost:9000
           NODE_OPTIONS: --max_old_space_size=4096
-          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
-          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
 
-      - name: Cypress run for Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'true'
-        uses: cypress-io/github-action@v5
-        with:
-          env: SKIP_PREFLIGHT_CHECK=true
-          install: false
-          start: "npx vite preview --host"
-          wait-on: "http://localhost:4000"
-          wait-on-timeout: 300
-          browser: chrome
-          record: true
-          parallel: true
-          group: "UI-Chrome"
-        env:
-          CYPRESS_SPLIT_TESTS: "true"
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_OPTIONS: --max_old_space_size=4096
-          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
-          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
-          SPLIT: ${{ strategy.job-total }}
-          SPLIT_INDEX: ${{ strategy.job-index }}
-
-      - name: Upload cypress screenshots on failure 📸
+      - name: Upload Cypress screenshots on failure
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
 
-      - name: Upload cypress videos 📹
+      - name: Upload Cypress videos
         uses: actions/upload-artifact@v3
-        if: steps.pr_origin.outputs.is_forked == 'true'
+        if: failure()
         with:
           name: cypress-videos
           path: cypress/videos
