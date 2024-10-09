@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import TextFormField from "../Form/FormFields/TextFormField";
