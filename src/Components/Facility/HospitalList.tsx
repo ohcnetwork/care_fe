@@ -1,4 +1,4 @@
-import { lazy, useEffect } from "react";
+import { useEffect } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import ExportMenu from "../Common/Export";
@@ -17,8 +17,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export const HospitalList = () => {
   const {
     qParams,

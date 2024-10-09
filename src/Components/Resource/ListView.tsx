@@ -1,4 +1,3 @@
-import { lazy } from "react";
 import { navigate } from "raviger";
 import ListFilter from "./ListFilter";
 import { formatFilter } from "./Commons";
@@ -17,8 +16,7 @@ import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
 import request from "../../Utils/request/request";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ListView() {
   const {
     qParams,
