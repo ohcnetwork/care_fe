@@ -17,6 +17,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import careConfig from "@careConfig";
 import { FacilityModel } from "./models";
+import { Avatar } from "../Common/Avatar";
 
 export const FacilityCard = (props: {
   facility: FacilityModel;
@@ -89,9 +90,10 @@ export const FacilityCard = (props: {
                         className="h-full w-full rounded-md object-cover"
                       />
                     )) || (
-                      <CareIcon
-                        icon="l-hospital"
-                        className="block text-5xl text-secondary-500"
+                      <Avatar
+                        name={facility.name || ""}
+                        square={true}
+                        className="h-full w-full rounded-md object-cover"
                       />
                     )}
                   </Link>

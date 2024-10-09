@@ -1,4 +1,4 @@
-import { useReducer, useState, lazy } from "react";
+import { useReducer, useState } from "react";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import * as Notification from "../../Utils/Notifications.js";
@@ -27,8 +27,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface resourceProps {
   facilityId: number;
 }

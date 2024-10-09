@@ -30,7 +30,7 @@ class LoginPage {
   }
 
   ensureLoggedIn(): void {
-    cy.get("p").contains("Sign Out").should("exist");
+    cy.get("#sign-out-button").contains("Sign Out").should("exist");
   }
 }
 

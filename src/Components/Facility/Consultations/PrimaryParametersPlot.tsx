@@ -8,7 +8,7 @@ import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
-import PageTitle from "../../Common/PageTitle";
+import PageTitle from "@/Components/Common/PageTitle";
 import dayjs from "../../../Utils/dayjs";
 import { meanArterialPressure } from "../../Common/BloodPressureFormField";
 import { PrimaryParametersPlotFields } from "../models";
