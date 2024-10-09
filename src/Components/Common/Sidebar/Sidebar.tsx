@@ -7,7 +7,6 @@ import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
 import careConfig from "@careConfig";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
@@ -33,8 +32,6 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
-  const authUser = useAuthUser();
-
   const NavItems: {
     text: string;
     to: string;
@@ -46,17 +43,6 @@ const StatelessSidebar = ({
     { text: "Sample Test", to: "/sample", icon: "l-medkit" },
     { text: "Shifting", to: "/shifting", icon: "l-ambulance" },
     { text: "Resource", to: "/resource", icon: "l-heart-medical" },
-    ...(!["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type,
-    )
-      ? ([
-          {
-            text: "External Results",
-            to: "/external_results",
-            icon: "l-clipboard-notes",
-          },
-        ] as const)
-      : []),
     { text: "Users", to: "/users", icon: "l-users-alt" },
     { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
   ];
