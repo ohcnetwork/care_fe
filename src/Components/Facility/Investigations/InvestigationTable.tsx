@@ -85,7 +85,7 @@ const HeadingRow = () => {
       <th
         key={t("investigations__result")}
         scope="col"
-        className={`w-3/6 text-center md:w-1/6 ${commonClass}`}
+        className={`w-2/6 text-center md:w-1/6 ${commonClass}`}
       >
         {t("investigations__result")}
       </th>
