@@ -222,7 +222,7 @@ export default function MedicineAdministrationTableRow({
                 </p>
               )}
 
-              <p>
+              <p className="max-w-[110px] truncate">
                 {prescription.dosage_type !== "PRN"
                   ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
                   : prescription.indicator}
