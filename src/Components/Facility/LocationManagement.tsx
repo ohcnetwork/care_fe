@@ -233,7 +233,7 @@ const Location = ({
     },
   });
 
-  const totalBeds = data?.results.length || 0;
+  const totalBeds = data?.count ?? 0;
 
   if (loading) {
     return <Loading />;
