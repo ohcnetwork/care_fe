@@ -17,7 +17,10 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
   const { t } = useTranslation();
 
   // Helper function to get the display value
-  const getDisplayValue = (value: any, field?: string): string => {
+  const getDisplayValue = (
+    value: string | boolean | null | undefined,
+    field?: string,
+  ): string => {
     if (value == null) {
       return " ";
     }
@@ -35,7 +38,7 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
     return "-";
   };
 
-  const isddm_mm = (str: string) => {
+  const isValidDate = (str: string) => {
     let ct = 0;
     for (let i = 0; i < str.length; i++) {
       if (str[i] == "/") ct++;
@@ -45,7 +48,7 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
     return false;
   };
 
-  const ddmm_mmdd = (str: string) => {
+  const dateConversion = (str: string) => {
     const time = str.split(";")[0].trim();
 
     const date = str.split(";")[1].trim();
@@ -72,13 +75,13 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
                 >
                   {/*   DD/MM/YYYY ->  MM/DD/YYYY */}
                   <p>
-                    {isddm_mm(date)
-                      ? formatDate(ddmm_mmdd(date))
+                    {isValidDate(date)
+                      ? formatDate(dateConversion(date))
                       : formatDate(date)}
                   </p>
                   <p>
-                    {isddm_mm(date)
-                      ? formatTime(ddmm_mmdd(date))
+                    {isValidDate(date)
+                      ? formatTime(dateConversion(date))
                       : formatTime(date)}
                   </p>
                 </th>

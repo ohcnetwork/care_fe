@@ -17,6 +17,8 @@ import LogUpdateAnalayseTable from "../Consultations/components/SharedTable";
 import { formatDateTime } from "../../../Utils/utils";
 
 import PageTitle from "@/Components/Common/PageTitle";
+import { ConsultationTabProps } from ".";
+import { ProcedureType } from "@/Components/Common/prescription-builder/ProcedureBuilder";
 
 const REVERSE_CHOICES = {
   appetite: {
@@ -90,7 +92,7 @@ const ROUTINE_ROWS = [
   { subField: true, field: "appetite" } as const,
 ];
 
-const NursingPlot = ({ consultationId }: any) => {
+const NursingPlot = ({ consultationId }: ConsultationTabProps) => {
   const { t } = useTranslation();
   const [results, setResults] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,7 +133,9 @@ const NursingPlot = ({ consultationId }: any) => {
     .reduce((accumulator, value) => accumulator.concat(value), []);
 
   const filterEmpty = (field: (typeof NURSING_CARE_PROCEDURES)[number]) => {
-    const filtered = dataToDisplay.filter((i: any) => i.procedure === field);
+    const filtered = dataToDisplay.filter(
+      (i: ProcedureType) => i.procedure === field,
+    );
     return filtered.length > 0;
   };
 
@@ -187,7 +191,7 @@ const NursingPlot = ({ consultationId }: any) => {
   );
 };
 
-const RoutineSection = ({ consultationId }: any) => {
+const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number>();
@@ -251,7 +255,7 @@ const RoutineSection = ({ consultationId }: any) => {
   );
 };
 
-export default function ConsultationNursingTab({ consultationId }: any) {
+export default function ConsultationNursingTab(props: ConsultationTabProps) {
   const { t } = useTranslation();
   return (
     <div>
@@ -262,11 +266,11 @@ export default function ConsultationNursingTab({ consultationId }: any) {
       />
       <div>
         <h4>{t("routine")}</h4>
-        <RoutineSection consultationId={consultationId} />
+        <RoutineSection {...props} />
       </div>
       <div>
         <h4>{t("nursing_care")}</h4>
-        <NursingPlot consultationId={consultationId} />
+        <NursingPlot {...props} />
       </div>
     </div>
   );
