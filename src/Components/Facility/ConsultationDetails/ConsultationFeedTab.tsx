@@ -61,7 +61,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { key, operate } = useOperateCamera(asset?.id ?? "", true);
 
   const { data, loading, refetch } = useQuery(routes.listAssetBeds, {
-    query: { limit: 100, facility, bed: bed?.id, asset: asset?.id },
+    query: { limit: 100, facility, bed: bed?.id },
     prefetch: !!bed,
     onResponse: ({ data }) => {
       if (!data) {
