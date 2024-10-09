@@ -123,6 +123,7 @@ const StatelessSidebar = ({
           <ToggleShrink
             shrinked={shrinked}
             toggle={() => setShrinked && setShrinked(!shrinked)}
+            handleOverflow={handleOverflow}
           />
         </div>
       )}
@@ -142,6 +143,7 @@ const StatelessSidebar = ({
             <ToggleShrink
               shrinked={shrinked}
               toggle={() => setShrinked && setShrinked(!shrinked)}
+              handleOverflow={handleOverflow}
             />
           </div>
         )}
@@ -188,7 +190,7 @@ const StatelessSidebar = ({
         </div>
         <div className="hidden md:block md:flex-1" />
 
-        <SidebarUserCard shrinked={shrinked} />
+        <SidebarUserCard shrinked={shrinked} handleOverflow={handleOverflow} />
       </div>
     </nav>
   );
@@ -230,20 +232,45 @@ export const MobileSidebar = (props: MobileSidebarProps) => {
 interface ToggleShrinkProps {
   shrinked: boolean;
   toggle: () => void;
+  handleOverflow: (value: boolean) => void;
 }
 
-const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
-  <div
-    className={`flex h-5 w-5 cursor-pointer items-center justify-center self-end rounded bg-gray-300 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
-      shrinked ? "mx-auto" : "mr-4"
-    } transition-all duration-200 ease-in-out`}
-    onClick={toggle}
-  >
-    <CareIcon
-      icon="l-angle-up"
-      className={`text-3xl ${
-        shrinked ? "rotate-90" : "-rotate-90"
-      } transition-all delay-150 duration-300 ease-out`}
-    />
-  </div>
-);
+interface ToggleShrinkProps {
+  shrinked: boolean;
+  toggle: () => void;
+  handleOverflow: (value: boolean) => void;
+}
+
+const ToggleShrink: React.FC<ToggleShrinkProps> = ({
+  shrinked,
+  toggle,
+  handleOverflow,
+}) => {
+  const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
+
+  return (
+    <div
+      className={`flex h-5 w-5 cursor-pointer items-center justify-center self-end rounded bg-gray-300 p-2 py-2 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
+        shrinked ? "mx-auto" : "mr-4"
+      } transition-all duration-200 ease-in-out`}
+    >
+      <Item
+        text={shrinked ? "Expand" : ""}
+        icon={
+          <CareIcon
+            icon="l-angle-up"
+            className={`text-3xl ${
+              shrinked ? "rotate-90" : "-rotate-90"
+            } transition-all delay-150 duration-300 ease-out`}
+          />
+        }
+        do={() => {
+          toggle();
+
+          handleOverflow(!shrinked);
+        }}
+        handleOverflow={handleOverflow}
+      />
+    </div>
+  );
+};

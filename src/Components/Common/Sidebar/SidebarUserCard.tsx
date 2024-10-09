@@ -1,62 +1,54 @@
 import React from "react";
-import { Link } from "raviger";
+
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { formatName, formatDisplayName } from "../../../Utils/utils";
 import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
 import { Avatar } from "@/Components/Common/Avatar";
+import { ShrinkedSidebarItem, SidebarItem } from "./SidebarItem";
 
 interface SidebarUserCardProps {
   shrinked: boolean;
+  handleOverflow: (value: boolean) => void;
 }
 
-const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
+const SidebarUserCard: React.FC<SidebarUserCardProps> = ({
+  shrinked,
+  handleOverflow,
+}) => {
   const { t } = useTranslation();
   const user = useAuthUser();
   const { signOut } = useAuthContext();
+  const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
 
   return (
     <div className="my-2 flex flex-col">
-      <Link
-        href="/user/profile"
-        className="tooltip relative ml-1 mr-2 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:flex-none"
-      >
-        <div
-          id="user-profile-name"
-          className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
-        >
-          <div className="flex-none text-lg">
-            <Avatar name={formatDisplayName(user)} className="w-6" />
-          </div>
-          {!shrinked && (
-            <span className="flex w-full grow items-center pl-4 text-sm tracking-wide">
-              {formatName(user)}
-            </span>
-          )}
-        </div>
-      </Link>
       <div
-        onClick={signOut}
-        className="tooltip relative ml-1 mr-2 mt-4 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:mt-0 md:flex-none"
+        className={`flex flex-col py-3 transition-all duration-300 ease-in-out${shrinked ? "w-14" : "w-60"}`}
       >
-        <div
-          id="sign-out-button"
-          className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
-        >
-          <div className="flex-none text-lg">
-            <CareIcon
-              icon="l-sign-out-alt"
-              className="text-2xl text-gray-900"
+        <Item
+          text={t(formatName(user))}
+          to="/user/profile"
+          icon={
+            <Avatar
+              name={formatDisplayName(user)}
+              className="w-6 text-gray-900"
             />
-          </div>
-
-          {!shrinked && (
-            <div className="flex w-full items-center pl-4 text-sm tracking-wide text-gray-900">
-              {t("sign_out")}
-            </div>
-          )}
-        </div>
+          }
+          selected={false}
+          handleOverflow={handleOverflow}
+        />
       </div>
+      <Item
+        text={t("sign_out")}
+        to="#"
+        icon={
+          <CareIcon icon="l-sign-out-alt" className="text-2xl text-gray-900" />
+        }
+        selected={false}
+        do={signOut}
+        handleOverflow={handleOverflow}
+      />
     </div>
   );
 };
