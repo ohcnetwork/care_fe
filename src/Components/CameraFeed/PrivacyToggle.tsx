@@ -75,6 +75,9 @@ export function TogglePrivacyButton({
           routes.toggleConsultationBedPrivacy,
           {
             pathParams: { externalId: consultationBedId },
+            body: {
+              is_privacy_enabled: !isPrivacyEnabled,
+            },
           },
         );
 

@@ -568,8 +568,9 @@ const routes = {
     method: "PUT",
   },
   toggleConsultationBedPrivacy: {
-    path: "/api/v1/consultationbed/{externalId}/toggle_privacy/",
+    path: "/api/v1/consultationbed/{externalId}/set_privacy/",
     method: "PATCH",
+    TBody: Type<{ is_privacy_enabled: boolean }>(),
     TRes: Type<CurrentBed>(),
   },
 
