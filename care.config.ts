@@ -1,3 +1,5 @@
+import appsData from "./apps.json";
+
 const env = import.meta.env;
 
 interface ILogo {
@@ -108,12 +110,7 @@ const careConfig = {
     enabled: env.REACT_ENABLE_SCRIBE === "true",
   },
 
-  careApps: [
-    {
-      name: "care-livekit",
-      package: "./apps/care-livekit",
-    },
-  ],
+  careApps: appsData,
 } as const;
 
 export default careConfig;

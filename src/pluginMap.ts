@@ -1,17 +1,12 @@
-import { LazyExoticComponent } from "react";
-import { PluginManifest } from "./PluginEngine";
+import { lazy, LazyExoticComponent } from "react";
 import { UserAssignedModel } from "./Components/Users/models";
+import { AppRoutes } from "./Routers/AppRouter";
+import { INavItem } from "./Components/Common/Sidebar/Sidebar";
 
 // Define the available plugins
-export type AvailablePlugin =
-  | "@apps/care-livekit"
-  | "@apps/care-ohif"
-  | "@apps/care-scribe";
+export type AvailablePlugin = "@apps/care-livekit";
 
-export type AvailablePluginManifest =
-  | "@app-manifest/care-livekit"
-  | "@app-manifest/care-ohif"
-  | "@app-manifest/care-scribe";
+export type AvailablePluginManifest = "@app-manifest/care-livekit";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
@@ -33,6 +28,24 @@ export type PluginComponentMap = {
   >;
 };
 
+type SupportedPluginExtensions =
+  | "DoctorConnectButtons"
+  | "PatientExternalRegistration";
+
+export type PluginManifest = {
+  plugin: string;
+  routes: AppRoutes;
+  extends: SupportedPluginExtensions[];
+  components: PluginComponentMap;
+  navItems: INavItem[];
+};
+
+export const careApps: Promise<PluginManifest>[] = [
+  import("@app-manifest/care-livekit").then(
+    (module) => module.default,
+  ) as Promise<PluginManifest>,
+];
+
 // Create a type that ensures only available plugins can be used
 export type EnabledPluginConfig = {
   plugin: string;
@@ -43,58 +56,25 @@ export type EnabledPluginConfig = {
   components: PluginComponentMap;
 };
 
-// Export a type for the fully loaded plugin
-export type LoadedPlugin = PluginManifest;
+const careLivekitM = import("@app-manifest/care-livekit").then(
+  (module) => module.default,
+) as Promise<PluginManifest>;
+const LiveKitDoctorConnectButtons = lazy(() =>
+  import("@apps/care-livekit").then((module) => ({
+    default: module.DoctorConnectButtons,
+  })),
+);
 
-// Export a function to get only the enabled plugins
-export function getEnabledPlugins(): EnabledPluginConfig[] {
-  return pluginMap;
-}
-
-// const careLivekitM = import("@app-manifest/care-livekit").then(
-//   (module) => module.default,
-// ) as Promise<PluginManifest>;
-// const LiveKitDoctorConnectButtons = lazy(() =>
-//   import("@apps/care-livekit").then((module) => ({
-//     default: module.DoctorConnectButtons,
-//   })),
-// );
-
-// const careOhifM = import("@app-manifest/care-ohif").then(
-//   (module) => module.default,
-// ) as Promise<PluginManifest>;
-
-// const careScribeM = import("@app-manifest/care-scribe").then(
-//   (module) => module.default,
-// ) as Promise<PluginManifest>;
-
-const pluginMap: EnabledPluginConfig[] = [];
-
-// careLivekitM, careOhifM, careScribeM
-// const pluginMap: EnabledPluginConfig[] = [
-//   {
-//     plugin: "care-livekit",
-//     path: "@apps/care-livekit",
-//     manifestPath: "@app-manifest/care-livekit",
-//     manifest: careLivekitM,
-//     components: {
-//       DoctorConnectButtons: LiveKitDoctorConnectButtons,
-//     },
-//   },
-//   {
-//     plugin: "care-ohif",
-//     path: "@apps/care-ohif",
-//     manifestPath: "@app-manifest/care-ohif",
-//     manifest: careOhifM,
-//     components: {},
-//   },
-//   {
-//     plugin: "care-scribe",
-//     path: "@apps/care-scribe",
-//     manifestPath: "@app-manifest/care-scribe",
-//     manifest: careScribeM,
-//     components: {},
-//   },
-// ];
+const pluginMap: EnabledPluginConfig[] = [
+  {
+    plugin: "care-livekit",
+    path: "@apps/care-livekit",
+    manifestPath: "@app-manifest/care-livekit",
+    manifest: careLivekitM,
+    components: {
+      DoctorConnectButtons: LiveKitDoctorConnectButtons,
+    },
+  },
+];
 
 export { pluginMap };

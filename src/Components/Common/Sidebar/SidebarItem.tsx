@@ -19,25 +19,20 @@ type SidebarItemProps = {
 
 type SidebarItemBaseProps = SidebarItemProps & {
   shrinked?: boolean;
-  ref: Ref<HTMLAnchorElement>;
 };
 
-const SidebarItemBase = forwardRef(
-  (
-    { shrinked, external, ...props }: SidebarItemBaseProps,
-    ref: Ref<HTMLAnchorElement>,
-  ) => {
+const SidebarItemBase = forwardRef<HTMLAnchorElement, SidebarItemBaseProps>(
+  ({ shrinked, external, ...props }, ref) => {
     const { t } = useTranslation();
     const { resetHistory } = useAppHistory();
 
     return (
       <Link
         ref={ref}
-        className={`${props.to ? "to" : ""} ${props.do ? "do" : ""} tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-white transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
+        className={`${props.to ? "to" : ""} ${props.do ? "do" : ""} tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-gray-900 transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
           props.selected
             ? "bg-gray-200 font-semibold"
-            : "font-normal" +
-              (props.to || props.do ? " hover:bg-gray-200" : "")
+            : "font-normal" + (props.to || props.do ? " hover:bg-gray-200" : "")
         }`}
         target={external && "_blank"}
         rel={external && "noreferrer"}

@@ -1,4 +1,4 @@
-import { PluginManifest } from "@core/PluginEngine";
+import { PluginManifest } from "@/pluginMap";
 import { createContext, useContext } from "react";
 
 export const AppConfigContext = createContext<IConfig | null>(null);

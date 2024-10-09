@@ -45,7 +45,8 @@
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
-    "supported-browsers": "node ./scripts/generate-supported-browsers.mjs"
+    "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
+    "preinstall": "node scripts/preinstall.js"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.1.0",
@@ -58,7 +59,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.2",
     "@sentry/browser": "^8.33.0",
-    "@yudiel/react-qr-scanner": "^2.0.0-beta.3",
+    "@yudiel/react-qr-scanner": "^2.0.8",
     "axios": "^1.7.7",
     "bowser": "^2.11.0",
     "browser-image-compression": "^2.0.2",
@@ -109,7 +110,7 @@
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^22.7.4",
     "@types/qrcode.react": "^1.0.5",
-    "@types/react": "18.3.2",
+    "@types/react": "^18.3.11",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-csv": "^1.1.10",
     "@types/react-dom": "^18.3.0",

@@ -2,22 +2,14 @@
 import React, { useEffect, Suspense } from "react";
 import { PluginConfigType } from "./Common/hooks/useConfig";
 import { CareAppsContext, useCareApps } from "./Common/hooks/useCareApps";
-import { AppRoutes } from "./Routers/AppRouter";
-import { INavItem } from "./Components/Common/Sidebar/Sidebar";
-import { EnabledPluginConfig, pluginMap } from "./pluginMap";
+import {
+  careApps,
+  EnabledPluginConfig,
+  PluginManifest,
+  pluginMap,
+} from "./pluginMap";
 import { UserAssignedModel } from "./Components/Users/models";
 import ErrorBoundary from "./Components/Common/ErrorBoundary";
-
-type SupportedPluginExtensions =
-  | "DoctorConnectButtons"
-  | "PatientExternalRegistration";
-
-export type PluginManifest = {
-  plugin: string;
-  routes: AppRoutes;
-  extends: SupportedPluginExtensions[];
-  navItems: INavItem[];
-};
 
 export default function PluginEngine({
   plugins,
@@ -32,8 +24,8 @@ export default function PluginEngine({
     const loadPlugins = async () => {
       try {
         const loadedPlugins = await Promise.all(
-          pluginMap.map(async (pluginMap, _index) => {
-            const plugin = await pluginMap.manifest;
+          careApps.map(async (appManifest, _index) => {
+            const plugin = await appManifest;
             if (!plugin) {
               throw new Error(`Unable to Load Plugin not found`);
             }

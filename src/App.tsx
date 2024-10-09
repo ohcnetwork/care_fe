@@ -9,9 +9,12 @@ import PluginEngine from "./PluginEngine";
 import { PluginConfigType } from "./Common/hooks/useConfig";
 import { FeatureFlagsProvider } from "./Utils/featureFlags";
 import { Toaster } from "./Components/ui/toaster";
+import { pluginMap } from "./pluginMap";
+
+const enabledPlugins = pluginMap.map((plugin) => plugin.plugin);
 
 const App = () => {
-  const [plugins, setPlugins] = useState<PluginConfigType[]>(["care-livekit"]);
+  const [plugins, setPlugins] = useState<PluginConfigType[]>(enabledPlugins);
   return (
     <Suspense fallback={<Loading />}>
       <ThemedFavicon />
