@@ -1,32 +1,30 @@
-import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
-import { useState, useEffect } from "react";
-
-import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
-import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
-import Error404 from "../Components/ErrorPages/404";
 import {
   DesktopSidebar,
   MobileSidebar,
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
 } from "../Components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS } from "../Common/constants";
-import SessionExpired from "../Components/ErrorPages/SessionExpired";
-import HealthInformation from "../Components/ABDM/HealthInformation";
-import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
+import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { useEffect, useState } from "react";
 
-import UserRoutes from "./routes/UserRoutes";
-import PatientRoutes from "./routes/PatientRoutes";
-import SampleRoutes from "./routes/SampleRoutes";
-import FacilityRoutes from "./routes/FacilityRoutes";
-import ConsultationRoutes from "./routes/ConsultationRoutes";
-import HCXRoutes from "./routes/HCXRoutes";
-import ShiftingRoutes from "./routes/ShiftingRoutes";
+import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
 import AssetRoutes from "./routes/AssetRoutes";
-import ResourceRoutes from "./routes/ResourceRoutes";
-import ExternalResultRoutes from "./routes/ExternalResultRoutes";
+import { BLACKLISTED_PATHS } from "../Common/constants";
+import ConsultationRoutes from "./routes/ConsultationRoutes";
 import { DetailRoute } from "./types";
-import useAuthUser from "../Common/hooks/useAuthUser";
+import Error404 from "../Components/ErrorPages/404";
+import FacilityRoutes from "./routes/FacilityRoutes";
+import HCXRoutes from "./routes/HCXRoutes";
+import HealthInformation from "../Components/ABDM/HealthInformation";
+import IconIndex from "../CAREUI/icons/Index";
+import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
+import PatientRoutes from "./routes/PatientRoutes";
+import ResourceRoutes from "./routes/ResourceRoutes";
+import SampleRoutes from "./routes/SampleRoutes";
+import SessionExpired from "../Components/ErrorPages/SessionExpired";
+import ShiftingRoutes from "./routes/ShiftingRoutes";
+import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
+import UserRoutes from "./routes/UserRoutes";
 import careConfig from "@careConfig";
 
 const Routes = {
@@ -55,23 +53,17 @@ const Routes = {
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
+  "/icons": () => <IconIndex />,
+
+  // Only include the icon route in development environment
+  ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
 };
 
 export default function AppRouter() {
-  const authUser = useAuthUser();
-
   let routes = Routes;
 
   if (careConfig.hcx.enabled) {
     routes = { ...HCXRoutes, ...routes };
-  }
-
-  if (
-    !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type,
-    )
-  ) {
-    routes = { ...routes, ...ExternalResultRoutes };
   }
 
   useRedirect("/user", "/users");
@@ -142,7 +134,7 @@ export default function AppRouter() {
               className="flex h-full w-full items-center px-4 md:hidden"
             >
               <img
-                className="h-6 w-auto"
+                className="h-8 w-auto"
                 src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />
@@ -151,9 +143,11 @@ export default function AppRouter() {
 
           <main
             id="pages"
-            className="flex-1 overflow-y-scroll pb-4 focus:outline-none md:py-0"
+            className="flex-1 overflow-y-scroll bg-gray-100 pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto p-1 sm:p-2 md:p-3">{pages}</div>
+            <div className="max-w-8xl mx-auto mt-4 rounded-t-lg border bg-gray-50 p-3 shadow-lg">
+              {pages}
+            </div>
           </main>
         </div>
       </div>

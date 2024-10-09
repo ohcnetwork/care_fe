@@ -1,61 +1,69 @@
-import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames, formatName } from "../../../Utils/utils";
+import { formatDisplayName, formatName } from "../../../Utils/utils";
 import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
 
-const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
+import { Avatar } from "@/Components/Common/Avatar";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Link } from "raviger";
+import React from "react";
+import { useTranslation } from "react-i18next";
+
+interface SidebarUserCardProps {
+  shrinked: boolean;
+}
+
+const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
   const { t } = useTranslation();
   const user = useAuthUser();
   const { signOut } = useAuthContext();
 
   return (
-    <div
-      className={`my-2 flex ${
-        shrinked ? "mx-auto flex-col" : "mx-5"
-      } transition-all duration-200 ease-in-out`}
-    >
-      <Link href="/user/profile">
-        <img
-          src={user.read_profile_picture_url || "/images/empty_avatar.jpg"}
-          alt="profile"
-          className={classNames(
-            "mb-3 size-10 rounded-full object-cover",
-            shrinked && "mb-2 mt-1",
-          )}
-        />
-      </Link>
-      <div className="flex cursor-pointer justify-center" onClick={signOut}>
-        <CareIcon
-          icon="l-sign-out-alt"
-          className={`text-2xl text-secondary-400 ${
-            shrinked ? "visible" : "hidden"
-          }`}
-        />
-      </div>
-      <div
-        className={`${
-          shrinked ? "hidden" : "grow"
-        } flex min-w-0 flex-col pb-2 pl-3`}
+    <div className="my-2 flex flex-col">
+      <Link
+        href="/user/profile"
+        className="tooltip relative ml-1 mr-2 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:flex-none"
       >
-        <div className="flex min-h-6 items-center">
-          <Link
-            href="/user/profile"
-            className="flex-nowrap overflow-hidden break-words font-semibold text-white"
-            id="profilenamelink"
-          >
-            {formatName(user)}
-          </Link>
-        </div>
         <div
-          className="flex min-h-6 cursor-pointer items-center"
-          onClick={signOut}
+          id="user-profile-name"
+          className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
         >
-          <CareIcon
-            icon="l-sign-out-alt"
-            className={`${shrinked ? "text-xl" : "mr-1"} text-secondary-400`}
-          />
-          <p className="text-secondary-400 text-opacity-80">{t("sign_out")}</p>
+          <div className="flex-none text-lg">
+            {user.read_profile_picture_url ? (
+              <img
+                src={user.read_profile_picture_url}
+                alt="profile"
+                className="size-6 rounded-full object-cover"
+              />
+            ) : (
+              <Avatar name={formatDisplayName(user)} className="w-6" />
+            )}
+          </div>
+          {!shrinked && (
+            <span className="flex w-full grow items-center pl-4 text-sm tracking-wide">
+              {formatName(user)}
+            </span>
+          )}
+        </div>
+      </Link>
+      <div
+        onClick={signOut}
+        className="tooltip relative ml-1 mr-2 mt-4 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:mt-0 md:flex-none"
+      >
+        <div
+          id="sign-out-button"
+          className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
+        >
+          <div className="flex-none text-lg">
+            <CareIcon
+              icon="l-sign-out-alt"
+              className="text-2xl text-gray-900"
+            />
+          </div>
+
+          {!shrinked && (
+            <div className="flex w-full items-center pl-4 text-sm tracking-wide text-gray-900">
+              {t("sign_out")}
+            </div>
+          )}
         </div>
       </div>
     </div>
