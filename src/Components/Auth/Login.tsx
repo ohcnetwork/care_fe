@@ -246,6 +246,14 @@ export const Login = (props: { forgot?: boolean }) => {
               >
                 {t("contribute_github")}
               </a>
+              <a
+                href="/licenses"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-4 text-primary-400 hover:text-primary-500"
+              >
+                {t("3rd Party Software Licenses")}
+              </a>
             </div>
           </div>
         </div>
