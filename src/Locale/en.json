@@ -198,6 +198,7 @@
   "retake": "Retake",
   "submit": "Submit",
   "camera": "Camera",
+  "camera_permission_denied": "Camera Permission denied",
   "submitting": "Submitting",
   "view_details": "View Details",
   "type_to_search": "Type to search",
