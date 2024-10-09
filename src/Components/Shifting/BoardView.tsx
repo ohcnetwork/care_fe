@@ -147,7 +147,7 @@ export default function BoardView() {
                   });
                   return data ?? null;
                 }}
-                filenamePrefix={`shift_requests_${board}`}
+                filenamePrefix={`shift_requests_${board.label || board.text}`}
               />
             </h3>
           ),
