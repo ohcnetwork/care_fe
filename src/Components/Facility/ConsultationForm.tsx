@@ -15,7 +15,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import { LegacyRef, createRef, lazy, useEffect, useRef, useState } from "react";
+import { LegacyRef, createRef, useEffect, useRef, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
@@ -67,8 +67,8 @@ import {
 import careConfig from "@careConfig";
 import DateFormField from "../Form/FormFields/DateFormField.js";
 
-const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 
 type BooleanStrings = "true" | "false";
 
