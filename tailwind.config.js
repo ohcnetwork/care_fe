@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const colors = require("tailwindcss/colors");
-const defaultTheme = require("tailwindcss/defaultTheme");
 
-const gray = {
+const secondary = {
   50: "#F9FAFB",
   100: "#FBFAFC",
   200: "#F7F5FA",
@@ -18,15 +17,11 @@ const gray = {
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   important: true,
+  darkMode: ["class"],
   theme: {
-    screens: {
-      vs: "348px",
-      ...defaultTheme.screens,
-      "3xl": "1920px",
-    },
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Figtree", "sans-serif"],
       },
       colors: {
         green: colors.emerald,
@@ -37,18 +32,18 @@ module.exports = {
           200: "#bcf0da",
           300: "#84e1bc",
           400: "#31c48d",
-          DEFAULT: "#0d9f6e",
           500: "#0d9f6e",
           600: "#057a55",
           700: "#046c4e",
           800: "#03543F",
           900: "#014737",
+          DEFAULT: "#0d9f6e",
         },
-        secondary: gray,
+        secondary: secondary,
         danger: colors.red,
         warning: colors.amber,
         alert: colors.violet,
-        gray,
+        gray: colors.gray,
         patient: {
           comfort: {
             DEFAULT: colors.slate[200],
@@ -67,8 +62,8 @@ module.exports = {
             fore: colors.red[100],
           },
           unknown: {
-            DEFAULT: gray[400],
-            fore: gray[800],
+            DEFAULT: secondary[400],
+            fore: secondary[800],
           },
           activelydying: {
             DEFAULT: colors.red[800],
@@ -76,13 +71,15 @@ module.exports = {
           },
         },
       },
-      padding: {
-        "1/5": "20%",
-      },
       scale: {
         25: "0.25",
         175: "1.75",
         200: "2",
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
     },
   },
@@ -91,5 +88,6 @@ module.exports = {
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
     require("@tailwindcss/container-queries"),
+    require("tailwindcss-animate"),
   ],
 };

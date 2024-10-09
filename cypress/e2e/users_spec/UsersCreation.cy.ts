@@ -66,7 +66,7 @@ describe("User Creation", () => {
   });
 
   it("Update the existing user profile and verify its reflection", () => {
-    userCreationPage.clickElementById("profilenamelink");
+    userCreationPage.clickElementById("user-profile-name");
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
       "devdistrictadmin",
@@ -128,7 +128,7 @@ describe("User Creation", () => {
   });
 
   it("Update the existing user profile Form Mandatory File Error", () => {
-    userCreationPage.clickElementById("profilenamelink");
+    userCreationPage.clickElementById("user-profile-name");
     userCreationPage.clickElementById("edit-cancel-profile-button");
     userCreationPage.clearIntoElementById("firstName");
     userCreationPage.clearIntoElementById("lastName");

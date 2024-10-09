@@ -1,12 +1,10 @@
 import { HCXPolicyModel } from "../HCX/models";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import Page from "../Common/components/Page";
-import { lazy } from "react";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface IProps {
   facilityId: string;
   id: string;

@@ -2,7 +2,7 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import Card from "../../CAREUI/display/Card";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useReducer, useState, lazy } from "react";
+import { useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { PatientStatsModel } from "./models";
@@ -10,7 +10,7 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-const Loading = lazy(() => import("../Common/Loading"));
+import Loading from "@/Components/Common/Loading";
 import Page from "../Common/components/Page";
 import dayjs from "dayjs";
 import { dateQueryString, scrollTo } from "../../Utils/utils";

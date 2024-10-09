@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import { Link, navigate } from "raviger";
 import ListFilter from "./ListFilter";
 import { RESOURCE_CHOICES } from "../../Common/constants";
@@ -19,7 +19,7 @@ import { ResourceModel } from "../Facility/models";
 import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import dayjs from "dayjs";
 
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import PageTitle from "@/Components/Common/PageTitle";
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const COMPLETED = ["COMPLETED", "REJECTED"];
@@ -45,7 +45,7 @@ export default function BoardView() {
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
-            title={t("resource")}
+            title={t("Resource")}
             hideBack
             className="mx-3 md:mx-5"
             componentRight={

@@ -11,7 +11,7 @@ import { formatFilter } from "./Commons";
 
 import { Link, navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
-import { lazy, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -26,8 +26,7 @@ import { ShiftingModel } from "../Facility/models";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import PageTitle from "@/Components/Common/PageTitle";
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
