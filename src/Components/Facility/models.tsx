@@ -87,8 +87,6 @@ export interface FacilityModel {
   kasp_empanelled?: boolean;
   patient_count?: number;
   bed_count?: number;
-  hubs?: FacilitySpokeModel[];
-  spokes?: FacilitySpokeModel[];
 }
 
 export enum SpokeRelationship {

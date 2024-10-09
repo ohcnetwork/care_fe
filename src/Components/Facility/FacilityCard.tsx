@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import {
-  FACILITY_FEATURE_TYPES,
-  SPOKE_RELATION_TYPES,
-} from "../../Common/constants";
+import { FACILITY_FEATURE_TYPES } from "../../Common/constants";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Chip from "../../CAREUI/display/Chip";
@@ -135,64 +132,6 @@ export const FacilityCard = (props: {
                         hideBorder
                         size="small"
                       />
-                      {SPOKE_RELATION_TYPES.map((srt) => ({
-                        ...srt,
-                        spokes: facility.hubs?.filter(
-                          (hub) => hub.relationship === srt.value,
-                        ),
-                      }))
-                        .filter((srt) => srt.spokes?.length)
-                        .map((srt) => (
-                          <div className="tooltip">
-                            <Chip
-                              hideBorder
-                              text={
-                                (srt.text !== "Regular" ? srt.text + " " : "") +
-                                "Spoke"
-                              }
-                              size="small"
-                              className="bg-sky-100 text-sky-900"
-                            />
-                            <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
-                              Linked with{" "}
-                              {srt.spokes
-                                ?.map(
-                                  (relationship) =>
-                                    relationship.hub_object.name,
-                                )
-                                .join(", ")}
-                            </span>
-                          </div>
-                        ))}
-                      {SPOKE_RELATION_TYPES.map((srt) => ({
-                        ...srt,
-                        spokes: facility.spokes?.filter(
-                          (hub) => hub.relationship === srt.value,
-                        ),
-                      }))
-                        .filter((srt) => srt.spokes?.length)
-                        .map((srt) => (
-                          <div className="tooltip">
-                            <Chip
-                              hideBorder
-                              text={
-                                (srt.text !== "Regular" ? srt.text + " " : "") +
-                                "Hub"
-                              }
-                              size="small"
-                              className="bg-purple-100 text-indigo-900"
-                            />
-                            <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
-                              Linked with{" "}
-                              {srt.spokes
-                                ?.map(
-                                  (relationship) =>
-                                    relationship.spoke_object.name,
-                                )
-                                .join(", ")}
-                            </span>
-                          </div>
-                        ))}
                       {facility.features?.map(
                         (feature: number) =>
                           FACILITY_FEATURE_TYPES.some(

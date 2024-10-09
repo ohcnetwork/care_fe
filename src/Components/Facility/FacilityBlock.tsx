@@ -7,7 +7,7 @@ export default function FacilityBlock(props: {
   facility: FacilityModel;
   redirect?: boolean;
 }) {
-  const { facility, redirect } = props;
+  const { facility, redirect = true } = props;
 
   const Element = (props: { children: ReactNode; className?: string }) =>
     redirect ? (
