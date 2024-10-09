@@ -1019,5 +1019,22 @@
   "is_declared_positive": "Whether declared positive",
   "date_declared_positive": "Date of declaring positive",
   "date_of_result": "Covid confirmation date",
-  "is_vaccinated": "Whether vaccinated"
+  "is_vaccinated": "Whether vaccinated",
+  "ventilator_log": "Ventilator Log",
+  "start_datetime": "Start Date/Time",
+  "end_datetime": "End Date/Time",
+  "ventilator_modality": "Modality",
+  "ventilator_mode": "Ventilator Mode",
+  "ventilator_oxygen_modality": "Oxygen Modality",
+  "OXYGEN_MODALITY__NASAL_PRONGS_short": "NP",
+  "OXYGEN_MODALITY__SIMPLE_FACE_MASK_short": "SFM",
+  "OXYGEN_MODALITY__NON_REBREATHING_MASK_short": "NRM",
+  "OXYGEN_MODALITY__HIGH_FLOW_NASAL_CANNULA_short": "HFNC",
+  "VENTILATOR_MODE__CMV_short": "CMV",
+  "VENTILATOR_MODE__VCV_short": "VCV",
+  "VENTILATOR_MODE__PCV_short": "PCV",
+  "VENTILATOR_MODE__SIMV_short": "SIMV",
+  "VENTILATOR_MODE__VC_SIMV_short": "VC-SIMV",
+  "VENTILATOR_MODE__PC_SIMV_short": "PC-SIMV",
+  "VENTILATOR_MODE__PSV_short": "C-PAP/PSV"
 }

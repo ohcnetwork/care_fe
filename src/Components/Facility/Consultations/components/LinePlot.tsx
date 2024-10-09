@@ -9,6 +9,8 @@ import {
   TooltipComponent,
   VisualMapComponent,
   VisualMapPiecewiseComponent,
+  MarkLineComponent,
+  MarkAreaComponent,
 } from "echarts/components";
 
 import * as echarts from "echarts/core";
@@ -21,12 +23,13 @@ echarts.use([
   DataZoomComponent,
   GridComponent,
   LegendComponent,
-  LegendComponent,
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,
   VisualMapComponent,
   VisualMapPiecewiseComponent,
+  MarkLineComponent,
+  MarkAreaComponent,
 ]);
 
 export const LinePlot = (props: any) => {
@@ -38,6 +41,7 @@ export const LinePlot = (props: any) => {
     low = null,
     high = null,
     defaultSpace,
+    verticalMarkerData = null,
   } = props;
   let generalOptions: any = {
     grid: {
@@ -126,6 +130,28 @@ export const LinePlot = (props: any) => {
       },
     ],
   };
+
+  if (verticalMarkerData) {
+    const series = generalOptions.series;
+    series.push({
+      type: "line",
+      markArea: {
+        silent: true,
+        data: verticalMarkerData,
+        symbol: "none",
+        itemStyle: {
+          color: "transparent",
+          borderWidth: 1,
+          borderType: "dashed",
+          borderColor: "#000000",
+        },
+      },
+    });
+    generalOptions = {
+      ...generalOptions,
+      series,
+    };
+  }
 
   if (props.type && props.type === "WAVEFORM") {
     generalOptions = {
