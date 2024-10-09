@@ -4,7 +4,7 @@ import { SampleTestModel } from "./models";
 import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
-import _ from "lodash-es";
+import * as _ from "lodash-es";
 import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";

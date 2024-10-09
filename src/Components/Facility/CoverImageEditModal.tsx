@@ -1,11 +1,11 @@
-import {
+import React, {
+  useState,
   ChangeEventHandler,
   useCallback,
   useEffect,
   useRef,
-  useState,
 } from "react";
-import { Success } from "../../Utils/Notifications";
+import { Success, Warn } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -67,9 +67,11 @@ const CoverImageEditModal = ({
   const LaptopScreenBreakpoint = 640;
   const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleSwitchCamera = useCallback(() => {
-    setConstraint((prev) =>
-      prev.facingMode === "user"
+    setConstraint(
+      constraint.facingMode === "user"
         ? VideoConstraints.environment
         : VideoConstraints.user,
     );
@@ -85,6 +87,7 @@ const CoverImageEditModal = ({
       setSelectedFile(myFile);
     });
   };
+
   const closeModal = () => {
     setPreview(undefined);
     setSelectedFile(undefined);
@@ -162,11 +165,25 @@ const CoverImageEditModal = ({
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     dragProps.setDragOver(false);
-    const dropedFile = e?.dataTransfer?.files[0];
-    if (dropedFile.type.split("/")[0] !== "image")
+    setIsDragging(false);
+    const droppedFile = e?.dataTransfer?.files[0];
+    if (droppedFile.type.split("/")[0] !== "image")
       return dragProps.setFileDropError("Please drop an image file to upload!");
-    setSelectedFile(dropedFile);
+    setSelectedFile(droppedFile);
   };
+
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragProps.onDragOver(e);
+    setIsDragging(true);
+  };
+
+  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragProps.onDragLeave();
+    setIsDragging(false);
+  };
+
   const commonHint = (
     <>
       {t("max_size_for_image_uploaded_should_be")} 1mb.
@@ -202,16 +219,16 @@ const CoverImageEditModal = ({
               </>
             ) : (
               <div
-                onDragOver={dragProps.onDragOver}
-                onDragLeave={dragProps.onDragLeave}
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
                 onDrop={onDrop}
                 className={`mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
-                  dragProps.dragOver && "border-primary-500"
-                } ${
-                  dragProps.fileDropError !== ""
-                    ? "border-red-500"
-                    : "border-secondary-500"
-                }`}
+                  isDragging
+                    ? "border-primary-800 bg-primary-100"
+                    : dragProps.dragOver
+                      ? "border-primary-500"
+                      : "border-secondary-500"
+                } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
               >
                 <svg
                   stroke="currentColor"
@@ -219,7 +236,11 @@ const CoverImageEditModal = ({
                   viewBox="0 0 48 48"
                   aria-hidden="true"
                   className={`h-12 w-12 stroke-[2px] ${
-                    dragProps.dragOver && "text-primary-500"
+                    isDragging
+                      ? "text-green-500"
+                      : dragProps.dragOver
+                        ? "text-primary-500"
+                        : "text-secondary-600"
                   } ${
                     dragProps.fileDropError !== ""
                       ? "text-red-500"
@@ -230,7 +251,9 @@ const CoverImageEditModal = ({
                 </svg>
                 <p
                   className={`text-sm ${
-                    dragProps.dragOver && "text-primary-500"
+                    dragProps.dragOver
+                      ? "text-primary-500"
+                      : "text-secondary-700"
                   } ${
                     dragProps.fileDropError !== ""
                       ? "text-red-500"
@@ -267,6 +290,7 @@ const CoverImageEditModal = ({
               <div className="sm:flex-1" />
               <ButtonV2
                 onClick={() => {
+                  setConstraint(() => VideoConstraints.user);
                   setIsCameraOpen(true);
                 }}
               >
@@ -322,6 +346,10 @@ const CoverImageEditModal = ({
                     width={1280}
                     ref={webRef}
                     videoConstraints={constraint}
+                    onUserMediaError={(_e) => {
+                      setIsCameraOpen(false);
+                      Warn({ msg: t("camera_permission_denied") });
+                    }}
                   />
                 </>
               ) : (

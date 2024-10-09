@@ -12,7 +12,7 @@ import { formatFilter } from "./Commons";
 
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
-import { lazy, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import withScrolling from "react-dnd-scrolling";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -23,8 +23,8 @@ import careConfig from "@careConfig";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 
-const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 const ScrollingComponent = withScrolling("div");
 
 export default function BoardView() {

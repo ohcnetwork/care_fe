@@ -23,7 +23,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   getPincodeDetails,
@@ -65,8 +65,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
 import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface FacilityProps {
   facilityId?: string;
 }
@@ -851,14 +850,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
-                  <div className="py-4 md:col-span-2">
-                    <h4 className="mb-4">{t("spokes")}</h4>
-                    {facilityId && (
+                  {facilityId && (
+                    <div className="py-4 md:col-span-2">
+                      <h4 className="mb-4">{t("spokes")}</h4>
                       <SpokeFacilityEditor
                         facility={{ ...facilityQuery.data, id: facilityId }}
                       />
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}
