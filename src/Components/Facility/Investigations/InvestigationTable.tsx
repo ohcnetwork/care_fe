@@ -78,21 +78,21 @@ const HeadingRow = () => {
       <th
         key={t("investigations__name")}
         scope="col"
-        className={`w-1/6 text-left ${commonClass}`}
+        className={`w-1/6 text-left md:w-1/6 ${commonClass}`}
       >
         {t("investigations__name")}
       </th>
       <th
         key={t("investigations__result")}
         scope="col"
-        className={`w-1/6 text-center ${commonClass}`}
+        className={`w-3/6 text-center md:w-1/6 ${commonClass}`}
       >
         {t("investigations__result")}
       </th>
       <th
         key={t("investigations__ideal_value")}
         scope="col"
-        className={`w-4/6 text-center ${commonClass}`}
+        className={`w-3/6 text-center md:w-4/6 ${commonClass}`}
       >
         {t("investigations__ideal_value")}
       </th>
