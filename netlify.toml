@@ -1,6 +1,6 @@
 [build]
 publish = "build/"
-command = "CI='' npm run build"
+command = "npm run install-all && CI='' npm run build"
 
 [build.environment]
 NODE_VERSION = "20.12.0"
