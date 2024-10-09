@@ -46,7 +46,8 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
-    "preinstall": "node scripts/preinstall.js"
+    "setup": "node scripts/preinstall.js",
+    "preinstall": "npm run setup && npm install"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.1.0",
