@@ -108,7 +108,7 @@ const BOMDisplay: React.FC = () => {
     return (
       <Card className="rounded-lg bg-white p-4 shadow-md transition-all duration-300">
         <div className="mb-4">
-          <h2 className="mb-2 text-2xl font-semibold">
+          <h2 className="mb-2 text-2xl font-semibold text-primary">
             {bomData.bomFormat || "N/A"} BOM (Version:{" "}
             {bomData.version || "N/A"})
           </h2>
@@ -119,12 +119,14 @@ const BOMDisplay: React.FC = () => {
               : "N/A"}
           </p>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <h3 className="col-span-2 text-lg font-semibold">Components:</h3>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <h3 className="col-span-2 text-lg font-semibold text-primary">
+            Components:
+          </h3>
           {bomData.components?.map((component, index) => (
             <div
               key={index}
-              className="block rounded-md border p-2 transition-all duration-300 hover:shadow-md"
+              className="block rounded-md border p-2 transition-all duration-300 hover:shadow-lg"
             >
               <a
                 href={
@@ -134,7 +136,7 @@ const BOMDisplay: React.FC = () => {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-500"
+                className="hover:text-primary-dark text-primary"
               >
                 <strong className="block text-lg">
                   {component.name || "N/A"} v{component.version || "N/A"}
@@ -149,7 +151,7 @@ const BOMDisplay: React.FC = () => {
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary-400 hover:text-primary-500"
+                    className="hover:text-primary-dark text-primary"
                   >
                     {component.licenses[0].license.id || "N/A"}
                   </a>
@@ -162,7 +164,7 @@ const BOMDisplay: React.FC = () => {
               )}
               <div>
                 <h5
-                  className="cursor-pointer font-semibold"
+                  className="cursor-pointer font-semibold text-primary"
                   onClick={() =>
                     setShowExternalRefs(
                       showExternalRefs === index ? null : index,
@@ -177,7 +179,7 @@ const BOMDisplay: React.FC = () => {
                       <li key={idx}>
                         <a
                           href={ref.url || "#"}
-                          className="text-primary-400 hover:text-primary-500"
+                          className="hover:text-primary-dark text-primary"
                         >
                           {ref.url || "N/A"}
                         </a>
@@ -195,7 +197,7 @@ const BOMDisplay: React.FC = () => {
             text={JSON.stringify(bomData, null, 2)}
             onCopy={handleCopy}
           >
-            <button className="text-md rounded-md bg-blue-400 px-4 py-2 text-white transition-all duration-300 hover:bg-blue-500 focus:outline-none">
+            <button className="text-md hover:bg-primary-dark rounded-md bg-primary px-4 py-2 text-white transition-all duration-300 focus:outline-none">
               Copy BOM JSON
             </button>
           </CopyToClipboard>
@@ -210,11 +212,11 @@ const BOMDisplay: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="p-4">
       <div className="mb-4 flex space-x-4">
         <button
           className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
-            activeTab === "bom" ? "bg-blue-400 text-white" : "bg-gray-200"
+            activeTab === "bom" ? "bg-primary text-white" : "bg-gray-200"
           }`}
           onClick={() => setActiveTab("bom")}
         >
@@ -222,7 +224,7 @@ const BOMDisplay: React.FC = () => {
         </button>
         <button
           className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
-            activeTab === "beBom" ? "bg-blue-400 text-white" : "bg-gray-200"
+            activeTab === "beBom" ? "bg-primary text-white" : "bg-gray-200"
           }`}
           onClick={() => setActiveTab("beBom")}
         >
