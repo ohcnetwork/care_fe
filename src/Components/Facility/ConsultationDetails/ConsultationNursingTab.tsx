@@ -1,4 +1,4 @@
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
