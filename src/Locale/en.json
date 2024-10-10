@@ -198,6 +198,7 @@
   "retake": "Retake",
   "submit": "Submit",
   "camera": "Camera",
+  "camera_permission_denied": "Camera Permission denied",
   "submitting": "Submitting",
   "view_details": "View Details",
   "type_to_search": "Type to search",
@@ -1019,5 +1020,7 @@
   "is_declared_positive": "Whether declared positive",
   "date_declared_positive": "Date of declaring positive",
   "date_of_result": "Covid confirmation date",
-  "is_vaccinated": "Whether vaccinated"
+  "is_vaccinated": "Whether vaccinated",
+  "consultation_not_filed": "You have not filed any consultation for this patient yet.",
+  "consultation_not_filed_description": "Please file a consultation for this patient to continue."
 }
