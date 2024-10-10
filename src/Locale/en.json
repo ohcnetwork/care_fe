@@ -1035,7 +1035,7 @@
   "link_camera_and_bed": "Link bed to Camera",
   "unlink_camera_and_bed": "Unlink this bed from this camera",
   "unlink_asset_bed_caution": "This action will also delete all presets that are associated to this camera and bed.",
-  "create_preset": "Create a new {{ type }} preset",
+  "create_position_preset": "Create a new position preset",
   "create_position_preset_description": "Creates a new position preset in Care from the current position of the camera for the given name",
   "preset_name_placeholder": "Specify an identifiable name for the new preset",
   "unable_to_get_current_position": "Unable to get current position.",
@@ -1051,5 +1051,8 @@
   "location_beds_empty": "No beds available in this location",
   "add_beds_to_configure_presets": "Add beds to this location to configure presets for them.",
   "manage_bed_presets": "Manage Presets of Bed",
-  "position": "Position"
+  "position": "Position",
+  "patient_face": "Patient Face",
+  "patient_body": "Patient Body",
+  "vitals_monitor": "Vitals Monitor"
 }
