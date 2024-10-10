@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import ButtonV2 from "./components/ButtonV2";
@@ -33,7 +33,14 @@ const Pagination = ({
     },
     [defaultPerPage, cPage],
   );
-
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageFromUrl = parseInt(urlParams.get("page") || "1", 10);
+    if (pageFromUrl !== currentPage) {
+      setCurrentPage(pageFromUrl);
+      onChange(pageFromUrl, rowsPerPage);
+    }
+  }, [onChange, rowsPerPage, currentPage]);
   const getPageNumbers = () => {
     const totalPage = Math.ceil(data.totalCount / rowsPerPage);
     if (totalPage === 0) return [1];
@@ -77,12 +84,17 @@ const Pagination = ({
   const goToPage = (page: number) => {
     setCurrentPage(page);
     onChange(page, rowsPerPage);
+    const url = new URL(window.location.href);
+    url.searchParams.set("page", page.toString());
+    window.history.pushState({}, "", url.toString());
     const pageContainer = window.document.getElementById("pages");
-    pageContainer?.scroll({
-      top: 0,
-      left: 0,
-      behavior: "smooth",
-    });
+    if (pageContainer) {
+      pageContainer.scroll({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    }
   };
 
   return (
