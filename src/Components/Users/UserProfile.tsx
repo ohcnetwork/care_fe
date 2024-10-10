@@ -1,4 +1,4 @@
-import { useState, useReducer, lazy, FormEvent } from "react";
+import { useState, useReducer, FormEvent } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
@@ -27,8 +27,7 @@ import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { validateRule } from "./UserAdd";
 import { useTranslation } from "react-i18next";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 type EditForm = {
   firstName: string;
   lastName: string;
