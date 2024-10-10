@@ -986,30 +986,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   ? navigate(`/facility/${facilityId}/patient/${id}`)
                   : navigate(`/facility/${facilityId}`);
               }}
-              componentRight={
-                !state.form.abha_number && (
-                  <div className="flex flex-col gap-2 md:flex-row">
-                    <RestoreDraftButton />
-                    <Button
-                      variant="outline_primary"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowLinkAbhaNumberModal(true);
-                      }}
-                    >
-                      <CareIcon icon="l-user-square" className="mr-2" />
-                      <span>Generate/Link ABHA Number</span>
-                    </Button>
-                  </div>
-                )
-              }
+              componentRight={<RestoreDraftButton />}
               crumbsReplacements={{
                 [facilityId]: { name: facilityObject?.name },
                 [id ?? "????"]: { name: patientName },
               }}
             />
             <div className="mt-4">
-              <div className="mx-4 my-8 rounded bg-purple-100 p-4 text-xs font-semibold text-purple-800">
+              <div className="my-8 rounded bg-purple-100 p-4 text-xs font-semibold text-purple-800">
                 <div className="mx-1 mb-1 flex items-center text-lg font-bold">
                   <CareIcon
                     icon="l-info-circle"
@@ -1023,6 +1007,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   result in duplication of patient records.
                 </p>
               </div>
+              {!state.form.abha_number && (
+                <div className="flex justify-center md:justify-end">
+                  <Button
+                    variant="outline_primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowLinkAbhaNumberModal(true);
+                    }}
+                  >
+                    <CareIcon icon="l-user-square" className="mr-2" />
+                    <span>Generate/Link ABHA Number</span>
+                  </Button>
+                </div>
+              )}
               {showAlertMessage.show && (
                 <ConfirmDialog
                   title={showAlertMessage.title}
