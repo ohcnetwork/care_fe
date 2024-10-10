@@ -1,3 +1,4 @@
+import { classNames } from "@/Utils/utils";
 import dayjs from "dayjs";
 import { Fragment, KeyboardEvent, useEffect, useState } from "react";
 
@@ -8,22 +9,24 @@ import { Fragment, KeyboardEvent, useEffect, useState } from "react";
  * @param {boolean} props.allowTime - If true, shows time input fields (hour and minute).
  * @param {Date} props.value - The current date value.
  * @param {function(Date):void} props.onChange - Callback function when date value changes.
+ * @param {String} props.error - Shows an error if specified
  *
  * @returns {JSX.Element} The date text input component.
  */
 export default function DateTextInput(props: {
   allowTime: boolean;
-  value: Date;
+  value?: Date;
   onChange: (date: Date) => unknown;
+  error?: string;
 }) {
-  const { value, onChange, allowTime } = props;
+  const { value, onChange, allowTime, error } = props;
 
   const [editingText, setDirtyEditingText] = useState({
-    date: `${value.getDate()}`,
-    month: `${value.getMonth() + 1}`,
-    year: `${value.getFullYear()}`,
-    hour: `${value.getHours()}`,
-    minute: `${value.getMinutes()}`,
+    date: `${value ? value?.getDate() : ""}`,
+    month: `${value ? value.getMonth() + 1 : ""} `,
+    year: `${value ? value.getFullYear() : ""}`,
+    hour: `${value ? value.getHours() : ""}`,
+    minute: `${value ? value.getMinutes() : ""}`,
   });
 
   const setEditingText = (et: typeof editingText) => {
@@ -32,10 +35,10 @@ export default function DateTextInput(props: {
       parseInt(et.year),
       parseInt(et.month) - 1,
       parseInt(et.date),
-      parseInt(et.hour),
-      parseInt(et.minute),
+      allowTime ? parseInt(et.hour) : 0,
+      allowTime ? parseInt(et.minute) : 0,
     );
-    if (dayjs(newDate).isValid()) {
+    if (et.year.length > 3 && dayjs(newDate).isValid()) {
       onChange(newDate);
     }
   };
@@ -54,7 +57,6 @@ export default function DateTextInput(props: {
     const value = Math.min(maxMap[index], parseInt(rawValue));
     const finalValue =
       rawValue !== "" ? ("000" + value).slice(key === "year" ? -4 : -2) : "";
-    console.log(finalValue);
     return finalValue;
   };
 
@@ -90,63 +92,84 @@ export default function DateTextInput(props: {
   };
 
   useEffect(() => {
+    const formatUnfocused = (value: number, id: number, digits: number = 2) => {
+      const activeElementIdRaw =
+        document.activeElement?.getAttribute("data-time-input");
+      const activeElementId = activeElementIdRaw
+        ? parseInt(activeElementIdRaw)
+        : undefined;
+      if (id === activeElementId) return value;
+      return ("000" + value).slice(-digits);
+    };
+
     setDirtyEditingText({
-      date: `${value.getDate()}`,
-      month: `${value.getMonth() + 1}`,
-      year: `${value.getFullYear()}`,
-      hour: `${value.getHours()}`,
-      minute: `${value.getMinutes()}`,
+      date: `${value ? formatUnfocused(value.getDate(), 0) : ""}`,
+      month: `${value ? formatUnfocused(value.getMonth() + 1, 1) : ""}`,
+      year: `${value ? formatUnfocused(value.getFullYear(), 2, 4) : ""}`,
+      hour: `${value ? formatUnfocused(value.getHours(), 3) : ""}`,
+      minute: `${value ? formatUnfocused(value.getMinutes(), 4) : ""}`,
     });
   }, [value]);
 
   return (
-    <div className="flex items-center overflow-hidden w-full text-gray-600 cui-input-base px-4 py-0 bg-secondary-50">
-      {Object.entries(editingText)
-        .slice(0, allowTime ? 5 : 3)
-        .map(([key, val], i) => (
-          <Fragment key={i}>
-            <input
-              type="text"
-              value={val}
-              autoFocus={i === 0}
-              className={`text-black shadow-none bg-transparent border-none rounded-none outline-none ring-0 ${
-                key === "year" ? "w-[45px]" : "w-[20px]"
-              } px-0 placeholder:text-sm`}
-              placeholder={
-                "DDMMYYHHmm".slice(i * 2, i * 2 + 2) +
-                (key === "year" ? "YY" : "")
-              }
-              onKeyDown={(e) => handleKeyDown(e, i)}
-              data-time-input={i}
-              onChange={(e) => {
-                const value = e.target.value;
-                setEditingText({
-                  ...editingText,
-                  [key]: value
-                    .replace(/\D/g, "")
-                    .slice(0, key === "year" ? 4 : 2),
-                });
-                if (
-                  (value.endsWith("/") ||
-                    value.endsWith(" ") ||
-                    value.endsWith(":") ||
-                    value.length > (key === "year" ? 3 : 1)) &&
-                  i < 4
-                ) {
-                  goToInput(i + 1);
+    <div className="w-full">
+      <div
+        className={classNames(
+          `cui-input-base flex w-full cursor-text items-center overflow-hidden bg-secondary-50 px-4 py-0 text-gray-600`,
+          error && `!border-red-500`,
+        )}
+        onClick={(e) =>
+          e.target === e.currentTarget && goToInput(allowTime ? 4 : 2)
+        }
+      >
+        {Object.entries(editingText)
+          .slice(0, allowTime ? 5 : 3)
+          .map(([key, val], i) => (
+            <Fragment key={i}>
+              <input
+                type="text"
+                value={val}
+                autoFocus={i === 0}
+                className={`rounded-none border-none bg-transparent text-black shadow-none outline-none ring-0 ${
+                  key === "year" ? "w-[45px]" : "w-[20px]"
+                } px-0 placeholder:text-xs`}
+                placeholder={
+                  "DDMMYYHHmm".slice(i * 2, i * 2 + 2) +
+                  (key === "year" ? "YY" : "")
                 }
-              }}
-              onBlur={(e) => handleBlur(e.target.value, key)}
-            />
-            <span className="mx-1">
-              {["date", "month"].includes(key)
-                ? "/"
-                : key === "hour"
-                  ? ":"
-                  : " "}
-            </span>
-          </Fragment>
-        ))}
+                onKeyDown={(e) => handleKeyDown(e, i)}
+                data-time-input={i}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEditingText({
+                    ...editingText,
+                    [key]: value
+                      .replace(/\D/g, "")
+                      .slice(0, key === "year" ? 4 : 2),
+                  });
+                  if (
+                    (value.endsWith("/") ||
+                      value.endsWith(" ") ||
+                      value.endsWith(":") ||
+                      value.length > (key === "year" ? 3 : 1)) &&
+                    i < 4
+                  ) {
+                    goToInput(i + 1);
+                  }
+                }}
+                onBlur={(e) => handleBlur(e.target.value, key)}
+              />
+              <span className="mx-1">
+                {["date", "month"].includes(key)
+                  ? "/"
+                  : key === "hour"
+                    ? ":"
+                    : " "}
+              </span>
+            </Fragment>
+          ))}
+      </div>
+      {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
   );
 }

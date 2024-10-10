@@ -50,7 +50,6 @@ const DateInputV2: React.FC<Props> = ({
   max,
   outOfLimitsErrorMessage,
   onChange,
-  position = "CENTER",
   disabled,
   placeholder,
   setIsOpen,
@@ -206,22 +205,6 @@ const DateInputV2: React.FC<Props> = ({
     return true;
   };
 
-  const isDateWithinLimits = (parsedDate: dayjs.Dayjs): boolean => {
-    if (parsedDate?.isValid()) {
-      if (
-        (max && parsedDate.toDate() > max) ||
-        (min && parsedDate.toDate() < min)
-      ) {
-        Notification.Error({
-          msg: outOfLimitsErrorMessage ?? "Cannot select date out of range",
-        });
-        return false;
-      }
-      return true;
-    }
-    return false;
-  };
-
   const isSelectedMonth = (month: number) =>
     month === datePickerHeaderDate.getMonth();
 
@@ -294,33 +277,9 @@ const DateInputV2: React.FC<Props> = ({
   }, [isOpen]);
 
   const dateFormat = `DD/MM/YYYY${time ? " hh:mm a" : ""}`;
-  const placeHolder = dateFormat.replace("a", "am/pm");
-
-  const getDisplayValue = (date: Date) => {
-    return dayjs(date).format(dateFormat);
-  };
 
   const getPosition = () => {
-    switch (position) {
-      case "LEFT":
-        return "left-0";
-      case "LEFT-CENTER":
-        return "right-0 transform md:translate-x-1/2";
-      case "RIGHT":
-        return "right-0";
-      case "RIGHT-CENTER":
-        return "right-0 transform md:translate-x-1/2";
-      case "CENTER":
-        return "transform -translate-x-1/2";
-      case "TOP-LEFT":
-        return "bottom-full left-full";
-      case "TOP-RIGHT":
-        return "bottom-full right-0";
-      case "TOP-CENTER":
-        return "bottom-full left-1/2 transform -translate-x-1/2";
-      default:
-        return "left-0";
-    }
+    return "";
   };
 
   return (
@@ -358,7 +317,6 @@ const DateInputV2: React.FC<Props> = ({
                 </PopoverButton>
                 {open && (
                   <PopoverPanel
-                    static
                     className={classNames(
                       `cui-dropdown-base absolute my-0.5 ${time ? "max-h-[80vh] w-full md:h-auto md:w-[400px]" : "w-72"} divide-y-0 rounded p-4`,
                       getPosition(),
@@ -367,19 +325,23 @@ const DateInputV2: React.FC<Props> = ({
                   >
                     <div
                       className={classNames(
-                        "flex w-full items-center justify-between gap-y-4",
-                        position?.includes("TOP")
-                          ? "flex-col-reverse"
-                          : "flex-col",
+                        "flex w-full flex-col items-center justify-between gap-y-4",
                       )}
                     >
-                      {value && (
-                        <DateTextInput
-                          allowTime={!!time}
-                          value={value}
-                          onChange={onChange}
-                        />
-                      )}
+                      <DateTextInput
+                        allowTime={!!time}
+                        value={value}
+                        onChange={onChange}
+                        error={
+                          value &&
+                          (!dayjs(value).isValid() ||
+                            (!!max && value > max) ||
+                            (!!min && value < min))
+                            ? "Cannot select date out of range"
+                            : undefined
+                        }
+                      />
+
                       <div className="flex flex-col items-center gap-4 px-4 md:flex-row md:px-0">
                         <div className="flex flex-1 flex-col items-center justify-between">
                           <div className="flex">
@@ -647,7 +609,7 @@ const DateInputV2: React.FC<Props> = ({
                                   <button
                                     type="button"
                                     key={j}
-                                    className={`flex aspect-square w-9 shrink-0 items-center justify-center rounded-md border transition-all ${(input.name === "Hours" && option === 12 ? [0, 12].includes(input.value) : input.value === option) ? "bg-primary-500 font-bold text-white" : "border-gray-300 hover:bg-secondary-300"} text-sm`}
+                                    className={`flex aspect-square w-9 shrink-0 items-center justify-center rounded-md border transition-all ${(input.name === "Hours" && option === 12 ? [0, 12].includes(input.value) : input.value === option) ? "border-primary-600 bg-primary-500 font-bold text-white" : "border-gray-200 hover:bg-secondary-300"} text-sm`}
                                     onClick={() =>
                                       input.onChange(option as any)
                                     }
