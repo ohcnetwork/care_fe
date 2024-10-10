@@ -25,6 +25,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import useFullscreen from "../../Common/hooks/useFullscreen";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   children?: React.ReactNode;
@@ -43,6 +44,7 @@ interface Props {
 }
 
 export default function CameraFeed(props: Props) {
+  const { t } = useTranslation();
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [streamUrl, setStreamUrl] = useState<string>("");
@@ -74,14 +76,14 @@ export default function CameraFeed(props: Props) {
       setCameraUser(errorData.camera_user);
     } else {
       Notification.Error({
-        msg: "An error occurred while locking the camera",
+        msg: t("camera_locking_error"),
       });
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const unlockCamera = useCallback(async () => {
     await props.operate({ type: "unlock_camera" });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     lockCamera();
@@ -277,7 +279,7 @@ export default function CameraFeed(props: Props) {
                 )}
               >
                 <FeedNetworkSignal
-                  playerRef={playerRef as any}
+                  playerRef={playerRef}
                   playedOn={playedOn}
                   status={playerStatus}
                   onReset={resetStream}
@@ -318,7 +320,7 @@ export default function CameraFeed(props: Props) {
                   {cameraUser.username !== user.username && (
                     <MenuItem>
                       <div className="mt-3 flex w-full flex-col items-center justify-between">
-                        <p>Need access to move camera?</p>
+                        <p>{t("need_camera_access")}</p>
                         <ButtonV2
                           size="small"
                           variant="primary"
@@ -337,12 +339,12 @@ export default function CameraFeed(props: Props) {
                               setCameraUser(successData.result.camera_user);
                             } else {
                               Notification.Error({
-                                msg: "An error occurred while requesting access",
+                                msg: t("request_camera_access_error"),
                               });
                             }
                           }}
                         >
-                          Request Access
+                          {t("request_access")}
                         </ButtonV2>
                       </div>
                     </MenuItem>

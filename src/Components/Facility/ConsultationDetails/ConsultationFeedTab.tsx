@@ -42,7 +42,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     useState(false);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
-  const divRef = useRef<any>();
+  const divRef = useRef<HTMLDivElement | null>(null);
 
   const suggestOptimalExperience = useBreakpoints({ default: true, sm: false });
 
@@ -56,7 +56,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         ),
       });
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { key, operate } = useOperateCamera(asset?.id ?? "", true);
 
@@ -130,7 +130,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     if (divRef.current) {
       divRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [!!bed, loading, !!asset, divRef.current]);
+  }, [!!bed, loading, !!asset, divRef.current]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (preset?.id) {
@@ -149,7 +149,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   }
 
   if (!bed || !asset) {
-    return <span>No bed/asset linked allocated</span>;
+    return <span>{t("no_bed_or_asset_linked")}</span>;
   }
 
   const cannotSaveToPreset = !hasMoved || !preset?.id;
@@ -158,7 +158,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 rounded-lg border-4 border-dashed border-secondary-400">
         <span className="text-center text-xl font-bold text-secondary-700">
-          The camera feed is currently disabled due to privacy settings.
+          {t("camera_feed_disabled_due_to_privacy")}
         </span>
         <TogglePrivacyButton
           value={isPrivacyEnabled}
@@ -172,8 +172,8 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   return (
     <StillWatching>
       <ConfirmDialog
-        title="Update Preset"
-        description="Are you sure you want to update this preset to the current location?"
+        title={t("update_preset")}
+        description={t("update_preset_confirmation")}
         action="Confirm"
         show={showPresetSaveConfirmation}
         onClose={() => setShowPresetSaveConfirmation(false)}
@@ -269,8 +269,8 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                     shadow={!cannotSaveToPreset}
                     tooltip={
                       !cannotSaveToPreset
-                        ? "Save current position to selected preset"
-                        : "Change camera position to update preset"
+                        ? t("save_current_position_to_preset")
+                        : t("change_camera_position_and_update_preset")
                     }
                     tooltipClassName="translate-x-3 translate-y-8 text-xs"
                     className="ml-1"
@@ -281,7 +281,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                 )}
               </>
             ) : (
-              <span>loading presets...</span>
+              <span>{t("loading_preset") + "..."}</span>
             )}
           </div>
         </CameraFeed>

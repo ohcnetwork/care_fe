@@ -4,6 +4,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface PrivacyToggleProps {
   consultationBedId: string;
@@ -56,6 +57,8 @@ export function TogglePrivacyButton({
   onChange: updatePrivacyChange,
   iconOnly = false,
 }: TogglePrivacyButtonProps) {
+  const { t } = useTranslation();
+
   return (
     <ButtonV2
       size="small"
@@ -65,8 +68,8 @@ export function TogglePrivacyButton({
         !iconOnly
           ? undefined
           : isPrivacyEnabled
-            ? "Privacy is enabled. Click to disable privacy"
-            : "Privacy is disabled. Click to enable privacy"
+            ? t("privacy_enabled_tooltip")
+            : t("privacy_disabled_tooltip")
       }
       tooltipClassName="left-0 top-full translate-y-2 text-xs"
       className="mr-2"
@@ -88,7 +91,7 @@ export function TogglePrivacyButton({
     >
       {!iconOnly && (
         <span className="text-xs font-bold">
-          {isPrivacyEnabled ? "Disable Privacy" : "Enable Privacy"}
+          {isPrivacyEnabled ? t("disable_privacy") : t("enable_privacy")}
         </span>
       )}
       <CareIcon
