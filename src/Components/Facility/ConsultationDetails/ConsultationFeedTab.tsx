@@ -112,7 +112,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     const { data: updated } = await request(FeedRoutes.updatePreset, {
       pathParams: {
         assetbed_id: preset.asset_bed.id,
-        external_id: preset.id,
+        id: preset.id,
       },
       body: {
         position,
