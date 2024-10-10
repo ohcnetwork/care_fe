@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import Card from "../../CAREUI/display/Card";
 import dayjs from "dayjs";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import axios from "axios";
 import licenseUrls from "./licenseUrls.json";
+import bomData from "./fe-sbom.json";
+import beBomData from "./be-sbom.json";
 
 const getLicenseUrl = (licenseId: string | undefined): string | null => {
   if (!licenseId) return null;
@@ -67,15 +68,8 @@ const BOMDisplay: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("bom");
 
   useEffect(() => {
-    axios
-      .get("/bom.json")
-      .then((response) => setBOM(response.data))
-      .catch((error) => console.error("Error fetching BOM:", error));
-
-    axios
-      .get("/be-sbom.json")
-      .then((response) => setBeBOM(response.data))
-      .catch((error) => console.error("Error fetching BE SBOM:", error));
+    setBOM(bomData as CycloneDXBOM);
+    setBeBOM(beBomData as CycloneDXBOM);
   }, []);
 
   const handleCopy = () => {
