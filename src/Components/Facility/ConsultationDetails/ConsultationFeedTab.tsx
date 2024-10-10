@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { ConsultationTabProps } from "./index";
-import { AssetData } from "../../Assets/AssetTypes";
 import useQuery from "../../../Utils/request/useQuery";
 import CameraFeed from "../../CameraFeed/CameraFeed";
 import Loading from "../../Common/Loading";
@@ -30,8 +29,6 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
   const bed = props.consultationData.current_bed?.bed_object;
   const feedStateSessionKey = `encounterFeedState[${props.consultationId}]`;
-
-  const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<CameraPreset>();
   const [showPresetSaveConfirmation, setShowPresetSaveConfirmation] =
     useState(false);
@@ -52,6 +49,8 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
       });
     }
   }, []);
+
+  const asset = preset?.asset_bed.asset_object;
 
   const { key, operate } = useOperateCamera(asset?.id ?? "");
 
@@ -97,7 +96,6 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
       if (preset) {
         setPreset(preset);
-        setAsset(preset.asset_bed.asset_object);
       }
     },
   });
