@@ -198,6 +198,47 @@ export const VentilatorPlot = ({
     return markAreaData;
   };
 
+  const getMarkLineData = (name: string) => {
+    const markLineData = [];
+    if (!dailyRoundsList) return [];
+    for (let index = 0; index < dailyRoundsList.length - 1; index++) {
+      const currentRound = dailyRoundsList[index];
+      const { condition, legend } = getConditions(name, currentRound);
+      const currentInterfaceOrModality = getModeOrModality(currentRound);
+      if (condition) {
+        const startIndex = dates.findIndex(
+          (element) => element == currentRound.taken_at,
+        );
+        if (startIndex != -1) {
+          while (index < dailyRoundsList.length - 1) {
+            const nextRound = dailyRoundsList[index + 1];
+            const nextInterfaceOrModality = getModeOrModality(nextRound);
+            if (
+              currentRound.ventilator_interface ==
+                nextRound.ventilator_interface &&
+              currentInterfaceOrModality == nextInterfaceOrModality
+            ) {
+              index += 1;
+            } else {
+              break;
+            }
+          }
+          markLineData.push({
+            name: legend,
+            xAxis: dates[startIndex],
+            label: {
+              show: true,
+              position: "middle",
+              formatter: "{b}",
+            },
+          });
+        }
+      }
+    }
+    console.log(dates);
+    return markLineData;
+  };
+
   const yAxisData = (name: string) => {
     return Object.values(results)
       .map((p: any) => p[name])
@@ -340,7 +381,7 @@ export const VentilatorPlot = ({
             name="Flow Rate"
             xData={dates}
             yData={yAxisData("ventilator_oxygen_modality_flow_rate")}
-            verticalMarkerData={getMarkAreaData(
+            verticalMarkerData2={getMarkLineData(
               "ventilator_oxygen_modality_flow_rate",
             )}
           />
