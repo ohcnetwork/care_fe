@@ -197,6 +197,7 @@
   "retake": "फिर से लेना",
   "submit": "जमा करना",
   "camera": "कैमरा",
+  "camera_permission_denied": "कैमरा अनुमति नहीं दी गई",
   "submitting": "भेजने से",
   "view_details": "विवरण देखें",
   "type_to_search": "खोजने के लिए टाइप करें",
