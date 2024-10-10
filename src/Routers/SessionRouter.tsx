@@ -2,7 +2,7 @@ import { Login, ResetPassword } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import InvalidReset from "../Components/ErrorPages/InvalidReset";
-import LicensesPage from "../Components/LicensesPage";
+import LicensesPage from "../Components/Licenses/LicensesPage";
 
 const routes = {
   "/": () => <Login />,
