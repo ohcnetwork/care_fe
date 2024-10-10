@@ -1,4 +1,12 @@
-import { useReducer, useEffect, useRef, useState, Dispatch } from "react";
+import React, {
+  useReducer,
+  useEffect,
+  useRef,
+  useState,
+  Dispatch,
+  useContext,
+  ReactNode,
+} from "react";
 import { Button } from "../Components/ui/button";
 import { FormAction, FormReducer, FormState } from "../Components/Form/Utils";
 import { relativeTime } from "./utils";
@@ -81,9 +89,20 @@ export function useAutoSaveState(initialState: any) {
   return [state, setState];
 }
 
+type RestoreDraftContextValue = {
+  handleDraftSelect: (formState: any) => void;
+  draftStarted: boolean;
+  drafts: Draft[];
+};
+
+const RestoreDraftContext =
+  React.createContext<RestoreDraftContextValue | null>(null);
+
 export function DraftSection(props: {
   handleDraftSelect: (formState: any) => void;
   formData: any;
+  hidden?: boolean;
+  children?: ReactNode;
 }) {
   const { handleDraftSelect } = props;
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -123,32 +142,55 @@ export function DraftSection(props: {
   }, []);
 
   return (
-    <>
-      {drafts && drafts.length > 0 && (
+    <RestoreDraftContext.Provider
+      value={{ handleDraftSelect, drafts, draftStarted }}
+    >
+      {!props.hidden && drafts && drafts.length > 0 && (
         <div className="my-2 flex flex-wrap justify-end">
-          <Button
-            variant="outline"
-            className="flex items-center space-x-2"
-            onClick={() =>
-              handleDraftSelect(
-                (draftStarted ? drafts[0] : drafts[drafts.length - 1]).draft,
-              )
-            }
-          >
-            <CareIcon icon="l-pen" />
-            <span>Restore draft</span>
-            <span className="text-sm text-secondary-500">
-              (
-              {relativeTime(
-                draftStarted
-                  ? drafts[0].timestamp
-                  : drafts[drafts.length - 1].timestamp,
-              )}
-              )
-            </span>
-          </Button>
+          <RestoreDraftButton />
         </div>
       )}
-    </>
+      {props.children}
+    </RestoreDraftContext.Provider>
   );
 }
+
+export const RestoreDraftButton = () => {
+  const ctx = useContext(RestoreDraftContext);
+
+  if (!ctx) {
+    throw new Error(
+      "RestoreDraftButton must be used within a RestoreDraftProvider",
+    );
+  }
+
+  const { handleDraftSelect, draftStarted, drafts } = ctx;
+
+  if (!(drafts && drafts.length > 0)) {
+    return null;
+  }
+
+  return (
+    <Button
+      variant="outline"
+      className="flex items-center space-x-2"
+      onClick={() =>
+        handleDraftSelect(
+          (draftStarted ? drafts[0] : drafts[drafts.length - 1]).draft,
+        )
+      }
+    >
+      <CareIcon icon="l-pen" />
+      <span>Restore draft</span>
+      <span className="text-sm text-secondary-500">
+        (
+        {relativeTime(
+          draftStarted
+            ? drafts[0].timestamp
+            : drafts[drafts.length - 1].timestamp,
+        )}
+        )
+      </span>
+    </Button>
+  );
+};
