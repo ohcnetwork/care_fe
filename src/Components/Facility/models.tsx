@@ -7,6 +7,7 @@ import {
   PATIENT_NOTES_THREADS,
   UserRole,
 } from "../../Common/constants";
+import { FeatureFlag } from "../../Utils/featureFlags";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import {
   AssignedToObjectModel,
@@ -80,6 +81,7 @@ export interface FacilityModel {
   local_body?: number;
   ward?: number;
   pincode?: string;
+  facility_flags?: FeatureFlag[];
   latitude?: string;
   longitude?: string;
   kasp_empanelled?: boolean;

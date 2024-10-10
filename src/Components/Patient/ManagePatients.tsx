@@ -12,7 +12,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import { ReactNode, lazy, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { parseOptionId } from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -53,9 +53,9 @@ import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import Tabs from "../Common/components/Tabs.js";
 import request from "../../Utils/request/request.js";
+import { Avatar } from "../Common/Avatar.js";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;
@@ -542,9 +542,10 @@ export const PatientManager = () => {
                 </div>
               ) : (
                 <div className="flex min-h-20 items-center justify-center">
-                  <CareIcon
-                    icon="l-user-injured"
-                    className="text-3xl text-secondary-500"
+                  <Avatar
+                    name={patient.name}
+                    square={true}
+                    colors={["#F9FAFB", "#BFB8CB"]}
                   />
                 </div>
               )}
@@ -890,7 +891,7 @@ export const PatientManager = () => {
               selected={qParams.ordering}
               onSelect={updateQuery}
             />
-            <div className="tooltip w-full md:w-auto">
+            <div className="tooltip w-full md:w-auto" id="patient-export">
               {!isExportAllowed ? (
                 <ButtonV2
                   onClick={() => {

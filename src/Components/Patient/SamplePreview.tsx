@@ -1,14 +1,11 @@
 import { classNames, formatDateTime, humanizeStrings } from "../../Utils/utils";
 
-import { lazy } from "react";
-
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface ISamplePreviewProps {
   id: string;
   sampleId: string;

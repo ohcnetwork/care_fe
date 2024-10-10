@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -37,8 +37,7 @@ import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
 import { showUserDelete } from "../../Utils/permissions";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ManageUsers() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -188,7 +187,6 @@ export default function ManageUsers() {
   };
 
   let userList: any[] = [];
-
   userListData?.results &&
     userListData.results.length &&
     (userList = userListData.results.map((user: any, idx) => {
@@ -283,15 +281,17 @@ export default function ManageUsers() {
                     <>
                       <div className="col-span-1">
                         <UserDetails
-                          id="doctor-qualification"
-                          title="Qualification"
+                          id="qualification"
+                          title={t("qualification")}
                         >
-                          {user.doctor_qualification ? (
+                          {user.qualification ? (
                             <span className="font-semibold">
-                              {user.doctor_qualification}
+                              {user.qualification}
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -307,7 +307,9 @@ export default function ManageUsers() {
                               years
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -321,7 +323,9 @@ export default function ManageUsers() {
                               {user.doctor_medical_council_registration}
                             </span>
                           ) : (
-                            <span className="text-secondary-600">Unknown</span>
+                            <span className="text-secondary-600">
+                              {t("unknown")}
+                            </span>
                           )}
                         </UserDetails>
                       </div>
@@ -335,11 +339,30 @@ export default function ManageUsers() {
                     </div>
                   </UserDetails>
                 )}
+
                 <div
                   className={`${
                     isExtremeSmallScreen ? "flex flex-wrap" : "grid grid-cols-2"
                   }`}
                 >
+                  {user.user_type === "Nurse" && (
+                    <div className="row-span-1">
+                      <UserDetails
+                        id="qualification"
+                        title={t("qualification")}
+                      >
+                        {user.qualification ? (
+                          <span className="font-semibold">
+                            {user.qualification}
+                          </span>
+                        ) : (
+                          <span className="text-secondary-600">
+                            {t("unknown")}
+                          </span>
+                        )}
+                      </UserDetails>
+                    </div>
+                  )}
                   {user.created_by && (
                     <div className="col-span-1">
                       <UserDetails id="created_by" title="Created by">
