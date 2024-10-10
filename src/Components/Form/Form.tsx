@@ -13,7 +13,6 @@ type Props<T extends FormDetails> = {
   className?: string;
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
-  onlyChild?: boolean;
   validate?: (form: T) => FormErrors<T>;
   onSubmit: (form: T) => Promise<FormErrors<T> | void>;
   onCancel?: () => void;
@@ -108,27 +107,21 @@ const Form = <T extends FormDetails>({
             };
           }}
         >
-          {props.onlyChild ? (
+          <div className="my-6">
             <Consumer>{props.children}</Consumer>
-          ) : (
-            <>
-              <div className="my-6">
-                <Consumer>{props.children}</Consumer>
-              </div>
-              <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
-                <Cancel
-                  onClick={props.onCancel}
-                  label={props.cancelLabel ?? "Cancel"}
-                />
-                <Submit
-                  data-testid="submit-button"
-                  type="submit"
-                  disabled={disabled}
-                  label={props.submitLabel ?? "Submit"}
-                />
-              </div>
-            </>
-          )}
+          </div>
+          <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
+            <Cancel
+              onClick={props.onCancel}
+              label={props.cancelLabel ?? "Cancel"}
+            />
+            <Submit
+              data-testid="submit-button"
+              type="submit"
+              disabled={disabled}
+              label={props.submitLabel ?? "Submit"}
+            />
+          </div>
         </Provider>
       </DraftSection>
     </form>
