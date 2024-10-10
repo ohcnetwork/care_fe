@@ -210,15 +210,6 @@ export const EVENTS_SORT_OPTIONS: SortOption[] = [
   { isAscending: true, value: "taken_at" },
 ];
 
-export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
-  { isAscending: false, value: "-created_date" },
-  { isAscending: true, value: "created_date" },
-  { isAscending: false, value: "-modified_date" },
-  { isAscending: true, value: "modified_date" },
-  { isAscending: true, value: "name" },
-  { isAscending: false, value: "-name" },
-];
-
 export const BED_TYPES = [100, 200, 300, 400, 500];
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [

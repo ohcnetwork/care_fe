@@ -9,7 +9,7 @@ import SearchInput from "../Form/SearchInput";
 import {
   ADMITTED_TO,
   CONSENT_TYPE_CHOICES,
-  DISCHARGED_PATIENT_SORT_OPTIONS,
+  PATIENT_SORT_OPTIONS,
   DISCHARGE_REASONS,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
@@ -267,7 +267,7 @@ const DischargedPatientsList = ({
               onClick={() => advancedFilter.setShow(true)}
             />
             <SortDropdownMenu
-              options={DISCHARGED_PATIENT_SORT_OPTIONS}
+              options={PATIENT_SORT_OPTIONS}
               selected={qParams.ordering}
               onSelect={(e) => updateQuery({ ordering: e.ordering })}
             />
