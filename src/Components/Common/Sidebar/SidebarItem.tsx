@@ -32,10 +32,10 @@ const SidebarItemBase = forwardRef(
     return (
       <Link
         ref={ref}
-        className={`tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-white transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
+        className={`tooltip relative ml-1 mr-2 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-gray-900 transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
           props.selected
-            ? "bg-primary-900 font-bold"
-            : "bg-primary-800 font-normal hover:bg-primary-700"
+            ? "bg-gray-200 font-semibold"
+            : "font-normal hover:bg-gray-200"
         }`}
         target={external && "_blank"}
         rel={external && "noreferrer"}
@@ -75,7 +75,7 @@ const SidebarItemBase = forwardRef(
               shrinked
                 ? "right-3 top-0.5 h-4 w-5 rounded-md text-xs"
                 : "inset-y-0 right-4 my-auto h-6 rounded-md px-2 text-xs"
-            } z-10 animate-pulse transition-all duration-200 ease-in-out`}
+            } duration-400 z-10 animate-pulse transition-all ease-in-out`}
           >
             {props.badgeCount > 9 ? "9+" : props.badgeCount}
           </span>

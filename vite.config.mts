@@ -86,6 +86,7 @@ export default {
   ],
   resolve: {
     alias: {
+      "@": path.resolve(__dirname, "./src"),
       "@careConfig": path.resolve(__dirname, "./care.config.ts"),
     },
   },
