@@ -4,6 +4,15 @@ import PatientHome from "../../pageobject/Patient/PatientHome";
 describe("Patient Homepage present functionalities", () => {
   const loginPage = new LoginPage();
   const patientHome = new PatientHome();
+  const patientGender = "Male";
+  const patientCategory = "Moderate";
+  const patientMinimumAge = "18";
+  const patientMaximumAge = "24";
+  const patientLastAdmittedBed = "No bed assigned";
+  const PatientLastConsentType = "No consents";
+  const patientTelemedicinePerference = "No";
+  const patientReviewStatus = "No";
+  const patientMedicoStatus = "Non-Medico-Legal";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -19,24 +28,31 @@ describe("Patient Homepage present functionalities", () => {
   it("Patient Details based advance filters applied in the patient tab", () => {
     // Patient Filtering based on data
     patientHome.clickPatientAdvanceFilters();
-    cy.clickAndSelectOption("#gender-advancefilter", "Male");
-    cy.clickAndSelectOption("#category-advancefilter", "Moderate");
-    cy.get("#age_min").type("18");
-    cy.get("#age_max").type("24");
-    cy.clickAndMultiSelectOption(
-      "#last_consultation_admitted_bed_type_list",
-      "No bed assigned",
-    );
-    cy.clickAndMultiSelectOption(
-      "#last_consultation__consent_types",
-      "No consents",
-    );
-    cy.clickAndSelectOption("#telemedicine-advancefilter", "No");
-    cy.clickAndSelectOption("#review-advancefilter", "No");
-    cy.clickAndSelectOption("#medico-advancefilter", "Non-Medico-Legal");
+    patientHome.selectPatientGenderfilter(patientGender);
+    patientHome.selectPatientCategoryfilter(patientCategory);
+    patientHome.typePatientMinimumAgeFilter(patientMinimumAge);
+    patientHome.typePatientMaximumAgeFilter(patientMaximumAge);
+    patientHome.selectPatientLastAdmittedBed(patientLastAdmittedBed);
+    patientHome.selectPatientLastConsentType(PatientLastConsentType);
+    patientHome.selectPatientTelemedicineFilter(patientTelemedicinePerference);
+    patientHome.selectPatientReviewFilter(patientReviewStatus);
+    patientHome.selectPatientMedicoFilter(patientMedicoStatus);
     patientHome.clickPatientFilterApply();
     cy.get("a[data-cy='patient']").should("contain.text", "Dummy Patient");
+    patientHome.verifyTotalPatientCount("1");
     // Verify the presence of badges
+    patientHome.verifyGenderBadgeContent(patientGender);
+    patientHome.verifyCategoryBadgeContent(patientCategory);
+    patientHome.verifyMinAgeBadgeContent(patientMinimumAge);
+    patientHome.verifyMaxAgeBadgeContent(patientMaximumAge);
+    patientHome.verifyLastAdmittedBedBadgeContent(patientLastAdmittedBed);
+    patientHome.verifyLastConsentTypeBadgeContent(PatientLastConsentType);
+    patientHome.verifyTelemedicineBadgeContent(patientTelemedicinePerference);
+    patientHome.verifyReviewMissedBadgeContent(patientReviewStatus);
+    patientHome.verifyMedicoBadgeContent(patientMedicoStatus);
+    // Clear the badges and verify the patient count along with badges
+    cy.clearAllFilters();
+    patientHome.verifyTotalPatientCount("18");
   });
 
   it("Export the live patient list based on a date range", () => {
