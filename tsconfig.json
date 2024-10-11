@@ -15,13 +15,13 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client", "vite-plugin-pwa/client"],
+    "types": ["vite/client", "vite-plugin-pwa/client", "cypress"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@careConfig": ["./care.config.ts"]
     }
   },
-  "include": ["src", "care.config.ts"],
+  "include": ["src", "care.config.ts", "cypress"],
   "exclude": ["src/**/*.gen.tsx"]
 }
