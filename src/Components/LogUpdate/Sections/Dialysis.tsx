@@ -12,6 +12,7 @@ const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
         value={log.dialysis_fluid_balance}
         min={0}
         max={5000}
+        allowIntegersOnly
       />
       <br />
       <RangeFormField
@@ -22,6 +23,7 @@ const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
         value={log.dialysis_net_balance}
         min={0}
         max={5000}
+        allowIntegersOnly
       />
     </>
   );

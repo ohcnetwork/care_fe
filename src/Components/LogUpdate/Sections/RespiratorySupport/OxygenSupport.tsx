@@ -41,6 +41,7 @@ const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
             min={0}
             max={70}
             valueDescriptions={rangeValueDescription({ low: 34, high: 60 })}
+            allowIntegersOnly
           />
           <br />
           <RangeFormField
@@ -56,6 +57,7 @@ const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
             min={21}
             max={100}
             valueDescriptions={rangeValueDescription({ high: 60 })}
+            allowIntegersOnly
           />
         </>
       ) : (
@@ -72,6 +74,7 @@ const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
           min={0}
           max={50}
           valueDescriptions={rangeValueDescription({ low: 4, high: 10 })}
+          allowIntegersOnly
         />
       )}
       <br />
@@ -88,6 +91,7 @@ const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
         min={0}
         max={100}
         valueDescriptions={rangeValueDescription({ low: 89 })}
+        allowIntegersOnly
       />
     </>
   );

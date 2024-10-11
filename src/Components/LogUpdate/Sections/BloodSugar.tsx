@@ -19,6 +19,7 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
         min={0}
         max={700}
         valueDescriptions={rangeValueDescription({ low: 69, high: 110 })}
+        allowIntegersOnly
       />
       <br />
       <hr />

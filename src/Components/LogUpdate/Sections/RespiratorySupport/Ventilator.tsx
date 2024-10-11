@@ -24,6 +24,7 @@ export const VentilatorFields = [
     min: 0,
     max: 100,
     valueDescription: rangeValueDescription({ low: 11, high: 30 }),
+    allowIntegersOnly: true,
   },
   {
     key: "ventilator_mean_airway_pressure",
@@ -32,6 +33,7 @@ export const VentilatorFields = [
     min: 0,
     max: 40,
     valueDescription: rangeValueDescription({ low: 11, high: 25 }),
+    allowIntegersOnly: true,
   },
   {
     key: "ventilator_resp_rate",
@@ -40,6 +42,7 @@ export const VentilatorFields = [
     min: 0,
     max: 100,
     valueDescription: rangeValueDescription({ low: 39, high: 60 }),
+    allowIntegersOnly: true,
   },
   {
     key: "ventilator_pressure_support",
@@ -48,6 +51,7 @@ export const VentilatorFields = [
     min: 0,
     max: 40,
     valueDescription: rangeValueDescription({ low: 6, high: 15 }),
+    allowIntegersOnly: true,
   },
   {
     key: "ventilator_tidal_volume",
@@ -56,6 +60,7 @@ export const VentilatorFields = [
     min: 0,
     max: 1000,
     valueDescription: rangeValueDescription({}),
+    allowIntegersOnly: true,
   },
   {
     key: "ventilator_fio2",
@@ -68,6 +73,7 @@ export const VentilatorFields = [
     min: 21,
     max: 100,
     valueDescription: rangeValueDescription({ high: 60 }),
+    allowIntegersOnly: true,
   },
   {
     key: "ventilator_spo2",
@@ -80,6 +86,7 @@ export const VentilatorFields = [
     min: 0,
     max: 100,
     valueDescription: rangeValueDescription({ low: 89 }),
+    allowIntegersOnly: true,
   },
 ] satisfies {
   key: keyof DailyRoundsModel;
@@ -89,6 +96,7 @@ export const VentilatorFields = [
   max: number;
   step?: number;
   valueDescription: ValueDescription[];
+  allowIntegersOnly?: boolean;
 }[];
 
 const VentilatorRespiratorySupport = ({
@@ -116,6 +124,7 @@ const VentilatorRespiratorySupport = ({
           max={field.max}
           step={field.step || 1}
           valueDescriptions={field.valueDescription}
+          allowIntegersOnly={field.allowIntegersOnly}
         />
       ))}
     </div>

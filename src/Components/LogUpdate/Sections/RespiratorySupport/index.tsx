@@ -85,6 +85,7 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
         max={200}
         step={1}
         valueDescriptions={rangeValueDescription({ low: 34, high: 45 })}
+        allowIntegersOnly
       />
       <hr />
       <RadioFormField
