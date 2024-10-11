@@ -1,5 +1,7 @@
 Care is a React Typescript Project, built with Vite and styled with TailwindCSS.
 
+Care uses a Plugin Architecture. Apps are installed in /apps. 
+
 Care uses a custom useQuery hook to fetch data from the API. APIs are defined in the api.tsx file
 
 Here's an example of how to use the useQuery hook to fetch data from the API:
@@ -16,4 +18,6 @@ const { res } = await request(routes.partialUpdateAsset, {
   body: data,
 });
 ```
+
+
 
