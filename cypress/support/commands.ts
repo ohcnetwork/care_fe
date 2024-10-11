@@ -66,6 +66,42 @@ Cypress.Commands.add("loginByApi", (username, password) => {
   );
 });
 
+Cypress.on("uncaught:exception", () => {
+  // returning false here prevents Cypress from
+  // failing the test
+  return false;
+});
+
+/**
+ * getAttached(selector)
+ * getAttached(selectorFn)
+ *
+ * Waits until the selector finds an attached element, then yields it (wrapped).
+ * selectorFn, if provided, is passed $(document). Don't use cy methods inside selectorFn.
+ */
+Cypress.Commands.add("getAttached", (selector: string) => {
+  const getElement =
+    typeof selector === "function"
+      ? selector
+      : ($d: JQuery<Document>) =>
+          $d.find(selector) as unknown as JQuery<HTMLElement>;
+
+  let $el: JQuery<HTMLElement> | null = null;
+
+  return cy
+    .document()
+    .should(($d: Document) => {
+      $el = getElement(Cypress.$($d));
+      // Ensure $el is an HTMLElement before checking if it is detached
+      if ($el.length && $el[0] instanceof HTMLElement) {
+        expect(Cypress.dom.isDetached($el[0])).to.be.false; // Access the first HTMLElement
+      } else {
+        throw new Error("Element is not an HTMLElement or is detached.");
+      }
+    })
+    .then(() => cy.wrap($el));
+});
+
 Cypress.Commands.add(
   "awaitUrl",
   (url: string, disableLoginVerification = false) => {
