@@ -14,6 +14,10 @@ describe("Patient Homepage present functionalities", () => {
   const patientReviewStatus = "No";
   const patientMedicoStatus = "Non-Medico-Legal";
   const patientIcdDiagnosis = "1A00";
+  const facilityName = "Dummy Facility 40";
+  const facilityType = "Private Hospital";
+  const facilityLsgBody = "Aikaranad Grama Panchayat, Ernakulam District";
+  const facilityDistrict = "Ernakulam";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -24,6 +28,19 @@ describe("Patient Homepage present functionalities", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
+  });
+
+  it("Facility Geography based advance filters applied in the patient tab", () => {
+    patientHome.clickPatientAdvanceFilters();
+    patientHome.typeFacilityName(facilityName);
+    patientHome.selectFacilityType(facilityType);
+    patientHome.typeFacilityLsgBody(facilityLsgBody);
+    patientHome.typeFacilityDistrict(facilityDistrict);
+    patientHome.clickPatientFilterApply();
+    patientHome.verifyTotalPatientCount("17");
+    // Clear the badges and verify the patient count along with badges
+    cy.clearAllFilters();
+    patientHome.verifyTotalPatientCount("18");
   });
 
   it("Patient diagnosis based advance filters applied in the patient tab", () => {

@@ -596,7 +596,7 @@ export default function PatientFilter(props: any) {
       >
         <div className="space-y-4">
           {!props.dischargePage && (
-            <div>
+            <div id="facility-name">
               <FieldLabel className="text-sm">Facility</FieldLabel>
               <FacilitySelect
                 multiple={false}
@@ -629,6 +629,7 @@ export default function PatientFilter(props: any) {
             <div>
               <FieldLabel className="text-sm">Facility type</FieldLabel>
               <SelectMenuV2
+                id="facility-type"
                 placeholder="Show all"
                 options={FACILITY_TYPES}
                 optionLabel={(o) => o.text}
@@ -647,6 +648,7 @@ export default function PatientFilter(props: any) {
             <FieldLabel className="text-sm">LSG Body</FieldLabel>
             <div className="">
               <AutoCompleteAsync
+                id="facility-lsgbody"
                 name="lsg_body"
                 selected={filterState.lsgBody_ref}
                 fetchData={lsgSearch}
@@ -657,7 +659,7 @@ export default function PatientFilter(props: any) {
             </div>
           </div>
 
-          <div>
+          <div id="facility-district">
             <FieldLabel className="text-sm">District</FieldLabel>
             <DistrictSelect
               multiple={false}

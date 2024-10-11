@@ -14,7 +14,7 @@ class PatientLogupdate {
   }
 
   selectBed(bed: string) {
-    cy.searchAndSelectOption("input[name='bed']", bed);
+    cy.typeAndSelectOption("input[name='bed']", bed);
     cy.get("#update-switchbed").click();
     cy.wait(2000);
   }
@@ -43,27 +43,27 @@ class PatientLogupdate {
   }
 
   typeSystolic(systolic: string) {
-    cy.searchAndSelectOption("#systolic", systolic);
+    cy.typeAndSelectOption("#systolic", systolic);
   }
 
   typeDiastolic(diastolic: string) {
-    cy.searchAndSelectOption("#diastolic", diastolic);
+    cy.typeAndSelectOption("#diastolic", diastolic);
   }
 
   typePulse(pulse: string) {
-    cy.searchAndSelectOption("#pulse", pulse);
+    cy.typeAndSelectOption("#pulse", pulse);
   }
 
   typeTemperature(temperature: string) {
-    cy.searchAndSelectOption("#temperature", temperature);
+    cy.typeAndSelectOption("#temperature", temperature);
   }
 
   typeRespiratory(respiratory: string) {
-    cy.searchAndSelectOption("#resp", respiratory);
+    cy.typeAndSelectOption("#resp", respiratory);
   }
 
   typeSpo2(spo: string) {
-    cy.searchAndSelectOption("#ventilator_spo2", spo);
+    cy.typeAndSelectOption("#ventilator_spo2", spo);
   }
 
   selectRhythm(rhythm: string) {

@@ -147,5 +147,21 @@ class PatientHome {
   selectDifferentialIcdDiagnosis(input: string, unconfirmed: string) {
     cy.typeAndMultiSelectOption("#diagnoses_differential", input, unconfirmed);
   }
+
+  typeFacilityName(facilityName: string) {
+    cy.typeAndSelectOption("input[name='facility']", facilityName);
+  }
+
+  selectFacilityType(facilityType: string) {
+    cy.clickAndSelectOption("#facility-type", facilityType);
+  }
+
+  typeFacilityLsgBody(lsgbody: string) {
+    cy.typeAndSelectOption("#facility-lsgbody", lsgbody);
+  }
+
+  typeFacilityDistrict(district: string) {
+    cy.typeAndSelectOption("#facility-district", district);
+  }
 }
 export default PatientHome;

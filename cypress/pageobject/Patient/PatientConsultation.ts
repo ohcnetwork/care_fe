@@ -25,15 +25,15 @@ export class PatientConsultationPage {
   }
 
   selectPatientReferance(referance: string) {
-    cy.searchAndSelectOption("#referred_to", referance);
+    cy.typeAndSelectOption("#referred_to", referance);
   }
 
   selectBed(bedNo: string) {
-    cy.searchAndSelectOption("#bed", bedNo);
+    cy.typeAndSelectOption("#bed", bedNo);
   }
 
   selectPatientWard(ward: string) {
-    cy.searchAndSelectOption("#transferred_from_location", ward);
+    cy.typeAndSelectOption("#transferred_from_location", ward);
   }
 
   selectPatientSuggestion(suggestion: string) {
@@ -49,7 +49,7 @@ export class PatientConsultationPage {
   }
 
   selectPatientDiagnosis(icdCode, statusId) {
-    cy.searchAndSelectOption("#icd11-search", icdCode);
+    cy.typeAndSelectOption("#icd11-search", icdCode);
     cy.get("#diagnosis-list")
       .contains("Add as")
       .scrollIntoView()
@@ -98,7 +98,7 @@ export class PatientConsultationPage {
   }
 
   typeReferringFacility(referringFacility: string) {
-    cy.searchAndSelectOption("#referred_from_facility", referringFacility);
+    cy.typeAndSelectOption("#referred_from_facility", referringFacility);
   }
 
   clickEditConsultationButton() {

@@ -22,7 +22,7 @@ export class PatientPage {
   }
 
   selectFacility(facilityName: string) {
-    cy.searchAndSelectOption("input[name='facilities']", facilityName);
+    cy.typeAndSelectOption("input[name='facilities']", facilityName);
     cy.submitButton("Select");
   }
 
@@ -114,7 +114,7 @@ export class PatientPage {
   }
 
   selectPatientOccupation(occupation: string) {
-    cy.searchAndSelectOption("#occupation", occupation);
+    cy.typeAndSelectOption("#occupation", occupation);
   }
 
   selectSocioeconomicStatus(value: string) {
