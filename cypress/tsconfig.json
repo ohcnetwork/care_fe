@@ -7,5 +7,5 @@
     "typeRoots": ["./support"],
     "resolveJsonModule": true
   },
-  "include": ["**/*.ts", "support/commands.ts"],
+  "include": ["**/*.cy.ts", "support/commands.ts","**/*.ts"],
 }
