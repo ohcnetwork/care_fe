@@ -38,8 +38,8 @@ Cypress.Commands.add("refreshApiLogin", (username, password) => {
 Cypress.Commands.add("loginByApi", (username, password) => {
   cy.log(`Logging in the user: ${username}:${password}`);
   cy.task("readFileMaybe", "cypress/fixtures/token.json").then(
-    (tkn: string) => {
-      const token = JSON.parse(tkn);
+    (tkn: unknown) => {
+      const token = JSON.parse(tkn as string); // Cast tkn to string
       if (tkn && token.access && token.username === username) {
         cy.request({
           method: "POST",
@@ -79,32 +79,6 @@ Cypress.Commands.add(
 
 Cypress.Commands.add("verifyNotification", (text) => {
   return cy.get(".pnotify-container").should("exist").contains(text);
-});
-
-Cypress.on("uncaught:exception", () => {
-  // returning false here prevents Cypress from
-  // failing the test
-  return false;
-});
-
-/**
- * getAttached(selector)
- * getAttached(selectorFn)
- *
- * Waits until the selector finds an attached element, then yields it (wrapped).
- * selectorFn, if provided, is passed $(document). Don't use cy methods inside selectorFn.
- */
-Cypress.Commands.add("getAttached", (selector) => {
-  const getElement =
-    typeof selector === "function" ? selector : ($d) => $d.find(selector);
-  let $el = null;
-  return cy
-    .document()
-    .should(($d) => {
-      $el = getElement(Cypress.$($d));
-      expect(Cypress.dom.isDetached($el)).to.be.false;
-    })
-    .then(() => cy.wrap($el));
 });
 
 Cypress.Commands.add("clearAllFilters", () => {

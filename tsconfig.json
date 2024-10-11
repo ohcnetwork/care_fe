@@ -22,6 +22,6 @@
       "@careConfig": ["./care.config.ts"]
     }
   },
-  "include": ["src", "care.config.ts", "cypress"],
+  "include": ["src", "care.config.ts", "./cypress"],
   "exclude": ["src/**/*.gen.tsx"]
 }
