@@ -101,9 +101,9 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.verifyMaxAgeBadgeContent(patientMaximumAge);
     patientHome.verifyLastAdmittedBedBadgeContent(patientLastAdmittedBed);
     patientHome.verifyLastConsentTypeBadgeContent("No Consents");
-    patientHome.verifyTelemedicineBadgeContent(patientTelemedicinePerference);
-    patientHome.verifyReviewMissedBadgeContent(patientReviewStatus);
-    patientHome.verifyMedicoBadgeContent(patientMedicoStatus);
+    patientHome.verifyTelemedicineBadgeContent("false");
+    patientHome.verifyReviewMissedBadgeContent("false");
+    patientHome.verifyMedicoBadgeContent("false");
     // Clear the badges and verify the patient count along with badges
     cy.clearAllFilters();
     patientHome.verifyTotalPatientCount("18");
