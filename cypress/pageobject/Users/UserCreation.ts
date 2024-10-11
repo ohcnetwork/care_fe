@@ -19,7 +19,12 @@ export class UserCreationPage {
   }
   typeIntoElementByIdPostClearDob(elementId: string, value: string) {
     cy.get("#" + elementId).click();
-    cy.get("#date-input").clear().type(value);
+    cy.get(
+      '[data-test-id="date-input"]:visible [data-test-id="clear-date-input"]',
+    ).click();
+    cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
+      .click()
+      .type(value);
   }
   clearIntoElementById(elementId: string) {
     cy.get("#" + elementId)
@@ -54,13 +59,9 @@ export class UserCreationPage {
     this.selectOptionContainingText(name);
   }
 
-  setInputDate(
-    dateElementId: string,
-    inputElementId: string,
-    dateValue: string,
-  ) {
+  setInputDate(dateElementId: string, dateValue: string) {
     this.clickElementById(dateElementId);
-    this.typeIntoElementById(inputElementId, dateValue);
+    cy.get(`[data-test-id="date-input"]:visible`).click().type(dateValue);
   }
 
   selectDropdownOption(dropdownId: string, optionText: string) {

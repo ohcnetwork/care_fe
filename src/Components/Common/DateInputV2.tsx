@@ -28,7 +28,7 @@ interface Props {
   min?: Date;
   max?: Date;
   outOfLimitsErrorMessage?: string;
-  onChange: (date: Date) => void;
+  onChange: (date: Date | undefined) => void;
   position?: DatePickerPosition;
   disabled?: boolean;
   placeholder?: string;

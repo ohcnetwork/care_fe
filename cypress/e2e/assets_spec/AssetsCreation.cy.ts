@@ -54,7 +54,7 @@ describe("Asset", () => {
       "email@support.com",
       "Vendor's Name",
       serialNumber,
-      "25/12/2021",
+      "25122021",
       "Test note for asset creation!",
     );
 
@@ -77,7 +77,7 @@ describe("Asset", () => {
       "email@support.com",
       "Vendor's Name",
       serialNumber,
-      "25/12/2021",
+      "25122021",
       "Test note for asset creation!",
     );
 
@@ -104,7 +104,7 @@ describe("Asset", () => {
       "Customer Support's Name Edited",
       "Vendor's Name Edited",
       "Test note for asset creation edited!",
-      "25/12/2021",
+      "25122021",
     );
 
     assetPage.clickUpdateAsset();
@@ -152,7 +152,7 @@ describe("Asset", () => {
       "email@support.com",
       "Vendor's Name",
       serialNumber,
-      "25/12/2021",
+      "25122021",
       "Test note for asset creation!",
     );
     assetPage.interceptAssetCreation();

@@ -1,3 +1,4 @@
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import { classNames } from "@/Utils/utils";
 import dayjs from "dayjs";
 import { Fragment, KeyboardEvent, useEffect, useState } from "react";
@@ -16,7 +17,7 @@ import { Fragment, KeyboardEvent, useEffect, useState } from "react";
 export default function DateTextInput(props: {
   allowTime: boolean;
   value?: Date;
-  onChange: (date: Date) => unknown;
+  onChange: (date: Date | undefined) => unknown;
   error?: string;
 }) {
   const { value, onChange, allowTime, error } = props;
@@ -56,7 +57,9 @@ export default function DateTextInput(props: {
     const index = Object.keys(editingText).findIndex((et) => et === key);
     const value = Math.min(maxMap[index], parseInt(rawValue));
     const finalValue =
-      rawValue !== "" ? ("000" + value).slice(key === "year" ? -4 : -2) : "";
+      rawValue.trim() !== ""
+        ? ("000" + value).slice(key === "year" ? -4 : -2)
+        : "";
     return finalValue;
   };
 
@@ -115,12 +118,16 @@ export default function DateTextInput(props: {
     <div className="w-full">
       <div
         className={classNames(
-          `cui-input-base flex w-full cursor-text items-center overflow-hidden bg-secondary-50 px-4 py-0 text-gray-600`,
+          `cui-input-base relative flex w-full cursor-text items-center overflow-hidden bg-secondary-50 px-4 py-0 text-gray-600`,
           error && `!border-red-500`,
+          !!document.activeElement?.getAttribute("data-time-input") &&
+            "border-primary-500",
         )}
         onClick={(e) =>
-          e.target === e.currentTarget && goToInput(allowTime ? 4 : 2)
+          e.target === e.currentTarget &&
+          (value ? goToInput(allowTime ? 4 : 2) : goToInput(0))
         }
+        data-test-id="date-input"
       >
         {Object.entries(editingText)
           .slice(0, allowTime ? 5 : 3)
@@ -141,12 +148,6 @@ export default function DateTextInput(props: {
                 data-time-input={i}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setEditingText({
-                    ...editingText,
-                    [key]: value
-                      .replace(/\D/g, "")
-                      .slice(0, key === "year" ? 4 : 2),
-                  });
                   if (
                     (value.endsWith("/") ||
                       value.endsWith(" ") ||
@@ -155,6 +156,13 @@ export default function DateTextInput(props: {
                     i < 4
                   ) {
                     goToInput(i + 1);
+                  } else {
+                    setEditingText({
+                      ...editingText,
+                      [key]: value
+                        .replace(/\D/g, "")
+                        .slice(0, key === "year" ? 4 : 2),
+                    });
                   }
                 }}
                 onBlur={(e) => handleBlur(e.target.value, key)}
@@ -168,6 +176,21 @@ export default function DateTextInput(props: {
               </span>
             </Fragment>
           ))}
+
+        <button
+          className="absolute inset-y-0 right-0 px-2 text-xl text-secondary-500 hover:text-secondary-700"
+          type="button"
+          data-test-id="clear-date-input"
+          onClick={() => {
+            setDirtyEditingText(
+              Object.fromEntries(
+                Object.entries(editingText).map(([key]) => [key, ""]),
+              ) as typeof editingText,
+            );
+          }}
+        >
+          <CareIcon icon="l-times" />
+        </button>
       </div>
       {error && <span className="text-xs text-red-500">{error}</span>}
     </div>

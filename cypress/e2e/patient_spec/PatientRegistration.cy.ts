@@ -19,11 +19,13 @@ const getRelativeDateString = (deltaDays = 0) => {
   if (deltaDays) {
     date.setDate(date.getDate() + deltaDays);
   }
-  return date.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  return date
+    .toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+    .replace("/", "");
 };
 
 describe("Patient Creation with consultation", () => {

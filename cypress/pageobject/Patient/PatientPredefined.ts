@@ -17,7 +17,7 @@ class PatientPredefined {
     const emergency_phone_number = generateEmergencyPhoneNumber();
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
-    patientPage.typePatientDateOfBirth("01/01/2001");
+    patientPage.typePatientDateOfBirth("01012001");
     patientPage.typePatientName("Patient With Predefined Data");
     patientPage.selectPatientGender("Male");
     patientPage.typePatientAddress("Test Patient Address");
