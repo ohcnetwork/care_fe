@@ -84,12 +84,13 @@ export default function AppRouter() {
 
   useRedirect("/user", "/users");
 
-  const allRoutes = {
+  // Merge in Plugin Routes
+  routes = {
     ...routes,
     ...pluginRoutes,
   };
 
-  const pages = useRoutes(allRoutes) || <Error404 />;
+  const pages = useRoutes(routes) || <Error404 />;
 
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
