@@ -18,6 +18,7 @@ type BaseProps = FormFieldBaseProps<number> & {
   valueDescriptions?: ValueDescription[];
   hideInput?: boolean;
   hideUnitInLabel?: boolean;
+  allowIntegersOnly?: boolean;
 };
 
 type PropsWithUnit = BaseProps & {
@@ -70,6 +71,10 @@ export default function RangeFormField(props: Props) {
 
     if (value > max) {
       return `Value must be lesser than or equal to ${max}${unit?.label ?? ""}.`;
+    }
+
+    if (props.allowIntegersOnly && Math.abs(value % 1) != 0) {
+      return `Value must be an integer, cannot use decimals.`;
     }
   })();
 
