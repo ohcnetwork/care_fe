@@ -27,12 +27,7 @@ class PatientHome {
   }
 
   verifyPatientExportRequest() {
-    cy.wait("@getPatients")
-      .its("request.url")
-      .should("include", "/api/v1/patient/")
-      .and("include", "&csv")
-      .its("response.statusCode")
-      .should("eq", 200);
+    cy.wait("@getPatients").its("response.statusCode").should("eq", 200);
   }
 
   typePatientModifiedBeforeDate(startDate: string) {

@@ -224,14 +224,12 @@ export class AssetPage {
     cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
     cy.get("#export-json-option").click();
     cy.wait("@getJsonexport").its("response.statusCode").should("eq", 200);
-    cy.wait("@getJsonexport").its("request.url").should("include", "json=true");
   }
 
   selectCsvExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
     cy.get("#export-csv-option").click();
     cy.wait("@getCsvexport").its("response.statusCode").should("eq", 200);
-    cy.wait("@getCsvexport").its("request.url").should("include", "csv=true");
   }
 
   selectImportOption() {
