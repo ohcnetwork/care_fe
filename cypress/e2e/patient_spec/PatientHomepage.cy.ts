@@ -13,6 +13,7 @@ describe("Patient Homepage present functionalities", () => {
   const patientTelemedicinePerference = "No";
   const patientReviewStatus = "No";
   const patientMedicoStatus = "Non-Medico-Legal";
+  const patientIcdDiagnosis = "1A00";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -25,8 +26,44 @@ describe("Patient Homepage present functionalities", () => {
     cy.awaitUrl("/patients");
   });
 
+  it("Patient diagnosis based advance filters applied in the patient tab", () => {
+    // Patient Filtering based on icd-11 data
+    patientHome.clickPatientAdvanceFilters();
+    patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
+    patientHome.selectConfirmedIcdDiagnosis(
+      patientIcdDiagnosis,
+      patientIcdDiagnosis,
+    );
+    patientHome.selectUnconfirmedIcdDiagnosis(
+      patientIcdDiagnosis,
+      patientIcdDiagnosis,
+    );
+    patientHome.selectProvisionalIcdDiagnosis(
+      patientIcdDiagnosis,
+      patientIcdDiagnosis,
+    );
+    patientHome.selectDifferentialIcdDiagnosis(
+      patientIcdDiagnosis,
+      patientIcdDiagnosis,
+    );
+    patientHome.clickPatientFilterApply();
+    patientHome.verifyTotalPatientCount("0");
+    // Clear the badges and verify the patient count along with badges
+    cy.clearAllFilters();
+    patientHome.verifyTotalPatientCount("18");
+    // Apply Any and confirmed diagonsis to verify patient count 17
+    patientHome.clickPatientAdvanceFilters();
+    patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
+    patientHome.selectConfirmedIcdDiagnosis(
+      patientIcdDiagnosis,
+      patientIcdDiagnosis,
+    );
+    patientHome.clickPatientFilterApply();
+    patientHome.verifyTotalPatientCount("17");
+  });
+
   it("Patient Details based advance filters applied in the patient tab", () => {
-    // Patient Filtering based on data
+    // Patient Filtering based on patient details
     patientHome.clickPatientAdvanceFilters();
     patientHome.selectPatientGenderfilter(patientGender);
     patientHome.selectPatientCategoryfilter(patientCategory);

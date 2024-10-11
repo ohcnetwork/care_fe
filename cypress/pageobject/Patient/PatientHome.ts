@@ -127,5 +127,25 @@ class PatientHome {
   verifyTotalPatientCount(count: string) {
     cy.get("#total-patientcount").should("contain", count);
   }
+
+  selectAnyIcdDiagnosis(input: string, random: string) {
+    cy.typeAndMultiSelectOption("#diagnoses", input, random);
+  }
+
+  selectConfirmedIcdDiagnosis(input: string, confirmed: string) {
+    cy.typeAndMultiSelectOption("#diagnoses_confirmed", input, confirmed);
+  }
+
+  selectUnconfirmedIcdDiagnosis(input: string, unconfirmed: string) {
+    cy.typeAndMultiSelectOption("#diagnoses_unconfirmed", input, unconfirmed);
+  }
+
+  selectProvisionalIcdDiagnosis(input: string, unconfirmed: string) {
+    cy.typeAndMultiSelectOption("#diagnoses_provisional", input, unconfirmed);
+  }
+
+  selectDifferentialIcdDiagnosis(input: string, unconfirmed: string) {
+    cy.typeAndMultiSelectOption("#diagnoses_differential", input, unconfirmed);
+  }
 }
 export default PatientHome;
