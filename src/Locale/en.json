@@ -1021,6 +1021,8 @@
   "date_declared_positive": "Date of declaring positive",
   "date_of_result": "Covid confirmation date",
   "is_vaccinated": "Whether vaccinated",
+  "consultation_not_filed": "You have not filed any consultation for this patient yet.",
+  "consultation_not_filed_description": "Please file a consultation for this patient to continue.",
   "years": "years",
   "investigation_report": "Investigation Report"
 }
