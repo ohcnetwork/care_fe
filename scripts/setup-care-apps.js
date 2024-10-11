@@ -25,6 +25,7 @@ if (!fs.existsSync(appsDir)) {
   fs.mkdirSync(appsDir);
 }
 
+// Clone or pull care apps
 appsConfig.forEach((app) => {
   const appDir = path.join(appsDir, app.name);
   if (!fs.existsSync(appDir)) {
@@ -49,9 +50,9 @@ const importApps = appsConfig.map((app) => ({
     ),
 }));
 
-// Add the following code to generate pluginMap.ts
+// Generate pluginMap.ts
 const pluginMapPath = path.join(__dirname, "..", "src", "pluginMap.ts");
-const pluginMapContent = `import { PluginManifest } from './pluginTypes';
+const pluginMapContent = `import { PluginManifest } from "./pluginTypes";
 
 ${importApps
   .map(
