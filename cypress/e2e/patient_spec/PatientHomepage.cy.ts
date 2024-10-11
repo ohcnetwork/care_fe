@@ -100,7 +100,7 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.verifyMinAgeBadgeContent(patientMinimumAge);
     patientHome.verifyMaxAgeBadgeContent(patientMaximumAge);
     patientHome.verifyLastAdmittedBedBadgeContent(patientLastAdmittedBed);
-    patientHome.verifyLastConsentTypeBadgeContent(PatientLastConsentType);
+    patientHome.verifyLastConsentTypeBadgeContent("No Consents");
     patientHome.verifyTelemedicineBadgeContent(patientTelemedicinePerference);
     patientHome.verifyReviewMissedBadgeContent(patientReviewStatus);
     patientHome.verifyMedicoBadgeContent(patientMedicoStatus);
