@@ -39,3 +39,31 @@ appsConfig.forEach((app) => {
 });
 
 console.log("All apps have been cloned or updated in apps directory.");
+
+const importApps = appsConfig.map((app) => ({
+  ...app,
+  camelCaseName: app.name
+    .replace(/-/g, "")
+    .replace(/\b\w/g, (char, index) =>
+      index === 0 ? char.toLowerCase() : char.toUpperCase(),
+    ),
+}));
+
+// Add the following code to generate pluginMap.ts
+const pluginMapPath = path.join(__dirname, "..", "src", "pluginMap.ts");
+const pluginMapContent = `import { PluginManifest } from './pluginTypes';
+
+${importApps
+  .map(
+    (app) =>
+      `import ${app.camelCaseName}Manifest from "@app-manifest/${app.name}";`,
+  )
+  .join("\n")}
+
+export const pluginMap: PluginManifest[] = [
+${importApps.map((app) => `  ${app.camelCaseName}Manifest`).join(",\n")}
+];
+`;
+
+fs.writeFileSync(pluginMapPath, pluginMapContent);
+console.log("Generated pluginMap.ts");

@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react";
-import { INavItem } from "@core/Components/Common/Sidebar/Sidebar";
-import { PluginConfigType } from "./useConfig";
+import { INavItem } from "@/Components/Common/Sidebar/Sidebar";
+import { PluginManifest } from "@/pluginTypes";
 
-export const CareAppsContext = createContext<PluginConfigType[] | null>(null);
+export const CareAppsContext = createContext<PluginManifest[]>([]);
 
 export const useCareApps = () => {
   const ctx = useContext(CareAppsContext);
@@ -17,9 +17,6 @@ export const useCareApps = () => {
 export const useCareAppNavItems = () => {
   const careApps = useCareApps();
   const navItems = careApps.reduce<INavItem[]>((acc, plugin) => {
-    if (typeof plugin === "string") {
-      return acc;
-    }
     return [...acc, ...(plugin.navItems || [])];
   }, []);
   return navItems;
@@ -29,9 +26,6 @@ export const useCareAppNavItems = () => {
 export function usePluginRoutes() {
   const careApps = useCareApps();
   const routes = careApps.reduce((acc, plugin) => {
-    if (typeof plugin === "string") {
-      return acc;
-    }
     return { ...acc, ...plugin.routes };
   }, {});
   if (!routes) {

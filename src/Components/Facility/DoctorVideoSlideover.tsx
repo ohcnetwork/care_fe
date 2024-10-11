@@ -16,7 +16,7 @@ import Switch from "../../CAREUI/interactive/Switch";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import Loading from "../Common/Loading";
-import { PLUGIN_DoctorConnectButtons } from "@core/PluginEngine";
+import { PLUGIN_DoctorConnectButtons } from "@/PluginEngine";
 
 const UserGroups = {
   ALL: "All",

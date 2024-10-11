@@ -8,7 +8,7 @@ import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
 import careConfig from "@careConfig";
-import { useCareAppNavItems } from "@core/Common/hooks/useCareApps";
+import { useCareAppNavItems } from "@/Common/hooks/useCareApps";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 

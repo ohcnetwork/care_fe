@@ -30,12 +30,15 @@
     "apps/*"
   ],
   "scripts": {
-    "build:react": "cross-env NODE_ENV=production vite build",
-    "build": "npm run generate-build-meta && npm run supported-browsers && npm run build:react",
     "dev": "npm run supported-browsers && vite",
     "local": "npm run supported-browsers && vite --mode docker",
     "preview": "cross-env NODE_ENV=production vite preview",
-    "generate-build-meta": "node ./scripts/generate-build-version.js",
+    "build:meta": "node ./scripts/generate-build-version.js",
+    "build:react": "cross-env NODE_ENV=production vite build",
+    "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
+    "build": "npm run install-all && npm run build:meta && npm run supported-browsers && npm run build:react",
+    "setup": "node scripts/setup-care-apps.js",
+    "install-all": "npm run setup && npm install",
     "test": "snyk test",
     "cypress:open": "cross-env NODE_ENV=development cypress open",
     "cypress:run": "cross-env NODE_ENV=development cypress run",
@@ -44,10 +47,7 @@
     "prepare": "husky install",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write",
-    "supported-browsers": "node ./scripts/generate-supported-browsers.mjs",
-    "setup": "node scripts/preinstall.js",
-    "install-all": "npm run setup && npm install"
+    "format": "prettier ./src --write"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.1.0",

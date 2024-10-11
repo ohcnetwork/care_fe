@@ -1,4 +1,4 @@
-import { useState, Suspense } from "react";
+import { Suspense } from "react";
 import Routers from "./Routers";
 import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
 import Integrations from "./Integrations";
@@ -6,19 +6,14 @@ import Loading from "./Components/Common/Loading";
 import HistoryAPIProvider from "./Providers/HistoryAPIProvider";
 import AuthUserProvider from "./Providers/AuthUserProvider";
 import PluginEngine from "./PluginEngine";
-import { PluginConfigType } from "./Common/hooks/useConfig";
 import { FeatureFlagsProvider } from "./Utils/featureFlags";
 import { Toaster } from "./Components/ui/toaster";
-import { pluginMap } from "./pluginMap";
-
-const enabledPlugins = pluginMap.map((plugin) => plugin.plugin);
 
 const App = () => {
-  const [plugins, setPlugins] = useState<PluginConfigType[]>(enabledPlugins);
   return (
     <Suspense fallback={<Loading />}>
       <ThemedFavicon />
-      <PluginEngine plugins={plugins} setPlugins={setPlugins}>
+      <PluginEngine>
         <HistoryAPIProvider>
           <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
             <FeatureFlagsProvider>

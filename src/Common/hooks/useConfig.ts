@@ -1,8 +1,3 @@
-import { PluginManifest } from "@/pluginMap";
-import { createContext, useContext } from "react";
-
-export const AppConfigContext = createContext<IConfig | null>(null);
-
 interface ILogo {
   light: string;
   dark: string;
@@ -91,24 +86,3 @@ export interface IBaseConfig {
    */
   min_encounter_date: string;
 }
-
-export type PluginConfigType = string | PluginManifest;
-
-export interface IConfig extends IBaseConfig {
-  /*
-   * The plugins to load.
-   */
-  plugins: PluginConfigType[];
-}
-
-const useConfig = () => {
-  const config = useContext(AppConfigContext);
-
-  if (!config) {
-    throw new Error("useConfig must be used within an AppConfigProvider");
-  }
-
-  return config;
-};
-
-export default useConfig;

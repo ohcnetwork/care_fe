@@ -24,7 +24,7 @@ import HCXRoutes from "./routes/HCXRoutes";
 import ShiftingRoutes from "./routes/ShiftingRoutes";
 import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
-import { usePluginRoutes } from "@core/Common/hooks/useCareApps";
+import { usePluginRoutes } from "@/Common/hooks/useCareApps";
 import careConfig from "@careConfig";
 import IconIndex from "../CAREUI/icons/Index";
 

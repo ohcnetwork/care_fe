@@ -31,8 +31,6 @@ export default function CareIcon({
 
   useEffect(() => transformIcons(), [effectiveClassName]);
   return (
-    <span id={id} onClick={onClick} key={effectiveClassName}>
-      <i className={`care ${effectiveClassName}`} />
-    </span>
+    <i id={id} className={`care ${effectiveClassName}`} onClick={onClick} />
   );
 }

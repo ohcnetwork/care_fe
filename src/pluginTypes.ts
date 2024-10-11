@@ -1,7 +1,8 @@
-import { lazy, LazyExoticComponent } from "react";
+import { LazyExoticComponent } from "react";
 import { UserAssignedModel } from "./Components/Users/models";
 import { AppRoutes } from "./Routers/AppRouter";
 import { INavItem } from "./Components/Common/Sidebar/Sidebar";
+import { pluginMap } from "./pluginMap";
 
 // Define the available plugins
 export type AvailablePlugin = "@apps/care-livekit";
@@ -40,12 +41,6 @@ export type PluginManifest = {
   navItems: INavItem[];
 };
 
-export const careApps: Promise<PluginManifest>[] = [
-  import("@app-manifest/care-livekit").then(
-    (module) => module.default,
-  ) as Promise<PluginManifest>,
-];
-
 // Create a type that ensures only available plugins can be used
 export type EnabledPluginConfig = {
   plugin: string;
@@ -55,26 +50,5 @@ export type EnabledPluginConfig = {
   // Components are a dictionary, with the key being the component name, and the value being the component type
   components: PluginComponentMap;
 };
-
-const careLivekitM = import("@app-manifest/care-livekit").then(
-  (module) => module.default,
-) as Promise<PluginManifest>;
-const LiveKitDoctorConnectButtons = lazy(() =>
-  import("@apps/care-livekit").then((module) => ({
-    default: module.DoctorConnectButtons,
-  })),
-);
-
-const pluginMap: EnabledPluginConfig[] = [
-  {
-    plugin: "care-livekit",
-    path: "@apps/care-livekit",
-    manifestPath: "@app-manifest/care-livekit",
-    manifest: careLivekitM,
-    components: {
-      DoctorConnectButtons: LiveKitDoctorConnectButtons,
-    },
-  },
-];
 
 export { pluginMap };
