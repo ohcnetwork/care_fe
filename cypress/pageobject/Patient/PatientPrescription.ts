@@ -16,7 +16,7 @@ export class PatientPrescription {
   }
 
   selectMedicine(medicine: string) {
-    cy.searchAndSelectOption(
+    cy.typeAndSelectOption(
       "div#medicine_object input[placeholder='Select'][role='combobox']",
       medicine,
     );
