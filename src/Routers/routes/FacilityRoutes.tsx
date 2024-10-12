@@ -2,7 +2,7 @@ import { FacilityConfigure } from "../../Components/Facility/FacilityConfigure";
 import { FacilityCreate } from "../../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../../Components/Facility/FacilityHome";
 import FacilityUsers from "../../Components/Facility/FacilityUsers";
-import { HospitalList } from "../../Components/Facility/HospitalList";
+import { FacilityList } from "../../Components/Facility/FacilityList";
 import { TriageForm } from "../../Components/Facility/TriageForm";
 import ResourceCreate from "../../Components/Resource/ResourceCreate";
 import CentralNursingStation from "../../Components/Facility/CentralNursingStation";
@@ -12,7 +12,7 @@ import DischargedPatientsList from "../../Components/Facility/DischargedPatients
 import { AppRoutes } from "../AppRouter";
 
 const FacilityRoutes: AppRoutes = {
-  "/facility": () => <HospitalList />,
+  "/facility": () => <FacilityList />,
   "/facility/create": () => <FacilityCreate />,
   "/facility/:facilityId/update": ({ facilityId }) => (
     <FacilityCreate facilityId={facilityId} />

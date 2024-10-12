@@ -18,7 +18,7 @@ import routes from "../../Redux/api";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 import Loading from "@/Components/Common/Loading";
-export const HospitalList = () => {
+export const FacilityList = () => {
   const {
     qParams,
     updateQuery,
