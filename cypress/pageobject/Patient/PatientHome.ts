@@ -34,12 +34,34 @@ class PatientHome {
     });
   }
 
+  typePatientCreatedBeforeDate(startDate: string) {
+    cy.clickAndTypeDate("input[name='created_date_start']", startDate);
+  }
+
+  typePatientCreatedAfterDate(endDate: string) {
+    cy.clickAndTypeDate("input[name='created_date_end']", endDate);
+  }
+
   typePatientModifiedBeforeDate(startDate: string) {
     cy.clickAndTypeDate("input[name='modified_date_start']", startDate);
   }
 
   typePatientModifiedAfterDate(endDate: string) {
     cy.clickAndTypeDate("input[name='modified_date_end']", endDate);
+  }
+
+  typePatientAdmitedBeforeDate(startDate: string) {
+    cy.clickAndTypeDate(
+      "input[name='last_consultation_encounter_date_start']",
+      startDate,
+    );
+  }
+
+  typePatientAdmitedAfterDate(endDate: string) {
+    cy.clickAndTypeDate(
+      "input[name='last_consultation_encounter_date_end']",
+      endDate,
+    );
   }
 
   clickPatientAdvanceFilters() {
@@ -162,6 +184,76 @@ class PatientHome {
 
   typeFacilityDistrict(district: string) {
     cy.typeAndSelectOption("#facility-district", district);
+  }
+
+  verifyAnyDiagnosisBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Diagnoses (of any verification status)']").should(
+      "contain",
+      expectedText,
+    );
+  }
+
+  verifyConfirmedDiagnosisBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Confirmed Diagnoses']").should(
+      "contain",
+      expectedText,
+    );
+  }
+
+  verifyUnconfirmedDiagnosisBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Unconfirmed Diagnoses']").should(
+      "contain",
+      expectedText,
+    );
+  }
+
+  verifyProvisionalDiagnosisBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Provisional Diagnoses']").should(
+      "contain",
+      expectedText,
+    );
+  }
+
+  verifyDifferentialDiagnosisBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Differential Diagnoses']").should(
+      "contain",
+      expectedText,
+    );
+  }
+
+  verifyFacilityNameBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Facility']").should("contain", expectedText);
+  }
+
+  verifyFacilityTypeBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Facility Type']").should("contain", expectedText);
+  }
+
+  verifyFacilityLsgBadgeContent(expectedText: string) {
+    cy.get("[data-testid='LSG Body']").should("contain", expectedText);
+  }
+
+  verifyFacilityDistrictContent(expectedText: string) {
+    cy.get("[data-testid='District']").should("contain", expectedText);
+  }
+
+  verifyPatientCreatedBeforeDate(expectedText: string) {
+    cy.get("[data-testid='Created before']").should("contain", expectedText);
+  }
+  verifyPatientCreatedAfterDate(expectedText: string) {
+    cy.get("[data-testid='Created after']").should("contain", expectedText);
+  }
+  verifyPatientModifiedBeforeDate(expectedText: string) {
+    cy.get("[data-testid='Modified before']").should("contain", expectedText);
+  }
+  verifyPatientModifiedAfterDate(expectedText: string) {
+    cy.get("[data-testid='Modified after']").should("contain", expectedText);
+  }
+  verifyPatientAdmittedAfterDate(expectedText: string) {
+    cy.get("[data-testid='Admitted after']").should("contain", expectedText);
+  }
+  verifyPatientAdmittedBeforeDate(expectedText: string) {
+    cy.get("[data-testid='Admitted before']").should("contain", expectedText);
   }
 }
 export default PatientHome;

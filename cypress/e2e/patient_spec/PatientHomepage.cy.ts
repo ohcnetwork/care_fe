@@ -18,6 +18,8 @@ describe("Patient Homepage present functionalities", () => {
   const facilityType = "Private Hospital";
   const facilityLsgBody = "Aikaranad Grama Panchayat, Ernakulam District";
   const facilityDistrict = "Ernakulam";
+  const patientBeforeDate = "01122023";
+  const patientAfterDate = "07122023";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -30,6 +32,27 @@ describe("Patient Homepage present functionalities", () => {
     cy.awaitUrl("/patients");
   });
 
+  it("Date based advance filters applied in the patient tab", () => {
+    patientHome.clickPatientAdvanceFilters();
+    patientHome.typePatientCreatedBeforeDate(patientBeforeDate);
+    patientHome.typePatientCreatedAfterDate(patientAfterDate);
+    patientHome.typePatientModifiedBeforeDate(patientBeforeDate);
+    patientHome.typePatientModifiedAfterDate(patientAfterDate);
+    patientHome.typePatientAdmitedBeforeDate(patientBeforeDate);
+    patientHome.typePatientAdmitedAfterDate(patientAfterDate);
+    patientHome.clickPatientFilterApply();
+    patientHome.verifyTotalPatientCount("1");
+    // verify the badge and clear the count
+    patientHome.verifyPatientCreatedBeforeDate(patientBeforeDate);
+    patientHome.verifyPatientCreatedAfterDate(patientAfterDate);
+    patientHome.verifyPatientModifiedBeforeDate(patientBeforeDate);
+    patientHome.verifyPatientModifiedAfterDate(patientAfterDate);
+    patientHome.verifyPatientAdmittedBeforeDate(patientBeforeDate);
+    patientHome.verifyPatientAdmittedAfterDate(patientAfterDate);
+    cy.clearAllFilters();
+    patientHome.verifyTotalPatientCount("1");
+  });
+
   it("Facility Geography based advance filters applied in the patient tab", () => {
     patientHome.clickPatientAdvanceFilters();
     patientHome.typeFacilityName(facilityName);
@@ -37,10 +60,14 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.typeFacilityLsgBody(facilityLsgBody);
     patientHome.typeFacilityDistrict(facilityDistrict);
     patientHome.clickPatientFilterApply();
-    patientHome.verifyTotalPatientCount("17");
+    patientHome.verifyTotalPatientCount("1");
     // Clear the badges and verify the patient count along with badges
+    patientHome.verifyFacilityNameBadgeContent(facilityName);
+    patientHome.verifyFacilityTypeBadgeContent(facilityType);
+    patientHome.verifyFacilityLsgBadgeContent(facilityLsgBody);
+    patientHome.verifyFacilityDistrictContent(facilityDistrict);
     cy.clearAllFilters();
-    patientHome.verifyTotalPatientCount("18");
+    patientHome.verifyTotalPatientCount("1");
   });
 
   it("Patient diagnosis based advance filters applied in the patient tab", () => {
@@ -65,6 +92,12 @@ describe("Patient Homepage present functionalities", () => {
     );
     patientHome.clickPatientFilterApply();
     patientHome.verifyTotalPatientCount("0");
+    // verify the badges presence in the platform
+    patientHome.verifyAnyDiagnosisBadgeContent(patientIcdDiagnosis);
+    patientHome.verifyConfirmedDiagnosisBadgeContent(patientIcdDiagnosis);
+    patientHome.verifyUnconfirmedDiagnosisBadgeContent(patientIcdDiagnosis);
+    patientHome.verifyProvisionalDiagnosisBadgeContent(patientIcdDiagnosis);
+    patientHome.verifyDifferentialDiagnosisBadgeContent(patientIcdDiagnosis);
     // Clear the badges and verify the patient count along with badges
     cy.clearAllFilters();
     patientHome.verifyTotalPatientCount("1");
