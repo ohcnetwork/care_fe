@@ -6,9 +6,10 @@ export class PatientConsultationPage {
     cy.clickAndSelectOption("#route_to_facility", status);
   }
 
-  typeAndMultiSelectSymptoms(input, symptoms) {
+  typeAndMultiSelectSymptoms(input: string, symptoms: string[]) {
     cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
   }
+
   selectSymptomsDate(date: string) {
     cy.clickAndTypeDate("#symptoms_onset_date", date);
   }
@@ -48,7 +49,7 @@ export class PatientConsultationPage {
     cy.get("#death_confirmed_doctor").click().type(doctor);
   }
 
-  selectPatientDiagnosis(icdCode, statusId) {
+  selectPatientDiagnosis(icdCode: string, statusId: string) {
     cy.searchAndSelectOption("#icd11-search", icdCode);
     cy.get("#diagnosis-list")
       .contains("Add as")
@@ -92,7 +93,7 @@ export class PatientConsultationPage {
     cy.clickAndSelectOption("#principal-diagnosis-select", diagnosis);
   }
 
-  verifyTextInConsultation(selector, text) {
+  verifyTextInConsultation(selector: string, text: string) {
     cy.get(selector).scrollIntoView();
     cy.get(selector).contains(text).should("be.visible");
   }

@@ -32,7 +32,7 @@ class PatientLogupdate {
     cy.get("#other_details").click().type(details);
   }
 
-  typeAndMultiSelectSymptoms(input, symptoms) {
+  typeAndMultiSelectSymptoms(input: string, symptoms: string[]) {
     cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
   }
   selectSymptomsDate(date: string) {
@@ -74,14 +74,14 @@ class PatientLogupdate {
     cy.get("#rhythm_detail").click().type(rhythm);
   }
 
-  clickLogUpdateViewDetails(element, patientCategory) {
+  clickLogUpdateViewDetails(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
     cy.get(element).first().contains("View Details").click();
     cy.wait(3000);
   }
 
-  clickLogUpdateUpdateLog(element, patientCategory) {
+  clickLogUpdateUpdateLog(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
     cy.get(element).first().contains("Update Log").click();
@@ -93,7 +93,7 @@ class PatientLogupdate {
     cy.wait(3000);
   }
 
-  clickClearButtonInElement(elementId) {
+  clickClearButtonInElement(elementId: string) {
     cy.get(elementId).find("#clear-button").click();
   }
 

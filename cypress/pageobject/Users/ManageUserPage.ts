@@ -1,5 +1,5 @@
 export class ManageUserPage {
-  assertHomeFacility(expectedText) {
+  assertHomeFacility(expectedText: string) {
     cy.get("#home_facility").should("contain.text", expectedText);
   }
 
@@ -7,11 +7,11 @@ export class ManageUserPage {
     cy.get("#facilities").click();
   }
 
-  selectFacilityFromDropdown(facilityName) {
+  selectFacilityFromDropdown(facilityName: string) {
     cy.searchAndSelectOption("input[name='facility']", facilityName);
   }
 
-  selectSkillFromDropdown(skill) {
+  selectSkillFromDropdown(skill: string) {
     cy.searchAndSelectOption("input[name='skill']", skill);
   }
 
@@ -19,11 +19,11 @@ export class ManageUserPage {
     cy.get("#link-facility").click();
   }
 
-  assertLinkedFacility(facilityName) {
+  assertLinkedFacility(facilityName: string) {
     cy.get("#linked-facility-list").should("contain.text", facilityName);
   }
 
-  assertnotLinkedFacility(facilityName) {
+  assertnotLinkedFacility(facilityName: string) {
     cy.get("#linked-facility-list").should("not.contain", facilityName);
   }
 
@@ -31,11 +31,11 @@ export class ManageUserPage {
     cy.get("#linked-facility-list").should("not.exist");
   }
 
-  assertHomeFacilitylink(facilityName) {
+  assertHomeFacilitylink(facilityName: string) {
     cy.get("#home-facility").should("contain.text", facilityName);
   }
 
-  assertFacilityNotInDropdown(facilityName) {
+  assertFacilityNotInDropdown(facilityName: string) {
     cy.get("input[name='facility']").click().type(facilityName);
     cy.get("[role='option']").should("not.exist");
   }
@@ -93,12 +93,12 @@ export class ManageUserPage {
     cy.visit("/facility");
   }
 
-  typeFacilitySearch(facilityName) {
+  typeFacilitySearch(facilityName: string) {
     cy.get("#search").click().clear();
     cy.get("#search").click().type(facilityName);
   }
 
-  assertFacilityInCard(facilityName) {
+  assertFacilityInCard(facilityName: string) {
     cy.get("#facility-name-card").should("contain", facilityName);
   }
 
@@ -117,13 +117,13 @@ export class ManageUserPage {
     cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
   }
 
-  assertSkillInAlreadyLinkedSkills(skillName) {
+  assertSkillInAlreadyLinkedSkills(skillName: string) {
     cy.get("#already-linked-skills")
       .contains(skillName)
       .should("have.length", 1);
   }
 
-  assertSkillIndoctorconnect(skillName) {
+  assertSkillIndoctorconnect(skillName: string) {
     cy.get("#doctor-connect-home-doctor")
       .contains(skillName)
       .should("have.length", 1);
@@ -137,11 +137,11 @@ export class ManageUserPage {
     cy.get("#unlink-skill").click();
   }
 
-  assertSkillInAddedUserSkills(skillName) {
+  assertSkillInAddedUserSkills(skillName: string) {
     cy.get("#added-user-skills").should("contain", skillName);
   }
 
-  assertDoctorConnectVisibility(realName) {
+  assertDoctorConnectVisibility(realName: string) {
     cy.get('*[id="doctor-connect-home-doctor"]').should(
       "contain.text",
       realName,
