@@ -279,7 +279,16 @@ const DateInputV2: React.FC<Props> = ({
   const dateFormat = `DD/MM/YYYY${time ? " hh:mm a" : ""}`;
 
   const getPosition = () => {
-    return "";
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+
+    const popOverX = popoverButtonRef.current?.getBoundingClientRect().x || 0;
+    const popOverY = popoverButtonRef.current?.getBoundingClientRect().y || 0;
+
+    const right = popOverX > viewportWidth - (time ? 420 : 300);
+    const top = popOverY > viewportHeight - 400;
+
+    return `${right ? "-translate-x-1/2" : ""} ${top ? "-translate-y-[calc(100%+50px)]" : ""}`;
   };
 
   return (

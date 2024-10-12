@@ -19,9 +19,9 @@ export class UserCreationPage {
   }
   typeIntoElementByIdPostClearDob(elementId: string, value: string) {
     cy.get("#" + elementId).click();
-    cy.get(
-      '[data-test-id="date-input"]:visible [data-test-id="clear-date-input"]',
-    ).click();
+    cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
+      cy.wrap(el).clear(),
+    );
     cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
       .click()
       .type(value);
@@ -61,7 +61,9 @@ export class UserCreationPage {
 
   setInputDate(dateElementId: string, dateValue: string) {
     this.clickElementById(dateElementId);
-    cy.get(`[data-test-id="date-input"]:visible`).click().type(dateValue);
+    cy.get(`[data-test-id="date-input"]:visible [data-time-input="0"]`)
+      .click()
+      .type(dateValue);
   }
 
   selectDropdownOption(dropdownId: string, optionText: string) {

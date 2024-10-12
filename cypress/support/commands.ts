@@ -176,9 +176,9 @@ Cypress.Commands.add("selectRadioOption", (name: string, value: string) => {
 Cypress.Commands.add("clickAndTypeDate", (selector, date) => {
   cy.get(selector).scrollIntoView();
   cy.get(selector).click();
-  cy.get(
-    `[data-test-id="date-input"]:visible [data-test-id="clear-date-input"]`,
-  ).click();
+  cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
+    cy.wrap(el).clear(),
+  );
   cy.get(`[data-test-id="date-input"]:visible [data-time-input="0"]`)
     .click()
     .type(date);

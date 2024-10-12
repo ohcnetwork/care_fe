@@ -61,9 +61,9 @@ export class PatientConsultationPage {
 
   typePatientConsultationDate(selector: string, date: string) {
     cy.get(selector).click();
-    cy.get(
-      '[data-test-id="date-input"]:visible [data-test-id="clear-date-input"]',
-    ).click();
+    cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
+      cy.wrap(el).clear(),
+    );
     cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
       .click()
       .type(date);
