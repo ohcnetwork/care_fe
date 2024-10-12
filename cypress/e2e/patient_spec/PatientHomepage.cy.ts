@@ -20,6 +20,8 @@ describe("Patient Homepage present functionalities", () => {
   const facilityDistrict = "Ernakulam";
   const patientBeforeDate = "01122023";
   const patientAfterDate = "07122023";
+  const patientBeforeDateBadge = "2023-12-01";
+  const patientAfterDateBadge = "2023-12-07";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -43,12 +45,12 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.clickPatientFilterApply();
     patientHome.verifyTotalPatientCount("1");
     // verify the badge and clear the count
-    patientHome.verifyPatientCreatedBeforeDate(patientBeforeDate);
-    patientHome.verifyPatientCreatedAfterDate(patientAfterDate);
-    patientHome.verifyPatientModifiedBeforeDate(patientBeforeDate);
-    patientHome.verifyPatientModifiedAfterDate(patientAfterDate);
-    patientHome.verifyPatientAdmittedBeforeDate(patientBeforeDate);
-    patientHome.verifyPatientAdmittedAfterDate(patientAfterDate);
+    patientHome.verifyPatientCreatedBeforeDate(patientBeforeDateBadge);
+    patientHome.verifyPatientCreatedAfterDate(patientAfterDateBadge);
+    patientHome.verifyPatientModifiedBeforeDate(patientBeforeDateBadge);
+    patientHome.verifyPatientModifiedAfterDate(patientAfterDateBadge);
+    patientHome.verifyPatientAdmittedBeforeDate(patientBeforeDateBadge);
+    patientHome.verifyPatientAdmittedAfterDate(patientAfterDateBadge);
     cy.clearAllFilters();
     patientHome.verifyTotalPatientCount("1");
   });
