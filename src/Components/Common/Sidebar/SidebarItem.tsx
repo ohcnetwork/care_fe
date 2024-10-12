@@ -29,7 +29,7 @@ const SidebarItemBase = forwardRef<HTMLAnchorElement, SidebarItemBaseProps>(
     return (
       <Link
         ref={ref}
-        className={`${props.to ? "to" : ""} ${props.do ? "do" : ""} tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-gray-900 transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
+        className={`tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-gray-900 transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
           props.selected
             ? "bg-gray-200 font-semibold"
             : "font-normal" + (props.to || props.do ? " hover:bg-gray-200" : "")
