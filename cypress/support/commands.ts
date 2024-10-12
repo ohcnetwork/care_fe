@@ -127,7 +127,7 @@ Cypress.Commands.add("submitButton", (buttonText = "Submit") => {
 });
 
 Cypress.Commands.add(
-  "searchAndSelectOption",
+  "typeAndSelectOption",
   (element: string, referance: string) => {
     cy.get(element)
       .click()
