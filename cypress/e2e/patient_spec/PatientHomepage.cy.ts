@@ -18,10 +18,10 @@ describe("Patient Homepage present functionalities", () => {
   const facilityType = "Private Hospital";
   const facilityLsgBody = "Aikaranad Grama Panchayat, Ernakulam District";
   const facilityDistrict = "Ernakulam";
-  const patientBeforeDate = "01122023";
-  const patientAfterDate = "07122023";
-  const patientBeforeDateBadge = "2023-12-01";
-  const patientAfterDateBadge = "2023-12-07";
+  const patientFromDate = "01122023";
+  const patientToDate = "07122023";
+  const patientFromDateBadge = "2023-12-01";
+  const patientToDateBadge = "2023-12-07";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -36,21 +36,21 @@ describe("Patient Homepage present functionalities", () => {
 
   it("Date based advance filters applied in the patient tab", () => {
     patientHome.clickPatientAdvanceFilters();
-    patientHome.typePatientCreatedBeforeDate(patientBeforeDate);
-    patientHome.typePatientCreatedAfterDate(patientAfterDate);
-    patientHome.typePatientModifiedBeforeDate(patientBeforeDate);
-    patientHome.typePatientModifiedAfterDate(patientAfterDate);
-    patientHome.typePatientAdmitedBeforeDate(patientBeforeDate);
-    patientHome.typePatientAdmitedAfterDate(patientAfterDate);
+    patientHome.typePatientCreatedBeforeDate(patientFromDate);
+    patientHome.typePatientCreatedAfterDate(patientToDate);
+    patientHome.typePatientModifiedBeforeDate(patientFromDate);
+    patientHome.typePatientModifiedAfterDate(patientToDate);
+    patientHome.typePatientAdmitedBeforeDate(patientFromDate);
+    patientHome.typePatientAdmitedAfterDate(patientToDate);
     patientHome.clickPatientFilterApply();
     patientHome.verifyTotalPatientCount("1");
     // verify the badge and clear the count
-    patientHome.verifyPatientCreatedBeforeDate(patientBeforeDateBadge);
-    patientHome.verifyPatientCreatedAfterDate(patientAfterDateBadge);
-    patientHome.verifyPatientModifiedBeforeDate(patientBeforeDateBadge);
-    patientHome.verifyPatientModifiedAfterDate(patientAfterDateBadge);
-    patientHome.verifyPatientAdmittedBeforeDate(patientBeforeDateBadge);
-    patientHome.verifyPatientAdmittedAfterDate(patientAfterDateBadge);
+    patientHome.verifyPatientCreatedBeforeDate(patientToDateBadge);
+    patientHome.verifyPatientCreatedAfterDate(patientFromDateBadge);
+    patientHome.verifyPatientModifiedBeforeDate(patientToDateBadge);
+    patientHome.verifyPatientModifiedAfterDate(patientFromDateBadge);
+    patientHome.verifyPatientAdmittedBeforeDate(patientToDateBadge);
+    patientHome.verifyPatientAdmittedAfterDate(patientFromDateBadge);
     cy.clearAllFilters();
     patientHome.verifyTotalPatientCount("1");
   });

@@ -237,23 +237,23 @@ class PatientHome {
     cy.get("[data-testid='District']").should("contain", expectedText);
   }
 
-  verifyPatientCreatedBeforeDate(expectedText: string) {
-    cy.get("[data-testid='Created before']").should("contain", expectedText);
-  }
   verifyPatientCreatedAfterDate(expectedText: string) {
     cy.get("[data-testid='Created after']").should("contain", expectedText);
   }
-  verifyPatientModifiedBeforeDate(expectedText: string) {
-    cy.get("[data-testid='Modified before']").should("contain", expectedText);
+  verifyPatientCreatedBeforeDate(expectedText: string) {
+    cy.get("[data-testid='Created before']").should("contain", expectedText);
   }
   verifyPatientModifiedAfterDate(expectedText: string) {
     cy.get("[data-testid='Modified after']").should("contain", expectedText);
   }
-  verifyPatientAdmittedAfterDate(expectedText: string) {
-    cy.get("[data-testid='Admitted after']").should("contain", expectedText);
+  verifyPatientModifiedBeforeDate(expectedText: string) {
+    cy.get("[data-testid='Modified before']").should("contain", expectedText);
   }
   verifyPatientAdmittedBeforeDate(expectedText: string) {
     cy.get("[data-testid='Admitted before']").should("contain", expectedText);
+  }
+  verifyPatientAdmittedAfterDate(expectedText: string) {
+    cy.get("[data-testid='Admitted after']").should("contain", expectedText);
   }
 }
 export default PatientHome;
