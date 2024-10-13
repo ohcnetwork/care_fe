@@ -154,7 +154,7 @@ const PatientNoteCard = ({
       {" "}
       <div
         className={classNames(
-          "group flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800",
+          "group flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800 max-sm:ml-2",
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >

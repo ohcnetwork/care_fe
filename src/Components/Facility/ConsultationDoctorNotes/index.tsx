@@ -119,9 +119,9 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="right-16 top-8 mx-2 md:absolute">
+      <div className="right-8 top-0 max-sm:my-1 sm:mx-2 md:absolute">
         <Tabs
-          className="mt-3 w-full gap-8 lg:w-full"
+          className="mt-1 w-full gap-8 lg:w-full"
           tabs={[
             { text: "Thread View", value: "thread-view" },
             { text: "Default View", value: "default-view" },

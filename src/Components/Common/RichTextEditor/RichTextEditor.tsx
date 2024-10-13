@@ -216,38 +216,92 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const handleOrderedList = () => {
     if (!editorRef.current) return;
     const selectionStart = editorRef.current.selectionStart || 0;
-    const lineIndex = getCurrentLineIndex(selectionStart);
-    const currentLine = getCurrentLine(lineIndex);
+    const selectionEnd = editorRef.current.selectionEnd || 0;
+    const text = editorRef.current.value;
 
-    let newText = "";
-    if (lineStyles.orderedList.test(currentLine)) {
-      newText = currentLine.replace(lineStyles.orderedList, "");
+    if (selectionStart === selectionEnd) {
+      const lineIndex = getCurrentLineIndex(selectionStart);
+      const currentLine = getCurrentLine(lineIndex);
+
+      let newText = "";
+      if (lineStyles.orderedList.test(currentLine)) {
+        newText = currentLine.replace(lineStyles.orderedList, "");
+      } else {
+        const prevLine = getCurrentLine(lineIndex - 1);
+        const prevNumber = lineStyles.orderedList
+          .exec(prevLine)?.[0]
+          .match(lineStyles.containsNumber)?.[0];
+        const nextNumber = prevNumber ? parseInt(prevNumber) + 1 : 1;
+        newText = `${nextNumber}. ${currentLine}`;
+      }
+
+      replaceLine(lineIndex, newText);
     } else {
-      const prevLine = getCurrentLine(lineIndex - 1);
-      const prevNumber = lineStyles.orderedList
-        .exec(prevLine)?.[0]
-        .match(lineStyles.containsNumber)?.[0];
-      const nextNumber = prevNumber ? parseInt(prevNumber) + 1 : 1;
-      newText = `${nextNumber}. ${currentLine}`;
-    }
+      const selectedText = text.substring(selectionStart, selectionEnd);
+      const lines = selectedText.split("\n");
 
-    replaceLine(lineIndex, newText);
+      let newText = "";
+      let currentNumber = 1;
+
+      lines.forEach((line) => {
+        if (lineStyles.orderedList.test(line)) {
+          newText += line.replace(lineStyles.orderedList, "") + "\n";
+        } else {
+          newText += `${currentNumber}. ${line}\n`;
+          currentNumber++;
+        }
+      });
+
+      newText = newText.trimEnd();
+
+      const beforeSelection = text.substring(0, selectionStart);
+      const afterSelection = text.substring(selectionEnd);
+
+      const updatedText = beforeSelection + newText + afterSelection;
+      setMarkdown(updatedText);
+    }
   };
 
   const handleUnorderedList = () => {
     if (!editorRef.current) return;
     const selectionStart = editorRef.current.selectionStart || 0;
-    const lineIndex = getCurrentLineIndex(selectionStart);
-    const currentLine = getCurrentLine(lineIndex);
+    const selectionEnd = editorRef.current.selectionEnd || 0;
+    const text = editorRef.current.value;
 
-    let newText = "";
-    if (lineStyles.unorderedList.test(currentLine)) {
-      newText = currentLine.replace(lineStyles.unorderedList, "");
+    if (selectionStart === selectionEnd) {
+      const lineIndex = getCurrentLineIndex(selectionStart);
+      const currentLine = getCurrentLine(lineIndex);
+
+      let newText = "";
+      if (lineStyles.unorderedList.test(currentLine)) {
+        newText = currentLine.replace(lineStyles.unorderedList, "");
+      } else {
+        newText = `- ${currentLine}`;
+      }
+
+      replaceLine(lineIndex, newText);
     } else {
-      newText = `- ${currentLine}`;
-    }
+      const selectedText = text.substring(selectionStart, selectionEnd);
+      const lines = selectedText.split("\n");
 
-    replaceLine(lineIndex, newText);
+      let newText = "";
+
+      lines.forEach((line) => {
+        if (lineStyles.unorderedList.test(line)) {
+          newText += line.replace(lineStyles.unorderedList, "") + "\n";
+        } else {
+          newText += `- ${line}\n`;
+        }
+      });
+
+      newText = newText.trimEnd();
+
+      const beforeSelection = text.substring(0, selectionStart);
+      const afterSelection = text.substring(selectionEnd);
+
+      const updatedText = beforeSelection + newText + afterSelection;
+      setMarkdown(updatedText);
+    }
   };
 
   const handleQuote = () => {
@@ -320,7 +374,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const handleInsertLink = () => {
-    if (!editorRef.current) return;
+    if (!editorRef.current || !linkDialogState.url.trim()) return;
 
     const { start } = getCaretCoordinates(
       editorRef.current,
@@ -457,19 +511,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       />
 
       {/* toolbar */}
-      <div className="flex items-center space-x-2 rounded-t-md border border-gray-300 bg-gray-100 pl-1">
+      <div className="flex items-center space-x-1 rounded-t-md border border-gray-300 bg-gray-100 pl-1 sm:space-x-2">
         <button
           onClick={() => insertMarkdown("**")}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-bold" className="text-lg" />
-          <span className="tooltip-text tooltip-top -translate-x-1/2">
-            Bold
-          </span>
+          <span className="tooltip-text tooltip-top -translate-x-4">Bold</span>
         </button>
         <button
           onClick={() => insertMarkdown("_")}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-italic" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -478,7 +530,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </button>
         <button
           onClick={() => insertMarkdown("~~")}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-text-strike-through" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -489,7 +541,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
         <button
           onClick={handleUnorderedList}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-list-ul" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -498,7 +550,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </button>
         <button
           onClick={handleOrderedList}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-list-ol" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -508,7 +560,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <div className="mx-2 h-6 border-l border-gray-400"></div>
         <button
           onClick={handleQuote}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-paragraph" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -518,7 +570,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
         <button
           onClick={handleLink}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-link" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -580,7 +632,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             {tempFiles.map((file, index) => (
               <div
                 key={index}
-                className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm transition-colors duration-200 hover:bg-gray-200"
+                className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm transition-colors duration-200 hover:bg-gray-200/50"
               >
                 <button
                   onClick={(e) => {
@@ -612,20 +664,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       </div>
 
       {/* toolbar-2 */}
-      <div className="flex items-center space-x-2 rounded-b-md border border-gray-300 bg-gray-100 pl-2">
+      <div className="flex items-center space-x-1 rounded-b-md border border-gray-300 bg-gray-100 pl-2 sm:space-x-2">
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-paperclip" className="text-lg" />
-          <span className="tooltip-text tooltip-top -translate-x-1/2">
+          <span className="tooltip-text tooltip-top -translate-x-4">
             Attach File
           </span>
         </button>
         <div className="mx-2 h-6 border-l border-gray-400"></div>
         <button
           onClick={() => setModalOpenForCamera(true)}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-camera" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -634,7 +686,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </button>
         <button
           onClick={() => setModalOpenForAudio(true)}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-microphone" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -654,7 +706,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             });
             setShowMentions(!showMentions);
           }}
-          className="tooltip rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-at" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -757,7 +809,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             >
               Cancel
             </ButtonV2>
-            <Submit onClick={handleInsertLink}>Apply Link</Submit>
+            <ButtonV2 onClick={handleInsertLink}>Apply Link</ButtonV2>
           </div>
         </div>
       </DialogModal>
