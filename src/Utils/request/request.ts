@@ -1,3 +1,4 @@
+import careConfig from "@careConfig";
 import handleResponse from "./handleResponse";
 import { RequestOptions, RequestResult, Route } from "./types";
 import { makeHeaders, makeUrl } from "./utils";
@@ -34,7 +35,7 @@ export default async function request<TData, TBody>(
   }
 
   const signal = controller?.signal ?? controllerRef?.current?.signal;
-  const url = makeUrl(path, query, pathParams);
+  const url = `${careConfig.apiUrl}${makeUrl(path, query, pathParams)}`;
 
   const options: RequestInit = { method, signal };
 

@@ -1,4 +1,3 @@
-import { IConfig } from "../Common/hooks/useConfig";
 import {
   ConsentRequestModel,
   CreateConsentTBody,
@@ -16,15 +15,6 @@ import {
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
-  IDeleteBedCapacity,
-  IDeleteExternalResult,
-  IExternalResult,
-  IExternalResultCsv,
-  ILocalBodies,
-  ILocalBodyByDistrict,
-  IPartialUpdateExternalResult,
-} from "../Components/ExternalResult/models";
-import {
   BedModel,
   CapacityModal,
   ConsultationModel,
@@ -34,26 +24,46 @@ import {
   DailyRoundsRes,
   DistrictModel,
   DoctorModal,
-  DupPatientModel,
   FacilityModel,
   FacilityRequest,
+  FacilitySpokeModel,
+  FacilitySpokeRequest,
   IFacilityNotificationRequest,
   IFacilityNotificationResponse,
+  IUserFacilityRequest,
   InventoryItemsModel,
   InventoryLogResponse,
   InventorySummaryResponse,
-  IUserFacilityRequest,
   LocalBodyModel,
   LocationModel,
   MinimumQuantityItemResponse,
-  PatientConsentModel,
   PatientNotesEditModel,
   PatientNotesModel,
   PatientStatsModel,
-  PatientTransferRequest,
   PatientTransferResponse,
   StateModel,
   WardModel,
+} from "../Components/Facility/models";
+import {
+  DailyRoundsModel,
+  PatientModel,
+  SampleReportModel,
+  SampleTestModel,
+} from "../Components/Patient/models";
+import { IComment, IResource } from "../Components/Resource/models";
+import {
+  IDeleteBedCapacity,
+  ILocalBodies,
+  ILocalBodyByDistrict,
+} from "../Components/ExternalResult/models";
+import {
+  InvestigationGroup,
+  InvestigationType,
+} from "../Components/Facility/Investigations";
+import {
+  DupPatientModel,
+  PatientConsentModel,
+  PatientTransferRequest,
 } from "../Components/Facility/models";
 import { MedibaseMedicine, Prescription } from "../Components/Medicine/models";
 import {
@@ -61,13 +71,18 @@ import {
   PNconfigData,
 } from "../Components/Notifications/models";
 import {
+  HCXClaimModel,
+  HCXCommunicationModel,
+  HCXPolicyModel,
+} from "../Components/HCX/models";
+import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
+import { IShift } from "../Components/Shifting/models";
+import { Investigation } from "../Components/Facility/Investigations/Reports/types";
+import { PaginatedResponse } from "../Utils/request/types";
+import {
   CreateFileRequest,
   CreateFileResponse,
-  DailyRoundsModel,
   FileUploadModel,
-  PatientModel,
-  SampleReportModel,
-  SampleTestModel,
 } from "../Components/Patient/models";
 import {
   SkillModel,
@@ -76,22 +91,11 @@ import {
   UserAssignedModel,
   UserModel,
 } from "../Components/Users/models";
-import { PaginatedResponse } from "../Utils/request/types";
-
-import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
 import {
   EventGeneric,
   type Type,
 } from "../Components/Facility/ConsultationDetails/Events/types";
-import {
-  InvestigationGroup,
-  InvestigationType,
-} from "../Components/Facility/Investigations";
 import { InvestigationSessionType } from "../Components/Facility/Investigations/investigationsTab";
-import { Investigation } from "../Components/Facility/Investigations/Reports/types";
-import { HCXPolicyModel } from "../Components/HCX/models";
-import { IComment, IResource } from "../Components/Resource/models";
-import { IShift } from "../Components/Shifting/models";
 import { AbhaNumberModel } from "../Components/ABDM/types/abha";
 import { ScribeModel } from "../Components/Scribe/Scribe";
 import {
@@ -99,6 +103,8 @@ import {
   IHealthFacility,
   IpartialUpdateHealthFacilityTBody,
 } from "../Components/ABDM/types/health-facility";
+import { PMJAYPackageItem } from "@/Components/Common/PMJAYProcedurePackageAutocomplete";
+import { InsurerOptionModel } from "@/Components/HCX/InsurerAutocomplete";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -119,13 +125,6 @@ export interface LoginCredentials {
 }
 
 const routes = {
-  config: {
-    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
-    method: "GET",
-    noAuth: true,
-    TRes: Type<IConfig>(),
-  },
-
   createScribe: {
     path: "/api/care_scribe/scribe/",
     method: "POST",
@@ -351,7 +350,7 @@ const routes = {
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
-    TRes: Type<FacilityRequest>(),
+    TRes: Type<FacilityModel>(),
   },
 
   getAnyFacility: {
@@ -372,6 +371,38 @@ const routes = {
     method: "PATCH",
     TRes: Type<FacilityModel>(),
     TBody: Type<Partial<FacilityModel>>(),
+  },
+
+  getFacilitySpokes: {
+    path: "/api/v1/facility/{id}/spokes/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
+  },
+
+  updateFacilitySpokes: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "PATCH",
+    TRes: Type<FacilitySpokeModel>(),
+    TBody: Type<FacilitySpokeRequest>(),
+  },
+
+  getFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "GET",
+    TRes: Type<FacilitySpokeModel>(),
+  },
+
+  createFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/",
+    method: "POST",
+    TRes: Type<FacilitySpokeModel>(),
+    TBody: Type<Partial<FacilitySpokeRequest>>(),
+  },
+
+  deleteFacilitySpoke: {
+    path: "/api/v1/facility/{id}/spokes/{spoke_id}/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   deleteFacilityCoverImage: {
@@ -528,24 +559,29 @@ const routes = {
   downloadFacility: {
     path: "/api/v1/facility/?csv",
     method: "GET",
+    TRes: Type<string>(),
   },
   downloadFacilityCapacity: {
     path: "/api/v1/facility/?csv&capacity",
     method: "GET",
+    TRes: Type<string>(),
   },
   downloadFacilityDoctors: {
     path: "/api/v1/facility/?csv&doctors",
     method: "GET",
+    TRes: Type<string>(),
   },
 
   downloadFacilityTriage: {
     path: "/api/v1/facility/?csv&triage",
     method: "GET",
+    TRes: Type<string>(),
   },
 
   downloadPatients: {
     path: "/api/v1/patient/?csv",
     method: "GET",
+    TRes: Type<string>(),
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
@@ -759,7 +795,10 @@ const routes = {
     method: "POST",
     TRes: Type<PatientNotesModel>(),
     TBody: Type<
-      Pick<PatientNotesModel, "note" | "thread"> & { consultation?: string }
+      Pick<PatientNotesModel, "note" | "thread"> & {
+        consultation?: string;
+        reply_to?: string;
+      }
     >(),
   },
   updatePatientNote: {
@@ -787,42 +826,6 @@ const routes = {
     path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample/",
     method: "GET",
     TRes: Type<SampleReportModel>(),
-  },
-
-  // External Results
-  externalResultList: {
-    path: "/api/v1/external_result/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<IExternalResult>>(),
-  },
-  externalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "GET",
-    TRes: Type<IExternalResult>(),
-  },
-  externalResultUploadCsv: {
-    path: "/api/v1/external_result/bulk_upsert/",
-    method: "POST",
-    TBody: Type<IExternalResultCsv>(),
-    TRes: Type<IExternalResult[]>(),
-  },
-
-  deleteExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "DELETE",
-    TRes: Type<IDeleteExternalResult>(),
-  },
-
-  updateExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "PUT",
-  },
-
-  partialUpdateExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "PATCH",
-    TRes: Type<IPartialUpdateExternalResult>(),
-    TBody: Type<IPartialUpdateExternalResult>(),
   },
 
   // States
@@ -1068,6 +1071,7 @@ const routes = {
   downloadShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
+    TRes: Type<string>(),
   },
   getShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
@@ -1239,6 +1243,7 @@ const routes = {
   downloadResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
+    TRes: Type<string>(),
   },
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
@@ -1620,89 +1625,166 @@ const routes = {
   },
 
   // HCX Endpoints
+  hcx: {
+    policies: {
+      list: {
+        path: "/api/hcx/policy/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<HCXPolicyModel>>(),
+      },
 
-  listPMJYPackages: {
-    path: "/api/v1/hcx/pmjy_packages/",
-    method: "GET",
-  },
+      create: {
+        path: "/api/hcx/policy/",
+        method: "POST",
+        TRes: Type<HCXPolicyModel>(),
+      },
 
-  hcxListPayors: {
-    path: "/api/v1/hcx/payors/",
-    method: "GET",
-  },
+      get: {
+        path: "/api/hcx/policy/{external_id}/",
+        method: "GET",
+      },
 
-  hcxCheckEligibility: {
-    path: "/api/v1/hcx/check_eligibility/",
-    method: "POST",
-    TRes: Type<HCXPolicyModel>(),
-  },
+      update: {
+        path: "/api/hcx/policy/{external_id}/",
+        method: "PUT",
+        TRes: Type<HCXPolicyModel>(),
+      },
 
-  listHCXPolicies: {
-    path: "/api/v1/hcx/policy/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<HCXPolicyModel>>(),
-  },
+      partialUpdate: {
+        path: "/api/hcx/policy/{external_id}/",
+        method: "PATCH",
+      },
 
-  createHCXPolicy: {
-    path: "/api/v1/hcx/policy/",
-    method: "POST",
-    TRes: Type<HCXPolicyModel>(),
-  },
+      delete: {
+        path: "/api/hcx/policy/{external_id}/",
+        method: "DELETE",
+        TRes: Type<Record<string, never>>(),
+      },
 
-  getHCXPolicy: {
-    path: "/api/v1/hcx/policy/{external_id}/",
-    method: "GET",
-  },
+      listPayors: {
+        path: "/api/hcx/payors/",
+        method: "GET",
+        TRes: Type<InsurerOptionModel[]>(),
+      },
 
-  updateHCXPolicy: {
-    path: "/api/v1/hcx/policy/{external_id}/",
-    method: "PUT",
-    TRes: Type<HCXPolicyModel>(),
-  },
+      checkEligibility: {
+        path: "/api/hcx/check_eligibility/",
+        method: "POST",
+        TBody: Type<{ policy: string }>(),
+        TRes: Type<HCXPolicyModel>(),
+      },
+    },
 
-  partialUpdateHCXPolicy: {
-    path: "/api/v1/hcx/policy/{external_id}/",
-    method: "PATCH",
-  },
+    claims: {
+      list: {
+        path: "/api/hcx/claim/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<HCXClaimModel>>(),
+      },
 
-  deleteHCXPolicy: {
-    path: "/api/v1/hcx/policy/{external_id}/",
-    method: "DELETE",
-  },
+      create: {
+        path: "/api/hcx/claim/",
+        method: "POST",
+        TBody: Type<{
+          policy: string;
+          items: {
+            id: string;
+            price: number;
+            category?: string;
+            name: string;
+          }[];
+          consultation: string;
+          use: "preauthorization" | "claim";
+        }>(),
+        TRes: Type<HCXClaimModel>(),
+      },
 
-  listHCXClaims: {
-    path: "/api/v1/hcx/claim/",
-    method: "GET",
-  },
+      get: {
+        path: "/api/hcx/claim/{external_id}/",
+        method: "GET",
+      },
 
-  createHCXClaim: {
-    path: "/api/v1/hcx/claim/",
-    method: "POST",
-  },
+      update: {
+        path: "/api/hcx/claim/{external_id}/",
+        method: "PUT",
+      },
 
-  getHCXClaim: {
-    path: "/api/v1/hcx/claim/{external_id}/",
-    method: "GET",
-  },
+      partialUpdate: {
+        path: "/api/hcx/claim/{external_id}/",
+        method: "PATCH",
+      },
 
-  updateHCXClaim: {
-    path: "/api/v1/hcx/claim/{external_id}/",
-    method: "PUT",
-  },
+      delete: {
+        path: "/api/hcx/claim/{external_id}/",
+        method: "DELETE",
+      },
 
-  partialUpdateHCXClaim: {
-    path: "/api/v1/hcx/claim/{external_id}/",
-    method: "PATCH",
-  },
+      listPMJYPackages: {
+        path: "/api/hcx/pmjy_packages/",
+        method: "GET",
+        TRes: Type<PMJAYPackageItem[]>(),
+      },
 
-  deleteHCXClaim: {
-    path: "/api/v1/hcx/claim/{external_id}/",
-    method: "DELETE",
-  },
+      makeClaim: {
+        path: "/api/hcx/make_claim/",
+        method: "POST",
+        TBody: Type<{ claim: string }>(),
+        TRes: Type<unknown>(),
+      },
+    },
 
-  hcxMakeClaim: {
-    path: "/api/v1/hcx/make_claim/",
-    method: "POST",
+    communications: {
+      list: {
+        path: "/api/hcx/communication/",
+        method: "GET",
+        TRes: Type<PaginatedResponse<HCXCommunicationModel>>(),
+      },
+
+      create: {
+        path: "/api/hcx/communication/",
+        method: "POST",
+        TRes: Type<HCXCommunicationModel>(),
+        TBody: Type<{
+          claim: string;
+          content: {
+            type: string;
+            data: string;
+          }[];
+        }>(),
+      },
+
+      get: {
+        path: "/api/hcx/communication/{external_id}/",
+        method: "GET",
+        TRes: Type<HCXCommunicationModel>(),
+      },
+
+      update: {
+        path: "/api/hcx/communication/{external_id}/",
+        method: "PUT",
+        TRes: Type<HCXCommunicationModel>(),
+      },
+
+      partialUpdate: {
+        path: "/api/hcx/communication/{external_id}/",
+        method: "PATCH",
+        TRes: Type<HCXCommunicationModel>(),
+      },
+
+      delete: {
+        path: "/api/hcx/communication/{external_id}/",
+        method: "DELETE",
+      },
+
+      send: {
+        path: "/api/hcx/send_communication/",
+        method: "POST",
+        TRes: Type<void>(),
+        TBody: Type<{
+          communication: string;
+        }>(),
+      },
+    },
   },
 } as const;
 

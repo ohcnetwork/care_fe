@@ -22,16 +22,6 @@ export class UserPage {
     cy.url().should("include", `username=${username}`);
   }
 
-  verifyUrlafteradvancefilter() {
-    cy.url()
-      .should("include", "first_name=Dev")
-      .and("include", "last_name=Doctor")
-      .and("include", "phone_number=%2B919876543219")
-      .and("include", "alt_phone_number=%2B919876543219")
-      .and("include", "user_type=Doctor")
-      .and("include", "district=7");
-  }
-
   checkUsernameText(username: string) {
     cy.get(this.usernameText).should("have.text", username);
   }
@@ -63,11 +53,11 @@ export class UserPage {
   }
 
   selectState(state: string) {
-    cy.searchAndSelectOption("#state input", state);
+    cy.typeAndSelectOption("#state input", state);
   }
 
   selectDistrict(district: string) {
-    cy.searchAndSelectOption("#district input", district);
+    cy.typeAndSelectOption("#district input", district);
   }
 
   typeInPhoneNumber(phone: string) {
@@ -79,7 +69,7 @@ export class UserPage {
   }
 
   selectHomeFacility(facility: string) {
-    cy.searchAndSelectOption("input[name='home_facility']", facility);
+    cy.typeAndSelectOption("input[name='home_facility']", facility);
   }
 
   applyFilter() {

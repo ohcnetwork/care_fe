@@ -5,13 +5,17 @@ class PatientLogupdate {
     cy.wait(2000);
   }
 
+  clickSwitchBed() {
+    cy.get("#switch-bed").click();
+  }
+
   selectRoundType(roundType: string) {
     cy.clickAndSelectOption("#rounds_type", roundType);
   }
 
   selectBed(bed: string) {
-    cy.searchAndSelectOption("input[name='bed']", bed);
-    cy.submitButton("Update");
+    cy.typeAndSelectOption("input[name='bed']", bed);
+    cy.get("#update-switchbed").click();
     cy.wait(2000);
   }
 
@@ -28,7 +32,7 @@ class PatientLogupdate {
     cy.get("#other_details").click().type(details);
   }
 
-  typeAndMultiSelectSymptoms(input, symptoms) {
+  typeAndMultiSelectSymptoms(input: string, symptoms: string[]) {
     cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
   }
   selectSymptomsDate(date: string) {
@@ -39,27 +43,27 @@ class PatientLogupdate {
   }
 
   typeSystolic(systolic: string) {
-    cy.searchAndSelectOption("#systolic", systolic);
+    cy.typeAndSelectOption("#systolic", systolic);
   }
 
   typeDiastolic(diastolic: string) {
-    cy.searchAndSelectOption("#diastolic", diastolic);
+    cy.typeAndSelectOption("#diastolic", diastolic);
   }
 
   typePulse(pulse: string) {
-    cy.searchAndSelectOption("#pulse", pulse);
+    cy.typeAndSelectOption("#pulse", pulse);
   }
 
   typeTemperature(temperature: string) {
-    cy.searchAndSelectOption("#temperature", temperature);
+    cy.typeAndSelectOption("#temperature", temperature);
   }
 
   typeRespiratory(respiratory: string) {
-    cy.searchAndSelectOption("#resp", respiratory);
+    cy.typeAndSelectOption("#resp", respiratory);
   }
 
   typeSpo2(spo: string) {
-    cy.searchAndSelectOption("#ventilator_spo2", spo);
+    cy.typeAndSelectOption("#ventilator_spo2", spo);
   }
 
   selectRhythm(rhythm: string) {
@@ -70,10 +74,17 @@ class PatientLogupdate {
     cy.get("#rhythm_detail").click().type(rhythm);
   }
 
-  clickLogupdateCard(element, patientCategory) {
+  clickLogUpdateViewDetails(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
     cy.get(element).first().contains("View Details").click();
+    cy.wait(3000);
+  }
+
+  clickLogUpdateUpdateLog(element: string, patientCategory: string) {
+    cy.get(element).scrollIntoView();
+    cy.verifyContentPresence(element, [patientCategory]);
+    cy.get(element).first().contains("Update Log").click();
     cy.wait(3000);
   }
 
@@ -82,13 +93,61 @@ class PatientLogupdate {
     cy.wait(3000);
   }
 
-  clickClearButtonInElement(elementId) {
+  clickClearButtonInElement(elementId: string) {
     cy.get(elementId).find("#clear-button").click();
   }
 
   clickVitals() {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.verifyAndClickElement("#consultation_tab_nav", "Vitals");
+  }
+
+  selectNoBilateralAirFlow() {
+    cy.get("#bilateral_air_entry-option-false").click();
+  }
+
+  typeEtco2(etco2: string) {
+    cy.get("#etco2-range-input").type(etco2);
+  }
+
+  selectOxygenSupport() {
+    cy.get("#respiratory_support-option-OXYGEN_SUPPORT").click();
+  }
+
+  selectNonBreathingModality() {
+    cy.get("#ventilator_oxygen_modality-option-NON_REBREATHING_MASK").click();
+  }
+
+  typeOxygenFlowRate(flowRate: string) {
+    cy.get("#oxygen_flow_rate-range-input").type(flowRate);
+  }
+
+  typeVentilatorSpo2(spo2: string) {
+    cy.get("#ventilator_spo2-range-input").type(spo2);
+  }
+
+  selectCriticalCareSection(sectionName: string) {
+    cy.contains("button", sectionName).click();
+  }
+
+  typeBloodSugar(bloodSugar: string) {
+    cy.get("#blood_sugar_level-range-input").type(bloodSugar);
+  }
+
+  typeInsulinDosage(insulinDosage: string) {
+    cy.get("#insulin_intake_dose-range-input").type(insulinDosage);
+  }
+
+  clickGoBackConsultation() {
+    cy.get("#back-to-consultation").click();
+  }
+
+  typeFluidBalance(fluid: string) {
+    cy.get("#dialysis_fluid_balance-range-input").type(fluid);
+  }
+
+  typeNetBalance(netBalance: string) {
+    cy.get("#dialysis_net_balance-range-input").type(netBalance);
   }
 }
 export default PatientLogupdate;

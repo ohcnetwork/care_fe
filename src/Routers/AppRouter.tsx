@@ -11,7 +11,6 @@ import {
   SidebarShrinkContext,
 } from "../Components/Common/Sidebar/Sidebar";
 import { BLACKLISTED_PATHS } from "../Common/constants";
-import useConfig from "../Common/hooks/useConfig";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import HealthInformation from "../Components/ABDM/HealthInformation";
 import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
@@ -25,9 +24,9 @@ import HCXRoutes from "./routes/HCXRoutes";
 import ShiftingRoutes from "./routes/ShiftingRoutes";
 import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
-import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
-import useAuthUser from "../Common/hooks/useAuthUser";
+import careConfig from "@careConfig";
+import IconIndex from "../CAREUI/icons/Index";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
@@ -55,24 +54,17 @@ const Routes = {
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
+  "/icons": () => <IconIndex />,
+
+  // Only include the icon route in development environment
+  ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
 };
 
 export default function AppRouter() {
-  const authUser = useAuthUser();
-  const { main_logo, enable_hcx } = useConfig();
-
   let routes = Routes;
 
-  if (enable_hcx) {
-    routes = { ...routes, ...HCXRoutes };
-  }
-
-  if (
-    !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type,
-    )
-  ) {
-    routes = { ...routes, ...ExternalResultRoutes };
+  if (careConfig.hcx.enabled) {
+    routes = { ...HCXRoutes, ...routes };
   }
 
   useRedirect("/user", "/users");
@@ -143,8 +135,8 @@ export default function AppRouter() {
               className="flex h-full w-full items-center px-4 md:hidden"
             >
               <img
-                className="h-6 w-auto"
-                src={main_logo.dark}
+                className="h-8 w-auto"
+                src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />
             </a>
@@ -152,9 +144,11 @@ export default function AppRouter() {
 
           <main
             id="pages"
-            className="flex-1 overflow-y-scroll pb-4 focus:outline-none md:py-0"
+            className="flex-1 overflow-y-scroll bg-gray-100 pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto p-3">{pages}</div>
+            <div className="max-w-8xl mx-auto mt-4 rounded-t-lg border bg-gray-50 p-3 shadow-lg">
+              {pages}
+            </div>
           </main>
         </div>
       </div>

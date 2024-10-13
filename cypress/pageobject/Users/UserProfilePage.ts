@@ -1,5 +1,3 @@
-import { cy } from "local-cypress";
-
 export default class UserProfilePage {
   assertVideoConnectLink(link: string) {
     cy.get("#videoconnectlink-profile-details").should("contain.text", link);
@@ -44,8 +42,8 @@ export default class UserProfilePage {
     cy.get("#weekly_working_hours").click().clear().type(workinghours);
   }
 
-  typeDoctorQualification = (doctorQualification: string) => {
-    cy.get("#doctor_qualification").click().clear().type(doctorQualification);
+  typeQualification = (qualification: string) => {
+    cy.get("#qualification").click().clear().type(qualification);
   };
 
   typeDoctorYoE = (doctorYoE: string) => {

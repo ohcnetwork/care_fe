@@ -8,25 +8,16 @@ import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
-import PageTitle from "../../Common/PageTitle";
+import PageTitle from "@/Components/Common/PageTitle";
 import dayjs from "../../../Utils/dayjs";
+import { meanArterialPressure } from "../../Common/BloodPressureFormField";
+import { PrimaryParametersPlotFields } from "../models";
 
 interface PrimaryParametersPlotProps {
   facilityId: string;
   patientId: string;
   consultationId: string;
 }
-
-const sanitizeBPAttribute = (value: number | undefined) => {
-  // Temp. hack until the cleaning of daily rounds as a db migration is done.
-  // TODO: remove once migration is merged.
-
-  if (value == null || value < 0) {
-    return;
-  }
-
-  return value;
-};
 
 export const PrimaryParametersPlot = ({
   consultationId,
@@ -43,19 +34,7 @@ export const PrimaryParametersPlot = ({
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
           page: currentPage,
-          fields: [
-            "bp",
-            "pulse",
-            "temperature",
-            "resp",
-            "blood_sugar_level",
-            "insulin_intake_frequency",
-            "insulin_intake_dose",
-            "ventilator_spo2",
-            "ventilator_fio2",
-            "rhythm",
-            "rhythm_detail",
-          ],
+          fields: PrimaryParametersPlotFields,
         },
         pathParams: {
           consultationId,
@@ -88,19 +67,19 @@ export const PrimaryParametersPlot = ({
     {
       name: "diastolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.diastolic))
+        .map((p: any) => p.bp?.diastolic)
         .reverse(),
     },
     {
       name: "systolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.systolic))
+        .map((p: any) => p.bp?.systolic)
         .reverse(),
     },
     {
       name: "mean",
       data: Object.values(results)
-        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.mean))
+        .map((p: any) => meanArterialPressure(p.bp))
         .reverse(),
     },
   ];

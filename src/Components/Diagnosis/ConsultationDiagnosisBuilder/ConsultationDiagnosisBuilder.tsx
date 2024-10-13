@@ -11,6 +11,7 @@ import request from "../../../Utils/request/request";
 import DiagnosesRoutes from "../routes";
 import * as Notification from "../../../Utils/Notifications";
 import PrincipalDiagnosisSelect from "./PrincipalDiagnosisSelect";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface CreateDiagnosesProps {
   className?: string;
@@ -78,11 +79,15 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
 interface EditDiagnosesProps {
   className?: string;
   value: ConsultationDiagnosis[];
+  suggestions?: ICD11DiagnosisModel[];
+  consultationId?: string;
+  onUpdate?: (diagnoses: ConsultationDiagnosis[]) => void;
 }
 
 export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
-  const consultation = useSlug("consultation");
+  const consultation = useSlug("consultation", props.consultationId);
   const [diagnoses, setDiagnoses] = useState(props.value);
+  const [prefill, setPrefill] = useState<ICD11DiagnosisModel>();
 
   useEffect(() => {
     setDiagnoses(props.value);
@@ -129,16 +134,34 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
 
               if (res?.ok && data) {
                 setDiagnoses([...diagnoses, data]);
+                setPrefill(undefined);
+                props.onUpdate?.(diagnoses);
                 return true;
               }
 
               if (error) {
                 Notification.Error({ msg: error });
               }
-
               return false;
             }}
+            prefill={prefill}
+            onSelect={() => setPrefill(undefined)}
           />
+          {!!props.suggestions?.length && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {props.suggestions?.map((suggestion, i) => (
+                <button
+                  key={i}
+                  className="flex items-center gap-2 rounded-full border border-primary-500 px-4 py-1 text-sm text-primary-500 transition-all hover:bg-primary-400/10"
+                  onClick={() => setPrefill(suggestion)}
+                  type="button"
+                >
+                  <CareIcon icon="l-heart-medical" />
+                  {suggestion.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

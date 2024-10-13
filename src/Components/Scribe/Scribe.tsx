@@ -6,9 +6,9 @@ import routes from "../../Redux/api";
 import * as Notify from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
 import { UserModel } from "../Users/models";
-import useConfig from "../../Common/hooks/useConfig";
 import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
 import uploadFile from "../../Utils/request/uploadFile";
+import { useFeatureFlags } from "../../Utils/featureFlags";
 
 interface FieldOption {
   id: string | number;
@@ -52,6 +52,7 @@ export type ScribeModel = {
 };
 
 interface ScribeProps {
+  facilityId: string;
   form: ScribeForm;
   existingData?: { [key: string]: any };
   onFormUpdate: (fields: any) => void;
@@ -62,8 +63,11 @@ const SCRIBE_FILE_TYPES = {
   SCRIBE: 1,
 };
 
-export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
-  const { enable_scribe } = useConfig();
+export const Scribe: React.FC<ScribeProps> = ({
+  form,
+  onFormUpdate,
+  facilityId,
+}) => {
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
   const [stage, setStage] = useState("start");
@@ -80,6 +84,8 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
   const [scribeID, setScribeID] = useState<string>("");
   const stageRef = useRef(stage);
   const [fields, setFields] = useState<Field[]>([]);
+
+  const featureFlags = useFeatureFlags(facilityId);
 
   useEffect(() => {
     const loadFields = async () => {
@@ -545,7 +551,7 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
     }
   }
 
-  if (!enable_scribe) return null;
+  if (!featureFlags.includes("SCRIBE_ENABLED")) return null;
 
   return (
     <Popover>

@@ -1,12 +1,10 @@
-@import "@fontsource/inter/100.css";
-@import "@fontsource/inter/200.css";
-@import "@fontsource/inter/300.css";
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
-@import "@fontsource/inter/800.css";
-@import "@fontsource/inter/900.css";
+@import "@fontsource/figtree/300.css";
+@import "@fontsource/figtree/400.css";
+@import "@fontsource/figtree/500.css";
+@import "@fontsource/figtree/600.css";
+@import "@fontsource/figtree/700.css";
+@import "@fontsource/figtree/800.css";
+@import "@fontsource/figtree/900.css";
 
 @import "@pnotify/core/dist/PNotify.css";
 @import "@pnotify/mobile/dist/PNotifyMobile.css";
@@ -39,7 +37,7 @@ html {
 }
 
 body {
-    font-family: "Inter", sans-serif;
+    font-family: "Figtree", sans-serif;
     color: #453c52;
     @apply font-sans text-secondary-900 w-full h-full antialiased;
 }
@@ -435,7 +433,6 @@ button:disabled,
     background-size: 1000px 100%;
 }
 
-
 @media print {
     body * {
         visibility: hidden;
@@ -665,13 +662,13 @@ button:disabled,
 }
 
 
-  
+
 .csv-input::file-selector-button:hover {
     background-color: #84e1bc;
 }
-  
 
-  
+
+
 /* for gmaps search dropdown */
 .pac-container {
     z-index: 100000 !important;
@@ -696,16 +693,16 @@ button:disabled,
 
 /* Patient Category Styles */
 
-.patient-comfort { 
+.patient-comfort {
   @apply bg-patient-comfort text-patient-comfort-fore
 }
-.patient-stable { 
+.patient-stable {
   @apply bg-patient-stable text-patient-stable-fore
 }
-.patient-abnormal { 
+.patient-abnormal {
   @apply bg-patient-abnormal text-patient-abnormal-fore
 }
-.patient-critical { 
+.patient-critical {
   @apply bg-patient-critical text-patient-critical-fore
 }
 .patient-unknown {
@@ -716,16 +713,16 @@ button:disabled,
     @apply bg-patient-activelydying text-patient-activelydying-fore
 }
 
-.patient-comfort-ring { 
+.patient-comfort-ring {
   @apply ring-patient-comfort
 }
-.patient-stable-ring { 
+.patient-stable-ring {
   @apply ring-patient-stable
 }
-.patient-abnormal-ring { 
+.patient-abnormal-ring {
   @apply ring-patient-abnormal
 }
-.patient-critical-ring { 
+.patient-critical-ring {
   @apply ring-patient-critical
 }
 .patient-unknown-ring {
@@ -735,16 +732,16 @@ button:disabled,
     @apply ring-patient-activelydying
 }
 
-.patient-comfort-profile { 
+.patient-comfort-profile {
   @apply border-2 border-patient-comfort rounded-t
 }
-.patient-stable-profile { 
+.patient-stable-profile {
   @apply border-2 border-patient-stable rounded-t
 }
-.patient-abnormal-profile { 
+.patient-abnormal-profile {
   @apply border-2 border-patient-abnormal rounded-t
 }
-.patient-critical-profile { 
+.patient-critical-profile {
   @apply border-2 border-patient-critical rounded-t
 }
 .patient-unknown-profile {
@@ -1306,4 +1303,10 @@ input[type="number"] {
     font-weight: 700;
     color: #2856ff;
     font-size: 1rem;
+}
+
+@layer base {
+  :root {
+        --radius:  0.5rem;
+    }
 }

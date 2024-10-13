@@ -70,6 +70,10 @@ Authenticate to staging API with any of the following credentials
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
 
+### Translations
+
+All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
+
 ### Testing
 
 To ensure the quality of our pull requests, we use a variety of tools:
@@ -81,11 +85,11 @@ To ensure the quality of our pull requests, we use a variety of tools:
 
 To run cypress tests locally, you'll need to setup the backend to run locally and load dummy data required for cypress to the database. See [docs](https://github.com/ohcnetwork/care#self-hosting).
 
-Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `CARE_API` env.
+Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `REACT_CARE_API_URL` env.
 
 ```env
 #.env
-CARE_API=http://127.0.0.1:9000
+REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
 
 Once done, start the development server by running

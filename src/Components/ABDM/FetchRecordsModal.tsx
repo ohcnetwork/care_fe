@@ -226,8 +226,8 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
               });
 
               navigate(
-                `/facility/${abha?.patient_object?.facility}/abdm` ??
-                  `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`,
+                `/facility/${abha?.patient_object?.facility}/abdm`,
+                // ?? `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`,
               );
             }
             setIsMakingConsentRequest(false);

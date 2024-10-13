@@ -1,29 +1,29 @@
 import { Suspense } from "react";
 import Routers from "./Routers";
-import {
-  AppConfigProvider,
-  AuthUserProvider,
-  HistoryAPIProvider,
-} from "./Providers";
 import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
-import Intergrations from "./Integrations";
+import Integrations from "./Integrations";
 import Loading from "./Components/Common/Loading";
+import HistoryAPIProvider from "./Providers/HistoryAPIProvider";
+import AuthUserProvider from "./Providers/AuthUserProvider";
+import { FeatureFlagsProvider } from "./Utils/featureFlags";
+import { Toaster } from "./Components/ui/toaster";
 
 const App = () => {
   return (
     <Suspense fallback={<Loading />}>
       <ThemedFavicon />
       <HistoryAPIProvider>
-        <AppConfigProvider>
-          <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
+        <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
+          <FeatureFlagsProvider>
             <Routers.AppRouter />
-          </AuthUserProvider>
+          </FeatureFlagsProvider>
+        </AuthUserProvider>
 
-          {/* Integrations */}
-          <Intergrations.Sentry disabled={!import.meta.env.PROD} />
-          <Intergrations.Plausible />
-        </AppConfigProvider>
+        {/* Integrations */}
+        <Integrations.Sentry disabled={!import.meta.env.PROD} />
+        <Integrations.Plausible />
       </HistoryAPIProvider>
+      <Toaster />
     </Suspense>
   );
 };

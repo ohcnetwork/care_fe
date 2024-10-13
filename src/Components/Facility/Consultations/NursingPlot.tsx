@@ -9,6 +9,7 @@ import {
 import Pagination from "../../Common/Pagination";
 import { formatDateTime } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import { NursingPlotFields } from "../models";
 
 export const NursingPlot = ({ consultationId }: any) => {
   const { t } = useTranslation();
@@ -22,10 +23,7 @@ export const NursingPlot = ({ consultationId }: any) => {
       consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: {
-          page: currentPage,
-          fields: ["nursing"],
-        },
+        body: { page: currentPage, fields: NursingPlotFields },
         pathParams: {
           consultationId,
         },
@@ -81,7 +79,7 @@ export const NursingPlot = ({ consultationId }: any) => {
             {areFieldsEmpty() && (
               <div className="mt-1 w-full rounded-lg border bg-white p-4 shadow">
                 <div className="flex items-center justify-center text-2xl font-bold text-secondary-500">
-                  No data available
+                  {t("no_data_found")}
                 </div>
               </div>
             )}

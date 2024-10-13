@@ -1,4 +1,4 @@
-import { useReducer, useState, lazy } from "react";
+import { useReducer, useState } from "react";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import * as Notification from "../../Utils/Notifications.js";
@@ -27,8 +27,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface resourceProps {
   facilityId: number;
 }
@@ -257,7 +256,7 @@ export default function ResourceCreate(props: resourceProps) {
           label={t("is_this_an_emergency")}
           name="emergency"
           options={[true, false]}
-          optionDisplay={(o) => (o ? t("yes") : t("no"))}
+          optionLabel={(o) => (o ? t("yes") : t("no"))}
           optionValue={(o) => String(o)}
           value={state.form.emergency}
           onChange={handleChange}

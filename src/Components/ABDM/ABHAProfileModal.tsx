@@ -1,3 +1,5 @@
+import * as Notify from "../../Utils/Notifications";
+
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
@@ -7,7 +9,6 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { AbhaNumberModel } from "./types/abha";
 import { useTranslation } from "react-i18next";
-import * as Notify from "../../Utils/Notifications";
 
 interface IProps {
   patientId?: string;

@@ -73,10 +73,10 @@ export default function DailyRoundsFilter(props: Props) {
               <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
                 <SelectFormField
                   {...field("rounds_type")}
-                  label={t("Round Type")}
+                  label={t("LOG_UPDATE_FIELD_LABEL__rounds_type")}
                   options={DailyRoundTypes}
                   placeholder={t("show_all")}
-                  optionLabel={(o) => t(o)}
+                  optionLabel={(o) => t(`ROUNDS_TYPE__${o}`)}
                   optionValue={(o) => o}
                 />
                 <TextFormField

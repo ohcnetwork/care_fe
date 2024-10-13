@@ -3,7 +3,7 @@ export class AssetFilters {
     facilityName: string,
     assetStatus: string,
     assetClass: string,
-    assetLocation: string
+    assetLocation: string,
   ) {
     cy.contains("Advanced Filters").click();
     cy.get("input[name='Facilities']")
@@ -56,16 +56,16 @@ export class AssetFilters {
     cy.get("#close-slide-over").click();
   }
   // Assertions
-  assertFacilityText(text) {
+  assertFacilityText(text: string) {
     cy.get("[data-testid=Facility]").should("contain", text);
   }
-  assertAssetClassText(text) {
+  assertAssetClassText(text: string) {
     cy.get("[data-testid='Asset Class']").should("contain", text);
   }
-  assertStatusText(text) {
+  assertStatusText(text: string) {
     cy.get("[data-testid=Status]").should("contain", text);
   }
-  assertLocationText(text) {
+  assertLocationText(text: string) {
     cy.get("[data-testid=Location]").should("contain", text);
   }
 }

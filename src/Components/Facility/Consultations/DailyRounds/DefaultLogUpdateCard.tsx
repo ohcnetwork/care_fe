@@ -4,15 +4,21 @@ import ButtonV2 from "../../../Common/components/ButtonV2";
 import { DailyRoundsModel } from "../../../Patient/models";
 import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
 import { ConsultationModel } from "../../models";
+import { useSlugs } from "../../../../Common/hooks/useSlug";
 
 interface Props {
   round: DailyRoundsModel;
   consultationData: ConsultationModel;
-  onViewDetails: () => void;
-  onUpdateLog?: () => void;
 }
 const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
+  const [facilityId, patientId, consultationId] = useSlugs(
+    "facility",
+    "patient",
+    "consultation",
+  );
   const { t } = useTranslation();
+
+  const consultationUrl = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`;
 
   return (
     <div
@@ -21,7 +27,11 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
     >
       <LogUpdateCardAttribute
         attributeKey={"rounds_type"}
-        attributeValue={round.rounds_type}
+        attributeValue={
+          t(
+            `ROUNDS_TYPE__${round.rounds_type}`,
+          ) as DailyRoundsModel["rounds_type"]
+        }
       />
       <LogUpdateCardAttribute
         attributeKey="patient_category"
@@ -42,19 +52,35 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           ghost
           size="small"
           className="w-full"
-          onClick={props.onViewDetails}
+          href={
+            ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
+              round.rounds_type!,
+            )
+              ? `${consultationUrl}/daily-rounds/${round.id}`
+              : `${consultationUrl}/daily_rounds/${round.id}`
+          }
         >
           <CareIcon icon="l-eye" className="text-lg" />
           <span>{t("view_details")}</span>
         </ButtonV2>
         <ButtonV2
+          id="update-log"
           variant="secondary"
           disabled={!!props.consultationData?.discharge_date}
           border
           ghost
           size="small"
           className="w-full"
-          onClick={props.onUpdateLog}
+          href={
+            [
+              "NORMAL",
+              "TELEMEDICINE",
+              "DOCTORS_LOG",
+              "COMMUNITY_NURSES_LOG",
+            ].includes(round.rounds_type!)
+              ? `${consultationUrl}/daily-rounds/${round.id}/update`
+              : `${consultationUrl}/daily_rounds/${round.id}/update`
+          }
         >
           <CareIcon icon="l-pen" className="text-lg" />
           <span>{t("update_log")}</span>

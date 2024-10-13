@@ -15,7 +15,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import { LegacyRef, createRef, lazy, useEffect, useRef, useState } from "react";
+import { LegacyRef, createRef, useEffect, useRef, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
@@ -38,7 +38,6 @@ import { UserBareMinimum } from "../Users/models";
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
 import RouteToFacilitySelect, {
@@ -65,9 +64,10 @@ import {
   EncounterSymptomsBuilder,
   CreateSymptomsBuilder,
 } from "../Symptoms/SymptomsBuilder.js";
+import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 
 type BooleanStrings = "true" | "false";
 
@@ -229,7 +229,6 @@ type Props = {
 
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
-  const { kasp_enabled, kasp_string } = useConfig();
   const submitController = useRef<AbortController>();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
@@ -254,8 +253,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const [bedStatusVisible, bedStatusRef] = useVisibility(-300);
 
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
-
-  const { min_encounter_date } = useConfig();
 
   const sections = {
     "Consultation Details": {
@@ -407,9 +404,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             cause_of_death: data?.discharge_notes || "",
             death_datetime: data?.death_datetime || "",
             death_confirmed_doctor: data?.death_confirmed_doctor || "",
-            InvestigationAdvice: Array.isArray(data.investigation)
-              ? data.investigation
-              : [],
+            InvestigationAdvice: data.investigation ?? [],
             diagnoses: data.diagnoses?.sort(
               (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
                 ConditionVerificationStatuses.indexOf(a.verification_status) -
@@ -474,11 +469,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           if (
-            min_encounter_date &&
-            dayjs(state.form.encounter_date).isBefore(dayjs(min_encounter_date))
+            dayjs(state.form.encounter_date).isBefore(
+              careConfig.minEncounterDate,
+            )
           ) {
             errors[field] =
-              `Admission date cannot be before ${min_encounter_date}`;
+              `Admission date cannot be before ${careConfig.minEncounterDate}`;
             invalidForm = true;
           }
           return;
@@ -552,7 +548,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         case "is_kasp":
           if (!state.form[field]) {
             errors[field] =
-              `Please select an option, ${kasp_string} is mandatory`;
+              `Please select an option, ${careConfig.kasp.string} is mandatory`;
             invalidForm = true;
           }
           return;
@@ -1226,11 +1222,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         "YYYY-MM-DDTHH:mm",
                       )}
                       max={dayjs().format("YYYY-MM-DDTHH:mm")}
-                      min={
-                        min_encounter_date
-                          ? dayjs(min_encounter_date).format("YYYY-MM-DDTHH:mm")
-                          : undefined
-                      }
+                      min={dayjs(careConfig.minEncounterDate).format(
+                        "YYYY-MM-DDTHH:mm",
+                      )}
                     />
                     {dayjs().diff(state.form.encounter_date, "day") > 30 && (
                       <div className="mb-6">
@@ -1365,7 +1359,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         ref={fieldRef["procedure"]}
                       >
-                        <FieldLabel>Procedures</FieldLabel>
+                        <FieldLabel>{t("procedure_suggestions")}</FieldLabel>
                         <ProcedureBuilder
                           procedures={
                             Array.isArray(state.form.procedure)
@@ -1402,12 +1396,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         />
                       </div>
 
-                      {kasp_enabled && (
+                      {careConfig.kasp.enabled && (
                         <CheckBoxFormField
                           {...field("is_kasp")}
                           className="flex-1"
                           required
-                          label={kasp_string}
+                          label={careConfig.kasp.string}
                           onChange={handleFormFieldChange}
                         />
                       )}

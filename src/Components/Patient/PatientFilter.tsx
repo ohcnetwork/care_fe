@@ -10,7 +10,6 @@ import {
   PATIENT_FILTER_CATEGORIES,
   RATION_CARD_CATEGORY,
 } from "../../Common/constants";
-import useConfig from "../../Common/hooks/useConfig";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
@@ -35,6 +34,7 @@ import request from "../../Utils/request/request";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { useTranslation } from "react-i18next";
+import careConfig from "@careConfig";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -42,7 +42,6 @@ const getDate = (value: any) =>
 export default function PatientFilter(props: any) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter, removeFilters } = props;
 
   const [filterState, setFilterState] = useMergeState({
@@ -88,10 +87,6 @@ export default function PatientFilter(props: any) {
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
     is_declared_positive: filter.is_declared_positive || null,
-    last_consultation_symptoms_onset_date_before:
-      filter.last_consultation_symptoms_onset_date_before || null,
-    last_consultation_symptoms_onset_date_after:
-      filter.last_consultation_symptoms_onset_date_after || null,
     last_vaccinated_date_before: filter.last_vaccinated_date_before || null,
     last_vaccinated_date_after: filter.last_vaccinated_date_after || null,
     last_consultation_is_telemedicine:
@@ -192,8 +187,6 @@ export default function PatientFilter(props: any) {
       covin_id,
       is_kasp,
       is_declared_positive,
-      last_consultation_symptoms_onset_date_before,
-      last_consultation_symptoms_onset_date_after,
       last_vaccinated_date_before,
       last_vaccinated_date_after,
       last_consultation_is_telemedicine,
@@ -251,12 +244,6 @@ export default function PatientFilter(props: any) {
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
-      last_consultation_symptoms_onset_date_before: dateQueryString(
-        last_consultation_symptoms_onset_date_before,
-      ),
-      last_consultation_symptoms_onset_date_after: dateQueryString(
-        last_consultation_symptoms_onset_date_after,
-      ),
       last_vaccinated_date_before: dateQueryString(last_vaccinated_date_before),
       last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
       last_consultation_is_telemedicine:
@@ -305,6 +292,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Gender</FieldLabel>
             <SelectMenuV2
+              id="gender-advancefilter"
               placeholder="Show all"
               options={GENDER_TYPES}
               optionLabel={(o) => o.text}
@@ -317,6 +305,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Category</FieldLabel>
             <SelectMenuV2
+              id="category-advancefilter"
               placeholder="Show all"
               options={PATIENT_FILTER_CATEGORIES}
               optionLabel={(o) => o.text}
@@ -356,27 +345,25 @@ export default function PatientFilter(props: any) {
               />
             </div>
           </div>
-          {props.dischargePage || (
-            <div className="w-full flex-none" id="bed-type-select">
-              <FieldLabel className="text-sm">
-                {props.dischargePage && "Last "}Admitted to (Bed Types)
-              </FieldLabel>
-              <MultiSelectMenuV2
-                id="last_consultation_admitted_bed_type_list"
-                placeholder="Select bed types"
-                options={ADMITTED_TO}
-                value={filterState.last_consultation_admitted_bed_type_list}
-                optionValue={(o) => o.id}
-                optionLabel={(o) => o.text}
-                onChange={(o) =>
-                  setFilterState({
-                    ...filterState,
-                    last_consultation_admitted_bed_type_list: o,
-                  })
-                }
-              />
-            </div>
-          )}
+          <div className="w-full flex-none" id="bed-type-select">
+            <FieldLabel className="text-sm">
+              {props.dischargePage && "Last "}Admitted to (Bed Types)
+            </FieldLabel>
+            <MultiSelectMenuV2
+              id="last_consultation_admitted_bed_type_list"
+              placeholder="Select bed types"
+              options={ADMITTED_TO}
+              value={filterState.last_consultation_admitted_bed_type_list}
+              optionValue={(o) => o.id}
+              optionLabel={(o) => o.text}
+              onChange={(o) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_admitted_bed_type_list: o,
+                })
+              }
+            />
+          </div>
           <div className="w-full flex-none" id="consent-type-select">
             <FieldLabel className="text-sm">Has consent records for</FieldLabel>
             <MultiSelectMenuV2
@@ -422,6 +409,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Telemedicine</FieldLabel>
             <SelectMenuV2
+              id="telemedicine-advancefilter"
               placeholder="Show all"
               options={TELEMEDICINE_FILTER}
               optionLabel={(o) => o.text}
@@ -438,6 +426,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Respiratory Support</FieldLabel>
             <SelectMenuV2
+              id="respiratory-advancefilter"
               placeholder="Show all"
               options={RESPIRATORY_SUPPORT_FILTER}
               optionLabel={(o) => o.text}
@@ -470,6 +459,7 @@ export default function PatientFilter(props: any) {
               <>
                 <FieldLabel className="text-sm">Review Missed</FieldLabel>
                 <SelectMenuV2
+                  id="review-advancefilter"
                   placeholder="Show all"
                   options={["true", "false"]}
                   optionLabel={(o) => (o === "true" ? "Yes" : "No")}
@@ -484,6 +474,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Medico-Legal Case</FieldLabel>
             <SelectMenuV2
+              id="medico-advancefilter"
               placeholder="Show all"
               options={["true", "false"]}
               optionLabel={(o) =>
@@ -499,6 +490,7 @@ export default function PatientFilter(props: any) {
             />
           </div>
           <SelectFormField
+            id="ration-advancefilter"
             name="ration_card_category"
             label="Ration Card Category"
             placeholder="Select"
@@ -591,21 +583,6 @@ export default function PatientFilter(props: any) {
             onChange={handleDateRangeChange}
             errorClassName="hidden"
           />
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="last_consultation_symptoms_onset_date"
-            label="Onset of Symptoms Date"
-            value={{
-              start: getDate(
-                filterState.last_consultation_symptoms_onset_date_after,
-              ),
-              end: getDate(
-                filterState.last_consultation_symptoms_onset_date_before,
-              ),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
         </div>
       </AccordionV2>
       <AccordionV2
@@ -619,7 +596,7 @@ export default function PatientFilter(props: any) {
       >
         <div className="space-y-4">
           {!props.dischargePage && (
-            <div>
+            <div id="facility-name">
               <FieldLabel className="text-sm">Facility</FieldLabel>
               <FacilitySelect
                 multiple={false}
@@ -652,6 +629,7 @@ export default function PatientFilter(props: any) {
             <div>
               <FieldLabel className="text-sm">Facility type</FieldLabel>
               <SelectMenuV2
+                id="facility-type"
                 placeholder="Show all"
                 options={FACILITY_TYPES}
                 optionLabel={(o) => o.text}
@@ -670,6 +648,7 @@ export default function PatientFilter(props: any) {
             <FieldLabel className="text-sm">LSG Body</FieldLabel>
             <div className="">
               <AutoCompleteAsync
+                id="facility-lsgbody"
                 name="lsg_body"
                 selected={filterState.lsgBody_ref}
                 fetchData={lsgSearch}
@@ -680,7 +659,7 @@ export default function PatientFilter(props: any) {
             </div>
           </div>
 
-          <div>
+          <div id="facility-district">
             <FieldLabel className="text-sm">District</FieldLabel>
             <DistrictSelect
               multiple={false}
@@ -702,14 +681,18 @@ export default function PatientFilter(props: any) {
         className="w-full rounded-md"
       >
         <div className="grid w-full grid-cols-1 gap-4">
-          {kasp_enabled && (
+          {careConfig.kasp.enabled && (
             <div className="w-full flex-none">
-              <FieldLabel className="text-sm">{kasp_string}</FieldLabel>
+              <FieldLabel className="text-sm">
+                {careConfig.kasp.string}
+              </FieldLabel>
               <SelectMenuV2
                 placeholder="Show all"
                 options={[true, false]}
                 optionLabel={(o) =>
-                  o ? `Show ${kasp_string}` : `Show Non ${kasp_string}`
+                  o
+                    ? `Show ${careConfig.kasp.string}`
+                    : `Show Non ${careConfig.kasp.string}`
                 }
                 value={filterState.is_kasp}
                 onChange={(v) => setFilterState({ ...filterState, is_kasp: v })}

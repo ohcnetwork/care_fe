@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getBedTypes } from "../../Common/constants";
+import { BED_TYPES } from "../../Common/constants";
 import routes from "../../Redux/api";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import useQuery from "../../Utils/request/useQuery";
@@ -7,12 +7,13 @@ import DialogModal from "../Common/Dialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
-import useConfig from "../../Common/hooks/useConfig";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
 export const FacilityBedCapacity = (props: any) => {
+  const { t } = useTranslation();
+
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
-  const config = useConfig();
 
   const capacityQuery = useQuery(routes.getCapacity, {
     pathParams: { facilityId: props.facilityId },
@@ -45,9 +46,9 @@ export const FacilityBedCapacity = (props: any) => {
             return;
           }}
         />
-        {getBedTypes(config).map((x) => {
+        {BED_TYPES.map((x) => {
           const res = capacityQuery.data?.results.find((data) => {
-            return data.room_type === x.id;
+            return data.room_type === x;
           });
           if (
             res &&
@@ -66,7 +67,7 @@ export const FacilityBedCapacity = (props: any) => {
                 bedCapacityId={res.id}
                 key={`bed_${res.id}`}
                 room_type={res.room_type}
-                label={x.text}
+                label={t(`bed_type__${x}`)}
                 used={res.current_capacity}
                 total={res.total_capacity}
                 lastUpdated={res.modified_date}

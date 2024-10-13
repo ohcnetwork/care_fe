@@ -8,23 +8,17 @@ NPM_FLAGS = "--legacy-peer-deps"
 NODE_OPTIONS = "--max_old_space_size=4096"
 
 [[redirects]]
-from = "/api/*"
-to = "https://work.khavinshankar.dev/api/:splat"
-status = 200
-force = true
-
-[[redirects]]
 from = "/*"
 to = "/index.html"
 status = 200
 
 [[headers]]
-  for = "/*"
-  [headers.values]
-    cache-control = "max-age=0, no-store"
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Content-Security-Policy-Report-Only = '''
+for = "/*"
+[headers.values]
+cache-control = "max-age=0, no-store"
+X-Frame-Options = "DENY"
+X-Content-Type-Options = "nosniff"
+Content-Security-Policy-Report-Only = '''
       default-src 'self';
       script-src 'self' 'nonce-f51b9742' https://plausible.10bedicu.in;
       style-src 'self' 'unsafe-inline';

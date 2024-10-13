@@ -11,9 +11,8 @@ import {
   USER_TYPES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-
 import { navigate, useQueryParams } from "raviger";
-import { lazy, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -26,8 +25,6 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { parsePhoneNumber } from "../../Utils/utils.js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
-
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress.js";
 import Card from "../../CAREUI/display/Card";
@@ -41,9 +38,9 @@ import { IShift } from "./models.js";
 import request from "../../Utils/request/request.js";
 import { PatientModel } from "../Patient/models.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface patientShiftProps {
   id: string;
 }
@@ -51,9 +48,6 @@ interface patientShiftProps {
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
   const { user_type, home_facility } = useAuthUser();
-
-  const { kasp_full_string, kasp_enabled, wartime_shifting } = useConfig();
-
   const [qParams, _] = useQueryParams();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -137,7 +131,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     },
   };
 
-  if (wartime_shifting) {
+  if (careConfig.wartimeShifting) {
     requiredFields = {
       ...requiredFields,
       shifting_approving_facility_object: {
@@ -336,7 +330,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             label={t("status")}
             required
             options={
-              wartime_shifting
+              careConfig.wartimeShifting
                 ? SHIFTING_CHOICES_WARTIME
                 : SHIFTING_CHOICES_PEACETIME
             }
@@ -355,7 +349,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             className="w-full bg-white md:col-span-1 md:leading-5"
           />
 
-          {wartime_shifting &&
+          {careConfig.wartimeShifting &&
             (assignedUserLoading ? (
               <CircularProgress />
             ) : (
@@ -369,7 +363,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               />
             ))}
 
-          {wartime_shifting && (
+          {careConfig.wartimeShifting && (
             <div>
               <FieldLabel>
                 {t("name_of_shifting_approving_facility")}
@@ -425,21 +419,21 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               { label: t("yes"), value: "true" },
               { label: t("no"), value: "false" },
             ]}
-            optionDisplay={(option) => option.label}
+            optionLabel={(option) => option.label}
             optionValue={(option) => option.value}
           />
 
-          {kasp_enabled && (
+          {careConfig.kasp.enabled && (
             <RadioFormField
               name="is_kasp"
               value={state.form.is_kasp?.toString()}
-              label={t("is") + " " + kasp_full_string + "?"}
+              label={t("is") + " " + careConfig.kasp.fullString + "?"}
               options={[
                 { label: t("yes"), value: "true" },
                 { label: t("no"), value: "false" },
               ]}
               optionValue={(option) => option.value}
-              optionDisplay={(option) => option.label}
+              optionLabel={(option) => option.label}
               onChange={handleFormFieldChange}
             />
           )}
@@ -453,7 +447,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               { label: t("no"), value: "false" },
             ]}
             optionValue={(option) => option.value}
-            optionDisplay={(option) => option.label}
+            optionLabel={(option) => option.label}
             onChange={handleFormFieldChange}
           />
 
@@ -467,7 +461,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             error={state.errors.patient_category}
           />
 
-          {wartime_shifting && (
+          {careConfig.wartimeShifting && (
             <>
               <SelectFormField
                 name="preferred_vehicle_choice"

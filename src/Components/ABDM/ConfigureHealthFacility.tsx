@@ -1,4 +1,4 @@
-import { lazy, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Submit } from "../Common/components/ButtonV2";
@@ -10,8 +10,8 @@ import request from "../../Utils/request/request";
 import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 import { IHealthFacility } from "./types/health-facility.js";
 import { useTranslation } from "react-i18next";
-const Loading = lazy(() => import("../Common/Loading"));
 
+import Loading from "@/Components/Common/Loading";
 const initForm = {
   health_facility: null as IHealthFacility | null,
   hf_id: "",

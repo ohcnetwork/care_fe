@@ -1,10 +1,9 @@
 import useWindowDimensions from "./useWindowDimensions";
 
-type Breakpoints = "vs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
+type Breakpoints = "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
 
 // Ensure that the breakpoint widths are sorted in ascending order.
 const BREAKPOINT_WIDTH: Record<Breakpoints, number> = {
-  vs: 348,
   sm: 640,
   md: 768,
   lg: 1024,

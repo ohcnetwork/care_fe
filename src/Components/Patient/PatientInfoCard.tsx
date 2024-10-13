@@ -12,7 +12,6 @@ import { Switch, MenuItem, Field, Label } from "@headlessui/react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import useConfig from "../../Common/hooks/useConfig.js";
 import dayjs from "../../Utils/dayjs.js";
 import {
   classNames,
@@ -43,6 +42,7 @@ import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
 import LinkAbhaNumber from "../ABDM/LinkAbhaNumber";
+import careConfig from "@careConfig";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -74,8 +74,6 @@ export default function PatientInfoCard(props: {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
-
-  const { enable_hcx, enable_abdm } = useConfig();
 
   const patient = props.patient;
   const consultation = props.consultation;
@@ -230,6 +228,7 @@ export default function PatientInfoCard(props: {
               )}
               {consultation?.admitted && (
                 <ButtonV2
+                  id="switch-bed"
                   ghost
                   onClick={() => setOpen(true)}
                   className="mt-1 px-[10px] py-1"
@@ -665,7 +664,7 @@ export default function PatientInfoCard(props: {
                   ],
                 ]
                   .concat(
-                    enable_hcx
+                    careConfig.hcx.enabled
                       ? [
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
@@ -735,7 +734,7 @@ export default function PatientInfoCard(props: {
               </div>
 
               <div>
-                {enable_abdm &&
+                {careConfig.abdm.enabled &&
                   (props.abhaNumber ? (
                     <>
                       <MenuItem>

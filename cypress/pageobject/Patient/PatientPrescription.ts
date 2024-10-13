@@ -1,4 +1,3 @@
-import { cy } from "local-cypress";
 export class PatientPrescription {
   clickAddPrescription() {
     cy.get("#add-prescription").scrollIntoView();
@@ -17,7 +16,7 @@ export class PatientPrescription {
   }
 
   selectMedicine(medicine: string) {
-    cy.searchAndSelectOption(
+    cy.typeAndSelectOption(
       "div#medicine_object input[placeholder='Select'][role='combobox']",
       medicine,
     );

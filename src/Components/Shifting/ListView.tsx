@@ -1,6 +1,4 @@
-import { downloadShiftRequests } from "../../Redux/actions";
-import { lazy, useState } from "react";
-
+import { useState } from "react";
 import BadgesList from "./BadgesList";
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
@@ -11,11 +9,7 @@ import SearchInput from "../Form/SearchInput";
 import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
-
-import useConfig from "../../Common/hooks/useConfig";
-
 import useFilters from "../../Common/hooks/useFilters";
-
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -24,11 +18,10 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
+import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ListView() {
-  const { wartime_shifting } = useConfig();
   const {
     qParams,
     updateQuery,
@@ -127,7 +120,7 @@ export default function ListView() {
                     </dd>
                   </dt>
                 </div>
-                {wartime_shifting && (
+                {careConfig.wartimeShifting && (
                   <div className="sm:col-span-1">
                     <dt
                       title={t("shifting_approving_facility")}
@@ -240,9 +233,12 @@ export default function ListView() {
       hideBack
       componentRight={
         <ExportButton
-          action={() =>
-            downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-          }
+          action={async () => {
+            const { data } = await request(routes.downloadShiftRequests, {
+              query: { ...formatFilter(qParams), csv: true },
+            });
+            return data ?? null;
+          }}
           filenamePrefix="shift_requests"
         />
       }
