@@ -940,7 +940,7 @@
   "modified_date": "Modified Date",
   "no_patients_to_show": "No patients to show.",
   "shifting_status": "Shifting status",
-  "transfer_to_receiving_facility": "TRANSFER TO RECEIVING FACILITY",
+  "transfer_to_receiving_facility": "Transfer to receiving facility",
   "confirm_transfer_complete": "Confirm Transfer Complete!",
   "mark_transfer_complete_confirmation": "Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient",
   "board_view": "Board View",
@@ -1054,5 +1054,9 @@
   "position": "Position",
   "patient_face": "Patient Face",
   "patient_body": "Patient Body",
-  "vitals_monitor": "Vitals Monitor"
+  "vitals_monitor": "Vitals Monitor",
+  "resource_origin_facility": "Origin Facility",
+  "resource_approving_facility" : "Resource approving facility",
+  "consultation_not_filed": "You have not filed any consultation for this patient yet.",
+  "consultation_not_filed_description": "Please file a consultation for this patient to continue."
 }
