@@ -294,6 +294,7 @@ const AddSymptom = (props: {
     <div className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap">
       <DateFormField
         className="w-full md:w-36"
+        position="LEFT"
         name="onset_date"
         id="symptoms_onset_date"
         placeholder="Date of onset"
