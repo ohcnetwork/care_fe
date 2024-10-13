@@ -1,68 +1,68 @@
-import * as Notification from '../../Utils/Notifications.js';
-import ButtonV2, { Cancel, Submit } from '../Common/components/ButtonV2';
+import * as Notification from "../../Utils/Notifications.js";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import {
   CapacityModal,
   DistrictModel,
   DoctorModal,
   FacilityRequest,
-} from './models';
-import { DraftSection, useAutoSaveReducer } from '../../Utils/AutoSave.js';
+} from "./models";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   BED_TYPES,
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
-} from '../../Common/constants';
+} from "../../Common/constants";
 import {
   MultiSelectFormField,
   SelectFormField,
-} from '../Form/FormFields/SelectFormField';
+} from "../Form/FormFields/SelectFormField";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
-} from '@headlessui/react';
-import {useEffect, useState } from 'react';
-import Steps, { Step } from '../Common/Steps';
+} from "@headlessui/react";
+import { useEffect, useState } from "react";
+import Steps, { Step } from "../Common/Steps";
 import {
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
   compareBy,
-} from '../../Utils/utils';
+} from "../../Utils/utils";
 import {
   phonePreg,
   validateLatitude,
   validateLongitude,
   validatePincode,
-} from '../../Common/validation';
+} from "../../Common/validation";
 
-import { BedCapacity } from './BedCapacity';
-import BedTypeCard from './BedTypeCard';
-import Card from '../../CAREUI/display/Card.js';
-import CareIcon from '../../CAREUI/icons/CareIcon';
-import { StaffCapacity } from './StaffCapacity.js';
-import StaffCountCard from './StaffCountCard.js';
-import { FieldChangeEvent } from '../Form/FormFields/Utils';
-import { FormAction } from '../Form/Utils.js';
-import GLocationPicker from '../Common/GLocationPicker';
-import Page from '../Common/components/Page.js';
-import PhoneNumberFormField from '../Form/FormFields/PhoneNumberFormField';
-import RadioFormField from '../Form/FormFields/RadioFormField';
-import TextAreaFormField from '../Form/FormFields/TextAreaFormField';
-import TextFormField from '../Form/FormFields/TextFormField';
-import { navigate } from 'raviger';
-import useAppHistory from '../../Common/hooks/useAppHistory';
-import { useTranslation } from 'react-i18next';
-import { PhoneNumberValidator } from '../Form/FieldValidators.js';
-import request from '../../Utils/request/request.js';
-import routes from '../../Redux/api.js';
-import useQuery from '../../Utils/request/useQuery.js';
-import { RequestResult } from '../../Utils/request/types.js';
-import useAuthUser from '../../Common/hooks/useAuthUser';
-import SpokeFacilityEditor from './SpokeFacilityEditor.js';
-import careConfig from '@careConfig';
-import CoverImageEditModal from './CoverImageEditModal';
+import { BedCapacity } from "./BedCapacity";
+import BedTypeCard from "./BedTypeCard";
+import Card from "../../CAREUI/display/Card.js";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { StaffCapacity } from "./StaffCapacity.js";
+import StaffCountCard from "./StaffCountCard.js";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FormAction } from "../Form/Utils.js";
+import GLocationPicker from "../Common/GLocationPicker";
+import Page from "../Common/components/Page.js";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { navigate } from "raviger";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import { useTranslation } from "react-i18next";
+import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import { RequestResult } from "../../Utils/request/types.js";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
+import careConfig from "@careConfig";
+import CoverImageEditModal from "./CoverImageEditModal";
 
 import Loading from "../Common/Loading";
 interface FacilityProps {
@@ -95,18 +95,18 @@ type FacilityForm = {
 
 const initForm: FacilityForm = {
   facility_type: undefined,
-  name: '',
+  name: "",
   state: 0,
   district: 0,
   local_body: 0,
   ward: 0,
-  kasp_empanelled: 'false',
+  kasp_empanelled: "false",
   features: [],
-  address: '',
-  phone_number: '',
-  latitude: '',
-  longitude: '',
-  pincode: '',
+  address: "",
+  phone_number: "",
+  latitude: "",
+  longitude: "",
+  pincode: "",
   oxygen_capacity: undefined,
   type_b_cylinders: undefined,
   type_c_cylinders: undefined,
@@ -119,7 +119,7 @@ const initForm: FacilityForm = {
 
 const initError: Record<keyof FacilityForm, string> = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: '' }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -129,11 +129,11 @@ const initialState = {
 
 const facilityCreateReducer = (state = initialState, action: FormAction) => {
   switch (action.type) {
-    case 'set_form':
+    case "set_form":
       return { ...state, form: action.form };
-    case 'set_errors':
+    case "set_errors":
       return { ...state, errors: action.errors };
-    case 'set_state': {
+    case "set_state": {
       if (action.state) return action.state;
       return state;
     }
@@ -146,11 +146,11 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
     facilityCreateReducer,
-    initialState
+    initialState,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [createdFacilityId, setCreatedFacilityId] = useState('');
+  const [createdFacilityId, setCreatedFacilityId] = useState("");
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
@@ -160,20 +160,19 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [districtId, setDistrictId] = useState<number>();
   const [localBodyId, setLocalBodyId] = useState<number>();
   const { goBack } = useAppHistory();
-  const headerText = !facilityId ? 'Create Facility' : 'Update Facility';
-  const buttonText = !facilityId ? 'Save Facility' : 'Update Facility';
-  const [isImageUploadChecked, setIsImageUploadChecked] = useState(false); // Track if the user wants to upload a cover image
-
+  const headerText = !facilityId ? "Create Facility" : "Update Facility";
+  const buttonText = !facilityId ? "Save Facility" : "Update Facility";
+  const [isImageUploadChecked] = useState(false);
 
   const authUser = useAuthUser();
   useEffect(() => {
     if (
       authUser &&
-      authUser.user_type !== 'StateAdmin' &&
-      authUser.user_type !== 'DistrictAdmin' &&
-      authUser.user_type !== 'DistrictLabAdmin'
+      authUser.user_type !== "StateAdmin" &&
+      authUser.user_type !== "DistrictAdmin" &&
+      authUser.user_type !== "DistrictLabAdmin"
     ) {
-      navigate('/facility');
+      navigate("/facility");
       Notification.Error({
         msg: "You don't have permission to perform this action. Contact the admin",
       });
@@ -198,42 +197,61 @@ export const FacilityCreate = (props: FacilityProps) => {
         id: String(districtId),
       },
       prefetch: !!districtId,
-    }
+    },
   );
 
   const getSteps = (): Step[] => {
     return [
       {
         id: 1,
-        name: 'Facility details',
+        name: "Facility details",
         onClick: () => {
           setCurrentStep(1);
         },
-        status: currentStep === 1 ? 'current' : 'complete',
+        status: currentStep === 1 ? "current" : "complete",
         disabled: currentStep > 1,
       },
       {
         id: 2,
-        name: 'Bed Capacity',
+        name: "Bed Capacity",
         onClick: () => {
           setCurrentStep(2);
         },
         status:
           currentStep === 2
-            ? 'current'
+            ? "current"
             : currentStep > 2
-              ? 'complete'
-              : 'upcoming',
-        disabled: createdFacilityId == '',
+              ? "complete"
+              : "upcoming",
+        disabled: createdFacilityId === "",
       },
       {
         id: 3,
-        name: 'Staff Capacity',
+        name: "Staff Capacity",
         onClick: () => {
           setCurrentStep(3);
         },
-        disabled: createdFacilityId == '',
-        status: currentStep === 3 ? 'current' : 'upcoming',
+        status:
+          currentStep === 3
+            ? "current"
+            : currentStep > 3
+              ? "complete"
+              : "upcoming",
+        disabled: createdFacilityId === "",
+      },
+      {
+        id: 4,
+        name: "Cover Image",
+        onClick: () => {
+          setCurrentStep(4);
+        },
+        status:
+          currentStep === 4
+            ? "current"
+            : currentStep > 4
+              ? "complete"
+              : "upcoming",
+        disabled: createdFacilityId === "",
       },
     ];
   };
@@ -245,7 +263,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         id: String(localBodyId),
       },
       prefetch: !!localBodyId,
-    }
+    },
   );
 
   const facilityQuery = useQuery(routes.getPermittedFacility, {
@@ -258,25 +276,25 @@ export const FacilityCreate = (props: FacilityProps) => {
         setIsLoading(true);
         if (res?.ok && data) {
           const formData = {
-            facility_type: data.facility_type ? data.facility_type : '',
-            name: data.name ? data.name : '',
+            facility_type: data.facility_type ? data.facility_type : "",
+            name: data.name ? data.name : "",
             state: data.state ? data.state : 0,
             district: data.district ? data.district : 0,
             local_body: data.local_body ? data.local_body : 0,
             features: data.features || [],
             ward: data.ward_object ? data.ward_object.id : 0,
-            kasp_empanelled: '',
-            address: data.address ? data.address : '',
-            pincode: data.pincode ? data.pincode : '',
+            kasp_empanelled: "",
+            address: data.address ? data.address : "",
+            pincode: data.pincode ? data.pincode : "",
             phone_number: data.phone_number
               ? data.phone_number.length == 10
-                ? '+91' + data.phone_number
+                ? "+91" + data.phone_number
                 : data.phone_number
-              : '',
-            latitude: data.latitude ? parseFloat(data.latitude).toFixed(7) : '',
+              : "",
+            latitude: data.latitude ? parseFloat(data.latitude).toFixed(7) : "",
             longitude: data.longitude
               ? parseFloat(data.longitude).toFixed(7)
-              : '',
+              : "",
             type_b_cylinders: data.type_b_cylinders,
             type_c_cylinders: data.type_c_cylinders,
             type_d_cylinders: data.type_d_cylinders,
@@ -286,7 +304,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             expected_oxygen_requirement: data.expected_oxygen_requirement,
             oxygen_capacity: data.oxygen_capacity,
           };
-          dispatch({ type: 'set_form', form: formData });
+          dispatch({ type: "set_form", form: formData });
           setStateId(data.state);
           setDistrictId(data.district);
           setLocalBodyId(data.local_body);
@@ -299,12 +317,12 @@ export const FacilityCreate = (props: FacilityProps) => {
   });
 
   const { data: stateData, loading: isStateLoading } = useQuery(
-    routes.statesList
+    routes.statesList,
   );
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
     dispatch({
-      type: 'set_form',
+      type: "set_form",
       form: { ...state.form, [e.name]: e.value },
     });
   };
@@ -312,7 +330,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const handleLocationChange = (location: google.maps.LatLng | undefined) => {
     if (location) {
       dispatch({
-        type: 'set_form',
+        type: "set_form",
         form: {
           ...state.form,
           latitude: location.lat().toFixed(7),
@@ -329,7 +347,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
     const pincodeDetails = await getPincodeDetails(
       e.value,
-      careConfig.govDataApiKey
+      careConfig.govDataApiKey,
     );
     if (!pincodeDetails) return;
 
@@ -350,7 +368,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     if (!matchedDistrict) return;
 
     dispatch({
-      type: 'set_form',
+      type: "set_form",
       form: {
         ...state.form,
         state: matchedState.id,
@@ -367,12 +385,12 @@ export const FacilityCreate = (props: FacilityProps) => {
   };
 
   const handleSelectCurrentLocation = (
-    setCenter: (lat: number, lng: number) => void
+    setCenter: (lat: number, lng: number) => void,
   ) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         dispatch({
-          type: 'set_form',
+          type: "set_form",
           form: {
             ...state.form,
             latitude: String(position.coords.latitude),
@@ -390,52 +408,47 @@ export const FacilityCreate = (props: FacilityProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
-        case 'facility_type':
-        case 'name':
-        case 'address':
+        case "facility_type":
+        case "name":
+        case "address":
           if (!state.form[field]) {
-            errors[field] = t('required');
+            errors[field] = t("required");
             invalidForm = true;
           }
           return;
 
-        case 'district':
-        case 'state':
-        case 'local_body':
-        case 'ward':
+        case "district":
+        case "state":
+        case "local_body":
+        case "ward":
           if (!Number(state.form[field])) {
-            errors[field] = t('required');
+            errors[field] = t("required");
             invalidForm = true;
           }
           return;
 
-        case 'pincode':
-          if (!validatePincode(state.form[field])) {
-            errors[field] = t('invalid_pincode');
-            invalidForm = true;
-          }
-          return;
-        case 'phone_number':
-          // eslint-disable-next-line no-case-declarations
+        case "phone_number": {
           const phoneNumber = state.form[field];
           if (
             !phoneNumber ||
-            !PhoneNumberValidator()(phoneNumber) === undefined ||
+            PhoneNumberValidator()(phoneNumber) === undefined ||
             !phonePreg(phoneNumber)
           ) {
-            errors[field] = t('invalid_phone_number');
+            errors[field] = t("invalid_phone_number");
             invalidForm = true;
           }
           return;
-        case 'latitude':
+        }
+
+        case "latitude":
           if (!!state.form.latitude && !validateLatitude(state.form[field])) {
-            errors[field] = t('latitude_invalid');
+            errors[field] = t("latitude_invalid");
             invalidForm = true;
           }
           return;
-        case 'longitude':
+        case "longitude":
           if (!!state.form.longitude && !validateLongitude(state.form[field])) {
-            errors[field] = t('longitude_invalid');
+            errors[field] = t("longitude_invalid");
             invalidForm = true;
           }
           return;
@@ -445,10 +458,10 @@ export const FacilityCreate = (props: FacilityProps) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: 'set_errors', errors });
+      dispatch({ type: "set_errors", errors });
       return false;
     }
-    dispatch({ type: 'set_errors', errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
   const [isCoverImageModalOpen, setIsCoverImageModalOpen] = useState(false);
@@ -501,8 +514,8 @@ export const FacilityCreate = (props: FacilityProps) => {
 
       if (res?.ok && requestData) {
         const id = requestData.id;
-        dispatch({ type: 'set_form', form: initForm });
-        Notification.Success({ msg: 'Facility added successfully' });
+        dispatch({ type: "set_form", form: initForm });
+        Notification.Success({ msg: "Facility added successfully" });
         setCreatedFacilityId(String(id));
         setCurrentStep(2);
         if (isImageUploadChecked) {
@@ -524,7 +537,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (!capacityData || !capacityData.length) {
     capacityList = (
       <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
-        {t('no_bed_types_found')}
+        {t("no_bed_types_found")}
       </h5>
     );
   } else {
@@ -539,7 +552,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         id="total-bed-capacity"
       >
         <BedTypeCard
-          label={t('total_beds')}
+          label={t("total_beds")}
           bedCapacityId={0}
           used={totalOccupiedBedCount}
           total={totalBedCount}
@@ -554,7 +567,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           if (res) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
-                state.filter((i) => i.id !== bedTypeId)
+                state.filter((i) => i.id !== bedTypeId),
               );
               setBedCapacityKey((bedCapacityKey) => bedCapacityKey + 1);
             };
@@ -588,7 +601,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (!doctorData || !doctorData.length) {
     doctorList = (
       <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
-        {t('no_staff')}
+        {t("no_staff")}
       </h5>
     );
   } else {
@@ -597,14 +610,14 @@ export const FacilityCreate = (props: FacilityProps) => {
         {doctorData.map((data: DoctorModal) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
             setDoctorData((state) =>
-              state.filter((i: DoctorModal) => i.id !== doctorId)
+              state.filter((i: DoctorModal) => i.id !== doctorId),
             );
             setDocCapacityKey((docCapacityKey) => docCapacityKey + 1);
           };
 
           return (
             <StaffCountCard
-              facilityId={createdFacilityId || ''}
+              facilityId={createdFacilityId || ""}
               key={`bed_${data.id}`}
               handleUpdate={async () => {
                 const { res, data } = await request(routes.listDoctor, {
@@ -635,53 +648,65 @@ export const FacilityCreate = (props: FacilityProps) => {
   };
 
   switch (currentStep) {
+    case 4:
+      return (
+        <Page
+          title={t("Upload Cover Image")}
+          crumbsReplacements={{
+            [createdFacilityId || "????"]: { name: state.form.name },
+          }}
+        >
+          <Steps steps={getSteps()} />
+
+          <div className="mt-4">
+            <ButtonV2
+              onClick={() => setIsCoverImageModalOpen(true)}
+              className="mt-4"
+            >
+              {t("Upload Facility Image")}
+            </ButtonV2>
+
+            <CoverImageEditModal
+              open={isCoverImageModalOpen}
+              onClose={() => setIsCoverImageModalOpen(false)}
+              onSave={() => setIsCoverImageModalOpen(false)}
+              facility={{
+                id: createdFacilityId,
+                name: state.form.name,
+                read_cover_image_url: "",
+              }}
+            />
+          </div>
+
+          <div className="mt-5">
+            <ButtonV2
+              onClick={() => {
+                navigate(`/facility/${createdFacilityId}`);
+              }}
+              className="mt-4"
+            >
+              {t("Save Facility")}
+            </ButtonV2>
+          </div>
+        </Page>
+      );
+
     case 3:
       return (
         <Page
           title={headerText}
           crumbsReplacements={{
-            [createdFacilityId || '????']: { name: state.form.name },
+            [createdFacilityId || "????"]: { name: state.form.name },
           }}
         >
           <Steps steps={getSteps()} />
-          <div className="mt-4">
-          <label>
-            <input
-              type="checkbox"
-              checked={isImageUploadChecked}
-              onChange={(e) => setIsImageUploadChecked(e.target.checked)}
-            />
-            {t("Would you like to upload a cover image?")}
-          </label>
-        </div>
-          
-          <div className="mt-4">
-            <ButtonV2
-              onClick={() => setIsCoverImageModalOpen(true)}
-              className="mt-4"
-              disabled={!isImageUploadChecked}
-            >
-              {t('Upload Facility Image')}
-            </ButtonV2>
-            
-            <CoverImageEditModal
-              open={isCoverImageModalOpen}
-              onClose={() => setIsCoverImageModalOpen(false)}
-              onSave={() => setIsCoverImageModalOpen(false)} 
-              facility={{
-                id: createdFacilityId,
-                name: state.form.name, 
-                read_cover_image_url: '',
-              }}
-            />
-          </div>
           <div className="mt-3">
             <StaffCapacity
               key={docCapacityKey}
               className="mx-auto w-full max-w-2xl"
-              facilityId={createdFacilityId || ''}
+              facilityId={createdFacilityId || ""}
               handleClose={() => {
-                navigate(`/facility/${createdFacilityId}`);
+                setCurrentStep(4);
               }}
               handleUpdate={async () => {
                 const { res, data } = await request(routes.listDoctor, {
@@ -695,7 +720,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           </div>
           <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
             <div className="justify-between md:flex md:pb-2">
-              <div className="mb-2 text-xl font-bold">{t('staff_list')}</div>
+              <div className="mb-2 text-xl font-bold">{t("staff_list")}</div>
             </div>
             <div className="mt-4" id="total-doctor-capacity">
               {doctorList}
@@ -708,7 +733,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         <Page
           title={headerText}
           crumbsReplacements={{
-            [createdFacilityId || '????']: { name: state.form.name },
+            [createdFacilityId || "????"]: { name: state.form.name },
           }}
         >
           <Steps steps={getSteps()} />
@@ -716,7 +741,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             <BedCapacity
               key={bedCapacityKey}
               className="mx-auto w-full max-w-2xl"
-              facilityId={createdFacilityId || ''}
+              facilityId={createdFacilityId || ""}
               handleClose={() => {
                 setCurrentStep(3);
               }}
@@ -733,12 +758,11 @@ export const FacilityCreate = (props: FacilityProps) => {
           <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
             <div className="justify-between md:flex md:border-b md:pb-2">
               <div className="mb-2 text-xl font-semibold">
-                {t('bed_capacity')}
+                {t("bed_capacity")}
               </div>
             </div>
             <div>{capacityList}</div>
           </div>
-    
         </Page>
       );
     case 1:
@@ -747,7 +771,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         <Page
           title={headerText}
           crumbsReplacements={{
-            [facilityId || '????']: { name: state.form.name },
+            [facilityId || "????"]: { name: state.form.name },
           }}
         >
           {!facilityId && <Steps steps={getSteps()} />}
@@ -756,7 +780,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               <form onSubmit={(e) => handleSubmit(e)}>
                 <DraftSection
                   handleDraftSelect={(newState: any) => {
-                    dispatch({ type: 'set_state', state: newState });
+                    dispatch({ type: "set_state", state: newState });
                     setStateId(newState.form.state);
                     setDistrictId(newState.form.district);
                     setLocalBodyId(newState.form.local_body);
@@ -765,28 +789,28 @@ export const FacilityCreate = (props: FacilityProps) => {
                 />
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <SelectFormField
-                    {...field('facility_type')}
+                    {...field("facility_type")}
                     required
                     options={FACILITY_TYPES}
                     optionLabel={(o) => o.text}
                     optionValue={(o) => o.text}
                   />
                   <TextFormField
-                    {...field('name')}
+                    {...field("name")}
                     required
-                    label={t('facility_name')}
+                    label={t("facility_name")}
                   />
 
                   <MultiSelectFormField
-                    {...field('features')}
-                    placeholder={t('features')}
+                    {...field("features")}
+                    placeholder={t("features")}
                     options={FACILITY_FEATURE_TYPES}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                   />
                   <div>
                     <TextFormField
-                      {...field('pincode')}
+                      {...field("pincode")}
                       required
                       onChange={handlePincodeChange}
                     />
@@ -794,16 +818,16 @@ export const FacilityCreate = (props: FacilityProps) => {
                       <div className="flex items-center gap-2 text-primary-500">
                         <CareIcon icon="l-check-circle" />
                         <span className="text-sm">
-                          {t('State and district auto-filled from pincode')}
+                          {t("State and district auto-filled from pincode")}
                         </span>
                       </div>
                     )}
                   </div>
                   <SelectFormField
-                    {...field('state')}
+                    {...field("state")}
                     required
-                    placeholder={t('Choose State')}
-                    className={isStateLoading ? 'animate-pulse' : ''}
+                    placeholder={t("Choose State")}
+                    className={isStateLoading ? "animate-pulse" : ""}
                     disabled={isStateLoading}
                     options={stateData ? stateData.results : []}
                     optionLabel={(o) => o.name}
@@ -815,10 +839,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                     }}
                   />
                   <SelectFormField
-                    {...field('district')}
-                    placeholder={t('Choose District')}
+                    {...field("district")}
+                    placeholder={t("Choose District")}
                     required
-                    className={isDistrictLoading ? 'animate-pulse' : ''}
+                    className={isDistrictLoading ? "animate-pulse" : ""}
                     disabled={isDistrictLoading}
                     options={districtData ? districtData : []}
                     optionLabel={(o) => o.name}
@@ -830,11 +854,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                     }}
                   />
                   <SelectFormField
-                    {...field('local_body')}
+                    {...field("local_body")}
                     required
-                    className={isLocalbodyLoading ? 'animate-pulse' : ''}
+                    className={isLocalbodyLoading ? "animate-pulse" : ""}
                     disabled={isLocalbodyLoading}
-                    placeholder={t('Choose Local Body')}
+                    placeholder={t("Choose Local Body")}
                     options={localbodyData ? localbodyData : []}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
@@ -845,32 +869,32 @@ export const FacilityCreate = (props: FacilityProps) => {
                     }}
                   />
                   <SelectFormField
-                    {...field('ward')}
+                    {...field("ward")}
                     required
-                    className={isWardLoading ? 'animate-pulse' : ''}
+                    className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
-                    placeholder={t('Choose Ward')}
+                    placeholder={t("Choose Ward")}
                     options={(wardData ? wardData.results : [])
-                      .sort(compareBy('number'))
+                      .sort(compareBy("number"))
                       .map((e) => {
                         return {
                           id: e.id,
-                          name: e.number + ': ' + e.name,
+                          name: e.number + ": " + e.name,
                         };
                       })}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                   />
-                  <TextAreaFormField {...field('address')} required />
+                  <TextAreaFormField {...field("address")} required />
                   <PhoneNumberFormField
-                    {...field('phone_number')}
-                    label={t('emergency_contact_number')}
+                    {...field("phone_number")}
+                    label={t("emergency_contact_number")}
                     required
-                    types={['mobile', 'landline']}
+                    types={["mobile", "landline"]}
                   />
                   {facilityId && (
                     <div className="py-4 md:col-span-2">
-                      <h4 className="mb-4">{t('spokes')}</h4>
+                      <h4 className="mb-4">{t("spokes")}</h4>
                       <SpokeFacilityEditor
                         facility={{ ...facilityQuery.data, id: facilityId }}
                       />
@@ -878,83 +902,83 @@ export const FacilityCreate = (props: FacilityProps) => {
                   )}
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
-                      {...field('oxygen_capacity')}
+                      {...field("oxygen_capacity")}
                       type="number"
                       placeholder="0"
-                      label={t('liquid_oxygen_capacity')}
+                      label={t("liquid_oxygen_capacity")}
                       trailingPadding=" "
-                      trailing={<FieldUnit unit={t('litres')} />}
+                      trailing={<FieldUnit unit={t("litres")} />}
                       min={0}
                     />
                     <TextFormField
-                      {...field('expected_oxygen_requirement')}
+                      {...field("expected_oxygen_requirement")}
                       type="number"
                       placeholder="0"
                       trailingPadding=" "
-                      trailing={<FieldUnit unit={t('litres_per_day')} />}
-                      label={t('expected_burn_rate')}
+                      trailing={<FieldUnit unit={t("litres_per_day")} />}
+                      label={t("expected_burn_rate")}
                       min={0}
                     />
 
                     <TextFormField
-                      {...field('type_b_cylinders')}
+                      {...field("type_b_cylinders")}
                       type="number"
                       placeholder="0"
                       trailingPadding=" "
-                      trailing={<FieldUnit unit={t('cylinders')} />}
+                      trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
                     />
                     <TextFormField
-                      {...field('expected_type_b_cylinders')}
+                      {...field("expected_type_b_cylinders")}
                       type="number"
                       placeholder="0"
-                      label={t('expected_burn_rate')}
+                      label={t("expected_burn_rate")}
                       trailingPadding=" "
-                      trailing={<FieldUnit unit={t('cylinders_per_day')} />}
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
                       min={0}
                     />
                     <TextFormField
-                      {...field('type_c_cylinders')}
+                      {...field("type_c_cylinders")}
                       type="number"
                       placeholder="0"
                       trailingPadding=" "
-                      trailing={<FieldUnit unit={t('cylinders')} />}
+                      trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
                     />
                     <TextFormField
-                      {...field('expected_type_c_cylinders')}
+                      {...field("expected_type_c_cylinders")}
                       type="number"
                       placeholder="0"
                       trailingPadding=" "
-                      trailing={<FieldUnit unit={t('cylinders_per_day')} />}
-                      label={t('expected_burn_rate')}
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
+                      label={t("expected_burn_rate")}
                       min={0}
                     />
                     <TextFormField
-                      {...field('type_d_cylinders')}
+                      {...field("type_d_cylinders")}
                       type="number"
                       placeholder="0"
                       trailingPadding=" "
-                      trailing={<FieldUnit unit={t('cylinders')} />}
+                      trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
                     />
                     <TextFormField
-                      {...field('expected_type_d_cylinders')}
+                      {...field("expected_type_d_cylinders")}
                       type="number"
                       placeholder="0"
-                      label={t('expected_burn_rate')}
+                      label={t("expected_burn_rate")}
                       trailingPadding=" "
-                      trailing={<FieldUnit unit={t('cylinders_per_day')} />}
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
                       min={0}
                     />
                   </div>
 
                   {careConfig.kasp.enabled && (
                     <RadioFormField
-                      {...field('kasp_empanelled')}
+                      {...field("kasp_empanelled")}
                       label={`Is this facility ${careConfig.kasp.string} empanelled?`}
                       options={[true, false]}
-                      optionLabel={(o) => (o ? 'Yes' : 'No')}
+                      optionLabel={(o) => (o ? "Yes" : "No")}
                       optionValue={(o) => String(o)}
                     />
                   )}
@@ -963,8 +987,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <div className="flex items-center gap-3">
                   <TextFormField
                     className="flex-1"
-                    {...field('latitude')}
-                    label={t('location')}
+                    {...field("latitude")}
+                    label={t("location")}
                     placeholder="Latitude"
                   />
 
@@ -980,7 +1004,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                           >
                             <CareIcon icon="l-map-marker" className="text-xl" />
                             <span className="tooltip-text tooltip-bottom">
-                              {t('Select location from map')}
+                              {t("Select location from map")}
                             </span>
                           </ButtonV2>
                         </PopoverButton>
@@ -1010,7 +1034,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   </div>
                   <TextFormField
                     className="flex-1"
-                    {...field('longitude')}
+                    {...field("longitude")}
                     label={<br />}
                     placeholder="Longitude"
                   />
