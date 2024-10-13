@@ -374,7 +374,7 @@ export const DailyRounds = (props: any) => {
           resp: state.form.resp ?? null,
           temperature:
             (unit == "celsius"
-              ? celsiusToFahrenheit(state.form.temperature)
+              ? celsiusToFahrenheit(state.form.temperature).toFixed(1)
               : state.form.temperature) ?? null,
           rhythm: state.form.rhythm || undefined,
           rhythm_detail: state.form.rhythm_detail,
@@ -806,8 +806,6 @@ export const DailyRounds = (props: any) => {
             <>
               <TemperatureFormField
                 {...field("temperature")}
-                onChange={handleFormFieldChange}
-                id="temperature"
                 unit={unit}
                 setUnit={setUnit}
               />
