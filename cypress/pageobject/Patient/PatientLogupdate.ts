@@ -5,13 +5,17 @@ class PatientLogupdate {
     cy.wait(2000);
   }
 
+  clickSwitchBed() {
+    cy.get("#switch-bed").click();
+  }
+
   selectRoundType(roundType: string) {
     cy.clickAndSelectOption("#rounds_type", roundType);
   }
 
   selectBed(bed: string) {
-    cy.searchAndSelectOption("input[name='bed']", bed);
-    cy.submitButton("Update");
+    cy.typeAndSelectOption("input[name='bed']", bed);
+    cy.get("#update-switchbed").click();
     cy.wait(2000);
   }
 
@@ -28,7 +32,7 @@ class PatientLogupdate {
     cy.get("#other_details").click().type(details);
   }
 
-  typeAndMultiSelectSymptoms(input, symptoms) {
+  typeAndMultiSelectSymptoms(input: string, symptoms: string[]) {
     cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
   }
   selectSymptomsDate(date: string) {
@@ -39,27 +43,27 @@ class PatientLogupdate {
   }
 
   typeSystolic(systolic: string) {
-    cy.searchAndSelectOption("#systolic", systolic);
+    cy.typeAndSelectOption("#systolic", systolic);
   }
 
   typeDiastolic(diastolic: string) {
-    cy.searchAndSelectOption("#diastolic", diastolic);
+    cy.typeAndSelectOption("#diastolic", diastolic);
   }
 
   typePulse(pulse: string) {
-    cy.searchAndSelectOption("#pulse", pulse);
+    cy.typeAndSelectOption("#pulse", pulse);
   }
 
   typeTemperature(temperature: string) {
-    cy.searchAndSelectOption("#temperature", temperature);
+    cy.typeAndSelectOption("#temperature", temperature);
   }
 
   typeRespiratory(respiratory: string) {
-    cy.searchAndSelectOption("#resp", respiratory);
+    cy.typeAndSelectOption("#resp", respiratory);
   }
 
   typeSpo2(spo: string) {
-    cy.searchAndSelectOption("#ventilator_spo2", spo);
+    cy.typeAndSelectOption("#ventilator_spo2", spo);
   }
 
   selectRhythm(rhythm: string) {
@@ -70,14 +74,14 @@ class PatientLogupdate {
     cy.get("#rhythm_detail").click().type(rhythm);
   }
 
-  clickLogUpdateViewDetails(element, patientCategory) {
+  clickLogUpdateViewDetails(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
     cy.get(element).first().contains("View Details").click();
     cy.wait(3000);
   }
 
-  clickLogUpdateUpdateLog(element, patientCategory) {
+  clickLogUpdateUpdateLog(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
     cy.get(element).first().contains("Update Log").click();
@@ -89,7 +93,7 @@ class PatientLogupdate {
     cy.wait(3000);
   }
 
-  clickClearButtonInElement(elementId) {
+  clickClearButtonInElement(elementId: string) {
     cy.get(elementId).find("#clear-button").click();
   }
 

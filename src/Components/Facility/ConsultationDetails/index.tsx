@@ -1,18 +1,18 @@
-import { CONSULTATION_TABS, GENDER_TYPES } from "../../../Common/constants";
+import { GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
 import {
   getConsultation,
   getPatient,
   listAssetBeds,
-  listShiftRequests,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { lazy, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { PatientModel } from "../../Patient/models";
 import {
   formatDateTime,
   humanizeStrings,
+  keysOf,
   relativeTime,
 } from "../../../Utils/utils";
 
@@ -22,7 +22,7 @@ import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
 import { ConsultationABGTab } from "./ConsultationABGTab";
-import { ConsultationNursingTab } from "./ConsultationNursingTab";
+import ConsultationNursingTab from "./ConsultationNursingTab";
 import { ConsultationFeedTab } from "./ConsultationFeedTab";
 import { ConsultationSummaryTab } from "./ConsultationSummaryTab";
 import { ConsultationFilesTab } from "./ConsultationFilesTab";
@@ -39,11 +39,15 @@ import { AssetBedModel } from "../../Assets/AssetTypes";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
 import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
+import { AbhaNumberModel } from "../../ABDM/types/abha";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 import Error404 from "../../ErrorPages/404";
+import { useTranslation } from "react-i18next";
 
-const Loading = lazy(() => import("../../Common/Loading"));
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 
 export interface ConsultationTabProps {
   consultationId: string;
@@ -72,6 +76,7 @@ const TABS = {
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
+  const { t } = useTranslation();
   let tab = undefined;
   if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
     tab = props.tab.toUpperCase() as keyof typeof TABS;
@@ -85,6 +90,7 @@ export const ConsultationDetails = (props: any) => {
     {} as ConsultationModel,
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
+  const [abhaNumberData, setAbhaNumberData] = useState<AbhaNumberModel>();
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
   const [isCameraAttached, setIsCameraAttached] = useState(false);
 
@@ -137,6 +143,8 @@ export const ConsultationDetails = (props: any) => {
                 })
               : false;
           setIsCameraAttached(isCameraAttachedRes);
+
+          // Get patient data
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
           if (patientRes?.data) {
@@ -159,13 +167,22 @@ export const ConsultationDetails = (props: any) => {
             setPatientData(data);
           }
 
-          // Get shifting data
-          const shiftingRes = await dispatch(
-            listShiftRequests({ patient: id }, "shift-list-call"),
+          // Get abha number data
+          const { data: abhaNumberData } = await request(
+            routes.abha.getAbhaNumber,
+            {
+              pathParams: { abhaNumberId: id ?? "" },
+              silent: true,
+            },
           );
-          if (shiftingRes?.data?.results) {
-            const data = shiftingRes.data.results;
-            setActiveShiftingData(data);
+          setAbhaNumberData(abhaNumberData);
+
+          // Get shifting data
+          const shiftRequestsQuery = await request(routes.listShiftRequests, {
+            query: { patient: id },
+          });
+          if (shiftRequestsQuery.data?.results) {
+            setActiveShiftingData(shiftRequestsQuery.data.results);
           }
         } else {
           navigate("/not-found");
@@ -272,7 +289,7 @@ export const ConsultationDetails = (props: any) => {
               Patient Details
             </Link>
             <a
-              id="patient_doctor_notes"
+              id="patient_discussion_notes"
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
@@ -290,6 +307,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
+              abhaNumber={abhaNumberData}
               consultation={consultationData}
               fetchPatientData={fetchData}
               consultationId={consultationId}
@@ -371,8 +389,8 @@ export const ConsultationDetails = (props: any) => {
                 className="flex space-x-6 overflow-x-auto pb-2 pl-2"
                 id="consultation_tab_nav"
               >
-                {CONSULTATION_TABS.map((p) => {
-                  if (p.text === "FEED") {
+                {keysOf(TABS).map((p) => {
+                  if (p === "FEED") {
                     if (
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
@@ -382,17 +400,17 @@ export const ConsultationDetails = (props: any) => {
                       return null; // Hide feed tab
                   }
 
-                  if (p.text === "ABDM" && !patientData.abha_number) {
+                  if (p === "ABDM" && !abhaNumberData?.abha_number) {
                     return null;
                   }
 
                   return (
                     <Link
-                      key={p.text}
-                      className={tabButtonClasses(tab === p.text)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                      key={p}
+                      className={tabButtonClasses(tab === p)}
+                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
                     >
-                      {p.desc}
+                      {t(`CONSULTATION_TAB__${p}`)}
                     </Link>
                   );
                 })}

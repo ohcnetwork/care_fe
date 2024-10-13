@@ -38,8 +38,8 @@ Cypress.Commands.add("refreshApiLogin", (username, password) => {
 Cypress.Commands.add("loginByApi", (username, password) => {
   cy.log(`Logging in the user: ${username}:${password}`);
   cy.task("readFileMaybe", "cypress/fixtures/token.json").then(
-    (tkn: string) => {
-      const token = JSON.parse(tkn);
+    (tkn: unknown) => {
+      const token = JSON.parse(tkn as string); // Cast tkn to string
       if (tkn && token.access && token.username === username) {
         cy.request({
           method: "POST",
@@ -66,6 +66,42 @@ Cypress.Commands.add("loginByApi", (username, password) => {
   );
 });
 
+Cypress.on("uncaught:exception", () => {
+  // returning false here prevents Cypress from
+  // failing the test
+  return false;
+});
+
+/**
+ * getAttached(selector)
+ * getAttached(selectorFn)
+ *
+ * Waits until the selector finds an attached element, then yields it (wrapped).
+ * selectorFn, if provided, is passed $(document). Don't use cy methods inside selectorFn.
+ */
+Cypress.Commands.add("getAttached", (selector: string) => {
+  const getElement =
+    typeof selector === "function"
+      ? selector
+      : ($d: JQuery<Document>) =>
+          $d.find(selector) as unknown as JQuery<HTMLElement>;
+
+  let $el: JQuery<HTMLElement> | null = null;
+
+  return cy
+    .document()
+    .should(($d: Document) => {
+      $el = getElement(Cypress.$($d));
+      // Ensure $el is an HTMLElement before checking if it is detached
+      if ($el.length && $el[0] instanceof HTMLElement) {
+        expect(Cypress.dom.isDetached($el[0])).to.be.false; // Access the first HTMLElement
+      } else {
+        throw new Error("Element is not an HTMLElement or is detached.");
+      }
+    })
+    .then(() => cy.wrap($el));
+});
+
 Cypress.Commands.add(
   "awaitUrl",
   (url: string, disableLoginVerification = false) => {
@@ -81,32 +117,6 @@ Cypress.Commands.add("verifyNotification", (text) => {
   return cy.get(".pnotify-container").should("exist").contains(text);
 });
 
-Cypress.on("uncaught:exception", () => {
-  // returning false here prevents Cypress from
-  // failing the test
-  return false;
-});
-
-/**
- * getAttached(selector)
- * getAttached(selectorFn)
- *
- * Waits until the selector finds an attached element, then yields it (wrapped).
- * selectorFn, if provided, is passed $(document). Don't use cy methods inside selectorFn.
- */
-Cypress.Commands.add("getAttached", (selector) => {
-  const getElement =
-    typeof selector === "function" ? selector : ($d) => $d.find(selector);
-  let $el = null;
-  return cy
-    .document()
-    .should(($d) => {
-      $el = getElement(Cypress.$($d));
-      expect(Cypress.dom.isDetached($el)).to.be.false;
-    })
-    .then(() => cy.wrap($el));
-});
-
 Cypress.Commands.add("clearAllFilters", () => {
   return cy.get("#clear-all-filters").click();
 });
@@ -117,7 +127,7 @@ Cypress.Commands.add("submitButton", (buttonText = "Submit") => {
 });
 
 Cypress.Commands.add(
-  "searchAndSelectOption",
+  "typeAndSelectOption",
   (element: string, referance: string) => {
     cy.get(element)
       .click()
@@ -168,6 +178,10 @@ Cypress.Commands.add(
       });
   },
 );
+
+Cypress.Commands.add("selectRadioOption", (name: string, value: string) => {
+  cy.get(`input[type='radio'][name='${name}'][value=${value}]`).click();
+});
 
 Cypress.Commands.add("clickAndTypeDate", (selector: string, date: string) => {
   cy.get(selector).scrollIntoView();

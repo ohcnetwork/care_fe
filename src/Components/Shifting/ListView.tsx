@@ -1,6 +1,4 @@
-import { downloadShiftRequests } from "../../Redux/actions";
-import { lazy, useState } from "react";
-
+import { useState } from "react";
 import BadgesList from "./BadgesList";
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
@@ -22,8 +20,7 @@ import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ListView() {
   const {
     qParams,
@@ -236,9 +233,12 @@ export default function ListView() {
       hideBack
       componentRight={
         <ExportButton
-          action={() =>
-            downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-          }
+          action={async () => {
+            const { data } = await request(routes.downloadShiftRequests, {
+              query: { ...formatFilter(qParams), csv: true },
+            });
+            return data ?? null;
+          }}
           filenamePrefix="shift_requests"
         />
       }

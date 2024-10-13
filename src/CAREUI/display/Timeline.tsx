@@ -26,7 +26,7 @@ const TimelineContext = createContext("");
 
 export default function Timeline({ className, children, name }: TimelineProps) {
   return (
-    <div className={className} id="list">
+    <div className={className} id="previousbed-list">
       <ol role="list" className="space-y-6">
         <TimelineContext.Provider value={name}>
           {children}

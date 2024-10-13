@@ -12,7 +12,7 @@ import {
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { navigate, useQueryParams } from "raviger";
-import { lazy, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -40,8 +40,7 @@ import { PatientModel } from "../Patient/models.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface patientShiftProps {
   id: string;
 }
@@ -420,7 +419,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               { label: t("yes"), value: "true" },
               { label: t("no"), value: "false" },
             ]}
-            optionDisplay={(option) => option.label}
+            optionLabel={(option) => option.label}
             optionValue={(option) => option.value}
           />
 
@@ -434,7 +433,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 { label: t("no"), value: "false" },
               ]}
               optionValue={(option) => option.value}
-              optionDisplay={(option) => option.label}
+              optionLabel={(option) => option.label}
               onChange={handleFormFieldChange}
             />
           )}
@@ -448,7 +447,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               { label: t("no"), value: "false" },
             ]}
             optionValue={(option) => option.value}
-            optionDisplay={(option) => option.label}
+            optionLabel={(option) => option.label}
             onChange={handleFormFieldChange}
           />
 

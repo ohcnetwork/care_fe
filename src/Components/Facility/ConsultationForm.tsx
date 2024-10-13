@@ -15,7 +15,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import { LegacyRef, createRef, lazy, useEffect, useRef, useState } from "react";
+import { LegacyRef, createRef, useEffect, useRef, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
@@ -66,8 +66,8 @@ import {
 } from "../Symptoms/SymptomsBuilder.js";
 import careConfig from "@careConfig";
 
-const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 
 type BooleanStrings = "true" | "false";
 
@@ -404,9 +404,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             cause_of_death: data?.discharge_notes || "",
             death_datetime: data?.death_datetime || "",
             death_confirmed_doctor: data?.death_confirmed_doctor || "",
-            InvestigationAdvice: Array.isArray(data.investigation)
-              ? data.investigation
-              : [],
+            InvestigationAdvice: data.investigation ?? [],
             diagnoses: data.diagnoses?.sort(
               (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
                 ConditionVerificationStatuses.indexOf(a.verification_status) -

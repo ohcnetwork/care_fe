@@ -1,6 +1,10 @@
-import ConsultationClaims from "../../Components/Facility/ConsultationClaims";
+import ConsultationClaims, {
+  IConsultationClaimsProps,
+} from "../../Components/Facility/ConsultationClaims";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/claims":
-    (pathParams: any) => <ConsultationClaims {...pathParams} />,
+    (pathParams: IConsultationClaimsProps) => (
+      <ConsultationClaims {...pathParams} />
+    ),
 };

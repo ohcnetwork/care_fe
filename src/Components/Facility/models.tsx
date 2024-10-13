@@ -1,3 +1,4 @@
+import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
@@ -6,18 +7,19 @@ import {
   PATIENT_NOTES_THREADS,
   UserRole,
 } from "../../Common/constants";
-import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
-import { RouteToFacility } from "../Common/RouteToFacilitySelect";
-import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { FeatureFlag } from "../../Utils/featureFlags";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import {
   AssignedToObjectModel,
+  BloodPressure,
   DailyRoundsModel,
+  FacilityNameModel,
   FileUploadModel,
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
+import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
@@ -79,7 +81,32 @@ export interface FacilityModel {
   local_body?: number;
   ward?: number;
   pincode?: string;
+  facility_flags?: FeatureFlag[];
+  latitude?: string;
+  longitude?: string;
+  kasp_empanelled?: boolean;
+  patient_count?: string;
+  bed_count?: string;
 }
+
+export enum SpokeRelationship {
+  REGULAR = 1,
+  TELE_ICU = 2,
+}
+
+export interface FacilitySpokeModel {
+  id: string;
+  hub_object: FacilityNameModel;
+  spoke_object: FacilityNameModel;
+  relationship: SpokeRelationship;
+}
+
+export interface FacilitySpokeRequest {
+  spoke?: string;
+  relationship?: SpokeRelationship;
+}
+
+export interface FacilitySpokeErrors {}
 
 export interface CapacityModal {
   id?: number;
@@ -132,8 +159,6 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   new_discharge_reason?: (typeof DISCHARGE_REASONS)[number]["id"];
-  discharge_prescription?: NormalPrescription;
-  discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
@@ -275,23 +300,22 @@ export interface CurrentBed {
   meta: Record<string, any>;
 }
 
-// Voluntarily made as `type` for it to achieve type-safety when used with
-// `useAsyncOptions<ICD11DiagnosisModel>`
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
 };
 
-export type ABGPlotsFields =
-  | "ph"
-  | "pco2"
-  | "po2"
-  | "hco3"
-  | "base_excess"
-  | "lactate"
-  | "sodium"
-  | "potassium"
-  | "ventilator_fio2";
+export const ABGPlotsFields = [
+  "ph",
+  "pco2",
+  "po2",
+  "hco3",
+  "base_excess",
+  "lactate",
+  "sodium",
+  "potassium",
+  "ventilator_fio2",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type ABGPlotsRes = {
   ph: string;
@@ -305,33 +329,35 @@ export type ABGPlotsRes = {
   ventilator_fio2: number;
 };
 
-export type DialysisPlotsFields =
-  | "dialysis_fluid_balance"
-  | "dialysis_net_balance";
+export const DialysisPlotsFields = [
+  "dialysis_fluid_balance",
+  "dialysis_net_balance",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type DialysisPlotsRes = {
   dialysis_fluid_balance: number;
   dialysis_net_balance: number;
 };
 
-export type NeurologicalTablesFields =
-  | "consciousness_level"
-  | "left_pupil_size"
-  | "left_pupil_size_detail"
-  | "right_pupil_size"
-  | "right_pupil_size_detail"
-  | "left_pupil_light_reaction"
-  | "left_pupil_light_reaction_detail"
-  | "right_pupil_light_reaction"
-  | "right_pupil_light_reaction_detail"
-  | "limb_response_upper_extremity_right"
-  | "limb_response_upper_extremity_left"
-  | "limb_response_lower_extremity_left"
-  | "limb_response_lower_extremity_right"
-  | "glasgow_eye_open"
-  | "glasgow_verbal_response"
-  | "glasgow_motor_response"
-  | "glasgow_total_calculated";
+export const NeurologicalTablesFields = [
+  "consciousness_level",
+  "left_pupil_size",
+  "left_pupil_size_detail",
+  "right_pupil_size",
+  "right_pupil_size_detail",
+  "left_pupil_light_reaction",
+  "left_pupil_light_reaction_detail",
+  "right_pupil_light_reaction",
+  "right_pupil_light_reaction_detail",
+  "limb_response_upper_extremity_right",
+  "limb_response_upper_extremity_left",
+  "limb_response_lower_extremity_left",
+  "limb_response_lower_extremity_right",
+  "glasgow_eye_open",
+  "glasgow_verbal_response",
+  "glasgow_motor_response",
+  "glasgow_total_calculated",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NeurologicalTablesRes = {
   consciousness_level: number;
@@ -353,19 +379,36 @@ export type NeurologicalTablesRes = {
   glasgow_total_calculated: number;
 };
 
-export type NursingPlotFields = "nursing";
+export const NursingPlotFields = [
+  "nursing",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NursingPlotRes = {
   nursing: any[];
 };
 
-export type NutritionPlotsFields =
-  | "infusions"
-  | "iv_fluids"
-  | "feeds"
-  | "total_intake_calculated"
-  | "total_output_calculated"
-  | "output";
+export const RoutineFields = [
+  "sleep",
+  "bowel_issue",
+  "bladder_drainage",
+  "bladder_issue",
+  "is_experiencing_dysuria",
+  "urination_frequency",
+  "nutrition_route",
+  "oral_issue",
+  "appetite",
+] as const satisfies (keyof DailyRoundsModel)[];
+
+export type RoutineAnalysisRes = Record<(typeof RoutineFields)[number], any>;
+
+export const NutritionPlotsFields = [
+  "infusions",
+  "iv_fluids",
+  "feeds",
+  "total_intake_calculated",
+  "total_output_calculated",
+  "output",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NutritionPlotsRes = {
   infusions: any[];
@@ -376,37 +419,38 @@ export type NutritionPlotsRes = {
   output: any[];
 };
 
-export type PainDiagramsFields = "pain_scale_enhanced";
+export const PainDiagramsFields = [
+  "pain_scale_enhanced",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PainDiagramsRes = {
   pain_scale_enhanced: any[];
 };
 
-export type PressureSoreDiagramsFields = "pressure_sore";
+export const PressureSoreDiagramsFields = [
+  "pressure_sore",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PressureSoreDiagramsRes = {
   pressure_sore: any[];
 };
 
-export type PrimaryParametersPlotFields =
-  | "bp"
-  | "pulse"
-  | "temperature"
-  | "resp"
-  | "blood_sugar_level"
-  | "insulin_intake_frequency"
-  | "insulin_intake_dose"
-  | "ventilator_spo2"
-  | "ventilator_fio2"
-  | "rhythm"
-  | "rhythm_detail";
+export const PrimaryParametersPlotFields = [
+  "bp",
+  "pulse",
+  "temperature",
+  "resp",
+  "blood_sugar_level",
+  "insulin_intake_frequency",
+  "insulin_intake_dose",
+  "ventilator_spo2",
+  "ventilator_fio2",
+  "rhythm",
+  "rhythm_detail",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PrimaryParametersPlotRes = {
-  bp: {
-    mean?: number;
-    systolic?: number;
-    diastolic?: number;
-  };
+  bp: BloodPressure;
   pulse: number;
   temperature: string;
   resp: number;
@@ -419,19 +463,20 @@ export type PrimaryParametersPlotRes = {
   rhythm_detail: string;
 };
 
-export type VentilatorPlotFields =
-  | "ventilator_pip"
-  | "ventilator_mean_airway_pressure"
-  | "ventilator_resp_rate"
-  | "ventilator_pressure_support"
-  | "ventilator_tidal_volume"
-  | "ventilator_peep"
-  | "ventilator_fio2"
-  | "ventilator_spo2"
-  | "etco2"
-  | "bilateral_air_entry"
-  | "ventilator_oxygen_modality_oxygen_rate"
-  | "ventilator_oxygen_modality_flow_rate";
+export const VentilatorPlotFields = [
+  "ventilator_pip",
+  "ventilator_mean_airway_pressure",
+  "ventilator_resp_rate",
+  "ventilator_pressure_support",
+  "ventilator_tidal_volume",
+  "ventilator_peep",
+  "ventilator_fio2",
+  "ventilator_spo2",
+  "etco2",
+  "bilateral_air_entry",
+  "ventilator_oxygen_modality_oxygen_rate",
+  "ventilator_oxygen_modality_flow_rate",
+] as const satisfies (keyof DailyRoundsModel)[];
 
 export type VentilatorPlotRes = {
   ventilator_pip: number;
@@ -451,15 +496,16 @@ export type VentilatorPlotRes = {
 export interface DailyRoundsBody {
   page?: number;
   fields:
-    | ABGPlotsFields[]
-    | DialysisPlotsFields[]
-    | NeurologicalTablesFields[]
-    | NursingPlotFields[]
-    | NutritionPlotsFields[]
-    | PainDiagramsFields[]
-    | PressureSoreDiagramsFields[]
-    | PrimaryParametersPlotFields[]
-    | VentilatorPlotFields[];
+    | typeof ABGPlotsFields
+    | typeof DialysisPlotsFields
+    | typeof NeurologicalTablesFields
+    | typeof NursingPlotFields
+    | typeof RoutineFields
+    | typeof NutritionPlotsFields
+    | typeof PainDiagramsFields
+    | typeof PressureSoreDiagramsFields
+    | typeof PrimaryParametersPlotFields
+    | typeof VentilatorPlotFields;
 }
 
 export interface DailyRoundsRes {
@@ -472,6 +518,7 @@ export interface DailyRoundsRes {
       | DialysisPlotsRes
       | NeurologicalTablesRes
       | NursingPlotRes
+      | RoutineAnalysisRes
       | NutritionPlotsRes
       | PainDiagramsRes
       | PrimaryParametersPlotRes
@@ -526,6 +573,14 @@ export interface PatientNotesEditModel {
   note: string;
 }
 
+export interface PaitentNotesReplyModel {
+  id: string;
+  note: string;
+  user_type?: UserRole | "RemoteSpecialist";
+  created_by_object: BaseUserModel;
+  created_date: string;
+}
+
 export interface PatientNotesModel {
   id: string;
   note: string;
@@ -536,6 +591,7 @@ export interface PatientNotesModel {
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
+  reply_to_object?: PaitentNotesReplyModel;
 }
 
 export interface PatientNoteStateType {
@@ -559,13 +615,7 @@ export type IUserFacilityRequest = {
   facility: string;
 };
 
-export type FacilityRequest = Omit<FacilityModel, "location"> & {
-  latitude?: string;
-  longitude?: string;
-  kasp_empanelled?: boolean;
-  patient_count?: string;
-  bed_count?: string;
-};
+export type FacilityRequest = Omit<FacilityModel, "location" | "id">;
 
 export type InventorySummaryResponse = {
   id: string;

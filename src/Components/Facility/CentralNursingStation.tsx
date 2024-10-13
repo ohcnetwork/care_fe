@@ -64,7 +64,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
 
   const { config, hash } = useVitalsAspectRatioConfig({
     default: 6 / 11,
-    vs: 10 / 11,
     sm: 17 / 11,
     md: 19 / 11,
     lg: 11 / 11,
@@ -145,7 +144,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       value={qParams.ordering || "bed__name"}
                       onChange={({ value }) => updateQuery({ ordering: value })}
                       options={SORT_OPTIONS}
-                      optionLabel={({ value }) => t("SortOptions." + value)}
+                      optionLabel={({ value }) => t("SORT_OPTIONS__" + value)}
                       optionIcon={({ isAscending }) => (
                         <CareIcon
                           icon={
@@ -208,7 +207,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           No Vitals Monitor present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 3xl:grid-cols-3">
+        <div className="3xl:grid-cols-3 mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2">
           {data.map((props, i) => (
             <div className="overflow-hidden text-clip" key={i}>
               <HL7PatientVitalsMonitor

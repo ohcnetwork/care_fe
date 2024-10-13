@@ -6,9 +6,10 @@ export class PatientConsultationPage {
     cy.clickAndSelectOption("#route_to_facility", status);
   }
 
-  typeAndMultiSelectSymptoms(input, symptoms) {
+  typeAndMultiSelectSymptoms(input: string, symptoms: string[]) {
     cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
   }
+
   selectSymptomsDate(date: string) {
     cy.clickAndTypeDate("#symptoms_onset_date", date);
   }
@@ -25,15 +26,15 @@ export class PatientConsultationPage {
   }
 
   selectPatientReferance(referance: string) {
-    cy.searchAndSelectOption("#referred_to", referance);
+    cy.typeAndSelectOption("#referred_to", referance);
   }
 
   selectBed(bedNo: string) {
-    cy.searchAndSelectOption("#bed", bedNo);
+    cy.typeAndSelectOption("#bed", bedNo);
   }
 
   selectPatientWard(ward: string) {
-    cy.searchAndSelectOption("#transferred_from_location", ward);
+    cy.typeAndSelectOption("#transferred_from_location", ward);
   }
 
   selectPatientSuggestion(suggestion: string) {
@@ -48,8 +49,8 @@ export class PatientConsultationPage {
     cy.get("#death_confirmed_doctor").click().type(doctor);
   }
 
-  selectPatientDiagnosis(icdCode, statusId) {
-    cy.searchAndSelectOption("#icd11-search", icdCode);
+  selectPatientDiagnosis(icdCode: string, statusId: string) {
+    cy.typeAndSelectOption("#icd11-search", icdCode);
     cy.get("#diagnosis-list")
       .contains("Add as")
       .scrollIntoView()
@@ -92,13 +93,13 @@ export class PatientConsultationPage {
     cy.clickAndSelectOption("#principal-diagnosis-select", diagnosis);
   }
 
-  verifyTextInConsultation(selector, text) {
+  verifyTextInConsultation(selector: string, text: string) {
     cy.get(selector).scrollIntoView();
     cy.get(selector).contains(text).should("be.visible");
   }
 
   typeReferringFacility(referringFacility: string) {
-    cy.searchAndSelectOption("#referred_from_facility", referringFacility);
+    cy.typeAndSelectOption("#referred_from_facility", referringFacility);
   }
 
   clickEditConsultationButton() {
@@ -109,31 +110,5 @@ export class PatientConsultationPage {
       "Edit Consultation Details",
     );
     cy.wait(3000);
-  }
-
-  visitShiftRequestPage() {
-    cy.get("#create_shift_request").click();
-  }
-
-  createShiftRequest() {
-    cy.intercept("POST", "**/api/v1/shift/").as("createShiftRequest");
-    cy.get("#submit").click();
-    cy.wait("@createShiftRequest").its("response.statusCode").should("eq", 201);
-  }
-
-  visitDoctorNotesPage() {
-    cy.get("#patient_doctor_notes").scrollIntoView();
-    cy.get("#patient_doctor_notes").click();
-  }
-
-  addDoctorsNotes(notes: string) {
-    cy.get("#doctor_notes_textarea").scrollIntoView();
-    cy.get("#doctor_notes_textarea").click().type(notes);
-  }
-
-  postDoctorNotes() {
-    cy.intercept("POST", "**/api/v1/patient/*/notes").as("postDoctorNotes");
-    cy.get("#add_doctor_note_button").click();
-    cy.wait("@postDoctorNotes").its("response.statusCode").should("eq", 201);
   }
 }

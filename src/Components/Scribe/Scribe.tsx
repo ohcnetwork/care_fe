@@ -7,9 +7,9 @@ import * as Notify from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
 import { UserModel } from "../Users/models";
 import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
-import careConfig from "@careConfig";
 import uploadFile from "../../Utils/request/uploadFile";
 import _ from "lodash";
+import { useFeatureFlags } from "../../Utils/featureFlags";
 
 interface FieldOption {
   id: string | number;
@@ -58,6 +58,7 @@ export type ScribeModel = {
 };
 
 interface ScribeProps {
+  facilityId: string;
   form: ScribeForm;
   existingData?: { [key: string]: any };
   onFormUpdate: (fields: any) => void;
@@ -71,6 +72,7 @@ const SCRIBE_FILE_TYPES = {
 export const Scribe: React.FC<ScribeProps> = ({
   form,
   onFormUpdate,
+  facilityId,
   existingData,
 }) => {
   const [open, setOpen] = useState(false);
@@ -88,7 +90,7 @@ export const Scribe: React.FC<ScribeProps> = ({
   const [updatedTranscript, setUpdatedTranscript] = useState<string>("");
   const [scribeID, setScribeID] = useState<string>("");
   const stageRef = useRef(stage);
-
+  const featureFlags = useFeatureFlags(facilityId);
   useEffect(() => {
     if (stageRef.current === "cancelled") {
       setStage("start");
@@ -544,7 +546,7 @@ export const Scribe: React.FC<ScribeProps> = ({
     }
   }
 
-  if (!careConfig.scribe.enabled) return null;
+  if (!featureFlags.includes("SCRIBE_ENABLED")) return null;
 
   return (
     <Popover>

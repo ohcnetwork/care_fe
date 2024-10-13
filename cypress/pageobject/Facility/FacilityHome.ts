@@ -6,6 +6,7 @@ class FacilityHome {
 
   // Operations
   clickExportButton() {
+    cy.get(this.exportButton).scrollIntoView();
     cy.get(this.exportButton).click();
   }
 
@@ -52,7 +53,7 @@ class FacilityHome {
     cy.get("#facility-detailspage-cns").click();
   }
 
-  selectLocation(location) {
+  selectLocation(location: string) {
     cy.get("#location").click().type(location);
     cy.get("li[role=option]").contains(location).click();
   }
@@ -89,14 +90,16 @@ class FacilityHome {
   }
 
   verifyDownload(alias: string) {
-    cy.wait(`@${alias}`).its("response.statusCode").should("eq", 200);
+    cy.wait(`@${alias}`, { timeout: 60000 })
+      .its("response.statusCode")
+      .should("eq", 200);
   }
 
   getURL() {
     return cy.url();
   }
 
-  verifyURLContains(searchText) {
+  verifyURLContains(searchText: string) {
     const encodedText = encodeURIComponent(searchText).replace(/%20/g, "+");
     this.getURL().should("include", `search=${encodedText}`);
   }

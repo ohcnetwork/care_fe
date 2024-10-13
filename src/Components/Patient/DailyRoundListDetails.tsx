@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -6,8 +6,7 @@ import { formatDateTime } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { useTranslation } from "react-i18next";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export const DailyRoundListDetails = (props: any) => {
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId, id } = props;
@@ -16,13 +15,9 @@ export const DailyRoundListDetails = (props: any) => {
 
   const { loading: isLoading } = useQuery(routes.getDailyReport, {
     pathParams: { consultationId, id },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        const tdata: DailyRoundsModel = {
-          ...data,
-          medication_given: data.medication_given ?? [],
-        };
-        setDailyRoundListDetails(tdata);
+    onResponse: ({ data }) => {
+      if (data) {
+        setDailyRoundListDetails(data);
       }
     },
   });

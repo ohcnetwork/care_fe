@@ -1,32 +1,35 @@
 import * as Notification from "../../Utils/Notifications";
 
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ClaimDetailCard from "../HCX/ClaimDetailCard";
+import CircularProgress from "../Common/components/CircularProgress";
+import ClaimCard from "../HCX/ClaimCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DISCHARGE_REASONS } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
+import { FacilityModel } from "./models";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldError } from "../Form/FieldValidators";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
+import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
+import dayjs from "../../Utils/dayjs";
 import { dischargePatient } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
-import CircularProgress from "../Common/components/CircularProgress";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FacilityModel } from "./models";
-import dayjs from "../../Utils/dayjs";
-import { FieldError } from "../Form/FieldValidators";
+import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
 import useConfirmedAction from "../../Common/hooks/useConfirmedAction";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import routes from "../../Redux/api";
+import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
+import Loading from "../Common/Loading";
 import careConfig from "@careConfig";
 
 interface PreDischargeFormInterface {
@@ -81,6 +84,34 @@ const DischargeModal = ({
   const [facility, setFacility] = useState<FacilityModel | null>(referred_to);
   const [errors, setErrors] = useState<any>({});
 
+  const { refetch: refetchLatestClaim } = useQuery(routes.hcx.claims.list, {
+    query: {
+      consultation: consultationData.id,
+      ordering: "-modified_date",
+      use: "claim",
+      outcome: "complete",
+      limit: 1,
+    },
+    onResponse: (res) => {
+      if (!isCreateClaimLoading) return;
+
+      setIsCreateClaimLoading(false);
+
+      if (res?.data?.results?.length !== 0) {
+        setLatestClaim(res?.data?.results[0]);
+        Notification.Success({
+          msg: t("claim__fetched_claim_approval_results"),
+        });
+        return;
+      }
+
+      setLatestClaim(undefined);
+      Notification.Success({
+        msg: t("claim__error_fetching_claim_approval_results"),
+      });
+    },
+  });
+
   useEffect(() => {
     setPreDischargeForm((prev) => ({
       ...prev,
@@ -94,33 +125,13 @@ const DischargeModal = ({
     setFacility(referred_to);
   }, [referred_to]);
 
+  const initialDiagnoses = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationData.id ?? "" },
+    prefetch: !!consultationData.id,
+  }).data?.diagnoses;
+
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
-
-  const fetchLatestClaim = useCallback(async () => {
-    const res = await dispatch(
-      HCXActions.claims.list({
-        ordering: "-modified_date",
-        use: "claim",
-        consultation: consultationData.id,
-      }),
-    );
-
-    if (res?.data?.results?.length > 0) {
-      setLatestClaim(res.data.results[0]);
-      if (isCreateClaimLoading)
-        Notification.Success({ msg: "Fetched Claim Approval Results" });
-    } else {
-      setLatestClaim(undefined);
-      if (isCreateClaimLoading)
-        Notification.Success({ msg: "Error Fetched Claim Approval Results" });
-    }
-    setIsCreateClaimLoading(false);
-  }, [consultationData.id, dispatch]);
-
-  useEffect(() => {
-    fetchLatestClaim();
-  }, [fetchLatestClaim]);
 
   useMessageListener((data) => {
     if (
@@ -128,7 +139,7 @@ const DischargeModal = ({
       (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
       data.message === "success"
     ) {
-      fetchLatestClaim();
+      refetchLatestClaim();
     }
   });
 
@@ -203,6 +214,10 @@ const DischargeModal = ({
   );
 
   const confirmationRequired = encounterDuration.asDays() >= 30;
+
+  if (initialDiagnoses == null) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -287,27 +302,6 @@ const DischargeModal = ({
               />
             </div>
           )}
-          <TextAreaFormField
-            required={
-              discharge_reason ==
-              DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
-            }
-            label={
-              {
-                "3": "Cause of death",
-                "1": "Discharged Advice",
-              }[discharge_reason ?? 0] ?? "Notes"
-            }
-            name="discharge_notes"
-            value={preDischargeForm.discharge_notes}
-            onChange={(e) =>
-              setPreDischargeForm((prev) => ({
-                ...prev,
-                discharge_notes: e.value,
-              }))
-            }
-            error={errors?.discharge_notes}
-          />
           <TextFormField
             name={
               discharge_reason ===
@@ -350,6 +344,18 @@ const DischargeModal = ({
                 : errors?.discharge_date
             }
           />
+
+          {discharge_reason !==
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
+            <div id="diagnoses">
+              <FieldLabel>{t("diagnosis_at_discharge")}</FieldLabel>
+              <EditDiagnosesBuilder
+                consultationId={consultationData.id}
+                value={initialDiagnoses}
+              />
+            </div>
+          )}
+
           {discharge_reason ===
             DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id && (
             <>
@@ -383,13 +389,34 @@ const DischargeModal = ({
             />
           )}
         </div>
+        <TextAreaFormField
+          required={
+            discharge_reason ==
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+          }
+          label={
+            {
+              "3": "Cause of death",
+              "1": "Discharged Advice",
+            }[discharge_reason ?? 0] ?? "Notes"
+          }
+          name="discharge_notes"
+          value={preDischargeForm.discharge_notes}
+          onChange={(e) =>
+            setPreDischargeForm((prev) => ({
+              ...prev,
+              discharge_notes: e.value,
+            }))
+          }
+          error={errors?.discharge_notes}
+        />
 
         {careConfig.hcx.enabled && (
           // TODO: if policy and approved pre-auth exists
           <div className="my-5 rounded p-5 shadow">
             <h2 className="mb-2">Claim Insurance</h2>
             {latestClaim ? (
-              <ClaimDetailCard claim={latestClaim} />
+              <ClaimCard claim={latestClaim} />
             ) : (
               <CreateClaimCard
                 consultationId={consultationData.id ?? ""}

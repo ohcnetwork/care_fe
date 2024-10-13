@@ -8,12 +8,11 @@ import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import SearchInput from "../Form/SearchInput";
 import ShiftingBoard from "./ShiftingBoard";
-import { downloadShiftRequests } from "../../Redux/actions";
 import { formatFilter } from "./Commons";
 
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
-import { lazy, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import withScrolling from "react-dnd-scrolling";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -21,9 +20,11 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Tabs from "../Common/components/Tabs";
 import careConfig from "@careConfig";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
-const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
 const ScrollingComponent = withScrolling("div");
 
 export default function BoardView() {
@@ -135,9 +136,12 @@ export default function BoardView() {
             hideBack
             componentRight={
               <ExportButton
-                action={() =>
-                  downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-                }
+                action={async () => {
+                  const { data } = await request(routes.downloadShiftRequests, {
+                    query: { ...formatFilter(qParams), csv: true },
+                  });
+                  return data ?? null;
+                }}
                 filenamePrefix="shift_requests"
               />
             }

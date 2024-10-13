@@ -1,4 +1,4 @@
-import { useState, lazy } from "react";
+import { useState } from "react";
 import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications.js";
@@ -10,8 +10,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ResourceDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =
@@ -254,7 +253,7 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="text-xl font-semibold">{data.title || "--"}</div>
               <ButtonV2
                 data-testid="update-status"
-                className="mt-4 w-full sm:mt-2"
+                className="mt-4 sm:mt-2"
                 href={`/resource/${data.id}/update`}
               >
                 Update Status/Details

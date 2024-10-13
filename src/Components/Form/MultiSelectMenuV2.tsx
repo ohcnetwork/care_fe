@@ -14,7 +14,7 @@ type OptionCallback<T, R = void> = (option: T) => R;
 
 type Props<T, V = T> = {
   id?: string;
-  options: T[];
+  options: readonly T[];
   value: V[] | undefined;
   placeholder?: ReactNode;
   optionLabel: OptionCallback<T, ReactNode>;

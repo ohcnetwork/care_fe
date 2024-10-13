@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { HCXActions } from "../../Redux/actions";
-import PageTitle from "../Common/PageTitle";
-import ClaimDetailCard from "../HCX/ClaimDetailCard";
-import CreateClaimCard from "../HCX/CreateClaimCard";
-import { HCXClaimModel } from "../HCX/models";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications";
 
-interface Props {
+import ClaimCard from "../HCX/ClaimCard";
+import CreateClaimCard from "../HCX/CreateClaimCard";
+import PageTitle from "@/Components/Common/PageTitle";
+import { navigate } from "raviger";
+import routes from "../../Redux/api";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import useQuery from "../../Utils/request/useQuery";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+export interface IConsultationClaimsProps {
   facilityId: string;
   patientId: string;
   consultationId: string;
@@ -19,33 +20,34 @@ export default function ConsultationClaims({
   facilityId,
   consultationId,
   patientId,
-}: Props) {
-  const dispatch = useDispatch<any>();
-  const [claims, setClaims] = useState<HCXClaimModel[]>();
+}: IConsultationClaimsProps) {
+  const { t } = useTranslation();
+
   const [isCreateLoading, setIsCreateLoading] = useState(false);
 
-  const fetchClaims = useCallback(async () => {
-    const res = await dispatch(
-      HCXActions.claims.list({
+  const { data: claimsResult, refetch: refetchClaims } = useQuery(
+    routes.hcx.claims.list,
+    {
+      query: {
         ordering: "-modified_date",
         consultation: consultationId,
-      }),
-    );
+      },
+      onResponse: (res) => {
+        if (!isCreateLoading) return;
 
-    if (res.data && res.data.results) {
-      setClaims(res.data.results);
-      if (isCreateLoading)
-        Notification.Success({ msg: "Fetched Claim Approval Results" });
-    } else {
-      if (isCreateLoading)
-        Notification.Success({ msg: "Error Fetched Claim Approval Results" });
-    }
-    setIsCreateLoading(false);
-  }, [dispatch, consultationId]);
+        if (res.data?.results) {
+          Notification.Success({
+            msg: t("claim__fetched_claim_approval_results"),
+          });
+          return;
+        }
 
-  useEffect(() => {
-    fetchClaims();
-  }, [fetchClaims]);
+        Notification.Error({
+          msg: t("claim__error_fetching_claim_approval_results"),
+        });
+      },
+    },
+  );
 
   useMessageListener((data) => {
     if (
@@ -53,14 +55,14 @@ export default function ConsultationClaims({
       (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
       data.message === "success"
     ) {
-      fetchClaims();
+      refetchClaims();
     }
   });
 
   return (
     <div className="relative flex flex-col pb-2">
       <PageTitle
-        title="Claims"
+        title={t("Claims")}
         className="grow-0 pl-6"
         onBackClick={() => {
           navigate(
@@ -81,9 +83,9 @@ export default function ConsultationClaims({
         </div>
 
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
-          {claims?.map((claim) => (
+          {claimsResult?.results.map((claim) => (
             <div className="rounded-lg bg-white p-8">
-              <ClaimDetailCard claim={claim} />
+              <ClaimCard claim={claim} />
             </div>
           ))}
         </div>

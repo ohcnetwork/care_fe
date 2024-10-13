@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { FieldValidator } from "../Form/FieldValidators";
 import FormField from "../Form/FormFields/FormField";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
@@ -8,42 +9,37 @@ import {
 } from "../Form/FormFields/Utils";
 import { BloodPressure } from "../Patient/models";
 
-type Props = FormFieldBaseProps<BloodPressure>;
+type Props = FormFieldBaseProps<BloodPressure | null>;
 
 export default function BloodPressureFormField(props: Props) {
+  const { t } = useTranslation();
   const field = useFormFieldPropsResolver(props);
+  const map = meanArterialPressure(props.value)?.toFixed();
 
   const handleChange = (event: FieldChangeEvent<number>) => {
-    const value: BloodPressure = {
-      ...field.value,
-      [event.name]: event.value,
+    const bp = {
+      systolic: field.value?.systolic,
+      diastolic: field.value?.diastolic,
     };
-    value.mean = meanArterialPressure(value);
-    field.onChange({ name: field.name, value });
+    bp[event.name as keyof BloodPressure] = event.value;
+    field.handleChange(Object.values(bp).filter(Boolean).length ? bp : null);
   };
-
-  const map =
-    !!props.value?.diastolic &&
-    !!props.value.systolic &&
-    meanArterialPressure(props.value);
 
   return (
     <FormField
       field={{
         ...field,
-        labelSuffix: map ? (
-          <span className="font-medium">MAP: {map.toFixed(1)}</span>
-        ) : undefined,
+        labelSuffix: map && <span className="font-medium">MAP: {map}</span>,
       }}
     >
       <div className="flex flex-row items-center">
         <RangeAutocompleteFormField
           name="systolic"
-          placeholder="Systolic"
+          placeholder={t("systolic")}
           start={0}
           end={250}
           step={1}
-          value={field.value?.systolic}
+          value={field.value?.systolic ?? undefined}
           onChange={handleChange}
           labelClassName="hidden"
           errorClassName="hidden"
@@ -68,11 +64,11 @@ export default function BloodPressureFormField(props: Props) {
         <span className="px-2 text-lg font-medium text-secondary-400">/</span>
         <RangeAutocompleteFormField
           name="diastolic"
-          placeholder="Diastolic"
+          placeholder={t("diastolic")}
           start={0}
           end={250}
           step={1}
-          value={field.value?.diastolic}
+          value={field.value?.diastolic ?? undefined}
           onChange={handleChange}
           labelClassName="hidden"
           errorClassName="hidden"
@@ -99,13 +95,11 @@ export default function BloodPressureFormField(props: Props) {
   );
 }
 
-export const meanArterialPressure = ({
-  diastolic,
-  systolic,
-}: BloodPressure) => {
-  if (diastolic != null && systolic != null) {
-    return (2 * diastolic + systolic) / 3;
+export const meanArterialPressure = (bp?: BloodPressure | null) => {
+  if (bp?.diastolic == null || bp?.systolic == null) {
+    return;
   }
+  return (2 * bp.diastolic + bp.systolic) / 3;
 };
 
 export const BloodPressureValidator: FieldValidator<BloodPressure> = (bp) => {

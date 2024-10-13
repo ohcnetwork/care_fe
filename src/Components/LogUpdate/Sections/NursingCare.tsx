@@ -1,9 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { NURSING_CARE_PROCEDURES } from "../../../Common/constants";
-import { classNames } from "../../../Utils/utils";
-import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
-import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
+import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField";
+import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
 
 const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();
@@ -11,59 +10,58 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
 
   return (
     <div className="flex flex-col">
-      {NURSING_CARE_PROCEDURES.map((procedure, i) => {
-        const obj = nursing.find((n) => n.procedure === procedure);
-
-        return (
-          <div
-            key={i}
-            className={classNames(
-              "overflow-hidden rounded-lg shadow-none transition-all duration-200 ease-in-out",
-              obj &&
-                "border border-secondary-400 bg-secondary-100 focus-within:shadow-md",
-            )}
-          >
-            <div className="px-4 pt-4">
-              <CheckBoxFormField
-                label={t(`NURSING_CARE_PROCEDURE__${procedure}`)}
-                name={`${procedure}__enabled`}
-                value={!!obj}
-                onChange={(e) => {
-                  if (e.value) {
-                    onChange({
-                      nursing: [...nursing, { procedure, description: "" }],
-                    });
-                  } else {
-                    onChange({
-                      nursing: nursing.filter((n) => n.procedure !== procedure),
-                    });
-                  }
-                }}
-                errorClassName="hidden"
-              />
-            </div>
-            {obj && (
-              <div className="p-4">
-                <TextAreaFormField
-                  name={`${procedure}__description`}
-                  value={obj.description}
-                  onChange={(val) =>
-                    onChange({
-                      nursing: nursing.map((n) =>
-                        n.procedure === procedure
-                          ? { ...n, description: val.value }
-                          : n,
-                      ),
-                    })
-                  }
-                  placeholder="Description"
-                  errorClassName="hidden"
-                />
-              </div>
-            )}
-          </div>
-        );
-      })}
+      <AutocompleteMultiSelectFormField
+        name="procedures"
+        placeholder={t("procedures_select_placeholder")}
+        value={nursing.map((p) => p.procedure)}
+        onChange={({ value }) => {
+          onChange({
+            nursing: value.map((procedure) => ({
+              procedure,
+              description:
+                nursing.find((p) => p.procedure === procedure)?.description ??
+                "",
+            })),
+          });
+        }}
+        options={NURSING_CARE_PROCEDURES}
+        optionLabel={(procedure) => t(`NURSING_CARE_PROCEDURE__${procedure}`)}
+        optionValue={(o) => o}
+        errorClassName="hidden"
+      />
+      {!!nursing.length && (
+        <table className="mb-8 mt-2 w-full border-collapse">
+          <tbody>
+            {nursing.map((obj) => (
+              <tr key={obj.procedure}>
+                <td className="whitespace-nowrap border border-r-2 border-secondary-400 border-r-secondary-300 bg-secondary-50 p-2 pr-4 text-left text-sm font-semibold md:pr-16">
+                  {t(`NURSING_CARE_PROCEDURE__${obj.procedure}`)}
+                </td>
+                <td className="w-full border border-secondary-400">
+                  <AutoExpandingTextInputFormField
+                    innerClassName="border-none rounded-none"
+                    name={`${obj.procedure}__description`}
+                    value={obj.description}
+                    onChange={(val) =>
+                      onChange({
+                        nursing: nursing.map((n) =>
+                          n.procedure === obj.procedure
+                            ? { ...n, description: val.value }
+                            : n,
+                        ),
+                      })
+                    }
+                    rows={1}
+                    maxHeight={160}
+                    placeholder={t("add_remarks")}
+                    errorClassName="hidden"
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

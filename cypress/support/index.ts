@@ -15,7 +15,7 @@ declare global {
       getAttached(selector: string): Chainable<Subject>;
       clearAllFilters(): Chainable<Subject>;
       submitButton(buttonText?: string): Chainable<Element>;
-      searchAndSelectOption(
+      typeAndSelectOption(
         element: string,
         referance: string,
       ): Chainable<Element>;
@@ -23,6 +23,7 @@ declare global {
         selector: string,
         symptoms: string | string[],
       ): Chainable<Element>;
+      selectRadioOption(name: string, value: string): Chainable<Element>;
       typeAndMultiSelectOption(
         selector: string,
         input: string,

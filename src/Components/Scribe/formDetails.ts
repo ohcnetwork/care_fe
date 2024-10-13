@@ -91,7 +91,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     id: "bp",
     current: { systolic: null, diastolic: null, mean: null },
     type: "{ systolic?: number, diastolic?: number }",
-    example: "{ systolic: 120 }",
+    example: "{ systolic: 120, diastolic: 90 }",
     description:
       "An object to store the blood pressure of the patient. It may contain two integers, systolic and diastolic.",
   },
@@ -301,9 +301,9 @@ export const SCRIBE_FORMS: { [key: string]: ScribeForm } = {
           options:
             field.id === "investigations"
               ? investigations?.map((investigation, i) => ({
-                  id: i,
-                  text: investigation,
-                }))
+                id: i,
+                text: investigation,
+              }))
               : field.options,
         };
       });
