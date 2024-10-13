@@ -47,7 +47,7 @@
     "@fontsource/figtree": "^5.1.0",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.3",
-    "@headlessui/react": "^2.1.2",
+    "@headlessui/react": "^2.1.10",
     "@hello-pangea/dnd": "^17.0.0",
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
