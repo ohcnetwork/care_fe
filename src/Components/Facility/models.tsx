@@ -5,6 +5,7 @@ import {
   ConsultationSuggestionValue,
   DISCHARGE_REASONS,
   PATIENT_NOTES_THREADS,
+  SHIFTING_CHOICES_PEACETIME,
   UserRole,
 } from "../../Common/constants";
 import { FeatureFlag } from "../../Utils/featureFlags";
@@ -15,12 +16,13 @@ import {
   DailyRoundsModel,
   FacilityNameModel,
   FileUploadModel,
+  PatientModel,
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
+import { UserBareMinimum, UserModel } from "../Users/models";
 import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
-import { UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
   id: number;
@@ -683,3 +685,50 @@ export type PatientTransferResponse = {
   date_of_birth: string;
   facility_object: BaseFacilityModel;
 };
+
+export interface ShiftingModel {
+  assigned_facility: string;
+  assigned_facility_external: string | null;
+  assigned_facility_object: FacilityModel;
+  created_date: string;
+  emergency: boolean;
+  external_id: string;
+  id: string;
+  modified_date: string;
+  origin_facility_object: FacilityModel;
+  patient: string;
+  patient_object: PatientModel;
+  shifting_approving_facility_object: FacilityModel | null;
+  status: (typeof SHIFTING_CHOICES_PEACETIME)[number]["text"];
+  assigned_to_object?: UserModel;
+}
+
+export interface ResourceModel {
+  approving_facility: string | null;
+  approving_facility_object: FacilityModel | null;
+  assigned_facility: string | null;
+  assigned_facility_object: FacilityModel | null;
+  assigned_quantity: number;
+  assigned_to: string | null;
+  assigned_to_object: UserModel | null;
+  category: string;
+  created_by: number;
+  created_by_object: UserModel;
+  created_date: string;
+  emergency: boolean;
+  id: string;
+  is_assigned_to_user: boolean;
+  last_edited_by: number;
+  last_edited_by_object: UserModel;
+  modified_date: string;
+  origin_facility: string;
+  origin_facility_object: FacilityModel;
+  priority: number | null;
+  reason: string;
+  refering_facility_contact_name: string;
+  refering_facility_contact_number: string;
+  requested_quantity: number;
+  status: string;
+  sub_category: string;
+  title: string;
+}

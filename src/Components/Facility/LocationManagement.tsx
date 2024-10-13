@@ -13,6 +13,7 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import DialogModal from "../Common/Dialog";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
 
 import Loading from "@/Components/Common/Loading";
 interface Props {
@@ -223,97 +224,120 @@ const Location = ({
   disabled,
   setShowDeletePopup,
   facilityId,
-}: LocationProps) => (
-  <div className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
-    <div className="flex-1">
-      <div className="flex w-full items-start justify-between gap-2">
-        <div className="flex items-end gap-3">
-          <p className="break-all text-xl font-medium" id="view-location-name">
-            {name}
-          </p>
-          <div
-            className="mt-2 h-fit rounded-full border-2 border-primary-500 bg-primary-100 px-3 py-[3px]"
-            id="location-type"
-          >
-            <p className="text-xs font-bold text-primary-500">
-              {location_type}
+}: LocationProps) => {
+  const { loading, data } = useQuery(routes.listFacilityBeds, {
+    query: {
+      facility: facilityId,
+      location: id,
+    },
+  });
+
+  const totalBeds = data?.count ?? 0;
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  return (
+    <div className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
+      <div className="flex-1">
+        <div className="flex w-full items-start justify-between gap-2">
+          <div className="flex items-end gap-3">
+            <p
+              className="break-all text-xl font-medium"
+              id="view-location-name"
+            >
+              {name}
             </p>
+            <div
+              className="mt-2 h-fit rounded-full border-2 border-primary-500 bg-primary-100 px-3 py-[3px]"
+              id="location-type"
+            >
+              <p className="text-xs font-bold text-primary-500">
+                {location_type}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-      <p
-        className="mt-3 break-all text-sm font-medium text-secondary-700"
-        id="view-location-description"
-      >
-        {description || "-"}
-      </p>
-      <p className="mt-3 text-sm font-semibold text-secondary-700">
-        Middleware Address:
-      </p>
-      <p
-        className="mt-1 break-all font-mono text-sm font-bold text-secondary-700"
-        id="view-location-middleware"
-      >
-        {middleware_address || "-"}
-      </p>
-      <Uptime
-        route={routes.listFacilityAssetLocationAvailability}
-        params={{ external_id: id, facility_external_id: facilityId }}
-        header={
-          <p className="mt-3 text-sm font-semibold text-secondary-700">
-            Middleware Uptime
-          </p>
-        }
-        centerInfoPanel
-      />
-    </div>
-
-    <ButtonV2
-      id="manage-bed-button"
-      variant="secondary"
-      border
-      className="mt-3 w-full"
-      href={`location/${id}/beds`}
-    >
-      <CareIcon icon="l-bed" className="text-lg" />
-      Manage Beds
-    </ButtonV2>
-    <div className="mt-2 flex w-full flex-col gap-2 md:flex-row">
-      <div className="w-full md:w-1/2">
-        <ButtonV2
-          id="edit-location-button"
-          variant="secondary"
-          border
-          className="w-full"
-          href={`location/${id}/update`}
-          authorizeFor={NonReadOnlyUsers}
+        <p
+          className="mt-3 break-all text-sm font-medium text-secondary-700"
+          id="view-location-description"
         >
-          <CareIcon icon="l-pen" className="text-lg" />
-          Edit
-        </ButtonV2>
-      </div>
-      <div className="w-full md:w-1/2">
-        <ButtonV2
-          authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
-          id="delete-location-button"
-          variant="secondary"
-          border
-          className="w-full"
-          tooltip={disabled ? "Contact your admin to delete the location" : ""}
-          tooltipClassName=" text-xs w-full lg:w-auto"
-          onClick={() =>
-            setShowDeletePopup({ open: true, name: name ?? "", id: id ?? "" })
+          {description || "-"}
+        </p>
+        <p className="mt-3 text-sm font-semibold text-secondary-700">
+          Middleware Address:
+        </p>
+        <p
+          className="mt-1 break-all font-mono text-sm font-bold text-secondary-700"
+          id="view-location-middleware"
+        >
+          {middleware_address || "-"}
+        </p>
+        <Uptime
+          route={routes.listFacilityAssetLocationAvailability}
+          params={{ external_id: id, facility_external_id: facilityId }}
+          header={
+            <p className="mt-3 text-sm font-semibold text-secondary-700">
+              Middleware Uptime
+            </p>
           }
-        >
-          <CareIcon icon="l-trash" className="text-lg" />
-          Delete
-        </ButtonV2>
+          centerInfoPanel
+        />
+      </div>
+
+      <ButtonV2
+        id="manage-bed-button"
+        variant="secondary"
+        border
+        className="mt-3 flex w-full items-center justify-between"
+        href={`location/${id}/beds`}
+      >
+        Manage Beds
+        <span className="flex items-center justify-center gap-2">
+          <CareIcon icon="l-bed" className="text-lg" />
+          {totalBeds}
+        </span>
+      </ButtonV2>
+      <div className="mt-2 flex w-full flex-col gap-2 md:flex-row">
+        <div className="w-full md:w-1/2">
+          <ButtonV2
+            id="edit-location-button"
+            variant="secondary"
+            border
+            className="w-full"
+            href={`location/${id}/update`}
+            authorizeFor={NonReadOnlyUsers}
+          >
+            <CareIcon icon="l-pen" className="text-lg" />
+            Edit
+          </ButtonV2>
+        </div>
+        <div className="w-full md:w-1/2">
+          <ButtonV2
+            authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
+            id="delete-location-button"
+            variant="secondary"
+            border
+            className="w-full"
+            tooltip={
+              disabled ? "Contact your admin to delete the location" : ""
+            }
+            tooltipClassName=" text-xs w-full lg:w-auto"
+            onClick={() =>
+              setShowDeletePopup({ open: true, name: name ?? "", id: id ?? "" })
+            }
+          >
+            <CareIcon icon="l-trash" className="text-lg" />
+            Delete
+          </ButtonV2>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-4 text-sm font-medium text-secondary-700">
+        <RecordMeta time={created_date} prefix="Created:" />
+        <RecordMeta time={modified_date} prefix="Modified:" />
       </div>
     </div>
-
-    <div className="mt-3 flex items-center justify-between gap-4 text-sm font-medium text-secondary-700">
-      <RecordMeta time={created_date} prefix="Created:" />
-      <RecordMeta time={modified_date} prefix="Modified:" />
-    </div>
-  </div>
-);
+  );
+};
