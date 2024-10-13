@@ -1027,7 +1027,7 @@
   "consultation_not_filed_description": "Please file a consultation for this patient to continue.",
   "width": "Width ({{unit}})",
   "length": "Length ({{unit}})",
-  "minimize":"Minimize",
-  "send":"Send",
-   "reply":"Reply"
+  "minimize": "Minimize",
+  "send": "Send",
+  "reply": "Reply"
 }
