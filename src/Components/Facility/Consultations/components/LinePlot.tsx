@@ -42,7 +42,6 @@ export const LinePlot = (props: any) => {
     high = null,
     defaultSpace,
     verticalMarkerData = null,
-    verticalMarkerData2 = null,
   } = props;
   let generalOptions: any = {
     grid: {
@@ -136,49 +135,19 @@ export const LinePlot = (props: any) => {
     let series = generalOptions.series[0];
     series = {
       ...series,
-      markArea: {
+      markLine: {
         silent: true,
         data: verticalMarkerData,
         symbol: "none",
-        itemStyle: {
-          borderWidth: 1,
-          borderType: "dashed",
-          borderColor: "#000000",
+        lineStyle: {
+          color: "#000000",
         },
       },
     };
-    generalOptions.series[0] = series;
-    /* series.push({
-      type: "line",
-      markArea: {
-        silent: true,
-        data: verticalMarkerData,
-        symbol: "none",
-        itemStyle: {
-          color: "transparent",
-          borderWidth: 1,
-          borderType: "dashed",
-          borderColor: "#000000",
-        },
-      },
-    });
     generalOptions = {
       ...generalOptions,
       series,
-    }; */
-  }
-
-  if (verticalMarkerData2) {
-    let series = generalOptions.series[0];
-    series = {
-      ...series,
-      markLine: {
-        silent: true,
-        data: verticalMarkerData2,
-        symbol: "none",
-      },
     };
-    generalOptions.series[0] = series;
   }
 
   if (props.type && props.type === "WAVEFORM") {

@@ -70,7 +70,10 @@ export const VentilatorPlot = ({
     .map((p: string) => formatDateTime(p))
     .reverse();
 
-  const getConditions = (name: string, currentRound: DailyRoundsModel) => {
+  const getConditionAndLegend = (
+    name: string,
+    currentRound: DailyRoundsModel,
+  ) => {
     let condition = false;
     let legend = "";
     switch (name) {
@@ -116,13 +119,28 @@ export const VentilatorPlot = ({
     }
     switch (currentRound.ventilator_interface) {
       case "OXYGEN_SUPPORT":
-        legend = t(
-          `OXYGEN_MODALITY__${currentRound.ventilator_oxygen_modality}_short`,
-        );
+        legend =
+          t(
+            `OXYGEN_MODALITY__${currentRound.ventilator_oxygen_modality}_short`,
+          ) +
+          " (" +
+          t("RESPIRATORY_SUPPORT_SHORT__OXYGEN_SUPPORT") +
+          ")";
         break;
       case "INVASIVE":
+        legend =
+          t(`VENTILATOR_MODE__${currentRound.ventilator_mode}_short`) +
+          " (" +
+          t("RESPIRATORY_SUPPORT_SHORT__INVASIVE") +
+          ")";
+        break;
       case "NON_INVASIVE":
-        legend = t(`VENTILATOR_MODE__${currentRound.ventilator_mode}_short`);
+        legend =
+          t(`VENTILATOR_MODE__${currentRound.ventilator_mode}_short`) +
+          " (" +
+          t("RESPIRATORY_SUPPORT_SHORT__NON_INVASIVE") +
+          ")";
+        break;
     }
     return { condition, legend };
   };
@@ -138,72 +156,12 @@ export const VentilatorPlot = ({
     return modeOrModality;
   };
 
-  const getMarkAreaData = (name: string) => {
-    const markAreaData = [];
-    const colorList = ["rgb(226,225,226, 0.2)", "rgb(226,225,226, 0.8)"];
-    let colorFlag = true;
-    let currentColor = colorList[0];
-    if (!dailyRoundsList) return [];
-    for (let index = 0; index < dailyRoundsList.length - 1; index++) {
-      const currentRound = dailyRoundsList[index];
-      const { condition, legend } = getConditions(name, currentRound);
-      const currentInterfaceOrModality = getModeOrModality(currentRound);
-      if (condition) {
-        const currentCoords = [];
-        const startIndex = dates.findIndex(
-          (element) => element == currentRound.taken_at,
-        );
-        if (startIndex != -1) {
-          while (index < dailyRoundsList.length - 1) {
-            const nextRound = dailyRoundsList[index + 1];
-            const nextInterfaceOrModality = getModeOrModality(nextRound);
-            if (
-              currentRound.ventilator_interface ==
-                nextRound.ventilator_interface &&
-              currentInterfaceOrModality == nextInterfaceOrModality
-            ) {
-              index += 1;
-            } else {
-              break;
-            }
-          }
-          const endIndex = dates.findIndex(
-            (element) => element == dailyRoundsList[index + 1].taken_at,
-          );
-          currentColor = colorFlag ? colorList[0] : colorList[1];
-          colorFlag = !colorFlag;
-          currentCoords.push({
-            name: legend,
-            xAxis: dates[startIndex],
-            itemStyle: {
-              color: currentColor,
-            },
-            borderJoin: "miter",
-          });
-          currentCoords.push({
-            xAxis: dates[endIndex],
-            label: {
-              rotate: 30,
-              formatter: legend,
-              distance: 20,
-              align: "center",
-              verticalAlign: "top",
-              position: "top",
-            },
-          });
-          markAreaData.push(currentCoords);
-        }
-      }
-    }
-    return markAreaData;
-  };
-
   const getMarkLineData = (name: string) => {
     const markLineData = [];
     if (!dailyRoundsList) return [];
     for (let index = 0; index < dailyRoundsList.length - 1; index++) {
       const currentRound = dailyRoundsList[index];
-      const { condition, legend } = getConditions(name, currentRound);
+      const { condition, legend } = getConditionAndLegend(name, currentRound);
       const currentInterfaceOrModality = getModeOrModality(currentRound);
       if (condition) {
         const startIndex = dates.findIndex(
@@ -230,12 +188,14 @@ export const VentilatorPlot = ({
               show: true,
               position: "middle",
               formatter: "{b}",
+              color: "#000000",
+              textBorderColor: "#ffffff",
+              textBorderWidth: 2,
             },
           });
         }
       }
     }
-    console.log(dates);
     return markLineData;
   };
 
@@ -265,7 +225,7 @@ export const VentilatorPlot = ({
             yData={yAxisData("ventilator_pip")}
             low={12}
             high={30}
-            verticalMarkerData={getMarkAreaData("ventilator_pip")}
+            verticalMarkerData={getMarkLineData("ventilator_pip")}
           />
         </div>
         <div className="rounded-lg border bg-white px-4 pt-4 shadow">
@@ -276,7 +236,7 @@ export const VentilatorPlot = ({
             yData={yAxisData("ventilator_mean_airway_pressure")}
             low={12}
             high={25}
-            verticalMarkerData={getMarkAreaData(
+            verticalMarkerData={getMarkLineData(
               "ventilator_mean_airway_pressure",
             )}
           />
@@ -289,7 +249,7 @@ export const VentilatorPlot = ({
             yData={yAxisData("ventilator_resp_rate")}
             low={12}
             high={20}
-            verticalMarkerData={getMarkAreaData("ventilator_resp_rate")}
+            verticalMarkerData={getMarkLineData("ventilator_resp_rate")}
           />
         </div>
         <div className="rounded-lg border bg-white px-4 pt-4 shadow">
@@ -300,7 +260,7 @@ export const VentilatorPlot = ({
             yData={yAxisData("ventilator_pressure_support")}
             low={5}
             high={15}
-            verticalMarkerData={getMarkAreaData("ventilator_pressure_support")}
+            verticalMarkerData={getMarkLineData("ventilator_pressure_support")}
           />
         </div>
         <div className="rounded-lg border bg-white px-4 pt-4 shadow">
@@ -309,7 +269,7 @@ export const VentilatorPlot = ({
             name="Tidal Volume"
             xData={dates}
             yData={yAxisData("ventilator_tidal_volume")}
-            verticalMarkerData={getMarkAreaData("ventilator_tidal_volume")}
+            verticalMarkerData={getMarkLineData("ventilator_tidal_volume")}
           />
         </div>
         <div className="rounded-lg border bg-white px-4 pt-4 shadow">
@@ -320,7 +280,7 @@ export const VentilatorPlot = ({
             yData={yAxisData("ventilator_peep")}
             low={5}
             high={10}
-            verticalMarkerData={getMarkAreaData("ventilator_peep")}
+            verticalMarkerData={getMarkLineData("ventilator_peep")}
           />
         </div>
         <div className="rounded-lg border bg-white px-4 pt-4 shadow">
@@ -331,7 +291,7 @@ export const VentilatorPlot = ({
             yData={yAxisData("ventilator_fio2")}
             low={21}
             high={60}
-            verticalMarkerData={getMarkAreaData("ventilator_fio2")}
+            verticalMarkerData={getMarkLineData("ventilator_fio2")}
           />
         </div>
         <div className="rounded-lg border bg-white px-4 pt-4 shadow">
@@ -342,7 +302,7 @@ export const VentilatorPlot = ({
             yData={yAxisData("ventilator_spo2")}
             low={90}
             high={100}
-            verticalMarkerData={getMarkAreaData("ventilator_spo2")}
+            verticalMarkerData={getMarkLineData("ventilator_spo2")}
           />
         </div>
         <div className="rounded-lg border bg-white px-4 pt-4 shadow">
@@ -353,7 +313,7 @@ export const VentilatorPlot = ({
             yData={yAxisData("etco2")}
             low={35}
             high={45}
-            verticalMarkerData={getMarkAreaData("etco2")}
+            verticalMarkerData={getMarkLineData("etco2")}
           />
         </div>
         <div className="rounded-lg border bg-white px-4 pt-4 shadow">
@@ -370,7 +330,7 @@ export const VentilatorPlot = ({
             name="Oxygen Flow Rate"
             xData={dates}
             yData={yAxisData("ventilator_oxygen_modality_oxygen_rate")}
-            verticalMarkerData={getMarkAreaData(
+            verticalMarkerData={getMarkLineData(
               "ventilator_oxygen_modality_oxygen_rate",
             )}
           />
@@ -381,7 +341,7 @@ export const VentilatorPlot = ({
             name="Flow Rate"
             xData={dates}
             yData={yAxisData("ventilator_oxygen_modality_flow_rate")}
-            verticalMarkerData2={getMarkLineData(
+            verticalMarkerData={getMarkLineData(
               "ventilator_oxygen_modality_flow_rate",
             )}
           />
