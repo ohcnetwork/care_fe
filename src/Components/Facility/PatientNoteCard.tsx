@@ -135,12 +135,16 @@ const PatientNoteCard = ({
               note.created_by_object.id === authUser.id &&
               !isEditing && (
                 <ButtonV2
+                  className="tooltip"
                   ghost
                   onClick={() => {
                     setIsEditing(true);
                   }}
                 >
                   <CareIcon icon="l-pen" className="h-5 w-5" />
+                  <span className="tooltip-text tooltip-bottom -translate-x-11 -translate-y-1 text-xs">
+                    {t("edit")}
+                  </span>
                 </ButtonV2>
               )}
             <ButtonV2
