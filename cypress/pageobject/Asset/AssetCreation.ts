@@ -158,10 +158,8 @@ export class AssetPage {
     cy.intercept(/\/api\/v1\/asset/).as("asset");
   }
 
-  verifyAssetConfiguration(statusCode: number) {
-    cy.wait("@asset").then((interception) => {
-      expect(interception.response.statusCode).to.equal(statusCode);
-    });
+  verifyAssetConfiguration() {
+    cy.wait("@asset").its("response.statusCode").should("eq", 200);
   }
 
   clickConfigureAsset() {
@@ -231,22 +229,16 @@ export class AssetPage {
     cy.get("[data-testid=import-asset-button]").click();
   }
 
-  selectjsonexportbutton() {
+  selectJsonExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
     cy.get("#export-json-option").click();
-    cy.wait("@getJsonexport").then(({ request, response }) => {
-      expect(response.statusCode).to.eq(200);
-      expect(request.url).to.include("json=true");
-    });
+    cy.wait("@getJsonexport").its("response.statusCode").should("eq", 200);
   }
 
-  selectcsvexportbutton() {
+  selectCsvExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
     cy.get("#export-csv-option").click();
-    cy.wait("@getCsvexport").then(({ request, response }) => {
-      expect(response.statusCode).to.eq(200);
-      expect(request.url).to.include("csv=true");
-    });
+    cy.wait("@getCsvexport").its("response.statusCode").should("eq", 200);
   }
 
   selectImportOption() {

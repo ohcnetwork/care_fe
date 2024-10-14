@@ -4,7 +4,7 @@ class PatientTreatmentPlan {
   }
 
   fillTreatingPhysican(doctor: string) {
-    cy.searchAndSelectOption("#treating_physician", doctor);
+    cy.typeAndSelectOption("#treating_physician", doctor);
   }
 
   selectReviewAfter(time: string) {
@@ -20,7 +20,7 @@ class PatientTreatmentPlan {
   }
 
   assignTelemedicineDoctor(doctor: string) {
-    cy.searchAndSelectOption("#assigned_to", doctor);
+    cy.typeAndSelectOption("#assigned_to", doctor);
   }
 
   clickAddProcedure() {
