@@ -38,7 +38,7 @@ export default function CareIcon({
   return (
     <svg
       id={id}
-      className={`${icon} ${svgClassName}`}
+      className={`care-${icon} ${svgClassName}`}
       role="img"
       xmlns="http://www.w3.org/2000/svg"
       onClick={onClick}
