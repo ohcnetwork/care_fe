@@ -106,10 +106,6 @@ const careConfig = {
     enabled: (env.REACT_ENABLE_ABDM ?? "true") === "true",
   },
 
-  scribe: {
-    enabled: env.REACT_ENABLE_SCRIBE === "true",
-  },
-
   careApps: appsData,
 } as const;
 
