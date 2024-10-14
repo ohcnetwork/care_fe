@@ -72,7 +72,7 @@ class FacilityHome {
   }
 
   verifyOccupancyBadgeVisibility() {
-    cy.get("#occupany-badge").should("be.visible");
+    cy.get("#occupancy-badge").should("be.visible");
   }
 
   verifyAndCloseNotifyModal() {
