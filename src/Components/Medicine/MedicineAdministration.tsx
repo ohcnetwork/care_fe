@@ -179,7 +179,7 @@ export default function MedicineAdministration(props: Props) {
                 }
                 errorClassName="hidden"
               />
-              <div className="flex flex-col gap-2 lg:max-w-min">
+              <div className="flex w-full flex-col gap-2 lg:max-w-min">
                 <CheckBoxFormField
                   label="Administer for a time in the past"
                   labelClassName="whitespace-nowrap"
@@ -217,7 +217,7 @@ export default function MedicineAdministration(props: Props) {
                   disabled={!shouldAdminister[index] || !isCustomTime[index]}
                   min={new Date(obj.created_date)}
                   max={new Date()}
-                  position="TOP-RIGHT"
+                  className="w-full"
                   errorClassName="hidden"
                   time
                 />

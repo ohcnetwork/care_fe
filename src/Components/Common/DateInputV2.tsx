@@ -288,7 +288,7 @@ const DateInputV2: React.FC<Props> = ({
     const right = popOverX > viewportWidth - (time ? 420 : 300);
     const top = popOverY > viewportHeight - 400;
 
-    return `${right ? "-translate-x-1/2" : ""} ${top ? "-translate-y-[calc(100%+50px)]" : ""}`;
+    return `${right ? "md:-translate-x-1/2" : ""} ${top ? "md:-translate-y-[calc(100%+50px)] w-screen" : ""}`;
   };
 
   return (
