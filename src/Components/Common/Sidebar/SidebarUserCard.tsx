@@ -25,8 +25,11 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
           id="user-profile-name"
           className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
         >
-          <div className="flex-none text-lg">
-            <Avatar name={formatDisplayName(user)} className="w-6" />
+          <div className="w-8 flex-none">
+            <Avatar
+              name={formatDisplayName(user)}
+              className="rounded-full text-black/50"
+            />
           </div>
           {!shrinked && (
             <span className="flex w-full grow items-center pl-4 text-sm tracking-wide">

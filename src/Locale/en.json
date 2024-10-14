@@ -1026,5 +1026,8 @@
   "consultation_not_filed": "You have not filed any consultation for this patient yet.",
   "consultation_not_filed_description": "Please file a consultation for this patient to continue.",
   "width": "Width ({{unit}})",
-  "length": "Length ({{unit}})"
+  "length": "Length ({{unit}})",
+  "live_patients_total_beds": "Live Patients / Total beds",
+  "occupancy" : "Occupancy",
+  "view_cns" : "View CNS"
 }
