@@ -1,5 +1,3 @@
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import { ShiftCreate } from "../../Components/Patient/ShiftCreate";
 import ShiftDetails from "../../Components/Shifting/ShiftDetails";
 import { ShiftDetailsUpdate } from "../../Components/Shifting/ShiftDetailsUpdate";
@@ -12,11 +10,7 @@ const getDefaultView = () =>
 
 export default {
   "/shifting": () => <Redirect to={`/shifting/${getDefaultView()}`} />,
-  "/shifting/board": () => (
-    <DndProvider backend={HTML5Backend}>
-      <BoardView />
-    </DndProvider>
-  ),
+  "/shifting/board": () => <BoardView />,
   "/shifting/list": () => <ListView />,
   "/shifting/:id": ({ id }: any) => <ShiftDetails id={id} />,
   "/shifting/:id/update": ({ id }: any) => <ShiftDetailsUpdate id={id} />,

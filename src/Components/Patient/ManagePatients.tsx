@@ -891,7 +891,7 @@ export const PatientManager = () => {
               selected={qParams.ordering}
               onSelect={updateQuery}
             />
-            <div className="tooltip w-full md:w-auto">
+            <div className="tooltip w-full md:w-auto" id="patient-export">
               {!isExportAllowed ? (
                 <ButtonV2
                   onClick={() => {
@@ -967,7 +967,7 @@ export const PatientManager = () => {
 
       <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
         <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1">
+          <div className="flex-1" id="total-patientcount">
             <CountBlock
               text="Total Patients"
               count={data?.count || 0}
