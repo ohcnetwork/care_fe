@@ -10,7 +10,6 @@ import {
   VisualMapComponent,
   VisualMapPiecewiseComponent,
   MarkLineComponent,
-  MarkAreaComponent,
 } from "echarts/components";
 
 import * as echarts from "echarts/core";
@@ -29,7 +28,6 @@ echarts.use([
   VisualMapComponent,
   VisualMapPiecewiseComponent,
   MarkLineComponent,
-  MarkAreaComponent,
 ]);
 
 export const LinePlot = (props: any) => {
