@@ -13,6 +13,8 @@ import { ScribeModel } from "./Scribe";
 import uploadFile from "../../Utils/request/uploadFile";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { scrapeFields } from "./scribeutils";
+import { description } from "../CriticalCareRecording/types/CriticalCare__NursingCare.bs";
 
 export function Controller(props: ScribeControlProps) {
   const [context, setContext] = useContext(ScribeContext);
@@ -20,6 +22,7 @@ export function Controller(props: ScribeControlProps) {
   const [micAllowed, setMicAllowed] = useState<null | boolean>(null);
   const [transcript, setTranscript] = useState<string>();
   const timer = useTimer();
+  const [scribedData, setScribedData] = useState<{ [key: number]: string }>();
 
   //const { blob, waveform, resetRecording, startRecording, stopRecording } =
   //  useVoiceRecorder((permission: boolean) => {
@@ -221,8 +224,31 @@ export function Controller(props: ScribeControlProps) {
 
   // gets hydrated fields, but does not fetch them again unless ignoreCache is true
   const getHydratedFields = async (ignoreCache?: boolean) => {
-    if (context.hydratedInputs && !ignoreCache) return context.hydratedInputs;
-    return await hydrateValues();
+    //if (context.hydratedInputs && !ignoreCache) return context.hydratedInputs;
+    //return await hydrateValues();
+    const fields = scrapeFields();
+    return fields.map((field, i) => ({
+      friendlyName: field.label || "Unlabled Field",
+      current: field.value,
+      id: `${i}`,
+      description:
+        field.type === "date"
+          ? "A date value"
+          : field.type === "datetime-local"
+            ? "A datetime value"
+            : "A normal string value",
+      type: "string",
+      example:
+        field.type === "date"
+          ? "2003-12-21"
+          : field.type === "datetime-local"
+            ? "2003-12-21T23:10"
+            : "A value",
+      options: field.options?.map((opt) => ({
+        id: opt.value || "NONE",
+        text: opt.text,
+      })),
+    }));
   };
 
   // updates the transcript and fetches a new AI response

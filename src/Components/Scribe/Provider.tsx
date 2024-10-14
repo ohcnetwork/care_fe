@@ -18,6 +18,8 @@ import routes from "../../Redux/api";
 import * as Notify from "../../Utils/Notifications";
 import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
 import uploadFile from "../../Utils/request/uploadFile";
+import { scrapeFields } from "./scribeutils";
+import { Controller } from "./Controller";
 
 export const initialContextValue: ScribeForm = {
   inputs: [],
@@ -51,6 +53,7 @@ export function Provider(props: ScribeProviderProps) {
 
   return (
     <ScribeContext.Provider value={[scribe, setScribe]}>
+      <Controller />
       {children}
     </ScribeContext.Provider>
   );
@@ -76,6 +79,7 @@ export function useScribe<T>(input?: ScribeInput<T>) {
       ...context,
       inputs: [...context.inputs, input],
     }));
+
     return () =>
       setContext((context) => ({
         ...context,

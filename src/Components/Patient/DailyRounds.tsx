@@ -554,7 +554,6 @@ export const DailyRounds = (props: any) => {
       className="mx-auto max-w-4xl"
     >
       <Scribe.Provider>
-        <Scribe.Controller />
         <div className="flex w-full justify-end md:m-4">
           {/*<Scribe
           form={SCRIBE_FORMS.daily_round}
@@ -663,7 +662,10 @@ export const DailyRounds = (props: any) => {
           }}
         />*/}
         </div>
-        <form className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11">
+        <form
+          className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11"
+          data-scribe-form
+        >
           <DraftSection
             handleDraftSelect={(newState) => {
               dispatch({ type: "set_state", state: newState });
@@ -692,29 +694,11 @@ export const DailyRounds = (props: any) => {
               />
             </div>
             <div className="w-full md:w-1/3">
-              <Scribe.Input<string>
-                {...scribeArbitraryField("patient_category")}
-                friendlyName="Patient Category"
-                type="string"
-                example="Mild"
-                description="A string to categorize the patient."
-                options={PATIENT_CATEGORIES.filter(
-                  (c) => c.id !== "Comfort",
-                ).map((category) => ({
-                  id: category.id,
-                  text: category.text,
-                }))}
-              >
-                {({ value, aiResponse }) => (
-                  <PatientCategorySelect
-                    {...field("patient_category")}
-                    value={value() as any}
-                    disabled={!!aiResponse}
-                    required
-                    id="patientCategory"
-                  />
-                )}
-              </Scribe.Input>
+              <PatientCategorySelect
+                {...field("patient_category")}
+                required
+                id="patientCategory"
+              />
             </div>
           </div>
 
@@ -771,40 +755,11 @@ export const DailyRounds = (props: any) => {
                 )}
               </Scribe.Input>
             </div>
-            <Scribe.Input<string>
-              {...scribeArbitraryField("physical_examination_info")}
-              friendlyName="Physical Examination Info"
-              type="string"
-              example="Patient presents with red burn marks over the chest and swollen arms. Examination reveals no additional external injuries or abnormalities."
-              description="This field is designated for storing detailed findings from the physical examination of the patient. It should include all observable physical attributes, conditions, or symptoms noted during the examination. When processing a doctor's transcript, identify and extract descriptions that pertain directly to the patient's physical state, such as visible conditions, physical symptoms, or any abnormalities noted by touch, sight, or measurement. This can include, but is not limited to, descriptions of skin conditions, swellings, lacerations, posture, mobility issues, and any other physically observable traits."
-            >
-              {({ value, aiResponse }) => (
-                <TextAreaFormField
-                  {...field("physical_examination_info")}
-                  value={value() as any}
-                  disabled={!!aiResponse}
-                  label="Physical Examination Info"
-                  rows={5}
-                />
-              )}
-            </Scribe.Input>
-            <Scribe.Input<string>
-              {...scribeArbitraryField("other_details")}
-              friendlyName="Other Details"
-              type="string"
-              example="Patient reports trouble sleeping and a decreased appetite. Additionally, the patient is allergic to penicillin and has a history of asthma."
-              description="This field is for capturing any supplementary details about the patient that are mentioned in the doctor's transcript but do not directly pertain to the physical examination findings. This includes, but is not limited to, behavioral observations, medical history, patient complaints, lifestyle factors, allergies, or any other non-physical observations that are relevant to the patient's overall health and well-being. When processing a transcript, extract information that describes the patient's health, habits, or conditions in a broader sense than what is observed through physical examination alone."
-            >
-              {({ value, aiResponse }) => (
-                <TextAreaFormField
-                  {...field("other_details")}
-                  disabled={!!aiResponse}
-                  value={value() as any}
-                  label="Other Details"
-                  rows={5}
-                />
-              )}
-            </Scribe.Input>
+            <TextAreaFormField
+              {...field("physical_examination_info")}
+              rows={5}
+            />
+            <TextAreaFormField {...field("other_details")} rows={5} />
 
             {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
               <>
