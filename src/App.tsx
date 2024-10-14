@@ -6,6 +6,7 @@ import Loading from "./Components/Common/Loading";
 import HistoryAPIProvider from "./Providers/HistoryAPIProvider";
 import AuthUserProvider from "./Providers/AuthUserProvider";
 import { FeatureFlagsProvider } from "./Utils/featureFlags";
+import { Toaster } from "./Components/ui/toaster";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Integrations.Sentry disabled={!import.meta.env.PROD} />
         <Integrations.Plausible />
       </HistoryAPIProvider>
+      <Toaster />
     </Suspense>
   );
 };
