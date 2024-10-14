@@ -173,6 +173,7 @@ export const RestoreDraftButton = () => {
   return (
     <Button
       variant="outline"
+      type="button"
       className="flex items-center space-x-2"
       onClick={() =>
         handleDraftSelect(

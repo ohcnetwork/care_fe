@@ -292,6 +292,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Gender</FieldLabel>
             <SelectMenuV2
+              id="gender-advancefilter"
               placeholder="Show all"
               options={GENDER_TYPES}
               optionLabel={(o) => o.text}
@@ -304,6 +305,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Category</FieldLabel>
             <SelectMenuV2
+              id="category-advancefilter"
               placeholder="Show all"
               options={PATIENT_FILTER_CATEGORIES}
               optionLabel={(o) => o.text}
@@ -407,6 +409,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Telemedicine</FieldLabel>
             <SelectMenuV2
+              id="telemedicine-advancefilter"
               placeholder="Show all"
               options={TELEMEDICINE_FILTER}
               optionLabel={(o) => o.text}
@@ -423,6 +426,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Respiratory Support</FieldLabel>
             <SelectMenuV2
+              id="respiratory-advancefilter"
               placeholder="Show all"
               options={RESPIRATORY_SUPPORT_FILTER}
               optionLabel={(o) => o.text}
@@ -455,6 +459,7 @@ export default function PatientFilter(props: any) {
               <>
                 <FieldLabel className="text-sm">Review Missed</FieldLabel>
                 <SelectMenuV2
+                  id="review-advancefilter"
                   placeholder="Show all"
                   options={["true", "false"]}
                   optionLabel={(o) => (o === "true" ? "Yes" : "No")}
@@ -469,6 +474,7 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Medico-Legal Case</FieldLabel>
             <SelectMenuV2
+              id="medico-advancefilter"
               placeholder="Show all"
               options={["true", "false"]}
               optionLabel={(o) =>
@@ -484,6 +490,7 @@ export default function PatientFilter(props: any) {
             />
           </div>
           <SelectFormField
+            id="ration-advancefilter"
             name="ration_card_category"
             label="Ration Card Category"
             placeholder="Select"
@@ -589,7 +596,7 @@ export default function PatientFilter(props: any) {
       >
         <div className="space-y-4">
           {!props.dischargePage && (
-            <div>
+            <div id="facility-name">
               <FieldLabel className="text-sm">Facility</FieldLabel>
               <FacilitySelect
                 multiple={false}
@@ -622,6 +629,7 @@ export default function PatientFilter(props: any) {
             <div>
               <FieldLabel className="text-sm">Facility type</FieldLabel>
               <SelectMenuV2
+                id="facility-type"
                 placeholder="Show all"
                 options={FACILITY_TYPES}
                 optionLabel={(o) => o.text}
@@ -640,6 +648,7 @@ export default function PatientFilter(props: any) {
             <FieldLabel className="text-sm">LSG Body</FieldLabel>
             <div className="">
               <AutoCompleteAsync
+                id="facility-lsgbody"
                 name="lsg_body"
                 selected={filterState.lsgBody_ref}
                 fetchData={lsgSearch}
@@ -650,7 +659,7 @@ export default function PatientFilter(props: any) {
             </div>
           </div>
 
-          <div>
+          <div id="facility-district">
             <FieldLabel className="text-sm">District</FieldLabel>
             <DistrictSelect
               multiple={false}
