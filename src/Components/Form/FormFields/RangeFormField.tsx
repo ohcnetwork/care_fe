@@ -72,10 +72,6 @@ export default function RangeFormField(props: Props) {
     if (value > max) {
       return `Value must be lesser than or equal to ${max}${unit?.label ?? ""}.`;
     }
-
-    if (props.allowIntegersOnly && Math.abs(value % 1) != 0) {
-      return `Value must be an integer, cannot use decimals.`;
-    }
   })();
 
   const valueDescription =
@@ -98,7 +94,10 @@ export default function RangeFormField(props: Props) {
       sliderDelta) *
     100;
 
-  const handleChange = (v: number) => field.handleChange(unit.inversionFn(v));
+  const handleChange = (v: number) =>
+    field.handleChange(
+      unit.inversionFn(props.allowIntegersOnly ? Math.round(v) : v),
+    );
 
   const displayValue = value != null ? properRoundOf(value) : "";
 
