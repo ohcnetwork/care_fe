@@ -32,10 +32,10 @@ const SidebarItemBase = forwardRef(
     return (
       <Link
         ref={ref}
-        className={`tooltip relative ml-1 mr-2 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-gray-900 transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
+        className={`tooltip relative ml-1 mr-2 h-12 flex-1 cursor-pointer rounded-md py-1 font-medium text-gray-600 transition md:flex-none ${
           props.selected
-            ? "bg-gray-200 font-semibold"
-            : "font-normal hover:bg-gray-200"
+            ? "bg-white text-green-800 shadow"
+            : "hover:bg-gray-200"
         }`}
         target={external && "_blank"}
         rel={external && "noreferrer"}

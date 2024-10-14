@@ -58,23 +58,21 @@ const StatelessSidebar = ({
   const updateIndicator = () => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
-    const navItemCount = NavItems.length + (careConfig.urls.dashboard ? 2 : 1); // +2 for notification and dashboard
+    const navItemCount = NavItems.length + (careConfig.urls.dashboard ? 2 : 1);
     if (index !== -1) {
-      // Haha math go brrrrrrrrr
-
       const e = indicatorRef.current;
       const itemHeight = activeLinkRef.current?.clientHeight || 0;
-      if (lastIndicatorPosition > index) {
-        e.style.top = `${itemHeight * (index + 0.37)}px`;
-        setTimeout(() => {
-          e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
-        }, 50);
-      } else {
-        e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
-        setTimeout(() => {
-          e.style.top = `${itemHeight * (index + 0.37)}px`;
-        }, 50);
-      }
+      const itemOffset = index * itemHeight;
+
+      const indicatorHeight = indicatorRef.current.clientHeight;
+      const indicatorOffset = (itemHeight - indicatorHeight) / 2;
+
+      const top = `${itemOffset + indicatorOffset}px`;
+      const bottom = `${navItemCount * itemHeight - itemOffset - indicatorOffset}px`;
+
+      e.style.top = top;
+      e.style.bottom = bottom;
+
       setLastIndicatorPosition(index);
     } else {
       indicatorRef.current.style.display = "none";
@@ -96,7 +94,7 @@ const StatelessSidebar = ({
 
   return (
     <nav
-      className={`group flex h-full flex-col bg-gray-100 py-3 md:py-5 ${
+      className={`group flex h-dvh flex-1 flex-col bg-gray-100 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
@@ -132,15 +130,13 @@ const StatelessSidebar = ({
           </div>
         )}
       </div>
-      <div className="h-4" /> {/* flexible spacing */}
-      <div className="relative flex h-full flex-col">
+      <div className="relative mt-4 flex h-full flex-col justify-between">
         <div className="relative flex flex-1 flex-col md:flex-none">
           <div
             ref={indicatorRef}
-            // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
-              "absolute left-2 z-10 block w-1 rounded bg-primary-400 transition-all",
-              activeLink ? "opacity-0 md:opacity-100" : "opacity-0",
+              "absolute right-2 z-10 block h-6 w-1 rounded-l bg-primary-500 transition-all",
+              activeLink ? "opacity-100" : "opacity-0",
             )}
           />
           {NavItems.map((i) => {

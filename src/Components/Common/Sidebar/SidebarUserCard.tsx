@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+// import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { formatName, formatDisplayName } from "../../../Utils/utils";
 import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
@@ -11,25 +11,30 @@ interface SidebarUserCardProps {
 }
 
 const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const user = useAuthUser();
   const { signOut } = useAuthContext();
 
   return (
-    <div className="my-2 flex flex-col">
+    <div
+      className={`mx-auto ${shrinked ? "space-y-2" : "flex items-center md:space-x-2"}`}
+    >
       <Link
         href="/user/profile"
-        className="tooltip relative ml-1 mr-2 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:flex-none"
+        className="tooltip relative cursor-pointer rounded-lg bg-gray-200 font-normal text-gray-900 transition hover:bg-gray-200 md:flex-none"
       >
         <div
           id="user-profile-name"
-          className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
+          className={`flex items-center justify-start transition ${shrinked ? "" : "px-2 py-1"}`}
         >
           <div className="flex-none text-lg">
-            <Avatar name={formatDisplayName(user)} className="w-6" />
+            <Avatar
+              name={formatDisplayName(user)}
+              className="w-9 rounded-full border border-gray-300"
+            />
           </div>
           {!shrinked && (
-            <span className="flex w-full grow items-center pl-4 text-sm tracking-wide">
+            <span className="flex w-full grow items-center pl-2 text-sm tracking-wide">
               {formatName(user)}
             </span>
           )}
@@ -37,24 +42,19 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
       </Link>
       <div
         onClick={signOut}
-        className="tooltip relative ml-1 mr-2 mt-4 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:mt-0 md:flex-none"
+        className="tooltip relative flex cursor-pointer items-center justify-center rounded-lg p-2 font-normal text-gray-900 transition hover:bg-gray-200 md:mt-0 md:flex-none"
       >
         <div
           id="sign-out-button"
-          className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
+          className={`flex items-center justify-start transition-all duration-200 ease-in-out`}
         >
-          <div className="flex-none text-lg">
-            <CareIcon
-              icon="l-sign-out-alt"
-              className="text-2xl text-gray-900"
-            />
-          </div>
+          <CareIcon icon="l-sign-out-alt" className="text-2xl text-gray-900" />
 
-          {!shrinked && (
-            <div className="flex w-full items-center pl-4 text-sm tracking-wide text-gray-900">
+          {/* {!shrinked && (
+            <div className="flex items-center w-full pl-4 text-sm tracking-wide text-gray-900">
               {t("sign_out")}
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
