@@ -98,7 +98,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                           {facility.name}
                         </Link>
                         <div
-                          id="occupancy-badge"
+                          data-test-id="occupancy-badge"
                           className={`tooltip flex items-center gap-1 text-sm ${facility.patient_count / facility.bed_count > 0.85 ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white" : "text-secondary-700"}`}
                         >
                           <span className="tooltip-text tooltip-top">
