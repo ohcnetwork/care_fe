@@ -34,7 +34,7 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
           {data?.investigation_object.unit || "---"}
         </p>
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-secondary-700">
+      <td className="whitespace-nowrap px-3 py-4 text-center text-sm text-secondary-700 xl:px-6">
         {showForm ? (
           data?.investigation_object?.investigation_type === "Choice" ? (
             <SelectFormField
@@ -72,7 +72,7 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
 const HeadingRow = () => {
   const { t } = useTranslation();
   const commonClass =
-    "px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-800 print:text-sm print:font-normal print:tracking-normal print:text-black";
+    "px-6 py-3 text-xs font-semibold uppercase tracking-wider text-secondary-800";
   return (
     <tr>
       <th
@@ -127,11 +127,9 @@ export const InvestigationTable = ({
 
   return (
     <div className="m-4 p-4">
-      <div className="mb flex flex-col items-center justify-between sm:flex-row">
-        {title && (
-          <div className="text-xl font-bold print:text-xs">{title}</div>
-        )}
-        <div className="flex flex-col py-2 sm:flex-row print:hidden">
+      <div className="mb flex flex-col items-center justify-between gap-x-3 sm:flex-row">
+        {title && <div className="text-xl font-bold">{title}</div>}
+        <div className="flex flex-col py-2 sm:flex-row">
           <ButtonV2
             disabled={isDischargedPatient}
             variant="primary"
@@ -172,60 +170,56 @@ export const InvestigationTable = ({
       <TextFormField
         name="test_search"
         label="Search Test"
-        className="mt-2 print:hidden"
+        className="mt-2"
         placeholder="Search test"
         value={searchFilter}
         onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <div className="print:w-full">
-        <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg print:overflow-visible print:border-none print:shadow-none">
-          <table className="min-w-full divide-y divide-secondary-200 print:min-w-0 print:divide-none">
-            <thead className="bg-secondary-50 print:bg-white">
-              <HeadingRow />
-            </thead>
-            <tbody className="print:divide-none">
-              {filterTests.length > 0 ? (
-                filterTests.map((t: any, i) => {
-                  const value =
-                    changedFields[t.id]?.notes ??
-                    changedFields[t.id]?.value ??
-                    null;
-                  const isChanged = changedFields[t.id]?.initialValue !== value;
-                  return (
-                    <TestRow
-                      data={t}
-                      key={t.id}
-                      i={i}
-                      showForm={showForm}
-                      value={value}
-                      isChanged={isChanged}
-                      onChange={(e: any) => {
-                        const { target, value } =
-                          t?.investigation_object?.investigation_type ===
-                          "Float"
-                            ? {
-                                target: `${t.id}.value`,
-                                value: Number(e.value) || null,
-                              }
-                            : {
-                                target: `${t.id}.notes`,
-                                value: e.value,
-                              };
-                        handleValueChange(value, target);
-                      }}
-                      className="print:text-black"
-                    />
-                  );
-                })
-              ) : (
-                <tr className="text-center text-secondary-500 print:text-black">
-                  <td className="col-span-6">{t("no_tests_taken")}</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg">
+        <table className="min-w-full divide-y divide-secondary-200">
+          <thead className="bg-secondary-50">
+            <HeadingRow />
+          </thead>
+          <tbody>
+            {filterTests.length > 0 ? (
+              filterTests.map((t: any, i) => {
+                const value =
+                  changedFields[t.id]?.notes ??
+                  changedFields[t.id]?.value ??
+                  null;
+                const isChanged = changedFields[t.id]?.initialValue !== value;
+                return (
+                  <TestRow
+                    data={t}
+                    key={t.id}
+                    i={i}
+                    showForm={showForm}
+                    value={value}
+                    isChanged={isChanged}
+                    onChange={(e: any) => {
+                      const { target, value } =
+                        t?.investigation_object?.investigation_type === "Float"
+                          ? {
+                              target: `${t.id}.value`,
+                              value: Number(e.value) || null,
+                            }
+                          : {
+                              target: `${t.id}.notes`,
+                              value: e.value,
+                            };
+                      handleValueChange(value, target);
+                    }}
+                  />
+                );
+              })
+            ) : (
+              <tr className="text-center text-secondary-500">
+                <td className="col-span-6">{t("no_tests_taken")}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
