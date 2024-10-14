@@ -252,7 +252,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 rel="noopener noreferrer"
                 className="ml-4 text-primary-400 hover:text-primary-500"
               >
-                {t("3rd Party Software Licenses")}
+                {t("third_party_software_licenses")}
               </a>
             </div>
           </div>
