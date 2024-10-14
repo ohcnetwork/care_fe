@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Card from "../../CAREUI/display/Card";
 import dayjs from "dayjs";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import licenseUrls from "./licenseUrls.json";
-import bomData from "./fe-sbom.json";
+import feBomData from "./fe-sbom.json";
 import beBomData from "./be-sbom.json";
 
 const getLicenseUrl = (licenseId: string | undefined): string | null => {
@@ -61,26 +61,37 @@ interface CycloneDXBOM {
 }
 
 const BOMDisplay: React.FC = () => {
-  const [bom, setBOM] = useState<CycloneDXBOM | null>(null);
-  const [beBom, setBeBOM] = useState<CycloneDXBOM | null>(null);
   const [copyStatus, setCopyStatus] = useState(false);
   const [showExternalRefs, setShowExternalRefs] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("bom");
-
-  useEffect(() => {
-    setBOM(bomData as CycloneDXBOM);
-    setBeBOM(beBomData as CycloneDXBOM);
-  }, []);
 
   const handleCopy = () => {
     setCopyStatus(true);
     setTimeout(() => setCopyStatus(false), 2000);
   };
 
-  const renderBOM = (bomData: CycloneDXBOM | null) => {
-    if (!bomData) return <div>Loading BOM...</div>;
+  const bomData = (activeTab === "bom" ? feBomData : beBomData) as CycloneDXBOM;
 
-    return (
+  return (
+    <div className="p-4">
+      <div className="mb-4 flex space-x-4">
+        <button
+          className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
+            activeTab === "bom" ? "bg-primary text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setActiveTab("bom")}
+        >
+          Care Frontend
+        </button>
+        <button
+          className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
+            activeTab === "beBom" ? "bg-primary text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setActiveTab("beBom")}
+        >
+          Care Backend
+        </button>
+      </div>
       <Card className="rounded-lg bg-white p-4 shadow-md transition-all duration-300">
         <div className="mb-4">
           <h2 className="mb-2 text-2xl font-semibold text-primary">
@@ -183,30 +194,6 @@ const BOMDisplay: React.FC = () => {
           )}
         </div>
       </Card>
-    );
-  };
-
-  return (
-    <div className="p-4">
-      <div className="mb-4 flex space-x-4">
-        <button
-          className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
-            activeTab === "bom" ? "bg-primary text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setActiveTab("bom")}
-        >
-          Care Frontend
-        </button>
-        <button
-          className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
-            activeTab === "beBom" ? "bg-primary text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setActiveTab("beBom")}
-        >
-          Care Backend
-        </button>
-      </div>
-      {activeTab === "bom" ? renderBOM(bom) : renderBOM(beBom)}
     </div>
   );
 };
