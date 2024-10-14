@@ -135,6 +135,7 @@ export interface PatientModel {
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
   meta_info?: PatientMeta;
+  age?: string;
 }
 
 export interface SampleTestModel {
