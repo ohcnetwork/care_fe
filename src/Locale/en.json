@@ -1028,5 +1028,6 @@
   "create_consultation": "Create Consultation",
   "patient_details": "Patient Details",
   "width": "Width ({{unit}})",
-  "length": "Length ({{unit}})"
+  "length": "Length ({{unit}})",
+  "linked_skills": "Linked Skills"
 }
