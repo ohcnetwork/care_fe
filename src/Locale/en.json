@@ -1058,5 +1058,7 @@
   "resource_origin_facility": "Origin Facility",
   "resource_approving_facility" : "Resource approving facility",
   "consultation_not_filed": "You have not filed any consultation for this patient yet.",
-  "consultation_not_filed_description": "Please file a consultation for this patient to continue."
+  "consultation_not_filed_description": "Please file a consultation for this patient to continue.",
+  "width": "Width ({{unit}})",
+  "length": "Length ({{unit}})"
 }
