@@ -7,7 +7,7 @@ export default function ThemedFavicon() {
       "link[rel~='icon']",
     ) as HTMLLinkElement;
 
-    favicon.href = darkThemeMq.matches ? "/favicon-light.ico" : "/favicon.ico";
+    favicon.href = darkThemeMq.matches ? "/favicon.ico" : "/favicon-light.ico";
   }, []);
 
   return null;
