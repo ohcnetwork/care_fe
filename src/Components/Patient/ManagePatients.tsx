@@ -541,8 +541,9 @@ export const PatientManager = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex min-h-20 items-center justify-center">
+                <div className="flex items-center justify-center">
                   <Avatar
+                    className="size-10 md:size-auto"
                     name={patient.name!}
                     square={true}
                     colors={["#F9FAFB", "#BFB8CB"]}
