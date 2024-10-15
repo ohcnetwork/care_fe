@@ -74,9 +74,9 @@ const BOMDisplay: React.FC = () => {
 
   return (
     <div className="p-4">
-      <div className="mb-4 flex space-x-4">
+      <div className="mb-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
         <button
-          className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
+          className={`text-md w-full rounded-md px-4 py-2 transition-all duration-300 md:w-auto ${
             activeTab === "bom" ? "bg-primary text-white" : "bg-gray-200"
           }`}
           onClick={() => setActiveTab("bom")}
@@ -84,7 +84,7 @@ const BOMDisplay: React.FC = () => {
           Care Frontend
         </button>
         <button
-          className={`text-md rounded-md px-4 py-2 transition-all duration-300 ${
+          className={`text-md w-full rounded-md px-4 py-2 transition-all duration-300 md:w-auto ${
             activeTab === "beBom" ? "bg-primary text-white" : "bg-gray-200"
           }`}
           onClick={() => setActiveTab("beBom")}
@@ -94,7 +94,7 @@ const BOMDisplay: React.FC = () => {
       </div>
       <Card className="rounded-lg bg-white p-4 shadow-md transition-all duration-300">
         <div className="mb-4">
-          <h2 className="mb-2 text-2xl font-semibold text-primary">
+          <h2 className="mb-2 text-xl font-semibold text-primary md:text-2xl">
             {bomData.bomFormat || "N/A"} BOM (Version:{" "}
             {bomData.version || "N/A"})
           </h2>
@@ -105,8 +105,8 @@ const BOMDisplay: React.FC = () => {
               : "N/A"}
           </p>
         </div>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <h3 className="col-span-2 text-lg font-semibold text-primary">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <h3 className="col-span-full text-lg font-semibold text-primary">
             Components:
           </h3>
           {bomData.components?.map((component, index) => (
@@ -122,9 +122,9 @@ const BOMDisplay: React.FC = () => {
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-primary-dark text-primary"
+                className="hover:text-primary-dark block text-primary"
               >
-                <strong className="block text-lg">
+                <strong className="text-lg">
                   {component.name || "N/A"} v{component.version || "N/A"}
                 </strong>
               </a>
@@ -150,7 +150,7 @@ const BOMDisplay: React.FC = () => {
               )}
               <div>
                 <h5
-                  className="cursor-pointer font-semibold text-primary"
+                  className="block cursor-pointer font-semibold text-primary"
                   onClick={() =>
                     setShowExternalRefs(
                       showExternalRefs === index ? null : index,
@@ -165,7 +165,7 @@ const BOMDisplay: React.FC = () => {
                       <li key={idx}>
                         <a
                           href={ref.url || "#"}
-                          className="hover:text-primary-dark text-primary"
+                          className="hover:text-primary-dark block text-primary"
                         >
                           {ref.url || "N/A"}
                         </a>
@@ -183,7 +183,7 @@ const BOMDisplay: React.FC = () => {
             text={JSON.stringify(bomData, null, 2)}
             onCopy={handleCopy}
           >
-            <button className="text-md hover:bg-primary-dark rounded-md bg-primary px-4 py-2 text-white transition-all duration-300 focus:outline-none">
+            <button className="text-md hover:bg-primary-dark w-full rounded-md bg-primary px-4 py-2 text-white transition-all duration-300 focus:outline-none md:w-auto">
               Copy BOM JSON
             </button>
           </CopyToClipboard>
