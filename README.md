@@ -35,6 +35,13 @@
 ```sh
 npm install
 ```
+#### First-time setup
+
+For first-time setup, run the following command to generate the pluginMap and install plugin configurations:
+
+```sh
+npm run setup
+```
 
 #### 🏃 Run the app in development mode
 
