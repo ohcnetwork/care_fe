@@ -451,22 +451,6 @@ export default function NotificationsList({
             <CircularProgress />
           </div>
         )}
-        {!showUnread &&
-          totalCount > RESULT_LIMIT &&
-          offset < totalCount - RESULT_LIMIT && (
-            <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
-              <ButtonV2
-                className="w-full"
-                disabled={isLoading}
-                variant="secondary"
-                shadow
-                border
-                onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
-              >
-                {isLoading ? t("loading") : t("load_more")}
-              </ButtonV2>
-            </div>
-          )}
       </>
     );
   } else if (data && data.length === 0) {
