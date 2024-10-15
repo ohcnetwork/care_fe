@@ -801,7 +801,7 @@
     "exceed": "Value cannot exceed 250 mmHg.",
     "systolic_less_than_diastolic": "Systolic must be greater than diastolic."
   },
-  "temperature_error": "Temperature must be between 95°F (35°C) and 106°F (41.1°C).",
+  "out_of_range_error": "Value must be between {{ start }} and {{ end }}.",
   "pain": "Pain",
   "pain_chart_description": "Mark region and intensity of pain",
   "bradycardia": "Bradycardia",

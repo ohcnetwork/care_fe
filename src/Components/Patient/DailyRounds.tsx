@@ -265,7 +265,10 @@ export const DailyRounds = (props: any) => {
             temperatureInputValue &&
             (temperatureInputValue < 95 || temperatureInputValue > 106)
           ) {
-            errors[field] = t("temperature_error");
+            errors[field] = t("out_of_range_error", {
+              start: "95°F (35°C)",
+              end: "106°F (41.1°C)",
+            });
             invalidForm = true;
             scrollTo("temperature");
           }
