@@ -182,7 +182,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
             hasPermissionToEditCoverImage && setEditCoverImage(true)
           }
         >
-          <Avatar name={facilityData!.name!} square={true} />
+          <Avatar name={facilityData?.name ?? ""} square={true} />
           {editCoverImageTooltip}
         </div>
       )}
@@ -207,7 +207,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <CoverImage />
                   ) : (
                     <div className="flex h-80 w-[88px] items-center justify-center rounded-lg bg-secondary-200 font-medium text-secondary-700 lg:h-80 lg:w-80">
-                      <Avatar name={facilityData!.name!} square={true} />
+                      <Avatar name={facilityData?.name ?? ""} square={true} />
                     </div>
                   )}
                   {editCoverImageTooltip}
