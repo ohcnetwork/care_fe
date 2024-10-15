@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FormFieldBaseProps } from "../Form/FormFields/Utils";
+import { FieldChangeEvent, FormFieldBaseProps } from "../Form/FormFields/Utils";
 import { fahrenheitToCelsius, celsiusToFahrenheit } from "@/Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "./components/ButtonV2";
@@ -41,7 +41,7 @@ export default function TemperatureFormField({
     }
   };
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: FieldChangeEvent<string>) => {
     const newValue = e.value;
 
     const regex = /^-?\d*\.?\d{0,1}$/;
