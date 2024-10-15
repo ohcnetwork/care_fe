@@ -230,6 +230,7 @@ export const ConsultationDetails = (props: any) => {
             {!consultationData.discharge_date && (
               <>
                 <button
+                  id="doctor-connect-button"
                   onClick={() => {
                     triggerGoal("Doctor Connect Clicked", {
                       consultationId,
