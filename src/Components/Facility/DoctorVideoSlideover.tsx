@@ -296,7 +296,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
                   );
                 }}
               >
-                <span className="tooltip">
+                <span className="tooltip" id="copy-phoneicon">
                   <span className="tooltip-text tooltip-top">
                     Copy Phone number
                   </span>
@@ -348,7 +348,7 @@ function DoctorConnectButtons(props: {
       <a onClick={props.connectOnWhatsApp}>
         <div className="tooltip">
           <span className="tooltip-text tooltip-left">Connect on WhatsApp</span>
-          <CareIcon icon="l-whatsapp" className="h-5 w-5" />
+          <CareIcon icon="l-whatsapp" id="whatsapp-icon" className="h-5 w-5" />
         </div>
       </a>
       <a
@@ -364,7 +364,7 @@ function DoctorConnectButtons(props: {
       >
         <div className="tooltip">
           <span className="tooltip-text tooltip-left">Connect on Phone</span>
-          <CareIcon icon="l-phone-alt" className="h-5 w-5" />
+          <CareIcon icon="l-phone-alt" id="phone-icon" className="h-5 w-5" />
         </div>
       </a>
       <PLUGIN_DoctorConnectButtons user={user} />
