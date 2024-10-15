@@ -1,10 +1,10 @@
+import { t } from "i18next";
 import { FieldValidator } from "../Form/FieldValidators";
 import { HCXPolicyModel } from "./models";
 
 const HCXPolicyValidator: FieldValidator<HCXPolicyModel> = (
   value,
   enable_hcx,
-  t,
 ) => {
   if (!value.subscriber_id.trim()) {
     return t("member_id_required");
