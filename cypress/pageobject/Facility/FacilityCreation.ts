@@ -9,7 +9,7 @@ class FacilityPage {
       .should("eq", 200);
   }
 
-  typeFacilitySearch(facilityName) {
+  typeFacilitySearch(facilityName: string) {
     cy.get("#search").click().clear();
     cy.get("#search").click().type(facilityName);
   }
@@ -21,7 +21,7 @@ class FacilityPage {
     cy.get("#manage-facility-dropdown button").should("be.visible");
   }
 
-  clickUpdateFacilityType(facilityType) {
+  clickUpdateFacilityType(facilityType: string) {
     cy.get("#facility_type")
       .click()
       .then(() => {
@@ -225,11 +225,11 @@ class FacilityPage {
   }
 
   fillTriageEntryFields(
-    visited,
-    homeQuarantine,
-    isolation,
-    referred,
-    confirmedPositive,
+    visited: string,
+    homeQuarantine: string,
+    isolation: string,
+    referred: string,
+    confirmedPositive: string,
   ) {
     cy.get("#num_patients_visited").clear().click().type(visited);
     cy.get("#num_patients_home_quarantine")
@@ -244,7 +244,7 @@ class FacilityPage {
       .type(confirmedPositive);
   }
 
-  fillEntryDate(date) {
+  fillEntryDate(date: string) {
     cy.get("#entry_date").click();
     cy.get("#date-input").click().type(date);
   }
@@ -253,13 +253,13 @@ class FacilityPage {
     cy.get("#edit-button").click();
   }
 
-  clickButtonsMultipleTimes(selector) {
+  clickButtonsMultipleTimes(selector: string) {
     cy.get(selector).each(($button) => {
       cy.wrap($button).click();
     });
   }
 
-  verifyTriageTableContains(value) {
+  verifyTriageTableContains(value: string) {
     cy.get("#triage-table").contains(value);
   }
 
@@ -430,7 +430,7 @@ class FacilityPage {
     return cy.get("#district");
   }
 
-  selectStateOnPincode(stateName) {
+  selectStateOnPincode(stateName: string) {
     this.getStateElement()
       .scrollIntoView()
       .wait(2000)
@@ -444,7 +444,7 @@ class FacilityPage {
       });
   }
 
-  selectDistrictOnPincode(districtName) {
+  selectDistrictOnPincode(districtName: string) {
     this.getDistrictElement()
       .scrollIntoView()
       .wait(2000)
