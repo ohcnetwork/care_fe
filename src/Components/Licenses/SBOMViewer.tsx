@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Card from "../../CAREUI/display/Card";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "dayjs";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import licenseUrls from "./licenseUrls.json";
@@ -149,7 +150,7 @@ const BOMDisplay: React.FC = () => {
                 </p>
               )}
               <div>
-                <h5
+                <h4
                   className="block cursor-pointer font-semibold text-primary"
                   onClick={() =>
                     setShowExternalRefs(
@@ -157,8 +158,8 @@ const BOMDisplay: React.FC = () => {
                     )
                   }
                 >
-                  External References:
-                </h5>
+                  <CareIcon icon="l-info-circle" />
+                </h4>
                 {showExternalRefs === index && (
                   <ul className="list-inside list-disc pl-4 text-xs">
                     {component.externalReferences?.map((ref, idx) => (
