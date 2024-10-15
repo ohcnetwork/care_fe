@@ -5,6 +5,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { formatName, formatDisplayName } from "../../../Utils/utils";
 import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
 import { Avatar } from "@/Components/Common/Avatar";
+import { Button } from "@/Components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,8 +28,10 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
     >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <div
-            className={`tooltip relative flex w-full cursor-pointer items-center justify-between rounded-lg bg-gray-200 px-2 py-1 font-normal text-gray-900 transition hover:bg-gray-200 ${shrinked ? "flex-col" : "flex-row"}`}
+          <Button
+            variant="outline"
+            size="lg"
+            className={`tooltip relative w-full cursor-pointer items-center justify-between rounded-lg bg-gray-200 p-2 font-normal text-gray-900 transition hover:bg-gray-200 focus:outline-none focus:ring focus:ring-violet-300 ${shrinked ? "flex h-full flex-col-reverse" : "flex flex-row"}`}
           >
             <div
               id="user-profile-name"
@@ -37,7 +40,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
               <div className="flex-none text-lg">
                 <Avatar
                   name={formatDisplayName(user)}
-                  className="w-9 rounded-lg border-gray-300"
+                  className="w-8 text-sm font-medium"
                 />
               </div>
               {!shrinked && (
@@ -46,8 +49,12 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
                 </span>
               )}
             </div>
-            <div className="flex w-8 shrink-0 items-center justify-center rounded-full bg-gray-300/50 p-1">
-              <CareIcon icon="l-angle-up" className="text-xl text-gray-700" />
+            <div className="flex shrink-0 items-center justify-center rounded-full bg-gray-300/50">
+              <CareIcon
+                icon="l-angle-up"
+                className="text-xl text-gray-600"
+                aria-label="Up arrow icon"
+              />
             </div>
             <div>
               <DropdownMenuContent align="end" className="w-full">
@@ -64,7 +71,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </div>
-          </div>
+          </Button>
         </DropdownMenuTrigger>
       </DropdownMenu>
     </div>
