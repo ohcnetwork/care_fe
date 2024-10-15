@@ -73,7 +73,7 @@
     "i18next": "^23.11.4",
     "i18next-browser-languagedetector": "^7.2.1",
     "lodash-es": "^4.17.21",
-    "lucide-react": "^0.446.0",
+    "lucide-react": "^0.453.0",
     "postcss-loader": "^7.3.3",
     "qrcode.react": "^3.1.0",
     "raviger": "^4.1.2",
