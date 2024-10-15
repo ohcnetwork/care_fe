@@ -8,6 +8,12 @@ import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
 import careConfig from "@careConfig";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/Components/ui/tooltip";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -113,11 +119,14 @@ const StatelessSidebar = ({
       <div
         className={`flex items-center ${shrinked ? "mt-2 justify-center" : "justify-between"}`}
       >
-        <Link href="/" className="flex items-center justify-between">
+        <Link
+          href="/"
+          className={`${
+            shrinked ? "mx-auto" : "ml-3"
+          } flex items-center justify-between`}
+        >
           <img
-            className={`${
-              shrinked ? "mx-auto" : "ml-4 md:ml-2"
-            } h-8 self-start transition md:h-12 lg:h-12`}
+            className="h-8 w-auto self-start transition md:h-10"
             src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
           />
         </Link>
@@ -215,17 +224,26 @@ interface ToggleShrinkProps {
 }
 
 const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
-  <div
-    className={`flex h-5 w-5 cursor-pointer items-center justify-center self-end rounded bg-gray-300 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
-      shrinked ? "mx-auto" : "mr-4"
-    } transition-all duration-200 ease-in-out`}
-    onClick={toggle}
-  >
-    <CareIcon
-      icon="l-angle-up"
-      className={`text-3xl ${
-        shrinked ? "rotate-90" : "-rotate-90"
-      } transition-all delay-150 duration-300 ease-out`}
-    />
-  </div>
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${
+            shrinked ? "mx-auto" : "mr-4"
+          } transition-all duration-200 ease-in-out`}
+          onClick={toggle}
+        >
+          <CareIcon
+            icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
+            className={`text-lg ${
+              shrinked ? "" : ""
+            } transition-all delay-150 duration-300 ease-out`}
+          />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{shrinked ? "Expand Sidebar" : "Collapse Sidebar"}</p>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
 );

@@ -60,7 +60,7 @@ const SidebarItemBase = forwardRef(
           <span
             className={`${
               shrinked ? "hidden" : "grow"
-            } flex w-full items-center pl-4 text-sm tracking-wide`}
+            } flex w-full items-center text-nowrap pl-4 text-sm tracking-wide`}
           >
             {t(props.text)}
           </span>
