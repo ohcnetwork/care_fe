@@ -109,6 +109,9 @@ export interface AssetData {
   latest_status: string;
   last_service: AssetService;
   meta?: {
+    middleware_hostname?: string;
+    local_ip_address?: string;
+    camera_access_key?: string;
     [key: string]: any;
   };
 }

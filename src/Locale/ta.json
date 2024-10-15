@@ -281,7 +281,7 @@
   "SORT_OPTIONS__bed__name": "படுக்கை எண் 1-N",
   "SORT_OPTIONS__-bed__name": "படுக்கை எண். N-1",
   "middleware_hostname": "மிடில்வேர் ஹோஸ்ட்பெயர்",
-  "local_ipaddress": "உள்ளூர் ஐபி முகவரி",
+  "local_ip_address": "உள்ளூர் ஐபி முகவரி",
   "no_consultation_updates": "ஆலோசனை அறிவிப்புகள் இல்லை",
   "consultation_updates": "ஆலோசனை புதுப்பிப்புகள்",
   "update_log": "புதுப்பிப்பு பதிவேடு",

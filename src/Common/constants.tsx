@@ -839,20 +839,6 @@ export const LOCATION_BED_TYPES = [
   { id: "REGULAR", name: "Regular" },
 ] as const;
 
-export const ASSET_META_TYPE = [
-  { id: "CAMERA", text: "Camera(ONVIF)" },
-  { id: "HL7MONITOR", text: "Vitals Monitor(HL7)" },
-];
-
-export const CAMERA_TYPE = [
-  { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
-];
-
-export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
-  (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
-  {},
-);
-
 export type CameraPTZ = {
   icon?: IconName;
   label: string;

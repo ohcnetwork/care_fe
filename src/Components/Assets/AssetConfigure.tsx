@@ -1,6 +1,6 @@
 import Loading from "../Common/Loading";
 import HL7Monitor from "./AssetType/HL7Monitor";
-import ONVIFCamera from "./AssetType/ONVIFCamera";
+import ConfigureCamera from "../CameraFeed/ConfigureCamera";
 import Page from "../Common/components/Page";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
@@ -11,13 +11,11 @@ interface AssetConfigureProps {
 }
 
 const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
-  const {
-    data: asset,
-    loading,
-    refetch,
-  } = useQuery(routes.getAsset, { pathParams: { external_id: assetId } });
+  const { data: asset, refetch } = useQuery(routes.getAsset, {
+    pathParams: { external_id: assetId },
+  });
 
-  if (loading || !asset) {
+  if (!asset) {
     return <Loading />;
   }
 
@@ -63,12 +61,7 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
       }}
       backUrl={`/facility/${facilityId}/assets/${assetId}`}
     >
-      <ONVIFCamera
-        asset={asset}
-        assetId={assetId}
-        facilityId={facilityId}
-        onUpdated={() => refetch()}
-      />
+      <ConfigureCamera asset={asset} onUpdated={() => refetch()} />
     </Page>
   );
 };

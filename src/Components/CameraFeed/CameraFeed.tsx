@@ -78,7 +78,7 @@ export default function CameraFeed(props: Props) {
       .operate({ type: "get_stream_token" })
       .then(({ res, data }) => {
         if (res?.status != 200) {
-          setState("authentication_error");
+          setState("host_unreachable");
           return props.onStreamError?.();
         }
         const result = data?.result as { token: string };
@@ -183,13 +183,15 @@ export default function CameraFeed(props: Props) {
             {props.children}
           </div>
           <div className="flex w-full flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
-            <span className="text-xs font-bold md:text-sm">
-              {props.asset.name}
-            </span>
-            <MonitorAssetPopover
-              asset={props.asset}
-              className="absolute z-[100] mt-2 w-56 -translate-x-full -translate-y-4 rounded-md bg-white md:w-[350px] md:-translate-x-full md:-translate-y-2"
-            />
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold md:text-sm">
+                {props.asset.name}
+              </span>
+              <MonitorAssetPopover
+                asset={props.asset}
+                className="absolute z-[100] mt-2 w-56 -translate-x-full -translate-y-4 rounded-md bg-white md:w-[350px] md:-translate-x-full md:-translate-y-2"
+              />
+            </div>
             {!isIOS && (
               <div
                 className={classNames(
@@ -219,17 +221,6 @@ export default function CameraFeed(props: Props) {
                 return (
                   <NoFeedAvailable
                     message="Host Unreachable"
-                    className="text-warning-500"
-                    icon="l-exclamation-triangle"
-                    streamUrl=""
-                    asset={props.asset}
-                    onResetClick={resetStream}
-                  />
-                );
-              case "authentication_error":
-                return (
-                  <NoFeedAvailable
-                    message="Authentication Error"
                     className="text-warning-500"
                     icon="l-exclamation-triangle"
                     streamUrl=""

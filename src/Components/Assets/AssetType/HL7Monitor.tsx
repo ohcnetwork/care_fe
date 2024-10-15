@@ -1,7 +1,6 @@
 import { SyntheticEvent, useEffect, useState } from "react";
-import { AssetData, ResolvedMiddleware } from "../AssetTypes";
+import { AssetClass, AssetData, ResolvedMiddleware } from "../AssetTypes";
 import * as Notification from "../../../Utils/Notifications.js";
-import MonitorConfigure from "../configure/MonitorConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import Card from "../../../CAREUI/display/Card";
@@ -13,6 +12,10 @@ import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatien
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
+import { BedModel } from "../../Facility/models";
+import useQuery from "../../../Utils/request/useQuery";
+import { FieldLabel } from "../../Form/FormFields/FormField";
+import { BedSelect } from "../../Common/BedSelect";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -151,3 +154,79 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   );
 };
 export default HL7Monitor;
+
+const saveLink = async (assetId: string, bedId: string) => {
+  await request(routes.createAssetBed, {
+    body: {
+      asset: assetId,
+      bed: bedId,
+    },
+  });
+  Notification.Success({ msg: "AssetBed Link created successfully" });
+};
+const updateLink = async (
+  assetbedId: string,
+  assetId: string,
+  bed: BedModel,
+) => {
+  await request(routes.partialUpdateAssetBed, {
+    pathParams: { external_id: assetbedId },
+    body: {
+      asset: assetId,
+      bed: bed.id ?? "",
+    },
+  });
+  Notification.Success({ msg: "AssetBed Link updated successfully" });
+};
+
+function MonitorConfigure({ asset }: { asset: AssetData }) {
+  const [bed, setBed] = useState<BedModel>({});
+  const [shouldUpdateLink, setShouldUpdateLink] = useState(false);
+  const { data: assetBed } = useQuery(routes.listAssetBeds, {
+    query: { asset: asset.id },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data && data.results.length > 0) {
+        setBed(data.results[0].bed_object);
+        setShouldUpdateLink(true);
+      }
+    },
+  });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (shouldUpdateLink) {
+          updateLink(
+            assetBed?.results[0].id as string,
+            asset.id as string,
+            bed as BedModel,
+          );
+        } else {
+          saveLink(asset.id as string, bed?.id as string);
+        }
+      }}
+    >
+      <div className="flex flex-col">
+        <div className="w-full">
+          <FieldLabel className="">Bed</FieldLabel>
+          <BedSelect
+            name="bed"
+            setSelected={(selected) => setBed(selected as BedModel)}
+            selected={bed}
+            error=""
+            multiple={false}
+            location={asset?.location_object?.id}
+            facility={asset?.location_object?.facility?.id}
+            not_occupied_by_asset_type={AssetClass.HL7MONITOR}
+            className="w-full"
+          />
+        </div>
+        <Submit className="mt-6 w-full shrink-0">
+          <CareIcon icon="l-bed" className="text-lg" />
+          {shouldUpdateLink ? "Update Bed" : "Save Bed"}
+        </Submit>
+      </div>
+    </form>
+  );
+}
