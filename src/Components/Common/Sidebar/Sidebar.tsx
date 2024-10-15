@@ -104,11 +104,11 @@ const StatelessSidebar = ({
           : "overflow-y-auto overflow-x-hidden"
       }`}
     >
-      {shrinked && (
+      {setShrinked && shrinked && (
         <div>
           <ToggleShrink
             shrinked={shrinked}
-            toggle={() => setShrinked && setShrinked(!shrinked)}
+            toggle={() => setShrinked(!shrinked)}
           />
         </div>
       )}
@@ -123,11 +123,11 @@ const StatelessSidebar = ({
             src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
           />
         </Link>
-        {!shrinked && (
+        {setShrinked && !shrinked && (
           <div className="ml-1">
             <ToggleShrink
               shrinked={shrinked}
-              toggle={() => setShrinked && setShrinked(!shrinked)}
+              toggle={() => setShrinked(!shrinked)}
             />
           </div>
         )}
