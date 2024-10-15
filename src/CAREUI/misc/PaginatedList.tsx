@@ -50,6 +50,11 @@ export default function PaginatedList<TItem extends object>({
   ...queryOptions
 }: Props<TItem>) {
   const [currentPage, setPage] = useState(1);
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = parseInt(urlParams.get("page") || "1", 10);
+    setPage(page);
+  }, []);
   const query = useQuery(route, {
     ...queryOptions,
     query: {
@@ -61,6 +66,29 @@ export default function PaginatedList<TItem extends object>({
 
   const items = query.data?.results ?? [];
 
+  const setQueryParams = (
+    params: Record<string, any>,
+    options?: { replace?: boolean },
+  ) => {
+    const url = new URL(window.location.href);
+
+    Object.keys(params).forEach((key) => {
+      if (params[key] === undefined || params[key] === null) {
+        url.searchParams.delete(key);
+      } else {
+        url.searchParams.set(key, params[key]);
+      }
+    });
+
+    if (options?.replace) {
+      window.history.replaceState({}, "", url.toString());
+    } else {
+      window.history.pushState({}, "", url.toString());
+    }
+  };
+  useEffect(() => {
+    setQueryParams({ page: currentPage }, { replace: true });
+  }, [currentPage]);
   useEffect(() => {
     if (queryCB) {
       queryCB(query);
