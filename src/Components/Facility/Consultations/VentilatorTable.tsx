@@ -81,7 +81,7 @@ export default function VentilatorTable(props: VentilatorTableProps) {
   }
 
   return (
-    <div className="my-3 w-full rounded-lg border bg-white px-4 pt-3 shadow">
+    <div className="my-3 w-full overflow-x-scroll rounded-lg border bg-white px-4 pt-3 shadow">
       <table className="w-full">
         <caption className="mb-2 caption-top text-lg font-bold">
           {t("ventilator_log")}
