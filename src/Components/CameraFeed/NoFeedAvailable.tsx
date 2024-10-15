@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { AssetData } from "../Assets/AssetTypes";
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export default function NoFeedAvailable(props: Props) {
+  const { t } = useTranslation();
+
   const redactedURL = props.streamUrl
     // Replace all uuids in the URL with "ID_REDACTED"
     .replace(/[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}/gi, "***")
@@ -40,7 +43,7 @@ export default function NoFeedAvailable(props: Props) {
           onClick={props.onResetClick}
         >
           <CareIcon icon="l-redo" className="text-base" />
-          Retry
+          {t("retry")}
         </ButtonV2>
         <ButtonV2
           variant="secondary"
@@ -50,7 +53,7 @@ export default function NoFeedAvailable(props: Props) {
           href={`/facility/${props.asset.location_object.facility?.id}/assets/${props.asset.id}/configure`}
         >
           <CareIcon icon="l-cog" className="text-base" />
-          Configure
+          {t("configure")}
         </ButtonV2>
       </div>
     </div>

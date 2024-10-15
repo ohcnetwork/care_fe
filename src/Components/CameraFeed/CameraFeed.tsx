@@ -1,18 +1,31 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AssetData } from "../Assets/AssetTypes";
-import useOperateCamera, { PTZPayload } from "./useOperateCamera";
-import { getStreamUrl } from "./utils";
-import { classNames, isIOS } from "../../Utils/utils";
+import * as Notification from "../../Utils/Notifications";
+
 import FeedAlert, { FeedAlertState, StreamStatus } from "./FeedAlert";
-import FeedNetworkSignal from "./FeedNetworkSignal";
-import NoFeedAvailable from "./NoFeedAvailable";
+import {
+  GetLockCameraResponse,
+  GetPresetsResponse,
+  GetRequestAccessResponse,
+} from "./routes";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { classNames, isIOS } from "../../Utils/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import useOperateCamera, { PTZPayload } from "./useOperateCamera";
+
+import { AssetData } from "../Assets/AssetTypes";
+import ButtonV2 from "../Common/components/ButtonV2";
 import FeedControls from "./FeedControls";
+import FeedNetworkSignal from "./FeedNetworkSignal";
 import FeedWatermark from "./FeedWatermark";
-import useFullscreen from "../../Common/hooks/useFullscreen";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
-import { GetPresetsResponse } from "./routes";
-import VideoPlayer from "./videoPlayer";
 import MonitorAssetPopover from "../Common/MonitorAssetPopover";
+import NoFeedAvailable from "./NoFeedAvailable";
+import { UserBareMinimum } from "../Users/models";
+import VideoPlayer from "./videoPlayer";
+import { getStreamUrl } from "./utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import useFullscreen from "../../Common/hooks/useFullscreen";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   children?: React.ReactNode;
@@ -31,6 +44,7 @@ interface Props {
 }
 
 export default function CameraFeed(props: Props) {
+  const { t } = useTranslation();
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const [streamUrl, setStreamUrl] = useState<string>("");
@@ -40,6 +54,60 @@ export default function CameraFeed(props: Props) {
   const [state, setState] = useState<FeedAlertState>();
   const [playedOn, setPlayedOn] = useState<Date>();
   const [playerStatus, setPlayerStatus] = useState<StreamStatus>("stop");
+
+  const [cameraUser, setCameraUser] = useState<UserBareMinimum>();
+  const user = useAuthUser();
+
+  const lockCamera = useCallback(async () => {
+    const { res, data, error } = await props.operate({ type: "lock_camera" });
+
+    const successData = data as GetLockCameraResponse;
+    const errorData = error as GetLockCameraResponse["result"];
+
+    if (res?.status === 200 && successData?.result) {
+      Notification.Success({
+        msg: successData.result.message,
+      });
+      setCameraUser(successData.result.camera_user);
+    } else if (res?.status === 409 && errorData) {
+      Notification.Warn({
+        msg: errorData.message,
+      });
+      setCameraUser(errorData.camera_user);
+    } else {
+      Notification.Error({
+        msg: t("camera_locking_error"),
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const unlockCamera = useCallback(async () => {
+    await props.operate({ type: "unlock_camera" });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    lockCamera();
+
+    return () => {
+      unlockCamera();
+    };
+  }, [lockCamera, unlockCamera]);
+
+  useMessageListener((data) => {
+    if (data?.action === "CAMERA_ACCESS_REQUEST") {
+      Notification.Warn({
+        msg: data?.message,
+      });
+    }
+
+    if (data?.action === "CAMERA_AVAILABILITY") {
+      Notification.Success({
+        msg: data?.message,
+      });
+      lockCamera();
+    }
+  });
+
   // Move camera when selected preset has changed
   useEffect(() => {
     async function move(preset: PTZPayload) {
@@ -57,7 +125,7 @@ export default function CameraFeed(props: Props) {
     if (props.preset) {
       move(props.preset);
     }
-  }, [props.preset]);
+  }, [props.preset]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Get camera presets (only if onCameraPresetsObtained is provided)
   useEffect(() => {
@@ -69,7 +137,7 @@ export default function CameraFeed(props: Props) {
       }
     }
     getPresets(props.onCameraPresetsObtained);
-  }, [props.operate, props.onCameraPresetsObtained]);
+  }, [props.operate, props.onCameraPresetsObtained]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const initializeStream = useCallback(async () => {
     if (!playerRef.current) return;
@@ -88,12 +156,12 @@ export default function CameraFeed(props: Props) {
         setState("host_unreachable");
         return props.onStreamError?.();
       });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Start stream on mount
   useEffect(() => {
     initializeStream();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetStream = () => {
     setState("loading");
@@ -133,13 +201,26 @@ export default function CameraFeed(props: Props) {
       onReset={resetStream}
       onMove={async (data) => {
         setState("moving");
-        const { res } = await props.operate({ type: "relative_move", data });
+        const { res, error } = await props.operate({
+          type: "relative_move",
+          data,
+        });
         props.onMove?.();
         setTimeout(() => {
           setState((state) => (state === "moving" ? undefined : state));
         }, 4000);
+
         if (res?.status === 500) {
           setState("host_unreachable");
+        }
+
+        if (res?.status === 409 && error) {
+          const errorData = error as GetLockCameraResponse["result"];
+
+          Notification.Warn({
+            msg: errorData?.message,
+          });
+          setCameraUser(errorData?.camera_user);
         }
       }}
     />
@@ -177,12 +258,12 @@ export default function CameraFeed(props: Props) {
               playerStatus !== "playing"
                 ? "pointer-events-none opacity-10"
                 : "opacity-100",
-              "transition-all duration-200 ease-in-out",
+              "flex-1 transition-all duration-200 ease-in-out",
             )}
           >
             {props.children}
           </div>
-          <div className="flex w-full flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
+          <div className="flex flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
             <span className="text-xs font-bold md:text-sm">
               {props.asset.name}
             </span>
@@ -198,12 +279,78 @@ export default function CameraFeed(props: Props) {
                 )}
               >
                 <FeedNetworkSignal
-                  playerRef={playerRef as any}
+                  playerRef={playerRef}
                   playedOn={playedOn}
                   status={playerStatus}
                   onReset={resetStream}
                 />
               </div>
+            )}
+            {cameraUser && (
+              <Menu>
+                <MenuButton className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-sm uppercase text-white shadow">
+                  <span>{cameraUser.username[0]}</span>
+                </MenuButton>
+
+                <MenuItems
+                  transition
+                  anchor="bottom end"
+                  className="z-30 mt-2 w-52 min-w-full origin-top-right rounded-xl border bg-white p-4 py-1 text-sm/6 shadow-lg ring-1 ring-black/5 transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 sm:min-w-[250px] md:w-max"
+                >
+                  <MenuItem>
+                    <div className="flex w-full flex-col items-end justify-end">
+                      <p className="font-semibold">
+                        {[
+                          cameraUser.first_name,
+                          cameraUser.last_name,
+                          `(${cameraUser.username})`,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      </p>
+                      <p className="text-sm text-secondary-500">
+                        {cameraUser.user_type}
+                      </p>
+                      <p className="text-sm text-secondary-500">
+                        {cameraUser.email}
+                      </p>
+                    </div>
+                  </MenuItem>
+
+                  {cameraUser.username !== user.username && (
+                    <MenuItem>
+                      <div className="mt-3 flex w-full flex-col items-center justify-between">
+                        <p>{t("need_camera_access")}</p>
+                        <ButtonV2
+                          size="small"
+                          variant="primary"
+                          onClick={async () => {
+                            const { res, data } = await props.operate({
+                              type: "request_access",
+                            });
+
+                            const successData =
+                              data as GetRequestAccessResponse;
+
+                            if (res?.status === 200) {
+                              Notification.Success({
+                                msg: successData.result.message,
+                              });
+                              setCameraUser(successData.result.camera_user);
+                            } else {
+                              Notification.Error({
+                                msg: t("request_camera_access_error"),
+                              });
+                            }
+                          }}
+                        >
+                          {t("request_access")}
+                        </ButtonV2>
+                      </div>
+                    </MenuItem>
+                  )}
+                </MenuItems>
+              </Menu>
             )}
           </div>
         </div>
