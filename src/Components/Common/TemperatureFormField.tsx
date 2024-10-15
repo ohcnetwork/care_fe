@@ -1,36 +1,67 @@
+import { useState, useEffect } from "react";
 import { FormFieldBaseProps } from "../Form/FormFields/Utils";
 import { fahrenheitToCelsius, celsiusToFahrenheit } from "@/Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "./components/ButtonV2";
-
 import TextFormField from "../Form/FormFields/TextFormField";
 
-type TemperatureFormFieldProps = FormFieldBaseProps<string> & {
-  unit: "celsius" | "fahrenheit";
-  setUnit: (unit: "celsius" | "fahrenheit") => void;
-};
+type TemperatureUnit = "celsius" | "fahrenheit";
+
+type TemperatureFormFieldProps = FormFieldBaseProps<string>;
 
 export default function TemperatureFormField({
   onChange,
-  unit,
-  setUnit,
   id,
   label,
   error,
   value,
   name,
 }: TemperatureFormFieldProps) {
-  const handleUnitChange = () => {
-    let newValue = parseFloat(value || "0");
-    if (!isNaN(newValue)) {
-      if (unit === "celsius") {
-        newValue = celsiusToFahrenheit(newValue);
-      } else {
-        newValue = fahrenheitToCelsius(newValue);
-      }
-      onChange({ name, value: newValue.toFixed(1) });
+  const [unit, setUnit] = useState<TemperatureUnit>("fahrenheit");
+  const [inputValue, setInputValue] = useState(value || "");
+
+  useEffect(() => {
+    if (value) {
+      const initialTemperature =
+        unit === "celsius"
+          ? fahrenheitToCelsius(parseFloat(value)).toFixed(1)
+          : value;
+      setInputValue(initialTemperature);
     }
+  }, [value, unit]);
+
+  const handleUnitChange = () => {
     setUnit(unit === "celsius" ? "fahrenheit" : "celsius");
+    if (inputValue) {
+      const convertedValue =
+        unit === "celsius"
+          ? celsiusToFahrenheit(parseFloat(inputValue)).toFixed(1)
+          : fahrenheitToCelsius(parseFloat(inputValue)).toFixed(1);
+      setInputValue(convertedValue);
+    }
+  };
+
+  const handleInputChange = (e: any) => {
+    const newValue = e.value;
+
+    const regex = /^-?\d*\.?\d{0,1}$/;
+    if (regex.test(newValue)) {
+      setInputValue(newValue);
+    }
+  };
+
+  const handleBlur = () => {
+    if (!inputValue) return;
+    const parsedValue = parseFloat(inputValue);
+    if (isNaN(parsedValue)) return;
+
+    const finalValue =
+      unit === "celsius"
+        ? celsiusToFahrenheit(parsedValue).toString()
+        : parsedValue.toString();
+
+    setInputValue(finalValue);
+    onChange({ name, value: finalValue });
   };
 
   return (
@@ -39,17 +70,13 @@ export default function TemperatureFormField({
         id={id}
         label={label}
         type="number"
-        value={value ? value : ""}
+        value={inputValue}
         name={name}
         min={`${unit === "celsius" ? 35 : 95}`}
         max={`${unit === "celsius" ? 41.1 : 106}`}
         step={0.1}
-        onChange={(e) => {
-          const newValue = e.value;
-          if (newValue === "" || /^-?\d*\.?\d{0,1}$/.test(newValue)) {
-            onChange(e);
-          }
-        }}
+        onChange={handleInputChange}
+        onBlur={handleBlur}
         autoComplete="off"
         error={error}
       />

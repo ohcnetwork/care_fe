@@ -75,24 +75,20 @@ export const meanArterialPressure = (bp?: BloodPressure | null) => {
   return (2 * bp.diastolic + bp.systolic) / 3;
 };
 
-export const BloodPressureValidator: FieldValidator<BloodPressure> = (bp) => {
+export const BloodPressureValidator: FieldValidator<BloodPressure> = (
+  bp,
+  t,
+) => {
   if (Object.values(bp).every((v) => v == null)) {
     return;
   }
-  if (bp.diastolic == null) {
-    return "Diastolic is missing. Either specify both or clear both.";
+  if (bp.systolic == null || bp.diastolic == null) {
+    return t("blood_pressure_error.missing");
   }
-  if (bp.systolic == null) {
-    return "Systolic is missing. Either specify both or clear both.";
-  }
-  if (bp.systolic > 250) {
-    return "Systolic value cannot exceed 250.";
-  }
-
-  if (bp.diastolic > 250) {
-    return "Diastolic value cannot exceed 250.";
+  if (bp.systolic > 250 || bp.diastolic > 250) {
+    return t("blood_pressure_error.exceed");
   }
   if (bp.systolic < bp.diastolic) {
-    return "Blood Pressure - Systolic must be greater than diastolic";
+    return t("blood_pressure_error.systolic_less_than_diastolic");
   }
 };

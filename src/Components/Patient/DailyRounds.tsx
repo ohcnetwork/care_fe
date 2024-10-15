@@ -126,8 +126,6 @@ export const DailyRounds = (props: any) => {
         return state;
     }
   };
-  type TemperatureUnit = "celsius" | "fahrenheit";
-  const [unit, setUnit] = useState<TemperatureUnit>("fahrenheit");
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
     initialState,
@@ -250,7 +248,8 @@ export const DailyRounds = (props: any) => {
           }
           return;
         case "bp": {
-          const error = state.form.bp && BloodPressureValidator(state.form.bp);
+          const error =
+            state.form.bp && BloodPressureValidator(state.form.bp, t);
 
           if (error) {
             errors.bp = error;
@@ -262,20 +261,12 @@ export const DailyRounds = (props: any) => {
 
         case "temperature": {
           const temperatureInputValue = state.form["temperature"];
-          const convertedTemperature =
-            unit === "celsius"
-              ? celsiusToFahrenheit(temperatureInputValue)
-              : temperatureInputValue;
 
           if (
-            convertedTemperature &&
-            (convertedTemperature < 95 || convertedTemperature > 106)
+            temperatureInputValue &&
+            (temperatureInputValue < 95 || temperatureInputValue > 106)
           ) {
-            const tempRange =
-              unit === "celsius" ? t("celsius_range") : t("fahrenheit_range");
-
-            errors[field] = `Temperature must be between ${tempRange}.`;
-
+            errors[field] = t("temperature_error");
             invalidForm = true;
             scrollTo("temperature");
           }
@@ -372,10 +363,7 @@ export const DailyRounds = (props: any) => {
           bp: state.form.bp,
           pulse: state.form.pulse ?? null,
           resp: state.form.resp ?? null,
-          temperature:
-            (unit == "celsius"
-              ? celsiusToFahrenheit(state.form.temperature).toFixed(1)
-              : state.form.temperature) ?? null,
+          temperature: state.form.temperature ?? null,
           rhythm: state.form.rhythm || undefined,
           rhythm_detail: state.form.rhythm_detail,
           ventilator_spo2: state.form.ventilator_spo2 ?? null,
@@ -804,11 +792,7 @@ export const DailyRounds = (props: any) => {
             state.form.rounds_type,
           ) && (
             <>
-              <TemperatureFormField
-                {...field("temperature")}
-                unit={unit}
-                setUnit={setUnit}
-              />
+              <TemperatureFormField {...field("temperature")} />
 
               <RangeAutocompleteFormField
                 {...field("resp")}
