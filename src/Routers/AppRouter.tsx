@@ -24,9 +24,7 @@ import HCXRoutes from "./routes/HCXRoutes";
 import ShiftingRoutes from "./routes/ShiftingRoutes";
 import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
-import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
-import useAuthUser from "../Common/hooks/useAuthUser";
 import careConfig from "@careConfig";
 import IconIndex from "../CAREUI/icons/Index";
 
@@ -63,20 +61,10 @@ const Routes = {
 };
 
 export default function AppRouter() {
-  const authUser = useAuthUser();
-
   let routes = Routes;
 
   if (careConfig.hcx.enabled) {
     routes = { ...HCXRoutes, ...routes };
-  }
-
-  if (
-    !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type,
-    )
-  ) {
-    routes = { ...routes, ...ExternalResultRoutes };
   }
 
   useRedirect("/user", "/users");
