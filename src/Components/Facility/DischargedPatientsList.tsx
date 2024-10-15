@@ -435,10 +435,7 @@ const DischargedPatientsList = ({
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
         query={{ ordering: "-modified_date", ...qParams }}
-        queryCB={(query) => {
-          setCount(query.data?.count || 0);
-          console.log(query.data?.count);
-        }}
+        queryCB={(query) => setCount(query.data?.count || 0)}
         onPageChange={updatePage}
       >
         {() => (
