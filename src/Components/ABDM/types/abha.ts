@@ -17,9 +17,29 @@ export type AbhaNumberModel = {
   district: string | null;
   state: string | null;
   pincode: string | null;
+  mobile: string | null;
   email: string | null;
   profile_photo: string | null;
   new: boolean;
   patient: string | null;
   patient_object: PatientModel | null;
 };
+
+export type ABHAQRContent = {
+  hidn: string;
+  name: string;
+  gender: "M" | "F" | "O";
+  dob: string;
+  mobile: string;
+  address: string;
+  distlgd: string;
+  statelgd: string;
+} & ({ hid: string; phr?: never } | { phr: string; hid?: never }) &
+  (
+    | { district_name: string; "dist name"?: never }
+    | { "dist name": string; district_name?: never }
+  ) &
+  (
+    | { state_name: string; "state name"?: never }
+    | { "state name": string; state_name?: never }
+  );

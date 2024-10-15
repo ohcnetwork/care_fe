@@ -85,6 +85,11 @@ async function getResponseBody<TData>(res: Response): Promise<TData> {
   }
 
   const isJson = res.headers.get("content-type")?.includes("application/json");
+  const isImage = res.headers.get("content-type")?.includes("image");
+
+  if (isImage) {
+    return (await res.blob()) as TData;
+  }
 
   if (!isJson) {
     return (await res.text()) as TData;
