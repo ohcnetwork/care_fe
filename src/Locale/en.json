@@ -1029,5 +1029,6 @@
   "length": "Length ({{unit}})",
   "live_patients_total_beds": "Live Patients / Total beds",
   "occupancy" : "Occupancy",
-  "view_cns" : "View CNS"
+  "view_cns" : "View CNS",
+  "create_consultation" : "Create Consultation"
 }
