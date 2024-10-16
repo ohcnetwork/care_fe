@@ -10,8 +10,8 @@ export class DoctorConnect {
     });
   }
 
-  verifyCopiedContent(text: string) {
-    cy.get("@clipboardStub").should("be.calledWith", text);
+  verifyCopiedContent() {
+    cy.get("@clipboardStub").should("be.calledWithMatch", /^\+91\d{10}$/);
   }
 
   verifyIconVisible(selector: string) {

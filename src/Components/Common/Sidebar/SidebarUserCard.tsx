@@ -63,7 +63,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
                   href="/user/profile"
                 >
                   <DropdownMenuItem className="cursor-pointer">
-                    {t("profile")}
+                    <div id="profile-button">{t("profile")}</div>
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
