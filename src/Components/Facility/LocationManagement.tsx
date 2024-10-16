@@ -16,6 +16,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 
 import Loading from "@/Components/Common/Loading";
+import { cn } from "@/lib/utils";
 interface Props {
   facilityId: string;
 }
@@ -87,14 +88,14 @@ export default function LocationManagement({ facilityId }: Props) {
               id="add-new-location"
               href={`/facility/${facilityId}/location/add`}
               authorizeFor={NonReadOnlyUsers}
-              className="mr-4 hidden lg:block"
+              className="hidden lg:block"
             >
               <CareIcon icon="l-plus" className="text-lg" />
               Add New Location
             </ButtonV2>
           }
         >
-          <div className="mx-auto">
+          <div className="mx-auto mt-4 lg:mt-0">
             <ButtonV2
               href={`/facility/${facilityId}/location/add`}
               authorizeFor={NonReadOnlyUsers}
@@ -112,7 +113,7 @@ export default function LocationManagement({ facilityId }: Props) {
             <PaginatedList.WhenLoading>
               <Loading />
             </PaginatedList.WhenLoading>
-            <PaginatedList.Items<LocationModel> className="my-8 grid gap-3 @4xl:grid-cols-2 @6xl:grid-cols-3 @[100rem]:grid-cols-4 lg:mx-8">
+            <PaginatedList.Items<LocationModel> className="my-8 grid gap-3 @4xl:grid-cols-2 @6xl:grid-cols-3 @[100rem]:grid-cols-4">
               {(item) => (
                 <Location
                   setShowDeletePopup={setShowDeletePopup}
@@ -225,18 +226,14 @@ const Location = ({
   setShowDeletePopup,
   facilityId,
 }: LocationProps) => {
-  const { loading, data } = useQuery(routes.listFacilityBeds, {
+  const bedsQuery = useQuery(routes.listFacilityBeds, {
     query: {
       facility: facilityId,
       location: id,
     },
   });
 
-  const totalBeds = data?.count ?? 0;
-
-  if (loading) {
-    return <Loading />;
-  }
+  const totalBeds = bedsQuery.data?.count;
 
   return (
     <div className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
@@ -290,13 +287,16 @@ const Location = ({
         id="manage-bed-button"
         variant="secondary"
         border
-        className="mt-3 flex w-full items-center justify-between"
+        className={cn(
+          "mt-3 flex w-full items-center justify-between",
+          totalBeds != null && "opacity-50",
+        )}
         href={`location/${id}/beds`}
       >
         Manage Beds
         <span className="flex items-center justify-center gap-2">
           <CareIcon icon="l-bed" className="text-lg" />
-          {totalBeds}
+          {totalBeds ?? "--"}
         </span>
       </ButtonV2>
       <div className="mt-2 flex w-full flex-col gap-2 md:flex-row">
