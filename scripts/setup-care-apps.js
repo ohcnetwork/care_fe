@@ -64,17 +64,17 @@ appsConfig.forEach((app) => {
       );
       if (lockFile.package === app.package && lockFile.branch === app.branch) {
         console.log(`Package already exists. Pulling latest changes...`);
-        execSync(`cd ${appDir} && git pull`, { stdio: "inherit" });
+        execSync(`git -C "${appDir}" pull`, { stdio: "inherit" });
         return;
       } else {
         console.log(`Branch/package does not match. Recreating...`);
-        execSync(`rm -rf ${appDir}`, { stdio: "inherit" });
+        fs.rmSync(appDir, { recursive: true, force: true });
       }
     } else {
       console.log(
         `Package already exists but care-package.lock file does not exist. Recreating...`,
       );
-      execSync(`rm -rf ${appDir}`, { stdio: "inherit" });
+      fs.rmSync(appDir, { recursive: true, force: true });
     }
   }
 
