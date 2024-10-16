@@ -5,9 +5,7 @@ import ManagePrescriptions from "../../Components/Medicine/ManagePrescriptions";
 import { DailyRoundListDetails } from "../../Components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "../../Components/Patient/DailyRounds";
 import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
-import TreatmentSummary, {
-  ITreatmentSummaryProps,
-} from "../../Components/Facility/TreatmentSummary";
+import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
 import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
 import PatientConsentRecords from "../../Components/Patient/PatientConsentRecords";
 import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
@@ -15,21 +13,22 @@ import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
 import CriticalCarePreview from "../../Components/LogUpdate/CriticalCarePreview";
 import FileUploadPage from "../../Components/Patient/FileUploadPage";
 import InvestigationPrintPreview from "../../Components/Facility/Investigations/InvestigationsPrintPreview";
+import { AppRoutes } from "../AppRouter";
 
-export default {
+const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
     patientId,
-  }: any) => <ConsultationForm facilityId={facilityId} patientId={patientId} />,
+  }) => <ConsultationForm facilityId={facilityId} patientId={patientId} />,
   "/facility/:facilityId/patient/:patientId/consultation/:id/update": ({
     facilityId,
     patientId,
     id,
-  }: any) => (
+  }) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/consent-records":
-    ({ facilityId, patientId, id }: any) => (
+    ({ facilityId, patientId, id }) => (
       <PatientConsentRecords
         facilityId={facilityId}
         patientId={patientId}
@@ -40,7 +39,7 @@ export default {
     facilityId,
     patientId,
     id,
-  }: any) => (
+  }) => (
     <FileUploadPage
       facilityId={facilityId}
       patientId={patientId}
@@ -49,14 +48,14 @@ export default {
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
-    (path: any) => <ManagePrescriptions {...path} />,
+    (path) => <ManagePrescriptions {...path} />,
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions/print":
     () => <PrescriptionsPrintPreview />,
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigation": ({
     facilityId,
     patientId,
     id,
-  }: any) => (
+  }) => (
     <Investigation
       consultationId={id}
       facilityId={facilityId}
@@ -64,7 +63,7 @@ export default {
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId":
-    ({ facilityId, patientId, id, sessionId }: any) => (
+    ({ facilityId, patientId, id, sessionId }) => (
       <ShowInvestigation
         consultationId={id}
         facilityId={facilityId}
@@ -85,7 +84,7 @@ export default {
     facilityId,
     patientId,
     id,
-  }: any) => (
+  }) => (
     <DailyRounds
       facilityId={facilityId}
       patientId={patientId}
@@ -93,7 +92,7 @@ export default {
     />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update":
-    ({ facilityId, patientId, consultationId, id }: any) => (
+    ({ facilityId, patientId, consultationId, id }) => (
       <DailyRounds
         facilityId={facilityId}
         patientId={patientId}
@@ -102,7 +101,7 @@ export default {
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id":
-    ({ facilityId, patientId, consultationId, id }: any) => (
+    ({ facilityId, patientId, consultationId, id }) => (
       <DailyRoundListDetails
         facilityId={facilityId}
         patientId={patientId}
@@ -110,26 +109,29 @@ export default {
         id={id}
       />
     ),
-
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
-    (params: {
-      facilityId: string;
-      patientId: string;
-      consultationId: string;
-      id: string;
-    }) => <CriticalCarePreview {...params} />,
+    ({ facilityId, patientId, consultationId, id }) => (
+      <CriticalCarePreview
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
-    (params: {
-      facilityId: string;
-      patientId: string;
-      consultationId: string;
-      id: string;
-    }) => <CriticalCareEditor {...params} />,
+    ({ facilityId, patientId, consultationId, id }) => (
+      <CriticalCareEditor
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+        id={id}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId": ({
     facilityId,
     patientId,
     consultationId,
-  }: any) => (
+  }) => (
     <ConsultationDetails
       facilityId={facilityId}
       patientId={patientId}
@@ -137,11 +139,11 @@ export default {
       tab={"updates"}
     />
   ),
-  "/consultation/:consultationId": ({ consultationId }: any) => (
+  "/consultation/:consultationId": ({ consultationId }) => (
     <ConsultationDetails consultationId={consultationId} tab={"updates"} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
-    ({ facilityId, patientId, consultationId }: ITreatmentSummaryProps) => (
+    ({ facilityId, patientId, consultationId }) => (
       <TreatmentSummary
         facilityId={facilityId}
         consultationId={consultationId}
@@ -149,7 +151,7 @@ export default {
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/notes":
-    ({ facilityId, patientId, consultationId }: any) => (
+    ({ facilityId, patientId, consultationId }) => (
       <ConsultationDoctorNotes
         facilityId={facilityId}
         patientId={patientId}
@@ -157,7 +159,7 @@ export default {
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
-    ({ facilityId, patientId, consultationId, tab }: any) => (
+    ({ facilityId, patientId, consultationId, tab }) => (
       <ConsultationDetails
         facilityId={facilityId}
         patientId={patientId}
@@ -166,3 +168,5 @@ export default {
       />
     ),
 };
+
+export default consultationRoutes;
