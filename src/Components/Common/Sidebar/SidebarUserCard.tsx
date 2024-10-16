@@ -35,7 +35,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
           >
             <div
               id="user-profile-name"
-              className={`flex flex-1 items-center justify-start transition ${shrinked ? "" : ""}`}
+              className="flex flex-1 items-center justify-start transition"
             >
               <div className="flex-none text-lg">
                 <Avatar
