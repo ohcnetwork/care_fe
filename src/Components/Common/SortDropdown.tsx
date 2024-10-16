@@ -29,6 +29,7 @@ export default function SortDropdownMenu(props: Props) {
     >
       {props.options.map(({ isAscending, value }) => (
         <DropdownItem
+          key={value}
           className={
             props.selected === value
               ? "bg-primary-100 !font-medium text-primary-500"

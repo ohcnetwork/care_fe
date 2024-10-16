@@ -58,8 +58,8 @@ export default function Breadcrumbs({
       style: replacements[field]?.style || "",
     }));
 
-  const renderCrumb = (crumb: any, index: number, array: any[]) => {
-    const isLastItem = index === array.length - 1;
+  const renderCrumb = (crumb: any, index: number) => {
+    const isLastItem = index === crumbs!.length - 1;
     return (
       <li
         key={crumb.name}
@@ -139,9 +139,8 @@ export default function Breadcrumbs({
             {showFullPath && crumbs.slice(0, -1).map(renderCrumb)}
           </>
         )}
-        {crumbs &&
-          crumbs.length > 0 &&
-          renderCrumb(crumbs[crumbs.length - 1], crumbs.length - 1, crumbs)}
+        {crumbs?.length &&
+          renderCrumb(crumbs[crumbs.length - 1], crumbs.length - 1)}
       </ol>
     </nav>
   );

@@ -15,10 +15,17 @@ import {
   TooltipTrigger,
 } from "@/Components/ui/tooltip";
 import { useTranslation } from "react-i18next";
+import { useCareAppNavItems } from "@/Common/hooks/useCareApps";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
 const LOGO_COLLAPSE = "/images/care_logo_mark.svg";
+
+export interface INavItem {
+  text: string;
+  to?: string;
+  icon: IconName;
+}
 
 type StatelessSidebarProps =
   | {
@@ -40,11 +47,7 @@ const StatelessSidebar = ({
   onItemClick,
 }: StatelessSidebarProps) => {
   const { t } = useTranslation();
-  const NavItems: {
-    text: string;
-    to: string;
-    icon: IconName;
-  }[] = [
+  const BaseNavItems: INavItem[] = [
     { text: t("facilities"), to: "/facility", icon: "l-hospital" },
     { text: t("patients"), to: "/patients", icon: "l-user-injured" },
     { text: t("assets"), to: "/assets", icon: "l-shopping-cart-alt" },
@@ -54,6 +57,10 @@ const StatelessSidebar = ({
     { text: t("users"), to: "/users", icon: "l-users-alt" },
     { text: t("notice_board"), to: "/notice_board", icon: "l-meeting-board" },
   ];
+
+  const PluginNavItems = useCareAppNavItems();
+
+  const NavItems = [...BaseNavItems, ...PluginNavItems];
 
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
@@ -110,11 +117,11 @@ const StatelessSidebar = ({
           : "overflow-y-auto overflow-x-hidden"
       }`}
     >
-      {shrinked && (
+      {setShrinked && shrinked && (
         <div>
           <ToggleShrink
             shrinked={shrinked}
-            toggle={() => setShrinked && setShrinked(!shrinked)}
+            toggle={() => setShrinked(!shrinked)}
           />
         </div>
       )}
@@ -132,11 +139,11 @@ const StatelessSidebar = ({
             src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
           />
         </Link>
-        {!shrinked && (
+        {setShrinked && !shrinked && (
           <div className="ml-1">
             <ToggleShrink
               shrinked={shrinked}
-              toggle={() => setShrinked && setShrinked(!shrinked)}
+              toggle={() => setShrinked(!shrinked)}
             />
           </div>
         )}
@@ -158,7 +165,7 @@ const StatelessSidebar = ({
                 {...i}
                 icon={<CareIcon icon={i.icon} className="h-5" />}
                 selected={i.to === activeLink}
-                do={() => onItemClick && onItemClick(false)}
+                onItemClick={() => onItemClick && onItemClick(false)}
                 handleOverflow={handleOverflow}
               />
             );

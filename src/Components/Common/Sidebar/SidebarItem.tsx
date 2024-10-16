@@ -10,22 +10,19 @@ type SidebarItemProps = {
   ref?: React.Ref<HTMLAnchorElement>;
   text: string;
   icon: SidebarIcon;
+  onItemClick?: () => void;
   external?: true | undefined;
   badgeCount?: number | undefined;
   selected?: boolean | undefined;
   handleOverflow?: any;
-} & ({ to: string; do?: undefined } | { to?: string; do: () => void });
+} & ({ to?: string; do?: undefined } | { to?: string; do: () => void });
 
 type SidebarItemBaseProps = SidebarItemProps & {
   shrinked?: boolean;
-  ref: Ref<HTMLAnchorElement>;
 };
 
-const SidebarItemBase = forwardRef(
-  (
-    { shrinked, external, ...props }: SidebarItemBaseProps,
-    ref: Ref<HTMLAnchorElement>,
-  ) => {
+const SidebarItemBase = forwardRef<HTMLAnchorElement, SidebarItemBaseProps>(
+  ({ shrinked, external, ...props }, ref) => {
     const { t } = useTranslation();
     const { resetHistory } = useAppHistory();
 
@@ -35,12 +32,17 @@ const SidebarItemBase = forwardRef(
         className={`tooltip relative ml-1 mr-2 h-12 flex-1 cursor-pointer rounded-md py-1 font-medium text-gray-600 transition md:flex-none ${
           props.selected
             ? "bg-white text-green-800 shadow"
-            : "hover:bg-gray-200"
+            : "font-normal" + (props.to || props.do ? " hover:bg-gray-200" : "")
         }`}
         target={external && "_blank"}
         rel={external && "noreferrer"}
         href={props.to ?? ""}
-        onClick={props.do ?? resetHistory}
+        onClick={() => {
+          // On Review: Check if resetHistory is working as intended.
+          props.do?.();
+          props.onItemClick?.();
+          resetHistory();
+        }}
         onMouseEnter={() => {
           props.handleOverflow(true);
         }}
