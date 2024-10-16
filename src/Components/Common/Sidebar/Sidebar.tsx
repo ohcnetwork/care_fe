@@ -14,6 +14,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/Components/ui/tooltip";
+import { useTranslation } from "react-i18next";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -38,19 +39,20 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
+  const { t } = useTranslation();
   const NavItems: {
     text: string;
     to: string;
     icon: IconName;
   }[] = [
-    { text: "Facilities", to: "/facility", icon: "l-hospital" },
-    { text: "Patients", to: "/patients", icon: "l-user-injured" },
-    { text: "Assets", to: "/assets", icon: "l-shopping-cart-alt" },
-    { text: "Sample Test", to: "/sample", icon: "l-medkit" },
-    { text: "Shifting", to: "/shifting", icon: "l-ambulance" },
-    { text: "Resource", to: "/resource", icon: "l-heart-medical" },
-    { text: "Users", to: "/users", icon: "l-users-alt" },
-    { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
+    { text: t("facilities"), to: "/facility", icon: "l-hospital" },
+    { text: t("patients"), to: "/patients", icon: "l-user-injured" },
+    { text: t("assets"), to: "/assets", icon: "l-shopping-cart-alt" },
+    { text: t("sample_test"), to: "/sample", icon: "l-medkit" },
+    { text: t("shifting"), to: "/shifting", icon: "l-ambulance" },
+    { text: t("resource"), to: "/resource", icon: "l-heart-medical" },
+    { text: t("users"), to: "/users", icon: "l-users-alt" },
+    { text: t("notice_board"), to: "/notice_board", icon: "l-meeting-board" },
   ];
 
   const activeLink = useActiveLink();
@@ -223,27 +225,30 @@ interface ToggleShrinkProps {
   toggle: () => void;
 }
 
-const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
-  <TooltipProvider>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${
-            shrinked ? "mx-auto" : "mr-4"
-          } transition-all duration-200 ease-in-out`}
-          onClick={toggle}
-        >
-          <CareIcon
-            icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
-            className={`text-lg ${
-              shrinked ? "" : ""
-            } transition-all delay-150 duration-300 ease-out`}
-          />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>{shrinked ? "Expand Sidebar" : "Collapse Sidebar"}</p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-);
+const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => {
+  const { t } = useTranslation();
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${
+              shrinked ? "mx-auto" : "mr-4"
+            } transition-all duration-200 ease-in-out`}
+            onClick={toggle}
+          >
+            <CareIcon
+              icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
+              className={`text-lg ${
+                shrinked ? "" : ""
+              } transition-all delay-150 duration-300 ease-out`}
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{shrinked ? t("expand_sidebar") : t("collapse_sidebar")}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};

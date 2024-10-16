@@ -145,7 +145,7 @@ export const HospitalList = () => {
 
   return (
     <Page
-      title={t("Facilities")}
+      title={t("facilities")}
       breadcrumbs={false}
       hideBack
       options={

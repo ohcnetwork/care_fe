@@ -785,7 +785,7 @@ export const PatientManager = () => {
 
   return (
     <Page
-      title={t("Patients")}
+      title={t("patients")}
       hideBack={true}
       breadcrumbs={false}
       options={
