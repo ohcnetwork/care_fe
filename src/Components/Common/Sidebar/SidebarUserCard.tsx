@@ -43,13 +43,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
           id="sign-out-button"
           className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
         >
-          <div className="flex-none text-lg">
-            <CareIcon
-              icon="l-sign-out-alt"
-              className="text-2xl text-gray-900"
-            />
-          </div>
-
+          <CareIcon icon="l-sign-out-alt" className="text-2xl text-gray-900" />
           {!shrinked && (
             <div className="flex w-full items-center pl-4 text-sm tracking-wide text-gray-900">
               {t("sign_out")}
