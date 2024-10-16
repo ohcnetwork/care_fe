@@ -813,6 +813,12 @@
   "map_acronym": "M.A.P.",
   "systolic": "Systolic",
   "diastolic": "Diastolic",
+  "blood_pressure_error": {
+    "missing": "Field is required. Either specify both or clear both.",
+    "exceed": "Value cannot exceed 250 mmHg.",
+    "systolic_less_than_diastolic": "Systolic must be greater than diastolic."
+  },
+  "out_of_range_error": "Value must be between {{ start }} and {{ end }}.",
   "pain": "Pain",
   "pain_chart_description": "Mark region and intensity of pain",
   "bradycardia": "Bradycardia",
