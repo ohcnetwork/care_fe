@@ -1,29 +1,5 @@
 import { fireRequest } from "./fireRequest";
 
-// asset bed
-export const listAssetBeds = (params: object, altKey?: string) =>
-  fireRequest("listAssetBeds", [], params, {}, altKey);
-
-export const partialUpdateAssetBed = (params: object, asset_id: string) =>
-  fireRequest(
-    "partialUpdateAssetBed",
-    [],
-    { ...params },
-    {
-      external_id: asset_id,
-    },
-  );
-
-export const deleteAssetBed = (asset_id: string) =>
-  fireRequest(
-    "deleteAssetBed",
-    [],
-    {},
-    {
-      external_id: asset_id,
-    },
-  );
-
 export const getPatient = (pathParam: object) => {
   return fireRequest("getPatient", [], {}, pathParam);
 };
@@ -41,6 +17,3 @@ export const getConsultation = (id: string) => {
 export const dischargePatient = (params: object, pathParams: object) => {
   return fireRequest("dischargePatient", [], params, pathParams);
 };
-
-export const operateAsset = (id: string, params: object) =>
-  fireRequest("operateAsset", [], params, { external_id: id });

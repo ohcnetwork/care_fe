@@ -62,7 +62,7 @@ const MonitorAssetPopover = ({
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-sm text-black md:text-base">
-                {t("local_ipaddress")}:
+                {t("local_ip_address")}:
               </p>
               <p className="break-words text-secondary-600">
                 {asset?.meta?.local_ip_address}
