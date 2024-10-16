@@ -61,12 +61,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   alt={facility.name}
                   className="h-full max-h-32 w-full object-cover"
                 />
-              )) || (
-                <CareIcon
-                  icon="l-hospital"
-                  className="block text-7xl text-secondary-500"
-                />
-              )}
+              )) || <Avatar name={facility.name} square={true} />}
             </Link>
 
             <div className="mx-auto flex h-fit w-full max-w-full flex-col flex-wrap justify-between md:h-full lg:max-w-3xl">
