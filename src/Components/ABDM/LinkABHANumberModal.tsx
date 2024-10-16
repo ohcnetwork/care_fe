@@ -225,7 +225,6 @@ const ScanABHAQRSection = ({
               Notify.Error({ msg: "Linking Failed" });
             }
           } catch (e) {
-            console.log(e);
             Notify.Error({ msg: "Invalid ABHA QR" });
           } finally {
             setIsLoading(false);

@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import Routers from "./Routers";
-import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
 import Integrations from "./Integrations";
 import Loading from "./Components/Common/Loading";
 import HistoryAPIProvider from "./Providers/HistoryAPIProvider";
