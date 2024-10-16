@@ -47,7 +47,8 @@
     "prepare": "husky install",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write"
+    "format": "prettier ./src --write",
+    "sort-locales": "node ./scripts/sort-locales.js"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.1.0",
@@ -163,6 +164,9 @@
       "prettier --write --ignore-unknown --plugin prettier-plugin-tailwindcss",
       "eslint --fix",
       "git update-index --again"
+    ],
+    "src/Locale/*.json": [
+      "npm run sort-locales"
     ]
   },
   "engines": {
