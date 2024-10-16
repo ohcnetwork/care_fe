@@ -65,7 +65,7 @@ export const FacilityCard = (props: {
                   alt={facility.name}
                   className="h-full max-h-32 w-full object-cover"
                 />
-              )) || <Avatar name={facility.name} square={true} />}
+              )) || <Avatar name={facility.name ?? "Unknown"} square={true} />}
             </Link>
 
             <div className="mx-auto flex h-fit w-full max-w-full flex-col flex-wrap justify-between md:h-full lg:max-w-3xl">
