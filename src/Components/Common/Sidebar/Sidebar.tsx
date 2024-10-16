@@ -8,6 +8,13 @@ import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
 import careConfig from "@careConfig";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/Components/ui/tooltip";
+import { useTranslation } from "react-i18next";
 import { useCareAppNavItems } from "@/Common/hooks/useCareApps";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
@@ -39,15 +46,16 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
+  const { t } = useTranslation();
   const BaseNavItems: INavItem[] = [
-    { text: "Facilities", to: "/facility", icon: "l-hospital" },
-    { text: "Patients", to: "/patients", icon: "l-user-injured" },
-    { text: "Assets", to: "/assets", icon: "l-shopping-cart-alt" },
-    { text: "Sample Test", to: "/sample", icon: "l-medkit" },
-    { text: "Shifting", to: "/shifting", icon: "l-ambulance" },
-    { text: "Resource", to: "/resource", icon: "l-heart-medical" },
-    { text: "Users", to: "/users", icon: "l-users-alt" },
-    { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
+    { text: t("facilities"), to: "/facility", icon: "l-hospital" },
+    { text: t("patients"), to: "/patients", icon: "l-user-injured" },
+    { text: t("assets"), to: "/assets", icon: "l-shopping-cart-alt" },
+    { text: t("sample_test"), to: "/sample", icon: "l-medkit" },
+    { text: t("shifting"), to: "/shifting", icon: "l-ambulance" },
+    { text: t("resource"), to: "/resource", icon: "l-heart-medical" },
+    { text: t("users"), to: "/users", icon: "l-users-alt" },
+    { text: t("notice_board"), to: "/notice_board", icon: "l-meeting-board" },
   ];
 
   const PluginNavItems = useCareAppNavItems();
@@ -65,23 +73,21 @@ const StatelessSidebar = ({
   const updateIndicator = () => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
-    const navItemCount = NavItems.length + (careConfig.urls.dashboard ? 2 : 1); // +2 for notification and dashboard
+    const navItemCount = NavItems.length + (careConfig.urls.dashboard ? 2 : 1);
     if (index !== -1) {
-      // Haha math go brrrrrrrrr
-
       const e = indicatorRef.current;
       const itemHeight = activeLinkRef.current?.clientHeight || 0;
-      if (lastIndicatorPosition > index) {
-        e.style.top = `${itemHeight * (index + 0.37)}px`;
-        setTimeout(() => {
-          e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
-        }, 50);
-      } else {
-        e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
-        setTimeout(() => {
-          e.style.top = `${itemHeight * (index + 0.37)}px`;
-        }, 50);
-      }
+      const itemOffset = index * itemHeight;
+
+      const indicatorHeight = indicatorRef.current.clientHeight;
+      const indicatorOffset = (itemHeight - indicatorHeight) / 2;
+
+      const top = `${itemOffset + indicatorOffset}px`;
+      const bottom = `${navItemCount * itemHeight - itemOffset - indicatorOffset}px`;
+
+      e.style.top = top;
+      e.style.bottom = bottom;
+
       setLastIndicatorPosition(index);
     } else {
       indicatorRef.current.style.display = "none";
@@ -103,7 +109,7 @@ const StatelessSidebar = ({
 
   return (
     <nav
-      className={`group flex h-full flex-col bg-gray-100 py-3 md:py-5 ${
+      className={`group flex h-dvh flex-1 flex-col bg-gray-100 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
@@ -122,11 +128,14 @@ const StatelessSidebar = ({
       <div
         className={`flex items-center ${shrinked ? "mt-2 justify-center" : "justify-between"}`}
       >
-        <Link href="/" className="flex items-center justify-between">
+        <Link
+          href="/"
+          className={`${
+            shrinked ? "mx-auto" : "ml-3"
+          } flex items-center justify-between`}
+        >
           <img
-            className={`${
-              shrinked ? "mx-auto" : "ml-4 md:ml-2"
-            } h-8 self-start transition md:h-12 lg:h-12`}
+            className="h-8 w-auto self-start transition md:h-10"
             src={shrinked ? LOGO_COLLAPSE : careConfig.mainLogo?.light}
           />
         </Link>
@@ -139,15 +148,13 @@ const StatelessSidebar = ({
           </div>
         )}
       </div>
-      <div className="h-4" /> {/* flexible spacing */}
-      <div className="relative flex h-full flex-col">
+      <div className="relative mt-4 flex h-full flex-col justify-between">
         <div className="relative flex flex-1 flex-col md:flex-none">
           <div
             ref={indicatorRef}
-            // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
-              "absolute left-2 z-10 block w-1 rounded bg-primary-400 transition-all",
-              activeLink ? "opacity-0 md:opacity-100" : "opacity-0",
+              "absolute right-2 z-10 block h-6 w-1 rounded-l bg-primary-500 transition-all",
+              activeLink ? "opacity-100" : "opacity-0",
             )}
           />
           {NavItems.map((i) => {
@@ -225,18 +232,28 @@ interface ToggleShrinkProps {
   toggle: () => void;
 }
 
-const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
-  <div
-    className={`flex h-5 w-5 cursor-pointer items-center justify-center self-end rounded bg-gray-300 text-secondary-100 text-opacity-70 hover:bg-secondary-500 hover:text-opacity-100 ${
-      shrinked ? "mx-auto" : "mr-4"
-    } transition-all duration-200 ease-in-out`}
-    onClick={toggle}
-  >
-    <CareIcon
-      icon="l-angle-up"
-      className={`text-3xl ${
-        shrinked ? "rotate-90" : "-rotate-90"
-      } transition-all delay-150 duration-300 ease-out`}
-    />
-  </div>
-);
+const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => {
+  const { t } = useTranslation();
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${
+              shrinked ? "mx-auto" : "mr-4"
+            } transition-all ease-in-out`}
+            onClick={toggle}
+          >
+            <CareIcon
+              icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
+              className="text-lg transition"
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{shrinked ? t("expand_sidebar") : t("collapse_sidebar")}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};

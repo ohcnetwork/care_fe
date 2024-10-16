@@ -145,7 +145,7 @@ export const FacilityList = () => {
 
   return (
     <Page
-      title={t("Facilities")}
+      title={t("facilities")}
       breadcrumbs={false}
       hideBack
       options={

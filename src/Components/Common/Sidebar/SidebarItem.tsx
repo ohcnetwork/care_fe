@@ -29,9 +29,9 @@ const SidebarItemBase = forwardRef<HTMLAnchorElement, SidebarItemBaseProps>(
     return (
       <Link
         ref={ref}
-        className={`tooltip relative ml-1 mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-gray-900 transition-all duration-200 ease-in-out md:h-11 md:flex-none ${
+        className={`tooltip relative ml-1 mr-2 h-12 flex-1 cursor-pointer rounded-md py-1 font-medium text-gray-600 transition md:flex-none ${
           props.selected
-            ? "bg-gray-200 font-semibold"
+            ? "bg-white text-green-800 shadow"
             : "font-normal" + (props.to || props.do ? " hover:bg-gray-200" : "")
         }`}
         target={external && "_blank"}
@@ -62,7 +62,7 @@ const SidebarItemBase = forwardRef<HTMLAnchorElement, SidebarItemBaseProps>(
           <span
             className={`${
               shrinked ? "hidden" : "grow"
-            } flex w-full items-center pl-4 text-sm tracking-wide`}
+            } flex w-full items-center text-nowrap pl-4 text-sm tracking-wide`}
           >
             {t(props.text)}
           </span>
