@@ -8,20 +8,22 @@
 </a>
 <p align="center"><b>Our goal is to continuously improve the quality and accessibility of public healthcare services using digital tools.</b></p>
 <h2></h2>
-<h3 align="center"><a href="https://care.ohc.network" target="_blank">🚀 Staging Deploy</a></h3>
-<p align="center"><img src="https://api.netlify.com/api/v1/badges/fd123f42-ef65-448c-9b03-39959d60e60b/deploy-status"></p>
+<h3 align="center"><a href="https://care.ohc.network" target="_blank">🚀 Staging Deployment</a></h3>
+<center>
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/de76351f-b1f0-4bf8-8445-d9faf6391b13/deploy-status)](https://app.netlify.com/sites/care-ohc/deploys)
+
+</center>
 <p align="center">Auto deployed to <a href="https://care.ohc.network/">care.ohc.network</a> for <code>develop</code> branch. All pull requests have preview builds powered by <a href="https://netlify.com">Netlify</a>.</p>
 
 [![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/0)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/0)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/1)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/1)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/2)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/2)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/3)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/3)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/4)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/4)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/5)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/5)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/6)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/6)[![](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/images/7)](https://sourcerer.io/fame/tomahawk-pilot/ohcnetwork/care_fe/links/7)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=coronasafe_care_fe&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=coronasafe_care_fe)
 ![Code scanning - action](https://github.com/ohcnetwork/care_fe/workflows/Code%20scanning%20-%20action/badge.svg)
 ![OSSAR](https://github.com/ohcnetwork/care_fe/workflows/OSSAR/badge.svg)
 [![Cypress Tests](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/wf7d2m/develop&style=flat&logo=cypress)](https://cloud.cypress.io/projects/wf7d2m/runs)
 ![Staging Release](https://github.com/ohcnetwork/care_fe/workflows/CARE%20Develop%20Registry/badge.svg)
 ![Production Release](https://github.com/ohcnetwork/care_fe/workflows/Production%20Release/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/ohcnetwork/care_fe?utm_source=github.com&utm_medium=referral&utm_content=ohcnetwork/care_fe&utm_campaign=Badge_Grade)
-[![CircleCI](https://circleci.com/gh/ohcnetwork/care_fe.svg?style=svg)](https://circleci.com/gh/ohcnetwork/care_fe)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f1438f693aa459805301/maintainability)](https://codeclimate.com/github/ohcnetwork/care_fe/maintainability)
 
 ## Getting started
@@ -33,7 +35,7 @@
 #### Install the required dependencies
 
 ```sh
-npm install
+npm run install-all
 ```
 #### First-time setup
 
