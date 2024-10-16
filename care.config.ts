@@ -1,5 +1,3 @@
-import appsData from "./apps.json";
-
 const env = import.meta.env;
 
 interface ILogo {
@@ -106,7 +104,12 @@ const careConfig = {
     enabled: (env.REACT_ENABLE_ABDM ?? "true") === "true",
   },
 
-  careApps: appsData,
+  careApps: env.REACT_ENABLED_APPS
+    ? env.REACT_ENABLED_APPS.split(",").map((app) => ({
+        branch: app.split("@")[1],
+        package: app.split("@")[0],
+      }))
+    : [],
 } as const;
 
 export default careConfig;

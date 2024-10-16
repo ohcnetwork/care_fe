@@ -5,9 +5,9 @@ import { INavItem } from "./Components/Common/Sidebar/Sidebar";
 import { pluginMap } from "./pluginMap";
 
 // Define the available plugins
-export type AvailablePlugin = "@apps/care-livekit";
+export type AvailablePlugin = "@apps/care_livekit_fe";
 
-export type AvailablePluginManifest = "@app-manifest/care-livekit";
+export type AvailablePluginManifest = "@app-manifest/care_livekit_fe";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
