@@ -1055,6 +1055,8 @@
   "live_patients_total_beds": "Live Patients / Total beds",
   "occupancy" : "Occupancy",
   "view_cns" : "View CNS",
+  "years": "years",
+  "investigation_report": "Investigation Report",
   "expand_sidebar": "Expand Sidebar",
   "collapse_sidebar": "Collapse Sidebar",
   "linked_skills": "Linked Skills"
