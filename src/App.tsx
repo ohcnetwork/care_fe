@@ -11,7 +11,6 @@ import { Toaster } from "./Components/ui/toaster";
 const App = () => {
   return (
     <Suspense fallback={<Loading />}>
-      <ThemedFavicon />
       <PluginEngine>
         <HistoryAPIProvider>
           <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
