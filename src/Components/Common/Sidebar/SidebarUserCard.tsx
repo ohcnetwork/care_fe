@@ -40,7 +40,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
               <div className="flex-none text-lg">
                 <Avatar
                   name={formatDisplayName(user)}
-                  className="rounded-full text-black/50"
+                  className="h-8 rounded-full text-black/50"
                 />
               </div>
               <div className="max-w-32">

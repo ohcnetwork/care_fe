@@ -11,15 +11,11 @@ export default function FacilityBlock(props: { facility: FacilityModel }) {
       target="_blank"
       href={`/facility/${facility.id}`}
     >
-      <div className="flex aspect-square h-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-400 bg-gray-200">
-        {facility.read_cover_image_url ? (
-          <img
-            className="h-full w-full object-cover"
-            src={facility.read_cover_image_url}
-          />
-        ) : (
-          <Avatar name={facility.name!} square={true} />
-        )}
+      <div className="flex aspect-square h-14 shrink-0 items-center justify-center overflow-hidden">
+        <Avatar
+          name={facility.name!}
+          imageUrl={facility.read_cover_image_url}
+        />
       </div>
       <div>
         <b className="font-semibold">{facility.name}</b>

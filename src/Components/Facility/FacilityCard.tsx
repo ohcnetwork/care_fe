@@ -52,15 +52,13 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
           <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
-              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch bg-secondary-300 min-[425px]:hidden"
+              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch min-[425px]:hidden"
             >
-              {(facility.read_cover_image_url && (
-                <img
-                  src={facility.read_cover_image_url}
-                  alt={facility.name}
-                  className="h-full max-h-32 w-full object-cover"
-                />
-              )) || <Avatar name={facility.name} square={true} />}
+              <Avatar
+                name={facility.name}
+                imageUrl={facility.read_cover_image_url}
+                className="m-4 mb-0 md:m-0"
+              />
             </Link>
 
             <div className="mx-auto flex h-fit w-full max-w-full flex-col flex-wrap justify-between md:h-full lg:max-w-3xl">

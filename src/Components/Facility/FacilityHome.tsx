@@ -129,14 +129,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
     </div>
   );
 
-  const CoverImage = () => (
-    <img
-      src={`${facilityData?.read_cover_image_url}`}
-      alt={facilityData?.name}
-      className="h-full w-full rounded-lg object-cover"
-    />
-  );
-
   return (
     <Page
       title={facilityData?.name || "Facility"}
@@ -164,28 +156,19 @@ export const FacilityHome = ({ facilityId }: Props) => {
         onDelete={() => facilityFetch()}
         facility={facilityData ?? ({} as FacilityModel)}
       />
-      {hasCoverImage ? (
-        <div
-          className={
-            "group relative h-48 w-full text-clip rounded-t bg-secondary-200 opacity-100 transition-all duration-200 ease-in-out md:h-0 md:opacity-0"
-          }
-        >
-          <CoverImage />
-          {editCoverImageTooltip}
-        </div>
-      ) : (
-        <div
-          className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch bg-secondary-300 md:hidden ${
-            hasPermissionToEditCoverImage && "cursor-pointer"
-          }`}
-          onClick={() =>
-            hasPermissionToEditCoverImage && setEditCoverImage(true)
-          }
-        >
-          <Avatar name={facilityData?.name ?? ""} square={true} />
-          {editCoverImageTooltip}
-        </div>
-      )}
+
+      <div
+        className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch md:hidden ${
+          hasPermissionToEditCoverImage && "cursor-pointer"
+        }`}
+        onClick={() => hasPermissionToEditCoverImage && setEditCoverImage(true)}
+      >
+        <Avatar
+          imageUrl={facilityData?.read_cover_image_url}
+          name={facilityData?.name ?? ""}
+        />
+        {editCoverImageTooltip}
+      </div>
       <div
         className={`bg-white ${
           hasCoverImage ? "rounded-b lg:rounded-t" : "rounded"
@@ -203,13 +186,13 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     hasPermissionToEditCoverImage && setEditCoverImage(true)
                   }
                 >
-                  {hasCoverImage ? (
-                    <CoverImage />
-                  ) : (
-                    <div className="flex h-80 w-[88px] items-center justify-center rounded-lg bg-secondary-200 font-medium text-secondary-700 lg:h-80 lg:w-80">
-                      <Avatar name={facilityData?.name ?? ""} square={true} />
-                    </div>
-                  )}
+                  <div className="flex h-80 w-[88px] items-center justify-center rounded-lg font-medium text-secondary-700 lg:h-80 lg:w-80">
+                    <Avatar
+                      imageUrl={facilityData?.read_cover_image_url}
+                      name={facilityData?.name ?? ""}
+                    />
+                  </div>
+
                   {editCoverImageTooltip}
                 </div>
                 <div className="mb-6 grid gap-4 md:mb-0">
