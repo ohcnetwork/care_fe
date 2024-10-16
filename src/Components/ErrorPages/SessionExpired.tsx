@@ -1,22 +1,15 @@
 import * as Notification from "../../Utils/Notifications";
-import { useNavigate } from "raviger";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "../../Common/hooks/useAuthUser";
 
 export default function SessionExpired() {
-  const { signOut, user } = useAuthContext();
-  const isAuthenticated = !!user;
-  const navigate = useNavigate();
+  const { signOut } = useAuthContext();
   const { t } = useTranslation();
 
   useEffect(() => {
     Notification.closeAllNotifications();
   }, []);
-
-  if (isAuthenticated) {
-    navigate("/");
-  }
 
   return (
     <div className="flex h-screen items-center justify-center text-center">
