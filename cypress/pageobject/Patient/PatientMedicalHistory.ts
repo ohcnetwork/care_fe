@@ -11,7 +11,7 @@ class PatientMedicalHistory {
     cy.get("#allergies").click().type(allergies);
   }
 
-  typeMedicalHistory(index, text) {
+  typeMedicalHistory(index: number, text: string) {
     cy.get(`#medical_history_check_${index}`).click();
     cy.get(`#medical_history_${index}`).click().type(text);
   }
@@ -22,16 +22,16 @@ class PatientMedicalHistory {
   }
 
   verifyPatientMedicalDetails(
-    patientPresentHealth,
-    patientOngoingMedication,
-    patientAllergies,
-    patientSymptoms1,
-    patientSymptoms2,
-    patientSymptoms3,
-    patientSymptoms4,
-    patientSymptoms5,
-    patientSymptoms6,
-    patientSymptoms7,
+    patientPresentHealth: string,
+    patientOngoingMedication: string,
+    patientAllergies: string,
+    patientSymptoms1: string,
+    patientSymptoms2: string,
+    patientSymptoms3: string,
+    patientSymptoms4: string,
+    patientSymptoms5: string,
+    patientSymptoms6: string,
+    patientSymptoms7: string,
   ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");

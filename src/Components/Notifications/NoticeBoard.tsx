@@ -53,7 +53,7 @@ export const NoticeBoard = () => {
 
   if (loading) return <Loading />;
   return (
-    <Page title={t("Notice Board")} hideBack={true} breadcrumbs={false}>
+    <Page title={t("notice_board")} hideBack={true} breadcrumbs={false}>
       <div>{notices}</div>
     </Page>
   );
