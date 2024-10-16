@@ -45,7 +45,7 @@ export default function BoardView() {
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
-            title={t("Resource")}
+            title={t("resource")}
             hideBack
             className="mx-3 md:mx-5"
             componentRight={

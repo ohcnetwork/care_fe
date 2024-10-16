@@ -18,7 +18,7 @@ import routes from "../../Redux/api";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 import Loading from "@/Components/Common/Loading";
-export const HospitalList = () => {
+export const FacilityList = () => {
   const {
     qParams,
     updateQuery,
@@ -145,7 +145,7 @@ export const HospitalList = () => {
 
   return (
     <Page
-      title={t("Facilities")}
+      title={t("facilities")}
       breadcrumbs={false}
       hideBack
       options={
