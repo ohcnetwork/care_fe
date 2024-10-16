@@ -1052,6 +1052,8 @@
   "patient_details": "Patient Details",
   "width": "Width ({{unit}})",
   "length": "Length ({{unit}})",
+  "years": "years",
+  "investigation_report": "Investigation Report",
   "expand_sidebar": "Expand Sidebar",
   "collapse_sidebar": "Collapse Sidebar",
   "linked_skills": "Linked Skills"
