@@ -1022,9 +1022,12 @@
   "date_of_result": "Covid confirmation date",
   "is_vaccinated": "Whether vaccinated",
   "resource_origin_facility": "Origin Facility",
-  "resource_approving_facility" : "Resource approving facility",
+  "resource_approving_facility": "Resource approving facility",
   "consultation_not_filed": "You have not filed any consultation for this patient yet.",
   "consultation_not_filed_description": "Please file a consultation for this patient to continue.",
+  "create_consultation": "Create Consultation",
+  "patient_details": "Patient Details",
   "width": "Width ({{unit}})",
-  "length": "Length ({{unit}})"
+  "length": "Length ({{unit}})",
+  "linked_skills": "Linked Skills"
 }
