@@ -166,7 +166,7 @@ const BOMDisplay: React.FC = () => {
                       <li key={idx}>
                         <a
                           href={ref.url || "#"}
-                          className="hover:text-primary-dark block text-primary"
+                          className="hover:text-primary-dark block break-words text-primary"
                         >
                           {ref.url || "N/A"}
                         </a>
