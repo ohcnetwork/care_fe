@@ -43,11 +43,13 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
                   className="w-8 text-sm font-medium"
                 />
               </div>
-              {!shrinked && (
-                <span className="flex w-full grow items-center pl-1 text-xs font-medium tracking-wide">
-                  {formatName(user)}
-                </span>
-              )}
+              <div className="max-w-32">
+                {!shrinked && (
+                  <p className="truncate pl-1 text-xs font-medium tracking-wide">
+                    {formatName(user)}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="flex shrink-0 items-center justify-center rounded-full bg-gray-300/50">
               <CareIcon
