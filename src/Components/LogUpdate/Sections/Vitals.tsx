@@ -38,7 +38,6 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         step={1}
         unit="%"
         valueDescriptions={rangeValueDescription({ low: 89 })}
-        allowIntegersOnly
       />
       <RangeFormField
         label={t("LOG_UPDATE_FIELD_LABEL__temperature")}
@@ -68,7 +67,6 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         step={1}
         unit="bpm"
         valueDescriptions={rangeValueDescription({ low: 11, high: 16 })}
-        allowIntegersOnly
       />
       <hr />
       <div>
@@ -107,7 +105,6 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
             text: t("tachycardia"),
           },
         ]}
-        allowIntegersOnly
       />
       <RadioFormField
         label={t("LOG_UPDATE_FIELD_LABEL__rhythm")}
@@ -151,7 +148,7 @@ const BPAttributeEditor = ({
       max={400}
       sliderMin={30}
       sliderMax={270}
-      step={1}
+      step={0.1}
       unit="mmHg"
       valueDescriptions={rangeValueDescription(
         attribute === "systolic"

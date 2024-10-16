@@ -16,7 +16,6 @@ export const ABGAnalysisFields = [
     min: 10,
     max: 400,
     valueDescription: rangeValueDescription({ low: 49, high: 200 }),
-    allowIntegersOnly: true,
   },
   {
     key: "pco2",
@@ -29,7 +28,6 @@ export const ABGAnalysisFields = [
     min: 10,
     max: 200,
     valueDescription: rangeValueDescription({ low: 34, high: 45 }),
-    allowIntegersOnly: true,
   },
   {
     key: "ph",
@@ -60,7 +58,6 @@ export const ABGAnalysisFields = [
     min: -20,
     max: 20,
     valueDescription: rangeValueDescription({ low: -3, high: 2 }),
-    allowIntegersOnly: true,
   },
   {
     key: "lactate",
@@ -97,7 +94,6 @@ export const ABGAnalysisFields = [
   max: number;
   step?: number;
   valueDescription: ValueDescription[];
-  allowIntegersOnly?: boolean;
 }[];
 
 const ABGAnalysis = ({ log, onChange }: LogUpdateSectionProps) => {
@@ -115,7 +111,6 @@ const ABGAnalysis = ({ log, onChange }: LogUpdateSectionProps) => {
           max={field.max}
           step={field.step || 1}
           valueDescriptions={field.valueDescription}
-          allowIntegersOnly={field.allowIntegersOnly ?? false}
         />
       ))}
     </div>

@@ -18,7 +18,6 @@ type BaseProps = FormFieldBaseProps<number> & {
   valueDescriptions?: ValueDescription[];
   hideInput?: boolean;
   hideUnitInLabel?: boolean;
-  allowIntegersOnly?: boolean;
 };
 
 type PropsWithUnit = BaseProps & {
@@ -95,9 +94,7 @@ export default function RangeFormField(props: Props) {
     100;
 
   const handleChange = (v: number) =>
-    field.handleChange(
-      unit.inversionFn(props.allowIntegersOnly ? Math.round(v) : v),
-    );
+    field.handleChange(unit.inversionFn(props.step === 1 ? Math.round(v) : v));
 
   const displayValue = value != null ? properRoundOf(value) : "";
 
