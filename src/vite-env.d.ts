@@ -25,13 +25,13 @@ interface ImportMetaEnv {
   readonly REACT_KASP_STRING?: string;
   readonly REACT_KASP_FULL_STRING?: string;
   readonly REACT_SAMPLE_FORMAT_ASSET_IMPORT?: string;
-  readonly REACT_SAMPLE_FORMAT_EXTERNAL_RESULT_IMPORT?: string;
   readonly REACT_WARTIME_SHIFTING?: string;
   readonly REACT_STILL_WATCHING_IDLE_TIMEOUT?: string;
   readonly REACT_STILL_WATCHING_PROMPT_DURATION?: string;
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_MIN_ENCOUNTER_DATE?: string;
   readonly REACT_ALLOWED_LOCALES?: string;
+  readonly REACT_ENABLED_APPS?: string;
 
   // Plugins related envs...
   readonly REACT_PLAUSIBLE_SERVER_URL?: string;

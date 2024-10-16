@@ -12,7 +12,6 @@ const MENU_TAGS: { [key: string]: string } = {
   sample: "Sample Tests",
   shifting: "Shiftings",
   resource: "Resources",
-  external_results: "External Results",
   users: "Users",
   notice_board: "Notice Board",
 };
@@ -59,12 +58,12 @@ export default function Breadcrumbs({
       style: replacements[field]?.style || "",
     }));
 
-  const renderCrumb = (crumb: any, index: number, array: any[]) => {
-    const isLastItem = index === array.length - 1;
+  const renderCrumb = (crumb: any, index: number) => {
+    const isLastItem = index === crumbs!.length - 1;
     return (
       <li
         key={crumb.name}
-        className={classNames("text-sm font-light", crumb.style)}
+        className={classNames("text-sm font-normal", crumb.style)}
       >
         <div className="flex items-center">
           <CareIcon icon="l-angle-right" className="h-4 text-gray-400" />
@@ -91,7 +90,7 @@ export default function Breadcrumbs({
           <li className="mr-1 flex items-center">
             <Button
               variant="link"
-              className="px-1 text-sm font-light text-gray-500 underline underline-offset-2"
+              className="px-1 text-sm font-normal text-gray-500 underline underline-offset-2"
               size="xs"
               onClick={() => {
                 if (onBackClick && onBackClick() === false) return;
@@ -140,9 +139,8 @@ export default function Breadcrumbs({
             {showFullPath && crumbs.slice(0, -1).map(renderCrumb)}
           </>
         )}
-        {crumbs &&
-          crumbs.length > 0 &&
-          renderCrumb(crumbs[crumbs.length - 1], crumbs.length - 1, crumbs)}
+        {crumbs?.length &&
+          renderCrumb(crumbs[crumbs.length - 1], crumbs.length - 1)}
       </ol>
     </nav>
   );

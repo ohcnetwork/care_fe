@@ -1,7 +1,7 @@
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import * as Notification from "../../Utils/Notifications.js";
 import { assetClassProps, AssetData } from "./AssetTypes";
-import { useState, useEffect, lazy } from "react";
+import { useState, useEffect } from "react";
 import { Link, navigate } from "raviger";
 import AssetFilter from "./AssetFilter";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -24,8 +24,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 const AssetsList = () => {
   const { t } = useTranslation();
   const {
@@ -160,7 +159,6 @@ const AssetsList = () => {
         });
       }
     } catch (err) {
-      console.log(err);
       Notification.Error({
         msg: t("invalid_asset_id_msg"),
       });

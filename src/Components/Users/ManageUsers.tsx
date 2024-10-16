@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -37,8 +37,7 @@ import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
 import { showUserDelete } from "../../Utils/permissions";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function ManageUsers() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -416,7 +415,7 @@ export default function ManageUsers() {
                       }}
                     >
                       <CareIcon icon="l-hospital" className="text-lg" />
-                      <p>Linked Facilities</p>
+                      <p>{t("linked_facilities")}</p>
                     </ButtonV2>
                     <ButtonV2
                       id="skills"
@@ -427,7 +426,7 @@ export default function ManageUsers() {
                       }}
                     >
                       <CareIcon icon="l-award" className="text-xl" />
-                      <p>Linked Skills</p>
+                      <p>{t("linked_skills")}</p>
                     </ButtonV2>
                   </div>
                   {["DistrictAdmin", "StateAdmin"].includes(
@@ -782,7 +781,7 @@ export function UserFacilities(props: { user: any }) {
           selected={facility}
           setSelected={setFacility}
           errors=""
-          className="z-40"
+          className="z-40 w-full"
         />
         <ButtonV2
           id="link-facility"

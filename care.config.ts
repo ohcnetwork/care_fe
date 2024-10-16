@@ -61,9 +61,6 @@ const careConfig = {
   sampleFormats: {
     assetImport:
       env.REACT_SAMPLE_FORMAT_ASSET_IMPORT || "/asset-import-template.xlsx",
-    externalResultImport:
-      env.REACT_SAMPLE_FORMAT_EXTERNAL_RESULT_IMPORT ||
-      "/External-Results-Template.csv",
   },
 
   wartimeShifting: env.REACT_WARTIME_SHIFTING === "true",
@@ -106,6 +103,13 @@ const careConfig = {
   abdm: {
     enabled: (env.REACT_ENABLE_ABDM ?? "true") === "true",
   },
+
+  careApps: env.REACT_ENABLED_APPS
+    ? env.REACT_ENABLED_APPS.split(",").map((app) => ({
+        branch: app.split("@")[1],
+        package: app.split("@")[0],
+      }))
+    : [],
 } as const;
 
 export default careConfig;
