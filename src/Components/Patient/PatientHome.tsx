@@ -253,7 +253,7 @@ export const PatientHome = (props: any) => {
 
   return (
     <Page
-      title={t("patient details")}
+      title={t("patient_details")}
       crumbsReplacements={{
         [facilityId]: { name: patientData?.facility_object?.name },
         [id]: { name: patientData?.name },
@@ -318,11 +318,11 @@ export const PatientHome = (props: any) => {
               />
               <div>
                 <AlertTitle className="flex items-center">
-                  {t("consultation_not_found")}
+                  {t("consultation_not_filed")}
                 </AlertTitle>
                 <AlertDescription>
                   <span className="text-gray-700">
-                    {t("consultation_not_found_description")}
+                    {t("consultation_not_filed_description")}
                   </span>
                 </AlertDescription>
               </div>

@@ -1,7 +1,7 @@
 import { Link } from "raviger";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { FacilityModel } from "./models";
 import { ReactNode } from "react";
+import { Avatar } from "@/Components/Common/Avatar";
 
 export default function FacilityBlock(props: {
   facility: FacilityModel;
@@ -31,9 +31,7 @@ export default function FacilityBlock(props: {
             src={facility.read_cover_image_url}
           />
         ) : (
-          <>
-            <CareIcon icon="l-hospital" />
-          </>
+          <Avatar name={facility.name!} square={true} />
         )}
       </div>
       <div>

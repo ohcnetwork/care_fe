@@ -1135,7 +1135,7 @@ const routes = {
     path: "/api/v1/notification/notify/",
     method: "POST",
     TRes: Type<IFacilityNotificationResponse>(),
-    Tbody: Type<IFacilityNotificationRequest>(),
+    TBody: Type<IFacilityNotificationRequest>(),
   },
 
   // FileUpload Create
