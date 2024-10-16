@@ -75,6 +75,7 @@ export class ManageUserPage {
   navigateToProfile() {
     cy.intercept("GET", "**/api/v1/users/**").as("getUsers");
     cy.get("#user-profile-name").click();
+    cy.get("#profile-button").click();
     cy.wait("@getUsers").its("response.statusCode").should("eq", 200);
   }
 
