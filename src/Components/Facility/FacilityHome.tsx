@@ -43,6 +43,7 @@ type Props = {
 };
 
 import Loading from "@/Components/Common/Loading";
+import { Avatar } from "@/Components/Common/Avatar.js";
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
@@ -124,7 +125,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       onClick={() => setEditCoverImage(true)}
     >
       <CareIcon icon="l-pen" className="text-lg" />
-      <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
+      <span className="mt-2">{t(hasCoverImage ? "edit" : "upload")}</span>
     </div>
   );
 
@@ -181,11 +182,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
             hasPermissionToEditCoverImage && setEditCoverImage(true)
           }
         >
-          <CareIcon
-            icon="l-hospital"
-            className="block p-10 text-4xl text-secondary-500"
-            aria-hidden="true"
-          />
+          <Avatar name={facilityData?.name ?? ""} square={true} />
           {editCoverImageTooltip}
         </div>
       )}
@@ -210,13 +207,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                     <CoverImage />
                   ) : (
                     <div className="flex h-80 w-[88px] items-center justify-center rounded-lg bg-secondary-200 font-medium text-secondary-700 lg:h-80 lg:w-80">
-                      <svg
-                        className="h-8 w-8 fill-current text-secondary-500"
-                        viewBox="0 0 40 32"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M18.5 6C18.5 5.4475 18.95 5 19.5 5H20.5C21.05 5 21.5 5.4475 21.5 6V7.5H23C23.55 7.5 24 7.95 24 8.5V9.5C24 10.05 23.55 10.5 23 10.5H21.5V12C21.5 12.55 21.05 13 20.5 13H19.5C18.95 13 18.5 12.55 18.5 12V10.5H17C16.45 10.5 16 10.05 16 9.5V8.5C16 7.95 16.45 7.5 17 7.5H18.5V6ZM25.5 0C27.9875 0 30 2.015 30 4.5V5H35.5C37.9875 5 40 7.0125 40 9.5V27.5C40 29.9875 37.9875 32 35.5 32H4.49875C2.01188 32 0 29.9875 0 27.5V9.5C0 7.0125 2.015 5 4.5 5H10V4.5C10 2.015 12.0125 0 14.5 0H25.5ZM30 8V29H35.5C36.3312 29 37 28.3313 37 27.5V21H33.5C32.6688 21 32 20.3313 32 19.5C32 18.6688 32.6688 18 33.5 18H37V15H33.5C32.6688 15 32 14.3313 32 13.5C32 12.6688 32.6688 12 33.5 12H37V9.5C37 8.66875 36.3312 8 35.5 8H30ZM3 9.5V12H6.5C7.33125 12 8 12.6688 8 13.5C8 14.3313 7.33125 15 6.5 15H3V18H6.5C7.33125 18 8 18.6688 8 19.5C8 20.3313 7.33125 21 6.5 21H3V27.5C3 28.3313 3.67125 29 4.49875 29H10V8H4.5C3.67188 8 3 8.66875 3 9.5ZM13 29H17V25C17 23.3438 18.3438 22 20 22C21.6562 22 23 23.3438 23 25V29H27V4.5C27 3.67188 26.3312 3 25.5 3H14.5C13.6688 3 13 3.67188 13 4.5V29Z" />
-                      </svg>
+                      <Avatar name={facilityData?.name ?? ""} square={true} />
                     </div>
                   )}
                   {editCoverImageTooltip}
@@ -291,7 +282,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                             </h1>
                             <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
                               {spokesQuery.data?.results.map((spoke) => (
-                                <FacilityBlock facility={spoke.spoke_object} />
+                                <FacilityBlock
+                                  key={spoke.id}
+                                  facility={spoke.spoke_object}
+                                />
                               ))}
                             </div>
                           </div>
