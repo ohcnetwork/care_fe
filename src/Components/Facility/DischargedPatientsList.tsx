@@ -436,6 +436,7 @@ const DischargedPatientsList = ({
         pathParams={{ facility_external_id }}
         query={{ ordering: "-modified_date", ...qParams }}
         queryCB={(query) => setCount(query.data?.count || 0)}
+        initialPage={qParams.page}
         onPageChange={updatePage}
       >
         {() => (
