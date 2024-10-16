@@ -24,11 +24,26 @@ import HCXRoutes from "./routes/HCXRoutes";
 import ShiftingRoutes from "./routes/ShiftingRoutes";
 import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
-import { DetailRoute } from "./types";
+import { usePluginRoutes } from "@/Common/hooks/useCareApps";
 import careConfig from "@careConfig";
 import IconIndex from "../CAREUI/icons/Index";
 
-const Routes = {
+export type RouteParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? { [K in Param | keyof RouteParams<Rest>]: string }
+    : T extends `${string}:${infer Param}`
+      ? { [K in Param]: string }
+      : Record<string, never>;
+
+export type RouteFunction<T extends string> = (
+  params: RouteParams<T>,
+) => JSX.Element;
+
+export type AppRoutes = {
+  [K in string]: RouteFunction<K>;
+};
+
+const Routes: AppRoutes = {
   "/": () => <Redirect to="/facility" />,
 
   ...AssetRoutes,
@@ -40,15 +55,13 @@ const Routes = {
   ...ShiftingRoutes,
   ...UserRoutes,
 
-  "/notifications/:id": ({ id }: DetailRoute) => (
-    <ShowPushNotification id={id} />
-  ),
+  "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
   "/notice_board": () => <NoticeBoard />,
 
-  "/abdm/health-information/:id": ({ id }: { id: string }) => (
+  "/abdm/health-information/:id": ({ id }) => (
     <HealthInformation artefactId={id} />
   ),
-  "/facility/:facilityId/abdm": ({ facilityId }: any) => (
+  "/facility/:facilityId/abdm": ({ facilityId }) => (
     <ABDMFacilityRecords facilityId={facilityId} />
   ),
 
@@ -61,6 +74,8 @@ const Routes = {
 };
 
 export default function AppRouter() {
+  const pluginRoutes = usePluginRoutes();
+
   let routes = Routes;
 
   if (careConfig.hcx.enabled) {
@@ -68,7 +83,15 @@ export default function AppRouter() {
   }
 
   useRedirect("/user", "/users");
+
+  // Merge in Plugin Routes
+  routes = {
+    ...routes,
+    ...pluginRoutes,
+  };
+
   const pages = useRoutes(routes) || <Error404 />;
+
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
