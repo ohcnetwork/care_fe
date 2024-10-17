@@ -12,6 +12,7 @@ import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
 import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
 import CriticalCarePreview from "../../Components/LogUpdate/CriticalCarePreview";
 import FileUploadPage from "../../Components/Patient/FileUploadPage";
+import InvestigationPrintPreview from "../../Components/Facility/Investigations/InvestigationsPrintPreview";
 import { AppRoutes } from "../AppRouter";
 
 const consultationRoutes: AppRoutes = {
@@ -64,6 +65,15 @@ const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId":
     ({ facilityId, patientId, id, sessionId }) => (
       <ShowInvestigation
+        consultationId={id}
+        facilityId={facilityId}
+        patientId={patientId}
+        sessionId={sessionId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/investigation/:sessionId/print":
+    ({ facilityId, patientId, id, sessionId }: any) => (
+      <InvestigationPrintPreview
         consultationId={id}
         facilityId={facilityId}
         patientId={patientId}

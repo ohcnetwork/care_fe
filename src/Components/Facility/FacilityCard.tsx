@@ -13,13 +13,17 @@ import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import careConfig from "@careConfig";
+import { FacilityModel } from "./models";
 import { Avatar } from "../Common/Avatar";
 
-export const FacilityCard = (props: { facility: any; userType: any }) => {
+export const FacilityCard = (props: {
+  facility: FacilityModel;
+  userType: string;
+}) => {
   const { facility, userType } = props;
 
   const { t } = useTranslation();
-  const [notifyModalFor, setNotifyModalFor] = useState(undefined);
+  const [notifyModalFor, setNotifyModalFor] = useState<string>();
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
 
@@ -61,7 +65,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   alt={facility.name}
                   className="h-full max-h-32 w-full object-cover"
                 />
-              )) || <Avatar name={facility.name} square={true} />}
+              )) || <Avatar name={facility.name ?? "Unknown"} square={true} />}
             </Link>
 
             <div className="mx-auto flex h-fit w-full max-w-full flex-col flex-wrap justify-between md:h-full lg:max-w-3xl">
@@ -79,7 +83,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       />
                     )) || (
                       <Avatar
-                        name={facility.name}
+                        name={facility.name || ""}
                         square={true}
                         className="h-full w-full rounded-md object-cover"
                       />
@@ -117,7 +121,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       <Chip
-                        text={facility.facility_type}
+                        text={facility.facility_type || ""}
                         variant="custom"
                         className="bg-blue-100 text-blue-900"
                         hideBorder
@@ -173,7 +177,9 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     <div
                       id="occupany-badge"
                       className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${
-                        facility.patient_count / facility.bed_count > 0.85
+                        (facility.patient_count || 0) /
+                          (facility.bed_count || 0) >
+                        0.85
                           ? "button-danger-border bg-red-500"
                           : "button-primary-border bg-primary-100"
                       }`}
@@ -185,14 +191,18 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         icon="l-bed"
                         className={classNames(
                           "mr-2",
-                          facility.patient_count / facility.bed_count > 0.85
+                          (facility.patient_count || 0) /
+                            (facility.bed_count || 0) >
+                            0.85
                             ? "text-white"
                             : "text-primary-600",
                         )}
                       />{" "}
                       <dt
                         className={`text-sm font-semibold ${
-                          facility.patient_count / facility.bed_count > 0.85
+                          (facility.patient_count || 0) /
+                            (facility.bed_count || 0) >
+                          0.85
                             ? "text-white"
                             : "text-secondary-700"
                         }`}
