@@ -117,6 +117,7 @@ export default function UserProfile() {
     isChecking: false,
     isUpdateAvailable: false,
   });
+  const [dirty, setDirty] = useState<boolean>(false);
 
   const authUser = useAuthUser();
 
@@ -172,6 +173,7 @@ export default function UserProfile() {
         type: "set_form",
         form: formData,
       });
+      setDirty(false);
     },
   });
 
@@ -324,6 +326,7 @@ export default function UserProfile() {
       type: "set_form",
       form: { ...states.form, [event.name]: event.value },
     });
+    setDirty(true);
   };
 
   const getDate = (value: any) =>
@@ -788,7 +791,11 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div className="bg-secondary-50 px-4 py-3 text-right sm:px-6">
-                      <Submit onClick={handleSubmit} label={t("update")} />
+                      <Submit
+                        onClick={handleSubmit}
+                        label={t("update")}
+                        disabled={!dirty}
+                      />
                     </div>
                   </div>
                 </form>
