@@ -13,7 +13,7 @@ import {
   PAGINATION_LIMIT,
   NURSING_CARE_PROCEDURES,
 } from "../../../Common/constants";
-import LogUpdateAnalayseTable from "../Consultations/components/SharedTable";
+import LogUpdateAnalayseTable from "../Consultations/LogUpdateAnalayseTable";
 import { formatDateTime } from "../../../Utils/utils";
 
 import PageTitle from "@/Components/Common/PageTitle";

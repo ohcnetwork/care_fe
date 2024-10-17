@@ -1,6 +1,6 @@
 import React from "react";
-import { formatDate, formatTime } from "../../../../Utils/utils";
-import { classNames } from "../../../../Utils/utils";
+import { formatDate, formatTime } from "../../../Utils/utils";
+import { classNames } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
 
 interface SharedSectionTableProps {
