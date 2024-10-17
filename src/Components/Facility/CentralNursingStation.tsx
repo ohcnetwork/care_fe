@@ -134,6 +134,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
                           facilityId={facilityId}
                           errors=""
                           errorClassName="hidden"
+                          bedIsOccupied={JSON.parse(
+                            qParams.monitors_without_patient ?? "false",
+                          )}
+                          disableOnOneOrFewer
                         />
                       </div>
                     </div>
