@@ -1,8 +1,8 @@
 <a href="https://ohc.network/">
   <p align="center">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://cdn.ohc.network/light-logo.svg">
-      <img alt="CARE Logo" src="https://user-images.githubusercontent.com/25143503/193396107-27e0d587-b195-4e95-a795-5d0663d5cd81.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ohcnetwork/branding/refs/heads/main/Care/SVG/Logo/Care-Logo_gradient_mark_with_white_wordmark.svg">
+      <img alt="CARE Logo" src="https://raw.githubusercontent.com/ohcnetwork/branding/refs/heads/main/Care/SVG/Logo/Care-Logo_gradient_mark_with_dark_wordmark.svg" width="400">
     </picture>
   </p>
 </a>
