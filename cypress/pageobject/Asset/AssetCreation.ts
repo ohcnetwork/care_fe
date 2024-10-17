@@ -62,7 +62,10 @@ export class AssetPage {
     cy.get(
       "[data-testid=asset-last-serviced-on-input] input[type='text']",
     ).click();
-    cy.get("#date-input").click().type(lastServicedOn);
+    cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
+      .click(0, 0)
+      .type(lastServicedOn);
+    cy.get("body").click(0, 0);
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 
@@ -120,7 +123,13 @@ export class AssetPage {
     cy.get(
       "[data-testid=asset-last-serviced-on-input] input[type='text']",
     ).click();
-    cy.get("#date-input").click().clear().type(lastServicedOn);
+    cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
+      cy.wrap(el).clear(),
+    );
+    cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
+      .click()
+      .type(lastServicedOn);
+    cy.get("body").click(0, 0);
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
@@ -268,7 +277,13 @@ export class AssetPage {
 
   enterAssetservicedate(text: string) {
     cy.get("input[name='last_serviced_on']").click();
-    cy.get("#date-input").click().type(text);
+    cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
+      cy.wrap(el).clear(),
+    );
+    cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
+      .click()
+      .type(text);
+    cy.get("body").click(0, 0);
   }
 
   scrollintoWarrantyDetails() {

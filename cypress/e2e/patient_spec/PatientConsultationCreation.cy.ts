@@ -86,7 +86,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectPatientPrincipalDiagnosis(diagnosis4);
     patientTreatmentPlan.clickAddProcedure();
     patientTreatmentPlan.typeProcedureName(procedureName);
-    patientTreatmentPlan.typeProcedureTime("2024-02-22T12:30");
+    patientTreatmentPlan.typeProcedureTime("220220241230");
     patientTreatmentPlan.typeTreatmentPlan(patientTreatment);
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     patientTreatmentPlan.typeSpecialInstruction(specialInstruction);
@@ -182,12 +182,12 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.typeCauseOfDeath("Cause of Death");
     patientConsultationPage.typePatientConsultationDate(
       "#death_datetime",
-      "2024-02-22T12:45",
+      "220220241230",
     );
     patientConsultationPage.typeDeathConfirmedBy(doctorName);
     patientConsultationPage.typePatientConsultationDate(
       "#encounter_date",
-      "2024-02-22T12:30",
+      "220220241230",
     );
     cy.submitButton("Create Consultation");
     cy.verifyNotification(
@@ -245,7 +245,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.typePatientConsultationDate(
       "#icu_admission_date",
-      "2024-02-23T12:30",
+      "230220241230",
     );
     // add investigation
     patientInvestigation.clickAddInvestigation();
