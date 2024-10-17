@@ -56,18 +56,18 @@ const Avatar: React.FC<AvatarProps> = ({
   className,
 }) => {
   const [bgColor] = propColors || toColor(name);
-  const [w, setW] = useState(0);
+  const [width, setWidth] = useState(0);
   const avatarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const updateW = () => {
+    const updateWidth = () => {
       const avatarRect = avatarRef.current?.getBoundingClientRect();
-      const w = avatarRect?.width || 0;
-      setW(w);
+      const width = avatarRect?.width || 0;
+      setWidth(width);
     };
-    updateW();
-    document.addEventListener("resize", updateW);
-    return () => document.removeEventListener("resize", updateW);
+    updateWidth();
+    document.addEventListener("resize", updateWidth);
+    return () => document.removeEventListener("resize", updateWidth);
   }, []);
 
   return (
@@ -79,8 +79,8 @@ const Avatar: React.FC<AvatarProps> = ({
       )}
       style={{
         background: bgColor,
-        borderRadius: w / 15 + "px",
-        fontSize: w / 2.5 + "px",
+        borderRadius: width / 15 + "px",
+        fontSize: width / 2.5 + "px",
       }}
     >
       {imageUrl ? (
