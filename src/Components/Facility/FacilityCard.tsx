@@ -12,13 +12,17 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import careConfig from "@careConfig";
+import { FacilityModel } from "./models";
 import { Avatar } from "../Common/Avatar";
 
-export const FacilityCard = (props: { facility: any; userType: any }) => {
+export const FacilityCard = (props: {
+  facility: FacilityModel;
+  userType: string;
+}) => {
   const { facility, userType } = props;
 
   const { t } = useTranslation();
-  const [notifyModalFor, setNotifyModalFor] = useState(undefined);
+  const [notifyModalFor, setNotifyModalFor] = useState<string>();
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
 
@@ -55,7 +59,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch min-[425px]:hidden"
             >
               <Avatar
-                name={facility.name}
+                name={facility.name || ""}
                 imageUrl={facility.read_cover_image_url}
                 className="m-4 mb-0 md:m-0"
               />
@@ -69,7 +73,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     className="hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] sm:block"
                   >
                     <Avatar
-                      name={facility.name}
+                      name={facility.name || ""}
                       imageUrl={facility.read_cover_image_url}
                     />
                   </Link>
@@ -92,7 +96,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         </Link>
                         <div
                           data-test-id="occupancy-badge"
-                          className={`tooltip flex items-center gap-1 text-sm ${facility.patient_count / facility.bed_count > 0.85 ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white" : "text-secondary-700"}`}
+                          className={`tooltip flex items-center gap-1 text-sm ${(facility.patient_count || 0) / (facility.bed_count || 0) > 0.85 ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white" : "text-secondary-700"}`}
                         >
                           <span className="tooltip-text tooltip-top">
                             {t("live_patients_total_beds")}
@@ -121,7 +125,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
                     <div className="mt-2 flex flex-wrap gap-1">
                       <Chip
-                        text={facility.facility_type}
+                        text={facility.facility_type || ""}
                         variant="custom"
                         className="bg-blue-100 text-blue-900"
                         hideBorder

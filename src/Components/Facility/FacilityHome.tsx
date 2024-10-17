@@ -75,6 +75,20 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
+  const spokesQuery = useQuery(routes.getFacilitySpokes, {
+    pathParams: {
+      id: facilityId,
+    },
+    silent: true,
+  });
+
+  const hubsQuery = useQuery(routes.getFacilityHubs, {
+    pathParams: {
+      id: facilityId,
+    },
+    silent: true,
+  });
+
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
   };
@@ -92,13 +106,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
       },
     });
   };
-
-  const spokesQuery = useQuery(routes.getFacilitySpokes, {
-    pathParams: {
-      id: facilityId,
-    },
-    silent: true,
-  });
 
   if (isLoading) {
     return <Loading />;
@@ -257,7 +264,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                           />
                         </div>
                       </div>
-                      {!!spokesQuery.data?.results.length && (
+                      {!!spokesQuery.data?.results?.length && (
                         <div className="mt-4 flex items-center gap-3">
                           <div id="spokes-view">
                             <h1 className="text-base font-semibold text-[#B9B9B9]">
@@ -268,6 +275,24 @@ export const FacilityHome = ({ facilityId }: Props) => {
                                 <FacilityBlock
                                   key={spoke.id}
                                   facility={spoke.spoke_object}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {!!hubsQuery.data?.results?.length && (
+                        <div className="mt-4 flex items-center gap-3">
+                          <div id="hubs-view">
+                            <h1 className="text-base font-semibold text-[#B9B9B9]">
+                              {t("hubs")}
+                            </h1>
+                            <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+                              {hubsQuery.data.results.map((hub) => (
+                                <FacilityBlock
+                                  facility={hub.hub_object}
+                                  redirect={false}
                                 />
                               ))}
                             </div>
