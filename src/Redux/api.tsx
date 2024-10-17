@@ -1104,6 +1104,17 @@ const routes = {
     TBody: Type<Partial<IComment>>(),
     TRes: Type<IComment>(),
   },
+  updateShiftComments: {
+    path: "/api/v1/resource/{id}/comment/",
+    method: "PUT",
+    TRes: Type<IComment>(),
+    TBody: Type<Partial<IComment>>(),
+  },
+  deleteShiftComments: {
+    path: "/api/v1/resource/{id}/comment/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
+  },
 
   // Notifications
   getNotifications: {
@@ -1275,6 +1286,17 @@ const routes = {
     method: "POST",
     TRes: Type<IComment>(),
     TBody: Type<Partial<IComment>>(),
+  },
+  updateResourceComments: {
+    path: "/api/v1/resource/{id}/comment/",
+    method: "PUT",
+    TRes: Type<IComment>(),
+    TBody: Type<Partial<IComment>>(),
+  },
+  deleteResourceComments: {
+    path: "/api/v1/resource/{id}/comment/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   // Assets endpoints
