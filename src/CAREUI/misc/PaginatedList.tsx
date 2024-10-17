@@ -33,6 +33,8 @@ function useContextualized<TItem>() {
 interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   route: QueryRoute<PaginatedResponse<TItem>>;
   perPage?: number;
+  initialPage?: number;
+  onPageChange?: (page: number) => void;
   queryCB?: (
     query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
   ) => void;
@@ -49,7 +51,13 @@ export default function PaginatedList<TItem extends object>({
   queryCB,
   ...queryOptions
 }: Props<TItem>) {
-  const [currentPage, setPage] = useState(1);
+  const [currentPage, _setPage] = useState(queryOptions.initialPage ?? 1);
+
+  const setPage = (page: number) => {
+    _setPage(page);
+    queryOptions.onPageChange?.(page);
+  };
+
   const query = useQuery(route, {
     ...queryOptions,
     query: {
