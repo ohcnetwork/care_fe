@@ -407,9 +407,6 @@ export const PatientManager = () => {
       if (!params.phone_number) {
         setPhoneNumber("+91");
       }
-      if (!params.emergency_phone_number) {
-        setEmergencyPhoneNumber("+91");
-      }
     },
   });
 
