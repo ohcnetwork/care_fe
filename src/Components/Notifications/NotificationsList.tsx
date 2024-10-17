@@ -246,13 +246,17 @@ export default function NotificationsList({
         pathParams: { username: username },
       });
       const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res.data?.pf_endpoint) {
-        setIsSubscribed("NotSubscribed");
-      } else if (subscription?.endpoint === res.data?.pf_endpoint) {
-        setIsSubscribed("SubscribedOnThisDevice");
-      } else {
-        setIsSubscribed("SubscribedOnAnotherDevice");
+      try {
+        const subscription = await reg.pushManager.getSubscription();
+        if (!subscription && !res.data?.pf_endpoint) {
+          setIsSubscribed("NotSubscribed");
+        } else if (subscription?.endpoint === res.data?.pf_endpoint) {
+          setIsSubscribed("SubscribedOnThisDevice");
+        } else {
+          setIsSubscribed("SubscribedOnAnotherDevice");
+        }
+      } catch (error) {
+        Sentry.captureException(error);
       }
     } catch (error) {
       Sentry.captureException(error);
@@ -261,10 +265,18 @@ export default function NotificationsList({
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
-    if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
-      subscribe();
-    } else {
-      unsubscribe();
+    if (
+      navigator.serviceWorker !== null &&
+      navigator.serviceWorker !== undefined
+    ) {
+      if (
+        status === "NotSubscribed" ||
+        status === "SubscribedOnAnotherDevice"
+      ) {
+        subscribe();
+      } else {
+        unsubscribe();
+      }
     }
   };
 
@@ -299,36 +311,38 @@ export default function NotificationsList({
   const unsubscribe = () => {
     navigator.serviceWorker.ready
       .then(function (reg) {
-        setIsSubscribing(true);
-        reg.pushManager
-          .getSubscription()
-          .then(function (subscription) {
-            subscription
-              ?.unsubscribe()
-              .then(async function (_successful) {
-                const data = {
-                  pf_endpoint: "",
-                  pf_p256dh: "",
-                  pf_auth: "",
-                };
+        if (reg.pushManager !== null && reg.pushManager !== undefined) {
+          setIsSubscribing(true);
+          reg.pushManager
+            .getSubscription()
+            .then(function (subscription) {
+              subscription
+                ?.unsubscribe()
+                .then(async function (_successful) {
+                  const data = {
+                    pf_endpoint: "",
+                    pf_p256dh: "",
+                    pf_auth: "",
+                  };
 
-                await request(routes.updateUserPnconfig, {
-                  pathParams: { username: username },
-                  body: data,
-                });
+                  await request(routes.updateUserPnconfig, {
+                    pathParams: { username: username },
+                    body: data,
+                  });
 
-                setIsSubscribed("NotSubscribed");
-                setIsSubscribing(false);
-              })
-              .catch(function (_e) {
-                Error({
-                  msg: t("unsubscribe_failed"),
+                  setIsSubscribed("NotSubscribed");
+                  setIsSubscribing(false);
+                })
+                .catch(function (_e) {
+                  Error({
+                    msg: t("unsubscribe_failed"),
+                  });
                 });
-              });
-          })
-          .catch(function (_e) {
-            Error({ msg: t("subscription_error") });
-          });
+            })
+            .catch(function (_e) {
+              Error({ msg: t("subscription_error") });
+            });
+        }
       })
       .catch(function (_e) {
         Sentry.captureException(_e);
