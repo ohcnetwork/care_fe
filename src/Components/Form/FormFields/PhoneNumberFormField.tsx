@@ -100,7 +100,7 @@ export default function PhoneNumberFormField(props: Props) {
     <FormField
       field={{
         ...field,
-        error: field.error || error,
+        error: field.error ?? error,
         labelSuffix: field.labelSuffix || (
           <PhoneNumberTypesHelp types={props.types} />
         ),
