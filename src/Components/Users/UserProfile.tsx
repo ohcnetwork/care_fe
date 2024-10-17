@@ -1,4 +1,4 @@
-import { useState, useReducer, FormEvent, useEffect } from "react";
+import { useState, useReducer, FormEvent } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
@@ -117,8 +117,7 @@ export default function UserProfile() {
     isChecking: false,
     isUpdateAvailable: false,
   });
-  const [hasChanges, setHasChanges] = useState<boolean>(false);
-  const [isFieldLoaded, setIsFieldLoaded] = useState<boolean>(false);
+  const [dirty, setDirty] = useState<boolean>(false);
 
   const authUser = useAuthUser();
 
@@ -174,7 +173,7 @@ export default function UserProfile() {
         type: "set_form",
         form: formData,
       });
-      setHasChanges(false);
+      setDirty(false);
     },
   });
 
@@ -323,21 +322,25 @@ export default function UserProfile() {
   };
 
   const handleFieldChange = (event: FieldChangeEvent<unknown>) => {
+    console.log(event);
+    console.log(userData);
     dispatch({
       type: "set_form",
       form: { ...states.form, [event.name]: event.value },
     });
-    setIsFieldLoaded(true);
-  };
 
-  useEffect(() => {
-    if (showEdit && isFieldLoaded) {
-      setHasChanges(true);
+    const isMobileNumberModified =
+      (event.name === "phoneNumber" || event.name === "altPhoneNumber") &&
+      (event.value == userData?.alt_phone_number ||
+        event.value == userData?.phone_number);
+
+    if (isMobileNumberModified) {
+      console.log(states.form);
+      setDirty(false);
     } else {
-      setIsFieldLoaded(false);
-      setHasChanges(false);
+      setDirty(true);
     }
-  }, [handleFieldChange]);
+  };
 
   const getDate = (value: any) =>
     value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -804,7 +807,7 @@ export default function UserProfile() {
                       <Submit
                         onClick={handleSubmit}
                         label={t("update")}
-                        disabled={!hasChanges}
+                        disabled={!dirty}
                       />
                     </div>
                   </div>
