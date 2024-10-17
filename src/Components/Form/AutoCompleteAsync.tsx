@@ -92,7 +92,7 @@ const AutoCompleteAsync = (props: Props) => {
   return (
     <div className={className}>
       <Combobox
-        value={selected}
+        value={selected?.length > 0 ? selected : null}
         disabled={disabled}
         onChange={onChange}
         by={compareBy}
