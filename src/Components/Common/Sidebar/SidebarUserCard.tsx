@@ -2,10 +2,13 @@ import { formatDisplayName, formatName } from "../../../Utils/utils";
 import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
 
 import { Avatar } from "@/Components/Common/Avatar";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { Link } from "raviger";
-import React from "react";
-import { useTranslation } from "react-i18next";
+import { Button } from "@/Components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/Components/ui/dropdown-menu";
 
 interface SidebarUserCardProps {
   shrinked: boolean;
@@ -17,55 +20,59 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
   const { signOut } = useAuthContext();
 
   return (
-    <div className="my-2 flex flex-col">
-      <Link
-        href="/user/profile"
-        className="tooltip relative ml-1 mr-2 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:flex-none"
-      >
-        <div
-          id="user-profile-name"
-          className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
-        >
-          <div className="flex-none text-lg">
-            {user.read_profile_picture_url ? (
-              <img
-                src={user.read_profile_picture_url}
-                alt="profile"
-                className="size-6 rounded-full object-cover"
-              />
-            ) : (
-              <Avatar name={formatDisplayName(user)} className="w-6" />
-            )}
-          </div>
-          {!shrinked && (
-            <span className="flex w-full grow items-center pl-4 text-sm tracking-wide">
-              {formatName(user)}
-            </span>
-          )}
-        </div>
-      </Link>
-      <div
-        onClick={signOut}
-        className="tooltip relative ml-1 mr-2 mt-4 h-10 flex-1 cursor-pointer rounded-lg font-normal text-gray-900 transition-all duration-200 ease-in-out hover:bg-gray-200 md:mt-0 md:flex-none"
-      >
-        <div
-          id="sign-out-button"
-          className={`flex h-full items-center justify-start transition-all duration-200 ease-in-out ${shrinked ? "pl-2" : "pl-5 pr-4"}`}
-        >
-          <div className="flex-none text-lg">
-            <CareIcon
-              icon="l-sign-out-alt"
-              className="text-2xl text-gray-900"
-            />
-          </div>
-
-          {!shrinked && (
-            <div className="flex w-full items-center pl-4 text-sm tracking-wide text-gray-900">
-              {t("sign_out")}
+    <div
+      className={` ${shrinked ? "space-y-2 px-2" : "flex items-center px-4"}`}
+    >
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="lg"
+            className={`tooltip relative w-full cursor-pointer items-center justify-between rounded-lg bg-gray-200 p-2 font-normal text-gray-900 transition hover:bg-gray-200 focus:outline-none focus:ring focus:ring-violet-300 ${shrinked ? "flex h-full flex-col-reverse" : "flex flex-row"}`}
+          >
+            <div
+              id="user-profile-name"
+              className="flex flex-1 items-center justify-start transition"
+            >
+              <div className="flex-none text-lg">
+                <Avatar
+                  name={formatDisplayName(user)}
+                  className="h-8 rounded-full text-black/50"
+                />
+              </div>
+              <div className="max-w-32">
+                {!shrinked && (
+                  <p className="truncate pl-1 text-xs font-medium tracking-wide">
+                    {formatName(user)}
+                  </p>
+                )}
+              </div>
             </div>
-          )}
-        </div>
-      </div>
+            <div className="flex shrink-0 items-center justify-center rounded-full bg-gray-300/50">
+              <CareIcon
+                icon="l-angle-up"
+                className="text-xl text-gray-600"
+                aria-label="Up arrow icon"
+              />
+            </div>
+            <div>
+              <DropdownMenuContent align="end" className="w-full">
+                <Link
+                  className="block text-sm capitalize text-gray-900"
+                  href="/user/profile"
+                >
+                  <DropdownMenuItem className="cursor-pointer">
+                    <div id="profile-button">{t("profile")}</div>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
+                  <div id="sign-out-button">{t("sign_out")}</div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </div>
+          </Button>
+        </DropdownMenuTrigger>
+      </DropdownMenu>
     </div>
   );
 };

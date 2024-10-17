@@ -400,6 +400,12 @@ const routes = {
     TBody: Type<Partial<FacilityModel>>(),
   },
 
+  getFacilityHubs: {
+    path: "/api/v1/facility/{id}/hubs",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
+  },
+
   getFacilitySpokes: {
     path: "/api/v1/facility/{id}/spokes/",
     method: "GET",
@@ -1147,7 +1153,7 @@ const routes = {
     path: "/api/v1/notification/notify/",
     method: "POST",
     TRes: Type<IFacilityNotificationResponse>(),
-    Tbody: Type<IFacilityNotificationRequest>(),
+    TBody: Type<IFacilityNotificationRequest>(),
   },
 
   // FileUploads

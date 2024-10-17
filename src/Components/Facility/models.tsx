@@ -87,8 +87,8 @@ export interface FacilityModel {
   latitude?: string;
   longitude?: string;
   kasp_empanelled?: boolean;
-  patient_count?: string;
-  bed_count?: string;
+  patient_count?: number;
+  bed_count?: number;
 }
 
 export enum SpokeRelationship {

@@ -478,10 +478,11 @@ export default function UserProfile() {
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-secondary-900">
-                Personal Information
+                {t("personal_information")}
               </h3>
               <p className="my-1 text-sm leading-5 text-secondary-600">
-                Local Body, District and State are Non Editable Settings.
+                {t("local_body")}, {t("district")}, {t("state")}{" "}
+                {t("are_non_editable_fields")}.
               </p>
               <div className="my-4 flex items-center">
                 <div
@@ -517,11 +518,11 @@ export default function UserProfile() {
                   type="button"
                   id="edit-cancel-profile-button"
                 >
-                  {showEdit ? "Cancel" : "Edit User Profile"}
+                  {showEdit ? t("cancel") : t("edit_user_profile")}
                 </ButtonV2>
                 <ButtonV2 variant="danger" onClick={signOut}>
                   <CareIcon icon="l-sign-out-alt" />
-                  Sign out
+                  {t("sign_out")}
                 </ButtonV2>
               </div>
             </div>
@@ -535,7 +536,7 @@ export default function UserProfile() {
                     id="username-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Username
+                      {t("username")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.username || "-"}
@@ -546,7 +547,7 @@ export default function UserProfile() {
                     id="contactno-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Contact No
+                      {t("phone_number")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.phone_number || "-"}
@@ -558,7 +559,7 @@ export default function UserProfile() {
                     id="whatsapp-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Whatsapp No
+                      {t("whatsapp_number")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.alt_phone_number || "-"}
@@ -569,7 +570,7 @@ export default function UserProfile() {
                     id="emailid-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Email address
+                      {t("email")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.email || "-"}
@@ -580,7 +581,7 @@ export default function UserProfile() {
                     id="firstname-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      First Name
+                      {t("first_name")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.first_name || "-"}
@@ -591,7 +592,7 @@ export default function UserProfile() {
                     id="lastname-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Last Name
+                      {t("last_name")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.last_name || "-"}
@@ -602,7 +603,7 @@ export default function UserProfile() {
                     id="date_of_birth-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Date of Birth
+                      {t("date_of_birth")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.date_of_birth
@@ -612,7 +613,7 @@ export default function UserProfile() {
                   </div>
                   <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Access Level
+                      {t("access_level")}
                     </dt>
                     <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                       <CareIcon icon="l-user-check" className="mr-1 text-lg" />{" "}
@@ -624,7 +625,7 @@ export default function UserProfile() {
                     id="gender-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Gender
+                      {t("gender")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.gender || "-"}
@@ -632,7 +633,7 @@ export default function UserProfile() {
                   </div>
                   <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Local Body
+                      {t("local_body")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.local_body_object?.name || "-"}
@@ -640,7 +641,7 @@ export default function UserProfile() {
                   </div>
                   <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
-                      District
+                      {t("district")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.district_object?.name || "-"}
@@ -648,7 +649,7 @@ export default function UserProfile() {
                   </div>
                   <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
-                      State
+                      {t("state")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.state_object?.name || "-"}
@@ -656,7 +657,7 @@ export default function UserProfile() {
                   </div>
                   <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Skills
+                      {t("skills")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       <div
@@ -682,7 +683,7 @@ export default function UserProfile() {
                     id="averageworkinghour-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Average weekly working hours
+                      {t("average_weekly_working_hours")}
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-secondary-900">
                       {userData?.weekly_working_hours ?? "-"}
@@ -693,7 +694,7 @@ export default function UserProfile() {
                     id="videoconnectlink-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Video Connect Link
+                      {t("video_conference_link")}
                     </dt>
                     <dd className="mt-1 break-words text-sm leading-5 text-secondary-900">
                       {userData?.video_connect_link ? (
@@ -722,18 +723,18 @@ export default function UserProfile() {
                         <TextFormField
                           {...fieldProps("firstName")}
                           required
-                          label="First Name"
+                          label={t("first_name")}
                           className="col-span-6 sm:col-span-3"
                         />
                         <TextFormField
                           {...fieldProps("lastName")}
                           required
-                          label="Last name"
+                          label={t("last_name")}
                           className="col-span-6 sm:col-span-3"
                         />
                         <DateFormField
                           {...fieldProps("date_of_birth")}
-                          label="Date of Birth"
+                          label={t("date_of_birth")}
                           required
                           className="col-span-6 sm:col-span-3"
                           value={getDate(states.form.date_of_birth)}
@@ -742,34 +743,31 @@ export default function UserProfile() {
                         />
                         <SelectFormField
                           {...fieldProps("gender")}
-                          label="Gender"
+                          label={t("gender")}
                           className="col-span-6 sm:col-span-3"
                           required
                           optionLabel={(o) => o.text}
                           optionValue={(o) => o.text}
-                          optionIcon={(o) => (
-                            <i className="text-base">{o.icon}</i>
-                          )}
                           options={GENDER_TYPES}
                         />
                         <PhoneNumberFormField
                           {...fieldProps("phoneNumber")}
-                          label="Phone Number"
+                          label={t("phone_number")}
                           className="col-span-6 sm:col-span-3"
                           required
-                          placeholder="Phone Number"
+                          placeholder={t("phone_number")}
                           types={["mobile", "landline"]}
                         />
                         <PhoneNumberFormField
                           {...fieldProps("altPhoneNumber")}
-                          label="Whatsapp Number"
+                          label={t("whatsapp_number")}
                           className="col-span-6 sm:col-span-3"
-                          placeholder="WhatsApp Number"
+                          placeholder={t("whatsapp_number")}
                           types={["mobile"]}
                         />
                         <TextFormField
                           {...fieldProps("email")}
-                          label="Email"
+                          label={t("email")}
                           className="col-span-6 sm:col-span-3"
                           required
                           type="email"
@@ -792,8 +790,10 @@ export default function UserProfile() {
                               className="col-span-6 sm:col-span-3"
                               type="number"
                               min={0}
-                              label="Years of experience"
-                              placeholder="Years of experience of the Doctor"
+                              label={t("years_of_experience")}
+                              placeholder={t(
+                                "years_of_experience_of_the_doctor",
+                              )}
                             />
                             <TextFormField
                               {...fieldProps(
@@ -801,14 +801,16 @@ export default function UserProfile() {
                               )}
                               required
                               className="col-span-6 sm:col-span-3"
-                              label="Medical Council Registration"
-                              placeholder="Doctor's Medical Council Registration"
+                              label={t("medical_council_registration")}
+                              placeholder={t(
+                                "doctor_s_medical_council_registration",
+                              )}
                             />
                           </>
                         )}
                         <TextFormField
                           {...fieldProps("weekly_working_hours")}
-                          label="Average weekly working hours"
+                          label={t("average_weekly_working_hours")}
                           className="col-span-6 sm:col-span-3"
                           type="number"
                           min={0}
@@ -816,14 +818,14 @@ export default function UserProfile() {
                         />
                         <TextFormField
                           {...fieldProps("video_connect_link")}
-                          label="Video Conference Link"
+                          label={t("video_conference_link")}
                           className="col-span-6 sm:col-span-6"
                           type="url"
                         />
                       </div>
                     </div>
                     <div className="bg-secondary-50 px-4 py-3 text-right sm:px-6">
-                      <Submit onClick={handleSubmit} label="Update" />
+                      <Submit onClick={handleSubmit} label={t("update")} />
                     </div>
                   </div>
                 </form>
@@ -833,7 +835,7 @@ export default function UserProfile() {
                       <div className="grid grid-cols-6 gap-4">
                         <TextFormField
                           name="old_password"
-                          label="Current Password"
+                          label={t("current_password")}
                           className="col-span-6 sm:col-span-3"
                           type="password"
                           value={changePasswordForm.old_password}
@@ -849,7 +851,7 @@ export default function UserProfile() {
                         <div className="col-span-6 sm:col-span-3">
                           <TextFormField
                             name="new_password_1"
-                            label="New Password"
+                            label={t("new_password")}
                             type="password"
                             value={changePasswordForm.new_password_1}
                             className="peer col-span-6 sm:col-span-3"
@@ -885,7 +887,7 @@ export default function UserProfile() {
                         <div className="col-span-6 sm:col-span-3">
                           <TextFormField
                             name="new_password_2"
-                            label="New Password Confirmation"
+                            label={t("new_password_confirmation")}
                             className="peer col-span-6 sm:col-span-3"
                             type="password"
                             value={changePasswordForm.new_password_2}
@@ -911,7 +913,7 @@ export default function UserProfile() {
                     <div className="bg-secondary-50 px-4 py-3 text-right sm:px-6">
                       <Submit
                         onClick={changePassword}
-                        label="Change Password"
+                        label={t("change_password")}
                       />
                     </div>
                   </div>
@@ -925,10 +927,10 @@ export default function UserProfile() {
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-secondary-900">
-                Language Selection
+                {t("language_selection")}
               </h3>
               <p className="mt-1 text-sm leading-5 text-secondary-600">
-                Set your local language
+                {t("set_your_local_language")}
               </p>
             </div>
           </div>
@@ -940,10 +942,10 @@ export default function UserProfile() {
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-secondary-900">
-                Software Update
+                {t("software_update")}
               </h3>
               <p className="mt-1 text-sm leading-5 text-secondary-600">
-                Check for an available update
+                {t("check_for_available_update")}
               </p>
             </div>
           </div>
@@ -952,7 +954,7 @@ export default function UserProfile() {
               <ButtonV2 disabled={true}>
                 <div className="flex items-center gap-4">
                   <CareIcon icon="l-exclamation" className="text-2xl" />
-                  Update available
+                  {t("update_available")}
                 </div>
               </ButtonV2>
             </UpdatableApp>
@@ -973,8 +975,8 @@ export default function UserProfile() {
                     )}
                   />
                   {updateStatus.isChecking
-                    ? "Checking for update"
-                    : "Check for update"}
+                    ? t("checking_for_update")
+                    : t("check_for_update")}
                 </div>
               </ButtonV2>
             )}
