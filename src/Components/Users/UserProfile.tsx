@@ -322,8 +322,6 @@ export default function UserProfile() {
   };
 
   const handleFieldChange = (event: FieldChangeEvent<unknown>) => {
-    console.log(event);
-    console.log(userData);
     dispatch({
       type: "set_form",
       form: { ...states.form, [event.name]: event.value },
@@ -335,7 +333,6 @@ export default function UserProfile() {
         event.value == userData?.phone_number);
 
     if (isMobileNumberModified) {
-      console.log(states.form);
       setDirty(false);
     } else {
       setDirty(true);
