@@ -19,8 +19,8 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import careConfig from "@careConfig";
-
 import Loading from "@/Components/Common/Loading";
+import { IShift } from "./models";
 
 export default function ListView() {
   const {
@@ -32,14 +32,17 @@ export default function ListView() {
     resultsPerPage,
   } = useFilters({ cacheBlacklist: ["patient_name"] });
 
-  const [modalFor, setModalFor] = useState({
-    externalId: undefined,
+  const [modalFor, setModalFor] = useState<{
+    external_id: string | undefined;
+    loading: boolean;
+  }>({
+    external_id: undefined,
     loading: false,
   });
   const authUser = useAuthUser();
   const { t } = useTranslation();
 
-  const handleTransferComplete = async (shift: any) => {
+  const handleTransferComplete = async (shift: IShift) => {
     setModalFor({ ...modalFor, loading: true });
     await request(routes.completeTransfer, {
       pathParams: { externalId: shift.external_id },
@@ -60,7 +63,11 @@ export default function ListView() {
     }),
   });
 
-  const showShiftingCardList = (data: any) => {
+  const showShiftingCardList = (data: IShift[]) => {
+    if (loading) {
+      return <Loading />;
+    }
+
     if (!data || data.length === 0) {
       return (
         <div className="flex h-[calc(100vh-200px)] items-center justify-center">
@@ -73,7 +80,7 @@ export default function ListView() {
 
     return (
       <div className="mb-5 grid gap-x-6 md:grid-cols-2">
-        {data.map((shift: any) => (
+        {data.map((shift: IShift) => (
           <div key={`shift_${shift.id}`} className="mt-6 w-full">
             <div className="h-full overflow-hidden rounded-lg bg-white shadow">
               <div className="flex h-full flex-col justify-between p-4">
@@ -214,7 +221,12 @@ export default function ListView() {
                             shift.assigned_facility
                         )
                       }
-                      onClick={() => setModalFor(shift.external_id)}
+                      onClick={() =>
+                        setModalFor({
+                          external_id: shift.external_id,
+                          loading: false,
+                        })
+                      }
                     >
                       {t("transfer_to_receiving_facility")}
                     </ButtonV2>
@@ -222,9 +234,9 @@ export default function ListView() {
                       title={t("confirm_transfer_complete")}
                       description={t("mark_transfer_complete_confirmation")}
                       action="Confirm"
-                      show={modalFor === shift.external_id}
+                      show={modalFor.external_id === shift.external_id}
                       onClose={() =>
-                        setModalFor({ externalId: undefined, loading: false })
+                        setModalFor({ external_id: undefined, loading: false })
                       }
                       onConfirm={() => handleTransferComplete(shift)}
                     />
@@ -305,11 +317,9 @@ export default function ListView() {
 
             {showShiftingCardList(shiftData?.results || [])}
 
-            {(shiftData?.results?.length ?? 0) > 0 && (
-              <div>
-                <Pagination totalCount={shiftData?.count || 0} />
-              </div>
-            )}
+            <div>
+              <Pagination totalCount={shiftData?.count || 0} />
+            </div>
           </div>
         )}
       </div>
