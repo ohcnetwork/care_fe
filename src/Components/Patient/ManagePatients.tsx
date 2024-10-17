@@ -471,7 +471,7 @@ export const PatientManager = () => {
 
   let patientList: ReactNode[] = [];
   if (data?.count) {
-    patientList = data.results.map((patient: any) => {
+    patientList = data.results.map((patient) => {
       let patientUrl = "";
       if (
         patient.last_consultation &&
@@ -494,7 +494,7 @@ export const PatientManager = () => {
 
       const children = (
         <div
-          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
+          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg border border-secondary-300 bg-white p-4 pl-5 text-black transition-all duration-200 ease-in-out hover:border-secondary-400 hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
@@ -506,7 +506,7 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="h-20 w-full min-w-20 rounded-lg border border-secondary-300 bg-secondary-50 md:w-20">
+            <div className="w-full min-w-20 rounded-lg border border-secondary-300 bg-secondary-50 md:h-20 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
@@ -541,11 +541,11 @@ export const PatientManager = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex min-h-20 items-center justify-center">
+                <div className="flex items-center justify-center">
                   <Avatar
-                    name={patient.name}
-                    square={true}
+                    name={patient.name || ""}
                     colors={["#F9FAFB", "#BFB8CB"]}
+                    className="border-0 border-b border-b-secondary-300"
                   />
                 </div>
               )}
@@ -785,7 +785,7 @@ export const PatientManager = () => {
 
   return (
     <Page
-      title={t("Patients")}
+      title={t("patients")}
       hideBack={true}
       breadcrumbs={false}
       options={
@@ -967,7 +967,7 @@ export const PatientManager = () => {
 
       <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
         <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1">
+          <div className="flex-1" id="total-patientcount">
             <CountBlock
               text="Total Patients"
               count={data?.count || 0}

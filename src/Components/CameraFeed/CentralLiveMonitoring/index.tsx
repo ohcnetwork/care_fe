@@ -66,7 +66,7 @@ export default function CentralLiveMonitoring(props: { facilityId: string }) {
             fullscreen={isFullscreen}
             onExit={() => setFullscreen(false)}
           >
-            <div className="mt-1 grid grid-cols-1 place-content-center gap-1 lg:grid-cols-2 3xl:grid-cols-3">
+            <div className="3xl:grid-cols-3 mt-1 grid grid-cols-1 place-content-center gap-1 lg:grid-cols-2">
               {data.results.map((asset) => (
                 <div className="text-clip" key={asset.id}>
                   <LocationFeedTile asset={asset} />
