@@ -141,7 +141,7 @@ export default function DateTextInput(props: {
                   key === "year" ? "w-[45px]" : "w-[20px]"
                 } px-0 placeholder:text-xs`}
                 placeholder={
-                  "DDMMYYHHmm".slice(i * 2, i * 2 + 2) +
+                  "DDMMYYHHMM".slice(i * 2, i * 2 + 2) +
                   (key === "year" ? "YY" : "")
                 }
                 onKeyDown={(e) => handleKeyDown(e, i)}
