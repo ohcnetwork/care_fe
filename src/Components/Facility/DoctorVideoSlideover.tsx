@@ -16,6 +16,7 @@ import Switch from "../../CAREUI/interactive/Switch";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import Loading from "../Common/Loading";
+import { PLUGIN_DoctorConnectButtons } from "@/PluginEngine";
 
 const UserGroups = {
   ALL: "All",
@@ -366,6 +367,7 @@ function DoctorConnectButtons(props: {
           <CareIcon icon="l-phone-alt" id="phone-icon" className="h-5 w-5" />
         </div>
       </a>
+      <PLUGIN_DoctorConnectButtons user={user} />
     </div>
   );
 }
