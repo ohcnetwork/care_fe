@@ -302,6 +302,19 @@ const routes = {
     TBody: Type<Partial<UserModel>>(),
   },
 
+  updateProfilePicture: {
+    path: "/api/v1/users/{username}/profile_picture/",
+    method: "PATCH",
+    TRes: Type<UserModel>(),
+    TBody: Type<{ profile_picture_url: string }>(),
+  },
+
+  deleteProfilePicture: {
+    path: "/api/v1/users/{username}/profile_picture/",
+    method: "DELETE",
+    TRes: Type<UserModel>(),
+  },
+
   deleteUser: {
     path: "/api/v1/users/{username}/",
     method: "DELETE",
@@ -826,6 +839,11 @@ const routes = {
     method: "PUT",
     TRes: Type<PatientNotesModel>(),
   },
+  getPatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/{noteId}/",
+    method: "GET",
+    TRes: Type<PatientNotesModel>(),
+  },
   getPatientNoteEditHistory: {
     path: "/api/v1/patient/{patientId}/notes/{noteId}/edits/",
     method: "GET",
@@ -1138,7 +1156,7 @@ const routes = {
     TBody: Type<IFacilityNotificationRequest>(),
   },
 
-  // FileUpload Create
+  // FileUploads
   createUpload: {
     path: "/api/v1/files/",
     method: "POST",
@@ -1160,6 +1178,13 @@ const routes = {
     method: "PATCH",
     TBody: Type<Partial<FileUploadModel>>(),
     TRes: Type<FileUploadModel>(),
+  },
+
+  // Consultation FileUploads
+  listConsultationFileUploads: {
+    path: "/api/v1/consultation/{consultation_external_id}/files/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FileUploadModel>>(),
   },
 
   // Investigation
