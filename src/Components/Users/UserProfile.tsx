@@ -326,17 +326,7 @@ export default function UserProfile() {
       type: "set_form",
       form: { ...states.form, [event.name]: event.value },
     });
-
-    const isMobileNumberModified =
-      (event.name === "phoneNumber" || event.name === "altPhoneNumber") &&
-      (event.value == userData?.alt_phone_number ||
-        event.value == userData?.phone_number);
-
-    if (isMobileNumberModified) {
-      setDirty(false);
-    } else {
-      setDirty(true);
-    }
+    setDirty(true);
   };
 
   const getDate = (value: any) =>
