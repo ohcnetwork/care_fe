@@ -1,4 +1,4 @@
-import { useState, useReducer, FormEvent } from "react";
+import { useState, useReducer, FormEvent, useMemo } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
@@ -181,6 +181,51 @@ export default function UserProfile() {
       pathParams: { username: authUser.username },
     },
   );
+
+  const hasChanges = useMemo(() => {
+    if (!userData) return false;
+
+    const fieldsToCheck: (keyof EditForm)[] = [
+      "altPhoneNumber",
+      "date_of_birth",
+      "doctor_experience_commenced_on",
+      "doctor_medical_council_registration",
+      "email",
+      "firstName",
+      "gender",
+      "lastName",
+      "phoneNumber",
+      "qualification",
+      "video_connect_link",
+      "weekly_working_hours",
+    ];
+
+    return fieldsToCheck.some((field) => {
+      if (field === "date_of_birth") {
+        return (
+          dayjs(states.form[field]).format("YYYY-MM-DD") !==
+          dayjs(userData[field]).format("YYYY-MM-DD")
+        );
+      }
+      if (field === "doctor_experience_commenced_on") {
+        const userDataYears = dayjs().diff(dayjs(userData[field]), "years");
+        return Number(states.form[field]) !== Number(userDataYears);
+      }
+      if (field === "weekly_working_hours")
+        return Number(states.form[field]) !== Number(userData[field]);
+      if (field === "firstName")
+        return states.form[field] !== userData.first_name;
+      if (field === "lastName")
+        return states.form[field] !== userData.last_name;
+      if (field === "phoneNumber")
+        return states.form[field] !== userData.phone_number;
+      if (field === "altPhoneNumber")
+        return states.form[field] !== userData.alt_phone_number;
+      if (field === "video_connect_link")
+        return states.form[field] !== userData[field] && !!states.form[field];
+      return states.form[field] !== userData[field];
+    });
+  }, [states.form, userData]);
 
   const validateNewPassword = (password: string) => {
     if (
@@ -788,7 +833,11 @@ export default function UserProfile() {
                       </div>
                     </div>
                     <div className="bg-secondary-50 px-4 py-3 text-right sm:px-6">
-                      <Submit onClick={handleSubmit} label={t("update")} />
+                      <Submit
+                        onClick={handleSubmit}
+                        label={t("update")}
+                        disabled={!hasChanges}
+                      />
                     </div>
                   </div>
                 </form>
