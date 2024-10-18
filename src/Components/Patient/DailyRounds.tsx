@@ -1,5 +1,4 @@
 import { navigate } from "raviger";
-
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -126,7 +125,6 @@ export const DailyRounds = (props: any) => {
         return state;
     }
   };
-
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
     initialState,
@@ -249,11 +247,30 @@ export const DailyRounds = (props: any) => {
           }
           return;
         case "bp": {
-          const error = state.form.bp && BloodPressureValidator(state.form.bp);
+          const error =
+            state.form.bp && BloodPressureValidator(state.form.bp, t);
+
           if (error) {
             errors.bp = error;
             invalidForm = true;
             scrollTo("bloodPressure");
+          }
+          return;
+        }
+
+        case "temperature": {
+          const temperatureInputValue = state.form["temperature"];
+
+          if (
+            temperatureInputValue &&
+            (temperatureInputValue < 95 || temperatureInputValue > 106)
+          ) {
+            errors[field] = t("out_of_range_error", {
+              start: "95°F (35°C)",
+              end: "106°F (41.1°C)",
+            });
+            invalidForm = true;
+            scrollTo("temperature");
           }
           return;
         }
@@ -773,7 +790,6 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
-
           {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
             state.form.rounds_type,
           ) && (

@@ -254,7 +254,7 @@ export const PatientHome = (props: any) => {
 
   return (
     <Page
-      title={t("patient details")}
+      title={t("patient_details")}
       crumbsReplacements={{
         [facilityId]: { name: patientData?.facility_object?.name },
         [id]: { name: patientData?.name },

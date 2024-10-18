@@ -926,7 +926,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       validate={validateForm}
       onSubmit={handleSubmit}
       submitLabel={buttonText}
-      onCancel={() => navigate("/facility")}
+      onCancel={() => goBack()}
       className="bg-transparent px-1 py-2 md:px-2"
       onDraftRestore={(newState) => {
         dispatch({ type: "set_state", state: newState });
@@ -1551,7 +1551,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
               </div>
               {field("nationality").value === "India" && (
-                <div className="mb-8 rounded border border-secondary-200 p-4">
+                <div className="mb-8 rounded border p-4">
                   <AccordionV2
                     className="mt-2 shadow-none md:mt-0 lg:mt-0"
                     expandIcon={
@@ -1629,7 +1629,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </AccordionV2>
                 </div>
               )}
-              <div className="mb-8 rounded border border-secondary-200 p-4">
+              <div className="mb-8 rounded border p-4">
                 <AccordionV2
                   className="mt-2 shadow-none md:mt-0 lg:mt-0"
                   expandIcon={
@@ -1813,7 +1813,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex w-full flex-col gap-4 rounded border border-secondary-200 bg-white p-4">
+              <div className="flex w-full flex-col gap-4 rounded border bg-white p-4">
                 <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
                   <h1 className="text-left text-xl font-bold text-purple-500">
                     Insurance Details
