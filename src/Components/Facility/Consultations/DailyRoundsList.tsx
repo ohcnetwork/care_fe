@@ -29,14 +29,6 @@ export default function DailyRoundsList({ consultation, query }: Props) {
     >
       {() => (
         <>
-          {/* <div className="m-1 flex flex-1 justify-end">
-            <DailyRoundsFilter
-              onApply={(query) => {
-                setQuery(query);
-              }}
-            />
-          </div> */}
-
           <div className="flex max-h-screen min-h-full w-full flex-col gap-4">
             <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">

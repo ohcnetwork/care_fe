@@ -25,10 +25,19 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import EncounterSymptomsCard from "../../Symptoms/SymptomsCard";
 import Tabs from "../../Common/components/Tabs";
 import { QueryParams } from "../../../Utils/request/types";
-import SortDropdownMenu from "../../Common/SortDropdown";
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 import { EVENTS_SORT_OPTIONS } from "../../../Common/constants";
 import DailyRoundsFilter from "../Consultations/DailyRoundsFilter";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import { classNames } from "../../../Utils/utils";
+
+import { useTranslation } from "react-i18next";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
@@ -38,6 +47,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [showEvents, setShowEvents] = useState(true);
   const [eventsQuery, setEventsQuery] = useState<QueryParams>();
   const [dailyRoundsQuery, setDailyRoundsQuery] = useState<QueryParams>();
+  const { t } = useTranslation();
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -656,37 +666,82 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
-          <Tabs
-            className="mt-3 w-full lg:w-full"
-            tabs={[
-              {
-                text: (
-                  <div className="flex items-center justify-center gap-1 text-sm">
-                    Events
-                    <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
-                      beta
-                    </span>
-                  </div>
-                ),
-                value: 1,
-              },
-              { text: "Daily Rounds", value: 0 },
-            ]}
-            onTabChange={(v) => setShowEvents(!!v)}
-            currentTab={showEvents ? 1 : 0}
-          />
-
-          {showEvents ? (
-            <EventListSortDropdown
-              eventsQuery={eventsQuery!}
-              setEventsQuery={setEventsQuery}
+          <div className="flex items-center">
+            <Tabs
+              className="mr-2 mt-3 w-full lg:w-full"
+              tabs={[
+                {
+                  text: (
+                    <div className="flex items-center justify-center gap-1 text-sm">
+                      Events
+                      <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
+                        beta
+                      </span>
+                    </div>
+                  ),
+                  value: 1,
+                },
+                { text: "Daily Rounds", value: 0 },
+              ]}
+              onTabChange={(v) => setShowEvents(!!v)}
+              currentTab={showEvents ? 1 : 0}
             />
-          ) : (
-            <DailyRoundsSortDropdown
-              dailyRoundsQuery={dailyRoundsQuery!}
-              setDailyRoundsQuery={setDailyRoundsQuery}
-            />
-          )}
+            {showEvents ? (
+              <Popover className="relative mt-3">
+                <PopoverButton>
+                  <ButtonV2 className="border p-3" variant="secondary">
+                    <CareIcon icon="l-filter" />
+                  </ButtonV2>
+                </PopoverButton>
+                <Transition
+                  enter="transition ease-out duration-200"
+                  enterFrom="opacity-0 translate-y-1"
+                  enterTo="opacity-100 translate-y-0"
+                  leave="transition ease-in duration-150"
+                  leaveFrom="opacity-100 translate-y-0"
+                  leaveTo="opacity-0 translate-y-1"
+                >
+                  <PopoverPanel className="absolute right-0 z-30">
+                    <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
+                      <div className="relative flex flex-col rounded-b-lg bg-white">
+                        {EVENTS_SORT_OPTIONS.map(({ isAscending, value }) => {
+                          return (
+                            <div
+                              className={classNames(
+                                "dropdown-item-primary pointer-events-auto m-2 flex w-56 cursor-pointer items-center justify-start gap-3 rounded border-0 px-4 py-2 text-sm font-normal transition-all duration-200 ease-in-out",
+                                eventsQuery?.ordering?.toString() === value
+                                  ? "bg-primary-100 !font-medium text-primary-500"
+                                  : "",
+                              )}
+                              onClick={() => {
+                                setEventsQuery({
+                                  ordering: value,
+                                });
+                              }}
+                            >
+                              <CareIcon
+                                className="text-primary-600"
+                                icon={
+                                  isAscending
+                                    ? "l-sort-amount-up"
+                                    : "l-sort-amount-down"
+                                }
+                              />
+                              <span>{t("SORT_OPTIONS__" + value)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </PopoverPanel>
+                </Transition>
+              </Popover>
+            ) : (
+              <DailyRoundsSortDropdown
+                setDailyRoundsQuery={setDailyRoundsQuery}
+              />
+            )}
+          </div>
 
           {showEvents ? (
             <EventsList query={eventsQuery!} />
@@ -702,26 +757,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   );
 };
 
-function EventListSortDropdown({
-  eventsQuery,
-  setEventsQuery,
-}: {
-  eventsQuery: QueryParams;
-  setEventsQuery: (query: QueryParams) => void;
-}) {
-  return (
-    <SortDropdownMenu
-      options={EVENTS_SORT_OPTIONS}
-      selected={eventsQuery?.ordering?.toString()}
-      onSelect={setEventsQuery}
-    />
-  );
-}
-
 function DailyRoundsSortDropdown({
   setDailyRoundsQuery,
 }: {
-  dailyRoundsQuery: QueryParams;
   setDailyRoundsQuery: (query: QueryParams) => void;
 }) {
   return (
