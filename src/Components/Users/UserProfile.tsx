@@ -26,6 +26,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { validateRule } from "./UserAdd";
+import ProfilePicUploadModal from "./ProfilePicUploadModal";
 import { useTranslation } from "react-i18next";
 import Loading from "@/Components/Common/Loading";
 type EditForm = {
@@ -110,9 +111,10 @@ const editFormReducer = (state: State, action: Action) => {
 };
 
 export default function UserProfile() {
+  const { signOut, refetchUser } = useAuthContext();
   const { t } = useTranslation();
-  const { signOut } = useAuthContext();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
+  const [editProfilePic, setEditProfilePic] = useState(false);
   const [updateStatus, setUpdateStatus] = useState({
     isChecking: false,
     isUpdateAvailable: false,
@@ -464,6 +466,13 @@ export default function UserProfile() {
   };
   return (
     <div>
+      <ProfilePicUploadModal
+        open={editProfilePic}
+        onSave={() => refetchUser()}
+        onClose={() => setEditProfilePic(false)}
+        onDelete={() => refetchUserData()}
+        onRefetch={() => refetchUserData()}
+      />
       <div className="p-10 lg:p-16">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-1">
@@ -475,6 +484,34 @@ export default function UserProfile() {
                 {t("local_body")}, {t("district")}, {t("state")}{" "}
                 {t("are_non_editable_fields")}.
               </p>
+              <div className="my-4 flex items-center">
+                <div
+                  className="relative cursor-pointer"
+                  onClick={() => setEditProfilePic(!editProfilePic)}
+                >
+                  <img
+                    className="size-24 rounded-lg object-cover"
+                    src={
+                      userData?.read_profile_picture_url
+                        ? `${userData?.read_profile_picture_url}?imgKey=${Date.now()}`
+                        : "/images/empty_avatar.jpg"
+                    }
+                    alt=""
+                  />
+                  <div className="absolute inset-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-lg bg-black text-sm text-gray-300 opacity-0 transition-opacity hover:opacity-60">
+                    <CareIcon icon="l-pen" className="text-lg" />
+                    <span className="mt-2">{`${userData?.read_profile_picture_url ? "Edit" : "Upload"}`}</span>
+                  </div>
+                </div>
+                <div className="my-4 ml-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    {userData?.first_name} {userData?.last_name}
+                  </h3>
+                  <p className="text-sm leading-5 text-gray-500">
+                    @{userData?.username}
+                  </p>
+                </div>
+              </div>
               <div className="flex flex-col gap-2">
                 <ButtonV2
                   onClick={(_) => setShowEdit(!showEdit)}
