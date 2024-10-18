@@ -410,6 +410,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
+    errors["insurance_details"] = insuranceDetailsError;
+
     Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
