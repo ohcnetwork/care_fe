@@ -159,7 +159,7 @@ export const VentilatorPlot = ({
   const getMarkLineData = (name: string) => {
     const markLineData = [];
     if (!dailyRoundsList) return [];
-    for (let index = 0; index < dailyRoundsList.length - 1; index++) {
+    for (let index = 0; index < dailyRoundsList.length; index++) {
       const currentRound = dailyRoundsList[index];
       const { condition, legend } = getConditionAndLegend(name, currentRound);
       const currentInterfaceOrModality = getModeOrModality(currentRound);
