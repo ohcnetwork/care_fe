@@ -152,7 +152,13 @@ export const PatientManager = () => {
   const handleClose = () => {
     setOptionsPanelOpen(false);
   };
-
+  const handleInputChange = (e: any) => {
+    if (e.value == "/") {
+      setOptionsPanelOpen(true);
+    } else {
+      setOptionsPanelOpen(false);
+    }
+  };
   const { t } = useTranslation();
   const {
     qParams,
@@ -1049,7 +1055,8 @@ export const PatientManager = () => {
               label="Search by Patient Name / Phone number/ UHID"
               placeholder="Enter patient name"
               {...queryField("name")}
-              className="w-full grow"
+              className="w-full grow text-green-200"
+              onChange={handleInputChange}
             />
           )}
           {searchType === "phone_number" && (
@@ -1068,6 +1075,7 @@ export const PatientManager = () => {
               label="Search by Patient Name / Phone number/ UHID"
               placeholder="Enter UHID"
               {...queryField("uhid")}
+              onChange={handleInputChange}
               className="w-full grow"
             />
           )}
@@ -1094,9 +1102,6 @@ export const PatientManager = () => {
               >
                 UHID
               </button>
-              <div className="flex h-8 items-center justify-center rounded bg-gray-200 px-4 py-2 text-gray-400">
-                ctrl + /
-              </div>
             </div>
 
             {/* Options Panel */}
