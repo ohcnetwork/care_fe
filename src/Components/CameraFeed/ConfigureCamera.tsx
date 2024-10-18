@@ -41,6 +41,12 @@ export default function ConfigureCamera(props: Props) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
 
+  const presetNameSuggestions = [
+    t("patient_face"),
+    t("patient_body"),
+    t("vitals_monitor"),
+  ];
+
   const [query, setQuery] = useQueryParams<{ bed?: string }>();
   const [meta, setMeta] = useState(props.asset.meta);
   const [onvifPresets, setOnvifPresets] = useState<OnvifPreset[]>();
@@ -367,7 +373,7 @@ export default function ConfigureCamera(props: Props) {
                 />
                 <DialogModal
                   show={!!createPreset}
-                  title={t("create_preset", { type: "position" })}
+                  title={t("create_position_preset", { type: "position" })}
                   description={t("create_position_preset_description")}
                   onClose={() => {
                     setCreatePreset(undefined);
@@ -381,6 +387,7 @@ export default function ConfigureCamera(props: Props) {
                     onChange={({ value }) => setPresetName(value)}
                     errorClassName="hidden"
                     placeholder={t("preset_name_placeholder")}
+                    suggestions={presetNameSuggestions}
                   />
                   <div className="cui-form-button-group">
                     <Submit
@@ -443,6 +450,7 @@ export default function ConfigureCamera(props: Props) {
                             value={presetName || preset.name}
                             onChange={({ value }) => setPresetName(value)}
                             placeholder={t("preset_name_placeholder")}
+                            suggestions={presetNameSuggestions}
                           />
                           <FieldLabel>{t("position")}</FieldLabel>
                           <CheckBoxFormField

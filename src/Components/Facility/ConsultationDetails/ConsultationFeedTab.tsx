@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { ConsultationTabProps } from "./index";
-import { AssetData } from "../../Assets/AssetTypes";
 import useQuery from "../../../Utils/request/useQuery";
 import CameraFeed from "../../CameraFeed/CameraFeed";
 import Loading from "../../Common/Loading";
@@ -30,8 +29,6 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
   const bed = props.consultationData.current_bed?.bed_object;
   const feedStateSessionKey = `encounterFeedState[${props.consultationId}]`;
-
-  const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<CameraPreset>();
   const [showPresetSaveConfirmation, setShowPresetSaveConfirmation] =
     useState(false);
@@ -53,10 +50,13 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     }
   }, []);
 
+  const asset = preset?.asset_bed.asset_object;
+
   const { key, operate } = useOperateCamera(asset?.id ?? "");
 
-  const presetsQuery = useQuery(FeedRoutes.listPresets, {
-    query: { bed: bed?.id, position: true, limit: 100 },
+  const presetsQuery = useQuery(FeedRoutes.listBedPresets, {
+    pathParams: { bed_id: bed?.id ?? "" },
+    query: { limit: 100 },
     prefetch: !!bed,
     onResponse: ({ data }) => {
       if (!data) {
@@ -96,7 +96,6 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
       if (preset) {
         setPreset(preset);
-        setAsset(preset.asset_bed.asset_object);
       }
     },
   });
@@ -113,7 +112,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     const { data: updated } = await request(FeedRoutes.updatePreset, {
       pathParams: {
         assetbed_id: preset.asset_bed.id,
-        external_id: preset.id,
+        id: preset.id,
       },
       body: {
         position,

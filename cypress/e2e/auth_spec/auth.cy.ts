@@ -6,6 +6,7 @@ describe("Authorisation/Authentication", () => {
   it("Try login as admin with correct password", () => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.awaitUrl("/facility");
+    cy.get("#user-profile-name").click();
     cy.get("#sign-out-button").contains("Sign Out").click();
     cy.url().should("include", "/");
   });

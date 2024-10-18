@@ -70,10 +70,7 @@ export default function PatientConsentRecordBlockGroup(props: {
           <SelectFormField
             name="patient_code_status"
             className="flex-1"
-            onChange={(e) => {
-              console.log(e.value);
-              setPatientCodeStatus(e.value);
-            }}
+            onChange={(e) => setPatientCodeStatus(e.value)}
             value={
               CONSENT_PATIENT_CODE_STATUS_CHOICES.find(
                 (c) => c.id === patientCodeStatus,
