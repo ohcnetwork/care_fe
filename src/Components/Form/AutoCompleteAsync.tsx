@@ -92,7 +92,7 @@ const AutoCompleteAsync = (props: Props) => {
   return (
     <div className={className}>
       <Combobox
-        value={selected?.length > 0 ? selected : null}
+        value={selected}
         disabled={disabled}
         onChange={onChange}
         by={compareBy}
@@ -100,7 +100,7 @@ const AutoCompleteAsync = (props: Props) => {
         immediate
       >
         <div className="relative mt-1">
-          <div className="flex">
+          <div className="relative flex">
             <ComboboxInput
               id={id}
               name={name}
@@ -133,7 +133,7 @@ const AutoCompleteAsync = (props: Props) => {
                         className="h-4 w-4 text-secondary-800 transition-colors duration-200 ease-in-out hover:text-secondary-500"
                         onClick={(e) => {
                           e.preventDefault();
-                          onChange(undefined);
+                          onChange(null);
                         }}
                       />
                       <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
