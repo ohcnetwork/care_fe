@@ -4,19 +4,18 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
-
-import { AssetBedModel } from "../Assets/AssetTypes";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
+import { CameraPreset } from "./routes";
 
 interface Props {
   disabled?: boolean;
-  options: AssetBedModel[];
-  value?: AssetBedModel;
-  label?: (value: AssetBedModel) => string;
-  onChange?: (value: AssetBedModel) => void;
+  options: CameraPreset[];
+  value?: CameraPreset;
+  label?: (value: CameraPreset) => string;
+  onChange?: (value: CameraPreset) => void;
 }
 
 export default function CameraPresetSelect(props: Props) {
@@ -71,16 +70,13 @@ export const CameraPresetDropdown = (
   props: Props & { placeholder: string },
 ) => {
   const selected = props.value;
-
-  const options = props.options.filter(({ meta }) => meta.type !== "boundary");
-
   const label = props.label ?? defaultLabel;
 
   return (
     <Listbox
       value={selected}
       onChange={props.onChange}
-      disabled={options.length === 0 || props.disabled}
+      disabled={props.options.length === 0 || props.disabled}
     >
       <div className="relative flex-1">
         <ListboxButton
@@ -92,7 +88,7 @@ export const CameraPresetDropdown = (
           )}
         >
           <span className="block truncate">
-            {options.length === 0
+            {props.options.length === 0
               ? "No presets"
               : selected
                 ? label(selected)
@@ -113,7 +109,7 @@ export const CameraPresetDropdown = (
           as="ul"
           className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-secondary-500 focus:outline-none md:max-h-60"
         >
-          {options?.map((obj) => (
+          {props.options.map((obj) => (
             <ListboxOption
               as="li"
               key={obj.id}
@@ -131,6 +127,6 @@ export const CameraPresetDropdown = (
   );
 };
 
-const defaultLabel = ({ bed_object, meta }: AssetBedModel) => {
-  return `${bed_object.name}: ${meta.preset_name}`;
+const defaultLabel = (preset: CameraPreset) => {
+  return `${preset.asset_bed.bed_object.name}: ${preset.name}`;
 };
