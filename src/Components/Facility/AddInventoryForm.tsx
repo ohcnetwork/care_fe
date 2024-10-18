@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect, lazy } from "react";
+import { useReducer, useState, useEffect } from "react";
 import Card from "../../CAREUI/display/Card";
 import * as Notification from "../../Utils/Notifications.js";
 import Page from "../Common/components/Page";
@@ -11,8 +11,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 const initForm = {
   id: "",
   quantity: "",

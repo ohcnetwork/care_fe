@@ -1,8 +1,7 @@
-import { Scanner } from "@yudiel/react-qr-scanner";
+import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import * as Notification from "../../Utils/Notifications.js";
-import { listAssets } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
-import { useState, useEffect, lazy } from "react";
+import { useState, useEffect } from "react";
 import { Link, navigate } from "raviger";
 import AssetFilter from "./AssetFilter";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -25,8 +24,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 const AssetsList = () => {
   const { t } = useTranslation();
   const {
@@ -161,7 +159,6 @@ const AssetsList = () => {
         });
       }
     } catch (err) {
-      console.log(err);
       Notification.Error({
         msg: t("invalid_asset_id_msg"),
       });
@@ -182,24 +179,29 @@ const AssetsList = () => {
           className="btn btn-default mb-2"
         >
           <CareIcon icon="l-times" className="mr-1 text-lg" />
-          Close Scanner
+          {t("close_scanner")}
         </button>
         <Scanner
-          onResult={async (text) => {
-            if (text) {
-              await accessAssetIdFromQR(text);
+          onScan={(detectedCodes: IDetectedBarcode[]) => {
+            if (detectedCodes.length > 0) {
+              const text = detectedCodes[0].rawValue;
+              if (text) {
+                accessAssetIdFromQR(text);
+              }
             }
           }}
-          onError={(e) => {
+          onError={(e: unknown) => {
+            const errorMessage =
+              e instanceof Error ? e.message : "Unknown error";
             Notification.Error({
-              msg: e.message,
+              msg: errorMessage,
             });
           }}
-          options={{
-            delayBetweenScanAttempts: 300,
-          }}
+          scanDelay={3000}
         />
-        <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
+        <h2 className="self-center text-center text-lg">
+          {t("scan_asset_qr")}
+        </h2>
       </div>
     );
 
@@ -317,13 +319,12 @@ const AssetsList = () => {
                   },
                   {
                     label: "Export Assets (JSON)",
-                    action: () =>
-                      authorizedForImportExport &&
-                      listAssets({
-                        ...qParams,
-                        json: true,
-                        limit: totalCount,
-                      }),
+                    action: async () => {
+                      const { data } = await request(routes.listAssets, {
+                        query: { ...qParams, json: true, limit: totalCount },
+                      });
+                      return data ?? null;
+                    },
                     type: "json",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
@@ -334,13 +335,12 @@ const AssetsList = () => {
                   },
                   {
                     label: "Export Assets (CSV)",
-                    action: () =>
-                      authorizedForImportExport &&
-                      listAssets({
-                        ...qParams,
-                        csv: true,
-                        limit: totalCount,
-                      }),
+                    action: async () => {
+                      const { data } = await request(routes.listAssets, {
+                        query: { ...qParams, csv: true, limit: totalCount },
+                      });
+                      return data ?? null;
+                    },
                     type: "csv",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {

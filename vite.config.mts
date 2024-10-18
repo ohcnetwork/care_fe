@@ -1,10 +1,12 @@
-import path from "node:path";
+import path from "path";
 import { createRequire } from "node:module";
 import { VitePWA } from "vite-plugin-pwa";
 import react from "@vitejs/plugin-react-swc";
 import checker from "vite-plugin-checker";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+import fs from "fs";
+import { defineConfig } from "vite";
 
 const pdfWorkerPath = path.join(
   path.dirname(
@@ -22,8 +24,56 @@ const cdnUrls =
     "http://localhost:4566",
   ].join(" ");
 
+function getPluginAliases() {
+  const pluginsDir = path.resolve(__dirname, "apps");
+  // Make sure the `apps` folder exists
+  if (!fs.existsSync(pluginsDir)) {
+    return {};
+  }
+  const pluginFolders = fs.readdirSync(pluginsDir);
+
+  const aliases = {};
+
+  pluginFolders.forEach((pluginFolder) => {
+    const pluginSrcPath = path.join(pluginsDir, pluginFolder, "src");
+    if (fs.existsSync(pluginSrcPath)) {
+      aliases[`@apps/${pluginFolder}`] = pluginSrcPath;
+      aliases[`@app-manifest/${pluginFolder}`] = path.join(
+        pluginSrcPath,
+        "manifest.ts",
+      );
+    }
+  });
+
+  return aliases;
+}
+
+function getPluginDependencies() {
+  const pluginsDir = path.resolve(__dirname, "apps");
+  // Make sure the `apps` folder exists
+  if (!fs.existsSync(pluginsDir)) {
+    return [];
+  }
+  const pluginFolders = fs.readdirSync(pluginsDir);
+
+  const dependencies = new Set();
+
+  pluginFolders.forEach((pluginFolder) => {
+    const packageJsonPath = path.join(pluginsDir, pluginFolder, "package.json");
+    if (fs.existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+      const pluginDependencies = packageJson.dependencies
+        ? Object.keys(packageJson.dependencies)
+        : [];
+      pluginDependencies.forEach((dep) => dependencies.add(dep));
+    }
+  });
+
+  return Array.from(dependencies);
+}
+
 /** @type {import('vite').UserConfig} */
-export default {
+export default defineConfig({
   envPrefix: "REACT_",
   plugins: [
     viteStaticCopy({
@@ -86,8 +136,14 @@ export default {
   ],
   resolve: {
     alias: {
+      ...getPluginAliases(),
+      "@": path.resolve(__dirname, "./src"),
       "@careConfig": path.resolve(__dirname, "./care.config.ts"),
+      "@core": path.resolve(__dirname, "src/"),
     },
+  },
+  optimizeDeps: {
+    include: getPluginDependencies(),
   },
   build: {
     outDir: "build",
@@ -117,4 +173,4 @@ export default {
     },
     port: 4000,
   },
-};
+});

@@ -9,16 +9,20 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatPhoneNumber, parsePhoneNumber } from "../../Utils/utils";
 import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import careConfig from "@careConfig";
+import { FacilityModel } from "./models";
+import { Avatar } from "../Common/Avatar";
 
-export const FacilityCard = (props: { facility: any; userType: any }) => {
+export const FacilityCard = (props: {
+  facility: FacilityModel;
+  userType: string;
+}) => {
   const { facility, userType } = props;
 
   const { t } = useTranslation();
-  const [notifyModalFor, setNotifyModalFor] = useState(undefined);
+  const [notifyModalFor, setNotifyModalFor] = useState<string>();
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
 
@@ -47,46 +51,31 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
   return (
     <div key={`usr_${facility.id}`} className="w-full">
-      <div className="block h-full overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
+      <div className="block h-full overflow-hidden rounded-lg border border-secondary-300 bg-white transition-all hover:border-secondary-400">
         <div className="flex h-full">
           <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
-              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch bg-secondary-300 min-[425px]:hidden"
+              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch min-[425px]:hidden"
             >
-              {(facility.read_cover_image_url && (
-                <img
-                  src={facility.read_cover_image_url}
-                  alt={facility.name}
-                  className="h-full max-h-32 w-full object-cover"
-                />
-              )) || (
-                <CareIcon
-                  icon="l-hospital"
-                  className="block text-7xl text-secondary-500"
-                />
-              )}
+              <Avatar
+                name={facility.name || ""}
+                imageUrl={facility.read_cover_image_url}
+                className="m-4 mb-0 md:m-0"
+              />
             </Link>
 
-            <div className="flex h-fit w-full flex-col flex-wrap justify-between md:h-full">
+            <div className="mx-auto flex h-fit w-full max-w-full flex-col flex-wrap justify-between md:h-full lg:max-w-3xl">
               <div className="w-full p-4">
-                <div className="flex gap-5">
+                <div className="flex flex-col gap-5 sm:flex-row">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-secondary-300 min-[425px]:flex"
+                    className="hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] sm:block"
                   >
-                    {(facility.read_cover_image_url && (
-                      <img
-                        src={facility.read_cover_image_url}
-                        alt={facility.name}
-                        className="h-full w-full rounded-md object-cover"
-                      />
-                    )) || (
-                      <CareIcon
-                        icon="l-hospital"
-                        className="block text-5xl text-secondary-500"
-                      />
-                    )}
+                    <Avatar
+                      name={facility.name || ""}
+                      imageUrl={facility.read_cover_image_url}
+                    />
                   </Link>
                   <div className="flow-root grow">
                     {facility.kasp_empanelled && (
@@ -98,28 +87,45 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       className="flex flex-wrap items-center justify-between"
                       id="facility-name-card"
                     >
-                      <Link
-                        href={`/facility/${facility.id}`}
-                        className="float-left text-xl font-bold capitalize text-inherit hover:text-inherit"
-                      >
-                        {facility.name}
-                      </Link>
+                      <div>
+                        <Link
+                          href={`/facility/${facility.id}`}
+                          className="text-xl font-bold capitalize text-inherit hover:text-inherit"
+                        >
+                          {facility.name}
+                        </Link>
+                        <div
+                          data-test-id="occupancy-badge"
+                          className={`tooltip flex items-center gap-1 text-sm ${(facility.patient_count || 0) / (facility.bed_count || 0) > 0.85 ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white" : "text-secondary-700"}`}
+                        >
+                          <span className="tooltip-text tooltip-top">
+                            {t("live_patients_total_beds")}
+                          </span>{" "}
+                          <CareIcon icon="l-bed" />
+                          <dt>
+                            {t("occupancy")}: {facility.patient_count} /{" "}
+                            {facility.bed_count}{" "}
+                          </dt>
+                        </div>
+                      </div>
                       <ButtonV2
                         id="view-cns-button"
                         href={`/facility/${facility.id}/cns`}
                         border
                         ghost
+                        className="mt-2 sm:mt-0"
                       >
                         <CareIcon
                           icon="l-monitor-heart-rate"
                           className="text-lg"
                         />
-                        <span>View CNS</span>
+                        <span>{t("view_cns")}</span>
                       </ButtonV2>
                     </div>
+
                     <div className="mt-2 flex flex-wrap gap-1">
                       <Chip
-                        text={facility.facility_type}
+                        text={facility.facility_type || ""}
                         variant="custom"
                         className="bg-blue-100 text-blue-900"
                         hideBorder
@@ -168,41 +174,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap border-t bg-secondary-50 px-2 py-1 md:px-3">
+              <div className="flex flex-wrap border-t border-t-secondary-300 bg-secondary-50 px-2 py-1 md:px-3">
                 {/* <div className="flex justify-between py-2"> */}
                 <div className="flex w-full flex-wrap justify-between gap-2 py-2">
                   <div className="flex flex-wrap gap-2">
-                    <div
-                      id="occupany-badge"
-                      className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${
-                        facility.patient_count / facility.bed_count > 0.85
-                          ? "button-danger-border bg-red-500"
-                          : "button-primary-border bg-primary-100"
-                      }`}
-                    >
-                      <span className="tooltip-text tooltip-top">
-                        Live Patients / Total beds
-                      </span>{" "}
-                      <CareIcon
-                        icon="l-bed"
-                        className={classNames(
-                          "mr-2",
-                          facility.patient_count / facility.bed_count > 0.85
-                            ? "text-white"
-                            : "text-primary-600",
-                        )}
-                      />{" "}
-                      <dt
-                        className={`text-sm font-semibold ${
-                          facility.patient_count / facility.bed_count > 0.85
-                            ? "text-white"
-                            : "text-secondary-700"
-                        }`}
-                      >
-                        Occupancy: {facility.patient_count} /{" "}
-                        {facility.bed_count}{" "}
-                      </dt>{" "}
-                    </div>
                     <DialogModal
                       show={notifyModalFor === facility.id}
                       title={

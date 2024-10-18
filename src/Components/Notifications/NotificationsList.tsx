@@ -1,8 +1,8 @@
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
-import { Error } from "../../Utils/Notifications.js";
+import { Error, Success, Warn } from "../../Utils/Notifications.js";
 import { classNames, formatDateTime } from "../../Utils/utils";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import * as Sentry from "@sentry/browser";
@@ -183,6 +183,7 @@ export default function NotificationsList({
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [showUnread, setShowUnread] = useState(false);
+  const observerRef = useRef(null);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -194,6 +195,50 @@ export default function NotificationsList({
     if (open) document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && data.length < totalCount) {
+          setOffset((prevOffset) => prevOffset + RESULT_LIMIT);
+        }
+      },
+      { threshold: 1.0 },
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [data, totalCount]);
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setTimeout>;
+    if (isSubscribing) {
+      const checkNotificationPermission = () => {
+        if (Notification.permission === "denied") {
+          Warn({
+            msg: t("notification_permission_denied"),
+          });
+          setIsSubscribing(false);
+          clearInterval(intervalId);
+        } else if (Notification.permission === "granted") {
+          Success({
+            msg: t("notification_permission_granted"),
+          });
+          setIsSubscribing(false);
+          clearInterval(intervalId);
+        }
+      };
+
+      checkNotificationPermission();
+      intervalId = setInterval(checkNotificationPermission, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [isSubscribing]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -350,7 +395,15 @@ export default function NotificationsList({
     })
       .then((res) => {
         if (res && res.data) {
-          setData(res.data.results);
+          setData((prev) => {
+            const newNotifications = res?.data?.results || [];
+            const allNotifications =
+              offset === 0 ? newNotifications : [...prev, ...newNotifications];
+            const uniqueNotifications = Array.from(
+              new Set(allNotifications.map((n) => n.id)),
+            ).map((id) => allNotifications.find((n) => n.id === id));
+            return uniqueNotifications;
+          });
           setUnreadCount(
             res.data.results?.reduce(
               (acc: number, result: any) => acc + (result.read_at ? 0 : 1),
@@ -367,7 +420,9 @@ export default function NotificationsList({
       });
     intialSubscriptionState();
   }, [reload, open, offset, eventFilter, isSubscribed]);
-
+  useEffect(() => {
+    setOffset(0);
+  }, [eventFilter, showUnread]);
   if (!offset && isLoading) {
     manageResults = (
       <div className="flex items-center justify-center">
@@ -390,27 +445,12 @@ export default function NotificationsList({
               setShowNotifications={setOpen}
             />
           ))}
+        <div ref={observerRef} />
         {isLoading && (
           <div className="flex items-center justify-center">
             <CircularProgress />
           </div>
         )}
-        {!showUnread &&
-          totalCount > RESULT_LIMIT &&
-          offset < totalCount - RESULT_LIMIT && (
-            <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
-              <ButtonV2
-                className="w-full"
-                disabled={isLoading}
-                variant="secondary"
-                shadow
-                border
-                onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
-              >
-                {isLoading ? t("loading") : t("load_more")}
-              </ButtonV2>
-            </div>
-          )}
       </>
     );
   } else if (data && data.length === 0) {

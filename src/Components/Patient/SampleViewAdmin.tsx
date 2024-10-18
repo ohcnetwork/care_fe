@@ -1,13 +1,12 @@
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
-import { useState, lazy } from "react";
+import { useState } from "react";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
-import { downloadSampleTests } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
@@ -23,8 +22,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export default function SampleViewAdmin() {
   const {
     qParams,
@@ -314,7 +312,12 @@ export default function SampleViewAdmin() {
       breadcrumbs={false}
       componentRight={
         <ExportButton
-          action={() => downloadSampleTests({ ...qParams })}
+          action={async () => {
+            const { data } = await request(routes.getTestSampleList, {
+              query: { ...qParams, csv: true },
+            });
+            return data ?? null;
+          }}
           parse={parseExportData}
           filenamePrefix="samples"
         />

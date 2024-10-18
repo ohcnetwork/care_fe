@@ -24,12 +24,26 @@ import HCXRoutes from "./routes/HCXRoutes";
 import ShiftingRoutes from "./routes/ShiftingRoutes";
 import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
-import ExternalResultRoutes from "./routes/ExternalResultRoutes";
-import { DetailRoute } from "./types";
-import useAuthUser from "../Common/hooks/useAuthUser";
+import { usePluginRoutes } from "@/Common/hooks/useCareApps";
 import careConfig from "@careConfig";
+import IconIndex from "../CAREUI/icons/Index";
 
-const Routes = {
+export type RouteParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? { [K in Param | keyof RouteParams<Rest>]: string }
+    : T extends `${string}:${infer Param}`
+      ? { [K in Param]: string }
+      : Record<string, never>;
+
+export type RouteFunction<T extends string> = (
+  params: RouteParams<T>,
+) => JSX.Element;
+
+export type AppRoutes = {
+  [K in string]: RouteFunction<K>;
+};
+
+const Routes: AppRoutes = {
   "/": () => <Redirect to="/facility" />,
 
   ...AssetRoutes,
@@ -41,24 +55,26 @@ const Routes = {
   ...ShiftingRoutes,
   ...UserRoutes,
 
-  "/notifications/:id": ({ id }: DetailRoute) => (
-    <ShowPushNotification id={id} />
-  ),
+  "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
   "/notice_board": () => <NoticeBoard />,
 
-  "/abdm/health-information/:id": ({ id }: { id: string }) => (
+  "/abdm/health-information/:id": ({ id }) => (
     <HealthInformation artefactId={id} />
   ),
-  "/facility/:facilityId/abdm": ({ facilityId }: any) => (
+  "/facility/:facilityId/abdm": ({ facilityId }) => (
     <ABDMFacilityRecords facilityId={facilityId} />
   ),
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
+  "/icons": () => <IconIndex />,
+
+  // Only include the icon route in development environment
+  ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
 };
 
 export default function AppRouter() {
-  const authUser = useAuthUser();
+  const pluginRoutes = usePluginRoutes();
 
   let routes = Routes;
 
@@ -66,16 +82,16 @@ export default function AppRouter() {
     routes = { ...HCXRoutes, ...routes };
   }
 
-  if (
-    !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type,
-    )
-  ) {
-    routes = { ...routes, ...ExternalResultRoutes };
-  }
-
   useRedirect("/user", "/users");
+
+  // Merge in Plugin Routes
+  routes = {
+    ...routes,
+    ...pluginRoutes,
+  };
+
   const pages = useRoutes(routes) || <Error404 />;
+
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -142,7 +158,7 @@ export default function AppRouter() {
               className="flex h-full w-full items-center px-4 md:hidden"
             >
               <img
-                className="h-6 w-auto"
+                className="h-8 w-auto"
                 src={careConfig.mainLogo?.dark}
                 alt="care logo"
               />
@@ -151,9 +167,11 @@ export default function AppRouter() {
 
           <main
             id="pages"
-            className="flex-1 overflow-y-scroll pb-4 focus:outline-none md:py-0"
+            className="flex-1 overflow-y-scroll bg-gray-100 pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto p-3">{pages}</div>
+            <div className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow">
+              {pages}
+            </div>
           </main>
         </div>
       </div>

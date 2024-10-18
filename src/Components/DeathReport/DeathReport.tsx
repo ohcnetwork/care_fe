@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from "react";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useState } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -8,8 +6,8 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import {
   formatDateTime,
+  formatPatientAge,
   humanizeStrings,
-  patientAgeInYears,
 } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
@@ -111,7 +109,7 @@ export default function PrintDeathReport(props: { id: string }) {
         const patientComorbidities = getPatientComorbidities(res.data);
         const data = {
           ...res.data,
-          age: patientAgeInYears(res.data!),
+          age: formatPatientAge(res.data!, true),
           gender: patientGender,
           address: patientAddress,
           comorbidities: patientComorbidities,
@@ -333,7 +331,7 @@ export default function PrintDeathReport(props: { id: string }) {
         previewData()
       ) : (
         <Page
-          title={"Covid-19 Death Reporting : Form 1"}
+          title={t("covid_19_death_reporting_form_1")}
           crumbsReplacements={{
             [props.id]: { name: patientName },
             death_report: { style: "pointer-events-none" },
@@ -372,7 +370,7 @@ export default function PrintDeathReport(props: { id: string }) {
                     <div>
                       <TextFormField
                         {...field("age")}
-                        type="number"
+                        type="text"
                         label={t("age")}
                       />
                     </div>
@@ -403,7 +401,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       <TextFormField
                         {...field("is_declared_positive")}
                         type="text"
-                        label="Whether declared positive"
+                        label={t("is_declared_positive")}
                       />
                     </div>
                   </div>
@@ -411,7 +409,7 @@ export default function PrintDeathReport(props: { id: string }) {
                     <div>
                       <DateFormField
                         {...field("date_declared_positive")}
-                        label="Date of declaring positive"
+                        label={t("date_declared_positive")}
                         position="LEFT"
                         className="w-full"
                         disableFuture
@@ -421,7 +419,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       <TextFormField
                         {...field("test_type")}
                         type="text"
-                        label="Type of test done"
+                        label={t("test_type")}
                       />
                     </div>
                   </div>
@@ -429,14 +427,14 @@ export default function PrintDeathReport(props: { id: string }) {
                     <div>
                       <DateFormField
                         {...field("date_of_test")}
-                        label="Date of sample collection for Covid testing"
+                        label={t("date_of_test")}
                         position="LEFT"
                       />
                     </div>
                     <div>
                       <DateFormField
                         {...field("date_of_result")}
-                        label="Covid confirmation date"
+                        label={t("date_of_result")}
                         position="LEFT"
                         disableFuture
                       />
@@ -454,7 +452,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       <TextFormField
                         {...field("is_vaccinated")}
                         type="text"
-                        label="Whether vaccinated"
+                        label={t("is_vaccinated")}
                       />
                     </div>
                   </div>

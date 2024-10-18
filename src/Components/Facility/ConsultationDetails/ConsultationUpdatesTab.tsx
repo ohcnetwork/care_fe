@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
 import { BedModel } from "../models";
@@ -25,7 +25,6 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import EncounterSymptomsCard from "../../Symptoms/SymptomsCard";
 import Tabs from "../../Common/components/Tabs";
 import { QueryParams } from "../../../Utils/request/types";
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
 import { EVENTS_SORT_OPTIONS } from "../../../Common/constants";
 import DailyRoundsFilter from "../Consultations/DailyRoundsFilter";
 import ButtonV2 from "../../Common/components/ButtonV2";
@@ -38,6 +37,8 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
+
+import PageTitle from "@/Components/Common/PageTitle";
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();

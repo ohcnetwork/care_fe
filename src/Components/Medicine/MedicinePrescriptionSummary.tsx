@@ -2,14 +2,12 @@ import MedicineRoutes from "../Medicine/routes";
 import useQuery from "../../Utils/request/useQuery";
 import DialogModal from "../Common/Dialog";
 import { useState } from "react";
-import { lazy } from "react";
 import Timeline, { TimelineNode } from "../../CAREUI/display/Timeline";
 import { MedibaseMedicine, Prescription } from "../Medicine/models";
 import { useTranslation } from "react-i18next";
 import { humanizeStrings } from "../../Utils/utils";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 interface MedicinePrescriptionSummaryProps {
   consultation: string;
 }

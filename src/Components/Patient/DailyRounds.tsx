@@ -1,7 +1,6 @@
 import { navigate } from "raviger";
-
 import dayjs from "dayjs";
-import { lazy, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   APPETITE_CHOICES,
   BLADDER_DRAINAGE_CHOICES,
@@ -58,8 +57,7 @@ import { scrollTo } from "../../Utils/utils";
 import { ICD11DiagnosisModel } from "../Facility/models";
 import NursingCare from "../LogUpdate/Sections/NursingCare";
 
-const Loading = lazy(() => import("../Common/Loading"));
-
+import Loading from "@/Components/Common/Loading";
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -127,7 +125,6 @@ export const DailyRounds = (props: any) => {
         return state;
     }
   };
-
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
     initialState,
@@ -250,11 +247,30 @@ export const DailyRounds = (props: any) => {
           }
           return;
         case "bp": {
-          const error = state.form.bp && BloodPressureValidator(state.form.bp);
+          const error =
+            state.form.bp && BloodPressureValidator(state.form.bp, t);
+
           if (error) {
             errors.bp = error;
             invalidForm = true;
             scrollTo("bloodPressure");
+          }
+          return;
+        }
+
+        case "temperature": {
+          const temperatureInputValue = state.form["temperature"];
+
+          if (
+            temperatureInputValue &&
+            (temperatureInputValue < 95 || temperatureInputValue > 106)
+          ) {
+            errors[field] = t("out_of_range_error", {
+              start: "95°F (35°C)",
+              end: "106°F (41.1°C)",
+            });
+            invalidForm = true;
+            scrollTo("temperature");
           }
           return;
         }
@@ -542,6 +558,7 @@ export const DailyRounds = (props: any) => {
     >
       <div className="flex w-full justify-end md:m-4">
         <Scribe
+          facilityId={facilityId}
           form={SCRIBE_FORMS.daily_round}
           onFormUpdate={async (fields) => {
             setDiagnosisSuggestions([]);
@@ -773,7 +790,6 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
-
           {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
             state.form.rounds_type,
           ) && (

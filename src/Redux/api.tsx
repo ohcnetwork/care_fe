@@ -72,12 +72,8 @@ import {
 import { IComment, IResource } from "../Components/Resource/models";
 import {
   IDeleteBedCapacity,
-  IDeleteExternalResult,
-  IExternalResult,
-  IExternalResultCsv,
   ILocalBodies,
   ILocalBodyByDistrict,
-  IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
 import {
   InvestigationGroup,
@@ -391,6 +387,12 @@ const routes = {
     TBody: Type<Partial<FacilityModel>>(),
   },
 
+  getFacilityHubs: {
+    path: "/api/v1/facility/{id}/hubs",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FacilitySpokeModel>>(),
+  },
+
   getFacilitySpokes: {
     path: "/api/v1/facility/{id}/spokes/",
     method: "GET",
@@ -577,24 +579,29 @@ const routes = {
   downloadFacility: {
     path: "/api/v1/facility/?csv",
     method: "GET",
+    TRes: Type<string>(),
   },
   downloadFacilityCapacity: {
     path: "/api/v1/facility/?csv&capacity",
     method: "GET",
+    TRes: Type<string>(),
   },
   downloadFacilityDoctors: {
     path: "/api/v1/facility/?csv&doctors",
     method: "GET",
+    TRes: Type<string>(),
   },
 
   downloadFacilityTriage: {
     path: "/api/v1/facility/?csv&triage",
     method: "GET",
+    TRes: Type<string>(),
   },
 
   downloadPatients: {
     path: "/api/v1/patient/?csv",
     method: "GET",
+    TRes: Type<string>(),
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
@@ -841,42 +848,6 @@ const routes = {
     TRes: Type<SampleReportModel>(),
   },
 
-  // External Results
-  externalResultList: {
-    path: "/api/v1/external_result/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<IExternalResult>>(),
-  },
-  externalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "GET",
-    TRes: Type<IExternalResult>(),
-  },
-  externalResultUploadCsv: {
-    path: "/api/v1/external_result/bulk_upsert/",
-    method: "POST",
-    TBody: Type<IExternalResultCsv>(),
-    TRes: Type<IExternalResult[]>(),
-  },
-
-  deleteExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "DELETE",
-    TRes: Type<IDeleteExternalResult>(),
-  },
-
-  updateExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "PUT",
-  },
-
-  partialUpdateExternalResult: {
-    path: "/api/v1/external_result/{id}/",
-    method: "PATCH",
-    TRes: Type<IPartialUpdateExternalResult>(),
-    TBody: Type<IPartialUpdateExternalResult>(),
-  },
-
   // States
   statesList: {
     path: "/api/v1/state/",
@@ -1120,6 +1091,7 @@ const routes = {
   downloadShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
+    TRes: Type<string>(),
   },
   getShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
@@ -1163,7 +1135,7 @@ const routes = {
     path: "/api/v1/notification/notify/",
     method: "POST",
     TRes: Type<IFacilityNotificationResponse>(),
-    Tbody: Type<IFacilityNotificationRequest>(),
+    TBody: Type<IFacilityNotificationRequest>(),
   },
 
   // FileUpload Create
@@ -1291,6 +1263,7 @@ const routes = {
   downloadResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
+    TRes: Type<string>(),
   },
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
