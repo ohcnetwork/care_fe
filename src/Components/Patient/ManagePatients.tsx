@@ -494,7 +494,7 @@ export const PatientManager = () => {
 
       const children = (
         <div
-          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
+          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg border border-secondary-300 bg-white p-4 pl-5 text-black transition-all duration-200 ease-in-out hover:border-secondary-400 hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
@@ -543,10 +543,9 @@ export const PatientManager = () => {
               ) : (
                 <div className="flex items-center justify-center">
                   <Avatar
-                    className="size-10 md:size-auto"
-                    name={patient.name!}
-                    square={true}
+                    name={patient.name || ""}
                     colors={["#F9FAFB", "#BFB8CB"]}
+                    className="border-0 border-b border-b-secondary-300"
                   />
                 </div>
               )}
