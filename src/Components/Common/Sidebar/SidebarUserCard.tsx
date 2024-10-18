@@ -26,7 +26,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
     <div
       className={` ${shrinked ? "space-y-2 px-2" : "flex items-center px-4"}`}
     >
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
