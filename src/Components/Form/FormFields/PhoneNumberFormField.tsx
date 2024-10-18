@@ -92,6 +92,10 @@ export default function PhoneNumberFormField(props: Props) {
     }
   }, [setValue]);
 
+  useEffect(() => {
+    setValue(field.value || "+91");
+  }, []);
+
   return (
     <FormField
       field={{
