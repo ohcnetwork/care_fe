@@ -289,7 +289,7 @@ const Location = ({
         border
         className={cn(
           "mt-3 flex w-full items-center justify-between",
-          totalBeds != null && "opacity-50",
+          totalBeds != null && "opacity-100",
         )}
         href={`location/${id}/beds`}
       >
