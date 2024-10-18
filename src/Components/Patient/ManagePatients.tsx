@@ -1108,7 +1108,7 @@ export const PatientManager = () => {
                   </h3>
                   <button
                     type="button"
-                    className="text-lg text-gray-500 hover:text-gray-800 focus:outline-none"
+                    className="text-lg text-gray-600 hover:text-gray-800 focus:outline-none"
                     onClick={handleClose} // Function to handle closing
                   >
                     &times; {/* Close icon */}
