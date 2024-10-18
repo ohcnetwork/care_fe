@@ -52,6 +52,7 @@ import {
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import Tabs from "../Common/components/Tabs.js";
+import { isPatientMandatoryDataFilled } from "./Utils.js";
 import request from "../../Utils/request/request.js";
 import { Avatar } from "../Common/Avatar.js";
 
@@ -473,7 +474,9 @@ export const PatientManager = () => {
   if (data?.count) {
     patientList = data.results.map((patient) => {
       let patientUrl = "";
-      if (
+      if (!isPatientMandatoryDataFilled(patient)) {
+        patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
+      } else if (
         patient.last_consultation &&
         patient.last_consultation?.facility === patient.facility &&
         !(patient.last_consultation?.discharge_date && patient.is_active)
@@ -592,10 +595,26 @@ export const PatientManager = () => {
               )}
               <div className="flex w-full">
                 <div className="flex flex-row flex-wrap justify-start gap-2">
-                  {!patient.last_consultation ||
-                  patient.last_consultation?.facility !== patient.facility ||
-                  (patient.last_consultation?.discharge_date &&
-                    patient.is_active) ? (
+                  {!isPatientMandatoryDataFilled(patient) && (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-notes"
+                        text={t("patient_details_incomplete")}
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  )}
+
+                  {isPatientMandatoryDataFilled(patient) &&
+                  (!patient.last_consultation ||
+                    patient.last_consultation?.facility !== patient.facility ||
+                    (patient.last_consultation?.discharge_date &&
+                      patient.is_active)) ? (
                     <span className="relative inline-flex">
                       <Chip
                         size="small"
