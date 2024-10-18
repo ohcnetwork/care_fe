@@ -922,7 +922,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       validate={validateForm}
       onSubmit={handleSubmit}
       submitLabel={buttonText}
-      onCancel={() => navigate("/facility")}
+      onCancel={() => goBack()}
       className="bg-transparent px-1 py-2 md:px-2"
       onDraftRestore={(newState) => {
         dispatch({ type: "set_state", state: newState });
