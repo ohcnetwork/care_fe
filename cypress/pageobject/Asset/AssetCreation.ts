@@ -154,7 +154,7 @@ export class AssetPage {
   }
 
   clickConfigureAsset() {
-    cy.get("#submit").contains("Set Configuration").click();
+    cy.get("#submit").contains("Update").click();
   }
 
   clickConfigureVital() {
