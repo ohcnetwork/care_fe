@@ -101,17 +101,19 @@ export default function PhoneNumberFormField(props: Props) {
       field={{
         ...field,
         error: field.error || error,
-        labelSuffix: field.labelSuffix || "",
+        labelSuffix: field.labelSuffix || (
+          <PhoneNumberTypesHelp types={props.types} />
+        ),
       }}
     >
-      <div className="relative rounded-md">
+      <div className="relative rounded-md shadow-sm">
         <Popover>
           {({ open }: { open: boolean }) => {
             return (
               <>
                 <PopoverButton className="absolute h-full">
-                  <div className="hover:border-1 absolute inset-y-0 left-0 flex cursor-pointer items-center justify-around border-gray-200 hover:border hover:bg-gray-50">
-                    <span className="rounded-md pl-2">
+                  <div className="absolute inset-y-0 left-0 m-0.5 flex w-[4.5rem] cursor-pointer items-center justify-around bg-slate-100">
+                    <span className="rounded-md pl-4">
                       {country?.flag ?? "🇮🇳"}
                     </span>
                     <CareIcon
@@ -126,7 +128,7 @@ export default function PhoneNumberFormField(props: Props) {
                   name={field.name}
                   autoComplete={props.autoComplete ?? "tel"}
                   className={classNames(
-                    "cui-input-base h-full pl-14 tracking-widest sm:leading-6",
+                    "cui-input-base h-full pl-20 tracking-widest sm:leading-6",
                     field.error && "border-danger-500",
                     field.className,
                   )}
@@ -202,7 +204,7 @@ const CountryCodesList = ({
   const [searchValue, setSearchValue] = useState<string>("");
 
   return (
-    <div className="absolute z-10 w-full rounded-md border border-gray-300 bg-white shadow-lg transition-all duration-300">
+    <div className="absolute z-10 w-full rounded-md border border-secondary-300 bg-white shadow-lg transition-all duration-300">
       <div className="relative m-2">
         <CareIcon
           icon="l-search"
