@@ -15,8 +15,6 @@ const Actions = {
 
 const metaKey = isAppleDevice ? "Meta" : "Control";
 
-export type PTZAction = keyof typeof Actions;
-
 /**
  * Returns the PTZ payload for the given action
  *
