@@ -8,7 +8,6 @@ describe("Patient Doctor Connect in consultation page", () => {
   const doctorconnect = new DoctorConnect();
   const patientName = "Dummy Patient 11";
   const doctorUser = "Dev Doctor";
-  const doctorUserNumber = "+919876543219";
   const nurseUser = "Dev Staff";
   const teleIcuUser = "Dev Doctor Two";
 
@@ -37,7 +36,7 @@ describe("Patient Doctor Connect in consultation page", () => {
       "#doctor-connect-home-doctor",
       doctorUser,
     );
-    doctorconnect.verifyCopiedContent(doctorUserNumber);
+    doctorconnect.verifyCopiedContent();
     // verify the whatsapp and phone number icon presence
     doctorconnect.verifyIconVisible("#whatsapp-icon");
     doctorconnect.verifyIconVisible("#phone-icon");
