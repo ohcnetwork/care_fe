@@ -1,24 +1,24 @@
+import careConfig from "@careConfig";
+import { navigate } from "raviger";
 import { useState } from "react";
-import BadgesList from "./BadgesList";
+import { useTranslation } from "react-i18next";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import useFilters from "../../Common/hooks/useFilters";
+import routes from "../../Redux/api";
+import dayjs from "../../Utils/dayjs";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
+import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { ExportButton } from "../Common/Export";
-import ListFilter from "./ListFilter";
-import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import { formatDateTime, formatPatientAge } from "../../Utils/utils";
+import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
-import { navigate } from "raviger";
-import useFilters from "../../Common/hooks/useFilters";
-import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import careConfig from "@careConfig";
+import ListFilter from "./ListFilter";
 
 import Loading from "@/Components/Common/Loading";
 export default function ListView() {
@@ -245,7 +245,9 @@ export default function ListView() {
       breadcrumbs={false}
       options={
         <>
-          <div className="md:px-4">
+          <div className="md:px-4"></div>
+
+          <div className="mt-2 flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
             <SearchInput
               name="patient_name"
               value={qParams.patient_name}
@@ -253,10 +255,11 @@ export default function ListView() {
               placeholder={t("search_patient")}
             />
           </div>
-          <div className="w-32">
-            {/* dummy div to align space as per board view */}
-          </div>
-          <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
+
+          <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
             <ButtonV2
               className="py-[11px]"
               onClick={() => navigate("/shifting/board", { query: qParams })}
@@ -264,10 +267,6 @@ export default function ListView() {
               <CareIcon icon="l-list-ul" className="rotate-90" />
               {t("board_view")}
             </ButtonV2>
-
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
           </div>
         </>
       }
@@ -278,9 +277,9 @@ export default function ListView() {
           <Loading />
         ) : (
           <div>
-            <div className="-mb-4 mr-2 mt-4 flex justify-end">
+            <div className="-mb-2 mr-2 mt-2 flex justify-end">
               <button
-                className="text-xs hover:text-blue-800"
+                className="text-sm hover:text-blue-800"
                 onClick={() => fetchData()}
               >
                 <CareIcon
@@ -292,7 +291,7 @@ export default function ListView() {
               </button>
             </div>
 
-            <div className="mb-5 grid gap-x-6 md:grid-cols-2">
+            <div className="mb-5 grid gap-x-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {showShiftingCardList(shiftData?.results || [])}
             </div>
             <div>
