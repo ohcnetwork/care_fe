@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { ConsultationTabProps } from "./index";
-import { AssetBedModel, AssetData } from "../../Assets/AssetTypes";
-import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
 import CameraFeed from "../../CameraFeed/CameraFeed";
 import Loading from "../../Common/Loading";
-import AssetBedSelect from "../../CameraFeed/AssetBedSelect";
+import CameraPresetSelect from "../../CameraFeed/CameraPresetSelect";
 import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
-import useSlug from "../../../Common/hooks/useSlug";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import useOperateCamera, {
@@ -20,18 +17,19 @@ import ConfirmDialog from "../../Common/ConfirmDialog";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { Warn } from "../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
-import { GetStatusResponse } from "../../CameraFeed/routes";
+import {
+  CameraPreset,
+  FeedRoutes,
+  GetStatusResponse,
+} from "../../CameraFeed/routes";
 import StillWatching from "../../CameraFeed/StillWatching";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const facility = useSlug("facility");
   const bed = props.consultationData.current_bed?.bed_object;
   const feedStateSessionKey = `encounterFeedState[${props.consultationId}]`;
-
-  const [asset, setAsset] = useState<AssetData>();
-  const [preset, setPreset] = useState<AssetBedModel>();
+  const [preset, setPreset] = useState<CameraPreset>();
   const [showPresetSaveConfirmation, setShowPresetSaveConfirmation] =
     useState(false);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
@@ -52,23 +50,22 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     }
   }, []);
 
-  const { key, operate } = useOperateCamera(asset?.id ?? "", true);
+  const asset = preset?.asset_bed.asset_object;
 
-  const { data, loading, refetch } = useQuery(routes.listAssetBeds, {
-    query: { limit: 100, facility, bed: bed?.id, asset: asset?.id },
+  const { key, operate } = useOperateCamera(asset?.id ?? "");
+
+  const presetsQuery = useQuery(FeedRoutes.listBedPresets, {
+    pathParams: { bed_id: bed?.id ?? "" },
+    query: { limit: 100 },
     prefetch: !!bed,
     onResponse: ({ data }) => {
       if (!data) {
         return;
       }
 
-      const presets = data.results.filter(
-        (obj) =>
-          obj.asset_object.meta?.asset_type === "CAMERA" &&
-          obj.meta.type !== "boundary",
-      );
-
+      const presets = data.results;
       const lastStateJSON = sessionStorage.getItem(feedStateSessionKey);
+
       const preset =
         (() => {
           if (lastStateJSON) {
@@ -77,23 +74,33 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
               return presets.find((obj) => obj.id === lastState.value);
             }
             if (lastState.type === "position") {
+              const assetBedObj = presets.find(
+                (p) => p.asset_bed.id === lastState.assetBed,
+              )?.asset_bed;
+
+              if (!assetBedObj) {
+                return;
+              }
+
               return {
                 ...presets[0],
                 id: "",
-                meta: { ...presets[0].meta, position: lastState.value },
-              };
+                asset_bed: assetBedObj,
+                position: lastState.value,
+              } satisfies CameraPreset;
             }
           }
         })() ?? presets[0];
 
+      console.log({ preset, presets });
+
       if (preset) {
         setPreset(preset);
-        setAsset(preset.asset_object);
       }
     },
   });
 
-  const presets = data?.results;
+  const presets = presetsQuery.data?.results;
 
   const handleUpdatePreset = async () => {
     if (!preset) return;
@@ -102,17 +109,17 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
     const { data } = await operate({ type: "get_status" });
     const { position } = (data as { result: { position: PTZPayload } }).result;
-
-    const { data: updated } = await request(routes.partialUpdateAssetBed, {
-      pathParams: { external_id: preset.id },
+    const { data: updated } = await request(FeedRoutes.updatePreset, {
+      pathParams: {
+        assetbed_id: preset.asset_bed.id,
+        id: preset.id,
+      },
       body: {
-        asset: preset.asset_object.id,
-        bed: preset.bed_object.id,
-        meta: { ...preset.meta, position },
+        position,
       },
     });
 
-    await refetch();
+    await presetsQuery.refetch();
 
     setPreset(updated);
     setHasMoved(false);
@@ -124,7 +131,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     if (divRef.current) {
       divRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [!!bed, loading, !!asset, divRef.current]);
+  }, [!!bed, presetsQuery.loading, !!asset, divRef.current]);
 
   useEffect(() => {
     if (preset?.id) {
@@ -138,7 +145,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     }
   }, [feedStateSessionKey, preset]);
 
-  if (loading) {
+  if (presetsQuery.loading) {
     return <Loading />;
   }
 
@@ -169,8 +176,11 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         <CameraFeed
           key={key}
           asset={asset}
-          preset={preset?.meta.position}
+          preset={preset?.position}
           onMove={() => {
+            if (!preset) {
+              return;
+            }
             setHasMoved(true);
             setTimeout(async () => {
               const { data } = await operate({ type: "get_status" });
@@ -179,6 +189,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                   feedStateSessionKey,
                   JSON.stringify({
                     type: "position",
+                    assetBed: preset.asset_bed.id,
                     value: (data as GetStatusResponse).result.position,
                   } satisfies LastAccessedPosition),
                 );
@@ -204,26 +215,19 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
           <div className="flex items-center">
             {presets ? (
               <>
-                <AssetBedSelect
+                <CameraPresetSelect
                   options={presets}
-                  label={(obj) => obj.meta.preset_name}
+                  label={(obj) => obj.name}
                   value={preset}
                   onChange={(value) => {
                     triggerGoal("Camera Preset Clicked", {
-                      presetName: preset?.meta?.preset_name,
+                      presetName: preset?.name,
                       consultationId: props.consultationId,
                       userId: authUser.id,
                       result: "success",
                     });
                     setHasMoved(false);
-                    // Voluntarily copying to trigger change of reference of the position attribute, so that the useEffect of CameraFeed that handles the moves gets triggered.
-                    setPreset({
-                      ...value,
-                      meta: {
-                        ...value.meta,
-                        position: { ...value.meta.position },
-                      },
-                    });
+                    setPreset(value);
                   }}
                 />
                 {isUpdatingPreset ? (
@@ -269,6 +273,7 @@ type LastAccessedPreset = {
 
 type LastAccessedPosition = {
   type: "position";
+  assetBed: string;
   value: PTZPayload;
 };
 
