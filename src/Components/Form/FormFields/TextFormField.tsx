@@ -1,32 +1,30 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import { HTMLInputTypeAttribute, forwardRef, useState } from "react";
+import {
+  DetailedHTMLProps,
+  InputHTMLAttributes,
+  forwardRef,
+  useState,
+} from "react";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 
-export type TextFormFieldProps = FormFieldBaseProps<string> & {
-  placeholder?: string;
-  value?: string | number;
-  autoComplete?: string;
-  type?: HTMLInputTypeAttribute;
-  className?: string | undefined;
-  inputClassName?: string | undefined;
-  removeDefaultClasses?: true | undefined;
-  leading?: React.ReactNode | undefined;
-  trailing?: React.ReactNode | undefined;
-  leadingFocused?: React.ReactNode | undefined;
-  trailingFocused?: React.ReactNode | undefined;
-  trailingPadding?: string | undefined;
-  leadingPadding?: string | undefined;
-  min?: string | number;
-  max?: string | number;
-  step?: string | number;
-  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  suggestions?: string[];
-};
+export type TextFormFieldProps = FormFieldBaseProps<string> &
+  Omit<
+    DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
+    "onChange"
+  > & {
+    inputClassName?: string | undefined;
+    removeDefaultClasses?: true | undefined;
+    leading?: React.ReactNode | undefined;
+    trailing?: React.ReactNode | undefined;
+    leadingFocused?: React.ReactNode | undefined;
+    trailingFocused?: React.ReactNode | undefined;
+    trailingPadding?: string | undefined;
+    leadingPadding?: string | undefined;
+    suggestions?: string[];
+  };
 
 const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
   const field = useFormFieldPropsResolver(props);
@@ -44,7 +42,8 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
 
   let child = (
     <input
-      ref={ref as any}
+      {...props}
+      ref={ref as React.Ref<HTMLInputElement>}
       id={field.id}
       className={classNames(
         "cui-input-base peer",
@@ -55,18 +54,10 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
       )}
       disabled={field.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
-      placeholder={props.placeholder}
       name={field.name}
       value={field.value}
-      min={props.min}
-      max={props.max}
-      autoComplete={props.autoComplete}
       required={field.required}
-      onFocus={props.onFocus}
-      onBlur={props.onBlur}
       onChange={(e) => field.handleChange(e.target.value)}
-      onKeyDown={props.onKeyDown}
-      step={props.step}
     />
   );
 
