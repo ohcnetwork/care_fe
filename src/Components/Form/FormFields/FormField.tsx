@@ -71,7 +71,9 @@ const FormField = ({
         )}
       </div>
       <div className={field?.className}>{props.children}</div>
-      <FieldErrorText error={field?.error} className={field?.errorClassName} />
+      {field?.error && (
+        <FieldErrorText error={field.error} className={field?.errorClassName} />
+      )}
     </div>
   );
 };
