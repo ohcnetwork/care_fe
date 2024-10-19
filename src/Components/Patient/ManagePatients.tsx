@@ -12,7 +12,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import { ReactNode, useEffect, useState, useRef } from "react";
+import { ReactNode, useEffect, useState, useCallback } from "react";
 import { parseOptionId } from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -56,6 +56,8 @@ import request from "../../Utils/request/request.js";
 import { Avatar } from "../Common/Avatar.js";
 
 import Loading from "@/Components/Common/Loading";
+import SearchByMultipleFields from "@/Components/Common/SearchByMultipleFields";
+
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;
@@ -80,85 +82,6 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const PatientManager = () => {
-  const [searchType, setSearchType] = useState("name"); // Default search type
-  const [isOptionsPanelOpen, setOptionsPanelOpen] = useState(false); // State for the options panel
-  const nameOptionRef = useRef<HTMLButtonElement | null>(null);
-  const primaryNumberOptionRef = useRef<HTMLButtonElement | null>(null);
-  const uhidOptionRef = useRef<HTMLButtonElement | null>(null);
-  const [selectedOptionIndex, setSelectedOptionIndex] = useState(0);
-
-  const options = [
-    { ref: nameOptionRef, label: "name" },
-    { ref: primaryNumberOptionRef, label: "phone_number" },
-    { ref: uhidOptionRef, label: "uhid" },
-  ];
-  const handleSearchTypeChange = (type: any) => {
-    setSearchType(type);
-    options.forEach((opc, index) => {
-      if (opc.label === type) {
-        setSelectedOptionIndex(index);
-      }
-    });
-
-    setOptionsPanelOpen(false); // Close the panel when an option is selected
-  };
-
-  // Function to handle the keyboard shortcut
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (e.ctrlKey && e.key === "/") {
-      e.preventDefault();
-      setOptionsPanelOpen((prev) => !prev); // Toggle the options panel
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault(); // Prevent scrolling the page
-      setSelectedOptionIndex((prev) => (prev + 1) % options.length); // Move down
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault(); // Prevent scrolling the page
-      setSelectedOptionIndex(
-        (prev) => (prev - 1 + options.length) % options.length,
-      ); // Move up
-    } else if (e.key === "Enter" && isOptionsPanelOpen) {
-      e.preventDefault();
-      handleSearchTypeChange(options[selectedOptionIndex].label); // Select the current option
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyPress);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isOptionsPanelOpen) {
-      console.log(selectedOptionIndex);
-      options[selectedOptionIndex].ref.current?.focus(); // Focus on the selected option when the panel opens
-      options.forEach((option, index) => {
-        if (option.ref.current) {
-          option.ref.current.classList.toggle(
-            "bg-gray-200",
-            index === selectedOptionIndex,
-          ); // Light grey background for selected
-          option.ref.current.classList.toggle(
-            "bg-white",
-            index !== selectedOptionIndex,
-          ); // Default background for unselected
-        }
-      });
-    }
-  }, [isOptionsPanelOpen, selectedOptionIndex]);
-
-  const handleClose = () => {
-    setOptionsPanelOpen(false);
-  };
-  const handleInputChange = (e: any) => {
-    if (e.value == "/") {
-      setOptionsPanelOpen(true);
-    } else {
-      setOptionsPanelOpen(false);
-    }
-  };
   const { t } = useTranslation();
   const {
     qParams,
@@ -185,9 +108,9 @@ export const PatientManager = () => {
   const [showDoctors, setShowDoctors] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
-  // const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
-  // const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
-  //   useState("");
+  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
+  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
+    useState("");
 
   const setPhoneNum = (phone_number: string) => {
     setPhoneNumber(phone_number);
@@ -206,23 +129,23 @@ export const PatientManager = () => {
     setPhoneNumberError("Enter a valid number");
   };
 
-  // const setEmergencyPhoneNum = (emergency_phone_number: string) => {
-  //   setEmergencyPhoneNumber(emergency_phone_number);
-  //   if (emergency_phone_number.length >= 13) {
-  //     setEmergencyPhoneNumberError("");
-  //     updateQuery({ emergency_phone_number });
-  //     return;
-  //   }
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
+    if (emergency_phone_number.length >= 13) {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number });
+      return;
+    }
 
-  //   if (emergency_phone_number === "+91" || emergency_phone_number === "") {
-  //     setEmergencyPhoneNumberError("");
-  //     qParams.emergency_phone_number &&
-  //       updateQuery({ emergency_phone_number: null });
-  //     return;
-  //   }
+    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
+      setEmergencyPhoneNumberError("");
+      qParams.emergency_phone_number &&
+        updateQuery({ emergency_phone_number: null });
+      return;
+    }
 
-  //   setEmergencyPhoneNumberError("Enter a valid number");
-  // };
+    setEmergencyPhoneNumberError("Enter a valid number");
+  };
 
   const tabValue =
     qParams.last_consultation__new_discharge_reason ||
@@ -413,6 +336,9 @@ export const PatientManager = () => {
       if (!params.phone_number) {
         setPhoneNumber("+91");
       }
+      if (!params.emergency_phone_number) {
+        setEmergencyPhoneNumber("+91");
+      }
     },
   });
 
@@ -547,7 +473,7 @@ export const PatientManager = () => {
 
   let patientList: ReactNode[] = [];
   if (data?.count) {
-    patientList = data.results.map((patient: any) => {
+    patientList = data.results.map((patient) => {
       let patientUrl = "";
       if (
         patient.last_consultation &&
@@ -570,7 +496,7 @@ export const PatientManager = () => {
 
       const children = (
         <div
-          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
+          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg border border-secondary-300 bg-white p-4 pl-5 text-black transition-all duration-200 ease-in-out hover:border-secondary-400 hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
@@ -582,7 +508,7 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="h-20 w-full min-w-20 rounded-lg border border-secondary-300 bg-secondary-50 md:w-20">
+            <div className="w-full min-w-20 rounded-lg border border-secondary-300 bg-secondary-50 md:h-20 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
@@ -617,8 +543,12 @@ export const PatientManager = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex min-h-20 items-center justify-center">
-                  <Avatar name={patient.name} colors={["#F9FAFB", "#BFB8CB"]} />
+                <div className="flex items-center justify-center">
+                  <Avatar
+                    name={patient.name || ""}
+                    colors={["#F9FAFB", "#BFB8CB"]}
+                    className="border-0 border-b border-b-secondary-300"
+                  />
                 </div>
               )}
             </div>
@@ -855,9 +785,57 @@ export const PatientManager = () => {
   const onlyAccessibleFacility =
     permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
 
+  const searchOptions = [
+    {
+      key: "phone_number",
+      label: "Phone Number",
+      type: "phone" as const,
+      placeholder: "Search by phone number",
+      value: qParams.phone_number || "",
+      shortcut_key: "p",
+    },
+    {
+      key: "name",
+      label: "Name",
+      type: "text" as const,
+      placeholder: "Search by patient name",
+      value: qParams.name || "",
+      shortcut_key: "n",
+    },
+    {
+      key: "patient_no",
+      label: "UHID",
+      type: "text" as const,
+      placeholder: "Search by UHID",
+      value: qParams.patient_no || "",
+      shortcut_key: "u",
+    },
+    {
+      key: "emergency_contact_phone_number",
+      label: "Emergency Contact Phone Number",
+      type: "phone" as const,
+      placeholder: "Search by emergency contact phone number",
+      value: qParams.emergency_contact_phone_number || "",
+      shortcut_key: "e",
+    },
+  ];
+
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      if (key === "phone_number" || key === "emergency_contact_phone_number") {
+        if (value.length >= 13 || value === "+91" || value === "") {
+          updateQuery({ [key]: value });
+        }
+      } else {
+        updateQuery({ [key]: value });
+      }
+    },
+    [updateQuery],
+  );
+
   return (
     <Page
-      title={t("Patients")}
+      title={t("patients")}
       hideBack={true}
       breadcrumbs={false}
       options={
@@ -1037,114 +1015,24 @@ export const PatientManager = () => {
         }}
       />
 
-      <div className="manualGrid relative my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
-        <div className="mt-1 flex h-full flex-col gap-3 xl:flex-row">
+      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
+        <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
           <div className="flex-1" id="total-patientcount">
             <CountBlock
               text="Total Patients"
               count={data?.count || 0}
               loading={isLoading}
               icon="l-user-injured"
-              className="pb-"
+              className="pb-12"
             />
           </div>
         </div>
         <div className="col-span-3 w-full">
-          {searchType === "name" && (
-            <SearchInput
-              label="Search by Patient Name / Phone number/ UHID"
-              placeholder="Enter patient name"
-              {...queryField("name")}
-              className="w-full grow text-green-200"
-              onChange={handleInputChange}
-            />
-          )}
-          {searchType === "phone_number" && (
-            <PhoneNumberFormField
-              label="Search by Patient Name / Phone number/ UHID"
-              {...queryField("phone_number", "+91")}
-              value={phone_number}
-              onChange={(e) => setPhoneNum(e.value)}
-              error={phoneNumberError}
-              types={["mobile", "landline"]}
-              className="w-full grow"
-            />
-          )}
-          {searchType === "uhid" && (
-            <SearchInput
-              label="Search by Patient Name / Phone number/ UHID"
-              placeholder="Enter UHID"
-              {...queryField("uhid")}
-              onChange={handleInputChange}
-              className="w-full grow"
-            />
-          )}
           <div className="mt-2">
-            <div className="mb-4 mt-1 flex items-center gap-4">
-              <button
-                type="button"
-                className={`rounded px-4 py-2 ${searchType === "name" ? "text-grey-800 border-2 border-green-500 bg-green-200" : "bg-gray-200 text-gray-800"}`}
-                onClick={() => handleSearchTypeChange("name")}
-              >
-                Name
-              </button>
-              <button
-                type="button"
-                className={`rounded px-4 py-2 ${searchType === "phone_number" ? "text-grey-800 border-2 border-green-500 bg-green-200" : "bg-gray-200 text-gray-800"}`}
-                onClick={() => handleSearchTypeChange("phone_number")}
-              >
-                Phone Number
-              </button>
-              <button
-                type="button"
-                className={`rounded px-4 py-2 ${searchType === "uhid" ? "text-grey-800 border-2 border-green-500 bg-green-200" : "bg-gray-200 text-gray-800"}`}
-                onClick={() => handleSearchTypeChange("uhid")}
-              >
-                UHID
-              </button>
-            </div>
-
-            {/* Options Panel */}
-            {isOptionsPanelOpen && (
-              <div className="mb- absolute z-50 rounded-lg border border-gray-300 bg-white p-4 shadow-lg">
-                <div className="flex items-center justify-between">
-                  <h3 className="w-60 text-sm font-semibold">
-                    Select Search Type
-                  </h3>
-                  <button
-                    type="button"
-                    className="text-lg text-gray-600 hover:text-gray-800 focus:outline-none"
-                    onClick={handleClose} // Function to handle closing
-                  >
-                    &times; {/* Close icon */}
-                  </button>
-                </div>
-
-                <div className="mt-2 flex flex-col">
-                  {options.map((option, index) => (
-                    <button
-                      key={option.label}
-                      ref={option.ref}
-                      type="button"
-                      className={`rounded-md py-2 text-left hover:bg-gray-200 ${selectedOptionIndex === index ? "bg-gray-200" : "bg-white"}`}
-                      onClick={() => handleSearchTypeChange(option.label)}
-                    >
-                      <div className="flex w-full items-center justify-between pl-1 pr-2">
-                        <span className="">{option.label}</span>{" "}
-                        {/* Label with margin-right */}
-                        {selectedOptionIndex === index && (
-                          <span className="ml-auto inline-flex items-center rounded-md border-2 bg-white px-3 py-1 text-sm text-gray-500">
-                            Enter
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Conditional rendering of search inputs */}
+            <SearchByMultipleFields
+              options={searchOptions}
+              onSearch={handleSearch}
+            />
           </div>
         </div>
       </div>
