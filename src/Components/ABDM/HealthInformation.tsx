@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import Loading from "../Common/Loading";
@@ -9,7 +10,9 @@ interface IProps {
 }
 
 export default function HealthInformation({ artefactId }: IProps) {
-  const { data, loading, error } = useQuery(routes.abha.getHealthInformation, {
+  const { t } = useTranslation();
+
+  const { data, loading, error } = useQuery(routes.abdm.healthInformation.get, {
     pathParams: { artefactId },
     silent: true,
   });
@@ -18,7 +21,7 @@ export default function HealthInformation({ artefactId }: IProps) {
     return <Loading />;
   }
 
-  const parseData = (data: any) => {
+  const parseData = (data: string) => {
     try {
       return JSON.parse(data);
     } catch (e) {
@@ -29,20 +32,19 @@ export default function HealthInformation({ artefactId }: IProps) {
   };
 
   return (
-    <Page title="Health Information">
+    <Page title={t("hi__page_title")}>
       <div className="mt-10 flex flex-col items-center justify-center gap-6">
         {!!error?.is_archived && (
           <>
             <h3 className="text-2xl font-semibold text-secondary-700">
-              This record has been archived
+              {t("hi__record_archived__title")}
             </h3>
             <h5 className="mt-2 text-sm text-secondary-500">
-              This record has been archived and is no longer available for
-              viewing.
+              {t("hi__record_archived_description")}
             </h5>
             <h4 className="mt-2 text-center text-secondary-500">
-              This record was archived on{" "}
-              {new Date(error?.archived_time as string).toLocaleString()} as{" "}
+              {t("hi__record_archived_on")}{" "}
+              {new Date(error?.archived_time as string).toLocaleString()} -{" "}
               {error?.archived_reason as string}
             </h4>
           </>
@@ -50,13 +52,13 @@ export default function HealthInformation({ artefactId }: IProps) {
         {error && !error?.is_archived && (
           <>
             <h3 className="text-2xl font-semibold text-secondary-700">
-              This record hasn't been fetched yet
+              {t("hi__record_not_fetched_title")}
             </h3>
             <h5 className="mt-2 text-sm text-secondary-500">
-              This record hasn't been fetched yet. Please try again later.
+              {t("hi__record_not_fetched_description")}
             </h5>
             <h4 className="mt-2 text-secondary-500">
-              Waiting for the HIP to send the record.
+              {t("hi__waiting_for_record")}
             </h4>
           </>
         )}
