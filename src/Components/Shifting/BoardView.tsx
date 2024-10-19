@@ -143,7 +143,10 @@ export default function BoardView() {
               <ExportButton
                 action={async () => {
                   const { data } = await request(routes.downloadShiftRequests, {
-                    query: { ...formatFilter(qParams), csv: true },
+                    query: {
+                      ...formatFilter({ ...qParams, status: board.text }),
+                      csv: true,
+                    },
                   });
                   return data ?? null;
                 }}
