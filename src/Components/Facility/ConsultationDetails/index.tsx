@@ -168,7 +168,7 @@ export const ConsultationDetails = (props: any) => {
 
           // Get abha number data
           const { data: abhaNumberData } = await request(
-            routes.abha.getAbhaNumber,
+            routes.abdm.abhaNumber.get,
             {
               pathParams: { abhaNumberId: id ?? "" },
               silent: true,
