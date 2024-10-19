@@ -1,5 +1,7 @@
 import * as Notification from "../../Utils/Notifications";
 
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
+
 import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
@@ -44,6 +46,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
 import { Button } from "@/Components/ui/button";
 
 import Loading from "@/Components/Common/Loading";
+import { Avatar } from "../Common/Avatar";
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
 };
@@ -53,6 +56,7 @@ export const PatientHome = (props: any) => {
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
+  console.log(patientData);
   const [assignedVolunteerObject, setAssignedVolunteerObject] =
     useState<any>(null);
   const authUser = useAuthUser();
@@ -270,9 +274,9 @@ export const PatientHome = (props: any) => {
       />
 
       <div>
-        <div className="relative mt-2">
-          <div className="mx-auto max-w-screen-xl p-3 sm:px-6 lg:px-8">
-            <div className="md:flex">
+        <div className="">
+          <div className="my-3">
+            <div className="">
               {patientData?.last_consultation?.assigned_to_object && (
                 <p className="mx-3 flex flex-1 justify-center gap-2 rounded-lg bg-green-200 p-3 text-center font-bold text-green-800 shadow">
                   <span className="inline">
@@ -294,7 +298,7 @@ export const PatientHome = (props: any) => {
                 </p>
               )}
               {patientData.assigned_to_object && (
-                <p className="mx-2 flex-1 rounded-lg bg-primary-200 p-3 text-center font-bold text-primary-800 shadow">
+                <p className="rounded-lg bg-primary-200 p-3 text-center font-bold text-primary-800 shadow">
                   <span className="inline">
                     Assigned Volunteer:
                     {formatName(patientData.assigned_to_object)}
@@ -341,11 +345,169 @@ export const PatientHome = (props: any) => {
             </Button>
           </Alert>
         )}
+        <div>
+          <div>
+            <div className="flex flex-row gap-x-4">
+              <div className="w-14">
+                <Avatar
+                  className="size-10 rounded-md md:size-auto"
+                  name={patientData.name || "Unknown"}
+                  square={true}
+                  colors={["#86efac", "#14532d"]}
+                />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold capitalize">
+                  {patientData.name}
+                </h1>
+                <h3 className="text-sm font-medium text-gray-500">
+                  {formatPatientAge(patientData, true)},{"  "}
+                  {patientGender}
+                </h3>
+              </div>
+              <div className="mx-5 mt-3">
+                <h1 className="text-sm text-gray-500">UHID</h1>
+                <h1 className="text-sm text-gray-900">UHID</h1>
+              </div>
+              <div className="ml-auto flex flex-wrap gap-3">
+                {patientData.is_vaccinated && (
+                  <Chip
+                    variant="custom"
+                    className="bg-blue-100 text-blue-800"
+                    startIcon="l-syringe"
+                    text="Vaccinated"
+                  />
+                )}
+                {patientData.allow_transfer ? (
+                  <Chip
+                    variant="warning"
+                    startIcon="l-unlock"
+                    text="Transfer Allowed"
+                  />
+                ) : (
+                  <Chip startIcon="l-lock" text="Transfer Blocked" />
+                )}
+                {patientData.gender === 2 && (
+                  <>
+                    {patientData.is_antenatal &&
+                      isAntenatal(patientData.last_menstruation_start_date) && (
+                        <Chip
+                          variant="custom"
+                          className="border-pink-300 bg-pink-100 text-pink-600"
+                          startIcon="l-baby-carriage"
+                          text="Antenatal"
+                        />
+                      )}
+                    {isPostPartum(patientData.date_of_delivery) && (
+                      <Chip
+                        variant="custom"
+                        className="border-pink-300 bg-pink-100 text-pink-600"
+                        startIcon="l-baby-carriage"
+                        text="Post-partum"
+                      />
+                    )}
+                  </>
+                )}
+                {patientData.last_consultation?.is_telemedicine && (
+                  <Chip
+                    variant="alert"
+                    startIcon="l-phone"
+                    text="Telemedicine"
+                  />
+                )}
+              </div>
+            </div>
+
+            <h3 className="mt-3 text-base font-medium">
+              <CareIcon icon="l-hospital" className="mr-2 text-emerald-900" />
+              {patientData.facility_object?.name || "-"}
+            </h3>
+            <p className="mb-7 mt-4 text-sm font-medium text-zinc-500">
+              {patientGender} | {patientData.blood_group || "-"} | Born on{" "}
+              {patientData.date_of_birth
+                ? formatDate(patientData.date_of_birth)
+                : patientData.year_of_birth}
+            </p>
+          </div>
+        </div>
+
         <section className="lg:flex" data-testid="patient-dashboard">
           <div className="lg:w-2/3">
-            <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">
+            <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-9 shadow">
               <div>
-                <div className="flex flex-row gap-4">
+                {/* <div className="flex flex-row gap-x-2">
+                  <div className="w-14 rounded">
+                    <Avatar
+                      className="size-10 md:size-auto"
+                      name={patientData.name || "Unknown"}
+                      square={true}
+                      colors={["#86efac", "#14532d"]}
+                    />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold capitalize">
+                      {patientData.name}
+                    </h1>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {formatPatientAge(patientData, true)},{"  "}
+                      {patientGender}
+                    </h3>
+                  </div>
+                  <div className="mx-5 mt-3">
+                    <h1 className="text-sm text-gray-500">UHID</h1>
+                    <h1 className="text-sm text-gray-900">UHID</h1>
+                  </div>
+                  <div className="ml-auto mr-9 flex flex-wrap gap-3">
+                    {patientData.is_vaccinated && (
+                      <Chip
+                        variant="custom"
+                        className="bg-blue-100 text-blue-800"
+                        startIcon="l-syringe"
+                        text="Vaccinated"
+                      />
+                    )}
+                    {patientData.allow_transfer ? (
+                      <Chip
+                        variant="warning"
+                        startIcon="l-unlock"
+                        text="Transfer Allowed"
+                      />
+                    ) : (
+                      <Chip startIcon="l-lock" text="Transfer Blocked" />
+                    )}
+                    {patientData.gender === 2 && (
+                      <>
+                        {patientData.is_antenatal &&
+                          isAntenatal(
+                            patientData.last_menstruation_start_date,
+                          ) && (
+                            <Chip
+                              variant="custom"
+                              className="border-pink-300 bg-pink-100 text-pink-600"
+                              startIcon="l-baby-carriage"
+                              text="Antenatal"
+                            />
+                          )}
+                        {isPostPartum(patientData.date_of_delivery) && (
+                          <Chip
+                            variant="custom"
+                            className="border-pink-300 bg-pink-100 text-pink-600"
+                            startIcon="l-baby-carriage"
+                            text="Post-partum"
+                          />
+                        )}
+                      </>
+                    )}
+                    {patientData.last_consultation?.is_telemedicine && (
+                      <Chip
+                        variant="alert"
+                        startIcon="l-phone"
+                        text="Telemedicine"
+                      />
+                    )}
+                  </div>
+                </div> */}
+                {/* <div className="flex flex-row gap-4">
                   <h1 className="flex flex-row pb-3 text-2xl font-bold capitalize">
                     {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
@@ -398,169 +560,334 @@ export const PatientHome = (props: any) => {
                       />
                     )}
                   </div>
-                </div>
-                <h3 className="text-base font-medium">
-                  <CareIcon
-                    icon="l-hospital"
-                    className="mr-2 text-emerald-900"
-                  />
-                  {patientData.facility_object?.name || "-"}
-                </h3>
-                <p className="mb-7 mt-4 text-sm font-medium text-zinc-500">
-                  {patientGender} | {patientData.blood_group || "-"} | Born on{" "}
-                  {patientData.date_of_birth
-                    ? formatDate(patientData.date_of_birth)
-                    : patientData.year_of_birth}
-                </p>
+                </div> */}
               </div>
-              <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-4">
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Phone
-                  </div>
-                  <div className="mt-1 text-sm leading-5">
-                    <div>
-                      <a
-                        href={`tel:${patientData.phone_number}`}
-                        className="text-sm font-medium text-black hover:text-secondary-500"
+              <div>
+                <div className="w-full">
+                  <div className="flex justify-between">
+                    <h1 className="text-xl">General Info</h1>
+                    {/* edit button */}
+                    {/* <div>
+                      <ButtonV2
+                        className="w-full"
+                        disabled={!patientData.is_active}
+                        authorizeFor={NonReadOnlyUsers}
+                        onClick={() => {
+                          const showAllFacilityUsers = [
+                            "DistrictAdmin",
+                            "StateAdmin",
+                          ];
+                          if (
+                            !showAllFacilityUsers.includes(
+                              authUser.user_type,
+                            ) &&
+                            authUser.home_facility_object?.id !==
+                              patientData.facility
+                          ) {
+                            Notification.Error({
+                              msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                            });
+                          } else {
+                            navigate(
+                              `/facility/${patientData?.facility}/patient/${id}/update`,
+                            );
+                          }
+                        }}
                       >
-                        {patientData.phone_number || "-"}
-                      </a>
-                    </div>
-                    <div>
-                      <a
-                        href={`https://wa.me/${patientData.phone_number?.replace(/\D+/g, "")}`}
-                        target="_blank"
-                        className="text-sm font-normal text-sky-600 hover:text-sky-300"
-                        rel="noreferrer"
-                      >
-                        <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
-                      </a>
-                    </div>
+                        <CareIcon icon="l-edit-alt" className="text-lg" />
+                        Edit
+                      </ButtonV2>
+                    </div> */}
                   </div>
-                </div>
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Emergency Contact
-                  </div>
-                  <div className="mt-1 text-sm leading-5 text-secondary-900">
-                    <div>
-                      <a
-                        href={`tel:${patientData.emergency_phone_number}`}
-                        className="text-sm font-medium text-black hover:text-secondary-500"
-                      >
-                        {patientData.emergency_phone_number || "-"}
-                      </a>
-                    </div>
-                    <div>
-                      <a
-                        href={`https://wa.me/${patientData.emergency_phone_number?.replace(/\D+/g, "")}`}
-                        target="_blank"
-                        className="text-sm font-normal text-sky-600 hover:text-sky-300"
-                        rel="noreferrer"
-                      >
-                        <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                {patientData.date_of_return && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      Date of Return
-                    </div>
-                    <div className="mt-1 text-sm font-medium leading-5">
-                      {formatDateTime(patientData.date_of_return)}
-                    </div>
-                  </div>
-                )}
-                {patientData.is_vaccinated && !!patientData.number_of_doses && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      Number of vaccine doses
-                    </div>
-                    <div className="mt-1 text-sm font-medium leading-5">
-                      {patientData.number_of_doses}
-                    </div>
-                  </div>
-                )}
-                {patientData.is_vaccinated && patientData.vaccine_name && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      Vaccine name
-                    </div>
-                    <div className="mt-1 text-sm font-medium leading-5">
-                      {patientData.vaccine_name}
-                    </div>
-                  </div>
-                )}
-                {patientData.is_vaccinated &&
-                  patientData.last_vaccinated_date && (
+                  <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
                     <div className="sm:col-span-1">
                       <div className="text-sm font-semibold leading-5 text-zinc-400">
-                        Last Vaccinated on
+                        Full Name
                       </div>
                       <div className="mt-1 text-sm font-medium leading-5">
-                        {formatDateTime(patientData.last_vaccinated_date)}
+                        {patientData.name}
                       </div>
                     </div>
-                  )}
-                {patientData.countries_travelled &&
-                  !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">
                       <div className="text-sm font-semibold leading-5 text-zinc-400">
-                        Countries travelled
+                        Phone
+                      </div>
+                      <div className="mt-1 text-sm leading-5">
+                        <div>
+                          <a
+                            href={`tel:${patientData.phone_number}`}
+                            className="text-sm font-medium text-black hover:text-secondary-500"
+                          >
+                            {patientData.phone_number || "-"}
+                          </a>
+                        </div>
+                        <div>
+                          <a
+                            href={`https://wa.me/${patientData.phone_number?.replace(/\D+/g, "")}`}
+                            target="_blank"
+                            className="text-sm font-normal text-sky-600 hover:text-sky-300"
+                            rel="noreferrer"
+                          >
+                            <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        Date of Birth
                       </div>
                       <div className="mt-1 text-sm font-medium leading-5">
-                        {patientData.countries_travelled.join(", ")}
+                        {dayjs(patientData.date_of_birth).format("DD MMM YYYY")}{" "}
+                        ({formatPatientAge(patientData, true)})
                       </div>
                     </div>
-                  )}
-                {patientData.meta_info?.occupation && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      {t("occupation")}
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        Sex
+                      </div>
+                      <div className="mt-1 text-sm font-medium leading-5">
+                        {patientGender}
+                      </div>
                     </div>
-                    <div className="mt-1 text-sm font-medium leading-5">
-                      {parseOccupation(patientData.meta_info.occupation)}
+                    <div className="sm:col-span-2">
+                      <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-orange-300 bg-orange-50 p-4 sm:flex-row">
+                        {/* Emergency Contact Section */}
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold leading-5 text-zinc-400">
+                            Emergency Contact
+                          </div>
+                          <div className="mt-1 text-sm leading-5 text-secondary-900">
+                            <div>
+                              <a
+                                href={`tel:${patientData.emergency_phone_number}`}
+                                className="text-sm font-medium text-black hover:text-secondary-500"
+                              >
+                                {patientData.emergency_phone_number || "-"}
+                              </a>
+                            </div>
+                            <div>
+                              <a
+                                href={`https://wa.me/${patientData.emergency_phone_number?.replace(
+                                  /\D+/g,
+                                  "",
+                                )}`}
+                                target="_blank"
+                                className="text-sm font-normal text-sky-600 hover:text-sky-300"
+                                rel="noreferrer"
+                              >
+                                <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Emergency Contact Person Name Section */}
+                        <div className="ml-0 mt-4 flex-1 sm:ml-4 sm:mt-0">
+                          <div className="text-sm font-semibold leading-5 text-zinc-400">
+                            Emergency Contact Person Name
+                          </div>
+                          <div className="mt-1 text-sm font-medium leading-5">
+                            {patientData.name || "-"}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {patientData.ration_card_category && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      {t("ration_card_category")}
-                    </div>
-                    <div className="mt-1 text-sm font-medium leading-5">
-                      {t(`ration_card__${patientData.ration_card_category}`)}
-                    </div>
-                  </div>
-                )}
-                {patientData.meta_info?.socioeconomic_status && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      {t("socioeconomic_status")}
-                    </div>
-                    <div className="mt-1 text-sm font-medium leading-5">
-                      {t(
-                        `SOCIOECONOMIC_STATUS__${patientData.meta_info.socioeconomic_status}`,
+
+                    {patientData.date_of_return && (
+                      <div className="sm:col-span-1">
+                        <div className="text-sm font-semibold leading-5 text-zinc-400">
+                          Date of Return
+                        </div>
+                        <div className="mt-1 text-sm font-medium leading-5">
+                          {formatDateTime(patientData.date_of_return)}
+                        </div>
+                      </div>
+                    )}
+                    {patientData.is_vaccinated &&
+                      !!patientData.number_of_doses && (
+                        <div className="sm:col-span-1">
+                          <div className="text-sm font-semibold leading-5 text-zinc-400">
+                            Number of vaccine doses
+                          </div>
+                          <div className="mt-1 text-sm font-medium leading-5">
+                            {patientData.number_of_doses}
+                          </div>
+                        </div>
                       )}
-                    </div>
-                  </div>
-                )}
-                {patientData.meta_info?.domestic_healthcare_support && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      {t("domestic_healthcare_support")}
-                    </div>
-                    <div className="mt-1 text-sm font-medium leading-5">
-                      {t(
-                        `DOMESTIC_HEALTHCARE_SUPPORT__${patientData.meta_info.domestic_healthcare_support}`,
+                    {patientData.is_vaccinated && patientData.vaccine_name && (
+                      <div className="sm:col-span-1">
+                        <div className="text-sm font-semibold leading-5 text-zinc-400">
+                          Vaccine name
+                        </div>
+                        <div className="mt-1 text-sm font-medium leading-5">
+                          {patientData.vaccine_name}
+                        </div>
+                      </div>
+                    )}
+                    {patientData.is_vaccinated &&
+                      patientData.last_vaccinated_date && (
+                        <div className="sm:col-span-1">
+                          <div className="text-sm font-semibold leading-5 text-zinc-400">
+                            Last Vaccinated on
+                          </div>
+                          <div className="mt-1 text-sm font-medium leading-5">
+                            {formatDateTime(patientData.last_vaccinated_date)}
+                          </div>
+                        </div>
                       )}
+                    {patientData.countries_travelled &&
+                      !!patientData.countries_travelled.length && (
+                        <div className="sm:col-span-1">
+                          <div className="text-sm font-semibold leading-5 text-zinc-400">
+                            Countries travelled
+                          </div>
+                          <div className="mt-1 text-sm font-medium leading-5">
+                            {patientData.countries_travelled.join(", ")}
+                          </div>
+                        </div>
+                      )}
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        Current Address
+                      </div>
+                      <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        {patientData.address || "-"}
+                      </div>
+                    </div>
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        Permanent Address
+                      </div>
+                      <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        {patientData.permanent_address || "-"}
+                      </div>
+                    </div>
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        Country
+                      </div>
+                      <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        {patientData.nationality || "-"} - {patientData.pincode}
+                      </div>
+                    </div>
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        State
+                      </div>
+                      <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        {patientData?.state_object?.name} -{" "}
+                        {patientData.pincode}
+                      </div>
+                    </div>
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        District
+                      </div>
+                      <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        {patientData.district_object?.name || "-"}
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        Local Body
+                      </div>
+                      <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        {patientData.local_body_object?.name || "-"}
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        Ward
+                      </div>
+                      <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        {(patientData.ward_object &&
+                          patientData.ward_object.number +
+                            ", " +
+                            patientData.ward_object.name) ||
+                          "-"}
+                      </div>
+                    </div>
+
+                    <div className="sm:col-span-1">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
+                        Village
+                      </div>
+                      <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        {patientData.village || "-"}
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
+              <hr className="mb-3 mr-5" />
+              <div>
+                <div className="w-full">
+                  <div className="flex justify-between">
+                    <h1 className="text-xl">Social Profile</h1>
+                    {/* ... potential edit button for social profile ... */}
+                  </div>
+                  <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
+                    {patientData.meta_info?.occupation && (
+                      <div className="sm:col-span-1">
+                        <div className="text-sm font-semibold leading-5 text-zinc-400">
+                          {t("occupation")}
+                        </div>
+                        <div className="mt-1 text-sm font-medium leading-5">
+                          {parseOccupation(patientData.meta_info.occupation)}
+                        </div>
+                      </div>
+                    )}
+                    {patientData.ration_card_category && (
+                      <div className="sm:col-span-1">
+                        <div className="text-sm font-semibold leading-5 text-zinc-400">
+                          {t("ration_card_category")}
+                        </div>
+                        <div className="mt-1 text-sm font-medium leading-5">
+                          {t(
+                            `ration_card__${patientData.ration_card_category}`,
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {patientData.meta_info?.socioeconomic_status && (
+                      <div className="sm:col-span-1">
+                        <div className="text-sm font-semibold leading-5 text-zinc-400">
+                          {t("socioeconomic_status")}
+                        </div>
+                        <div className="mt-1 text-sm font-medium leading-5">
+                          {t(
+                            `SOCIOECONOMIC_STATUS__${patientData.meta_info.socioeconomic_status}`,
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {patientData.meta_info?.domestic_healthcare_support && (
+                      <div className="sm:col-span-1">
+                        <div className="text-sm font-semibold leading-5 text-zinc-400">
+                          {t("domestic_healthcare_support")}
+                        </div>
+                        <div className="mt-1 text-sm font-medium leading-5">
+                          {t(
+                            `DOMESTIC_HEALTHCARE_SUPPORT__${patientData.meta_info.domestic_healthcare_support}`,
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* <div>
+                <InsuranceDetialsCard
+                  data={insuranceDetials?.results[0]}
+                  showViewAllDetails={
+                    insuranceDetials?.count !== undefined &&
+                    insuranceDetials?.count > 1
+                  }
+                />
+              </div> */}
             </div>
           </div>
           <div className="h-full px-2 lg:w-1/3">
@@ -590,7 +917,7 @@ export const PatientHome = (props: any) => {
                       </p>
                     </div>
                   )}
-                <div className="mb-6 rounded-sm bg-white p-2 text-center shadow">
+                <div className="my-6 rounded-sm bg-white p-2 text-center shadow lg:my-0">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
                       <div className="text-sm font-normal leading-5 text-secondary-500">
@@ -631,7 +958,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 </div>
-                <div className="mt-2 flex justify-between rounded-sm bg-white p-2 px-4 text-center shadow">
+                <div className="mt-6 flex justify-between rounded-sm bg-white p-2 px-4 text-center shadow">
                   <div className="w-1/2 border-r-2 pb-1 pr-2">
                     <div className="text-sm font-normal leading-5 text-secondary-500">
                       Created
