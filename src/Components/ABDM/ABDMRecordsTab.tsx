@@ -1,6 +1,5 @@
 import { ConsentArtefactModel, ConsentRequestModel } from "./types/consent";
 import dayjs from "dayjs";
-import { ABDM_CONSENT_PURPOSE } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
@@ -10,12 +9,15 @@ import { Link } from "raviger";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
+import { useTranslation } from "react-i18next";
 
 interface IConsentArtefactCardProps {
   artefact: ConsentArtefactModel;
 }
 
 function ConsentArtefactCard({ artefact }: IConsentArtefactCardProps) {
+  const { t } = useTranslation();
+
   return (
     <Link
       href={`/abdm/health-information/${artefact.id}`}
@@ -27,7 +29,7 @@ function ConsentArtefactCard({ artefact }: IConsentArtefactCardProps) {
             {artefact.hip}
           </h5>
           <p className="mt-1 max-w-2xl text-sm text-secondary-500">
-            created {dayjs(artefact.created_date).fromNow()}
+            {t("created_on")} {dayjs(artefact.created_date).fromNow()}
           </p>
         </div>
         <div className="flex flex-col items-center">
@@ -39,7 +41,7 @@ function ConsentArtefactCard({ artefact }: IConsentArtefactCardProps) {
             {dayjs(artefact.to_time).format("MMM DD YYYY")}
           </h6>
           <p className="mt-1 max-w-2xl text-sm text-secondary-500">
-            expires in {dayjs(artefact.expiry).fromNow()}
+            {t("expires_on")} {dayjs(artefact.expiry).fromNow()}
           </p>
         </div>
       </div>
@@ -50,7 +52,7 @@ function ConsentArtefactCard({ artefact }: IConsentArtefactCardProps) {
               key={hiType}
               className="flex items-center justify-center rounded-full bg-secondary-600 px-4 py-1.5 text-xs font-medium text-white"
             >
-              {hiType}
+              {t(`consent__hi_type__${hiType}`)}
             </div>
           );
         })}
@@ -64,15 +66,14 @@ interface IConsentRequestCardProps {
 }
 
 function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="overflow-hidden bg-white shadow sm:rounded-lg">
       <div className="flex flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row sm:gap-0 sm:px-6">
         <div className="flex flex-col items-center">
           <h5 className="font-semibold leading-6 text-secondary-900">
-            {
-              ABDM_CONSENT_PURPOSE.find((p) => p.value === consent.purpose)
-                ?.label
-            }
+            {t(`consent__purpose__${consent.purpose}`)}
           </h5>
           <h6 className="mt-1 leading-6 text-secondary-700">
             {formatName(consent.requester)}
@@ -84,39 +85,40 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
             {dayjs(consent.to_time).format("MMM DD YYYY")}
           </h6>
           <p className="mt-1 max-w-2xl text-sm text-secondary-500">
-            expires in {dayjs(consent.expiry).fromNow()}
+            {t("expires_on")} {dayjs(consent.expiry).fromNow()}
           </p>
         </div>
         <div className="flex flex-col items-center">
           <ButtonV2
             onClick={async () => {
-              const { res, error } = await request(
-                routes.abha.checkConsentStatus,
+              const { res, data } = await request(
+                routes.abdm.consent.checkStatus,
                 {
-                  pathParams: { id: consent.id },
+                  body: {
+                    consent_request: consent.id,
+                  },
                 },
               );
 
-              if (res?.status === 200) {
+              if (res?.status === 202) {
                 Notification.Success({
-                  msg: "Checking Status!",
+                  msg: data?.detail ?? t("checking_consent_status"),
                 });
-              } else {
-                Notification.Error({
-                  msg: error?.message ?? "Error while checking status!",
+                Notification.Warn({
+                  msg: t("async_operation_warning"),
                 });
               }
             }}
             ghost
             className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
           >
-            <CareIcon icon="l-refresh" /> check status
+            <CareIcon icon="l-refresh" /> {t("check_status")}
           </ButtonV2>
           <p className="mt-1 max-w-2xl text-sm text-secondary-500">
-            created {dayjs(consent.created_date).fromNow()}
+            {t("created_on")} {dayjs(consent.created_date).fromNow()}
           </p>
           <p className="mt-1 max-w-2xl text-sm text-secondary-500">
-            modified {dayjs(consent.modified_date).fromNow()}
+            {t("modified_on")} {dayjs(consent.modified_date).fromNow()}
           </p>
         </div>
       </div>
@@ -130,8 +132,8 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
         <div className="border-t border-secondary-200 bg-secondary-50 px-4 py-5 sm:gap-4">
           <p className="text-center text-sm text-secondary-800">
             {consent.status === "REQUESTED"
-              ? "Waiting for the Patient to approve the consent request"
-              : "Patient has rejected the consent request"}
+              ? t("consent_request_waiting_approval")
+              : t("consent_request_rejected")}
           </p>
         </div>
       )}
@@ -147,7 +149,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
                   : "bg-secondary-600",
               )}
             >
-              {hiType}
+              {t(`consent__hi_type__${hiType}`)}
             </div>
           );
         })}
@@ -161,7 +163,9 @@ interface IProps {
 }
 
 export default function ABDMRecordsTab({ patientId }: IProps) {
-  const { data, loading } = useQuery(routes.abha.listConsents, {
+  const { t } = useTranslation();
+
+  const { data, loading } = useQuery(routes.abdm.consent.list, {
     query: {
       patient: patientId,
       ordering: "-created_date",
@@ -175,9 +179,11 @@ export default function ABDMRecordsTab({ patientId }: IProps) {
   if (!data?.results.length) {
     return (
       <div className="mt-12 flex flex-col items-center justify-center gap-2.5">
-        <p className="font-semibold text-secondary-600">No Records found</p>
+        <p className="font-semibold text-secondary-600">
+          {t("no_records_found")}
+        </p>
         <p className="text-sm text-secondary-600">
-          Raise a consent request to fetch patient records over ABDM
+          {t("raise_consent_request")}
         </p>
       </div>
     );
