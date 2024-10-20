@@ -23,12 +23,12 @@ import CountBlock from "../../CAREUI/display/Count";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import { ExportMenu } from "../Common/Export";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
+
 import FilterBadge from "../../CAREUI/display/FilterBadge";
 import PatientFilter from "./PatientFilter";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import SearchInput from "../Form/SearchInput";
+
 import SortDropdownMenu from "../Common/SortDropdown";
 import {
   formatPatientAge,
@@ -107,46 +107,6 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [phone_number, setPhoneNumber] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState("");
-  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
-  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
-    useState("");
-
-  const setPhoneNum = (phone_number: string) => {
-    setPhoneNumber(phone_number);
-    if (phone_number.length >= 13) {
-      setPhoneNumberError("");
-      updateQuery({ phone_number });
-      return;
-    }
-
-    if (phone_number === "+91" || phone_number === "") {
-      setPhoneNumberError("");
-      qParams.phone_number && updateQuery({ phone_number: null });
-      return;
-    }
-
-    setPhoneNumberError("Enter a valid number");
-  };
-
-  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
-    setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length >= 13) {
-      setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number });
-      return;
-    }
-
-    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
-      setEmergencyPhoneNumberError("");
-      qParams.emergency_phone_number &&
-        updateQuery({ emergency_phone_number: null });
-      return;
-    }
-
-    setEmergencyPhoneNumberError("Enter a valid number");
-  };
 
   const tabValue =
     qParams.last_consultation__new_discharge_reason ||
@@ -333,14 +293,6 @@ export const PatientManager = () => {
 
   const { loading: isLoading, data } = useQuery(routes.patientList, {
     query: params,
-    onResponse: () => {
-      if (!params.phone_number) {
-        setPhoneNumber("+91");
-      }
-      if (!params.emergency_phone_number) {
-        setEmergencyPhoneNumber("+91");
-      }
-    },
   });
 
   const getTheCategoryFromId = () => {
@@ -792,14 +744,6 @@ export const PatientManager = () => {
       </div>
     );
   }
-
-  const queryField = <T,>(name: string, defaultValue?: T) => {
-    return {
-      name,
-      value: qParams[name] || defaultValue,
-      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-    };
-  };
 
   const onlyAccessibleFacility =
     permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
