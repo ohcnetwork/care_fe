@@ -6,20 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import {
-  ScribeField,
-  ScribeForm,
-  ScribeInput,
-  ScribeProviderProps,
-  ScribeStatus,
-} from "./types";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import * as Notify from "../../Utils/Notifications";
-import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
-import uploadFile from "../../Utils/request/uploadFile";
-import { scrapeFields } from "./scribeutils";
-import { Controller } from "./Controller";
+import { ScribeForm, ScribeInput, ScribeProviderProps } from "./types";
 
 export const initialContextValue: ScribeForm = {
   inputs: [],
@@ -53,7 +40,6 @@ export function Provider(props: ScribeProviderProps) {
 
   return (
     <ScribeContext.Provider value={[scribe, setScribe]}>
-      <Controller />
       {children}
     </ScribeContext.Provider>
   );

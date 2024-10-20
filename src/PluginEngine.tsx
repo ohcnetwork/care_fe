@@ -20,6 +20,9 @@ export default function PluginEngine({
         }
       >
         <CareAppsContext.Provider value={pluginMap}>
+          {pluginMap.map(
+            (plugin) => plugin.Entry && <plugin.Entry key={plugin.plugin} />,
+          )}
           {children}
         </CareAppsContext.Provider>
       </ErrorBoundary>
