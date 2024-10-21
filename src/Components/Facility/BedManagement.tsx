@@ -58,6 +58,15 @@ const BedCard = ({
     authUser.user_type,
   );
 
+  const getDesc = () => {
+    if (description) {
+      return description.length > 100
+        ? description.slice(0, 100) + "..."
+        : description;
+    }
+    return "-";
+  };
+
   const handleDeleteConfirm = async () => {
     const { res } = await request(routes.deleteFacilityBed, {
       pathParams: { external_id: id },
@@ -115,7 +124,7 @@ const BedCard = ({
             className="my-3 break-all text-sm font-medium text-secondary-700"
             id="view-bed-description"
           >
-            {description || "-"}
+            {getDesc()}
           </p>
         </div>
 
@@ -151,7 +160,7 @@ const BedCard = ({
               tooltipClassName=" text-xs w-full lg:w-auto"
             >
               <CareIcon icon="l-trash" className="text-lg" />
-              Delete
+              {t("delete")}
             </ButtonV2>
           </div>
         </div>
@@ -163,6 +172,7 @@ const BedCard = ({
 export const BedManagement = (props: BedManagementProps) => {
   const { facilityId, locationId } = props;
   const { qParams, resultsPerPage } = useFilters({});
+  const { t } = useTranslation();
 
   const { data: location } = useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
@@ -202,12 +212,12 @@ export const BedManagement = (props: BedManagementProps) => {
                 authorizeFor={NonReadOnlyUsers}
               >
                 <CareIcon icon="l-plus" className="text-lg" />
-                Add New Bed(s)
+                {t("add_new_beds")}
               </ButtonV2>
             </div>
             <div className="w-full @container">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
-                <span>No beds available</span>
+                <span>{t("no_beds_available")}</span>
               </PaginatedList.WhenEmpty>
 
               <PaginatedList.WhenLoading>
