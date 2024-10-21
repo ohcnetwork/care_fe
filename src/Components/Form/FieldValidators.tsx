@@ -79,12 +79,13 @@ export const EmailValidator = (message = "Invalid email address") => {
 //   return RegexValidator(SUPPORT_PHONE_NUMBER_REGEX, message);
 // };
 
+// References: https://trai.gov.in/sites/default/files/Recommendations_29052020.pdf
 const INDIAN_MOBILE_NUMBER_REGEX = /^(?=^\+91)(^\+91[6-9]\d{9}$)/;
 const INTERNATIONAL_MOBILE_NUMBER_REGEX = /^(?!^\+91)(^\+\d{1,3}\d{8,14}$)/;
 const MOBILE_NUMBER_REGEX = new RegExp(
   `(${INDIAN_MOBILE_NUMBER_REGEX.source})|(${INTERNATIONAL_MOBILE_NUMBER_REGEX.source})`,
 );
-const INDIAN_LANDLINE_NUMBER_REGEX = /^\+91[2-9]\d{7,9}$/;
+const INDIAN_LANDLINE_NUMBER_REGEX = /^\+91[2-9]\d{9}$/;
 const INDIAN_SUPPORT_NUMBER_REGEX = /^(1800|1860)\d{6,7}$/;
 
 const PHONE_NUMBER_REGEX_MAP = {
