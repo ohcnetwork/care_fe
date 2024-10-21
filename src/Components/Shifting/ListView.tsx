@@ -6,7 +6,7 @@ import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import { formatDateTime, formatPatientAge } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
@@ -77,6 +77,7 @@ export default function ListView() {
         </div>
       );
     }
+
 
     return (
       <div className="mb-5 grid gap-x-6 md:grid-cols-2">
