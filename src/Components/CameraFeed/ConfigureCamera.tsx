@@ -560,7 +560,6 @@ export default function ConfigureCamera(props: Props) {
                         <div className="flex flex-col">
                           <span className="font-semibold">{preset.name}</span>
                           <span className="text-xs">
-                            asudhbu
                             <RecordMeta
                               prefix="last updated"
                               time={preset.modified_date}
