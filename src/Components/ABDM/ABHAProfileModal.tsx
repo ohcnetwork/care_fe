@@ -8,6 +8,7 @@ import { useRef } from "react";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { AbhaNumberModel } from "./types/abha";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   patientId?: string;
@@ -17,32 +18,55 @@ interface IProps {
 }
 
 const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
+  const { t } = useTranslation();
+
   const printRef = useRef(null);
 
   const downloadAbhaCard = async (type: "pdf" | "png") => {
-    if (!patientId) return;
-    const { res, data } = await request(routes.abha.getAbhaCard, {
-      body: {
-        patient: patientId,
-        type: type,
-      },
+    if (!patientId || !abha?.abha_number) return;
+
+    Notify.Success({ msg: t("downloading_abha_card") });
+
+    const { res, data } = await request(routes.abdm.healthId.getAbhaCard, {
+      query: { abha_id: abha?.abha_number },
     });
 
     if (res?.status === 200 && data) {
+      const imageUrl = URL.createObjectURL(data);
+
       if (type === "png") {
         const downloadLink = document.createElement("a");
-        downloadLink.href = "data:application/octet-stream;base64," + data;
+        downloadLink.href = imageUrl;
         downloadLink.download = "abha.png";
         downloadLink.click();
+        URL.revokeObjectURL(imageUrl);
       } else {
-        const htmlPopup = `<embed width=100% height=100%" type='application/pdf' src='data:application/pdf;base64,${data}'></embed>`;
-
-        const printWindow = window.open("", "PDF");
+        const printWindow = window.open("", "_blank");
+        const htmlPopup = `
+            <html>
+              <head>
+                <title>Print Image</title>
+                <style>
+                @media print {
+                  @page {
+                    size: landscape;
+                  }
+                  body, html { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100%; }
+                }
+                </style>
+              </head>
+              <body>
+                <embed width="100%" height="100%" src="${imageUrl}" type="image/png"></embed>
+              </body>
+            </html>
+          `;
         printWindow?.document.write(htmlPopup);
-        printWindow?.print();
+        printWindow?.document.close();
+        printWindow?.addEventListener("load", () => {
+          printWindow?.print();
+          URL.revokeObjectURL(imageUrl);
+        });
       }
-    } else {
-      Notify.Error({ msg: "Download Failed..." });
     }
   };
 
@@ -50,7 +74,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
     <DialogModal
       title={
         <div className="flex items-center justify-between">
-          <h4>ABHA Profile</h4>
+          <h4>{t("abha_profile")}</h4>
           <div className="flex items-center gap-2">
             <CareIcon
               onClick={() => downloadAbhaCard("pdf")}
@@ -93,16 +117,19 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         <div className="flex flex-wrap gap-4">
           {[
             {
-              label: "Name",
+              label: t("full_name"),
               value:
                 abha?.name ||
                 `${abha?.first_name} ${abha?.middle_name} ${abha?.last_name}`,
             },
-            { label: "DOB", value: abha?.date_of_birth },
-            { label: "Gender", value: abha?.gender },
-            { label: "ABHA Number", value: abha?.abha_number },
-            { label: "ABHA ID", value: abha?.health_id?.split("@")[0] },
-            { label: "Email", value: abha?.email },
+            { label: t("date_of_birth"), value: abha?.date_of_birth },
+            { label: t("gender"), value: abha?.gender },
+            { label: t("abha_number"), value: abha?.abha_number },
+            {
+              label: t("abha_address"),
+              value: abha?.health_id?.split("@")[0],
+            },
+            { label: t("email"), value: abha?.email },
           ].map((item, index) =>
             item.value ? (
               <div key={index}>
@@ -117,13 +144,13 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
       <div className="mt-4 flex flex-col text-xs text-secondary-700">
         {abha?.created_date && (
           <div className="flex items-center gap-1">
-            <span className="">Created On: </span>
+            <span>{t("created_on")}: </span>
             <span>{formatDateTime(abha.created_date)}</span>
           </div>
         )}
         {abha?.modified_date && (
           <div className="flex items-center gap-1">
-            <span className="">Last Modified On: </span>
+            <span>{t("modified_on")}: </span>
             <span>{formatDateTime(abha.modified_date)}</span>
           </div>
         )}
