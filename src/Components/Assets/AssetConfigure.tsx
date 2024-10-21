@@ -61,7 +61,11 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
       }}
       backUrl={`/facility/${facilityId}/assets/${assetId}`}
     >
-      <ConfigureCamera asset={asset} onUpdated={() => refetch()} />
+      <ConfigureCamera
+        asset={asset}
+        onUpdated={() => refetch()}
+        isAssetCongfigure={true}
+      />
     </Page>
   );
 };
