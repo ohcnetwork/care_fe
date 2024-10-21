@@ -78,7 +78,6 @@ export default function ListView() {
       );
     }
 
-
     return (
       <div className="mb-5 grid gap-x-6 md:grid-cols-2">
         {data.map((shift: IShift) => (
@@ -88,8 +87,7 @@ export default function ListView() {
                 <div>
                   <div className="flex justify-between">
                     <div className="mb-2 text-xl font-bold capitalize">
-                      {shift.patient_object.name} -{" "}
-                      {formatPatientAge(shift.patient_object, true)}
+                      {shift.patient_object.name} - {shift.patient_object.age}
                     </div>
                     <div>
                       {shift.emergency && (
