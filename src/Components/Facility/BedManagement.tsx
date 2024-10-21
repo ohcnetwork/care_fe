@@ -58,15 +58,6 @@ const BedCard = ({
     authUser.user_type,
   );
 
-  const getDesc = () => {
-    if (description) {
-      return description.length > 100
-        ? description.slice(0, 100) + "..."
-        : description;
-    }
-    return "-";
-  };
-
   const handleDeleteConfirm = async () => {
     const { res } = await request(routes.deleteFacilityBed, {
       pathParams: { external_id: id },
@@ -120,12 +111,14 @@ const BedCard = ({
               </p>
             </div>
           </div>
-          <p
-            className="my-3 break-all text-sm font-medium text-secondary-700"
-            id="view-bed-description"
-          >
-            {getDesc()}
-          </p>
+          {description && (
+            <p
+              className="... my-3 truncate break-all text-sm font-medium text-secondary-700"
+              id="view-bed-description"
+            >
+              {description}
+            </p>
+          )}
         </div>
 
         <div className="mt-2 flex w-full flex-col gap-2 md:flex-row">
