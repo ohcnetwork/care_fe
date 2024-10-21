@@ -1054,5 +1054,7 @@
   "length": "Length ({{unit}})",
   "expand_sidebar": "Expand Sidebar",
   "collapse_sidebar": "Collapse Sidebar",
-  "linked_skills": "Linked Skills"
+  "linked_skills": "Linked Skills",
+  "no_vitals_present": "No Vitals Monitor present in this location or facility",
+  "vitals_present": "Vitals Monitor present"
 }
