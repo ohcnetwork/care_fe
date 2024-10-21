@@ -274,8 +274,7 @@ export default function NotificationsList({
     } else {
         unsubscribe();
      }
-    }
-  };
+    };
 
   const getButtonText = () => {
     const status = isSubscribed;
