@@ -50,4 +50,4 @@ const AvatarEditable: React.FC<AvatarEditableProps> = ({
   );
 };
 
-export { AvatarEditable };
+export default AvatarEditable;

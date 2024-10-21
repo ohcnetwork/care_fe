@@ -29,7 +29,7 @@ import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { validateRule } from "./UserAdd";
 import { useTranslation } from "react-i18next";
-import { AvatarEditable } from "@/Components/Common/AvatarEditable";
+import AvatarEditable from "@/Components/Common/AvatarEditable";
 import Page from "@/Components/Common/components/Page";
 import Loading from "@/Components/Common/Loading";
 import AvatarEditModal from "@/Components/Common/AvatarEditModal";

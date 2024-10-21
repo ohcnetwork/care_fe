@@ -40,7 +40,7 @@ import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
 import { FacilityStaffList } from "./FacilityStaffList.js";
 import FacilityBlock from "./FacilityBlock.js";
 import Loading from "@/Components/Common/Loading";
-import { AvatarEditable } from "@/Components/Common/AvatarEditable";
+import AvatarEditable from "@/Components/Common/AvatarEditable";
 import AvatarEditModal from "@/Components/Common/AvatarEditModal";
 import careConfig from "@careConfig";
 import uploadFile from "@/Utils/request/uploadFile";
