@@ -275,9 +275,9 @@ export const PatientHome = (props: any) => {
       />
 
       <div>
-        <div className="">
-          <div className="my-3">
-            <div className="">
+        <div className="relative mt-2">
+          <div className="mx-auto max-w-screen-xl p-3 sm:px-6 lg:px-8">
+            <div className="md:flex">
               {patientData?.last_consultation?.assigned_to_object && (
                 <p className="mx-3 flex flex-1 justify-center gap-2 rounded-lg bg-green-200 p-3 text-center font-bold text-green-800 shadow">
                   <span className="inline">
