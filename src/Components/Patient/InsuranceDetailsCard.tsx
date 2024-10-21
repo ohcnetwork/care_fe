@@ -12,12 +12,12 @@ export const InsuranceDetialsCard = (props: InsuranceDetails) => {
 
   return (
     <div className="w-full">
-      <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-        <div className="border-b border-dashed pb-2 text-xl font-bold text-secondary-900">
-          Policy Details
+      <div className="h-full space-y-2 pr-5">
+        <div className="mr-4 w-full pb-2 text-xl font-bold text-secondary-900">
+          Insurance Details
         </div>
         {data ? (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-2">
+          <div className="border-gray-150 grid grid-cols-1 gap-2 rounded-md border bg-white p-5 shadow sm:grid-cols-2 md:grid-cols-2">
             <div className=" ">
               <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Member ID

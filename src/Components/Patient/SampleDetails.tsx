@@ -242,7 +242,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
     return (
       <Card key={flow.id}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
+          <div className="">
             <span className="font-semibold leading-relaxed">Status: </span>{" "}
             {_.startCase(_.camelCase(flow.status))}
           </div>
