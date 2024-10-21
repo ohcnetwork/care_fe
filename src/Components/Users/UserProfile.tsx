@@ -29,7 +29,7 @@ import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { validateRule } from "./UserAdd";
 import { useTranslation } from "react-i18next";
-import { EditableAvatar } from "@/Components/Common/Avatar";
+import { AvatarEditable } from "@/Components/Common/AvatarEditable";
 import Page from "@/Components/Common/components/Page";
 import Loading from "@/Components/Common/Loading";
 import AvatarEditModal from "@/Components/Common/AvatarEditModal";
@@ -534,7 +534,7 @@ export default function UserProfile() {
             {t("are_non_editable_fields")}.
           </p>
           <div className="my-4 flex items-center">
-            <EditableAvatar
+            <AvatarEditable
               id="user-profile-picture"
               imageUrl={authUser?.read_profile_picture_url}
               name={formatDisplayName(authUser)}

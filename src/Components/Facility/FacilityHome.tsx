@@ -40,7 +40,7 @@ import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
 import { FacilityStaffList } from "./FacilityStaffList.js";
 import FacilityBlock from "./FacilityBlock.js";
 import Loading from "@/Components/Common/Loading";
-import { EditableAvatar } from "@/Components/Common/Avatar";
+import { AvatarEditable } from "@/Components/Common/AvatarEditable";
 import AvatarEditModal from "@/Components/Common/AvatarEditModal";
 import careConfig from "@careConfig";
 import uploadFile from "@/Utils/request/uploadFile";
@@ -201,7 +201,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
           <div className="flex-col justify-between md:flex">
             <div className="flex flex-1 flex-col">
               <div className="flex flex-col items-start gap-4 md:flex-row">
-                <EditableAvatar
+                <AvatarEditable
                   id="facility-coverimage"
                   imageUrl={facilityData?.read_cover_image_url}
                   name={facilityData?.name ?? ""}
