@@ -195,46 +195,56 @@ export const BedManagement = (props: BedManagementProps) => {
               uri: `/facility/${facilityId}/location`,
             },
           }}
+          options={
+            <ButtonV2
+              id="add-new-bed"
+              href={`/facility/${facilityId}/location/${locationId}/beds/add`}
+              authorizeFor={NonReadOnlyUsers}
+              className="hidden lg:block"
+            >
+              <CareIcon icon="l-plus" className="text-lg" />
+              {t("add_new_beds")}
+            </ButtonV2>
+          }
           backUrl={`/facility/${facilityId}/location/${locationId}`}
         >
-          <div className="container mx-auto px-4 py-2 sm:px-8">
-            <div className="flex justify-end">
-              <ButtonV2
-                id="add-new-bed"
-                href={`/facility/${facilityId}/location/${locationId}/beds/add`}
-                authorizeFor={NonReadOnlyUsers}
-              >
-                <CareIcon icon="l-plus" className="text-lg" />
-                {t("add_new_beds")}
-              </ButtonV2>
-            </div>
-            <div className="w-full @container">
-              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
-                <span>{t("no_beds_available")}</span>
-              </PaginatedList.WhenEmpty>
+          <div className="mx-auto mt-4 lg:mt-0">
+            <ButtonV2
+              id="add-new-bed"
+              href={`/facility/${facilityId}/location/${locationId}/beds/add`}
+              authorizeFor={NonReadOnlyUsers}
+              className="w-full lg:hidden"
+            >
+              <CareIcon icon="l-plus" className="text-lg" />
+              {t("add_new_beds")}
+            </ButtonV2>
+          </div>
+          <div className="w-full @container">
+            <PaginatedList.WhenEmpty className="my-4 flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
+              <span>{t("no_beds_available")}</span>
+            </PaginatedList.WhenEmpty>
 
-              <PaginatedList.WhenLoading>
-                <Loading />
-              </PaginatedList.WhenLoading>
-              <PaginatedList.Items<BedModel> className="my-8 grid gap-3 @4xl:grid-cols-3 @6xl:grid-cols-4">
-                {(bedItem: BedModel) => (
-                  <BedCard
-                    id={bedItem.id ?? ""}
-                    facilityId={facilityId ?? ""}
-                    name={bedItem.name ?? ""}
-                    description={bedItem.description ?? ""}
-                    bedType={bedItem.bed_type ?? ""}
-                    triggerRerender={refetch}
-                    key={locationId ?? ""}
-                    locationId={locationId ?? ""}
-                    isOccupied={bedItem.is_occupied ?? false}
-                  />
-                )}
-              </PaginatedList.Items>
-            </div>
-            <div className="flex w-full items-center justify-center">
-              <PaginatedList.Paginator hideIfSinglePage />
-            </div>
+            <PaginatedList.WhenLoading>
+              <Loading />
+            </PaginatedList.WhenLoading>
+            <PaginatedList.Items<BedModel> className="my-8 grid grid-cols-1 gap-3 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
+              {(bedItem: BedModel) => (
+                <BedCard
+                  id={bedItem.id ?? ""}
+                  facilityId={facilityId ?? ""}
+                  name={bedItem.name ?? ""}
+                  description={bedItem.description ?? ""}
+                  bedType={bedItem.bed_type ?? ""}
+                  triggerRerender={refetch}
+                  key={locationId ?? ""}
+                  locationId={locationId ?? ""}
+                  isOccupied={bedItem.is_occupied ?? false}
+                />
+              )}
+            </PaginatedList.Items>
+          </div>
+          <div className="flex w-full items-center justify-center">
+            <PaginatedList.Paginator hideIfSinglePage />
           </div>
         </Page>
       )}
