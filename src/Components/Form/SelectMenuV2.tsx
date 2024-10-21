@@ -88,7 +88,15 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const value = options.find((o) => props.value == o.value) ?? defaultOption;
 
   return (
-    <div className={props.className} id={props.id}>
+    <div
+      className={props.className}
+      id={props.id}
+      data-cui-listbox
+      data-cui-listbox-options={JSON.stringify(
+        options.map((option) => [option.value, option.label?.toString()]),
+      )}
+      data-cui-listbox-value={JSON.stringify(props.value)}
+    >
       <Listbox
         disabled={props.disabled || valueOptions?.length === 0}
         value={value}
