@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { AvatarProps, Avatar } from "@/Components/Common/Avatar";
 
 interface AvatarEditableProps extends AvatarProps {
+  id?: string;
   editable?: boolean;
   onClick?: () => void;
 }

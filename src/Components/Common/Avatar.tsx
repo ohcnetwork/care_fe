@@ -43,7 +43,6 @@ const initials = (name: string): string => {
 };
 
 interface AvatarProps {
-  id?: string;
   colors?: [string, string];
   name: string;
   imageUrl?: string;
@@ -51,7 +50,6 @@ interface AvatarProps {
 }
 
 const Avatar: React.FC<AvatarProps> = ({
-  id,
   colors: propColors,
   name,
   imageUrl,
@@ -60,7 +58,6 @@ const Avatar: React.FC<AvatarProps> = ({
   const [bgColor] = propColors || toColor(name);
   return (
     <div
-      id={id}
       className={cn(
         `flex aspect-square w-full items-center justify-center overflow-hidden border border-black/10`,
         className,
