@@ -1,5 +1,10 @@
 import * as Notification from "../../Utils/Notifications.js";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/Components/ui/tooltip";
 import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
@@ -22,8 +27,6 @@ import {
   humanizeStrings,
 } from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal.js";
-import LinkCareContextModal from "../ABDM/LinkCareContextModal.js";
 import DialogModal from "../Common/Dialog.js";
 import ButtonV2 from "../Common/components/ButtonV2.js";
 import Beds from "../Facility/Consultations/Beds.js";
@@ -43,7 +46,9 @@ import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
+import LinkAbhaNumber from "../ABDM/LinkAbhaNumber";
 import careConfig from "@careConfig";
+import { cn } from "@/lib/utils.js";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -75,7 +80,6 @@ export default function PatientInfoCard(props: {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
-  const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
   const consultation = props.consultation;
@@ -133,6 +137,11 @@ export default function PatientInfoCard(props: {
       username: consultation?.treating_physician_object?.username ?? "",
     },
     prefetch: !!consultation?.treating_physician_object?.username,
+  });
+
+  const { data: healthFacility } = useQuery(routes.abdm.healthFacility.get, {
+    pathParams: { facility_id: patient.facility ?? "" },
+    silent: true,
   });
 
   return (
@@ -748,7 +757,7 @@ export default function PatientInfoCard(props: {
                                 close();
                                 setShowABHAProfile(true);
                                 triggerGoal("Patient Card Button Clicked", {
-                                  buttonName: "Show ABHA Profile",
+                                  buttonName: t("show_abha_profile"),
                                   consultationId: consultation?.id,
                                   userId: authUser?.id,
                                 });
@@ -758,25 +767,7 @@ export default function PatientInfoCard(props: {
                                 icon="l-user-square"
                                 className="text-lg text-primary-500"
                               />
-                              <span>Show ABHA Profile</span>
-                            </div>
-                            <div
-                              className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                              onClick={() => {
-                                triggerGoal("Patient Card Button Clicked", {
-                                  buttonName: "Link Care Context",
-                                  consultationId: consultation?.id,
-                                  userId: authUser?.id,
-                                });
-                                close();
-                                setShowLinkCareContext(true);
-                              }}
-                            >
-                              <CareIcon
-                                icon="l-link"
-                                className="text-lg text-primary-500"
-                              />
-                              <span>Link Care Context</span>
+                              <span>{t("show_abha_profile")}</span>
                             </div>
                             <div
                               className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -784,42 +775,57 @@ export default function PatientInfoCard(props: {
                                 close();
                                 setShowFetchABDMRecords(true);
                                 triggerGoal("Patient Card Button Clicked", {
-                                  buttonName: "Fetch Records over ABDM",
+                                  buttonName: t("hi__fetch_records"),
                                   consultationId: consultation?.id,
                                   userId: authUser?.id,
                                 });
                               }}
                             >
                               <CareIcon
-                                icon="l-user-square"
+                                icon="l-file-network"
                                 className="text-lg text-primary-500"
                               />
-                              <span>Fetch Records over ABDM</span>
+                              <span>{t("hi__fetch_records")}</span>
                             </div>
                           </>
                         )}
                       </MenuItem>
                     </>
                   ) : (
-                    <MenuItem>
-                      {({ close }) => (
-                        <div
-                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                          onClick={() => {
-                            close();
-                            setShowLinkABHANumber(true);
-                          }}
-                        >
-                          <span className="flex w-full items-center justify-start gap-2">
-                            <CareIcon
-                              icon="l-link"
-                              className="text-lg text-primary-500"
-                            />
-                            <p>Link ABHA Number</p>
-                          </span>
-                        </div>
-                      )}
-                    </MenuItem>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <MenuItem disabled={!healthFacility}>
+                            {({ close, disabled }) => (
+                              <div
+                                className={cn(
+                                  "dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out",
+                                  disabled && "pointer-events-none opacity-30",
+                                )}
+                                onClick={() => {
+                                  close();
+                                  setShowLinkABHANumber(true);
+                                }}
+                              >
+                                <span className="flex w-full items-center justify-start gap-2">
+                                  <CareIcon
+                                    icon="l-link"
+                                    className="text-lg text-primary-500"
+                                  />
+                                  <p>{t("generate_link_abha")}</p>
+                                </span>
+                              </div>
+                            )}
+                          </MenuItem>
+                        </TooltipTrigger>
+
+                        {!healthFacility && (
+                          <TooltipContent className="max-w-sm break-words text-sm">
+                            {t("abha_disabled_due_to_no_health_facility")}
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   ))}
               </div>
               <div>
@@ -957,12 +963,33 @@ export default function PatientInfoCard(props: {
           </div>
         </div>
       </section>
-      <LinkABHANumberModal
+      <LinkAbhaNumber
         show={showLinkABHANumber}
         onClose={() => setShowLinkABHANumber(false)}
-        patientId={patient.id as any}
-        onSuccess={(_) => {
-          window.location.href += "?show-abha-profile=true";
+        onSuccess={async (abhaProfile) => {
+          const { res, data } = await request(
+            routes.abdm.healthId.linkAbhaNumberAndPatient,
+            {
+              body: {
+                patient: patient.id,
+                abha_number: abhaProfile.external_id,
+              },
+            },
+          );
+
+          if (res?.status === 200 && data) {
+            Notification.Success({
+              msg: t("abha_number_linked_successfully"),
+            });
+
+            props.fetchPatientData?.({ aborted: false });
+            setShowLinkABHANumber(false);
+            setShowABHAProfile(true);
+          } else {
+            Notification.Error({
+              msg: t("failed_to_link_abha_number"),
+            });
+          }
         }}
       />
       <ABHAProfileModal
@@ -970,12 +997,6 @@ export default function PatientInfoCard(props: {
         abha={props.abhaNumber}
         show={showABHAProfile}
         onClose={() => setShowABHAProfile(false)}
-      />
-      <LinkCareContextModal
-        consultationId={props.consultationId}
-        abha={props.abhaNumber}
-        show={showLinkCareContext}
-        onClose={() => setShowLinkCareContext(false)}
       />
       <FetchRecordsModal
         abha={props.abhaNumber}

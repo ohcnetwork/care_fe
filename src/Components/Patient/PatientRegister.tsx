@@ -28,7 +28,12 @@ import {
 import { useCallback, useReducer, useRef, useState } from "react";
 import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/Components/ui/tooltip";
 import AccordionV2 from "../Common/components/AccordionV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -45,7 +50,6 @@ import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import { PatientModel, Occupation, PatientMeta } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
@@ -64,6 +68,8 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { useTranslation } from "react-i18next";
+import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index.js";
+import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { validatePincode } from "../../Common/validation";
 import careConfig from "@careConfig";
 import { Button } from "@/Components/ui/button";
@@ -71,6 +77,7 @@ import { Button } from "@/Components/ui/button";
 import Loading from "@/Components/Common/Loading";
 import PageTitle from "@/Components/Common/PageTitle";
 import { RestoreDraftButton } from "@/Utils/AutoSave.js";
+import { FormContextValue } from "../Form/FormContext.js";
 
 type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
@@ -266,7 +273,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         pathParams: { id: id ? id : 0 },
       });
       const { data: abhaNumberData } = await request(
-        routes.abha.getAbhaNumber,
+        routes.abdm.abhaNumber.get,
         {
           pathParams: { abhaNumberId: id ?? "" },
           silent: true,
@@ -369,6 +376,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     },
     [id],
   );
+
+  const { data: healthFacility } = useQuery(routes.abdm.healthFacility.get, {
+    pathParams: { facility_id: facilityId },
+    silent: true,
+  });
 
   useQuery(routes.hcx.policies.list, {
     query: {
@@ -589,7 +601,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     });
     const data = {
-      abha_number: state.form.abha_number,
       phone_number: parsePhoneNumber(formData.phone_number),
       emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
       date_of_birth:
@@ -681,12 +692,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         });
     if (res?.ok && requestData) {
       if (state.form.abha_number) {
-        const { res, data } = await request(routes.abha.linkPatient, {
-          body: {
-            patient: requestData.id,
-            abha_number: state.form.abha_number,
+        const { res, data } = await request(
+          routes.abdm.healthId.linkAbhaNumberAndPatient,
+          {
+            body: {
+              patient: requestData.id,
+              abha_number: state.form.abha_number,
+            },
           },
-        });
+        );
 
         if (res?.status === 200 && data) {
           Notification.Success({
@@ -738,63 +752,63 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     setIsLoading(false);
   };
 
-  const handleAbhaLinking = (
-    {
-      id,
-      abha_profile: {
-        healthIdNumber,
-        healthId,
-        name,
-        mobile,
-        gender,
-        monthOfBirth,
-        dayOfBirth,
-        yearOfBirth,
-        pincode,
-      },
-    }: any,
-    field: any,
+  const populateAbhaValues = (
+    abhaProfile: AbhaNumberModel,
+    field: FormContextValue<PatientForm>,
   ) => {
-    const values: any = {};
-    if (id) values["abha_number"] = id;
-    if (healthIdNumber) values["health_id_number"] = healthIdNumber;
-    if (healthId) values["health_id"] = healthId;
+    const values = {
+      abha_number: abhaProfile.external_id,
+      health_id_number: abhaProfile.abha_number,
+      health_id: abhaProfile.health_id,
+    };
 
-    if (name)
+    if (abhaProfile.name)
       field("name").onChange({
         name: "name",
-        value: name,
+        value: abhaProfile.name,
       });
 
-    if (mobile) {
+    if (abhaProfile.mobile) {
       field("phone_number").onChange({
         name: "phone_number",
-        value: parsePhoneNumber(mobile, "IN"),
+        value: parsePhoneNumber(abhaProfile.mobile, "IN"),
       });
 
       field("emergency_phone_number").onChange({
         name: "emergency_phone_number",
-        value: parsePhoneNumber(mobile, "IN"),
+        value: parsePhoneNumber(abhaProfile.mobile, "IN"),
       });
     }
 
-    if (gender)
+    if (abhaProfile.gender)
       field("gender").onChange({
         name: "gender",
-        value: gender === "M" ? "1" : gender === "F" ? "2" : "3",
+        value: { M: "1", F: "2", O: "3" }[abhaProfile.gender],
       });
 
-    if (monthOfBirth && dayOfBirth && yearOfBirth)
+    if (abhaProfile.date_of_birth)
       field("date_of_birth").onChange({
         name: "date_of_birth",
-        value: new Date(`${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`),
+        value: new Date(abhaProfile.date_of_birth),
       });
 
-    if (pincode)
+    if (abhaProfile.pincode)
       field("pincode").onChange({
         name: "pincode",
-        value: pincode,
+        value: abhaProfile.pincode,
       });
+
+    if (abhaProfile.address) {
+      field("address").onChange({
+        name: "address",
+        value: abhaProfile.address,
+      });
+
+      field("permanent_address").onChange({
+        name: "permanent_address",
+        value: abhaProfile.address,
+      });
+    }
 
     dispatch({ type: "set_form", form: { ...state.form, ...values } });
     setShowLinkAbhaNumberModal(false);
@@ -922,7 +936,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       validate={validateForm}
       onSubmit={handleSubmit}
       submitLabel={buttonText}
-      onCancel={() => navigate("/facility")}
+      onCancel={() => goBack()}
       className="bg-transparent px-1 py-2 md:px-2"
       onDraftRestore={(newState) => {
         dispatch({ type: "set_state", state: newState });
@@ -1009,16 +1023,28 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               </div>
               {!state.form.abha_number && (
                 <div className="flex justify-center md:justify-end">
-                  <Button
-                    variant="outline_primary"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setShowLinkAbhaNumberModal(true);
-                    }}
-                  >
-                    <CareIcon icon="l-user-square" className="mr-2" />
-                    <span>Generate/Link ABHA Number</span>
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="outline_primary"
+                          disabled={!healthFacility}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setShowLinkAbhaNumberModal(true);
+                          }}
+                        >
+                          <CareIcon icon="l-user-square" className="mr-2" />
+                          <span>{t("generate_link_abha")}</span>
+                        </Button>
+                      </TooltipTrigger>
+                      {!healthFacility && (
+                        <TooltipContent className="max-w-sm break-words text-sm">
+                          {t("abha_disabled_due_to_no_health_facility")}
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               )}
               {showAlertMessage.show && (
@@ -1035,16 +1061,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               {careConfig.abdm.enabled && (
                 <div className="mb-8 overflow-visible">
                   {showLinkAbhaNumberModal && (
-                    <LinkABHANumberModal
+                    <LinkAbhaNumber
                       show={showLinkAbhaNumberModal}
                       onClose={() => setShowLinkAbhaNumberModal(false)}
-                      onSuccess={(data: any) => {
+                      onSuccess={(data) => {
                         if (id) {
-                          navigate(`/facility/${facilityId}/patient/${id}`);
-                          return;
+                          Notification.Warn({
+                            msg: "To link Abha Number, please save the patient details",
+                          });
                         }
 
-                        handleAbhaLinking(data, field);
+                        populateAbhaValues(data, field);
                       }}
                     />
                   )}
@@ -1546,7 +1573,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
               </div>
               {field("nationality").value === "India" && (
-                <div className="mb-8 rounded border border-secondary-200 p-4">
+                <div className="mb-8 rounded border p-4">
                   <AccordionV2
                     className="mt-2 shadow-none md:mt-0 lg:mt-0"
                     expandIcon={
@@ -1624,7 +1651,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </AccordionV2>
                 </div>
               )}
-              <div className="mb-8 rounded border border-secondary-200 p-4">
+              <div className="mb-8 rounded border p-4">
                 <AccordionV2
                   className="mt-2 shadow-none md:mt-0 lg:mt-0"
                   expandIcon={
@@ -1808,7 +1835,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex w-full flex-col gap-4 rounded border border-secondary-200 bg-white p-4">
+              <div className="flex w-full flex-col gap-4 rounded border bg-white p-4">
                 <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
                   <h1 className="text-left text-xl font-bold text-purple-500">
                     Insurance Details
