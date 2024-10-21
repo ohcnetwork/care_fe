@@ -81,6 +81,13 @@ export default function CentralNursingStation({ facilityId }: Props) {
       collapseSidebar
       options={
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
+          <Pagination
+            className=""
+            cPage={qParams.page}
+            defaultPerPage={PER_PAGE_LIMIT}
+            data={{ totalCount }}
+            onChange={(page) => updatePage(page)}
+          />
           <Popover className="relative">
             <PopoverButton>
               <ButtonV2
@@ -109,8 +116,8 @@ export default function CentralNursingStation({ facilityId }: Props) {
                   <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                     <div className="flow-root rounded-md">
                       <span className="block text-sm text-secondary-800">
-                        <span className="font-bold">{totalCount}</span> Vitals
-                        Monitor present
+                        <span className="font-bold">{totalCount}</span>{" "}
+                        {t("vitals_present")}
                       </span>
                     </div>
                   </div>
@@ -134,6 +141,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
                           facilityId={facilityId}
                           errors=""
                           errorClassName="hidden"
+                          bedIsOccupied={JSON.parse(
+                            qParams.monitors_without_patient ?? "false",
+                          )}
+                          disableOnOneOrFewer
                         />
                       </div>
                     </div>
@@ -164,7 +175,9 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       value={JSON.parse(
                         qParams.monitors_without_patient ?? "false",
                       )}
-                      onChange={(e) => updateQuery({ [e.name]: `${e.value}` })}
+                      onChange={(e) =>
+                        updateQuery({ [e.name]: `${e.value}`, location: "" })
+                      }
                       labelClassName="text-sm"
                       errorClassName="hidden"
                     />
@@ -189,14 +202,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
               </PopoverPanel>
             </Transition>
           </Popover>
-
-          <Pagination
-            className=""
-            cPage={qParams.page}
-            defaultPerPage={PER_PAGE_LIMIT}
-            data={{ totalCount }}
-            onChange={(page) => updatePage(page)}
-          />
         </div>
       }
     >
@@ -204,7 +209,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
         <Loading />
       ) : data.length === 0 ? (
         <div className="flex h-[80vh] w-full items-center justify-center text-center text-black">
-          No Vitals Monitor present in this location or facility.
+          {t("no_vitals_present")}
         </div>
       ) : (
         <div className="3xl:grid-cols-3 mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2">
