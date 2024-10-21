@@ -31,7 +31,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
           <Button
             variant="outline"
             size="lg"
-            className={`tooltip relative w-full cursor-pointer items-center justify-between rounded-lg bg-gray-200 p-2 font-normal text-gray-900 transition hover:bg-gray-200 focus:outline-none focus:ring focus:ring-violet-300 ${shrinked ? "flex h-full flex-col-reverse" : "flex flex-row"}`}
+            className={`tooltip relative w-full cursor-pointer items-center justify-between rounded-lg bg-gray-200 p-2 font-normal text-gray-900 transition hover:bg-gray-200 focus:outline-none focus:ring focus:ring-primary-300 ${shrinked ? "flex h-full flex-col-reverse" : "flex flex-row"}`}
           >
             <div
               id="user-profile-name"
@@ -40,6 +40,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
               <div className="flex-none text-lg">
                 <Avatar
                   name={formatDisplayName(user)}
+                  imageUrl={user.read_profile_picture_url}
                   className="h-8 rounded-full text-black/50"
                 />
               </div>

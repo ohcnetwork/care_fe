@@ -87,7 +87,14 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
   }
 
   return (
-    <AuthUserContext.Provider value={{ signIn, signOut, user }}>
+    <AuthUserContext.Provider
+      value={{
+        signIn,
+        signOut,
+        user,
+        refetchUser: refetch,
+      }}
+    >
       {!res.ok || !user ? unauthorized : children}
     </AuthUserContext.Provider>
   );
