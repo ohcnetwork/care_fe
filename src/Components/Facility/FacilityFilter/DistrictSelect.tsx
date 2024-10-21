@@ -1,6 +1,5 @@
-import { useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { getDistrictByName } from "../../../Redux/actions";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
 
 interface DistrictSelectProps {
@@ -13,29 +12,22 @@ interface DistrictSelectProps {
 }
 
 function DistrictSelect(props: DistrictSelectProps) {
-  const { name, errors, className, multiple, selected, setSelected } = props;
-  const dispatchAction: any = useDispatch();
-
-  const districtSearch = useCallback(
-    async (text: string) => {
-      const params = { limit: 50, offset: 0, district_name: text };
-      const res = await dispatchAction(getDistrictByName(params));
-      return res?.data?.results;
-    },
-    [dispatchAction],
-  );
-
   return (
     <AutoCompleteAsync
-      name={name}
-      multiple={multiple}
-      selected={selected}
-      fetchData={districtSearch}
-      onChange={setSelected}
-      optionLabel={(option: any) => option.name}
+      name={props.name}
+      multiple={props.multiple}
+      selected={props.selected}
+      fetchData={async (search) => {
+        const { data } = await request(routes.getDistrictByName, {
+          query: { limit: 50, offset: 0, district_name: search },
+        });
+        return data?.results;
+      }}
+      onChange={props.setSelected}
+      optionLabel={(option) => option.name}
       compareBy="id"
-      error={errors}
-      className={className}
+      error={props.errors}
+      className={props.className}
     />
   );
 }
