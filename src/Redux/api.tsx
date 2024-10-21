@@ -860,6 +860,8 @@ const routes = {
   },
   getDistrictByName: {
     path: "/api/v1/district/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<DistrictModel>>(),
   },
   getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
