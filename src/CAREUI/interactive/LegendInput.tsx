@@ -2,6 +2,7 @@ import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { RefObject, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+
 type InputProps = {
   id?: string;
   name: string;
@@ -12,12 +13,12 @@ type InputProps = {
   required?: boolean;
   placeholder?: string;
   value?: string;
-  onChange?: (e: any) => void;
-  onFocus?: (e: any) => void;
-  onBlur?: (e: any) => void;
-  onKeyUp?: (e: any) => void;
-  onKeyDown?: (e: any) => void;
-  onKeyPress?: (e: any) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onKeyUp?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   error?: string;
   className?: string;

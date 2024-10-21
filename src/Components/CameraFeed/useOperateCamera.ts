@@ -54,7 +54,7 @@ export type OperationAction =
  * This hook is used to control the PTZ of a camera asset and retrieve other related information.
  * @param id The external id of the camera asset
  */
-export default function useOperateCamera(id: string, silent = false) {
+export default function useOperateCamera(id: string) {
   const [key, setKey] = useState(0);
 
   return {
@@ -70,14 +70,14 @@ export default function useOperateCamera(id: string, silent = false) {
               type: "get_status",
             },
           },
-          silent,
+          silent: true,
         });
       }
 
       return request(FeedRoutes.operateAsset, {
         pathParams: { id },
         body: { action },
-        silent,
+        silent: true,
       });
     },
   };

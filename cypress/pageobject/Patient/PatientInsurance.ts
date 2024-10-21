@@ -47,11 +47,11 @@ class PatientInsurance {
   }
 
   verifyPatientPolicyDetails(
-    subscriberId,
-    policyId,
-    insurerId,
-    insurerName,
-    isHcxEnabled,
+    subscriberId: string,
+    policyId: string,
+    insurerId: string,
+    insurerName: string,
+    isHcxEnabled: string,
   ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");

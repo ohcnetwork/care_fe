@@ -302,9 +302,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
       patientRhythm,
     ]);
     patientLogupdate.clickUpdateDetail();
-    patientLogupdate.clickClearButtonInElement("#systolic");
+    patientLogupdate.clearIntoElementById("#systolic");
     patientLogupdate.typeSystolic(patientModifiedSystolic);
-    patientLogupdate.clickClearButtonInElement("#diastolic");
+    patientLogupdate.clearIntoElementById("#diastolic");
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
     cy.verifyNotification("Brief Update updated successfully");

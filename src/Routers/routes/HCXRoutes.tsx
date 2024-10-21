@@ -1,10 +1,15 @@
-import ConsultationClaims, {
-  IConsultationClaimsProps,
-} from "../../Components/Facility/ConsultationClaims";
+import ConsultationClaims from "../../Components/Facility/ConsultationClaims";
+import { AppRoutes } from "../AppRouter";
 
-export default {
+const HCXRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/claims":
-    (pathParams: IConsultationClaimsProps) => (
-      <ConsultationClaims {...pathParams} />
+    ({ facilityId, patientId, consultationId }) => (
+      <ConsultationClaims
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
+      />
     ),
 };
+
+export default HCXRoutes;

@@ -124,6 +124,7 @@ export default ({ show, setShow, username }: IProps) => {
                   selected={selectedSkill}
                   setSelected={setSelectedSkill}
                   errors=""
+                  className="w-full"
                   userSkills={skills?.results || []}
                 />
                 <ButtonV2

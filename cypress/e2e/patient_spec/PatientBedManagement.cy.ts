@@ -10,7 +10,7 @@ describe("Patient swtich bed functionality", () => {
   const patientConsultationPage = new PatientConsultationPage();
   const switchBedOne = "Dummy Bed 4";
   const switchBedTwo = "Dummy Bed 1";
-  const switchBedThree = "Dummy Bed 3";
+  const switchBedThree = "Dummy Bed 7";
   const switchPatientOne = "Dummy Patient 6";
   const switchPatientTwo = "Dummy Patient 7";
 

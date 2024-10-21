@@ -4,9 +4,9 @@ class ResourcePage {
     cy.get("svg.care-svg-icon__baseline.care-l-export").each(($button) => {
       cy.intercept(/\/api\/v1\/resource/).as("resource_download");
       cy.wrap($button).click({ force: true });
-      cy.wait("@resource_download").then((interception) => {
-        expect(interception.response.statusCode).to.equal(200);
-      });
+      cy.wait("@resource_download")
+        .its("response.statusCode")
+        .should("eq", 200);
     });
   }
 
@@ -19,9 +19,7 @@ class ResourcePage {
   }
 
   verifyCompletedResources() {
-    cy.wait("@resource").then((interception) => {
-      expect(interception.response.statusCode).to.equal(200);
-    });
+    cy.wait("@resource").its("response.statusCode").should("eq", 200);
     cy.contains("button", "Active").should("have.class", "text-primary-500");
     cy.contains("button", "Completed").should("have.class", "text-white");
   }
@@ -31,9 +29,7 @@ class ResourcePage {
   }
 
   verifyActiveResources() {
-    cy.wait("@resource").then((interception) => {
-      expect(interception.response.statusCode).to.equal(200);
-    });
+    cy.wait("@resource").its("response.statusCode").should("eq", 200);
     cy.contains("button", "Active").should("have.class", "text-white");
     cy.contains("button", "Completed").should("have.class", "text-primary-500");
   }

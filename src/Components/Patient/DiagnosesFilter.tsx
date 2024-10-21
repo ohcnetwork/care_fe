@@ -68,6 +68,7 @@ export default function DiagnosesFilter(props: Props) {
 
   return (
     <AutocompleteMultiSelectFormField
+      id={props.name}
       label={DIAGNOSES_FILTER_LABELS[props.name]}
       labelClassName="text-sm"
       name="icd11_search"

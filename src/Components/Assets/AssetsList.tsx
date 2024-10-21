@@ -159,7 +159,6 @@ const AssetsList = () => {
         });
       }
     } catch (err) {
-      console.log(err);
       Notification.Error({
         msg: t("invalid_asset_id_msg"),
       });

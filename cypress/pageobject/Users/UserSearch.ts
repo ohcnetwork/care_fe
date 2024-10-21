@@ -53,11 +53,11 @@ export class UserPage {
   }
 
   selectState(state: string) {
-    cy.searchAndSelectOption("#state input", state);
+    cy.typeAndSelectOption("#state input", state);
   }
 
   selectDistrict(district: string) {
-    cy.searchAndSelectOption("#district input", district);
+    cy.typeAndSelectOption("#district input", district);
   }
 
   typeInPhoneNumber(phone: string) {
@@ -69,7 +69,7 @@ export class UserPage {
   }
 
   selectHomeFacility(facility: string) {
-    cy.searchAndSelectOption("input[name='home_facility']", facility);
+    cy.typeAndSelectOption("input[name='home_facility']", facility);
   }
 
   applyFilter() {

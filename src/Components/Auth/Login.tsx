@@ -246,11 +246,19 @@ export const Login = (props: { forgot?: boolean }) => {
               >
                 {t("contribute_github")}
               </a>
+              <span className="mx-2 text-primary-400">|</span>
+              <a
+                href="/licenses"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-400 hover:text-primary-500"
+              >
+                {t("third_party_software_licenses")}
+              </a>
             </div>
           </div>
         </div>
       </div>
-
       <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
         <div className="relative h-full items-center justify-center md:flex">
           <div className="p-8 md:w-4/5 md:p-0 lg:w-[400px]">

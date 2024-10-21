@@ -37,7 +37,7 @@ describe("Patient Discussion notes in the consultation page", () => {
     cy.verifyNotification(discussionNotesSuccessMessage);
     cy.closeNotification();
     // verify the auto-switching of tab to nurse notes if the user is a nurse
-    cy.get("#sign-out-button").contains("Sign Out").click();
+    patientDoctorNotes.signout();
     loginPage.loginManuallyAsNurse();
     loginPage.ensureLoggedIn();
     cy.visit("/patients");

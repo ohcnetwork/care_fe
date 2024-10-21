@@ -13,6 +13,8 @@ RUN npm install
 
 COPY . .
 
+RUN npm run setup
+
 RUN npm run build
 
 

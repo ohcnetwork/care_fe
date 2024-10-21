@@ -850,14 +850,14 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
-                  <div className="py-4 md:col-span-2">
-                    <h4 className="mb-4">{t("spokes")}</h4>
-                    {facilityId && (
+                  {facilityId && (
+                    <div className="py-4 md:col-span-2">
+                      <h4 className="mb-4">{t("spokes")}</h4>
                       <SpokeFacilityEditor
                         facility={{ ...facilityQuery.data, id: facilityId }}
                       />
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}
@@ -975,7 +975,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                           leaveFrom="opacity-100 translate-y-0"
                           leaveTo="opacity-0 translate-y-1"
                         >
-                          <PopoverPanel className="absolute -right-40 bottom-10 sm:-right-48">
+                          <PopoverPanel className="absolute -right-36 bottom-10 sm:-right-48">
                             <GLocationPicker
                               lat={Number(state.form.latitude)}
                               lng={Number(state.form.longitude)}

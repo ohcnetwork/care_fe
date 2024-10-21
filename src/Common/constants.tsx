@@ -839,20 +839,6 @@ export const LOCATION_BED_TYPES = [
   { id: "REGULAR", name: "Regular" },
 ] as const;
 
-export const ASSET_META_TYPE = [
-  { id: "CAMERA", text: "Camera(ONVIF)" },
-  { id: "HL7MONITOR", text: "Vitals Monitor(HL7)" },
-];
-
-export const CAMERA_TYPE = [
-  { id: "HIKVISION", text: "ONVIF Camera (HIKVISION)" },
-];
-
-export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
-  (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
-  {},
-);
-
 export type CameraPTZ = {
   icon?: IconName;
   label: string;
@@ -1158,23 +1144,23 @@ export const AssetImportSchema: SchemaType = {
 
 // ABDM
 export const ABDM_CONSENT_PURPOSE = [
-  { value: "CAREMGT", label: "Care Management" },
-  { value: "BTG", label: "Break The Glass" },
-  { value: "PUBHLTH", label: "Public Health" },
-  { value: "HPAYMT", label: "Healthcare Payment" },
-  { value: "DSRCH", label: "Disease Specific Healthcare Research" },
-  { value: "PATRQT", label: "Self Requested" },
-] as { value: ConsentPurpose; label: string }[];
+  "CAREMGT",
+  "BTG",
+  "PUBHLTH",
+  "HPAYMT",
+  "DSRCH",
+  "PATRQT",
+] as ConsentPurpose[];
 
 export const ABDM_HI_TYPE = [
-  { value: "Prescription", label: "Prescription" },
-  { value: "DiagnosticReport", label: "Diagnostic Report" },
-  { value: "OPConsultation", label: "Op Consultation" },
-  { value: "DischargeSummary", label: "Discharge Summary" },
-  { value: "ImmunizationRecord", label: "Immunization Record" },
-  { value: "HealthDocumentRecord", label: "Record Artifact" },
-  { value: "WellnessRecord", label: "Wellness Record" },
-] as { value: ConsentHIType; label: string }[];
+  "Prescription",
+  "DiagnosticReport",
+  "OPConsultation",
+  "DischargeSummary",
+  "ImmunizationRecord",
+  "HealthDocumentRecord",
+  "WellnessRecord",
+] as ConsentHIType[];
 
 export const USER_TYPES_MAP = {
   Pharmacist: "Pharmacist",

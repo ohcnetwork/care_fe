@@ -4,6 +4,8 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Link } from "raviger";
 import { classNames } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import Spinner from "../Spinner";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
@@ -22,36 +24,40 @@ export type RawButtonProps = Omit<
   "style"
 >;
 
+export type ButtonStyleProps = {
+  /**
+   * - `"small"` has small text and minimal padding.
+   * - `"default"` has small text with normal padding.
+   * - `"large"` has base text size with large padding.
+   */
+  size?: ButtonSize;
+  /**
+   * - `"square"` gives a button with minimally rounded corners.
+   * - `"circle"` gives a button with fully rounded corners. Ideal when only
+   * icons are present.
+   */
+  circle?: boolean | undefined;
+  /**
+   * - `"primary"` is ideal for form submissions, etc.
+   * - `"secondary"` is ideal for things that have secondary importance.
+   * - `"danger"` is ideal for destructive or dangerous actions, such as delete.
+   * - `"warning"` is ideal for actions that require caution such as archive.
+   * - `"alert"` is ideal for actions that require alert.
+   */
+  variant?: ButtonVariant;
+  /** If set, gives an elevated button with hover effects. */
+  shadow?: boolean | undefined;
+  /** If set, removes the background to give a simple text button. */
+  ghost?: boolean | undefined;
+  /**
+   * If set, applies border to the button.
+   */
+  border?: boolean | undefined;
+};
+
 export type ButtonProps = RawButtonProps &
-  AuthorizedElementProps & {
-    /**
-     * - `"small"` has small text and minimal padding.
-     * - `"default"` has small text with normal padding.
-     * - `"large"` has base text size with large padding.
-     */
-    size?: ButtonSize;
-    /**
-     * - `"square"` gives a button with minimally rounded corners.
-     * - `"circle"` gives a button with fully rounded corners. Ideal when only
-     * icons are present.
-     */
-    circle?: boolean | undefined;
-    /**
-     * - `"primary"` is ideal for form submissions, etc.
-     * - `"secondary"` is ideal for things that have secondary importance.
-     * - `"danger"` is ideal for destructive or dangerous actions, such as delete.
-     * - `"warning"` is ideal for actions that require caution such as archive.
-     * - `"alert"` is ideal for actions that require alert.
-     */
-    variant?: ButtonVariant;
-    /** If set, gives an elevated button with hover effects. */
-    shadow?: boolean | undefined;
-    /** If set, removes the background to give a simple text button. */
-    ghost?: boolean | undefined;
-    /**
-     * If set, applies border to the button.
-     */
-    border?: boolean | undefined;
+  AuthorizedElementProps &
+  ButtonStyleProps & {
     /**
      * Whether the button is disabled or not.
      * This is overriden to `true` if `loading` is `true`.
@@ -83,10 +89,28 @@ export type ButtonProps = RawButtonProps &
     tooltipClassName?: string;
   };
 
+export const buttonStyles = ({
+  size = "default",
+  circle = false,
+  variant = "primary",
+  ghost = false,
+  border = false,
+  shadow = !ghost,
+}: ButtonStyleProps) => {
+  return classNames(
+    "inline-flex h-min cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500",
+    `button-size-${size}`,
+    `button-shape-${circle ? "circle" : "square"}`,
+    ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
+    border && `button-${variant}-border`,
+    shadow && "shadow enabled:hover:shadow-md",
+  );
+};
+
 const ButtonV2 = ({
   authorizeFor,
-  size = "default",
-  variant = "primary",
+  size,
+  variant,
   circle,
   shadow,
   ghost,
@@ -103,14 +127,9 @@ const ButtonV2 = ({
   shadow ??= !ghost;
 
   const className = classNames(
-    props.className,
-    "inline-flex h-min cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500",
-    `button-size-${size}`,
-    `button-shape-${circle ? "circle" : "square"}`,
-    ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
-    border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-md",
+    buttonStyles({ size, circle, variant, ghost, border, shadow }),
     tooltip && "tooltip",
+    props.className,
   );
 
   if (tooltip) {
@@ -200,5 +219,55 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       {...props}
       className={classNames("w-full md:w-auto", props.className)}
     />
+  );
+};
+
+export type ButtonWithTimerProps = CommonButtonProps & {
+  initialInverval?: number;
+  interval?: number;
+};
+
+export const ButtonWithTimer = ({
+  initialInverval,
+  interval = 60,
+  ...buttonProps
+}: ButtonWithTimerProps) => {
+  const [seconds, setSeconds] = useState(initialInverval ?? interval);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
+  useEffect(() => {
+    let interval = undefined;
+    if (seconds > 0) {
+      interval = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      }, 1000);
+    } else {
+      setIsButtonDisabled(false);
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [seconds]);
+
+  return (
+    <div>
+      <ButtonV2
+        {...buttonProps}
+        disabled={isButtonDisabled}
+        onClick={async (e) => {
+          await buttonProps.onClick?.(e);
+          setSeconds(interval);
+          setIsButtonDisabled(true);
+        }}
+      >
+        {!!(seconds && isButtonDisabled) && (
+          <div className="mr-2 flex items-center">
+            <Spinner className="h-4 w-4" />
+            {seconds}
+          </div>
+        )}
+
+        {buttonProps.children ?? buttonProps.label}
+      </ButtonV2>
+    </div>
   );
 };

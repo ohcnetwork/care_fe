@@ -1,13 +1,12 @@
 import * as _ from "lodash-es";
-import { navigate } from "raviger";
 import { useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications.js";
 import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
-import PrintPreview from "../../../CAREUI/misc/PrintPreview";
 import { useTranslation } from "react-i18next";
+import Page from "../../Common/components/Page";
 import Loading from "@/Components/Common/Loading";
 const initialState = {
   changedFields: {},
@@ -40,7 +39,7 @@ interface ShowInvestigationProps {
   facilityId: string;
 }
 export default function ShowInvestigation(props: ShowInvestigationProps) {
-  const { consultationId, patientId, sessionId } = props;
+  const { consultationId, patientId, sessionId, facilityId } = props;
   const { t } = useTranslation();
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
   const { loading: investigationLoading } = useQuery(routes.getInvestigation, {
@@ -116,9 +115,28 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
         Notification.Success({
           msg: "Investigation Updated successfully!",
         });
-        navigate(
-          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`,
+        const changedDict: any = {};
+        Object.values(state.changedFields).forEach(
+          (field: any) =>
+            (changedDict[field.id] = {
+              id: field.id,
+              value: field?.value || null,
+              notes: field?.notes || null,
+            }),
         );
+        const changedInitialValues: any = {};
+        Object.values(state.initialValues).forEach(
+          (field: any) =>
+            (changedInitialValues[field.id] = {
+              ...field,
+              value: changedDict[field.id].value,
+              notes: changedDict[field.id].notes,
+            }),
+        );
+        dispatch({
+          type: "set_initial_values",
+          initialValues: changedInitialValues,
+        });
       }
       return;
     } else {
@@ -145,22 +163,28 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
     return <Loading />;
   }
   return (
-    <PrintPreview
-      title={t("investigation_report_for_{{name}}", {
+    <Page
+      title={t("investigation_report", {
         name: patientData?.name,
       })}
     >
-      <InvestigationTable
-        title={t("investigation_report_of_{{name}}", {
-          name: patientData?.name,
-        })}
-        data={state.initialValues}
-        isDischargedPatient={!!consultation?.discharge_date}
-        changedFields={state.changedFields}
-        handleValueChange={handleValueChange}
-        handleUpdateCancel={handleUpdateCancel}
-        handleSave={handleSubmit}
-      />
-    </PrintPreview>
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12">
+        <InvestigationTable
+          title={t("investigation_report_for_{{name}}", {
+            name: patientData?.name,
+          })}
+          data={state.initialValues}
+          isDischargedPatient={!!consultation?.discharge_date}
+          changedFields={state.changedFields}
+          handleValueChange={handleValueChange}
+          handleUpdateCancel={handleUpdateCancel}
+          handleSave={handleSubmit}
+          consultationId={consultationId}
+          patientId={patientId}
+          sessionId={sessionId}
+          facilityId={facilityId}
+        />
+      </div>
+    </Page>
   );
 }

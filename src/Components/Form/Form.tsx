@@ -13,7 +13,6 @@ type Props<T extends FormDetails> = {
   className?: string;
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
-  onlyChild?: boolean;
   validate?: (form: T) => FormErrors<T>;
   onSubmit: (form: T) => Promise<FormErrors<T> | void>;
   onCancel?: () => void;
@@ -23,6 +22,7 @@ type Props<T extends FormDetails> = {
   cancelLabel?: string;
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
+  hideRestoreDraft?: boolean;
 };
 
 const Form = <T extends FormDetails>({
@@ -87,47 +87,43 @@ const Form = <T extends FormDetails>({
           props.onDraftRestore?.(newState);
         }}
         formData={state.form}
-      />
-      <Provider
-        value={(name: keyof T, validate?: FieldValidator<T[keyof T]>) => {
-          return {
-            name,
-            id: name,
-            onChange: ({ name, value }: FieldChangeEvent<T[keyof T]>) =>
-              dispatch({
-                type: "set_field",
-                name,
-                value,
-                error: validate?.(value),
-              }),
-            value: state.form[name],
-            error: state.errors[name],
-            disabled,
-          };
-        }}
+        hidden={props.hideRestoreDraft}
       >
-        {props.onlyChild ? (
-          <Consumer>{props.children}</Consumer>
-        ) : (
-          <>
-            <div className="my-6">
-              <Consumer>{props.children}</Consumer>
-            </div>
-            <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
-              <Cancel
-                onClick={props.onCancel}
-                label={props.cancelLabel ?? "Cancel"}
-              />
-              <Submit
-                data-testid="submit-button"
-                type="submit"
-                disabled={disabled}
-                label={props.submitLabel ?? "Submit"}
-              />
-            </div>
-          </>
-        )}
-      </Provider>
+        <Provider
+          value={(name: keyof T, validate?: FieldValidator<T[keyof T]>) => {
+            return {
+              name,
+              id: name,
+              onChange: ({ name, value }: FieldChangeEvent<T[keyof T]>) =>
+                dispatch({
+                  type: "set_field",
+                  name,
+                  value,
+                  error: validate?.(value),
+                }),
+              value: state.form[name],
+              error: state.errors[name],
+              disabled,
+            };
+          }}
+        >
+          <div className="my-6">
+            <Consumer>{props.children}</Consumer>
+          </div>
+          <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
+            <Cancel
+              onClick={props.onCancel}
+              label={props.cancelLabel ?? "Cancel"}
+            />
+            <Submit
+              data-testid="submit-button"
+              type="submit"
+              disabled={disabled}
+              label={props.submitLabel ?? "Submit"}
+            />
+          </div>
+        </Provider>
+      </DraftSection>
     </form>
   );
 };

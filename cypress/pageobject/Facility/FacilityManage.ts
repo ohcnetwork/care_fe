@@ -7,17 +7,17 @@ class FacilityManage {
     cy.get("#upload-cover-image").should("be.visible");
   }
 
-  uploadCoverImage(fileName) {
+  uploadCoverImage(fileName: string) {
     cy.get("#upload-cover-image")
       .selectFile(`cypress/fixtures/${fileName}`, { force: true })
       .wait(100); // Adjust the wait time as needed
   }
 
-  verifyTotalDoctorCapacity(expectedCapacity) {
+  verifyTotalDoctorCapacity(expectedCapacity: string) {
     cy.get("#facility-doctor-totalcapacity").contains(expectedCapacity);
   }
 
-  verifyFacilityBedCapacity(expectedCapacity) {
+  verifyFacilityBedCapacity(expectedCapacity: string) {
     cy.get("#facility-bed-capacity-details").contains(expectedCapacity);
   }
 
@@ -51,15 +51,15 @@ class FacilityManage {
     cy.get("#middleware_address").should("be.visible");
   }
 
-  clickButtonWithText(text) {
+  clickButtonWithText(text: string) {
     cy.get("button#submit").contains(text).click();
   }
 
-  checkErrorMessageVisibility(text) {
+  checkErrorMessageVisibility(text: string) {
     cy.get(".error-text").contains(text).should("be.visible");
   }
 
-  typeMiddlewareAddress(address) {
+  typeMiddlewareAddress(address: string) {
     cy.get("#middleware_address").click().clear().click().type(address);
   }
 
@@ -67,11 +67,14 @@ class FacilityManage {
     cy.get("#hf_id").click().clear();
   }
 
-  typeHfrId(address) {
+  typeHfrId(address: string) {
     cy.get("#hf_id").click().clear().click().type(address);
   }
 
-  verifySuccessMessageVisibilityAndContent(text, isRegex = false) {
+  verifySuccessMessageVisibilityAndContent(
+    text: string | RegExp,
+    isRegex = false,
+  ) {
     if (isRegex) {
       cy.get(".pnotify-text").should("be.visible").contains(text);
     } else {
@@ -79,11 +82,11 @@ class FacilityManage {
     }
   }
 
-  verifyMiddlewareAddressValue(expectedValue) {
+  verifyMiddlewareAddressValue(expectedValue: string) {
     cy.get("#middleware_address").should("have.value", expectedValue);
   }
 
-  verifyHfrIdValue(expectedValue) {
+  verifyHfrIdValue(expectedValue: string) {
     cy.get("#hf_id").should("have.value", expectedValue);
   }
 

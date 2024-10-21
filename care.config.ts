@@ -103,6 +103,13 @@ const careConfig = {
   abdm: {
     enabled: (env.REACT_ENABLE_ABDM ?? "true") === "true",
   },
+
+  careApps: env.REACT_ENABLED_APPS
+    ? env.REACT_ENABLED_APPS.split(",").map((app) => ({
+        branch: app.split("@")[1],
+        package: app.split("@")[0],
+      }))
+    : [],
 } as const;
 
 export default careConfig;

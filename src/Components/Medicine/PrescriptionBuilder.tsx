@@ -149,5 +149,9 @@ export default function PrescriptionBuilder({
 
 const DefaultPrescription: Partial<NormalPrescription> = {
   dosage_type: "REGULAR",
+  route: "ORAL",
 };
-const DefaultPRNPrescription: Partial<PRNPrescription> = { dosage_type: "PRN" };
+const DefaultPRNPrescription: Partial<PRNPrescription> = {
+  dosage_type: "PRN",
+  route: "ORAL",
+};

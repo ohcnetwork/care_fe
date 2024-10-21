@@ -83,7 +83,7 @@ const GLocationPicker = ({
   };
 
   return (
-    <div className="flex h-80 w-80 sm:h-96 sm:w-96">
+    <div className="flex h-80 w-80 flex-col sm:h-96 sm:w-96">
       <Wrapper
         libraries={["places"]}
         apiKey={careConfig.gmapsApiKey}

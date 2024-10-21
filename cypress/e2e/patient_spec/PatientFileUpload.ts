@@ -5,7 +5,10 @@ const loginPage = new LoginPage();
 const patientPage = new PatientPage();
 const patientFileUpload = new PatientFileUpload();
 
-function runTests(testDescription, visitPatientFileUploadSection) {
+function runTests(
+  testDescription: string,
+  visitPatientFileUploadSection: () => void,
+) {
   describe(testDescription, () => {
     const cypressAudioName = "cypress audio";
     const cypressFileName = "cypress name";

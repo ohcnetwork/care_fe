@@ -1,9 +1,8 @@
-import { DetailRoute } from "../../Routers/types";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { NotificationData } from "./models";
 
-export default function ShowPushNotification({ id }: DetailRoute) {
+export default function ShowPushNotification({ id }: { id: string }) {
   useQuery(routes.getNotificationData, {
     pathParams: { id },
     onResponse(res) {

@@ -6,7 +6,7 @@ import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import { formatDateTime, formatPatientAge } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
@@ -75,8 +75,7 @@ export default function ListView() {
             <div>
               <div className="flex justify-between">
                 <div className="mb-2 text-xl font-bold capitalize">
-                  {shift.patient_object.name} -{" "}
-                  {formatPatientAge(shift.patient_object, true)}
+                  {shift.patient_object.name} - {shift.patient_object.age}
                 </div>
                 <div>
                   {shift.emergency && (

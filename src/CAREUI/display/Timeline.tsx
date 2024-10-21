@@ -55,7 +55,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
   const { t } = useTranslation();
 
   return (
-    <li className="relative flex gap-x-4">
+    <div className="relative flex gap-x-4">
       <div
         className={classNames(
           props.isLast ? "h-6" : "-bottom-6",
@@ -119,7 +119,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
           {props.children}
         </div>
       </div>
-    </li>
+    </div>
   );
 };
 

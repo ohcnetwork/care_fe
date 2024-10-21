@@ -294,6 +294,7 @@ export const UserAdd = (props: UserProps) => {
 
   const handleDateChange = (e: FieldChangeEvent<Date>) => {
     if (dayjs(e.value).isValid()) {
+      const errors = { ...state.errors, [e.name]: "" };
       dispatch({
         type: "set_form",
         form: {
@@ -301,10 +302,12 @@ export const UserAdd = (props: UserProps) => {
           [e.name]: dayjs(e.value).format("YYYY-MM-DD"),
         },
       });
+      dispatch({ type: "set_errors", errors });
     }
   };
 
   const handleFieldChange = (event: FieldChangeEvent<unknown>) => {
+    const errors = { ...state.errors, [event.name]: "" };
     dispatch({
       type: "set_form",
       form: {
@@ -312,6 +315,7 @@ export const UserAdd = (props: UserProps) => {
         [event.name]: event.value,
       },
     });
+    dispatch({ type: "set_errors", errors });
   };
 
   useAbortableEffect(() => {

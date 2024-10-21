@@ -19,9 +19,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@core/*": ["src/*"],
+      "@apps/*": ["apps/*/src"],
+      "@app-manifest/*": ["apps/*/src/manifest.ts"],
       "@careConfig": ["./care.config.ts"]
     }
   },
-  "include": ["src", "care.config.ts"],
+  "include": ["src/**/*", "apps/**/*", "care.config.ts"],
   "exclude": ["src/**/*.gen.tsx"]
 }
