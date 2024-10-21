@@ -481,7 +481,7 @@ export default function UserProfile() {
                   type="button"
                   id="edit-cancel-profile-button"
                 >
-                  {showEdit ? t("cancel") : t("edit_user_profile")}
+                  {showEdit ? t("Cancel") : t("edit_user_profile")}
                 </ButtonV2>
                 <ButtonV2 variant="danger" onClick={signOut}>
                   <CareIcon icon="l-sign-out-alt" />
