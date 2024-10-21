@@ -834,7 +834,7 @@ const AssetCreate = (props: AssetProps) => {
                         label={t("last_serviced_on")}
                         name="last_serviced_on"
                         className="mt-2"
-                        position="RIGHT"
+                        position="TOP-RIGHT"
                         disableFuture
                         value={last_serviced_on && new Date(last_serviced_on)}
                         onChange={(date) => {
