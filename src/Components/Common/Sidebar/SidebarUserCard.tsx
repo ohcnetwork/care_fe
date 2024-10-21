@@ -26,7 +26,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
     <div
       className={` ${shrinked ? "space-y-2 px-2" : "flex items-center px-4"}`}
     >
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
@@ -40,7 +40,7 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
               <div className="flex-none text-lg">
                 <Avatar
                   name={formatDisplayName(user)}
-                  className="w-8 text-sm font-medium"
+                  className="h-8 rounded-full text-black/50"
                 />
               </div>
               <div className="max-w-32">

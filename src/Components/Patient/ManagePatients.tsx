@@ -52,6 +52,8 @@ import {
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import Tabs from "../Common/components/Tabs.js";
+import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import { isPatientMandatoryDataFilled } from "./Utils.js";
 import request from "../../Utils/request/request.js";
 import { Avatar } from "../Common/Avatar.js";
 
@@ -104,45 +106,29 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [phone_number, setPhoneNumber] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState("");
-  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
-  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
-    useState("");
+  const [phoneNumber, _setPhoneNumber] = useState("");
+  const [emergencyPhoneNumber, _setEmergencyPhoneNumber] = useState("");
 
-  const setPhoneNum = (phone_number: string) => {
-    setPhoneNumber(phone_number);
-    if (phone_number.length >= 13) {
-      setPhoneNumberError("");
-      updateQuery({ phone_number });
-      return;
+  const setPhoneNumber = (value: string) => {
+    _setPhoneNumber(value);
+    const error = PhoneNumberValidator()(value);
+    if (!error) {
+      updateQuery({ phone_number: value });
     }
-
-    if (phone_number === "+91" || phone_number === "") {
-      setPhoneNumberError("");
-      qParams.phone_number && updateQuery({ phone_number: null });
-      return;
+    if ((value === "+91" || value === "") && qParams.phone_number) {
+      updateQuery({ phone_number: null });
     }
-
-    setPhoneNumberError("Enter a valid number");
   };
 
-  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
-    setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length >= 13) {
-      setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number });
-      return;
+  const setEmergencyPhoneNumber = (value: string) => {
+    _setEmergencyPhoneNumber(value);
+    const error = PhoneNumberValidator()(value);
+    if (!error) {
+      updateQuery({ emergency_phone_number: value });
     }
-
-    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
-      setEmergencyPhoneNumberError("");
-      qParams.emergency_phone_number &&
-        updateQuery({ emergency_phone_number: null });
-      return;
+    if ((value === "+91" || value === "") && qParams.emergency_phone_number) {
+      updateQuery({ emergency_phone_number: null });
     }
-
-    setEmergencyPhoneNumberError("Enter a valid number");
   };
 
   const tabValue =
@@ -332,10 +318,10 @@ export const PatientManager = () => {
     query: params,
     onResponse: () => {
       if (!params.phone_number) {
-        setPhoneNumber("+91");
+        _setPhoneNumber("+91");
       }
       if (!params.emergency_phone_number) {
-        setEmergencyPhoneNumber("+91");
+        _setEmergencyPhoneNumber("+91");
       }
     },
   });
@@ -473,7 +459,9 @@ export const PatientManager = () => {
   if (data?.count) {
     patientList = data.results.map((patient) => {
       let patientUrl = "";
-      if (
+      if (!isPatientMandatoryDataFilled(patient)) {
+        patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
+      } else if (
         patient.last_consultation &&
         patient.last_consultation?.facility === patient.facility &&
         !(patient.last_consultation?.discharge_date && patient.is_active)
@@ -494,7 +482,7 @@ export const PatientManager = () => {
 
       const children = (
         <div
-          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
+          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg border border-secondary-300 bg-white p-4 pl-5 text-black transition-all duration-200 ease-in-out hover:border-secondary-400 hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
@@ -543,10 +531,9 @@ export const PatientManager = () => {
               ) : (
                 <div className="flex items-center justify-center">
                   <Avatar
-                    className="size-10 md:size-auto"
-                    name={patient.name!}
-                    square={true}
+                    name={patient.name || ""}
                     colors={["#F9FAFB", "#BFB8CB"]}
+                    className="border-0 border-b border-b-secondary-300"
                   />
                 </div>
               )}
@@ -593,10 +580,26 @@ export const PatientManager = () => {
               )}
               <div className="flex w-full">
                 <div className="flex flex-row flex-wrap justify-start gap-2">
-                  {!patient.last_consultation ||
-                  patient.last_consultation?.facility !== patient.facility ||
-                  (patient.last_consultation?.discharge_date &&
-                    patient.is_active) ? (
+                  {!isPatientMandatoryDataFilled(patient) && (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-notes"
+                        text={t("patient_details_incomplete")}
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  )}
+
+                  {isPatientMandatoryDataFilled(patient) &&
+                  (!patient.last_consultation ||
+                    patient.last_consultation?.facility !== patient.facility ||
+                    (patient.last_consultation?.discharge_date &&
+                      patient.is_active)) ? (
                     <span className="relative inline-flex">
                       <Chip
                         size="small"
@@ -999,43 +1002,27 @@ export const PatientManager = () => {
               <PhoneNumberFormField
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
-                value={phone_number}
-                onChange={(e) => setPhoneNum(e.value)}
-                error={phoneNumberError}
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.value)}
                 types={["mobile", "landline"]}
                 className="w-full grow"
+                error={((phoneNumber || "+91") === "+91" && "") || undefined}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
-                value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNum(e.value)}
-                error={emergencyPhoneNumberError}
+                value={emergencyPhoneNumber}
+                onChange={(e) => setEmergencyPhoneNumber(e.value)}
                 types={["mobile", "landline"]}
                 className="w-full"
+                error={
+                  ((emergencyPhoneNumber || "+91") === "+91" && "") || undefined
+                }
               />
             </div>
           </div>
         </div>
       </div>
-      {/*!qParams.last_consultation__consent_types &&
-        (patientsWithNoConsents || 0) > 0 && (
-          <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
-            <CareIcon icon="l-info-circle" className="text-xl" />
-            <p className="font-semibold">
-              {patientsWithNoConsents} patients admitted missing consent
-              records&nbsp;
-              <button
-                onClick={() =>
-                  updateQuery({ last_consultation__consent_types: "None" })
-                }
-                className="underline"
-              >
-                Click to view
-              </button>
-            </p>
-          </div>
-        )*/}
       <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({
