@@ -47,15 +47,16 @@ const DischargedPatientsList = ({
     pathParams: { id: facility_external_id },
   });
 
-  const { qParams, updateQuery, advancedFilter, FilterBadges } = useFilters({
-    limit: 12,
-    cacheBlacklist: [
-      "name",
-      "patient_no",
-      "phone_number",
-      "emergency_phone_number",
-    ],
-  });
+  const { qParams, updateQuery, advancedFilter, FilterBadges, updatePage } =
+    useFilters({
+      limit: 12,
+      cacheBlacklist: [
+        "name",
+        "patient_no",
+        "phone_number",
+        "emergency_phone_number",
+      ],
+    });
 
   useEffect(() => {
     if (!qParams.phone_number && phone_number.length >= 13) {
@@ -434,10 +435,9 @@ const DischargedPatientsList = ({
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
         query={{ ordering: "-modified_date", ...qParams }}
-        queryCB={(query) => {
-          setCount(query.data?.count || 0);
-          console.log(query.data?.count);
-        }}
+        queryCB={(query) => setCount(query.data?.count || 0)}
+        initialPage={qParams.page}
+        onPageChange={updatePage}
       >
         {() => (
           <div className="flex flex-col gap-4">

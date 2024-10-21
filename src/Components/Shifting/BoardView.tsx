@@ -7,31 +7,52 @@ import BadgesList from "./BadgesList";
 import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import SearchInput from "../Form/SearchInput";
-import ShiftingBoard from "./ShiftingBoard";
 import { formatFilter } from "./Commons";
 
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import withScrolling from "react-dnd-scrolling";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Tabs from "../Common/components/Tabs";
 import careConfig from "@careConfig";
+import KanbanBoard from "../Kanban/Board";
+import { classNames, formatDateTime, formatName } from "../../Utils/utils";
+import dayjs from "dayjs";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import { ShiftingModel } from "../Facility/models";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-
-import Loading from "@/Components/Common/Loading";
 import PageTitle from "@/Components/Common/PageTitle";
-const ScrollingComponent = withScrolling("div");
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
     cacheBlacklist: ["patient_name"],
   });
+
+  const [modalFor, setModalFor] = useState<{
+    externalId?: string;
+    loading: boolean;
+  }>({
+    externalId: undefined,
+    loading: false,
+  });
+
+  const authUser = useAuthUser();
+
+  const handleTransferComplete = async (shift: any) => {
+    setModalFor({ ...modalFor, loading: true });
+    await request(routes.completeTransfer, {
+      pathParams: { externalId: shift.external_id },
+    });
+    navigate(
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
+    );
+  };
 
   const shiftStatusOptions = careConfig.wartimeShifting
     ? SHIFTING_CHOICES_WARTIME
@@ -55,79 +76,10 @@ export default function BoardView() {
   );
 
   const [boardFilter, setBoardFilter] = useState(activeBoards);
-  const [isLoading] = useState(false);
   const { t } = useTranslation();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState<number>(0);
-  const [isLeftScrollable, setIsLeftScrollable] = useState<boolean>(false);
-  const [isRightScrollable, setIsRightScrollable] = useState<boolean>(false);
-
-  useLayoutEffect(() => {
-    const container = containerRef.current;
-
-    if (!container) return;
-
-    const handleScroll = () => {
-      setIsLeftScrollable(container.scrollLeft > 0);
-      setIsRightScrollable(
-        container.scrollLeft + container.clientWidth <
-          container.scrollWidth - 10,
-      );
-    };
-
-    container.addEventListener("scroll", handleScroll);
-
-    handleScroll();
-
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  const handleOnClick = (direction: "right" | "left") => {
-    const container = containerRef.current;
-    if (direction === "left" ? !isLeftScrollable : !isRightScrollable) return;
-
-    if (container) {
-      const scrollAmount = 300;
-      const currentScrollLeft = container.scrollLeft;
-
-      if (direction === "left") {
-        container.scrollTo({
-          left: currentScrollLeft - scrollAmount,
-          behavior: "smooth",
-        });
-      } else if (direction === "right") {
-        container.scrollTo({
-          left: currentScrollLeft + scrollAmount,
-          behavior: "smooth",
-        });
-      }
-    }
-  };
-
-  const renderArrowIcons = (direction: "right" | "left") => {
-    const isIconEnable =
-      direction === "left" ? isLeftScrollable : isRightScrollable;
-    return (
-      isIconEnable && (
-        <div
-          className={`relative z-20 self-center ${
-            direction === "right" ? "-left-5" : ""
-          }`}
-        >
-          <CareIcon
-            icon={`l-arrow-${direction}`}
-            className="absolute inset-y-0 left-0 z-10 h-10 w-10 cursor-pointer hover:opacity-100"
-            onClick={() => handleOnClick(direction)}
-          />
-        </div>
-      )
-    );
-  };
 
   return (
-    <div className="max-h[95vh] flex min-h-full max-w-[100vw] flex-col px-2 pb-2">
+    <div className="flex-col px-2 pb-2">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
@@ -181,35 +133,193 @@ export default function BoardView() {
           </div>
         </div>
       </div>
-      <BadgesList {...{ qParams, FilterBadges }} />
-      <ScrollingComponent className="relative mt-4 flex max-h-[80vh] w-full items-start pb-2">
-        <div className="mt-4 flex min-h-full w-full flex-1 items-start pb-2">
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <>
-              {renderArrowIcons("left")}
-              <div
-                className="mx-0 flex max-h-[75vh] w-full flex-row overflow-y-auto overflow-x-hidden"
-                ref={containerRef}
-              >
-                {boardFilter.map((board) => (
-                  <ShiftingBoard
-                    key={board.text}
-                    filterProp={qParams}
-                    board={board.text}
-                    title={board.label}
-                    formatFilter={formatFilter}
-                    setContainerHeight={setContainerHeight}
-                    containerHeight={containerHeight}
-                  />
-                ))}
+      <KanbanBoard<ShiftingModel>
+        title={<BadgesList {...{ qParams, FilterBadges }} />}
+        sections={boardFilter.map((board) => ({
+          id: board.text,
+          title: (
+            <h3 className="flex h-8 items-center text-xs">
+              {board.label || board.text}{" "}
+              <ExportButton
+                action={async () => {
+                  const { data } = await request(routes.downloadShiftRequests, {
+                    query: {
+                      ...formatFilter({ ...qParams, status: board.text }),
+                      csv: true,
+                    },
+                  });
+                  return data ?? null;
+                }}
+                filenamePrefix={`shift_requests_${board.label || board.text}`}
+              />
+            </h3>
+          ),
+          fetchOptions: (id) => ({
+            route: routes.listShiftRequests,
+            options: {
+              query: formatFilter({
+                ...qParams,
+                status: id,
+              }),
+            },
+          }),
+        }))}
+        onDragEnd={(result) => {
+          if (result.source.droppableId !== result.destination?.droppableId)
+            navigate(
+              `/shifting/${result.draggableId}/update?status=${result.destination?.droppableId}`,
+            );
+        }}
+        itemRender={(shift) => (
+          <div className="flex flex-col justify-between gap-4">
+            <div>
+              <div className="flex justify-between p-4">
+                <div>
+                  <div className="text-xl font-bold capitalize">
+                    {shift.patient_object.name}
+                  </div>
+                  <div className="text-sm text-secondary-700">
+                    {shift.patient_object.age} old
+                  </div>
+                </div>
+                <div>
+                  {shift.emergency && (
+                    <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
+                      {t("emergency")}
+                    </span>
+                  )}
+                </div>
               </div>
-              {renderArrowIcons("right")}
-            </>
-          )}
-        </div>
-      </ScrollingComponent>
+              <dl className="flex flex-wrap gap-1">
+                {(
+                  [
+                    {
+                      title: "phone_number",
+                      icon: "l-mobile-android",
+                      data: shift.patient_object.phone_number,
+                    },
+                    {
+                      title: "origin_facility",
+                      icon: "l-plane-departure",
+                      data: shift.origin_facility_object.name,
+                    },
+                    {
+                      title: "shifting_approving_facility",
+                      icon: "l-user-check",
+                      data: careConfig.wartimeShifting
+                        ? shift.shifting_approving_facility_object?.name
+                        : undefined,
+                    },
+                    {
+                      title: "assigned_facility",
+                      icon: "l-plane-arrival",
+                      data:
+                        shift.assigned_facility_external ||
+                        shift.assigned_facility_object?.name ||
+                        t("yet_to_be_decided"),
+                    },
+                    {
+                      title: "last_modified",
+                      icon: "l-stopwatch",
+                      data: formatDateTime(shift.modified_date),
+                      className: dayjs()
+                        .subtract(2, "hours")
+                        .isBefore(shift.modified_date)
+                        ? "text-secondary-900"
+                        : "rounded bg-red-500 border border-red-600 text-white w-full font-bold",
+                    },
+                    {
+                      title: "patient_address",
+                      icon: "l-home",
+                      data: shift.patient_object.address,
+                    },
+                    {
+                      title: "assigned_to",
+                      icon: "l-user",
+                      data: shift.assigned_to_object
+                        ? formatName(shift.assigned_to_object) +
+                          " - " +
+                          shift.assigned_to_object.user_type
+                        : undefined,
+                    },
+                    {
+                      title: "patient_state",
+                      icon: "l-map-marker",
+                      data: shift.patient_object.state_object?.name,
+                    },
+                  ] as const
+                )
+                  .filter((d) => d.data)
+                  .map((datapoint, i) => (
+                    <div
+                      className={classNames(
+                        "mx-2 flex items-center gap-2 px-2 py-1",
+                        "className" in datapoint ? datapoint.className : "",
+                      )}
+                      key={i}
+                    >
+                      <dt title={t(datapoint.title)} className={""}>
+                        <CareIcon icon={datapoint.icon} className="text-xl" />
+                      </dt>
+                      <dd className="text-sm font-semibold">
+                        {datapoint.data}
+                      </dd>
+                    </div>
+                  ))}
+              </dl>
+            </div>
+            <div className="flex flex-col gap-2 px-4 pb-4">
+              <Link
+                href={`/shifting/${shift.external_id}`}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-secondary-300 bg-secondary-200 p-2 text-sm font-semibold text-inherit transition-all hover:bg-secondary-300"
+              >
+                <CareIcon icon="l-eye" className="text-lg" /> {t("all_details")}
+              </Link>
+
+              {shift.status === "COMPLETED" && shift.assigned_facility && (
+                <>
+                  <button
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-secondary-300 bg-secondary-200 p-2 text-sm font-semibold text-inherit transition-all hover:bg-secondary-300"
+                    disabled={
+                      !shift.patient_object.allow_transfer ||
+                      !(
+                        ["DistrictAdmin", "StateAdmin"].includes(
+                          authUser.user_type,
+                        ) ||
+                        authUser.home_facility_object?.id ===
+                          shift.assigned_facility
+                      )
+                    }
+                    onClick={() =>
+                      setModalFor((m) => ({
+                        ...m,
+                        externalId: shift.external_id,
+                      }))
+                    }
+                  >
+                    {t("transfer_to_receiving_facility")}
+                  </button>
+
+                  <ConfirmDialog
+                    title={t("confirm_transfer_complete")}
+                    description={t("mark_this_transfer_as_complete_question")}
+                    show={modalFor.externalId === shift.external_id}
+                    onClose={() =>
+                      setModalFor({ externalId: undefined, loading: false })
+                    }
+                    action={t("confirm")}
+                    onConfirm={() => handleTransferComplete(shift)}
+                  >
+                    <p className="mt-2 text-sm text-yellow-600">
+                      {t("redirected_to_create_consultation")}
+                    </p>
+                  </ConfirmDialog>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      />
       <ListFilter {...advancedFilter} key={window.location.search} />
     </div>
   );
