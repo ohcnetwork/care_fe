@@ -54,7 +54,6 @@ export const PatientHome = (props: any) => {
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
-  console.log(patientData);
   const [assignedVolunteerObject, setAssignedVolunteerObject] =
     useState<any>(null);
   const authUser = useAuthUser();
