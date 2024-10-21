@@ -674,15 +674,15 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 {
                   text: (
                     <div className="flex items-center justify-center gap-1 text-sm">
-                      Events
+                      {t("events")}
                       <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
-                        beta
+                        {t("BETA")}
                       </span>
                     </div>
                   ),
                   value: 1,
                 },
-                { text: "Daily Rounds", value: 0 },
+                { text: t("DAILY_ROUNDS"), value: 0 },
               ]}
               onTabChange={(v) => setShowEvents(!!v)}
               currentTab={showEvents ? 1 : 0}
