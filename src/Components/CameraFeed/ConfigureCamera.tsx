@@ -33,7 +33,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 interface Props {
   asset: AssetData;
   onUpdated: () => void;
-  isAssetCongfigure?: boolean;
+  isAssetConfigure?: boolean;
 }
 
 type OnvifPreset = { name: string; value: number };
@@ -59,7 +59,7 @@ export default function ConfigureCamera(props: Props) {
   }>();
   const [presetName, setPresetName] = useState("");
   const [showUnlinkConfirmation, setShowUnlinkConfirmation] = useState(false);
-  const isAssetCongfigure = props.isAssetCongfigure || false;
+  const isAssetConfigure = props.isAssetConfigure || false;
 
   const assetBedsQuery = useQuery(routes.listAssetBeds, {
     query: { asset: props.asset.id, limit: 50 },
@@ -112,7 +112,7 @@ export default function ConfigureCamera(props: Props) {
           asset={props.asset}
           key={key}
           operate={operate}
-          isAssetConfigurationPage={isAssetCongfigure}
+          isAssetConfigurationPage={isAssetConfigure}
         />
       </div>
     );
@@ -253,7 +253,7 @@ export default function ConfigureCamera(props: Props) {
                 );
               }
             }}
-            isAssetConfigurationPage={isAssetCongfigure}
+            isAssetConfigurationPage={isAssetConfigure}
           >
             <div className="flex items-center gap-2">
               <Listbox

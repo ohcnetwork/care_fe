@@ -64,7 +64,7 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
       <ConfigureCamera
         asset={asset}
         onUpdated={() => refetch()}
-        isAssetCongfigure={true}
+        isAssetConfigure={true}
       />
     </Page>
   );
