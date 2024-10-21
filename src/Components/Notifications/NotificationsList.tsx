@@ -244,18 +244,15 @@ export default function NotificationsList({
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
-    if (
-      navigator.serviceWorker !== null &&
-      navigator.serviceWorker !== undefined
-    ) {
-      if (
-        status === "NotSubscribed" ||
-        status === "SubscribedOnAnotherDevice"
-      ) {
+    if (!navigator.serviceWorker) {
+        return;
+    }
+      
+    if (["NotSubscribed", "SubscribedOnAnotherDevice"].includes(status)) {
         subscribe();
-      } else {
+    } else {
         unsubscribe();
-      }
+     }
     }
   };
 
