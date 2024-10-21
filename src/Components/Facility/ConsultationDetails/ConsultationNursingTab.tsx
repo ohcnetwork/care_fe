@@ -1,41 +1,24 @@
 import { useEffect, useState } from "react";
-import { ConsultationTabProps } from "./index";
-import { NursingPlot } from "../Consultations/NursingPlot";
 import { useTranslation } from "react-i18next";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
-import { RoutineAnalysisRes, RoutineFields } from "../models";
+import {
+  RoutineAnalysisRes,
+  RoutineFields,
+  NursingPlotFields,
+} from "../models";
 import Loading from "../../Common/Loading";
-import { classNames, formatDate, formatTime } from "../../../Utils/utils";
 import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
+import {
+  PAGINATION_LIMIT,
+  NURSING_CARE_PROCEDURES,
+} from "../../../Common/constants";
+import LogUpdateAnalayseTable from "../Consultations/LogUpdateAnalayseTable";
+import { formatDateTime } from "../../../Utils/utils";
 
 import PageTitle from "@/Components/Common/PageTitle";
-
-export default function ConsultationNursingTab(props: ConsultationTabProps) {
-  const { t } = useTranslation();
-  return (
-    <div>
-      <PageTitle
-        title={t("nursing_information")}
-        hideBack
-        breadcrumbs={false}
-      />
-      <div>
-        <h4>{t("routine")}</h4>
-        <RoutineSection {...props} />
-      </div>
-      <div>
-        <h4>{t("nursing_care")}</h4>
-        <NursingPlot
-          facilityId={props.facilityId}
-          patientId={props.patientId}
-          consultationId={props.consultationId}
-        />
-      </div>
-    </div>
-  );
-}
+import { ConsultationTabProps } from ".";
+import { ProcedureType } from "@/Components/Common/prescription-builder/ProcedureBuilder";
 
 const REVERSE_CHOICES = {
   appetite: {
@@ -109,6 +92,105 @@ const ROUTINE_ROWS = [
   { subField: true, field: "appetite" } as const,
 ];
 
+const NursingPlot = ({ consultationId }: ConsultationTabProps) => {
+  const { t } = useTranslation();
+  const [results, setResults] = useState<any>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string,
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: { page: currentPage, fields: NursingPlotFields },
+        pathParams: { consultationId },
+      });
+      if (res && res.ok && data) {
+        setResults(data.results);
+        setTotalCount(data.count);
+      }
+    };
+
+    fetchDailyRounds(currentPage, consultationId);
+  }, [consultationId, currentPage]);
+
+  const handlePagination = (page: number) => setCurrentPage(page);
+
+  const data = Object.entries(results).map((key: any) => ({
+    date: formatDateTime(key[0]),
+    nursing: key[1]["nursing"],
+  }));
+
+  const dataToDisplay = data
+    .map((x) =>
+      x.nursing.map((f: any) => {
+        f["date"] = x.date;
+        return f;
+      }),
+    )
+    .reduce((accumulator, value) => accumulator.concat(value), []);
+
+  const filterEmpty = (field: (typeof NURSING_CARE_PROCEDURES)[number]) => {
+    const filtered = dataToDisplay.filter(
+      (i: ProcedureType) => i.procedure === field,
+    );
+    return filtered.length > 0;
+  };
+
+  const areFieldsEmpty = () => {
+    let emptyFieldCount = 0;
+    for (const field of NURSING_CARE_PROCEDURES) {
+      if (!filterEmpty(field)) emptyFieldCount++;
+    }
+    return emptyFieldCount === NURSING_CARE_PROCEDURES.length;
+  };
+
+  const rows = NURSING_CARE_PROCEDURES.filter((f) => filterEmpty(f)).map(
+    (procedure) => ({
+      field: procedure,
+      title: t(`NURSING_CARE_PROCEDURE__${procedure}`),
+    }),
+  );
+
+  const mappedData = dataToDisplay.reduce(
+    (acc: Record<string, any>, item: any) => {
+      if (!acc[item.date]) acc[item.date] = {};
+      acc[item.date][item.procedure] = item.description;
+      return acc;
+    },
+    {},
+  );
+
+  return (
+    <div>
+      <div>
+        {areFieldsEmpty() ? (
+          <div className="mt-1 w-full rounded-lg border bg-white p-4 shadow">
+            <div className="flex items-center justify-center text-2xl font-bold text-secondary-500">
+              {t("no_data_found")}
+            </div>
+          </div>
+        ) : (
+          <LogUpdateAnalayseTable data={mappedData} rows={rows} />
+        )}
+      </div>
+
+      {totalCount > PAGINATION_LIMIT && !areFieldsEmpty() && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
@@ -153,65 +235,11 @@ const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
 
   return (
     <div className="pb-8 pt-4">
-      <div className="m-2 w-full overflow-hidden overflow-x-auto rounded-lg border border-black shadow md:w-fit">
-        <table className="border-collapse overflow-hidden rounded-lg border bg-secondary-100">
-          <thead className="bg-white shadow">
-            <tr>
-              <th className="w-48 border-b-2 border-r-2 border-black" />
-              {Object.keys(results).map((date) => (
-                <th
-                  key={date}
-                  className="border border-b-2 border-secondary-500 border-b-black p-1 text-sm font-semibold"
-                >
-                  <p>{formatDate(date)}</p>
-                  <p>{formatTime(date)}</p>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-secondary-200">
-            {ROUTINE_ROWS.map((row) => (
-              <tr
-                key={row.field ?? row.title}
-                className={classNames(
-                  row.title && "border-t-2 border-t-secondary-600",
-                )}
-              >
-                <td
-                  className={classNames(
-                    "border border-r-2 border-secondary-500 border-r-black bg-white p-2",
-                    row.subField ? "pl-4 font-medium" : "font-bold",
-                  )}
-                >
-                  {row.title ?? t(`LOG_UPDATE_FIELD_LABEL__${row.field!}`)}
-                </td>
-                {row.field &&
-                  Object.values(results).map((obj, idx) => (
-                    <td
-                      key={`${row.field}-${idx}`}
-                      className={classNames(
-                        "border border-secondary-500 bg-secondary-100 p-2 text-center font-medium",
-                      )}
-                    >
-                      {(() => {
-                        const value = obj[row.field];
-                        if (value == null) {
-                          return "-";
-                        }
-                        if (typeof value === "boolean") {
-                          return t(value ? "yes" : "no");
-                        }
-                        const choices = REVERSE_CHOICES[row.field];
-                        const choice = `${row.field.toUpperCase()}__${choices[value as keyof typeof choices]}`;
-                        return t(choice);
-                      })()}
-                    </td>
-                  ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <LogUpdateAnalayseTable
+        data={results}
+        rows={ROUTINE_ROWS}
+        choices={REVERSE_CHOICES}
+      />
 
       {totalCount != null && totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
@@ -226,3 +254,24 @@ const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
     </div>
   );
 };
+
+export default function ConsultationNursingTab(props: ConsultationTabProps) {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <PageTitle
+        title={t("nursing_information")}
+        hideBack
+        breadcrumbs={false}
+      />
+      <div>
+        <h4>{t("routine")}</h4>
+        <RoutineSection {...props} />
+      </div>
+      <div>
+        <h4>{t("nursing_care")}</h4>
+        <NursingPlot {...props} />
+      </div>
+    </div>
+  );
+}
