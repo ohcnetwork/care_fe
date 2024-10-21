@@ -128,7 +128,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
       <div className="relative mx-3 my-2 flex grow flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <div className="absolute inset-x-0 top-0 flex bg-secondary-200 text-sm shadow-md">
+        <div className="absolute inset-x-0 top-0 z-10 flex bg-secondary-200 text-sm shadow-md">
           {keysOf(PATIENT_NOTES_THREADS).map((current) => (
             <button
               id={`patient-note-tab-${current}`}
