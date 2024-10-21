@@ -3,30 +3,30 @@ import {
   SHIFTING_CHOICES_WARTIME,
 } from "../../Common/constants";
 
-import BadgesList from "./BadgesList";
 import { ExportButton } from "../Common/Export";
-import ListFilter from "./ListFilter";
 import SearchInput from "../Form/SearchInput";
+import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
+import ListFilter from "./ListFilter";
 
+import careConfig from "@careConfig";
+import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
-import useFilters from "../../Common/hooks/useFilters";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import Tabs from "../Common/components/Tabs";
-import careConfig from "@careConfig";
-import KanbanBoard from "../Kanban/Board";
-import { classNames, formatDateTime, formatName } from "../../Utils/utils";
-import dayjs from "dayjs";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import { ShiftingModel } from "../Facility/models";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import useAuthUser from "../../Common/hooks/useAuthUser";
-import request from "../../Utils/request/request";
+import useFilters from "../../Common/hooks/useFilters";
 import routes from "../../Redux/api";
-import PageTitle from "@/Components/Common/PageTitle";
+import request from "../../Utils/request/request";
+import { classNames, formatDateTime, formatName } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import Tabs from "../Common/components/Tabs";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import PageTitle from "../Common/PageTitle";
+import { ShiftingModel } from "../Facility/models";
+import KanbanBoard from "../Kanban/Board";
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
@@ -81,7 +81,7 @@ export default function BoardView() {
   return (
     <div className="flex-col px-2 pb-2">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-        <div className="w-1/3 lg:w-1/4">
+        <div className="mt-4 w-1/3 lg:w-1/4">
           <PageTitle
             title={t("shifting")}
             className="mx-3 md:mx-5"
@@ -100,14 +100,15 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
+        <div className="mt-2 flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
           <SearchInput
             name="patient_name"
             value={qParams.patient_name}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("search_patient")}
           />
-
+        </div>
+        <div className="mr-4 mt-2">
           <Tabs
             tabs={[
               { text: t("active"), value: 0 },
@@ -118,19 +119,17 @@ export default function BoardView() {
             }
             currentTab={boardFilter[0].text !== activeBoards[0].text ? 1 : 0}
           />
+        </div>
 
-          <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
-            <ButtonV2
-              className="py-[11px]"
-              onClick={() => navigate("/shifting/list", { query: qParams })}
-            >
-              <CareIcon icon="l-list-ul" />
-              {t("list_view")}
-            </ButtonV2>
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
-          </div>
+        <div className="mt-2 flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
+          <ButtonV2
+            className="py-[11px]"
+            onClick={() => navigate("/shifting/list", { query: qParams })}
+          >
+            <CareIcon icon="l-list-ul" />
+            {t("list_view")}
+          </ButtonV2>
         </div>
       </div>
       <KanbanBoard<ShiftingModel>
@@ -226,7 +225,7 @@ export default function BoardView() {
                         .subtract(2, "hours")
                         .isBefore(shift.modified_date)
                         ? "text-secondary-900"
-                        : "rounded bg-red-500 border border-red-600 text-white w-full font-bold",
+                        : "rounded bg-red-400 border border-red-500 text-white w-full font-bold",
                     },
                     {
                       title: "patient_address",
