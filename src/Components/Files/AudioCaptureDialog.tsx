@@ -4,6 +4,7 @@ import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTimer } from "../../Utils/useTimer";
 import { t } from "i18next";
+import * as Notify from "../../Utils/Notifications";
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -35,9 +36,19 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   const timer = useTimer();
 
   const handleStartRecording = () => {
-    setStatus("RECORDING");
-    startRecording();
-    timer.start();
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(() => {
+        setStatus("RECORDING");
+        startRecording();
+        timer.start();
+      })
+      .catch(() => {
+        Notify.Error({
+          msg: "Please grant microphone permission to record audio.",
+        });
+        setStatus("PERMISSION_DENIED");
+      });
   };
 
   const handleStopRecording = () => {
@@ -87,7 +98,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   }, [show]);
 
   useEffect(() => {
-    if (autoRecord && show && status === "WAITING_TO_RECORD") {
+    if (autoRecord && show && status === "RECORDING") {
       handleStartRecording();
     }
   }, [autoRecord, status, show]);
