@@ -287,11 +287,9 @@ const Location = ({
         id="manage-bed-button"
         variant="secondary"
         border
-        className={cn(
-          "mt-3 flex w-full items-center justify-between",
-          totalBeds != null && "opacity-100",
-        )}
-        href={`location/${id}/beds`}
+        className={cn("mt-3 flex w-full items-center justify-between")}
+        href={totalBeds != null ? `location/${id}/beds` : undefined}
+        disabled={totalBeds == null}
       >
         Manage Beds
         <span className="flex items-center justify-center gap-2">
