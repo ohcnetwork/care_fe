@@ -8,17 +8,32 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import { IHealthFacility } from "./types/health-facility.js";
+import { useTranslation } from "react-i18next";
+
 import Loading from "@/Components/Common/Loading";
 const initForm = {
-  health_facility: null,
+  health_facility: null as IHealthFacility | null,
   hf_id: "",
 };
+
 const initialState = {
   form: { ...initForm },
-  errors: {},
+  errors: {} as Partial<Record<keyof typeof initForm, string>>,
 };
 
-const FormReducer = (state = initialState, action: any) => {
+const FormReducer = (
+  state = initialState,
+  action:
+    | {
+        type: "set_form";
+        form: typeof initialState.form;
+      }
+    | {
+        type: "set_error";
+        errors: typeof initialState.errors;
+      },
+) => {
   switch (action.type) {
     case "set_form": {
       return {
@@ -37,12 +52,20 @@ const FormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const ConfigureHealthFacility = (props: any) => {
+export interface IConfigureHealthFacilityProps {
+  facilityId: string;
+}
+
+export const ConfigureHealthFacility = (
+  props: IConfigureHealthFacilityProps,
+) => {
+  const { t } = useTranslation();
+
   const [state, dispatch] = useReducer(FormReducer, initialState);
   const { facilityId } = props;
   const [isLoading, setIsLoading] = useState(false);
 
-  const { loading } = useQuery(routes.abha.getHealthFacility, {
+  const { loading } = useQuery(routes.abdm.healthFacility.get, {
     pathParams: { facility_id: facilityId },
     silent: true,
     onResponse(res) {
@@ -66,7 +89,7 @@ export const ConfigureHealthFacility = (props: any) => {
     if (!state.form.hf_id) {
       dispatch({
         type: "set_error",
-        errors: { hf_id: ["Health Facility Id is required"] },
+        errors: { hf_id: t("health_facility__validation__hf_id_required") },
       });
       setIsLoading(false);
       return;
@@ -76,7 +99,7 @@ export const ConfigureHealthFacility = (props: any) => {
     let responseData = null;
     if (state.form.hf_id === state.form.health_facility?.hf_id) {
       const { res, data } = await request(
-        routes.abha.registerHealthFacilityAsService,
+        routes.abdm.healthFacility.registerAsService,
         {
           pathParams: {
             facility_id: facilityId,
@@ -87,7 +110,7 @@ export const ConfigureHealthFacility = (props: any) => {
       responseData = data;
     } else if (state.form.health_facility) {
       const { res, data } = await request(
-        routes.abha.partialUpdateHealthFacility,
+        routes.abdm.healthFacility.partialUpdate,
         {
           pathParams: {
             facility_id: facilityId,
@@ -100,11 +123,12 @@ export const ConfigureHealthFacility = (props: any) => {
       response = res;
       responseData = data;
     } else {
-      const { res, data } = await request(routes.abha.createHealthFacility, {
+      const { res, data } = await request(routes.abdm.healthFacility.create, {
         body: {
           facility: facilityId,
           hf_id: state.form.hf_id,
         },
+        silent: true,
       });
       response = res;
       responseData = data;
@@ -112,18 +136,21 @@ export const ConfigureHealthFacility = (props: any) => {
 
     if (response?.ok && responseData?.registered) {
       Notification.Success({
-        msg: "Health Facility config updated successfully",
+        msg: t("health_facility__config_update_success"),
       });
       navigate(`/facility/${facilityId}`);
     } else {
       if (responseData?.registered === false) {
         Notification.Warn({
-          msg: responseData?.detail || "Health ID registration failed",
+          msg:
+            responseData?.detail ||
+            t("health_facility__config_registration_error"),
         });
         navigate(`/facility/${facilityId}`);
       } else {
         Notification.Error({
-          msg: responseData?.detail || "Health Facility config update failed",
+          msg:
+            responseData?.detail || t("health_facility__config_update_error"),
         });
       }
     }
@@ -148,7 +175,7 @@ export const ConfigureHealthFacility = (props: any) => {
           <div>
             <TextFormField
               name="hf_id"
-              label="Health Facility Id"
+              label={t("health_facility__hf_id")}
               trailing={
                 <p
                   className={classNames(
@@ -162,32 +189,31 @@ export const ConfigureHealthFacility = (props: any) => {
                     <>
                       <div className="tooltip-text -ml-20 -mt-36 flex w-48 flex-col gap-4 whitespace-break-spaces">
                         <span className="text-secondary-100">
-                          The ABDM health facility is successfully linked with
-                          care{" "}
-                          <strong>and registered as a service in bridge</strong>
+                          {t("health_facility__registered_1.1")}{" "}
+                          <strong>
+                            {t("health_facility__registered_1.2")}
+                          </strong>
                         </span>
                         <span className="text-green-100">
-                          No Action Required.
+                          {t("health_facility__registered_2")}
                         </span>
                       </div>
-                      Registered
+                      {t("health_facility__registered_3")}
                     </>
                   ) : (
                     <>
                       <div className="tooltip-text -ml-20 -mt-44 flex w-48 flex-col gap-4 whitespace-break-spaces">
                         <span className="text-secondary-100">
-                          The ABDM health facility is successfully linked with
-                          care{" "}
+                          {t("health_facility__not_registered_1.1")}{" "}
                           <strong>
-                            but not registered as a service in bridge
+                            {t("health_facility__not_registered_1.2")}
                           </strong>
                         </span>
                         <span className="text-warning-100">
-                          Click on <strong>Link Health Facility</strong> to
-                          register the service
+                          {t("health_facility__not_registered_2")}
                         </span>
+                        {t("health_facility__not_registered_3")}
                       </div>
-                      Not Registered
                     </>
                   )}
                 </p>
@@ -206,7 +232,7 @@ export const ConfigureHealthFacility = (props: any) => {
               state.form.hf_id === state.form.health_facility?.hf_id &&
               state.form.health_facility?.registered
             }
-            label="Link Health Facility"
+            label={t("health_facility__link")}
           />
         </div>
       </form>

@@ -1,6 +1,6 @@
+import { Link, navigate } from "raviger";
+import { useEffect, useState } from "react";
 import * as Notification from "../../Utils/Notifications";
-
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
 
 import {
   DISCHARGE_REASONS,
@@ -18,33 +18,31 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
-import { useEffect, useState } from "react";
+import ButtonV2, { buttonStyles } from "../Common/components/ButtonV2";
 
-import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
 import CircularProgress from "../Common/components/CircularProgress";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
-import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Page from "../Common/components/Page";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import { SampleTestCard } from "./SampleTestCard";
 import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
-import { navigate } from "raviger";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
+import request from "../../Utils/request/request";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import { isPatientMandatoryDataFilled } from "./Utils";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
 import { Button } from "@/Components/ui/button";
-
 import Loading from "@/Components/Common/Loading";
 import { Avatar } from "../Common/Avatar";
 export const parseOccupation = (occupation: string | undefined) => {
@@ -346,14 +344,46 @@ export const PatientHome = (props: any) => {
             </Button>
           </Alert>
         )}
+        {isPatientMandatoryDataFilled(patientData) &&
+          (patientData?.facility != patientData?.last_consultation?.facility ||
+            (patientData.is_active &&
+              patientData?.last_consultation?.discharge_date)) && (
+            <div className="relative my-2">
+              <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
+                <div className="text-center">
+                  <p className="font-bold text-red-800">
+                    <CareIcon icon="l-exclamation-triangle" className="mr-2" />
+                    <span className="inline">
+                      {t("consultation_missing_warning")}{" "}
+                      <strong>
+                        {patientData.facility_object?.name || "-"}{" "}
+                      </strong>
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center">
+                <Link
+                  href={`/facility/${patientData?.facility}/patient/${id}/consultation`}
+                  className={classNames(
+                    buttonStyles({}),
+                    "mb-2 w-full",
+                    !patientData.is_active &&
+                      "pointer-events-none cursor-not-allowed opacity-50",
+                  )}
+                >
+                  {t("create_consultation")}
+                </Link>
+              </div>
+            </div>
+          )}
         <div>
           <div>
             <div className="flex flex-row gap-x-4">
               <div className="w-14">
                 <Avatar
-                  className="size-10 rounded-md md:size-auto"
+                  className="size-10 text-green-800 md:size-auto"
                   name={patientData.name || "Unknown"}
-                  square={true}
                   colors={["#86efac", "#14532d"]}
                 />
               </div>
@@ -493,135 +523,6 @@ export const PatientHome = (props: any) => {
             <section className="lg:flex" data-testid="patient-dashboard">
               <div className="lg:w-3/5">
                 <div className="flex h-full flex-col justify-between">
-                  <div>
-                    {/* <div className="flex flex-row gap-x-2">
-         <div className="w-14 rounded">
-           <Avatar
-             className="size-10 md:size-auto"
-             name={patientData.name || "Unknown"}
-             square={true}
-             colors={["#86efac", "#14532d"]}
-           />
-         </div>
-         <div>
-           <h1 className="text-2xl font-bold capitalize">
-             {patientData.name}
-           </h1>
-           <h3 className="text-sm font-medium text-gray-500">
-             {formatPatientAge(patientData, true)},{"  "}
-             {patientGender}
-           </h3>
-         </div>
-         <div className="mx-5 mt-3">
-           <h1 className="text-sm text-gray-500">UHID</h1>
-           <h1 className="text-sm text-gray-900">UHID</h1>
-         </div>
-         <div className="ml-auto mr-9 flex flex-wrap gap-3">
-           {patientData.is_vaccinated && (
-             <Chip
-               variant="custom"
-               className="bg-blue-100 text-blue-800"
-               startIcon="l-syringe"
-               text="Vaccinated"
-             />
-           )}
-           {patientData.allow_transfer ? (
-             <Chip
-               variant="warning"
-               startIcon="l-unlock"
-               text="Transfer Allowed"
-             />
-           ) : (
-             <Chip startIcon="l-lock" text="Transfer Blocked" />
-           )}
-           {patientData.gender === 2 && (
-             <>
-               {patientData.is_antenatal &&
-                 isAntenatal(
-                   patientData.last_menstruation_start_date,
-                 ) && (
-                   <Chip
-                     variant="custom"
-                     className="border-pink-300 bg-pink-100 text-pink-600"
-                     startIcon="l-baby-carriage"
-                     text="Antenatal"
-                   />
-                 )}
-               {isPostPartum(patientData.date_of_delivery) && (
-                 <Chip
-                   variant="custom"
-                   className="border-pink-300 bg-pink-100 text-pink-600"
-                   startIcon="l-baby-carriage"
-                   text="Post-partum"
-                 />
-               )}
-             </>
-           )}
-           {patientData.last_consultation?.is_telemedicine && (
-             <Chip
-               variant="alert"
-               startIcon="l-phone"
-               text="Telemedicine"
-             />
-           )}
-         </div>
-       </div> */}
-                    {/* <div className="flex flex-row gap-4">
-         <h1 className="flex flex-row pb-3 text-2xl font-bold capitalize">
-           {patientData.name} - {formatPatientAge(patientData, true)}
-         </h1>
-         <div className="ml-auto mr-9 flex flex-wrap gap-3">
-           {patientData.is_vaccinated && (
-             <Chip
-               variant="custom"
-               className="bg-blue-100 text-blue-800"
-               startIcon="l-syringe"
-               text="Vaccinated"
-             />
-           )}
-           {patientData.allow_transfer ? (
-             <Chip
-               variant="warning"
-               startIcon="l-unlock"
-               text="Transfer Allowed"
-             />
-           ) : (
-             <Chip startIcon="l-lock" text="Transfer Blocked" />
-           )}
-           {patientData.gender === 2 && (
-             <>
-               {patientData.is_antenatal &&
-                 isAntenatal(
-                   patientData.last_menstruation_start_date,
-                 ) && (
-                   <Chip
-                     variant="custom"
-                     className="border-pink-300 bg-pink-100 text-pink-600"
-                     startIcon="l-baby-carriage"
-                     text="Antenatal"
-                   />
-                 )}
-               {isPostPartum(patientData.date_of_delivery) && (
-                 <Chip
-                   variant="custom"
-                   className="border-pink-300 bg-pink-100 text-pink-600"
-                   startIcon="l-baby-carriage"
-                   text="Post-partum"
-                 />
-               )}
-             </>
-           )}
-           {patientData.last_consultation?.is_telemedicine && (
-             <Chip
-               variant="alert"
-               startIcon="l-phone"
-               text="Telemedicine"
-             />
-           )}
-         </div>
-       </div> */}
-                  </div>
-
                   <div className="pb-2 pl-5 pt-5">
                     <div>
                       <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
@@ -1694,708 +1595,11 @@ export const PatientHome = (props: any) => {
                 </section>
               </div>
             </section>
-
+            {/* 
             <section
               className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2"
               data-testid="patient-details"
-            >
-              {/* <div className="w-full">
-   <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-     <div className="border-b border-dashed pb-2 text-xl font-bold text-secondary-900">
-       Location
-     </div>
-     <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-       <div className="sm:col-span-1">
-         <div className="text-sm font-semibold leading-5 text-zinc-400">
-           Address
-         </div>
-         <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-           {patientData.address || "-"}
-         </div>
-       </div>
-       <div className="sm:col-span-1">
-         <div className="text-sm font-semibold leading-5 text-zinc-400">
-           District
-         </div>
-         <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-           {patientData.district_object?.name || "-"}
-         </div>
-       </div>
-       <div className="sm:col-span-1">
-         <div className="text-sm font-semibold leading-5 text-zinc-400">
-           Village
-         </div>
-         <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-           {patientData.village || "-"}
-         </div>
-       </div>
-       <div className="sm:col-span-1">
-         <div className="text-sm font-semibold leading-5 text-zinc-400">
-           Ward
-         </div>
-         <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-           {(patientData.ward_object &&
-             patientData.ward_object.number +
-               ", " +
-               patientData.ward_object.name) ||
-             "-"}
-         </div>
-       </div>
-       <div className="sm:col-span-1">
-         <div className="text-sm font-semibold leading-5 text-zinc-400">
-           State, Country - Pincode
-         </div>
-         <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-           {patientData?.state_object?.name},
-           {patientData.nationality || "-"} - {patientData.pincode}
-         </div>
-       </div>
-       <div className="sm:col-span-1">
-         <div className="text-sm font-semibold leading-5 text-zinc-400">
-           Local Body
-         </div>
-         <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-           {patientData.local_body_object?.name || "-"}
-         </div>
-       </div>
-     </div>
-   </div>
- </div> */}
-              {/* <div className="w-full">
-   <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-     <div className="border-b border-dashed pb-2 text-xl font-bold text-secondary-900">
-       Medical
-     </div>
-     {!patientData.present_health &&
-       !patientData.allergies &&
-       !patientData.ongoing_medication &&
-       !(patientData.gender === 2 && patientData.is_antenatal) &&
-       !patientData.medical_history?.some(
-         (history) => history.disease !== "NO",
-       ) && (
-         <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
-           No Medical History Available
-         </div>
-       )}
-     <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-3 md:gap-y-8">
-       {patientData.present_health && (
-         <div className="sm:col-span-1">
-           <div className="text-sm font-semibold leading-5 text-zinc-400">
-             Present Health
-           </div>
-           <div
-             data-testid="patient-present-health"
-             className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
-           >
-             {patientData.present_health}
-           </div>
-         </div>
-       )}
-       {patientData.ongoing_medication && (
-         <div className="sm:col-span-1">
-           <div className="text-sm font-semibold leading-5 text-zinc-400">
-             Ongoing Medications
-           </div>
-           <div
-             data-testid="patient-ongoing-medication"
-             className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
-           >
-             {patientData.ongoing_medication}
-           </div>
-         </div>
-       )}
-       {patientData.allergies && (
-         <div className="sm:col-span-1">
-           <div className="text-sm font-semibold leading-5 text-zinc-400">
-             Allergies
-           </div>
-           <div
-             data-testid="patient-allergies"
-             className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
-           >
-             {patientData.allergies}
-           </div>
-         </div>
-       )}
-       {patientData.gender === 2 && patientData.is_antenatal && (
-         <div className="sm:col-span-1">
-           <div className="text-sm font-semibold leading-5 text-zinc-400">
-             Is pregnant
-           </div>
-           <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-             Yes
-           </div>
-         </div>
-       )}
-       {patientMedHis}
-     </div>
-   </div>
- </div> */}
-
-              {/* <InsuranceDetialsCard
-   data={insuranceDetials?.results[0]}
-   showViewAllDetails={
-     insuranceDetials?.count !== undefined &&
-     insuranceDetials?.count > 1
-   }
- /> */}
-            </section>
-            {/* <section className="mt-7 h-full space-y-2 rounded-lg bg-white p-4 text-secondary-100 shadow">
-              <div
-                className="flex cursor-pointer justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-secondary-900"
-                onClick={() => {
-                  setShowShifts(!showShifts);
-                  setIsShiftClicked(true);
-                }}
-              >
-                <div>Shifting</div>
-                {showShifts ? (
-                  <CareIcon icon="l-angle-up" className="text-2xl" />
-                ) : (
-                  <CareIcon icon="l-angle-down" className="text-2xl" />
-                )}
-              </div>
-              <div
-                className={
-                  showShifts
-                    ? activeShiftingData?.count || 0
-                      ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-                      : ""
-                    : "hidden"
-                }
-              >
-                {activeShiftingData?.count ? (
-                  activeShiftingData.results.map((shift: any) => (
-                    <div key={`shift_${shift.id}`} className="mx-2">
-                      <div className="h-full overflow-hidden rounded-lg bg-white shadow">
-                        <div className="flex h-full flex-col justify-between p-4">
-                          <div>
-                            <div className="mt-1 flex justify-between">
-                              <div>
-                                {shift.emergency && (
-                                  <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
-                                    Emergency
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
-                              <div className="sm:col-span-1">
-                                <dt
-                                  title="Shifting status"
-                                  className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
-                                >
-                                  <CareIcon
-                                    icon="l-truck"
-                                    className="mr-2 text-lg"
-                                  />
-                                  <dd className="text-sm font-bold leading-5 text-secondary-900">
-                                    {shift.status}
-                                  </dd>
-                                </dt>
-                              </div>
-                              <div className="sm:col-span-1">
-                                <dt
-                                  title=" Origin facility"
-                                  className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
-                                >
-                                  <CareIcon
-                                    icon="l-plane-fly"
-                                    className="mr-2 text-lg"
-                                  />
-                                  <dd className="text-sm font-bold leading-5 text-secondary-900">
-                                    {(shift.origin_facility_object || {})?.name}
-                                  </dd>
-                                </dt>
-                              </div>
-                              <div className="sm:col-span-1">
-                                <dt
-                                  title="Shifting approving facility"
-                                  className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
-                                >
-                                  <CareIcon
-                                    icon="l-user-check"
-                                    className="mr-2 text-lg"
-                                  />
-                                  <dd className="text-sm font-bold leading-5 text-secondary-900">
-                                    {
-                                      (
-                                        shift.shifting_approving_facility_object ||
-                                        {}
-                                      )?.name
-                                    }
-                                  </dd>
-                                </dt>
-                              </div>
-                              <div className="sm:col-span-1">
-                                <dt
-                                  title=" Assigned facility"
-                                  className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
-                                >
-                                  <CareIcon
-                                    icon="l-plane-arrival"
-                                    className="mr-2 text-lg"
-                                  />
-                                  <dd className="text-sm font-bold leading-5 text-secondary-900">
-                                    {(shift.assigned_facility_object || {})
-                                      ?.name || "Yet to be decided"}
-                                  </dd>
-                                </dt>
-                              </div>
-
-                              <div className="sm:col-span-1">
-                                <dt
-                                  title="  Last Modified"
-                                  className={
-                                    "flex items-center text-sm font-medium leading-5 " +
-                                    (dayjs()
-                                      .subtract(2, "hours")
-                                      .isBefore(shift.modified_date)
-                                      ? "text-secondary-900"
-                                      : "rounded p-1 font-normal text-red-600")
-                                  }
-                                >
-                                  <CareIcon
-                                    icon="l-stopwatch"
-                                    className="mr-2 text-lg"
-                                  />
-                                  <dd className="text-sm font-bold leading-5">
-                                    {formatDateTime(shift.modified_date) ||
-                                      "--"}
-                                  </dd>
-                                </dt>
-                              </div>
-                            </dl>
-                          </div>
-
-                          <div className="mt-2 flex">
-                            <ButtonV2
-                              className="mr-2 w-full bg-white hover:bg-secondary-100"
-                              variant="secondary"
-                              onClick={() =>
-                                navigate(`/shifting/${shift.external_id}`)
-                              }
-                            >
-                              <CareIcon icon="l-eye" className="mr-2 text-lg" />
-                              All Details
-                            </ButtonV2>
-                          </div>
-                          {shift.status === "COMPLETED" &&
-                            shift.assigned_facility && (
-                              <div className="mt-2">
-                                <ButtonV2
-                                  size="small"
-                                  className="w-full"
-                                  disabled={
-                                    !shift.patient_object.allow_transfer ||
-                                    !(
-                                      ["DistrictAdmin", "StateAdmin"].includes(
-                                        authUser.user_type,
-                                      ) ||
-                                      authUser.home_facility_object?.id ===
-                                        shift.assigned_facility
-                                    )
-                                  }
-                                  onClick={() => setModalFor(shift.external_id)}
-                                >
-                                  {t("transfer_to_receiving_facility")}
-                                </ButtonV2>
-                                <ConfirmDialog
-                                  title="Confirm Transfer Complete"
-                                  description="Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient"
-                                  show={modalFor === shift.external_id}
-                                  action="Confirm"
-                                  onClose={() =>
-                                    setModalFor({
-                                      externalId: undefined,
-                                      loading: false,
-                                    })
-                                  }
-                                  onConfirm={() =>
-                                    handleTransferComplete(shift)
-                                  }
-                                />
-                              </div>
-                            )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center text-secondary-500">
-                    {isShiftDataLoading ? "Loading..." : "No Shifting Records!"}
-                  </div>
-                )}
-              </div>
-            </section> */}
-            {/* <section className="mt-4 space-y-2 md:flex">
-              <div className="hidden lg:block">
-                <div className="mt-4 grid grid-cols-6 gap-5 xl:grid-cols-7">
-                  <div
-                    className={classNames(
-                      "w-full rounded-lg border",
-                      isPatientEligibleForNewConsultation(patientData)
-                        ? "cursor-pointer border-green-700 hover:bg-primary-400"
-                        : "border-secondary-700 text-secondary-700 hover:cursor-not-allowed",
-                    )}
-                    onClick={() =>
-                      isPatientEligibleForNewConsultation(patientData) &&
-                      navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                      )
-                    }
-                  >
-                    <div
-                      className={classNames(
-                        "h-full space-y-2 rounded-lg bg-white p-4 shadow",
-                        isPatientEligibleForNewConsultation(patientData) &&
-                          "hover:bg-secondary-200",
-                      )}
-                    >
-                      <div
-                        className={classNames(
-                          "text-center",
-                          isPatientEligibleForNewConsultation(patientData) &&
-                            "text-green-700",
-                        )}
-                      >
-                        <span>
-                          <CareIcon
-                            icon="l-chat-bubble-user"
-                            className="text-5xl"
-                          />
-                        </span>
-                      </div>
-
-                      <div>
-                        <p className="text-center text-sm font-medium">
-                          Add Consultation
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="w-full"
-                    onClick={() =>
-                      navigate(`/patient/${id}/investigation_reports`)
-                    }
-                  >
-                    <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-secondary-200">
-                      <div className="text-center text-green-700">
-                        <span>
-                          <CareIcon
-                            icon="l-file-search-alt"
-                            className="text-5xl"
-                          />
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-center text-sm font-medium">
-                          Investigations Summary
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="w-full"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/files/`,
-                      )
-                    }
-                  >
-                    <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-secondary-200">
-                      <div className="text-center text-green-700">
-                        <span>
-                          <CareIcon icon="l-file-upload" className="text-5xl" />
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-center text-sm font-medium">
-                          View/Upload Patient Files
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="w-full"
-                    onClick={() => {
-                      if (!isPatientInactive(patientData, facilityId)) {
-                        navigate(
-                          `/facility/${facilityId}/patient/${id}/shift/new`,
-                        );
-                      }
-                    }}
-                  >
-                    <div
-                      className={`h-full space-y-2 rounded-lg border bg-white p-4 shadow ${
-                        isPatientInactive(patientData, facilityId)
-                          ? "border-secondary-700 hover:cursor-not-allowed"
-                          : "border-green-700 hover:cursor-pointer hover:bg-secondary-200"
-                      } `}
-                    >
-                      <div
-                        className={`${
-                          isPatientInactive(patientData, facilityId)
-                            ? "text-secondary-700"
-                            : "text-green-700"
-                        } text-center`}
-                      >
-                        <span>
-                          <CareIcon icon="l-ambulance" className="text-5xl" />
-                        </span>
-                      </div>
-
-                      <div>
-                        <p
-                          className={`${
-                            isPatientInactive(patientData, facilityId) &&
-                            "text-secondary-700"
-                          } text-center text-sm font-medium`}
-                        >
-                          Shift Patient
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="w-full"
-                    onClick={() => {
-                      if (!isPatientInactive(patientData, facilityId)) {
-                        navigate(
-                          `/facility/${patientData?.facility}/patient/${id}/sample-test`,
-                        );
-                      }
-                    }}
-                  >
-                    <div
-                      className={classNames(
-                        "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
-                        isPatientInactive(patientData, facilityId)
-                          ? "border-secondary-700 hover:cursor-not-allowed"
-                          : "border-green-700 hover:cursor-pointer hover:bg-secondary-200",
-                      )}
-                    >
-                      <div
-                        className={`${
-                          isPatientInactive(patientData, facilityId)
-                            ? "text-secondary-700"
-                            : "text-green-700"
-                        } text-center`}
-                      >
-                        <span>
-                          <CareIcon icon="l-medkit" className="text-5xl" />
-                        </span>
-                      </div>
-                      <div>
-                        <p
-                          className={`${
-                            isPatientInactive(patientData, facilityId) &&
-                            "text-secondary-700"
-                          } text-center text-sm font-medium`}
-                        >
-                          Request Sample Test
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="w-full"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/notes`,
-                      )
-                    }
-                  >
-                    <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-secondary-200">
-                      <div className="text-center text-green-700">
-                        <span>
-                          <CareIcon
-                            icon="l-clipboard-notes"
-                            className="text-5xl"
-                          />
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-center text-sm font-medium">
-                          View Patient Notes
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="w-full"
-                    onClick={() => {
-                      if (!isPatientInactive(patientData, facilityId)) {
-                        setOpenAssignVolunteerDialog(true);
-                      }
-                    }}
-                  >
-                    <div
-                      className={classNames(
-                        "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
-                        isPatientInactive(patientData, facilityId)
-                          ? "border-secondary-700 hover:cursor-not-allowed"
-                          : "border-green-700 hover:cursor-pointer hover:bg-secondary-200",
-                      )}
-                    >
-                      <div
-                        className={classNames(
-                          "text-center",
-                          isPatientInactive(patientData, facilityId)
-                            ? "text-secondary-700"
-                            : "text-green-700",
-                        )}
-                      >
-                        <span>
-                          <CareIcon icon="l-users-alt" className="text-5xl" />
-                        </span>
-                      </div>
-                      <div>
-                        <p
-                          className={classNames(
-                            "text-center text-sm font-medium",
-                            isPatientInactive(patientData, facilityId)
-                              ? "text-secondary-700"
-                              : "text-black",
-                          )}
-                        >
-                          Assign to a volunteer
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="mx-2 w-full lg:hidden">
-                <div className="h-full space-y-2 rounded-lg bg-white p-4 shadow">
-                  <div className="space-y-2 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
-                    <div>
-                      <ButtonV2
-                        className="w-full"
-                        disabled={
-                          !(
-                            patientData.is_active &&
-                            (!patientData?.last_consultation ||
-                              patientData?.last_consultation?.discharge_date)
-                          )
-                        }
-                        onClick={() =>
-                          navigate(
-                            `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                          )
-                        }
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon
-                            icon="l-chat-bubble-user"
-                            className="text-xl"
-                          />
-                          Add Consultation
-                        </span>
-                      </ButtonV2>
-                    </div>
-                    <div>
-                      <ButtonV2
-                        className="w-full"
-                        onClick={() =>
-                          navigate(`/patient/${id}/investigation_reports`)
-                        }
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon
-                            icon="l-file-search-alt"
-                            className="text-xl"
-                          />
-                          Investigations Summary
-                        </span>
-                      </ButtonV2>
-                    </div>
-                    <div>
-                      <ButtonV2
-                        className="w-full"
-                        id="upload-patient-files"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${patientData?.facility}/patient/${id}/files`,
-                          )
-                        }
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon icon="l-file-upload" className="text-xl" />
-                          View/Upload Patient Files
-                        </span>
-                      </ButtonV2>
-                    </div>
-                    <div>
-                      <ButtonV2
-                        className="w-full"
-                        disabled={isPatientInactive(patientData, facilityId)}
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/patient/${id}/shift/new`,
-                          )
-                        }
-                        authorizeFor={NonReadOnlyUsers}
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon icon="l-ambulance" className="text-xl" />
-                          Shift Patient
-                        </span>
-                      </ButtonV2>
-                    </div>
-                    <div>
-                      <ButtonV2
-                        className="w-full"
-                        disabled={isPatientInactive(patientData, facilityId)}
-                        onClick={() =>
-                          navigate(
-                            `/facility/${patientData?.facility}/patient/${id}/sample-test`,
-                          )
-                        }
-                        authorizeFor={NonReadOnlyUsers}
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon icon="l-medkit" className="text-xl" />
-                          Request Sample Test
-                        </span>
-                      </ButtonV2>
-                    </div>
-                    <div>
-                      <ButtonV2
-                        className="w-full"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${patientData?.facility}/patient/${id}/notes`,
-                          )
-                        }
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon
-                            icon="l-clipboard-notes"
-                            className="text-xl"
-                          />
-                          View Patient Notes
-                        </span>
-                      </ButtonV2>
-                    </div>
-                    <div>
-                      <ButtonV2
-                        className="w-full"
-                        onClick={() => setOpenAssignVolunteerDialog(true)}
-                        disabled={false}
-                        authorizeFor={NonReadOnlyUsers}
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon icon="l-users-alt" className="text-xl" />
-                          Assign to a volunteer
-                        </span>
-                      </ButtonV2>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section> */}
+            ></section> */}
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
-import React from "react";
+import { cn } from "@/lib/utils";
+import React, { useEffect, useRef, useState } from "react";
 
 const colors: string[] = [
   "#E6F3FF", // Light Blue
@@ -47,43 +48,54 @@ const initials = (name: string): string => {
 interface AvatarProps {
   colors?: [string, string];
   name: string;
+  imageUrl?: string;
   className?: string;
-  square?: boolean; // New prop to determine if the avatar should be square
 }
 
 const Avatar: React.FC<AvatarProps> = ({
   colors: propColors,
   name,
+  imageUrl,
   className,
-  square = false, // Default to false for backwards compatibility
 }) => {
-  const [bgColor, fgColor] = propColors || toColor(name);
+  const [bgColor] = propColors || toColor(name);
+  const [width, setWidth] = useState(0);
+  const avatarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      const avatarRect = avatarRef.current?.getBoundingClientRect();
+      const width = avatarRect?.width || 0;
+      setWidth(width);
+    };
+    updateWidth();
+    document.addEventListener("resize", updateWidth);
+    return () => document.removeEventListener("resize", updateWidth);
+  }, []);
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      version="1.1"
-      viewBox="0 0 100 100"
-      className={className}
-    >
-      {square ? (
-        <rect width="100" height="100" fill={bgColor} />
-      ) : (
-        <circle cx="50" cy="50" r="50" fill={bgColor} />
+    <div
+      ref={avatarRef}
+      className={cn(
+        `flex aspect-square w-full items-center justify-center overflow-hidden border border-black/10 font-black text-black/10`,
+        className,
       )}
-      <text
-        fill={fgColor}
-        fontSize="42"
-        fontFamily="sans-serif"
-        x="50"
-        y="54"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        alignmentBaseline="middle"
-      >
-        {initials(name)}
-      </text>
-    </svg>
+      style={{
+        background: bgColor,
+        borderRadius: width / 15 + "px",
+        fontSize: width / 2.5 + "px",
+      }}
+    >
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={name}
+          className="aspect-square w-full object-cover"
+        />
+      ) : (
+        <div>{initials(name)}</div>
+      )}
+    </div>
   );
 };
 

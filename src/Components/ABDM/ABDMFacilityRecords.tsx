@@ -1,33 +1,35 @@
 import { Link } from "raviger";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import { formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { useTranslation } from "react-i18next";
 
 interface IProps {
   facilityId: string;
 }
 
 const TableHeads = [
-  "Patient",
-  "Status",
-  "Created On",
-  "Consent Granted On",
-  // "Requested By",
-  "Health Information Range",
-  "Expires On",
-  "HI Profiles",
+  "consent__patient",
+  "consent__status",
+  "created_on",
+  "updated_on",
+  "consent__hi_range",
+  "expires_on",
+  "consent__hi_types",
 ];
 
 export default function ABDMFacilityRecords({ facilityId }: IProps) {
+  const { t } = useTranslation();
+
   const {
     data: consentsResult,
     loading,
     refetch,
-  } = useQuery(routes.abha.listConsents, {
+  } = useQuery(routes.abdm.consent.list, {
     query: { facility: facilityId, ordering: "-created_date" },
   });
 
@@ -36,7 +38,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
   }
 
   return (
-    <Page title="Patient Consent List">
+    <Page title={t("facility_consent_requests_page_title")}>
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="sm:flex sm:items-center"></div>
         <div className="mt-8 flow-root">
@@ -51,7 +53,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                           scope="col"
                           className="px-3 py-3.5 text-center text-sm font-semibold text-secondary-900"
                         >
-                          {head}
+                          {t(head)}
                         </th>
                       ))}
                       <th
@@ -63,9 +65,9 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                           ghost
                           className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
                         >
-                          <CareIcon icon="l-refresh" /> Refresh
+                          <CareIcon icon="l-refresh" /> {t("refresh")}
                         </ButtonV2>
-                        <span className="sr-only">View</span>
+                        <span className="sr-only">{t("view")}</span>
                       </th>
                     </tr>
                   </thead>
@@ -84,9 +86,13 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                             consent.consent_artefacts?.[0]?.expiry ??
                               consent.expiry,
                           ) < new Date()
-                            ? "EXPIRED"
-                            : (consent.consent_artefacts?.[0]?.status ??
-                              consent.status)}
+                            ? t("consent__status__EXPIRED")
+                            : t(
+                                `consent__status__${
+                                  consent.consent_artefacts?.[0]?.status ??
+                                  consent.status
+                                }`,
+                              )}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
@@ -94,11 +100,30 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
-                          {consent.consent_artefacts.length
-                            ? formatDateTime(
-                                consent.consent_artefacts[0].created_date,
-                              )
-                            : "-"}
+                          {consent.status === "EXPIRED" ||
+                          new Date(
+                            consent.consent_artefacts?.[0]?.expiry ??
+                              consent.expiry,
+                          ) < new Date() ? (
+                            <p className="flex flex-col items-center gap-1">
+                              {formatDateTime(
+                                consent.consent_artefacts?.[0]?.expiry ??
+                                  consent.expiry,
+                              )}
+                              <span className="text-sm text-secondary-600">
+                                {t("expired_on")}
+                              </span>
+                            </p>
+                          ) : consent.status === "REQUESTED" ? (
+                            "-"
+                          ) : (
+                            <p className="flex flex-col items-center gap-1">
+                              {formatDateTime(consent.modified_date)}
+                              <span className="text-sm text-secondary-600">
+                                {t(`${consent.status.toLowerCase()}_on`)}
+                              </span>
+                            </p>
+                          )}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
@@ -127,7 +152,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               consent.hi_types
                             )?.map((hiType) => (
                               <span className="mb-2 mr-2 rounded-full bg-secondary-100 px-2 py-1 text-xs font-medium text-secondary-600">
-                                {hiType}
+                                {t(`consent__hi_type__${hiType}`)}
                               </span>
                             ))}
                           </div>
@@ -135,26 +160,22 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
 
                         <td className="sticky right-0 whitespace-nowrap bg-white py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <div className="flex flex-col items-center justify-center gap-2">
-                            {(consent.consent_artefacts?.[0]?.status ??
-                              consent.status) === "GRANTED" &&
-                            new Date(
-                              consent.consent_artefacts?.[0]?.expiry ??
-                                consent.expiry,
-                            ) > new Date() ? (
-                              <Link
-                                key={consent.id}
-                                href={`/abdm/health-information/${consent.id}`}
-                                className={
-                                  "cursor-pointer text-primary-600 hover:text-primary-900"
-                                }
-                              >
-                                View
-                              </Link>
-                            ) : (
-                              <p className="cursor-not-allowed text-secondary-600 opacity-70">
-                                View
-                              </p>
-                            )}
+                            <Link
+                              key={consent.id}
+                              href={`/abdm/health-information/${consent.id}`}
+                              className={classNames(
+                                (consent.consent_artefacts?.[0]?.status ??
+                                  consent.status) === "GRANTED" &&
+                                  new Date(
+                                    consent.consent_artefacts?.[0]?.expiry ??
+                                      consent.expiry,
+                                  ) > new Date()
+                                  ? "cursor-pointer text-primary-600 hover:text-primary-900"
+                                  : "pointer-events-none cursor-not-allowed text-secondary-600 opacity-70",
+                              )}
+                            >
+                              {t("view")}
+                            </Link>
                           </div>
                         </td>
                       </tr>

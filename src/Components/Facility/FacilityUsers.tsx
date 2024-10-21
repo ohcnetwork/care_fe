@@ -4,7 +4,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
 import { formatName, isUserOnline, relativeTime } from "../../Utils/utils";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
+import SlideOver from "../../CAREUI/interactive/SlideOver";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -279,7 +279,7 @@ export default function FacilityUsers(props: any) {
           />
         )}
       </div>
-      <SlideOverCustom
+      <SlideOver
         open={expandFacilityList}
         setOpen={setExpandFacilityList}
         slideFrom="right"
@@ -287,7 +287,7 @@ export default function FacilityUsers(props: any) {
         dialogClass="md:w-[400px]"
       >
         <UserFacilities user={selectedUser} />
-      </SlideOverCustom>
+      </SlideOver>
       <div>
         <div>{manageUsers}</div>
       </div>
