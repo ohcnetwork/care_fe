@@ -12,7 +12,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useCallback } from "react";
 import { parseOptionId } from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -23,12 +23,12 @@ import CountBlock from "../../CAREUI/display/Count";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import { ExportMenu } from "../Common/Export";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
+
 import FilterBadge from "../../CAREUI/display/FilterBadge";
 import PatientFilter from "./PatientFilter";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import SearchInput from "../Form/SearchInput";
+
 import SortDropdownMenu from "../Common/SortDropdown";
 import {
   formatPatientAge,
@@ -57,6 +57,8 @@ import request from "../../Utils/request/request.js";
 import { Avatar } from "../Common/Avatar.js";
 
 import Loading from "@/Components/Common/Loading";
+import SearchByMultipleFields from "@/Components/Common/SearchByMultipleFields";
+
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;
@@ -105,46 +107,6 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [phone_number, setPhoneNumber] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState("");
-  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
-  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
-    useState("");
-
-  const setPhoneNum = (phone_number: string) => {
-    setPhoneNumber(phone_number);
-    if (phone_number.length >= 13) {
-      setPhoneNumberError("");
-      updateQuery({ phone_number });
-      return;
-    }
-
-    if (phone_number === "+91" || phone_number === "") {
-      setPhoneNumberError("");
-      qParams.phone_number && updateQuery({ phone_number: null });
-      return;
-    }
-
-    setPhoneNumberError("Enter a valid number");
-  };
-
-  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
-    setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length >= 13) {
-      setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number });
-      return;
-    }
-
-    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
-      setEmergencyPhoneNumberError("");
-      qParams.emergency_phone_number &&
-        updateQuery({ emergency_phone_number: null });
-      return;
-    }
-
-    setEmergencyPhoneNumberError("Enter a valid number");
-  };
 
   const tabValue =
     qParams.last_consultation__new_discharge_reason ||
@@ -331,14 +293,6 @@ export const PatientManager = () => {
 
   const { loading: isLoading, data } = useQuery(routes.patientList, {
     query: params,
-    onResponse: () => {
-      if (!params.phone_number) {
-        setPhoneNumber("+91");
-      }
-      if (!params.emergency_phone_number) {
-        setEmergencyPhoneNumber("+91");
-      }
-    },
   });
 
   const getTheCategoryFromId = () => {
@@ -791,16 +745,56 @@ export const PatientManager = () => {
     );
   }
 
-  const queryField = <T,>(name: string, defaultValue?: T) => {
-    return {
-      name,
-      value: qParams[name] || defaultValue,
-      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-    };
-  };
-
   const onlyAccessibleFacility =
     permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
+  const searchOptions = [
+    {
+      key: "phone_number",
+      label: "Phone Number",
+      type: "phone" as const,
+      placeholder: "Search by phone number",
+      value: qParams.phone_number || "",
+      shortcut_key: "p",
+    },
+    {
+      key: "name",
+      label: "Name",
+      type: "text" as const,
+      placeholder: "Search by patient name",
+      value: qParams.name || "",
+      shortcut_key: "n",
+    },
+    {
+      key: "patient_no",
+      label: "UHID",
+      type: "text" as const,
+      placeholder: "Search by UHID",
+      value: qParams.patient_no || "",
+      shortcut_key: "u",
+    },
+    {
+      key: "emergency_contact_phone_number",
+      label: "Emergency Contact Phone Number",
+      type: "phone" as const,
+      placeholder: "Search by emergency contact phone number",
+      value: qParams.emergency_contact_phone_number || "",
+      shortcut_key: "e",
+    },
+  ];
+
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      if (key === "phone_number" || key === "emergency_contact_phone_number") {
+        if (value.length >= 13 || value === "+91" || value === "") {
+          updateQuery({ [key]: value });
+        }
+      } else {
+        updateQuery({ [key]: value });
+      }
+    },
+    [updateQuery],
+  );
 
   return (
     <Page
@@ -998,41 +992,10 @@ export const PatientManager = () => {
         </div>
         <div className="col-span-3 w-full">
           <div className="mt-2">
-            <div className="mb-4 mt-1 md:flex md:gap-4">
-              <SearchInput
-                label="Search by Patient"
-                placeholder="Enter patient name"
-                {...queryField("name")}
-                className="w-full grow"
-              />
-              <SearchInput
-                label="Search by IP/OP Number"
-                placeholder="Enter IP/OP Number"
-                secondary
-                {...queryField("patient_no")}
-                className="w-full grow"
-              />
-            </div>
-            <div className="mb-4 md:flex md:gap-4">
-              <PhoneNumberFormField
-                label="Search by Primary Number"
-                {...queryField("phone_number", "+91")}
-                value={phone_number}
-                onChange={(e) => setPhoneNum(e.value)}
-                error={phoneNumberError}
-                types={["mobile", "landline"]}
-                className="w-full grow"
-              />
-              <PhoneNumberFormField
-                label="Search by Emergency Number"
-                {...queryField("emergency_phone_number", "+91")}
-                value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNum(e.value)}
-                error={emergencyPhoneNumberError}
-                types={["mobile", "landline"]}
-                className="w-full"
-              />
-            </div>
+            <SearchByMultipleFields
+              options={searchOptions}
+              onSearch={handleSearch}
+            />
           </div>
         </div>
       </div>
