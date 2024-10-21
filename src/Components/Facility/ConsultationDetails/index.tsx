@@ -36,6 +36,7 @@ import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 import Error404 from "../../ErrorPages/404";
+import { DiscussionNotesFiles } from "../../Patient/DiscussionNotesFiles";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../../Utils/request/useQuery";
 
@@ -56,6 +57,7 @@ const TABS = {
   SUMMARY: ConsultationSummaryTab,
   MEDICINES: ConsultationMedicinesTab,
   FILES: ConsultationFilesTab,
+  DISCUSSION_NOTES_FILES: DiscussionNotesFiles,
   INVESTIGATIONS: ConsultationInvestigationsTab,
   ABG: ConsultationABGTab,
   NURSING: ConsultationNursingTab,
