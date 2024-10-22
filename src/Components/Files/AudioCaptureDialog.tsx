@@ -3,7 +3,7 @@ import useRecorder from "../../Utils/useRecorder";
 import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTimer } from "../../Utils/useTimer";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 import * as Notify from "../../Utils/Notifications";
 
 export interface AudioCaptureDialogProps {
@@ -21,8 +21,8 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     | "RECORDED";
 
   const { show, onHide, onCapture, autoRecord = false } = props;
-
   const [status, setStatus] = useState<Status | null>(null);
+  const { t } = useTranslation();
 
   const [audioURL, , startRecording, stopRecording, , resetRecording] =
     useRecorder((permission: boolean) => {
@@ -45,7 +45,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       })
       .catch(() => {
         Notify.Error({
-          msg: "Please grant microphone permission to record audio.",
+          msg: t("audio__permission_message"),
         });
         setStatus("PERMISSION_DENIED");
       });
