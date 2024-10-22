@@ -106,7 +106,12 @@ export default function ConfigureCamera(props: Props) {
   if (!["DistrictAdmin", "StateAdmin"].includes(authUser.user_type)) {
     return (
       <div className="w-full overflow-hidden rounded-lg bg-white shadow">
-        <CameraFeed asset={props.asset} key={key} operate={operate} />
+        <CameraFeed
+          asset={props.asset}
+          key={key}
+          operate={operate}
+          hideAssetInfo
+        />
       </div>
     );
   }
@@ -246,6 +251,7 @@ export default function ConfigureCamera(props: Props) {
                 );
               }
             }}
+            hideAssetInfo
           >
             <div className="flex items-center gap-2">
               <Listbox
