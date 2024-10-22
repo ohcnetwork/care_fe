@@ -83,12 +83,11 @@ export default function Breadcrumbs({
         )}
 
         <BreadcrumbItem>
-          <Link href="/" className="text-gray-500">
+          <Link href="/" className="text-gray-500 mr-[0.5px]">
             Home
           </Link>
           {crumbs.length > 2 ? null : <BreadcrumbSeparator />}
         </BreadcrumbItem>
-
         {crumbs.length > 2 && (
           <>
             <BreadcrumbSeparator />
@@ -110,20 +109,24 @@ export default function Breadcrumbs({
                 </DropdownMenuContent>
               </DropdownMenu>
             </BreadcrumbItem>
+            <BreadcrumbSeparator className="md:hidden" />
           </>
         )}
 
         {crumbs.length > 2 && (
-          <div className="hidden gap-1 md:flex">
+          <div className="hidden md:flex">
             {isExpanded ? (
               <>
                 {crumbs.slice(1, -1).map(renderCrumb)}
                 <Button variant="link" className="p-0 font-normal" onClick={toggleCrumbs}></Button>
               </>
             ) : (
-              <Button variant="link" className="p-0 font-normal" onClick={toggleCrumbs}>
-                •••
-              </Button>
+              <div className="flex items-center">
+                <Button variant="link" className="p-0 font-normal" onClick={toggleCrumbs}>
+                  •••
+                </Button>
+                <BreadcrumbSeparator />
+              </div>
             )}
           </div>
         )}
@@ -144,3 +147,5 @@ export default function Breadcrumbs({
     </Breadcrumb>
   );
 }
+
+
