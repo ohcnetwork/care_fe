@@ -275,6 +275,7 @@
   "audio__allow_permission": "Please allow microphone permission in site settings",
   "audio__allow_permission_button": "Click here to know how to allow",
   "audio__allow_permission_helper": "You might have denied microphone access in the past.",
+  "audio__permission_message": "Please grant microphone permission to record audio.",
   "audio__record": "Record Audio",
   "audio__record_helper": "Click the button to start recording",
   "audio__recorded": "Audio Recorded",
