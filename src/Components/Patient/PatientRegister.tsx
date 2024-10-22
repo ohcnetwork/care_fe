@@ -45,7 +45,6 @@ import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import { PatientModel, Occupation, PatientMeta } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
@@ -64,6 +63,8 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { useTranslation } from "react-i18next";
+import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index.js";
+import { AbhaNumberModel } from "../ABDM/types/abha.js";
 import { validatePincode } from "../../Common/validation";
 import careConfig from "@careConfig";
 import { Button } from "@/Components/ui/button";
@@ -71,6 +72,7 @@ import { Button } from "@/Components/ui/button";
 import Loading from "@/Components/Common/Loading";
 import PageTitle from "@/Components/Common/PageTitle";
 import { RestoreDraftButton } from "@/Utils/AutoSave.js";
+import { FormContextValue } from "../Form/FormContext.js";
 
 type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
@@ -266,7 +268,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         pathParams: { id: id ? id : 0 },
       });
       const { data: abhaNumberData } = await request(
-        routes.abha.getAbhaNumber,
+        routes.abdm.abhaNumber.get,
         {
           pathParams: { abhaNumberId: id ?? "" },
           silent: true,
@@ -409,6 +411,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       .map((policy) => HCXPolicyValidator(policy, careConfig.hcx.enabled))
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
+
+    errors["insurance_details"] = insuranceDetailsError;
 
     Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
@@ -589,7 +593,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     });
     const data = {
-      abha_number: state.form.abha_number,
       phone_number: parsePhoneNumber(formData.phone_number),
       emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
       date_of_birth:
@@ -681,12 +684,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         });
     if (res?.ok && requestData) {
       if (state.form.abha_number) {
-        const { res, data } = await request(routes.abha.linkPatient, {
-          body: {
-            patient: requestData.id,
-            abha_number: state.form.abha_number,
+        const { res, data } = await request(
+          routes.abdm.healthId.linkAbhaNumberAndPatient,
+          {
+            body: {
+              patient: requestData.id,
+              abha_number: state.form.abha_number,
+            },
           },
-        });
+        );
 
         if (res?.status === 200 && data) {
           Notification.Success({
@@ -738,63 +744,63 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     setIsLoading(false);
   };
 
-  const handleAbhaLinking = (
-    {
-      id,
-      abha_profile: {
-        healthIdNumber,
-        healthId,
-        name,
-        mobile,
-        gender,
-        monthOfBirth,
-        dayOfBirth,
-        yearOfBirth,
-        pincode,
-      },
-    }: any,
-    field: any,
+  const populateAbhaValues = (
+    abhaProfile: AbhaNumberModel,
+    field: FormContextValue<PatientForm>,
   ) => {
-    const values: any = {};
-    if (id) values["abha_number"] = id;
-    if (healthIdNumber) values["health_id_number"] = healthIdNumber;
-    if (healthId) values["health_id"] = healthId;
+    const values = {
+      abha_number: abhaProfile.external_id,
+      health_id_number: abhaProfile.abha_number,
+      health_id: abhaProfile.health_id,
+    };
 
-    if (name)
+    if (abhaProfile.name)
       field("name").onChange({
         name: "name",
-        value: name,
+        value: abhaProfile.name,
       });
 
-    if (mobile) {
+    if (abhaProfile.mobile) {
       field("phone_number").onChange({
         name: "phone_number",
-        value: parsePhoneNumber(mobile, "IN"),
+        value: parsePhoneNumber(abhaProfile.mobile, "IN"),
       });
 
       field("emergency_phone_number").onChange({
         name: "emergency_phone_number",
-        value: parsePhoneNumber(mobile, "IN"),
+        value: parsePhoneNumber(abhaProfile.mobile, "IN"),
       });
     }
 
-    if (gender)
+    if (abhaProfile.gender)
       field("gender").onChange({
         name: "gender",
-        value: gender === "M" ? "1" : gender === "F" ? "2" : "3",
+        value: { M: "1", F: "2", O: "3" }[abhaProfile.gender],
       });
 
-    if (monthOfBirth && dayOfBirth && yearOfBirth)
+    if (abhaProfile.date_of_birth)
       field("date_of_birth").onChange({
         name: "date_of_birth",
-        value: new Date(`${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`),
+        value: new Date(abhaProfile.date_of_birth),
       });
 
-    if (pincode)
+    if (abhaProfile.pincode)
       field("pincode").onChange({
         name: "pincode",
-        value: pincode,
+        value: abhaProfile.pincode,
       });
+
+    if (abhaProfile.address) {
+      field("address").onChange({
+        name: "address",
+        value: abhaProfile.address,
+      });
+
+      field("permanent_address").onChange({
+        name: "permanent_address",
+        value: abhaProfile.address,
+      });
+    }
 
     dispatch({ type: "set_form", form: { ...state.form, ...values } });
     setShowLinkAbhaNumberModal(false);
@@ -862,7 +868,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const checkboxField = `medical_history_check_${id}`;
     const textField = `medical_history_${id}`;
     return (
-      <div key={textField}>
+      <div key={textField} className="w-full md:w-auto">
         <div>
           <CheckBoxFormField
             value={(field("medical_history").value ?? []).includes(id)}
@@ -872,7 +878,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           />
         </div>
         {id !== 1 && (field("medical_history").value ?? []).includes(id) && (
-          <div className="mx-4">
+          <div className="mx-4 flex flex-col">
             <TextAreaFormField
               {...field(textField)}
               placeholder="Details"
@@ -1035,16 +1041,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               {careConfig.abdm.enabled && (
                 <div className="mb-8 overflow-visible">
                   {showLinkAbhaNumberModal && (
-                    <LinkABHANumberModal
+                    <LinkAbhaNumber
                       show={showLinkAbhaNumberModal}
                       onClose={() => setShowLinkAbhaNumberModal(false)}
-                      onSuccess={(data: any) => {
+                      onSuccess={(data) => {
                         if (id) {
-                          navigate(`/facility/${facilityId}/patient/${id}`);
-                          return;
+                          Notification.Warn({
+                            msg: "To link Abha Number, please save the patient details",
+                          });
                         }
 
-                        handleAbhaLinking(data, field);
+                        populateAbhaValues(data, field);
                       }}
                     />
                   )}
