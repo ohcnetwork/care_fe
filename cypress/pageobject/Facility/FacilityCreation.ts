@@ -58,7 +58,7 @@ class FacilityPage {
   }
 
   fillAddress(address: string) {
-    cy.get("#address").click().clear().type(address);
+    cy.get("#address").click().type(address);
   }
 
   fillPhoneNumber(phoneNumber: string) {
@@ -245,11 +245,7 @@ class FacilityPage {
   }
 
   fillEntryDate(date: string) {
-    cy.get("#entry_date").click();
-    cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
-      .click()
-      .type(date);
-    cy.get("body").click(0, 0);
+    cy.clickAndTypeDate("#entry_date", date);
   }
 
   clickEditButton() {

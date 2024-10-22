@@ -20,8 +20,6 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import dayjs from "../../Utils/dayjs";
-import { dischargePatient } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
@@ -32,6 +30,7 @@ import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/
 import Loading from "../Common/Loading";
 import careConfig from "@careConfig";
 import DateFormField from "../Form/FormFields/DateFormField";
+import request from "../../Utils/request/request";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -65,8 +64,6 @@ const DischargeModal = ({
   death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
   const { t } = useTranslation();
-
-  const dispatch: any = useDispatch();
   const [preDischargeForm, setPreDischargeForm] =
     useState<PreDischargeFormInterface>({
       new_discharge_reason,
@@ -176,19 +173,17 @@ const DischargeModal = ({
 
   const submitAction = useConfirmedAction(async () => {
     setIsSendingDischargeApi(true);
-    const dischargeResponse = await dispatch(
-      dischargePatient(
-        {
-          ...preDischargeForm,
-          new_discharge_reason: discharge_reason,
-          discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
-        },
-        { id: consultationData.id },
-      ),
-    );
+    const { res } = await request(routes.dischargePatient, {
+      pathParams: { id: consultationData.id },
+      body: {
+        ...preDischargeForm,
+        new_discharge_reason: discharge_reason,
+        discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
+      },
+    });
     setIsSendingDischargeApi(false);
 
-    if (dischargeResponse?.status === 200) {
+    if (res?.ok) {
       Notification.Success({ msg: "Patient Discharged Successfully" });
       afterSubmit?.();
     }

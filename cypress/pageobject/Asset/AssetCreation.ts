@@ -59,13 +59,10 @@ export class AssetPage {
     cy.get("[data-testid=asset-support-email-input] input").type(supportEmail);
     cy.get("[data-testid=asset-vendor-name-input] input").type(vendorName);
     cy.get("[data-testid=asset-serial-number-input] input").type(serialNumber);
-    cy.get(
-      "[data-testid=asset-last-serviced-on-input] input[type='text']",
-    ).click();
-    cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
-      .click(0, 0)
-      .type(lastServicedOn);
-    cy.get("body").click(0, 0);
+    cy.clickAndTypeDate(
+      "[data-testid=asset-last-serviced-on-input]",
+      lastServicedOn,
+    );
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 
@@ -123,13 +120,10 @@ export class AssetPage {
     cy.get(
       "[data-testid=asset-last-serviced-on-input] input[type='text']",
     ).click();
-    cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
-      cy.wrap(el).clear(),
+    cy.clickAndTypeDate(
+      "[data-testid=asset-last-serviced-on-input]",
+      lastServicedOn,
     );
-    cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
-      .click()
-      .type(lastServicedOn);
-    cy.get("body").click(0, 0);
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
@@ -163,7 +157,7 @@ export class AssetPage {
   }
 
   clickConfigureAsset() {
-    cy.get("#submit").contains("Set Configuration").click();
+    cy.get("#submit").contains("Update").click();
   }
 
   clickConfigureVital() {
@@ -276,14 +270,7 @@ export class AssetPage {
   }
 
   enterAssetservicedate(text: string) {
-    cy.get("input[name='last_serviced_on']").click();
-    cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
-      cy.wrap(el).clear(),
-    );
-    cy.get('[data-test-id="date-input"]:visible [data-time-input="0"]')
-      .click()
-      .type(text);
-    cy.get("body").click(0, 0);
+    cy.clickAndTypeDate("input[name='last_serviced_on']", text);
   }
 
   scrollintoWarrantyDetails() {
