@@ -7,7 +7,7 @@ import {
   formatPhoneNumber as formatPhoneNumberUtil,
   getCountryCode,
   CountryData,
-  humanizeStrings,
+  // humanizeStrings,
 } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
 import {
@@ -17,8 +17,8 @@ import {
 } from "../FieldValidators";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import { useTranslation } from "react-i18next";
-
+// import { useTranslation } from "react-i18next";
+import React from "react";
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
 interface Props extends FormFieldBaseProps<string> {
@@ -28,148 +28,135 @@ interface Props extends FormFieldBaseProps<string> {
   disableValidation?: boolean;
 }
 
-export default function PhoneNumberFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props);
-  const [error, setError] = useState<FieldError | undefined>();
-  const [country, setCountry] = useState<CountryData>({
-    flag: "🇮🇳",
-    name: "India",
-    code: "91",
-  });
-  const validator = useMemo(
-    () => PhoneNumberValidator(props.types),
-    [props.types],
-  );
+const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
+  (props, ref) => {
+    const field = useFormFieldPropsResolver(props);
+    const [error, setError] = useState<FieldError | undefined>();
+    const [country, setCountry] = useState<CountryData>({
+      flag: "🇮🇳",
+      name: "India",
+      code: "91",
+    });
+    const validator = useMemo(
+      () => PhoneNumberValidator(props.types),
+      [props.types],
+    );
 
-  const validate = useMemo(
-    () => (value: string | undefined, event: "blur" | "change") => {
-      if (!value || props.disableValidation) {
-        return;
+    const validate = useMemo(
+      () => (value: string | undefined, event: "blur" | "change") => {
+        if (!value || props.disableValidation) {
+          return;
+        }
+
+        const newError = validator(value);
+
+        if (!newError) {
+          return;
+        } else if (event === "blur") {
+          return newError;
+        }
+      },
+      [props.disableValidation],
+    );
+
+    const setValue = useCallback(
+      (value: string) => {
+        value = value.replaceAll(/[^0-9+]/g, "");
+        if (value.length > 12 && value.startsWith("+910")) {
+          value = "+91" + value.slice(4);
+        }
+
+        const error = validate(value, "change");
+        field.handleChange(value);
+
+        setError(error);
+      },
+      [field, validate],
+    );
+
+    const handleCountryChange = (value: CountryData): void => {
+      setCountry(value);
+      setValue(conditionPhoneCode(value.code));
+    };
+
+    useEffect(() => {
+      if (field.value && field.value.length > 0) {
+        if (field.value.startsWith("1800")) {
+          setCountry({ flag: "📞", name: "Support", code: "1800" });
+          return;
+        }
+        if (field.value === "+") {
+          setCountry({ flag: "🌍", name: "Other", code: "+" });
+          return;
+        }
+        setCountry(phoneCodes[getCountryCode(field.value)!]);
       }
+    }, [setValue]);
 
-      const newError = validator(value);
+    useEffect(() => {
+      setValue(field.value || "+91");
+    }, []);
 
-      if (!newError) {
-        return;
-      } else if (event === "blur") {
-        return newError;
-      }
-    },
-    [props.disableValidation],
-  );
-
-  const setValue = useCallback(
-    (value: string) => {
-      value = value.replaceAll(/[^0-9+]/g, "");
-      if (value.length > 12 && value.startsWith("+910")) {
-        value = "+91" + value.slice(4);
-      }
-
-      const error = validate(value, "change");
-      field.handleChange(value);
-
-      setError(error);
-    },
-    [field, validate],
-  );
-
-  const handleCountryChange = (value: CountryData): void => {
-    setCountry(value);
-    setValue(conditionPhoneCode(value.code));
-  };
-
-  useEffect(() => {
-    if (field.value && field.value.length > 0) {
-      if (field.value.startsWith("1800")) {
-        setCountry({ flag: "📞", name: "Support", code: "1800" });
-        return;
-      }
-      if (field.value === "+") {
-        setCountry({ flag: "🌍", name: "Other", code: "+" });
-        return;
-      }
-      setCountry(phoneCodes[getCountryCode(field.value)!]);
-    }
-  }, [setValue]);
-
-  useEffect(() => {
-    setValue(field.value || "+91");
-  }, []);
-
-  return (
-    <FormField
-      field={{
-        ...field,
-        error: field.error || error,
-        labelSuffix: field.labelSuffix || "",
-      }}
-    >
-      <div className="relative rounded-md">
-        <Popover>
-          {({ open }: { open: boolean }) => {
-            return (
-              <>
-                <PopoverButton className="absolute h-full">
-                  <div className="hover:border-1 absolute inset-y-0 left-0 flex cursor-pointer items-center justify-around border-gray-200 hover:border hover:bg-gray-50">
-                    <span className="rounded-md pl-2">
-                      {country?.flag ?? "🇮🇳"}
-                    </span>
-                    <CareIcon
-                      icon="l-angle-down"
-                      className={`text-2xl font-bold ${open && "rotate-180"}`}
-                    />
-                  </div>
-                </PopoverButton>
-                <input
-                  type="tel"
-                  id={field.id}
-                  name={field.name}
-                  autoComplete={props.autoComplete ?? "tel"}
-                  className={classNames(
-                    "cui-input-base h-full pl-14 tracking-widest sm:leading-6",
-                    field.error && "border-danger-500",
-                    field.className,
-                  )}
-                  maxLength={field.value?.startsWith("1800") ? 11 : 15}
-                  placeholder={props.placeholder}
-                  value={formatPhoneNumber(field.value, props.types)}
-                  onChange={(e) => setValue(e.target.value)}
-                  disabled={field.disabled}
-                  onBlur={() => setError(validate(field.value, "blur"))}
-                />
-                <PopoverPanel className="w-full">
-                  {({ close }) => (
-                    <CountryCodesList
-                      handleCountryChange={handleCountryChange}
-                      onClose={close}
-                    />
-                  )}
-                </PopoverPanel>
-              </>
-            );
-          }}
-        </Popover>
-      </div>
-    </FormField>
-  );
-}
-
-const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="tooltip mt-1 pr-1 text-secondary-500">
-      <CareIcon icon="l-question-circle" className="text-lg" />
-      <div className="tooltip-text tooltip-bottom w-64 -translate-x-full whitespace-pre-wrap text-sm">
-        Supports only{" "}
-        <span className="font-bold lowercase">
-          {humanizeStrings(props.types.map((item) => t(item)))}
-        </span>{" "}
-        numbers.
-      </div>
-    </div>
-  );
-};
+    return (
+      <FormField
+        field={{
+          ...field,
+          errorClassName: "hidden",
+          error: field.error || error,
+          labelSuffix: field.labelSuffix || "",
+        }}
+      >
+        <div className="relative rounded-md">
+          <Popover>
+            {({ open }: { open: boolean }) => {
+              return (
+                <>
+                  <PopoverButton className="absolute h-full">
+                    <div className="hover:border-1 absolute inset-y-0 left-0 flex cursor-pointer items-center justify-around border-gray-200 hover:border hover:bg-gray-50">
+                      <span className="rounded-md pl-2">
+                        {country?.flag ?? "🇮🇳"}
+                      </span>
+                      <CareIcon
+                        icon="l-angle-down"
+                        className={`text-2xl font-bold ${open && "rotate-180"}`}
+                      />
+                    </div>
+                  </PopoverButton>
+                  <input
+                    type="tel"
+                    id={field.id}
+                    name={field.name}
+                    autoComplete={props.autoComplete ?? "tel"}
+                    className={classNames(
+                      "cui-input-base h-full pl-14 tracking-widest sm:leading-6",
+                      field.error && "border-danger-500",
+                      field.className,
+                    )}
+                    maxLength={field.value?.startsWith("1800") ? 11 : 15}
+                    placeholder={props.placeholder}
+                    value={formatPhoneNumber(field.value, props.types)}
+                    onChange={(e) => setValue(e.target.value)}
+                    disabled={field.disabled}
+                    onBlur={() => setError(validate(field.value, "blur"))}
+                    ref={ref}
+                  />
+                  <PopoverPanel className="w-full">
+                    {({ close }) => (
+                      <CountryCodesList
+                        handleCountryChange={handleCountryChange}
+                        onClose={close}
+                      />
+                    )}
+                  </PopoverPanel>
+                </>
+              );
+            }}
+          </Popover>
+        </div>
+      </FormField>
+    );
+  },
+);
 
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
@@ -275,3 +262,4 @@ const CountryCodesList = ({
     </div>
   );
 };
+export default PhoneNumberFormField;

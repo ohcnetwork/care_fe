@@ -11,6 +11,7 @@ import { Button } from "@/Components/ui/button";
 import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import {
   Command,
   CommandGroup,
@@ -82,7 +83,11 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
-
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [selectedOption]);
   const handleOptionChange = useCallback(
     (option: SearchOption) => {
       setSelectedOption(option);
@@ -121,7 +126,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     const commonProps = {
       ref: inputRef,
       value: searchValue,
-      onChange: (e: any) =>
+      onChange: (e: FieldChangeEvent<string>) =>
         handleSearchChange(e.target ? e.target.value : e.value),
       onKeyDown: handleKeyDown,
       className: cn(
