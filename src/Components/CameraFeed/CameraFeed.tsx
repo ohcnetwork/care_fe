@@ -28,8 +28,8 @@ interface Props {
   shortcutsDisabled?: boolean;
   onMove?: () => void;
   operate: ReturnType<typeof useOperateCamera>["operate"];
-  //Assest Configuration
-  isAssetConfigurationPage?: boolean;
+  //Monitor Hide or Show
+  hideMonitorAsset?: boolean;
 }
 
 export default function CameraFeed(props: Props) {
@@ -147,7 +147,7 @@ export default function CameraFeed(props: Props) {
     />
   );
 
-  const isAssetConfigurationPage = props.isAssetConfigurationPage || false;
+  const hideMonitorAsset = props.hideMonitorAsset || false;
 
   return (
     <div ref={playerWrapperRef} className="flex h-full flex-col justify-center">
@@ -187,7 +187,7 @@ export default function CameraFeed(props: Props) {
             {props.children}
           </div>
           <div className="flex w-full flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
-            {!isAssetConfigurationPage && (
+            {!hideMonitorAsset && (
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold md:text-sm">
                   {props.asset.name}

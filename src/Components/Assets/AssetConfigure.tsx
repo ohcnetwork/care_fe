@@ -64,7 +64,7 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
       <ConfigureCamera
         asset={asset}
         onUpdated={() => refetch()}
-        isAssetConfigure={true}
+        hideMonitorAsset={true}
       />
     </Page>
   );
