@@ -1,8 +1,8 @@
-import { useState } from "react";
-import FeedButton from "./FeedButton";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import FeedButton from "./FeedButton";
 import { PTZPayload } from "./useOperateCamera";
 import { isAppleDevice } from "../../Utils/utils";
+import { useState } from "react";
 
 const Actions = {
   UP: 1 << 0,
@@ -43,16 +43,23 @@ const payload = (action: number, precision: number) => {
   return { x, y, zoom };
 };
 
-interface Props {
+export interface FeedControlsProps {
   shortcutsDisabled?: boolean;
   onMove: (payload: PTZPayload) => void;
   isFullscreen: boolean;
   setFullscreen: (state: boolean) => void;
   onReset: () => void;
   inlineView: boolean;
+  additionalControls?: (
+    props: Omit<FeedControlsProps, "additionalControls">,
+  ) => React.ReactNode;
 }
 
-export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
+export default function FeedControls({
+  shortcutsDisabled,
+  additionalControls,
+  ...props
+}: FeedControlsProps) {
   const [precision, setPrecision] = useState(1);
   const togglePrecision = () => setPrecision((p) => (p === 16 ? 1 : p << 1));
 
@@ -229,18 +236,22 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
             {controls.fullscreen}
           </div>
         </div>
+        {additionalControls?.(props)}
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex flex-col gap-2">{controls.zoom}</div>
-      <div className="grid grid-cols-3 gap-2">{controls.position}</div>
-      <div className="flex flex-col gap-2">
-        {controls.reset}
-        {controls.fullscreen}
+    <div className="h-full">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-2">{controls.zoom}</div>
+        <div className="grid grid-cols-3 gap-2">{controls.position}</div>
+        <div className="flex flex-col gap-2">
+          {controls.reset}
+          {controls.fullscreen}
+        </div>
       </div>
+      {additionalControls?.(props)}
     </div>
   );
 }

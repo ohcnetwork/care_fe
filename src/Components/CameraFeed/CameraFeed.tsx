@@ -1,18 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AssetData } from "../Assets/AssetTypes";
-import useOperateCamera, { PTZPayload } from "./useOperateCamera";
-import { getStreamUrl } from "./utils";
-import { classNames, isIOS } from "../../Utils/utils";
+import * as Notification from "../../Utils/Notifications.js";
+
 import FeedAlert, { FeedAlertState, StreamStatus } from "./FeedAlert";
+import FeedControls, { FeedControlsProps } from "./FeedControls";
+import { classNames, isIOS } from "../../Utils/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import useOperateCamera, { PTZPayload } from "./useOperateCamera";
+
+import { AssetData } from "../Assets/AssetTypes";
 import FeedNetworkSignal from "./FeedNetworkSignal";
-import NoFeedAvailable from "./NoFeedAvailable";
-import FeedControls from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
-import useFullscreen from "../../Common/hooks/useFullscreen";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
-import VideoPlayer from "./videoPlayer";
 import MonitorAssetPopover from "../Common/MonitorAssetPopover";
+import NoFeedAvailable from "./NoFeedAvailable";
+import VideoPlayer from "./videoPlayer";
+import { getStreamUrl } from "./utils";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import useFullscreen from "../../Common/hooks/useFullscreen";
 
 interface Props {
   children?: React.ReactNode;
@@ -28,6 +31,8 @@ interface Props {
   shortcutsDisabled?: boolean;
   onMove?: () => void;
   operate: ReturnType<typeof useOperateCamera>["operate"];
+  additionalControls?: FeedControlsProps["additionalControls"];
+  assetBedId?: string; // consider passing this to useOperateCamera incase it's needed for multiple operations
 }
 
 export default function CameraFeed(props: Props) {
@@ -133,15 +138,27 @@ export default function CameraFeed(props: Props) {
       onReset={resetStream}
       onMove={async (data) => {
         setState("moving");
-        const { res } = await props.operate({ type: "relative_move", data });
+        const { res, error } = await props.operate({
+          type: "relative_move",
+          data,
+          asset_bed_id: props.assetBedId,
+        });
         props.onMove?.();
         setTimeout(() => {
           setState((state) => (state === "moving" ? undefined : state));
         }, 4000);
+
+        if (res?.status === 400 && error) {
+          Notification.Error({
+            msg: error.detail,
+          });
+        }
+
         if (res?.status === 500) {
           setState("host_unreachable");
         }
       }}
+      additionalControls={props.additionalControls}
     />
   );
 

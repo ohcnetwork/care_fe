@@ -179,6 +179,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
           key={key}
           asset={asset}
           preset={preset?.position}
+          assetBedId={preset?.asset_bed.id}
           onMove={() => {
             if (!preset) {
               return;

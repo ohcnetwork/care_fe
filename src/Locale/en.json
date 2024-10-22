@@ -1050,5 +1050,16 @@
   "location_beds_empty": "No beds available in this location",
   "add_beds_to_configure_presets": "Add beds to this location to configure presets for them.",
   "manage_bed_presets": "Manage Presets of Bed",
-  "position": "Position"
+  "position": "Position",
+  "boundary": "Boundary",
+  "add_boundary": "Add boundary",
+  "set_as": "Set as",
+  "unset": "Unset",
+  "camera_preset__boundary_x0": "Left Boundary",
+  "camera_preset__boundary_x1": "Right Boundary",
+  "camera_preset__boundary_y1": "Top Boundary",
+  "camera_preset__boundary_y0": "Bottom Boundary",
+  "invalid_boundary_values": "Please ensure that all boundary values are set and are within the range of -1 to 1",
+  "boundary_manual_edit_warning": "We strongly recommend NOT to set boundary values manually. Use the navigations within camera feed to set the boundary values.",
+  "boundary_update_error": "Error updating boundary values"
 }

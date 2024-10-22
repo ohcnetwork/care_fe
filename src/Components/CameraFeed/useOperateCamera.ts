@@ -1,6 +1,6 @@
-import { useState } from "react";
-import request from "../../Utils/request/request";
 import { FeedRoutes } from "./routes";
+import request from "../../Utils/request/request";
+import { useState } from "react";
 
 export interface PTZPayload {
   x: number;
@@ -31,6 +31,7 @@ interface AbsoluteMoveOperation {
 interface RelativeMoveOperation {
   type: "relative_move";
   data: PTZPayload;
+  asset_bed_id?: string;
 }
 
 interface GetStreamToken {
