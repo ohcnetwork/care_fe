@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import React from "react";
 
 const colors: string[] = [
@@ -44,44 +45,58 @@ const initials = (name: string): string => {
 interface AvatarProps {
   colors?: [string, string];
   name: string;
+  imageUrl?: string;
   className?: string;
-  square?: boolean; // New prop to determine if the avatar should be square
 }
 
 const Avatar: React.FC<AvatarProps> = ({
   colors: propColors,
   name,
+  imageUrl,
   className,
-  square = false, // Default to false for backwards compatibility
 }) => {
-  const [bgColor, fgColor] = propColors || toColor(name);
-
+  const [bgColor] = propColors || toColor(name);
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      version="1.1"
-      viewBox="0 0 100 100"
-      className={className}
-    >
-      {square ? (
-        <rect width="100" height="100" fill={bgColor} />
-      ) : (
-        <circle cx="50" cy="50" r="50" fill={bgColor} />
+    <div
+      className={cn(
+        `flex aspect-square w-full items-center justify-center overflow-hidden border border-black/10`,
+        className,
       )}
-      <text
-        fill={fgColor}
-        fontSize="42"
-        fontFamily="sans-serif"
-        x="50"
-        y="54"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        alignmentBaseline="middle"
-      >
-        {initials(name)}
-      </text>
-    </svg>
+      style={{
+        background: bgColor,
+        borderRadius: "calc(100% / 15)",
+      }}
+    >
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={name}
+          className="aspect-square h-full w-full object-cover"
+        />
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          viewBox="0 0 100 100"
+        >
+          <text
+            fill="black"
+            fillOpacity="0.1"
+            fontSize="40"
+            fontWeight="900"
+            x="50"
+            y="54"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            alignmentBaseline="middle"
+          >
+            {initials(name)}
+          </text>
+        </svg>
+      )}
+    </div>
   );
 };
 
 export { Avatar };
+export type { AvatarProps };

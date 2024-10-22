@@ -1,3 +1,5 @@
+import { navigate } from "raviger";
+import { useEffect, useState } from "react";
 import * as Notification from "../../Utils/Notifications";
 
 import {
@@ -16,34 +18,32 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
-import { useEffect, useState } from "react";
-
 import ButtonV2 from "../Common/components/ButtonV2";
+
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
 import CircularProgress from "../Common/components/CircularProgress";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
-import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Page from "../Common/components/Page";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import { SampleTestCard } from "./SampleTestCard";
 import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
-import { navigate } from "raviger";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
+import request from "../../Utils/request/request";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
 import { Button } from "@/Components/ui/button";
-
 import Loading from "@/Components/Common/Loading";
+
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
 };
@@ -253,7 +253,7 @@ export const PatientHome = (props: any) => {
 
   return (
     <Page
-      title={t("patient details")}
+      title={t("patient_details")}
       crumbsReplacements={{
         [facilityId]: { name: patientData?.facility_object?.name },
         [id]: { name: patientData?.name },
@@ -341,6 +341,7 @@ export const PatientHome = (props: any) => {
             </Button>
           </Alert>
         )}
+
         <section className="lg:flex" data-testid="patient-dashboard">
           <div className="lg:w-2/3">
             <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">

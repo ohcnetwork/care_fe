@@ -1,12 +1,6 @@
 import { GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
-import {
-  getConsultation,
-  getPatient,
-  listAssetBeds,
-} from "../../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { PatientModel } from "../../Patient/models";
 import {
@@ -17,7 +11,6 @@ import {
 } from "../../../Utils/utils";
 
 import { Link, navigate, useQueryParams } from "raviger";
-import { useDispatch } from "react-redux";
 import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
@@ -35,7 +28,6 @@ import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologica
 import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
-import { AssetBedModel } from "../../Assets/AssetTypes";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
 import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
@@ -45,6 +37,7 @@ import request from "../../../Utils/request/request";
 import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 import Error404 from "../../ErrorPages/404";
 import { useTranslation } from "react-i18next";
+import useQuery from "../../../Utils/request/useQuery";
 
 import Loading from "@/Components/Common/Loading";
 import PageTitle from "@/Components/Common/PageTitle";
@@ -81,18 +74,11 @@ export const ConsultationDetails = (props: any) => {
   if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
     tab = props.tab.toUpperCase() as keyof typeof TABS;
   }
-  const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [qParams, _] = useQueryParams();
-
-  const [consultationData, setConsultationData] = useState<ConsultationModel>(
-    {} as ConsultationModel,
-  );
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [abhaNumberData, setAbhaNumberData] = useState<AbhaNumberModel>();
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
-  const [isCameraAttached, setIsCameraAttached] = useState(false);
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -113,94 +99,86 @@ export const ConsultationDetails = (props: any) => {
 
   const authUser = useAuthUser();
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getConsultation(consultationId));
-      if (!status.aborted) {
-        if (res?.data) {
-          const data: ConsultationModel = {
-            ...res.data,
-            symptoms_text: "",
-          };
-          if (facilityId != data.facility || patientId != data.patient) {
-            navigate(
-              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
-            );
-          }
-          setConsultationData(data);
-          const assetRes = data?.current_bed?.bed_object?.id
-            ? await dispatch(
-                listAssetBeds({
-                  bed: data?.current_bed?.bed_object?.id,
-                }),
-              )
-            : null;
-          const isCameraAttachedRes =
-            assetRes != null
-              ? assetRes.data.results.some((asset: AssetBedModel) => {
-                  return asset?.asset_object?.asset_class === "ONVIF";
-                })
-              : false;
-          setIsCameraAttached(isCameraAttachedRes);
-
-          // Get patient data
-          const id = res.data.patient;
-          const patientRes = await dispatch(getPatient({ id }));
-          if (patientRes?.data) {
-            const patientGender = getPatientGender(patientRes.data);
-            const patientAddress = getPatientAddress(patientRes.data);
-            const patientComorbidities = getPatientComorbidities(
-              patientRes.data,
-            );
-            const data = {
-              ...patientRes.data,
-              gender: patientGender,
-              address: patientAddress,
-              comorbidities: patientComorbidities,
-              is_declared_positive: patientRes.data.is_declared_positive
-                ? "Yes"
-                : "No",
-              is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
-            };
-
-            setPatientData(data);
-          }
-
-          // Get abha number data
-          const { data: abhaNumberData } = await request(
-            routes.abha.getAbhaNumber,
-            {
-              pathParams: { abhaNumberId: id ?? "" },
-              silent: true,
-            },
-          );
-          setAbhaNumberData(abhaNumberData);
-
-          // Get shifting data
-          const shiftRequestsQuery = await request(routes.listShiftRequests, {
-            query: { patient: id },
-          });
-          if (shiftRequestsQuery.data?.results) {
-            setActiveShiftingData(shiftRequestsQuery.data.results);
-          }
-        } else {
-          navigate("/not-found");
-        }
-        setIsLoading(false);
+  const consultationQuery = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationId },
+    onResponse: ({ data }) => {
+      if (!data) {
+        navigate("/not-found");
+        return;
+      }
+      if (facilityId != data.facility || patientId != data.patient) {
+        navigate(
+          `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
+        );
       }
     },
-    [consultationId, dispatch, patientData.is_vaccinated],
+  });
+
+  const consultationData = consultationQuery.data;
+  const bedId = consultationData?.current_bed?.bed_object?.id;
+
+  const isCameraAttached = useQuery(routes.listAssetBeds, {
+    prefetch: !!bedId,
+    query: { bed: bedId },
+  }).data?.results.some((a) => a.asset_object.asset_class === "ONVIF");
+
+  const patientDataQuery = useQuery(routes.getPatient, {
+    pathParams: { id: consultationQuery.data?.patient ?? "" },
+    prefetch: !!consultationQuery.data?.patient,
+    onResponse: ({ data }) => {
+      if (!data) {
+        return;
+      }
+      setPatientData({
+        ...data,
+        gender: getPatientGender(data),
+        address: getPatientAddress(data),
+        comorbidities: getPatientComorbidities(data),
+        is_declared_positive: data.is_declared_positive ? "Yes" : "No",
+        is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
+      } as any);
+    },
+  });
+
+  const fetchData = useCallback(
+    async (id: string) => {
+      // Get abha number data
+      const { data: abhaNumberData } = await request(
+        routes.abdm.abhaNumber.get,
+        {
+          pathParams: { abhaNumberId: id ?? "" },
+          silent: true,
+        },
+      );
+      setAbhaNumberData(abhaNumberData);
+
+      // Get shifting data
+      const shiftRequestsQuery = await request(routes.listShiftRequests, {
+        query: { patient: id },
+      });
+      if (shiftRequestsQuery.data?.results) {
+        setActiveShiftingData(shiftRequestsQuery.data.results);
+      }
+    },
+    [consultationId, patientData.is_vaccinated],
   );
 
-  useAbortableEffect((status: statusType) => {
-    fetchData(status);
+  useEffect(() => {
+    const id = patientDataQuery.data?.id;
+    if (!id) {
+      return;
+    }
+    fetchData(id);
     triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
       consultationId: consultationId,
       userId: authUser.id,
     });
-  }, []);
+  }, [patientDataQuery.data?.id]);
+
+  if (!consultationData || patientDataQuery.loading) {
+    return <Loading />;
+  }
 
   const consultationTabProps: ConsultationTabProps = {
     consultationId,
@@ -215,10 +193,6 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const SelectedTab = TABS[tab];
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   const tabButtonClasses = (selected: boolean) =>
     `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${
@@ -310,7 +284,10 @@ export const ConsultationDetails = (props: any) => {
               patient={patientData}
               abhaNumber={abhaNumberData}
               consultation={consultationData}
-              fetchPatientData={fetchData}
+              fetchPatientData={() => {
+                consultationQuery.refetch();
+                patientDataQuery.refetch();
+              }}
               consultationId={consultationId}
               activeShiftingData={activeShiftingData}
               showAbhaProfile={qParams["show-abha-profile"] === "true"}

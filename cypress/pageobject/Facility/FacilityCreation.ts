@@ -58,7 +58,7 @@ class FacilityPage {
   }
 
   fillAddress(address: string) {
-    cy.get("#address").click().clear().type(address);
+    cy.get("#address").click().type(address);
   }
 
   fillPhoneNumber(phoneNumber: string) {
@@ -297,7 +297,7 @@ class FacilityPage {
 
   selectLocation(location: string) {
     cy.intercept("https://maps.googleapis.com/**").as("mapApi");
-    cy.get("span > svg.care-svg-icon__baseline.care-l-map-marker").click();
+    cy.get("#facility-location-button").click();
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
     cy.wait(2000);

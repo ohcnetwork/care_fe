@@ -43,11 +43,11 @@ class PatientLogupdate {
   }
 
   typeSystolic(systolic: string) {
-    cy.typeAndSelectOption("#systolic", systolic);
+    cy.get("#systolic").click().type(systolic);
   }
 
   typeDiastolic(diastolic: string) {
-    cy.typeAndSelectOption("#diastolic", diastolic);
+    cy.get("#diastolic").click().type(diastolic);
   }
 
   typePulse(pulse: string) {
@@ -55,7 +55,7 @@ class PatientLogupdate {
   }
 
   typeTemperature(temperature: string) {
-    cy.typeAndSelectOption("#temperature", temperature);
+    cy.get("#temperature").click().type(temperature);
   }
 
   typeRespiratory(respiratory: string) {
@@ -93,8 +93,8 @@ class PatientLogupdate {
     cy.wait(3000);
   }
 
-  clickClearButtonInElement(elementId: string) {
-    cy.get(elementId).find("#clear-button").click();
+  clearIntoElementById(elementId) {
+    cy.get(elementId).click().clear();
   }
 
   clickVitals() {
