@@ -1,4 +1,4 @@
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import * as Notification from "../../Utils/Notifications";
 
@@ -18,7 +18,7 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
-import ButtonV2, { buttonStyles } from "../Common/components/ButtonV2";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
@@ -39,7 +39,6 @@ import routes from "../../Redux/api";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import request from "../../Utils/request/request";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import { isPatientMandatoryDataFilled } from "./Utils";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
 import { Button } from "@/Components/ui/button";
@@ -343,39 +342,6 @@ export const PatientHome = (props: any) => {
           </Alert>
         )}
 
-        {isPatientMandatoryDataFilled(patientData) &&
-          (patientData?.facility != patientData?.last_consultation?.facility ||
-            (patientData.is_active &&
-              patientData?.last_consultation?.discharge_date)) && (
-            <div className="relative mt-2">
-              <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
-                <div className="text-center">
-                  <p className="font-bold text-red-800">
-                    <CareIcon icon="l-exclamation-triangle" className="mr-2" />
-                    <span className="inline">
-                      {t("consultation_missing_warning")}{" "}
-                      <strong>
-                        {patientData.facility_object?.name || "-"}{" "}
-                      </strong>
-                    </span>
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 flex items-center">
-                <Link
-                  href={`/facility/${patientData?.facility}/patient/${id}/consultation`}
-                  className={classNames(
-                    buttonStyles({}),
-                    "mb-2 w-full",
-                    !patientData.is_active &&
-                      "pointer-events-none cursor-not-allowed opacity-50",
-                  )}
-                >
-                  {t("create_consultation")}
-                </Link>
-              </div>
-            </div>
-          )}
         <section className="lg:flex" data-testid="patient-dashboard">
           <div className="lg:w-2/3">
             <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">
