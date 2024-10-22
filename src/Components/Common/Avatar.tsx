@@ -34,6 +34,9 @@ const toColor = (name: string): [string, string] => {
 };
 
 const initials = (name: string): string => {
+  if (!name) {
+    return ""; // Return empty string or a default value if the name is undefined or null
+  }
   return name
     .split(" ")
     .slice(0, 2)
