@@ -9,7 +9,8 @@ import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 
 interface DropdownMenuProps {
   id?: string;
-  title: string;
+  title?: string;
+  dropdownIconVisible?: boolean;
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: JSX.Element | undefined;
@@ -23,6 +24,7 @@ interface DropdownMenuProps {
 export default function DropdownMenu({
   variant = "primary",
   size = "default",
+  dropdownIconVisible = true,
   ...props
 }: DropdownMenuProps) {
   return (
@@ -42,12 +44,14 @@ export default function DropdownMenu({
             )}
           >
             {props.icon}
-            {props.title || "Dropdown"}
+            {props.title}
           </div>
-          <CareIcon
-            icon="l-angle-down"
-            className={size === "small" ? "text-base" : "text-lg"}
-          />
+          {dropdownIconVisible && (
+            <CareIcon
+              icon="l-angle-down"
+              className={size === "small" ? "text-base" : "text-lg"}
+            />
+          )}
         </MenuButton>
 
         <MenuItems
