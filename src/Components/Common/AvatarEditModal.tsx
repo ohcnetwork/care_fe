@@ -114,11 +114,16 @@ const AvatarEditModal = ({
 
     setIsProcessing(true);
     setIsCaptureImgBeingUploaded(true);
-
-    await handleUpload(selectedFile, () => {
-      setIsCaptureImgBeingUploaded(false);
-      setIsProcessing(false);
-    });
+    try {
+      await handleUpload(selectedFile, () => {
+        setSelectedFile(undefined);
+        setPreview(undefined);
+        setPreviewImage(null);
+        closeModal();
+      });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const deleteAvatar = async () => {

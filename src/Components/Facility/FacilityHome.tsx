@@ -131,6 +131,8 @@ export const FacilityHome = ({ facilityId }: Props) => {
           facilityFetch();
           Notification.Success({ msg: "Cover image updated." });
           setEditCoverImage(false);
+        } else {
+          onError();
         }
       },
       null,
