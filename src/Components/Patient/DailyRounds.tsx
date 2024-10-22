@@ -712,7 +712,7 @@ export const DailyRounds = (props: any) => {
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <div className="pb-6 md:col-span-2">
+          <div className="pb-6 md:col-span-2" data-scribe-ignore>
             <FieldLabel>Symptoms</FieldLabel>
             <EncounterSymptomsBuilder
               key={symptomsSeed}
@@ -928,7 +928,7 @@ export const DailyRounds = (props: any) => {
           )}
 
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
-            <div className="md:col-span-2">
+            <div className="md:col-span-2" data-scribe-ignore>
               <hr className="my-4 md:col-span-2" />
               <div className="mb-4 mt-8 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
@@ -952,7 +952,7 @@ export const DailyRounds = (props: any) => {
           )}
 
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
-            <div className="md:col-span-2">
+            <div className="md:col-span-2" data-scribe-ignore>
               <hr className="mb-4 mt-8 md:col-span-2" />
               <div className="mb-4 mt-8 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{t("nursing_care")}</h3>
@@ -971,7 +971,10 @@ export const DailyRounds = (props: any) => {
 
           {state.form.rounds_type === "DOCTORS_LOG" && (
             <>
-              <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2">
+              <div
+                className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2"
+                data-scribe-ignore
+              >
                 <div id="diagnosis-list">
                   <h3 className="mb-4 mt-8 text-lg font-semibold">
                     {t("diagnosis")}
