@@ -88,7 +88,7 @@
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "18.3.1",
     "react-google-recaptcha": "^3.1.0",
-    "react-i18next": "^15.0.2",
+    "react-i18next": "^15.1.0",
     "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^8.0.7",
     "react-pdf": "^9.1.0",
