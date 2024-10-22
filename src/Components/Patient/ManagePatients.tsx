@@ -52,6 +52,7 @@ import {
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import Tabs from "../Common/components/Tabs.js";
+
 import { isPatientMandatoryDataFilled } from "./Utils.js";
 import request from "../../Utils/request/request.js";
 import { Avatar } from "../Common/Avatar.js";
@@ -999,24 +1000,6 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      {/*!qParams.last_consultation__consent_types &&
-        (patientsWithNoConsents || 0) > 0 && (
-          <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
-            <CareIcon icon="l-info-circle" className="text-xl" />
-            <p className="font-semibold">
-              {patientsWithNoConsents} patients admitted missing consent
-              records&nbsp;
-              <button
-                onClick={() =>
-                  updateQuery({ last_consultation__consent_types: "None" })
-                }
-                className="underline"
-              >
-                Click to view
-              </button>
-            </p>
-          </div>
-        )*/}
       <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({

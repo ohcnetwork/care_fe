@@ -58,7 +58,7 @@ export default function ViewInvestigations(props: {
                 <div>
                   {formatDateTime(investigationSession.session_created_date)}
                 </div>
-                <div className="space-x-2">
+                <div className="flex items-center space-x-2">
                   <ButtonV2
                     onClick={() =>
                       navigate(

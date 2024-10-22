@@ -85,8 +85,8 @@ export const Comment = ({
   modified_date,
 }: IComment) => (
   <div className="mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800">
-    <div className="flex w-full">
-      <p className="text-justify">{comment}</p>
+    <div className="w-full">
+      <p className="break-words">{comment}</p>
     </div>
     <div className="mt-3">
       <span className="text-xs text-secondary-500">

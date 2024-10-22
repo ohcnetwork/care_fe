@@ -288,6 +288,19 @@ const routes = {
     TBody: Type<Partial<UserModel>>(),
   },
 
+  updateProfilePicture: {
+    path: "/api/v1/users/{username}/profile_picture/",
+    method: "PATCH",
+    TRes: Type<UserModel>(),
+    TBody: Type<{ profile_picture_url: string }>(),
+  },
+
+  deleteProfilePicture: {
+    path: "/api/v1/users/{username}/profile_picture/",
+    method: "DELETE",
+    TRes: Type<UserModel>(),
+  },
+
   deleteUser: {
     path: "/api/v1/users/{username}/",
     method: "DELETE",
@@ -860,6 +873,8 @@ const routes = {
   },
   getDistrictByName: {
     path: "/api/v1/district/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<DistrictModel>>(),
   },
   getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",

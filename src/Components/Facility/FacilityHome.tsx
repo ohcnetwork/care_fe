@@ -1,8 +1,11 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import { FacilityModel } from "./models";
-import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
+import {
+  FACILITY_FEATURE_TYPES,
+  LocalStorageKeys,
+  USER_TYPES,
+} from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import { useState } from "react";
 
@@ -11,7 +14,6 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ContactLink from "../Common/components/ContactLink";
-import CoverImageEditModal from "./CoverImageEditModal";
 
 import Page from "../Common/components/Page";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
@@ -37,13 +39,16 @@ import { LocationSelect } from "../Common/LocationSelect.js";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
 import { FacilityStaffList } from "./FacilityStaffList.js";
 import FacilityBlock from "./FacilityBlock.js";
+import Loading from "@/Components/Common/Loading";
+import AvatarEditable from "@/Components/Common/AvatarEditable";
+import AvatarEditModal from "@/Components/Common/AvatarEditModal";
+import careConfig from "@careConfig";
+import uploadFile from "@/Utils/request/uploadFile";
+import { sleep } from "@/Utils/utils";
 
 type Props = {
   facilityId: string;
 };
-
-import Loading from "@/Components/Common/Loading";
-import { Avatar } from "@/Components/Common/Avatar.js";
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
@@ -107,11 +112,50 @@ export const FacilityHome = ({ facilityId }: Props) => {
     });
   };
 
+  const handleCoverImageUpload = async (file: File, onError: () => void) => {
+    const formData = new FormData();
+    formData.append("cover_image", file);
+    const url = `${careConfig.apiUrl}/api/v1/facility/${facilityId}/cover_image/`;
+
+    uploadFile(
+      url,
+      formData,
+      "POST",
+      {
+        Authorization:
+          "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
+      },
+      async (xhr: XMLHttpRequest) => {
+        if (xhr.status === 200) {
+          await sleep(1000);
+          facilityFetch();
+          Notification.Success({ msg: "Cover image updated." });
+          setEditCoverImage(false);
+        }
+      },
+      null,
+      () => {
+        onError();
+      },
+    );
+  };
+
+  const handleCoverImageDelete = async (onError: () => void) => {
+    const { res } = await request(routes.deleteFacilityCoverImage, {
+      pathParams: { id: facilityId },
+    });
+    if (res?.ok) {
+      Notification.Success({ msg: "Cover image deleted" });
+      facilityFetch();
+      setEditCoverImage(false);
+    } else {
+      onError();
+    }
+  };
+
   if (isLoading) {
     return <Loading />;
   }
-
-  const hasCoverImage = !!facilityData?.read_cover_image_url;
 
   const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
   const hasPermissionToEditCoverImage =
@@ -122,19 +166,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
   const hasPermissionToDeleteFacility =
     authUser.user_type === "DistrictAdmin" ||
     authUser.user_type === "StateAdmin";
-
-  const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div
-      id="facility-coverimage"
-      className={
-        "absolute right-0 top-0 z-10 flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg bg-black text-sm text-secondary-300 opacity-0 transition-opacity hover:opacity-60"
-      }
-      onClick={() => setEditCoverImage(true)}
-    >
-      <CareIcon icon="l-pen" className="text-lg" />
-      <span className="mt-2">{t(hasCoverImage ? "edit" : "upload")}</span>
-    </div>
-  );
 
   return (
     <Page
@@ -156,52 +187,28 @@ export const FacilityHome = ({ facilityId }: Props) => {
         onClose={handleDeleteClose}
         onConfirm={handleDeleteSubmit}
       />
-      <CoverImageEditModal
+      <AvatarEditModal
+        title={t("edit_cover_photo")}
         open={editCoverImage}
-        onSave={() => facilityFetch()}
+        imageUrl={facilityData?.read_cover_image_url}
+        handleUpload={handleCoverImageUpload}
+        handleDelete={handleCoverImageDelete}
         onClose={() => setEditCoverImage(false)}
-        onDelete={() => facilityFetch()}
-        facility={facilityData ?? ({} as FacilityModel)}
       />
 
-      <div
-        className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch md:hidden ${
-          hasPermissionToEditCoverImage && "cursor-pointer"
-        }`}
-        onClick={() => hasPermissionToEditCoverImage && setEditCoverImage(true)}
-      >
-        <Avatar
-          imageUrl={facilityData?.read_cover_image_url}
-          name={facilityData?.name ?? ""}
-        />
-        {editCoverImageTooltip}
-      </div>
-      <div
-        className={`bg-white ${
-          hasCoverImage ? "rounded-b lg:rounded-t" : "rounded"
-        } p-3 shadow-sm transition-all duration-200 ease-in-out md:p-6`}
-      >
+      <div className="rounded bg-white p-3 shadow-sm transition-all duration-200 ease-in-out md:p-6">
         <div className="justify-between gap-2 lg:flex">
           <div className="flex-col justify-between md:flex">
             <div className="flex flex-1 flex-col">
-              <div className="flex items-start gap-4">
-                <div
-                  className={`group relative hidden h-80 w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:mr-2 md:flex lg:mr-6 lg:h-80 lg:w-80 ${
-                    hasPermissionToEditCoverImage && "cursor-pointer"
-                  }`}
-                  onClick={() =>
-                    hasPermissionToEditCoverImage && setEditCoverImage(true)
-                  }
-                >
-                  <div className="flex h-80 w-[88px] items-center justify-center rounded-lg font-medium text-secondary-700 lg:h-80 lg:w-80">
-                    <Avatar
-                      imageUrl={facilityData?.read_cover_image_url}
-                      name={facilityData?.name ?? ""}
-                    />
-                  </div>
-
-                  {editCoverImageTooltip}
-                </div>
+              <div className="flex flex-col items-start gap-4 md:flex-row">
+                <AvatarEditable
+                  id="facility-coverimage"
+                  imageUrl={facilityData?.read_cover_image_url}
+                  name={facilityData?.name ?? ""}
+                  editable={hasPermissionToEditCoverImage}
+                  onClick={() => setEditCoverImage(true)}
+                  className="md:mr-2 lg:mr-6 lg:h-80 lg:w-80"
+                />
                 <div className="mb-6 grid gap-4 md:mb-0">
                   <div className="flex-col justify-between md:flex lg:flex-1">
                     <div className="mb-4" id="facility-name">

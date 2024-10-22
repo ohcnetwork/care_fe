@@ -412,6 +412,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
+    errors["insurance_details"] = insuranceDetailsError;
+
     Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
@@ -866,7 +868,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const checkboxField = `medical_history_check_${id}`;
     const textField = `medical_history_${id}`;
     return (
-      <div key={textField}>
+      <div key={textField} className="w-full md:w-auto">
         <div>
           <CheckBoxFormField
             value={(field("medical_history").value ?? []).includes(id)}
@@ -876,7 +878,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           />
         </div>
         {id !== 1 && (field("medical_history").value ?? []).includes(id) && (
-          <div className="mx-4">
+          <div className="mx-4 flex flex-col">
             <TextAreaFormField
               {...field(textField)}
               placeholder="Details"
