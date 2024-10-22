@@ -79,13 +79,13 @@ export default function DailyRoundsFilter(props: Props) {
               />
               <TextFormField
                 {...field("taken_at_after")}
-                label={t("MEASURED_AFTER")}
+                label={t("measured_after")}
                 type="datetime-local"
                 max={dayjs().format("YYYY-MM-DDTHH:mm")}
               />
               <TextFormField
                 {...field("taken_at_before")}
-                label={t("MEASURED_BEFORE")}
+                label={t("measured_before")}
                 type="datetime-local"
                 max={dayjs().format("YYYY-MM-DDTHH:mm")}
               />
