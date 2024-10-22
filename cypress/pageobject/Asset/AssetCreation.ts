@@ -117,9 +117,6 @@ export class AssetPage {
     cy.get("[data-testid=asset-vendor-name-input] input")
       .clear()
       .type(vendorName);
-    cy.get(
-      "[data-testid=asset-last-serviced-on-input] input[type='text']",
-    ).click();
     cy.clickAndTypeDate(
       "[data-testid=asset-last-serviced-on-input]",
       lastServicedOn,

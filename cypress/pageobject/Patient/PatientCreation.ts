@@ -52,8 +52,6 @@ export class PatientPage {
 
   typePatientDateOfBirth(dateOfBirth: string) {
     cy.clickAndSelectOption("#patientAge", "DOB");
-    cy.get("#date_of_birth").scrollIntoView();
-    cy.get("#date_of_birth").should("be.visible").click();
     cy.clickAndTypeDate("#date_of_birth", dateOfBirth);
   }
 
