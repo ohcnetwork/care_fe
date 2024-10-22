@@ -506,7 +506,7 @@ export default function ShiftDetails(props: { id: string }) {
           title={t("shifting_details")}
           backUrl="/shifting/board"
           options={
-            <div className="flex gap-2">
+            <div className="flex flex-col  md:flex-row gap-2">
               <ButtonV2
                 tooltip={
                   ["COMPLETED", "CANCELLED"].includes(data?.status || "")
