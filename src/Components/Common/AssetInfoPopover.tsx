@@ -1,6 +1,6 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AssetData, assetClassProps } from "../Assets/AssetTypes";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "./components/ButtonV2";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,15 +10,12 @@ import {
   Transition,
 } from "@headlessui/react";
 
-interface MonitorAssetPopoverProps {
+interface AssetInfoPopoverProps {
   asset?: AssetData;
   className?: string;
 }
 
-const MonitorAssetPopover = ({
-  asset,
-  className,
-}: MonitorAssetPopoverProps) => {
+const AssetInfoPopover = ({ asset, className }: AssetInfoPopoverProps) => {
   const { t } = useTranslation();
 
   return (
@@ -87,4 +84,4 @@ const MonitorAssetPopover = ({
   );
 };
 
-export default MonitorAssetPopover;
+export default AssetInfoPopover;

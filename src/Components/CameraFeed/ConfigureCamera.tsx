@@ -33,8 +33,6 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 interface Props {
   asset: AssetData;
   onUpdated: () => void;
-  //show or hide camera pop-up
-  hideMonitorAsset?: boolean;
 }
 
 type OnvifPreset = { name: string; value: number };
@@ -60,7 +58,6 @@ export default function ConfigureCamera(props: Props) {
   }>();
   const [presetName, setPresetName] = useState("");
   const [showUnlinkConfirmation, setShowUnlinkConfirmation] = useState(false);
-  const hideMonitorAsset = props.hideMonitorAsset || false;
 
   const assetBedsQuery = useQuery(routes.listAssetBeds, {
     query: { asset: props.asset.id, limit: 50 },
@@ -113,7 +110,7 @@ export default function ConfigureCamera(props: Props) {
           asset={props.asset}
           key={key}
           operate={operate}
-          hideMonitorAsset={hideMonitorAsset}
+          hideAssetInfo
         />
       </div>
     );
@@ -254,7 +251,7 @@ export default function ConfigureCamera(props: Props) {
                 );
               }
             }}
-            hideMonitorAsset={hideMonitorAsset}
+            hideAssetInfo
           >
             <div className="flex items-center gap-2">
               <Listbox
