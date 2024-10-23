@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import ButtonV2 from "../../Components/Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../icons/CareIcon";
 
 type ProviderValue = {
