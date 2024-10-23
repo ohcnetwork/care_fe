@@ -4,17 +4,16 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { MedicineAdministrationRecord, Prescription } from "./models";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { PrescriptionFormValidator } from "./validators";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import MedicineRoutes from "./routes";
-import request from "../../Utils/request/request";
 import useSlug from "../../Common/hooks/useSlug";
 import { Success } from "../../Utils/Notifications";
 import DosageFormField from "../Form/FormFields/DosageFormField";
+import useMutation from "@/Utils/request/useMutation";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
@@ -22,27 +21,20 @@ export default function CreatePrescriptionForm(props: {
 }) {
   const { t } = useTranslation();
   const consultation = useSlug("consultation");
-  const [isCreating, setIsCreating] = useState(false);
+  const mutation = useMutation(MedicineRoutes.createPrescription, {
+    pathParams: { consultation },
+  });
 
   return (
     <Form<Prescription>
-      disabled={isCreating}
+      disabled={mutation.isProcessing}
       defaults={props.prescription}
       onCancel={props.onDone}
       onSubmit={async (body) => {
         body["medicine"] = body.medicine_object?.id;
         delete body.medicine_object;
 
-        setIsCreating(true);
-        const { res, error } = await request(
-          MedicineRoutes.createPrescription,
-          {
-            pathParams: { consultation },
-            body,
-          },
-        );
-        setIsCreating(false);
-
+        const { res, error } = await mutation.mutate({ body });
         if (!res?.ok) {
           return error;
         }
