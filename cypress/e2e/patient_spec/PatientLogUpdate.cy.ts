@@ -113,6 +113,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.closeNotification();
     // Submit the doctors log update
     cy.submitButton("Save and Continue");
+    cy.wait(2000);
     cy.verifyNotification("Progress Note created successfully");
     cy.closeNotification();
     // modify the relevant critical care log update
