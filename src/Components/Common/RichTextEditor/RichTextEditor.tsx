@@ -609,9 +609,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               onRefetch?.();
               fileUpload.clearFiles();
               editorRef.current.innerHTML = "";
+              setIsPreviewMode(false);
             }}
             className="flex-none rounded bg-primary-500 p-2 text-white"
-            disabled={!isAuthorized}
+            disabled={!isAuthorized || isPreviewMode}
           >
             <CareIcon icon="l-message" className="text-lg" />
           </Submit>
