@@ -255,7 +255,7 @@ export const PrimaryParametersPlot = ({
       </div>
       <div>
         <PageTitle title="Pain Scale" hideBack={true} breadcrumbs={false} />
-        <PainDiagrams consultationId={consultationId} />
+        <PainDiagrams dailyRound={results} />
       </div>
       {totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
