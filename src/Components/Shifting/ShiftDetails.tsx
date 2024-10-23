@@ -5,6 +5,7 @@ import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "../../Common/constants";
+
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -506,7 +507,7 @@ export default function ShiftDetails(props: { id: string }) {
           title={t("shifting_details")}
           backUrl="/shifting/board"
           options={
-            <div className="flex flex-col gap-2·md:flex-row">
+            <div className="gap-2 md:flex-row flex flex-col">
               <ButtonV2
                 tooltip={
                   ["COMPLETED", "CANCELLED"].includes(data?.status || "")

@@ -1,4 +1,4 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from '../../Utils/Notifications.js';
 
 import {
   BREATHLESSNESS_LEVEL,
@@ -9,38 +9,38 @@ import {
   SHIFTING_CHOICES_WARTIME,
   SHIFTING_VEHICLE_CHOICES,
   USER_TYPES,
-} from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { navigate, useQueryParams } from "raviger";
-import { useReducer, useState } from "react";
-import { ConsultationModel } from "../Facility/models.js";
-import DischargeModal from "../Facility/DischargeModal.js";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { parsePhoneNumber } from "../../Utils/utils.js";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import { useTranslation } from "react-i18next";
-import CircularProgress from "../Common/components/CircularProgress.js";
-import Card from "../../CAREUI/display/Card";
-import RadioFormField from "../Form/FormFields/RadioFormField.js";
-import Page from "../Common/components/Page.js";
-import { LinkedFacilityUsers } from "../Common/UserAutocompleteFormField.js";
-import { UserBareMinimum } from "../Users/models.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import { IShift } from "./models.js";
-import request from "../../Utils/request/request.js";
-import { PatientModel } from "../Patient/models.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import careConfig from "@careConfig";
+} from '../../Common/constants';
+import { Cancel, Submit } from '../Common/components/ButtonV2';
+import { navigate, useQueryParams } from 'raviger';
+import { useReducer, useState } from 'react';
+import { ConsultationModel } from '../Facility/models.js';
+import DischargeModal from '../Facility/DischargeModal.js';
+import { FacilitySelect } from '../Common/FacilitySelect';
+import { FieldChangeEvent } from '../Form/FormFields/Utils.js';
+import { FieldLabel } from '../Form/FormFields/FormField';
+import PatientCategorySelect from '../Patient/PatientCategorySelect';
+import PhoneNumberFormField from '../Form/FormFields/PhoneNumberFormField';
+import { SelectFormField } from '../Form/FormFields/SelectFormField.js';
+import TextAreaFormField from '../Form/FormFields/TextAreaFormField';
+import TextFormField from '../Form/FormFields/TextFormField';
+import { parsePhoneNumber } from '../../Utils/utils.js';
+import useAppHistory from '../../Common/hooks/useAppHistory';
+import { useTranslation } from 'react-i18next';
+import CircularProgress from '../Common/components/CircularProgress.js';
+import Card from '../../CAREUI/display/Card';
+import RadioFormField from '../Form/FormFields/RadioFormField.js';
+import Page from '../Common/components/Page.js';
+import { LinkedFacilityUsers } from '../Common/UserAutocompleteFormField.js';
+import { UserBareMinimum } from '../Users/models.js';
+import useQuery from '../../Utils/request/useQuery.js';
+import routes from '../../Redux/api.js';
+import { IShift } from './models.js';
+import request from '../../Utils/request/request.js';
+import { PatientModel } from '../Patient/models.js';
+import useAuthUser from '../../Common/hooks/useAuthUser.js';
+import careConfig from '@careConfig';
 
-import Loading from "@/Components/Common/Loading";
+import Loading from '@/Components/Common/Loading';
 interface patientShiftProps {
   id: string;
 }
@@ -63,25 +63,25 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const initForm: any = {
     shifting_approving_facility_object: null,
     assigned_facility_object: null,
-    emergency: "false",
-    is_kasp: "false",
-    is_up_shift: "true",
-    reason: "",
-    vehicle_preference: "",
-    comments: "",
+    emergency: 'false',
+    is_kasp: 'false',
+    is_up_shift: 'true',
+    reason: '',
+    vehicle_preference: '',
+    comments: '',
     assigned_facility_type: null,
     preferred_vehicle_choice: null,
-    assigned_to: "",
-    initial_status: "",
-    patient_category: "",
-    ambulance_driver_name: "",
-    ambulance_phone_number: "",
-    ambulance_number: "",
+    assigned_to: '',
+    initial_status: '',
+    patient_category: '',
+    ambulance_driver_name: '',
+    ambulance_phone_number: '',
+    ambulance_number: '',
   };
 
   const initError = Object.assign(
     {},
-    ...Object.keys(initForm).map((k) => ({ [k]: "" })),
+    ...Object.keys(initForm).map((k) => ({ [k]: '' })),
   );
 
   const initialState = {
@@ -91,13 +91,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
-      case "set_form": {
+      case 'set_form': {
         return {
           ...state,
           form: action.form,
         };
       }
-      case "set_error": {
+      case 'set_error': {
         return {
           ...state,
           errors: action.errors,
@@ -113,21 +113,21 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   let requiredFields: any = {
     assigned_facility_object: {
       condition: [
-        "DESTINATION APPROVED",
-        "PATIENT TO BE PICKED UP",
-        "TRANSFER IN PROGRESS",
-        "COMPLETED",
+        'DESTINATION APPROVED',
+        'PATIENT TO BE PICKED UP',
+        'TRANSFER IN PROGRESS',
+        'COMPLETED',
       ].includes(state.form.status),
-      errorText: t("please_select_a_facility"),
+      errorText: t('please_select_a_facility'),
     },
     status: {
-      errorText: t("please_select_status"),
+      errorText: t('please_select_status'),
     },
     patient_category: {
-      errorText: t("please_select_patient_category"),
+      errorText: t('please_select_patient_category'),
     },
     reason: {
-      errorText: t("please_enter_a_reason_for_the_shift"),
+      errorText: t('please_enter_a_reason_for_the_shift'),
     },
   };
 
@@ -135,16 +135,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     requiredFields = {
       ...requiredFields,
       shifting_approving_facility_object: {
-        errorText: t("shifting_approving_facility_can_not_be_empty"),
+        errorText: t('shifting_approving_facility_can_not_be_empty'),
       },
       assigned_facility_type: {
-        errorText: t("please_select_facility_type"),
+        errorText: t('please_select_facility_type'),
       },
       preferred_vehicle_choice: {
-        errorText: t("please_select_preferred_vehicle_type"),
+        errorText: t('please_select_preferred_vehicle_type'),
       },
       breathlessness_level: {
-        errorText: t("please_select_breathlessness_level"),
+        errorText: t('please_select_breathlessness_level'),
       },
     };
   }
@@ -163,18 +163,18 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     Object.keys(requiredFields).forEach((field) => {
       if (
         (!state.form[field] || !/\S+/.test(state.form[field])) &&
-        ("condition" in requiredFields[field]
+        ('condition' in requiredFields[field]
           ? requiredFields[field].condition
           : true)
       ) {
         errors[field] = requiredFields[field].errorText;
         isInvalidForm = true;
       } else {
-        errors[field] = "";
+        errors[field] = '';
       }
     });
 
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: 'set_error', errors });
     return !isInvalidForm;
   };
 
@@ -183,14 +183,14 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   ) => {
     const user = event.value;
     const form = { ...state.form };
-    form["assigned_to"] = user?.id;
+    form['assigned_to'] = user?.id;
     SetAssignedUser(user);
-    dispatch({ type: "set_form", form });
+    dispatch({ type: 'set_form', form });
   };
 
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     dispatch({
-      type: "set_form",
+      type: 'set_form',
       form: { ...state.form, [event.name]: event.value },
     });
   };
@@ -199,29 +199,29 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     const form = { ...state.form };
     const { name, value } = e;
     form[name] = value;
-    dispatch({ type: "set_form", form });
+    dispatch({ type: 'set_form', form });
   };
 
   const setFacility = (selected: any, name: string) => {
     const form = { ...state.form };
     form[name] = selected;
-    dispatch({ type: "set_form", form });
+    dispatch({ type: 'set_form', form });
   };
 
   const handleSubmit = async (discharged = false) => {
     const validForm = validateForm();
 
     if (validForm) {
-      if (!discharged && state.form.status === "PATIENT EXPIRED") {
+      if (!discharged && state.form.status === 'PATIENT EXPIRED') {
         setDischargeReason(
-          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id,
+          DISCHARGE_REASONS.find((i) => i.text == 'Expired')?.id,
         );
         setShowDischargeModal(true);
         return;
       }
-      if (!discharged && state.form.status === "COMPLETED") {
+      if (!discharged && state.form.status === 'COMPLETED') {
         setDischargeReason(
-          DISCHARGE_REASONS.find((i) => i.text == "Referred")?.id,
+          DISCHARGE_REASONS.find((i) => i.text == 'Referred')?.id,
         );
         setShowDischargeModal(true);
         return;
@@ -237,9 +237,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           ? state.form?.assigned_facility_object?.name
           : null,
         patient: state.form.patient_object?.id,
-        emergency: [true, "true"].includes(state.form.emergency),
-        is_kasp: [true, "true"].includes(state.form.is_kasp),
-        is_up_shift: [true, "true"].includes(state.form.is_up_shift),
+        emergency: [true, 'true'].includes(state.form.emergency),
+        is_kasp: [true, 'true'].includes(state.form.is_kasp),
+        is_up_shift: [true, 'true'].includes(state.form.is_up_shift),
         reason: state.form.reason,
         vehicle_preference: state.form.vehicle_preference,
         comments: state.form.comments,
@@ -250,14 +250,14 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         patient_category: state.form.patient_category,
         ambulance_driver_name: state.form.ambulance_driver_name,
         ambulance_phone_number:
-          state.form.ambulance_phone_number === "+91"
-            ? ""
+          state.form.ambulance_phone_number === '+91'
+            ? ''
             : parsePhoneNumber(state.form.ambulance_phone_number),
         ambulance_number: state.form.ambulance_number,
       };
 
       if (state.form.status !== state.form.initial_status) {
-        data["status"] = state.form.status;
+        data['status'] = state.form.status;
       }
 
       const { res, data: shiftData } = await request(routes.updateShift, {
@@ -266,9 +266,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       });
       setIsLoading(false);
       if (res?.ok && shiftData) {
-        dispatch({ type: "set_form", form: shiftData });
+        dispatch({ type: 'set_form', form: shiftData });
         Notification.Success({
-          msg: t("shift_request_updated_successfully"),
+          msg: t('shift_request_updated_successfully'),
         });
 
         navigate(`/shifting/${props.id}`);
@@ -287,18 +287,18 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           (d.patient as PatientModel).last_consultation as ConsultationModel,
         );
         if (d.assigned_facility_external)
-          d["assigned_facility_object"] = {
+          d['assigned_facility_object'] = {
             name: String(data.assigned_facility_external),
           };
-        d["initial_status"] = data.status;
-        d["status"] = qParams.status || data.status;
+        d['initial_status'] = data.status;
+        d['status'] = qParams.status || data.status;
         const patient_category =
           (d.patient as PatientModel).last_consultation?.last_daily_round
             ?.patient_category ??
           (d.patient as PatientModel).last_consultation?.category;
-        d["patient_category"] =
-          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id ?? "";
-        dispatch({ type: "set_form", form: d });
+        d['patient_category'] =
+          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id ?? '';
+        dispatch({ type: 'set_form', form: d });
         setIsLoading(false);
       }
     },
@@ -312,7 +312,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   }
 
   return (
-    <Page title={t("update_shift_request")} backUrl={`/shifting/${props.id}`}>
+    <Page title={t('update_shift_request')} backUrl={`/shifting/${props.id}`}>
       <DischargeModal
         show={showDischargeModal}
         onClose={() => setShowDischargeModal(false)}
@@ -327,7 +327,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <SelectFormField
             name="status"
-            label={t("status")}
+            label={t('status')}
             required
             options={
               careConfig.wartimeShifting
@@ -341,8 +341,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               // disable all options except `Destination Approved` for non-admin destination facility users
               home_facility === state.form.assigned_facility_object?.id &&
               USER_TYPES.findIndex((type) => user_type === type) <
-                USER_TYPES.findIndex((type) => type === "DistrictAdmin") &&
-              !["DESTINATION APPROVED"].includes(option.text)
+                USER_TYPES.findIndex((type) => type === 'DistrictAdmin') &&
+              !['DESTINATION APPROVED'].includes(option.text)
             }
             optionSelectedLabel={(option) => option.text}
             onChange={handleFormFieldChange}
@@ -355,7 +355,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             ) : (
               <LinkedFacilityUsers
                 name="assigned_to"
-                label={t("assigned_to")}
+                label={t('assigned_to')}
                 value={assignedUser}
                 onChange={handleAssignedUserSelect}
                 facilityId={state.form?.shifting_approving_facility_object?.id}
@@ -366,7 +366,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           {careConfig.wartimeShifting && (
             <div>
               <FieldLabel>
-                {t("name_of_shifting_approving_facility")}
+                {t('name_of_shifting_approving_facility')}
               </FieldLabel>
               <FacilitySelect
                 multiple={false}
@@ -374,7 +374,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 facilityType={1300}
                 selected={state.form.shifting_approving_facility_object}
                 setSelected={(obj) =>
-                  setFacility(obj, "shifting_approving_facility_object")
+                  setFacility(obj, 'shifting_approving_facility_object')
                 }
                 errors={state.errors.shifting_approving_facility_object}
               />
@@ -384,40 +384,40 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           <div>
             <FieldLabel
               required={[
-                "DESTINATION APPROVED",
-                "PATIENT TO BE PICKED UP",
-                "TRANSFER IN PROGRESS",
-                "COMPLETED",
+                'DESTINATION APPROVED',
+                'PATIENT TO BE PICKED UP',
+                'TRANSFER IN PROGRESS',
+                'COMPLETED',
               ].includes(state.form.status)}
             >
-              {t("what_facility_assign_the_patient_to")}
+              {t('what_facility_assign_the_patient_to')}
             </FieldLabel>
             <FacilitySelect
               multiple={false}
               freeText
               name="assigned_facility"
               required={[
-                "DESTINATION APPROVED",
-                "PATIENT TO BE PICKED UP",
-                "TRANSFER IN PROGRESS",
-                "COMPLETED",
+                'DESTINATION APPROVED',
+                'PATIENT TO BE PICKED UP',
+                'TRANSFER IN PROGRESS',
+                'COMPLETED',
               ].includes(state.form.status)}
               selected={state.form.assigned_facility_object}
               setSelected={(obj) =>
-                setFacility(obj, "assigned_facility_object")
+                setFacility(obj, 'assigned_facility_object')
               }
               errors={state.errors.assigned_facility_object}
             />
           </div>
 
           <RadioFormField
-            label={t("is_this_an_emergency")}
+            label={t('is_this_an_emergency')}
             name="emergency"
             value={state.form.emergency?.toString()}
             onChange={handleFormFieldChange}
             options={[
-              { label: t("yes"), value: "true" },
-              { label: t("no"), value: "false" },
+              { label: t('yes'), value: 'true' },
+              { label: t('no'), value: 'false' },
             ]}
             optionLabel={(option) => option.label}
             optionValue={(option) => option.value}
@@ -427,10 +427,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             <RadioFormField
               name="is_kasp"
               value={state.form.is_kasp?.toString()}
-              label={t("is") + " " + careConfig.kasp.fullString + "?"}
+              label={t('is') + ' ' + careConfig.kasp.fullString + '?'}
               options={[
-                { label: t("yes"), value: "true" },
-                { label: t("no"), value: "false" },
+                { label: t('yes'), value: 'true' },
+                { label: t('no'), value: 'false' },
               ]}
               optionValue={(option) => option.value}
               optionLabel={(option) => option.label}
@@ -439,12 +439,12 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           )}
 
           <RadioFormField
-            label={t("is_this_an_upshift")}
+            label={t('is_this_an_upshift')}
             name="is_up_shift"
             value={state.form.is_up_shift?.toString()}
             options={[
-              { label: t("yes"), value: "true" },
-              { label: t("no"), value: "false" },
+              { label: t('yes'), value: 'true' },
+              { label: t('no'), value: 'false' },
             ]}
             optionValue={(option) => option.value}
             optionLabel={(option) => option.label}
@@ -465,7 +465,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             <>
               <SelectFormField
                 name="preferred_vehicle_choice"
-                label={t("preferred_vehicle")}
+                label={t('preferred_vehicle')}
                 value={state.form.preferred_vehicle_choice}
                 options={vehicleOptions}
                 optionLabel={(option) => option}
@@ -477,7 +477,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               <SelectFormField
                 name="assigned_facility_type"
                 required
-                label={t("preferred_facility_type")}
+                label={t('preferred_facility_type')}
                 value={state.form.assigned_facility_type}
                 options={facilityOptions}
                 optionLabel={(option) => option}
@@ -489,7 +489,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               <SelectFormField
                 name="breathlessness_level"
                 required
-                label={t("severity_of_breathlessness")}
+                label={t('severity_of_breathlessness')}
                 value={state.form.breathlessness_level}
                 options={BREATHLESSNESS_LEVEL}
                 optionLabel={(option) => option}
@@ -504,9 +504,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             className="md:col-span-2"
             rows={5}
             name="reason"
-            label={t("reason_for_shift")}
+            label={t('reason_for_shift')}
             required
-            placeholder={t("type_your_reason_here") + "*"}
+            placeholder={t('type_your_reason_here') + '*'}
             value={state.form.reason}
             onChange={handleFormFieldChange}
             error={state.errors.reason}
@@ -530,7 +530,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               handleFormFieldChange(event);
             }}
             error={state.errors.ambulance_phone_number}
-            types={["mobile", "landline"]}
+            types={['mobile', 'landline']}
           />
 
           <TextFormField
@@ -547,8 +547,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             className="md:col-span-2"
             rows={5}
             name="comments"
-            label={t("any_other_comments")}
-            placeholder={t("type_any_extra_comments_here")}
+            label={t('any_other_comments')}
+            placeholder={t('type_any_extra_comments_here')}
             value={state.form.comments}
             onChange={handleFormFieldChange}
             error={state.errors.comments}
