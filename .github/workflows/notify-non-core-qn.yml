@@ -24,9 +24,14 @@ jobs:
             }
       - name: Check if comment is a question
         id: check_question
-        run: |
-          echo "${{ github.event.comment.body }}" | grep -Eq "(\?|what|how|why|when|who)"
-
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commentBody = context.payload.comment.body.toLowerCase();
+            const questionKeywords = ["?", "what", "how", "why", "when", "who"];
+            const isQuestion = questionKeywords.some(keyword => commentBody.includes(keyword));
+            return isQuestion ? 'success' : 'failure';
       - name: Notify core team
         if: ${{ steps.check_question.conclusion == 'success' }}
         run: |
