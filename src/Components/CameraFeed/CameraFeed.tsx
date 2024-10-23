@@ -12,7 +12,6 @@ import useFullscreen from "../../Common/hooks/useFullscreen";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
 import VideoPlayer from "./videoPlayer";
-import MonitorAssetPopover from "../Common/MonitorAssetPopover";
 import * as Notification from "../../Utils/Notifications.js";
 import AssetInfoPopover from "../Common/AssetInfoPopover";
 
