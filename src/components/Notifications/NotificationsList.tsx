@@ -261,6 +261,9 @@ export default function NotificationsList({
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
+    if (!navigator.serviceWorker) {
+      return;
+    }
     if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
       subscribe();
     } else {
