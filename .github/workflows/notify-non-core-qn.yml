@@ -1,0 +1,46 @@
+name: Notify Core Team on Non-Core Questions
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  notify_core_team:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if commenter is non-core member
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commenter = context.payload.comment.user.login;
+            const { data: orgMembers } = await github.orgs.listMembers({
+              org: context.repo.owner,
+              role: 'all'
+            });
+            const isOrgMember = orgMembers.some(member => member.login === commenter);
+            if (!isOrgMember) {
+              return commenter; // Proceed if not an organization member
+            }
+      - name: Check if comment is a question
+        id: check_question
+        run: |
+          echo "${{ github.event.comment.body }}" | grep -Eq "(\?|what|how|why|when|who)"
+
+      - name: Notify core team
+        if: ${{ steps.check_question.conclusion == 'success' }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"A non-core member posted a question: https://github.com/${{ github.repository }}/issues/${{ github.event.issue.number }}"}' ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Add question label (optional)
+        if: ${{ steps.check_question.conclusion == 'success' }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: ['question'],
+            });
