@@ -322,7 +322,7 @@ export default function ResourceDetails(props: { id: string }) {
 
               <div className="md:col-span-2 md:row-span-2">
                 <div className="font-semibold leading-relaxed">Reason: </div>
-                <div className="ml-2">{data.reason || "--"}</div>
+                <div className="break-words">{data.reason || "--"}</div>
               </div>
             </div>
 
