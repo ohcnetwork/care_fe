@@ -1,7 +1,6 @@
 import { useState } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { BedModel } from "./models";
-import { ReactElement } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
@@ -14,6 +13,8 @@ import useQuery from "../../Utils/request/useQuery";
 import useFilters from "../../Common/hooks/useFilters";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import Loading from "@/Components/Common/Loading";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+import { useTranslation } from "react-i18next";
 interface BedManagementProps {
   facilityId: string;
   locationId: string;
@@ -30,17 +31,16 @@ interface BedRowProps {
   isOccupied: boolean;
 }
 
-const BedRow = (props: BedRowProps) => {
-  const {
-    id,
-    facilityId,
-    name,
-    description,
-    triggerRerender,
-    locationId,
-    bedType,
-    isOccupied,
-  } = props;
+const BedCard = ({
+  id,
+  facilityId,
+  name,
+  description,
+  triggerRerender,
+  locationId,
+  bedType,
+  isOccupied,
+}: BedRowProps) => {
   const [bedData, setBedData] = useState<{
     show: boolean;
     name: string;
@@ -52,6 +52,7 @@ const BedRow = (props: BedRowProps) => {
       name,
     });
   };
+  const { t } = useTranslation();
 
   const allowedUser = ["DistrictAdmin", "StateAdmin"].includes(
     authUser.user_type,
@@ -80,19 +81,17 @@ const BedRow = (props: BedRowProps) => {
         handleCancel={handleDeleteCancel}
         handleOk={handleDeleteConfirm}
       />
-      <div
-        key={id}
-        className="w-full items-center justify-between border-b py-4 lg:flex"
-      >
-        <div className="mt-2 space-y-2 px-4 lg:w-3/4">
-          <div className="flex flex-col sm:flex-row">
-            <p
-              className="inline break-words text-xl capitalize"
-              id="view-bed-name"
-            >
-              {name}
-            </p>{" "}
-            &nbsp;
+      <div className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
+        <div className="flex-1">
+          <div className="flex w-full flex-col items-start justify-between gap-2">
+            <div>
+              <p
+                className="inline break-words text-xl capitalize"
+                id="view-bed-name"
+              >
+                {name}
+              </p>
+            </div>
             <div id="view-bedbadges">
               {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
                 <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
@@ -108,45 +107,55 @@ const BedRow = (props: BedRowProps) => {
                     : "bg-primary-100 text-primary-600"
                 } mb-1 ml-1 inline-flex w-fit items-center rounded-md px-2.5 py-0.5 text-sm font-medium capitalize leading-5`}
               >
-                {isOccupied ? "Occupied" : "Vacant"}
+                {isOccupied ? t("occupied") : t("vacant")}
               </p>
             </div>
           </div>
-          <p className="break-all">{description}</p>
+          {description && (
+            <p
+              className="... my-3 truncate break-all text-sm font-medium text-secondary-700"
+              id="view-bed-description"
+            >
+              {description}
+            </p>
+          )}
         </div>
-        <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:flex-row">
-          <ButtonV2
-            id="edit-bed-button"
-            href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
-            authorizeFor={NonReadOnlyUsers}
-            className="w-full lg:w-auto"
-            variant="secondary"
-            border
-            ghost
-          >
-            <CareIcon icon="l-pen" className="text-lg" />
-            Edit
-          </ButtonV2>
-          <ButtonV2
-            id="delete-bed-button"
-            onClick={() => handleDelete(name, id)}
-            authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
-            variant="danger"
-            border
-            ghost
-            className="w-full lg:w-auto"
-            tooltip={
-              !allowedUser
-                ? "Contact your admin to delete the bed"
-                : isOccupied
-                  ? "Bed is occupied"
-                  : undefined
-            }
-            tooltipClassName=" text-xs w-full lg:w-auto"
-          >
-            <CareIcon icon="l-trash-alt" className="text-lg" />
-            Delete
-          </ButtonV2>
+
+        <div className="mt-2 flex w-full flex-col gap-2 md:flex-row">
+          <div className="w-full md:w-1/2">
+            <ButtonV2
+              id="edit-bed-button"
+              href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
+              authorizeFor={NonReadOnlyUsers}
+              variant="secondary"
+              border
+              className="w-full"
+            >
+              <CareIcon icon="l-pen" className="text-lg" />
+              {t("edit")}
+            </ButtonV2>
+          </div>
+          <div className="w-full md:w-1/2">
+            <ButtonV2
+              id="delete-bed-button"
+              onClick={() => handleDelete(name, id)}
+              authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
+              variant="secondary"
+              border
+              className="w-full"
+              tooltip={
+                !allowedUser
+                  ? "Contact your admin to delete the bed"
+                  : isOccupied
+                    ? "Bed is occupied"
+                    : undefined
+              }
+              tooltipClassName=" text-xs w-full lg:w-auto"
+            >
+              <CareIcon icon="l-trash" className="text-lg" />
+              {t("delete")}
+            </ButtonV2>
+          </div>
         </div>
       </div>
     </>
@@ -155,9 +164,8 @@ const BedRow = (props: BedRowProps) => {
 
 export const BedManagement = (props: BedManagementProps) => {
   const { facilityId, locationId } = props;
-  let bed: ReactElement | null = null;
-  let BedList: ReactElement[] | ReactElement = [];
-  const { qParams, Pagination, resultsPerPage } = useFilters({});
+  const { qParams, resultsPerPage } = useFilters({});
+  const { t } = useTranslation();
 
   const { data: location } = useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
@@ -166,77 +174,80 @@ export const BedManagement = (props: BedManagementProps) => {
     },
   });
 
-  const { loading, data, refetch } = useQuery(routes.listFacilityBeds, {
-    query: {
-      facility: facilityId,
-      location: locationId,
-      limit: resultsPerPage,
-      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-    },
-  });
-
-  if (data?.results.length) {
-    BedList = data.results.map((bedItem: BedModel) => (
-      <BedRow
-        id={bedItem.id ?? ""}
-        facilityId={facilityId ?? ""}
-        name={bedItem.name ?? ""}
-        description={bedItem.description ?? ""}
-        bedType={bedItem.bed_type ?? ""}
-        triggerRerender={refetch}
-        key={locationId ?? ""}
-        locationId={locationId ?? ""}
-        isOccupied={bedItem.is_occupied ?? false}
-      />
-    ));
-  } else if (data?.results.length === 0) {
-    BedList = (
-      <p className="flex w-full justify-center bg-white p-5 text-center text-2xl font-bold text-secondary-500">
-        No beds available in this location
-      </p>
-    );
-  }
-
-  bed = (
-    <>
-      <div className="mt-5 flex grow flex-wrap bg-white p-4">{BedList}</div>
-      {Boolean(data?.count && data.count > 0) && (
-        <div className="mt-4 flex w-full justify-center">
-          <Pagination totalCount={data?.count ?? 0} />
-        </div>
-      )}
-    </>
-  );
-
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
-    <Page
-      title="Bed Management"
-      crumbsReplacements={{
-        [facilityId]: { name: location?.facility?.name },
-        [locationId]: {
-          name: location?.name,
-          uri: `/facility/${facilityId}/location`,
-        },
+    <PaginatedList
+      route={routes.listFacilityBeds}
+      pathParams={{ facility_external_id: facilityId }}
+      query={{
+        facility: facilityId,
+        location: locationId,
+        limit: resultsPerPage,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
       }}
-      backUrl={`/facility/${facilityId}/location/${locationId}`}
     >
-      <div className="container mx-auto px-4 py-2 sm:px-8">
-        <div className="flex justify-end">
-          <ButtonV2
-            id="add-new-bed"
-            href={`/facility/${facilityId}/location/${locationId}/beds/add`}
-            authorizeFor={NonReadOnlyUsers}
-          >
-            <CareIcon icon="l-plus" className="text-lg" />
-            Add New Bed(s)
-          </ButtonV2>
-        </div>
-        {bed}
-      </div>
-    </Page>
+      {({ refetch }) => (
+        <Page
+          title="Bed Management"
+          crumbsReplacements={{
+            [facilityId]: { name: location?.facility?.name },
+            [locationId]: {
+              name: location?.name,
+              uri: `/facility/${facilityId}/location`,
+            },
+          }}
+          options={
+            <ButtonV2
+              id="add-new-bed"
+              href={`/facility/${facilityId}/location/${locationId}/beds/add`}
+              authorizeFor={NonReadOnlyUsers}
+              className="hidden lg:block"
+            >
+              <CareIcon icon="l-plus" className="text-lg" />
+              {t("add_new_beds")}
+            </ButtonV2>
+          }
+          backUrl={`/facility/${facilityId}/location/${locationId}`}
+        >
+          <div className="mx-auto mt-4 lg:mt-0">
+            <ButtonV2
+              id="add-new-bed"
+              href={`/facility/${facilityId}/location/${locationId}/beds/add`}
+              authorizeFor={NonReadOnlyUsers}
+              className="w-full lg:hidden"
+            >
+              <CareIcon icon="l-plus" className="text-lg" />
+              {t("add_new_beds")}
+            </ButtonV2>
+          </div>
+          <div className="w-full @container">
+            <PaginatedList.WhenEmpty className="my-4 flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
+              <span>{t("no_beds_available")}</span>
+            </PaginatedList.WhenEmpty>
+
+            <PaginatedList.WhenLoading>
+              <Loading />
+            </PaginatedList.WhenLoading>
+            <PaginatedList.Items<BedModel> className="my-8 grid grid-cols-1 gap-3 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
+              {(bedItem: BedModel) => (
+                <BedCard
+                  id={bedItem.id ?? ""}
+                  facilityId={facilityId ?? ""}
+                  name={bedItem.name ?? ""}
+                  description={bedItem.description ?? ""}
+                  bedType={bedItem.bed_type ?? ""}
+                  triggerRerender={refetch}
+                  key={locationId ?? ""}
+                  locationId={locationId ?? ""}
+                  isOccupied={bedItem.is_occupied ?? false}
+                />
+              )}
+            </PaginatedList.Items>
+          </div>
+          <div className="flex w-full items-center justify-center">
+            <PaginatedList.Paginator hideIfSinglePage />
+          </div>
+        </Page>
+      )}
+    </PaginatedList>
   );
 };
