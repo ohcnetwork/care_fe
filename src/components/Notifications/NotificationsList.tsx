@@ -264,7 +264,7 @@ export default function NotificationsList({
     if (!navigator.serviceWorker) {
       return;
     }
-    if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
+    if (["NotSubscribed", "SubscribedOnAnotherDevice"].includes(status)) {
       subscribe();
     } else {
       unsubscribe();
