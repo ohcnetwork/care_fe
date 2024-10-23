@@ -8,6 +8,25 @@ import { OXYGEN_MODALITY_OPTIONS } from "@/common/constants";
 const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();
 
+  const handleChange = (c: any) => {
+    let resetData = {};
+    switch (c.value) {
+      case "HIGH_FLOW_NASAL_CANNULA":
+        resetData = { ventilator_oxygen_modality_oxygen_rate: null };
+        break;
+      default:
+        resetData = {
+          ventilator_fio2: null,
+          ventilator_oxygen_modality_flow_rate: null,
+        };
+    }
+    onChange({
+      ventilator_oxygen_modality:
+        c.value as typeof log.ventilator_oxygen_modality,
+      ...resetData,
+    });
+  };
+
   return (
     <>
       <RadioFormField
@@ -17,12 +36,7 @@ const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
         optionValue={(c) => c.value}
         name="ventilator_oxygen_modality"
         value={log.ventilator_oxygen_modality}
-        onChange={(c) =>
-          onChange({
-            ventilator_oxygen_modality:
-              c.value as typeof log.ventilator_oxygen_modality,
-          })
-        }
+        onChange={handleChange}
         layout="vertical"
       />
       <br />
