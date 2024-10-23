@@ -243,30 +243,41 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                     {({ focus }) => (
                       <div className="flex flex-col">
                         <div className="flex items-center">
-                          <Avatar
-                            className="mr-2 h-7 w-7 rounded-full"
-                            name={option.label}
-                            imageUrl={option.image}
-                          />
-                          <div className="flex w-full justify-between">
-                            <span>{option.label}</span>
-                            <span>{option.icon}</span>
+                          <div className="flex flex-col">
+                            <div className="relative">
+                              <Avatar
+                                className="mr-2 h-11 w-11 rounded-full"
+                                name={option.label}
+                                imageUrl={option.image}
+                              />
+                              <span className="absolute bottom-0 right-0 z-10">
+                                {option.icon}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="w-full">
+                            <div className="flex w-full justify-between">
+                              <span>
+                                {"@"}
+                                {option.label}
+                              </span>
+                            </div>
+                            {option.description && (
+                              <div
+                                className={classNames(
+                                  "text-sm font-normal",
+                                  option.disabled
+                                    ? "text-secondary-700"
+                                    : focus
+                                      ? "text-primary-200"
+                                      : "text-secondary-700",
+                                )}
+                              >
+                                {option.description}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {option.description && (
-                          <div
-                            className={classNames(
-                              "text-sm font-normal",
-                              option.disabled
-                                ? "text-secondary-700"
-                                : focus
-                                  ? "text-primary-200"
-                                  : "text-secondary-700",
-                            )}
-                          >
-                            {option.description}
-                          </div>
-                        )}
                       </div>
                     )}
                   </ComboboxOption>
