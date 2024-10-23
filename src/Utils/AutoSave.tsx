@@ -7,8 +7,8 @@ import React, {
   useContext,
   ReactNode,
 } from "react";
-import { Button } from "../Components/ui/button";
-import { FormAction, FormReducer, FormState } from "../Components/Form/Utils";
+import { Button } from "@/components/ui/button";
+import { FormAction, FormReducer, FormState } from "@/components/Form/Utils";
 import { relativeTime } from "./utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
