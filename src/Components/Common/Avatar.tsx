@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 
 const colors: string[] = [
   "#E6F3FF", // Light Blue
@@ -56,44 +56,47 @@ const Avatar: React.FC<AvatarProps> = ({
   className,
 }) => {
   const [bgColor] = propColors || toColor(name);
-  const [width, setWidth] = useState(0);
-  const avatarRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const updateWidth = () => {
-      const avatarRect = avatarRef.current?.getBoundingClientRect();
-      const width = avatarRect?.width || 0;
-      setWidth(width);
-    };
-    updateWidth();
-    document.addEventListener("resize", updateWidth);
-    return () => document.removeEventListener("resize", updateWidth);
-  }, []);
-
   return (
     <div
-      ref={avatarRef}
       className={cn(
-        `flex aspect-square w-full items-center justify-center overflow-hidden border border-black/10 font-black text-black/10`,
+        `flex aspect-square w-full items-center justify-center overflow-hidden border border-black/10`,
         className,
       )}
       style={{
         background: bgColor,
-        borderRadius: width / 15 + "px",
-        fontSize: width / 2.5 + "px",
+        borderRadius: "calc(100% / 15)",
       }}
     >
       {imageUrl ? (
         <img
           src={imageUrl}
           alt={name}
-          className="aspect-square w-full object-cover"
+          className="aspect-square h-full w-full object-cover"
         />
       ) : (
-        <div>{initials(name)}</div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          viewBox="0 0 100 100"
+        >
+          <text
+            fill="black"
+            fillOpacity="0.1"
+            fontSize="40"
+            fontWeight="900"
+            x="50"
+            y="54"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            alignmentBaseline="middle"
+          >
+            {initials(name)}
+          </text>
+        </svg>
       )}
     </div>
   );
 };
 
 export { Avatar };
+export type { AvatarProps };
