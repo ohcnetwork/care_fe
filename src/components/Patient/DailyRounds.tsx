@@ -788,6 +788,30 @@ export const DailyRounds = (props: any) => {
                   },
                 ]}
               />
+              <RangeAutocompleteFormField
+                {...field("ventilator_spo2")}
+                unit="%"
+                start={0}
+                end={100}
+                step={1}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
+                    label: t("low"),
+                  },
+                  {
+                    value: 90,
+                    className: "text-primary-500",
+                    label: t("normal"),
+                  },
+                  {
+                    value: 100,
+                    className: "text-danger-500",
+                    label: t("high"),
+                  },
+                ]}
+              />
             </>
           )}
           {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
