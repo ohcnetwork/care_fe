@@ -15,6 +15,7 @@ import { classNames } from "../../../Utils/utils";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "@/Components/Common/Avatar";
+import { UserModel } from "@/Components/Users/models";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -25,7 +26,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionProfilePicture?: any;
+  optionImage?: OptionCallback<T | UserModel, string>;
   optionDisabled?: OptionCallback<T, boolean>;
   minQueryLength?: number;
   onQuery?: (query: string) => void;
@@ -76,7 +77,7 @@ type AutocompleteProps<T, V = T> = {
   placeholder?: string;
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionProfilePicture?: any;
+  optionImage?: OptionCallback<T | UserModel, string>;
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionDisabled?: OptionCallback<T, boolean>;
@@ -121,7 +122,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       description,
       search: label.toLowerCase(),
       icon: props.optionIcon?.(option),
-      profilePicture: props.optionProfilePicture?.(option) ?? null,
+      image: props.optionImage?.(option) ?? "",
       value: props.optionValue ? props.optionValue(option) : option,
       disabled: props.optionDisabled?.(option),
     };
@@ -141,7 +142,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
         description: undefined,
         search: query.toLowerCase(),
         icon: <CareIcon icon="l-plus" />,
-        profilePicture: null,
+        image: undefined,
         value: query,
         disabled: undefined,
       },
@@ -245,7 +246,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                           <Avatar
                             className="mr-2 h-7 w-7 rounded-full"
                             name={option.label}
-                            imageUrl={option.profilePicture}
+                            imageUrl={option.image}
                           />
                           <div className="flex w-full justify-between">
                             <span>{option.label}</span>
