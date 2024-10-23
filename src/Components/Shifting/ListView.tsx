@@ -10,7 +10,7 @@ import routes from "../../Redux/api";
 import dayjs from "../../Utils/dayjs";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
-import { formatDateTime, formatPatientAge } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
@@ -75,8 +75,7 @@ export default function ListView() {
             <div>
               <div className="flex justify-between">
                 <div className="mb-2 text-xl font-bold capitalize">
-                  {shift.patient_object.name} -{" "}
-                  {shift.patient_object.age}
+                  {shift.patient_object.name} - {shift.patient_object.age}
                 </div>
                 <div>
                   {shift.emergency && (
