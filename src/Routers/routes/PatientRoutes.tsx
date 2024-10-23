@@ -1,11 +1,11 @@
-import InvestigationReports from "../../Components/Facility/Investigations/Reports";
-import { PatientManager } from "../../Components/Patient/ManagePatients";
-import { PatientHome } from "../../Components/Patient/PatientHome";
-import PatientNotes from "../../Components/Patient/PatientNotes";
-import { PatientRegister } from "../../Components/Patient/PatientRegister";
-import DeathReport from "../../Components/DeathReport/DeathReport";
-import { InsuranceDetails } from "../../Components/Patient/InsuranceDetails";
-import FileUploadPage from "../../Components/Patient/FileUploadPage";
+import InvestigationReports from "@/components/Facility/Investigations/Reports";
+import { PatientManager } from "@/components/Patient/ManagePatients";
+import { PatientHome } from "@/components/Patient/PatientHome";
+import PatientNotes from "@/components/Patient/PatientNotes";
+import { PatientRegister } from "@/components/Patient/PatientRegister";
+import DeathReport from "@/components/DeathReport/DeathReport";
+import { InsuranceDetails } from "@/components/Patient/InsuranceDetails";
+import FileUploadPage from "@/components/Patient/FileUploadPage";
 import { AppRoutes } from "../AppRouter";
 
 const PatientRoutes: AppRoutes = {
