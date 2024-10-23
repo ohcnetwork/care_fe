@@ -76,16 +76,19 @@ const PatientNotesDetailedView = (props: Props) => {
     setReload?.(false);
   };
 
+  // Fetch notes when reload is triggered
   useEffect(() => {
     if (reload) {
       fetchNotes();
     }
   }, [reload]);
 
+  // Fetch notes when thread or noteId changes
   useEffect(() => {
     fetchNotes();
   }, [thread, noteId]);
 
+  // Set reload to true on component mount
   useEffect(() => {
     setReload?.(true);
   }, []);

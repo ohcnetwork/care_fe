@@ -566,7 +566,7 @@ export interface BaseUserModel {
   last_name: string;
   user_type: string;
   last_login: string;
-  read_profile_image_url: string;
+  read_profile_picture_url: string;
 }
 
 export interface PatientNotesEditModel {

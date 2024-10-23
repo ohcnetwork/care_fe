@@ -30,12 +30,9 @@ const MarkdownPreview = ({
   markdown: string;
   mentioned_users?: UserBareMinimum[];
 }) => {
-  const MentionedUsers: Record<string, UserBareMinimum> = {};
-  if (mentioned_users) {
-    mentioned_users.forEach((user) => {
-      MentionedUsers[user.username] = user;
-    });
-  }
+  const MentionedUsers = Object.fromEntries(
+    mentioned_users?.map((u) => [u.username, u]) ?? [],
+  );
 
   const processedMarkdown = markdown
     .replace(/@(\w+)/g, (_, username) => {
