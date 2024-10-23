@@ -58,9 +58,18 @@ const SearchInput = ({
     ));
 
   // Escape hotkey to clear related
-  useKeyboardShortcut(["Escape"], () => value && setValue(""), {
-    ignoreInputFields: false,
-  });
+  useKeyboardShortcut(
+    ["Escape"],
+    () => {
+      if (value) {
+        setValue("");
+        ref.current?.blur();
+      }
+    },
+    {
+      ignoreInputFields: false,
+    },
+  );
 
   return (
     <TextFormField
