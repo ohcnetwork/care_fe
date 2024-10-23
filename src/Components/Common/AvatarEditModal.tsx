@@ -119,7 +119,6 @@ const AvatarEditModal = ({
         setSelectedFile(undefined);
         setPreview(undefined);
         setPreviewImage(null);
-        closeModal();
       });
     } catch (e) {
       console.error(e);
