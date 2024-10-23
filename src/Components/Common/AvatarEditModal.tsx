@@ -123,6 +123,9 @@ const AvatarEditModal = ({
       });
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsCaptureImgBeingUploaded(false);
+      setIsProcessing(false);
     }
   };
 
