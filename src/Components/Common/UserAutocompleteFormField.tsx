@@ -14,7 +14,7 @@ import { UserRole } from "../../Common/constants";
 import { useEffect, useState } from "react";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import { UserBareMinimum } from "../Users/models";
+import { UserBareMinimum, UserModel } from "../Users/models";
 
 type BaseProps = FormFieldBaseProps<UserBareMinimum> & {
   placeholder?: string;
@@ -80,6 +80,9 @@ export default function UserAutocomplete(props: UserSearchProps) {
         )}
         optionLabel={formatName}
         optionIcon={userOnlineDot}
+        optionProfilePicture={(option: UserModel) =>
+          option.read_profile_picture_url
+        }
         optionDescription={(option) =>
           `${option.user_type} - ${option.username}`
         }

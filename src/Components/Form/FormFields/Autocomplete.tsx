@@ -14,6 +14,7 @@ import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
+import { Avatar } from "@/Components/Common/Avatar";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -24,6 +25,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
+  optionProfilePicture?: any;
   optionDisabled?: OptionCallback<T, boolean>;
   minQueryLength?: number;
   onQuery?: (query: string) => void;
@@ -74,6 +76,7 @@ type AutocompleteProps<T, V = T> = {
   placeholder?: string;
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
+  optionProfilePicture?: any;
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionDisabled?: OptionCallback<T, boolean>;
@@ -118,6 +121,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       description,
       search: label.toLowerCase(),
       icon: props.optionIcon?.(option),
+      profilePicture: props.optionProfilePicture?.(option) ?? null,
       value: props.optionValue ? props.optionValue(option) : option,
       disabled: props.optionDisabled?.(option),
     };
@@ -137,6 +141,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
         description: undefined,
         search: query.toLowerCase(),
         icon: <CareIcon icon="l-plus" />,
+        profilePicture: null,
         value: query,
         disabled: undefined,
       },
@@ -236,9 +241,16 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   >
                     {({ focus }) => (
                       <div className="flex flex-col">
-                        <div className="flex justify-between">
-                          <span>{option.label}</span>
-                          <span>{option.icon}</span>
+                        <div className="flex items-center">
+                          <Avatar
+                            className="mr-2 h-7 w-7 rounded-full"
+                            name={option.label}
+                            imageUrl={option.profilePicture}
+                          />
+                          <div className="flex w-full justify-between">
+                            <span>{option.label}</span>
+                            <span>{option.icon}</span>
+                          </div>
                         </div>
                         {option.description && (
                           <div
