@@ -257,10 +257,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                           </div>
                           <div className="w-full">
                             <div className="flex w-full justify-between">
-                              <span>
-                                {"@"}
-                                {option.label}
-                              </span>
+                              <span>{option.label}</span>
                             </div>
                             {option.description && (
                               <div
