@@ -10,6 +10,8 @@ import { useState } from "react";
 import DialogModal from "../Common/Dialog.js";
 import Beds from "./Consultations/Beds";
 import careConfig from "@careConfig";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -25,6 +27,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
     : !itemData.current_bed
       ? "Assign Bed"
       : "Switch Bed";
+  const facilities = useQuery(routes.getPermittedFacilities).data?.results;
   return (
     <>
       <DialogModal
@@ -173,6 +176,9 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`,
               )
             }
+            disabled={
+              !facilities?.some((item) => item.name === itemData.facility_name)
+            }
           >
             View Consultation / Consultation Updates
           </ButtonV2>
@@ -182,6 +188,9 @@ export const ConsultationCard = (props: ConsultationProps) => {
               navigate(
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`,
               )
+            }
+            disabled={
+              !facilities?.some((item) => item.name === itemData.facility_name)
             }
           >
             View / Upload Consultation Files
@@ -201,7 +210,12 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   );
                 }
               }}
-              disabled={!!itemData.discharge_date}
+              disabled={
+                !!itemData.discharge_date ||
+                !facilities?.some(
+                  (item) => item.name === itemData.facility_name,
+                )
+              }
               authorizeFor={NonReadOnlyUsers}
             >
               Add Consultation Updates
