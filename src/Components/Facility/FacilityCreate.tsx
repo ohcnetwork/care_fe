@@ -1,5 +1,4 @@
 import * as Notification from "../../Utils/Notifications.js";
-
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import {
   CapacityModal,
@@ -52,7 +51,6 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { useTranslation } from "react-i18next";
@@ -64,8 +62,9 @@ import { RequestResult } from "../../Utils/request/types.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
 import careConfig from "@careConfig";
+import CoverImageEditModal from "./CoverImageEditModal";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "../Common/Loading";
 interface FacilityProps {
   facilityId?: string;
 }
@@ -163,6 +162,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
+  const [isImageUploadChecked] = useState(false);
 
   const authUser = useAuthUser();
   useEffect(() => {
@@ -223,7 +223,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             : currentStep > 2
               ? "complete"
               : "upcoming",
-        disabled: createdFacilityId == "",
+        disabled: createdFacilityId === "",
       },
       {
         id: 3,
@@ -231,8 +231,27 @@ export const FacilityCreate = (props: FacilityProps) => {
         onClick: () => {
           setCurrentStep(3);
         },
-        disabled: createdFacilityId == "",
-        status: currentStep === 3 ? "current" : "upcoming",
+        status:
+          currentStep === 3
+            ? "current"
+            : currentStep > 3
+              ? "complete"
+              : "upcoming",
+        disabled: createdFacilityId === "",
+      },
+      {
+        id: 4,
+        name: "Cover Image",
+        onClick: () => {
+          setCurrentStep(4);
+        },
+        status:
+          currentStep === 4
+            ? "current"
+            : currentStep > 4
+              ? "complete"
+              : "upcoming",
+        disabled: createdFacilityId === "",
       },
     ];
   };
@@ -408,24 +427,19 @@ export const FacilityCreate = (props: FacilityProps) => {
           }
           return;
 
-        case "pincode":
-          if (!validatePincode(state.form[field])) {
-            errors[field] = t("invalid_pincode");
-            invalidForm = true;
-          }
-          return;
-        case "phone_number":
-          // eslint-disable-next-line no-case-declarations
+        case "phone_number": {
           const phoneNumber = state.form[field];
           if (
             !phoneNumber ||
-            !PhoneNumberValidator()(phoneNumber) === undefined ||
+            PhoneNumberValidator()(phoneNumber) === undefined ||
             !phonePreg(phoneNumber)
           ) {
             errors[field] = t("invalid_phone_number");
             invalidForm = true;
           }
           return;
+        }
+
         case "latitude":
           if (!!state.form.latitude && !validateLatitude(state.form[field])) {
             errors[field] = t("latitude_invalid");
@@ -450,12 +464,22 @@ export const FacilityCreate = (props: FacilityProps) => {
     dispatch({ type: "set_errors", errors });
     return true;
   };
+  const [isCoverImageModalOpen, setIsCoverImageModalOpen] = useState(false);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
+    const formData = new FormData();
+
+    // Append form fields to FormData
+    Object.keys(state.form).forEach((key) => {
+      formData.append(key, (state.form as any)[key]);
+    });
+
     if (validated) {
       setIsLoading(true);
+
+      // Facility data for creating/updating
       const data: FacilityRequest = {
         facility_type: state.form.facility_type,
         name: state.form.name,
@@ -469,61 +493,36 @@ export const FacilityCreate = (props: FacilityProps) => {
         latitude: state.form.latitude,
         longitude: state.form.longitude,
         phone_number: parsePhoneNumber(state.form.phone_number),
-        oxygen_capacity: state.form.oxygen_capacity
-          ? state.form.oxygen_capacity
-          : 0,
-        type_b_cylinders: state.form.type_b_cylinders
-          ? state.form.type_b_cylinders
-          : 0,
-        type_c_cylinders: state.form.type_c_cylinders
-          ? state.form.type_c_cylinders
-          : 0,
-        type_d_cylinders: state.form.type_d_cylinders
-          ? state.form.type_d_cylinders
-          : 0,
-        expected_oxygen_requirement: state.form.expected_oxygen_requirement
-          ? state.form.expected_oxygen_requirement
-          : 0,
-        expected_type_b_cylinders: state.form.expected_type_b_cylinders
-          ? state.form.expected_type_b_cylinders
-          : 0,
-
-        expected_type_c_cylinders: state.form.expected_type_c_cylinders
-          ? state.form.expected_type_c_cylinders
-          : 0,
-
-        expected_type_d_cylinders: state.form.expected_type_d_cylinders
-          ? state.form.expected_type_d_cylinders
-          : 0,
+        oxygen_capacity: state.form.oxygen_capacity ?? 0,
+        type_b_cylinders: state.form.type_b_cylinders ?? 0,
+        type_c_cylinders: state.form.type_c_cylinders ?? 0,
+        type_d_cylinders: state.form.type_d_cylinders ?? 0,
+        expected_oxygen_requirement:
+          state.form.expected_oxygen_requirement ?? 0,
+        expected_type_b_cylinders: state.form.expected_type_b_cylinders ?? 0,
+        expected_type_c_cylinders: state.form.expected_type_c_cylinders ?? 0,
+        expected_type_d_cylinders: state.form.expected_type_d_cylinders ?? 0,
       };
 
+      // Create or update facility
       const { res, data: requestData } = facilityId
         ? await request(routes.updateFacility, {
             body: data,
-            pathParams: {
-              id: facilityId,
-            },
+            pathParams: { id: facilityId },
           })
-        : await request(routes.createFacility, {
-            body: data,
-          });
+        : await request(routes.createFacility, { body: data });
 
       if (res?.ok && requestData) {
         const id = requestData.id;
         dispatch({ type: "set_form", form: initForm });
-        if (!facilityId) {
-          Notification.Success({
-            msg: "Facility added successfully",
-          });
-          setCreatedFacilityId(String(id));
-          setCurrentStep(2);
-        } else {
-          Notification.Success({
-            msg: "Facility updated successfully",
-          });
-          navigate(`/facility/${facilityId}`);
+        Notification.Success({ msg: "Facility added successfully" });
+        setCreatedFacilityId(String(id));
+        setCurrentStep(2);
+        if (isImageUploadChecked) {
+          setIsCoverImageModalOpen(true);
         }
       }
+
       setIsLoading(false);
     }
   };
@@ -531,7 +530,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (isLoading) {
     return <Loading />;
   }
-
   let capacityList: any = null;
   let totalBedCount = 0;
   let totalOccupiedBedCount = 0;
@@ -650,6 +648,49 @@ export const FacilityCreate = (props: FacilityProps) => {
   };
 
   switch (currentStep) {
+    case 4:
+      return (
+        <Page
+          title={t("Upload Cover Image")}
+          crumbsReplacements={{
+            [createdFacilityId || "????"]: { name: state.form.name },
+          }}
+        >
+          <Steps steps={getSteps()} />
+
+          <div className="mt-4">
+            <ButtonV2
+              onClick={() => setIsCoverImageModalOpen(true)}
+              className="mt-4"
+            >
+              {t("Upload Facility Image")}
+            </ButtonV2>
+
+            <CoverImageEditModal
+              open={isCoverImageModalOpen}
+              onClose={() => setIsCoverImageModalOpen(false)}
+              onSave={() => setIsCoverImageModalOpen(false)}
+              facility={{
+                id: createdFacilityId,
+                name: state.form.name,
+                read_cover_image_url: "",
+              }}
+            />
+          </div>
+
+          <div className="mt-5">
+            <ButtonV2
+              onClick={() => {
+                navigate(`/facility/${createdFacilityId}`);
+              }}
+              className="mt-4"
+            >
+              {t("Save Facility")}
+            </ButtonV2>
+          </div>
+        </Page>
+      );
+
     case 3:
       return (
         <Page
@@ -665,7 +706,7 @@ export const FacilityCreate = (props: FacilityProps) => {
               className="mx-auto w-full max-w-2xl"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
-                navigate(`/facility/${createdFacilityId}`);
+                setCurrentStep(4);
               }}
               handleUpdate={async () => {
                 const { res, data } = await request(routes.listDoctor, {
@@ -759,6 +800,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     label={t("facility_name")}
                   />
+
                   <MultiSelectFormField
                     {...field("features")}
                     placeholder={t("features")}
@@ -776,7 +818,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                       <div className="flex items-center gap-2 text-primary-500">
                         <CareIcon icon="l-check-circle" />
                         <span className="text-sm">
-                          State and district auto-filled from pincode
+                          {t("State and district auto-filled from pincode")}
                         </span>
                       </div>
                     )}
@@ -784,7 +826,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   <SelectFormField
                     {...field("state")}
                     required
-                    placeholder="Choose State"
+                    placeholder={t("Choose State")}
                     className={isStateLoading ? "animate-pulse" : ""}
                     disabled={isStateLoading}
                     options={stateData ? stateData.results : []}
@@ -798,7 +840,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   />
                   <SelectFormField
                     {...field("district")}
-                    placeholder="Choose District"
+                    placeholder={t("Choose District")}
                     required
                     className={isDistrictLoading ? "animate-pulse" : ""}
                     disabled={isDistrictLoading}
@@ -816,7 +858,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     className={isLocalbodyLoading ? "animate-pulse" : ""}
                     disabled={isLocalbodyLoading}
-                    placeholder="Choose Local Body"
+                    placeholder={t("Choose Local Body")}
                     options={localbodyData ? localbodyData : []}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
@@ -831,7 +873,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
-                    placeholder="Choose Ward"
+                    placeholder={t("Choose Ward")}
                     options={(wardData ? wardData.results : [])
                       .sort(compareBy("number"))
                       .map((e) => {
@@ -962,7 +1004,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                           >
                             <CareIcon icon="l-map-marker" className="text-xl" />
                             <span className="tooltip-text tooltip-bottom">
-                              Select location from map
+                              {t("Select location from map")}
                             </span>
                           </ButtonV2>
                         </PopoverButton>
