@@ -58,31 +58,45 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const [searchValue, setSearchValue] = useState(selectedOption.value || "");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const [focusedIndex, setFocusedIndex] = useState(0);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement !== inputRef.current) {
         e.preventDefault();
         setOpen(true);
+      } else if (e.key === "ArrowDown") {
+        setFocusedIndex((prevIndex) =>
+          prevIndex === options.length - 1 ? 0 : prevIndex + 1,
+        );
+        console.log(focusedIndex);
+      } else if (e.key === "ArrowUp") {
+        setFocusedIndex((prevIndex) =>
+          prevIndex === 0 ? options.length - 1 : prevIndex - 1,
+        );
+        console.log(focusedIndex);
+      } else if (e.key === "Enter") {
+        handleOptionChange(options[focusedIndex]);
       }
 
-      if (open) {
-        if (e.key === "Escape") {
-          setOpen(false);
-        }
+      if (e.key === "Escape") {
+        inputRef.current?.focus();
+        setOpen(false);
       }
 
       options.forEach((option) => {
         if (e.key.toLowerCase() === option.shortcut_key.toLowerCase()) {
           e.preventDefault();
+
           handleOptionChange(option);
+        } else if (e.key === "/") {
+          setOpen(true);
         }
       });
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [focusedIndex]);
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -181,10 +195,16 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             <Command>
               <CommandList>
                 <CommandGroup>
-                  {options.map((option) => (
+                  {options.map((option, index) => (
                     <CommandItem
                       key={option.key}
                       onSelect={() => handleOptionChange(option)}
+                      className={
+                        selectedOption.label === option.label ||
+                        focusedIndex === index
+                          ? "bg-gray-200"
+                          : "bg-white"
+                      }
                     >
                       <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
                       <span className="flex-1">{t(option.label)}</span>

@@ -57,8 +57,8 @@ import { isPatientMandatoryDataFilled } from "./Utils.js";
 import request from "../../Utils/request/request.js";
 import { Avatar } from "../Common/Avatar.js";
 
-import Loading from "@/Components/Common/Loading";
-import SearchByMultipleFields from "@/Components/Common/SearchByMultipleFields";
+import Loading from "@/components/Common/Loading";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
 interface TabPanelProps {
   children?: ReactNode;
