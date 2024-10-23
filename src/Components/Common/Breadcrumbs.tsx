@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+
 import { usePath, Link } from "raviger";
 import { Button } from "../ui/button";
 import CareIcon from "../../CAREUI/icons/CareIcon";
