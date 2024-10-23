@@ -27,6 +27,7 @@ import useAuthUser from "@/common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import PageTitle from "@/components/Common/PageTitle";
+import { IShift } from "./models";
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
@@ -35,16 +36,16 @@ export default function BoardView() {
   });
 
   const [modalFor, setModalFor] = useState<{
-    externalId?: string;
+    external_id: string | undefined;
     loading: boolean;
   }>({
-    externalId: undefined,
+    external_id: undefined,
     loading: false,
   });
 
   const authUser = useAuthUser();
 
-  const handleTransferComplete = async (shift: any) => {
+  const handleTransferComplete = async (shift: IShift) => {
     setModalFor({ ...modalFor, loading: true });
     await request(routes.completeTransfer, {
       pathParams: { externalId: shift.external_id },
@@ -101,12 +102,14 @@ export default function BoardView() {
           />
         </div>
         <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
-          <SearchInput
-            name="patient_name"
-            value={qParams.patient_name}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder={t("search_patient")}
-          />
+          <div className="w-full md:w-60">
+            <SearchInput
+              name="patient_name"
+              value={qParams.patient_name}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("search_patient")}
+            />
+          </div>
 
           <Tabs
             tabs={[
@@ -303,12 +306,12 @@ export default function BoardView() {
                   <ConfirmDialog
                     title={t("confirm_transfer_complete")}
                     description={t("mark_this_transfer_as_complete_question")}
-                    show={modalFor.externalId === shift.external_id}
+                    show={modalFor.external_id === shift.external_id}
                     onClose={() =>
-                      setModalFor({ externalId: undefined, loading: false })
+                      setModalFor({ external_id: undefined, loading: false })
                     }
                     action={t("confirm")}
-                    onConfirm={() => handleTransferComplete(shift)}
+                    onConfirm={() => handleTransferComplete(shift as IShift)}
                   >
                     <p className="mt-2 text-sm text-yellow-600">
                       {t("redirected_to_create_consultation")}
