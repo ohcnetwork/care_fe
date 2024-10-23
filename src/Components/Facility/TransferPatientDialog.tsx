@@ -1,14 +1,14 @@
-import * as Notification from "../../Utils/Notifications.js";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import * as Notification from "../../Utils/Notifications";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { useReducer, useState } from "react";
 import { DupPatientModel } from "./models";
-import { OptionsType } from "../../Common/constants";
+import { OptionsType } from "@/common/constants";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { navigate } from "raviger";
-import request from "../../Utils/request/request.js";
-import routes from "../../Redux/api.js";
-import TextFormField from "../Form/FormFields/TextFormField.js";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { useTranslation } from "react-i18next";
 
 interface Props {

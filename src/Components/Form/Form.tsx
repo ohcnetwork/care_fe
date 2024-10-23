@@ -1,7 +1,7 @@
 import { isEmpty, omitBy } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { classNames } from "../../Utils/utils";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { FieldValidator } from "./FieldValidators";
 import { FormContextValue, createFormContext } from "./FormContext";
 import { FieldChangeEvent } from "./FormFields/Utils";

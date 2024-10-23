@@ -3,20 +3,20 @@ import ListFilter from "./ListFilter";
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
 import { formatDateTime } from "../../Utils/utils";
-import useFilters from "../../Common/hooks/useFilters";
-import { ExportButton } from "../Common/Export";
-import ButtonV2 from "../Common/components/ButtonV2";
+import useFilters from "@/common/hooks/useFilters";
+import { ExportButton } from "@/components/Common/Export";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import SearchInput from "../Form/SearchInput";
 import request from "../../Utils/request/request";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export default function ListView() {
   const {
     qParams,

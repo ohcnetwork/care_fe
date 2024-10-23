@@ -7,12 +7,12 @@ import routes from "../../../Redux/api";
 import PaginatedList from "../../../CAREUI/misc/PaginatedList";
 import DailyRoundsFilter from "./DailyRoundsFilter";
 import { ConsultationModel } from "../models";
-import { useSlugs } from "../../../Common/hooks/useSlug";
+import { useSlugs } from "@/common/hooks/useSlug";
 
 import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
 import { useState } from "react";
 import { QueryParams } from "../../../Utils/request/types";
-import { UserRole } from "../../../Common/constants";
+import { UserRole } from "@/common/constants";
 
 interface Props {
   consultation: ConsultationModel;

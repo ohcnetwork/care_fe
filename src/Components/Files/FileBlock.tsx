@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { FileUploadModel } from "../Patient/models";
 import { FileManagerResult } from "../../Utils/useFileManager";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import { FILE_EXTENSIONS } from "../../Common/constants";
+import { FILE_EXTENSIONS } from "@/common/constants";
 import { t } from "i18next";
 
 export interface FileBlockProps {

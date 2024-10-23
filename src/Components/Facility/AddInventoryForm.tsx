@@ -1,17 +1,17 @@
 import { useReducer, useState, useEffect } from "react";
 import Card from "../../CAREUI/display/Card";
-import * as Notification from "../../Utils/Notifications.js";
-import Page from "../Common/components/Page";
+import * as Notification from "../../Utils/Notifications";
+import Page from "@/components/Common/components/Page";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 const initForm = {
   id: "",
   quantity: "",

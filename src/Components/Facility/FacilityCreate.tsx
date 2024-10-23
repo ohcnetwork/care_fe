@@ -1,18 +1,21 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/components/Common/components/ButtonV2";
 import {
   CapacityModal,
   DistrictModel,
   DoctorModal,
   FacilityRequest,
 } from "./models";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import {
   BED_TYPES,
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
-} from "../../Common/constants";
+} from "@/common/constants";
 import {
   MultiSelectFormField,
   SelectFormField,
@@ -24,7 +27,7 @@ import {
   Transition,
 } from "@headlessui/react";
 import { useEffect, useState } from "react";
-import Steps, { Step } from "../Common/Steps";
+import Steps, { Step } from "@/components/Common/Steps";
 import {
   getPincodeDetails,
   includesIgnoreCase,
@@ -36,36 +39,36 @@ import {
   validateLatitude,
   validateLongitude,
   validatePincode,
-} from "../../Common/validation";
+} from "@/common/validation";
 
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
-import Card from "../../CAREUI/display/Card.js";
+import Card from "../../CAREUI/display/Card";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { StaffCapacity } from "./StaffCapacity.js";
-import StaffCountCard from "./StaffCountCard.js";
+import { StaffCapacity } from "./StaffCapacity";
+import StaffCountCard from "./StaffCountCard";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FormAction } from "../Form/Utils.js";
-import GLocationPicker from "../Common/GLocationPicker";
-import Page from "../Common/components/Page.js";
+import { FormAction } from "../Form/Utils";
+import GLocationPicker from "@/components/Common/GLocationPicker";
+import Page from "@/components/Common/components/Page";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 
 import { navigate } from "raviger";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import { useTranslation } from "react-i18next";
-import { PhoneNumberValidator } from "../Form/FieldValidators.js";
-import request from "../../Utils/request/request.js";
-import routes from "../../Redux/api.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import { RequestResult } from "../../Utils/request/types.js";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import SpokeFacilityEditor from "./SpokeFacilityEditor.js";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { RequestResult } from "../../Utils/request/types";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import SpokeFacilityEditor from "./SpokeFacilityEditor";
 import careConfig from "@careConfig";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface FacilityProps {
   facilityId?: string;
 }

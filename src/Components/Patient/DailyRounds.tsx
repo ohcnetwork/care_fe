@@ -15,17 +15,17 @@ import {
   SLEEP_CHOICES,
   TELEMEDICINE_ACTIONS,
   URINATION_FREQUENCY_CHOICES,
-} from "../../Common/constants";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+} from "@/common/constants";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
 import BloodPressureFormField, {
   BloodPressureValidator,
-} from "../Common/BloodPressureFormField";
-import TemperatureFormField from "../Common/TemperatureFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import Page from "../Common/components/Page";
+} from "@/components/Common/BloodPressureFormField";
+import TemperatureFormField from "@/components/Common/TemperatureFormField";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
+import Page from "@/components/Common/components/Page";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -38,7 +38,7 @@ import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { SCRIBE_FORMS } from "../Scribe/formDetails";
 import { DailyRoundsModel, DailyRoundTypes } from "./models";
-import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
+import InvestigationBuilder from "@/components/Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
 import { error } from "@pnotify/core";
 import { useTranslation } from "react-i18next";
@@ -50,14 +50,14 @@ import {
 } from "../Diagnosis/types";
 import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import SymptomsApi from "../Symptoms/api";
 import { scrollTo } from "../../Utils/utils";
 import { ICD11DiagnosisModel } from "../Facility/models";
 import NursingCare from "../LogUpdate/Sections/NursingCare";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();

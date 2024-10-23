@@ -5,7 +5,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { classNames } from "../../../Utils/utils";
-import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
+import { useIsAuthorized } from "@/common/hooks/useIsAuthorized";
 
 interface DropdownMenuProps {
   id?: string;

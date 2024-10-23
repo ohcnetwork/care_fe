@@ -1,15 +1,15 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import {
   BREATHLESSNESS_LEVEL,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
   SHIFTING_VEHICLE_CHOICES,
-} from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+} from "@/common/constants";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { useReducer, useState } from "react";
 
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "./PatientCategorySelect";
@@ -17,21 +17,21 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { navigate } from "raviger";
-import { parsePhoneNumber } from "../../Utils/utils.js";
-import { phonePreg } from "../../Common/validation";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import { parsePhoneNumber } from "../../Utils/utils";
+import { phonePreg } from "@/common/validation";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import { useTranslation } from "react-i18next";
-import Page from "../Common/components/Page.js";
-import Card from "../../CAREUI/display/Card.js";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField.js";
-import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
-import { PhoneNumberValidator } from "../Form/FieldValidators.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import request from "../../Utils/request/request.js";
+import Page from "@/components/Common/components/Page";
+import Card from "../../CAREUI/display/Card";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 import careConfig from "@careConfig";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface patientShiftProps {
   facilityId: string;
   patientId: string;

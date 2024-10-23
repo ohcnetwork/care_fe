@@ -1,4 +1,6 @@
-import DateInputV2, { DatePickerPosition } from "../../Common/DateInputV2";
+import DateInputV2, {
+  DatePickerPosition,
+} from "@/components/Common/DateInputV2";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 import FormField from "./FormField";

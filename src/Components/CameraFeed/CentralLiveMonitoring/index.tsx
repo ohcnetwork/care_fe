@@ -1,11 +1,11 @@
 import { useState } from "react";
-import Loading from "../../Common/Loading";
-import Page from "../../Common/components/Page";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/components/Page";
 import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
 import LocationFeedTile from "../CameraFeedWithBedPresets";
 import Fullscreen from "../../../CAREUI/misc/Fullscreen";
-import useBreakpoints from "../../../Common/hooks/useBreakpoints";
+import useBreakpoints from "@/common/hooks/useBreakpoints";
 import { useQueryParams } from "raviger";
 import LiveMonitoringFilters from "./LiveMonitoringFilters";
 import StillWatching from "../StillWatching";

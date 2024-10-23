@@ -1,8 +1,8 @@
 import { useState } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { formatDateTime, formatName } from "../../Utils/utils";
-import CircularProgress from "../Common/components/CircularProgress";
-import ButtonV2 from "../Common/components/ButtonV2";
+import CircularProgress from "@/components/Common/components/CircularProgress";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import routes from "../../Redux/api";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";

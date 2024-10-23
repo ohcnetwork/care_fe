@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { DailyRoundsModel } from "../../../Patient/models";
 import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
 import { ConsultationModel } from "../../models";
-import { useSlugs } from "../../../../Common/hooks/useSlug";
+import { useSlugs } from "@/common/hooks/useSlug";
 
 interface Props {
   round: DailyRoundsModel;

@@ -6,7 +6,7 @@ import {
   MOTOR_RESPONSE_SCALE,
   PUPIL_REACTION_OPTIONS,
   VERBAL_RESPONSE_SCALE,
-} from "../../../Common/constants";
+} from "@/common/constants";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";

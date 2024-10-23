@@ -1,19 +1,22 @@
 import { useState } from "react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { FACILITY_FEATURE_TYPES } from "../../Common/constants";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import * as Notification from "../../Utils/Notifications.js";
+import { FACILITY_FEATURE_TYPES } from "@/common/constants";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/components/Common/components/ButtonV2";
+import * as Notification from "../../Utils/Notifications";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatPhoneNumber, parsePhoneNumber } from "../../Utils/utils";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import careConfig from "@careConfig";
 import { FacilityModel } from "./models";
-import { Avatar } from "../Common/Avatar";
+import { Avatar } from "@/components/Common/Avatar";
 
 export const FacilityCard = (props: {
   facility: FacilityModel;

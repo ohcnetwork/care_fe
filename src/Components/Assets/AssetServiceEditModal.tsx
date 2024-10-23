@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import * as Notification from "../../Utils/Notifications.js";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
+import * as Notification from "../../Utils/Notifications";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/components/Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
 import { AssetData, AssetService, AssetServiceEdit } from "./AssetTypes";
 import dayjs from "dayjs";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";

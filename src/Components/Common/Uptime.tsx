@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AssetStatus, AvailabilityRecord } from "../Assets/AssetTypes";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
-import useQuery from "../../Utils/request/useQuery.js";
+import useQuery from "../../Utils/request/useQuery";
 import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
 
 const STATUS_COLORS = {

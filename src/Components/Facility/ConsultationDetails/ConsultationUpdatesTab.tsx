@@ -5,7 +5,7 @@ import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
-import { DISCHARGE_REASONS } from "../../../Common/constants";
+import { DISCHARGE_REASONS } from "@/common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
 import {
@@ -15,7 +15,7 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../../Utils/utils";
-import ReadMore from "../../Common/components/Readmore";
+import ReadMore from "@/components/Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
 import EventsList from "./Events/EventsList";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
@@ -23,9 +23,9 @@ import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import EncounterSymptomsCard from "../../Symptoms/SymptomsCard";
-import Tabs from "../../Common/components/Tabs";
+import Tabs from "@/components/Common/components/Tabs";
 
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();

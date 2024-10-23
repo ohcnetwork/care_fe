@@ -1,7 +1,7 @@
 import * as Notify from "../../Utils/Notifications";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import QRCode from "qrcode.react";
 import { formatDateTime } from "../../Utils/utils";
 import { useRef } from "react";

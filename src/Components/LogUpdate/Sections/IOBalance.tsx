@@ -1,7 +1,7 @@
 import { Fragment } from "react/jsx-runtime";
 import { DailyRoundsModel } from "../../Patient/models";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";

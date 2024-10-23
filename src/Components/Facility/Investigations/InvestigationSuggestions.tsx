@@ -3,8 +3,8 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import routes from "../../../Redux/api";
 import dayjs from "../../../Utils/dayjs";
 import useQuery from "../../../Utils/request/useQuery";
-import Loading from "../../Common/Loading";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { InvestigationResponse } from "./Reports/types";
 
 export default function ViewInvestigationSuggestions(props: {

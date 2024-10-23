@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import PrintPreview from "../../CAREUI/misc/PrintPreview";
-import { useSlugs } from "../../Common/hooks/useSlug";
+import { useSlugs } from "@/common/hooks/useSlug";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import {

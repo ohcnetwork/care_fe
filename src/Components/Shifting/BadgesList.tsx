@@ -1,4 +1,4 @@
-import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
+import { SHIFTING_FILTER_ORDER } from "@/common/constants";
 import { useFacilityQuery } from "../Resource/BadgesList";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery";

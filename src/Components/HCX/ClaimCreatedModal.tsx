@@ -1,10 +1,10 @@
 import * as Notification from "../../Utils/Notifications";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import { FileUpload } from "../Files/FileUpload";
 import { HCXClaimModel } from "./models";
-import { Submit } from "../Common/components/ButtonV2";
+import { Submit } from "@/components/Common/components/ButtonV2";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { useState } from "react";

@@ -1,17 +1,17 @@
 import { useTranslation } from "react-i18next";
-import useSlug from "../../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import useQuery from "../../../Utils/request/useQuery";
 import MedicineRoutes from "../routes";
 import { useMemo, useState } from "react";
 import { computeActivityBounds } from "./utils";
-import useBreakpoints from "../../../Common/hooks/useBreakpoints";
+import useBreakpoints from "@/common/hooks/useBreakpoints";
 import SubHeading from "../../../CAREUI/display/SubHeading";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import BulkAdminister from "./BulkAdminister";
-import useRangePagination from "../../../Common/hooks/useRangePagination";
+import useRangePagination from "@/common/hooks/useRangePagination";
 import MedicineAdministrationTable from "./AdministrationTable";
-import Loading from "../../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import ScrollOverlay from "../../../CAREUI/interactive/ScrollOverlay";
 import { AuthorizedForConsultationRelatedActions } from "../../../CAREUI/misc/AuthorizedChild";
 

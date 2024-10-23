@@ -5,7 +5,7 @@ import HumanBodyChart from "../../../CAREUI/interactive/HumanChart";
 import PopupModal from "../../../CAREUI/display/PopupModal";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { classNames, getValueDescription } from "../../../Utils/utils";
-import { HumanBodyRegion } from "../../../Common/constants";
+import { HumanBodyRegion } from "@/common/constants";
 import { Error } from "../../../Utils/Notifications";
 
 type Props = {

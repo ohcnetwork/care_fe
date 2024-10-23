@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import PatientCategoryBadge from "../../../Common/PatientCategoryBadge";
+import PatientCategoryBadge from "@/components/Common/PatientCategoryBadge";
 import { DailyRoundsModel, NameQuantity } from "../../../Patient/models";
 import { PatientCategory } from "../../models";
 

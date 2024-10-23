@@ -2,11 +2,11 @@ import { lazy, useState } from "react";
 import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "../Facility/models";
 import { AssetData } from "./AssetTypes";
-import * as Notification from "../../Utils/Notifications.js";
-import { Cancel } from "../Common/components/ButtonV2";
+import * as Notification from "../../Utils/Notifications";
+import { Cancel } from "@/components/Common/components/ButtonV2";
 import { Link } from "raviger";
-import { AssetImportSchema } from "../../Common/constants";
-import DialogModal from "../Common/Dialog";
+import { AssetImportSchema } from "@/common/constants";
+import DialogModal from "@/components/Common/Dialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -14,7 +14,7 @@ import careConfig from "@careConfig";
 import request from "../../Utils/request/request";
 
 const ExcelFileDragAndDrop = lazy(
-  () => import("../Common/ExcelFIleDragAndDrop"),
+  () => import("@/components/Common/ExcelFIleDragAndDrop"),
 );
 
 interface Props {

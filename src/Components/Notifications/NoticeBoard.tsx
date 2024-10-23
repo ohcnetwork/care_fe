@@ -1,5 +1,5 @@
-import Page from "../Common/components/Page";
-import Loading from "../Common/Loading";
+import Page from "@/components/Common/components/Page";
+import Loading from "@/components/Common/Loading";
 import { formatDateTime, formatName } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";

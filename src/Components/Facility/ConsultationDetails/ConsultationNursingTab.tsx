@@ -5,12 +5,12 @@ import { useTranslation } from "react-i18next";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import { RoutineAnalysisRes, RoutineFields } from "../models";
-import Loading from "../../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import { classNames, formatDate, formatTime } from "../../../Utils/utils";
-import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
+import Pagination from "@/components/Common/Pagination";
+import { PAGINATION_LIMIT } from "@/common/constants";
 
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 
 export default function ConsultationNursingTab(props: ConsultationTabProps) {
   const { t } = useTranslation();

@@ -3,7 +3,7 @@ import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { MedicineAdministrationRecord, Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Error, Success } from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
@@ -12,7 +12,7 @@ import dayjs from "../../Utils/dayjs";
 import TextFormField from "../Form/FormFields/TextFormField";
 import request from "../../Utils/request/request";
 import MedicineRoutes from "./routes";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import DosageFormField from "../Form/FormFields/DosageFormField";
 import { AdministrationDosageValidator } from "./validators";
 

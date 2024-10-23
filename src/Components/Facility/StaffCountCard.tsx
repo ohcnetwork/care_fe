@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { DoctorModal } from "./models";
-import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
+import { DOCTOR_SPECIALIZATION } from "@/common/constants";
 import * as Notification from "../../Utils/Notifications";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import { StaffCapacity } from "./StaffCapacity";
-import DialogModal from "../Common/Dialog";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import ButtonV2 from "../Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";

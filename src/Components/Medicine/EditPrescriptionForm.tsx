@@ -3,7 +3,7 @@ import Form from "../Form/Form";
 import { Prescription } from "./models";
 import request from "../../Utils/request/request";
 import * as Notification from "../../Utils/Notifications";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import { RequiredFieldValidator } from "../Form/FieldValidators";
 import { useTranslation } from "react-i18next";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";

@@ -9,7 +9,7 @@ import {
   HumanBodyRegion,
   PressureSoreExudateAmountOptions,
   PressureSoreTissueTypeOptions,
-} from "../../../../Common/constants";
+} from "@/common/constants";
 import { IPressureSore } from "../../../Patient/models";
 import { Error } from "../../../../Utils/Notifications";
 import { classNames, getValueDescription } from "../../../../Utils/utils";

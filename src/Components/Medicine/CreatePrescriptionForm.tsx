@@ -12,7 +12,7 @@ import { PrescriptionFormValidator } from "./validators";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import MedicineRoutes from "./routes";
 import request from "../../Utils/request/request";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import { Success } from "../../Utils/Notifications";
 import DosageFormField from "../Form/FormFields/DosageFormField";
 

@@ -1,17 +1,17 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import {
   GENDER_TYPES,
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
-} from "../../Common/constants";
+} from "@/common/constants";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CommentSection from "./CommentsSection";
-import ConfirmDialog from "../Common/ConfirmDialog.js";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import {
@@ -21,15 +21,15 @@ import {
 } from "../../Utils/utils";
 
 import { useTranslation } from "react-i18next";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import request from "../../Utils/request/request.js";
-import { ConsultationModel } from "../Facility/models.js";
-import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import { PatientModel } from "../Patient/models.js";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+import { ConsultationModel } from "../Facility/models";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { PatientModel } from "../Patient/models";
 import careConfig from "@careConfig";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export default function ShiftDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);

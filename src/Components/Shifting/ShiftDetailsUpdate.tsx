@@ -1,4 +1,4 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import {
   BREATHLESSNESS_LEVEL,
@@ -9,38 +9,38 @@ import {
   SHIFTING_CHOICES_WARTIME,
   SHIFTING_VEHICLE_CHOICES,
   USER_TYPES,
-} from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+} from "@/common/constants";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
-import { ConsultationModel } from "../Facility/models.js";
-import DischargeModal from "../Facility/DischargeModal.js";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import { ConsultationModel } from "../Facility/models";
+import DischargeModal from "../Facility/DischargeModal";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { parsePhoneNumber } from "../../Utils/utils.js";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import { parsePhoneNumber } from "../../Utils/utils";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import { useTranslation } from "react-i18next";
-import CircularProgress from "../Common/components/CircularProgress.js";
+import CircularProgress from "@/components/Common/components/CircularProgress";
 import Card from "../../CAREUI/display/Card";
-import RadioFormField from "../Form/FormFields/RadioFormField.js";
-import Page from "../Common/components/Page.js";
-import { LinkedFacilityUsers } from "../Common/UserAutocompleteFormField.js";
-import { UserBareMinimum } from "../Users/models.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import { IShift } from "./models.js";
-import request from "../../Utils/request/request.js";
-import { PatientModel } from "../Patient/models.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import Page from "@/components/Common/components/Page";
+import { LinkedFacilityUsers } from "@/components/Common/UserAutocompleteFormField";
+import { UserBareMinimum } from "../Users/models";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { IShift } from "./models";
+import request from "../../Utils/request/request";
+import { PatientModel } from "../Patient/models";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import careConfig from "@careConfig";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface patientShiftProps {
   id: string;
 }

@@ -1,21 +1,21 @@
 import { useState } from "react";
-import * as Notification from "../../../Utils/Notifications.js";
-import Page from "../../Common/components/Page";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import * as Notification from "../../../Utils/Notifications";
+import Page from "@/components/Common/components/Page";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
-import { useMessageListener } from "../../../Common/hooks/useMessageListener";
-import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
-import { PatientNoteStateType, PaitentNotesReplyModel } from "../models.js";
-import routes from "../../../Redux/api.js";
-import request from "../../../Utils/request/request.js";
-import useQuery from "../../../Utils/request/useQuery.js";
+import { useMessageListener } from "@/common/hooks/useMessageListener";
+import PatientConsultationNotesList from "../PatientConsultationNotesList";
+import { PatientNoteStateType, PaitentNotesReplyModel } from "../models";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+import useQuery from "../../../Utils/request/useQuery";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import { classNames, isAppleDevice, keysOf } from "../../../Utils/utils.js";
-import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
-import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
-import useAuthUser from "../../../Common/hooks/useAuthUser.js";
-import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
+import { classNames, isAppleDevice, keysOf } from "../../../Utils/utils";
+import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField";
+import { PATIENT_NOTES_THREADS } from "@/common/constants";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard";
 import { t } from "i18next";
 
 interface ConsultationDoctorNotesProps {

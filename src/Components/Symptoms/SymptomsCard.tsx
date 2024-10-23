@@ -1,5 +1,5 @@
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import useQuery from "../../Utils/request/useQuery";
 import { SymptomText } from "./SymptomsBuilder";
 import SymptomsApi from "./api";

@@ -6,29 +6,29 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
-import { USER_TYPES } from "../../Common/constants";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import useFilters from "../../Common/hooks/useFilters";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import routes from "../../Redux/api.js";
-import * as Notification from "../../Utils/Notifications.js";
-import request from "../../Utils/request/request.js";
-import useQuery from "../../Utils/request/useQuery.js";
+import { USER_TYPES } from "@/common/constants";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import useFilters from "@/common/hooks/useFilters";
+import useWindowDimensions from "@/common/hooks/useWindowDimensions";
+import routes from "../../Redux/api";
+import * as Notification from "../../Utils/Notifications";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
 import {
   classNames,
   formatName,
   isUserOnline,
   relativeTime,
 } from "../../Utils/utils";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import Pagination from "../Common/Pagination";
-import UserDetails from "../Common/UserDetails";
-import UserDetailComponent from "../Common/UserDetailsComponet.js";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import CircularProgress from "../Common/components/CircularProgress.js";
-import Page from "../Common/components/Page.js";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Pagination from "@/components/Common/Pagination";
+import UserDetails from "@/components/Common/UserDetails";
+import UserDetailComponent from "@/components/Common/UserDetailsComponet";
+import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
+import CircularProgress from "@/components/Common/components/CircularProgress";
+import Page from "@/components/Common/components/Page";
 import { FacilityModel } from "../Facility/models";
-import TextFormField from "../Form/FormFields/TextFormField.js";
+import TextFormField from "../Form/FormFields/TextFormField";
 import SearchInput from "../Form/SearchInput";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
 import SkillsSlideOver from "./SkillsSlideOver";
@@ -37,7 +37,7 @@ import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
 import { showUserDelete } from "../../Utils/permissions";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export default function ManageUsers() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();

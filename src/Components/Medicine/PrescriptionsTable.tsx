@@ -3,12 +3,12 @@ import ResponsiveMedicineTable from "./ResponsiveMedicineTables";
 import { formatDateTime } from "../../Utils/utils";
 import { Prescription } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Cancel } from "../Common/components/ButtonV2";
+import { Cancel } from "@/components/Common/components/ButtonV2";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { useTranslation } from "react-i18next";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import useQuery from "../../Utils/request/useQuery";
 import MedicineRoutes from "./routes";
 

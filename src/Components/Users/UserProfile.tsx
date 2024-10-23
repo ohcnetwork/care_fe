@@ -1,10 +1,10 @@
 import { useState, useReducer, FormEvent } from "react";
-import { GENDER_TYPES, LocalStorageKeys } from "../../Common/constants";
-import { validateEmailAddress } from "../../Common/validation";
-import * as Notification from "../../Utils/Notifications.js";
-import LanguageSelector from "../../Components/Common/LanguageSelector";
+import { GENDER_TYPES, LocalStorageKeys } from "@/common/constants";
+import { validateEmailAddress } from "@/common/validation";
+import * as Notification from "../../Utils/Notifications";
+import LanguageSelector from "@/components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
 import {
   classNames,
   dateQueryString,
@@ -18,10 +18,10 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { GenderType, SkillModel, UpdatePasswordForm } from "../Users/models";
-import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
+import { GenderType, SkillModel, UpdatePasswordForm } from "./models";
+import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
-import useAuthUser, { useAuthContext } from "../../Common/hooks/useAuthUser";
+import useAuthUser, { useAuthContext } from "@/common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
@@ -29,10 +29,10 @@ import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { validateRule } from "./UserAdd";
 import { useTranslation } from "react-i18next";
-import AvatarEditable from "@/Components/Common/AvatarEditable";
-import Page from "@/Components/Common/components/Page";
-import Loading from "@/Components/Common/Loading";
-import AvatarEditModal from "@/Components/Common/AvatarEditModal";
+import AvatarEditable from "@/components/Common/AvatarEditable";
+import Page from "@/components/Common/components/Page";
+import Loading from "@/components/Common/Loading";
+import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import uploadFile from "@/Utils/request/uploadFile";
 import careConfig from "@careConfig";
 

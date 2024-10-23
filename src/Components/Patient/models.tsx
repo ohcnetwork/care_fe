@@ -24,7 +24,7 @@ import {
   SOCIOECONOMIC_STATUS_CHOICES,
   URINATION_FREQUENCY_CHOICES,
   VENTILATOR_MODE_OPTIONS,
-} from "../../Common/constants";
+} from "@/common/constants";
 
 export interface FlowModel {
   id?: number;

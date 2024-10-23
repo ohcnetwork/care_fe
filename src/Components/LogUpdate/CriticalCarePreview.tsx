@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import ButtonV2 from "../Common/components/ButtonV2";
-import Loading from "../Common/Loading";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import Loading from "@/components/Common/Loading";
 import Card from "../../CAREUI/display/Card";
 import React, { useEffect } from "react";
 import { ABGAnalysisFields } from "./Sections/ABGAnalysis";
@@ -16,7 +16,7 @@ import { VentilatorFields } from "./Sections/RespiratorySupport/Ventilator";
 import PressureSore from "./Sections/PressureSore/PressureSore";
 import { IOBalanceSections } from "./Sections/IOBalance";
 import PainChart from "./components/PainChart";
-import { meanArterialPressure } from "../Common/BloodPressureFormField";
+import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
 import { DailyRoundsModel } from "../Patient/models";
 
 type Props = {

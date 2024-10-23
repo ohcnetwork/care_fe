@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { UserModel } from "../../Components/Users/models";
+import { UserModel } from "@/components/Users/models";
 import { RequestResult } from "../../Utils/request/types";
 import { JwtTokenObtainPair, LoginCredentials } from "../../Redux/api";
 

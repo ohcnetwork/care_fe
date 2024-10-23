@@ -9,13 +9,13 @@ import {
   isUserOnline,
   relativeTime,
 } from "../../Utils/utils";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
 import { Warn } from "../../Utils/Notifications";
 import Switch from "../../CAREUI/interactive/Switch";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import Loading from "../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import { PLUGIN_DoctorConnectButtons } from "@/PluginEngine";
 
 const UserGroups = {

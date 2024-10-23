@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
 import { DupPatientModel } from "./models";
 import { useTranslation } from "react-i18next";
 

@@ -7,12 +7,12 @@ import {
 } from "./types";
 import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
 import DateFormField from "../Form/FormFields/DateFormField";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { classNames, dateQueryString } from "../../Utils/utils";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import useQuery from "../../Utils/request/useQuery";
 import SymptomsApi from "./api";
 import request from "../../Utils/request/request";

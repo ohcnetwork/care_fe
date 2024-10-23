@@ -5,7 +5,7 @@ import WaveformLabels from "./WaveformLabels";
 import { classNames } from "../../Utils/utils";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import dayjs from "dayjs";
 import VitalsMonitorHeader from "./VitalsMonitorHeader";
 import VitalsMonitorFooter from "./VitalsMonitorFooter";

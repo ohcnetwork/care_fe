@@ -2,15 +2,15 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import LogUpdateSections, { RoundTypeSections } from "./Sections";
 import React, { useState } from "react";
-import Loading from "../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import { DailyRoundsModel } from "../Patient/models";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Card from "../../CAREUI/display/Card";
 import { navigate } from "raviger";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
-import { useSlugs } from "../../Common/hooks/useSlug";
+import { useSlugs } from "@/common/hooks/useSlug";
 import { useTranslation } from "react-i18next";
 import { Success } from "../../Utils/Notifications";
 

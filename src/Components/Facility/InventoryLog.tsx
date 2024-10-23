@@ -1,16 +1,16 @@
 import { useState } from "react";
 
-import * as Notification from "../../Utils/Notifications.js";
-import Pagination from "../Common/Pagination";
+import * as Notification from "../../Utils/Notifications";
+import Pagination from "@/components/Common/Pagination";
 import { formatDateTime } from "../../Utils/utils";
-import Page from "../Common/components/Page.js";
-import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import ButtonV2 from "../Common/components/ButtonV2.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import request from "../../Utils/request/request.js";
+import Page from "@/components/Common/components/Page";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export default function InventoryLog(props: any) {
   const { facilityId, inventoryId }: any = props;
   const [saving, setSaving] = useState(false);

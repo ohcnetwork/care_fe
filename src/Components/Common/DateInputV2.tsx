@@ -4,7 +4,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { t } from "i18next";
 
 type DatePickerType = "date" | "month" | "year";

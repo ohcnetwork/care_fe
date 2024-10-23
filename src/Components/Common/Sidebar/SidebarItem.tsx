@@ -1,7 +1,7 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import useAppHistory from "../../../Common/hooks/useAppHistory";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import React, { forwardRef, Ref } from "react";
 
 export type SidebarIcon = React.ReactNode;

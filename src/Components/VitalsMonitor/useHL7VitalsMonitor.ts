@@ -4,7 +4,7 @@ import HL7DeviceClient, {
   HL7VitalsWaveformData,
 } from "./HL7DeviceClient";
 import HL7VitalsRenderer from "./HL7VitalsRenderer";
-import useCanvas from "../../Common/hooks/useCanvas";
+import useCanvas from "@/common/hooks/useCanvas";
 import {
   ChannelOptions,
   IVitalsComponentProps,

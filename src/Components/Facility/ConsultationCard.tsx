@@ -1,13 +1,13 @@
 import { navigate } from "raviger";
 import { ConsultationModel } from "./models";
 import { formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
 import Chip from "../../CAREUI/display/Chip";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { useState } from "react";
-import DialogModal from "../Common/Dialog.js";
+import DialogModal from "@/components/Common/Dialog";
 import Beds from "./Consultations/Beds";
 import careConfig from "@careConfig";
 

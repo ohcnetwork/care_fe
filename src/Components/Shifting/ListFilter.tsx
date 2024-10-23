@@ -1,16 +1,16 @@
 import {
   BREATHLESSNESS_LEVEL,
   SHIFTING_FILTER_ORDER,
-} from "../../Common/constants";
-import { DateRange } from "../Common/DateRangeInputV2";
+} from "@/common/constants";
+import { DateRange } from "@/components/Common/DateRangeInputV2";
 
 import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
-} from "../../Common/constants";
+} from "@/common/constants";
 
-import CircularProgress from "../Common/components/CircularProgress";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import CircularProgress from "@/components/Common/components/CircularProgress";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
@@ -18,9 +18,9 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 
-import useMergeState from "../../Common/hooks/useMergeState";
+import useMergeState from "@/common/hooks/useMergeState";
 import { useTranslation } from "react-i18next";
-import UserAutocomplete from "../Common/UserAutocompleteFormField";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 import { dateQueryString, parsePhoneNumber } from "../../Utils/utils";
 import dayjs from "dayjs";
 import useQuery from "../../Utils/request/useQuery";

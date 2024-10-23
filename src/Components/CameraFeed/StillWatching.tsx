@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
 import { useTimer } from "../../Utils/useTimer";

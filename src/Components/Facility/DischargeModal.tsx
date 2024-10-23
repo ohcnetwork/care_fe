@@ -1,17 +1,17 @@
 import * as Notification from "../../Utils/Notifications";
 
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import CircularProgress from "../Common/components/CircularProgress";
+import CircularProgress from "@/components/Common/components/CircularProgress";
 import ClaimCard from "../HCX/ClaimCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
-import { DISCHARGE_REASONS } from "../../Common/constants";
-import DialogModal from "../Common/Dialog";
+import { DISCHARGE_REASONS } from "@/common/constants";
+import DialogModal from "@/components/Common/Dialog";
 import { FacilityModel } from "./models";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FieldError } from "../Form/FieldValidators";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { HCXClaimModel } from "../HCX/models";
@@ -20,14 +20,14 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import dayjs from "../../Utils/dayjs";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { useMessageListener } from "@/common/hooks/useMessageListener";
 import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
-import useConfirmedAction from "../../Common/hooks/useConfirmedAction";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import useConfirmedAction from "@/common/hooks/useConfirmedAction";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import routes from "../../Redux/api";
 import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
-import Loading from "../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import careConfig from "@careConfig";
 import request from "../../Utils/request/request";
 

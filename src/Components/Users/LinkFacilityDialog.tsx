@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 
 interface Props {
   username: string;

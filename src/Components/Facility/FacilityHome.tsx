@@ -1,47 +1,49 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import {
   FACILITY_FEATURE_TYPES,
   LocalStorageKeys,
   USER_TYPES,
-} from "../../Common/constants";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+} from "@/common/constants";
+import DropdownMenu, {
+  DropdownItem,
+} from "@/components/Common/components/Menu";
 import { useState } from "react";
 
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import ContactLink from "../Common/components/ContactLink";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import ContactLink from "@/components/Common/components/ContactLink";
 
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import Table from "../Common/components/Table";
+import Table from "@/components/Common/components/Table";
 
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import request from "../../Utils/request/request.js";
-import routes from "../../Redux/api.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
-import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
-import useSlug from "../../Common/hooks/useSlug.js";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { FacilityHomeTriage } from "./FacilityHomeTriage";
+import { FacilityBedCapacity } from "./FacilityBedCapacity";
+import useSlug from "@/common/hooks/useSlug";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { FieldLabel } from "../Form/FormFields/FormField.js";
-import { LocationSelect } from "../Common/LocationSelect.js";
-import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
-import { FacilityStaffList } from "./FacilityStaffList.js";
-import FacilityBlock from "./FacilityBlock.js";
-import Loading from "@/Components/Common/Loading";
-import AvatarEditable from "@/Components/Common/AvatarEditable";
-import AvatarEditModal from "@/Components/Common/AvatarEditModal";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import { CameraFeedPermittedUserTypes } from "../../Utils/permissions";
+import { FacilityStaffList } from "./FacilityStaffList";
+import FacilityBlock from "./FacilityBlock";
+import Loading from "@/components/Common/Loading";
+import AvatarEditable from "@/components/Common/AvatarEditable";
+import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import careConfig from "@careConfig";
 import uploadFile from "@/Utils/request/uploadFile";
 import { sleep } from "@/Utils/utils";

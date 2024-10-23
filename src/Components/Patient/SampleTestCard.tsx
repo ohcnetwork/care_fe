@@ -1,14 +1,14 @@
 import { navigate } from "raviger";
 import { useState } from "react";
 import { SampleTestModel } from "./models";
-import { SAMPLE_TEST_STATUS } from "../../Common/constants";
+import { SAMPLE_TEST_STATUS } from "@/common/constants";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import * as _ from "lodash-es";
 import { formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 

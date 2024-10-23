@@ -1,19 +1,19 @@
 import { useReducer, useState } from "react";
 
-import { FacilitySelect } from "../Common/FacilitySelect";
-import * as Notification from "../../Utils/Notifications.js";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import * as Notification from "../../Utils/Notifications";
 import { navigate } from "raviger";
 import {
   OptionsType,
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
-} from "../../Common/constants";
+} from "@/common/constants";
 import { parsePhoneNumber } from "../../Utils/utils";
-import { phonePreg } from "../../Common/validation";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { phonePreg } from "@/common/validation";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import { useTranslation } from "react-i18next";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -21,13 +21,13 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import Card from "../../CAREUI/display/Card";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface resourceProps {
   facilityId: number;
 }

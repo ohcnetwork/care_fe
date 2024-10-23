@@ -10,9 +10,9 @@ import {
   SpokeRelationship,
 } from "./models";
 import ModelCrudEditor from "../Form/ModelCrudEditor";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { useEffect, useState } from "react";
-import { SPOKE_RELATION_TYPES } from "../../Common/constants";
+import { SPOKE_RELATION_TYPES } from "@/common/constants";
 import FacilityBlock from "./FacilityBlock";
 import { useTranslation } from "react-i18next";
 

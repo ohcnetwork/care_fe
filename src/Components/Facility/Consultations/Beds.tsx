@@ -1,4 +1,4 @@
-import * as Notification from "../../../Utils/Notifications.js";
+import * as Notification from "../../../Utils/Notifications";
 
 import { BedModel, CurrentBed } from "../models";
 import { Dispatch, SetStateAction, useState } from "react";
@@ -6,23 +6,23 @@ import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 
-import { BedSelect } from "../../Common/BedSelect";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import { BedSelect } from "@/components/Common/BedSelect";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import CircularProgress from "../../Common/components/CircularProgress.js";
+import CircularProgress from "@/components/Common/components/CircularProgress";
 import { FieldLabel } from "../../Form/FormFields/FormField";
-import Loading from "../../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import dayjs from "../../../Utils/dayjs";
-import { AssetSelect } from "../../Common/AssetSelect.js";
-import DialogModal from "../../Common/Dialog.js";
+import { AssetSelect } from "@/components/Common/AssetSelect";
+import DialogModal from "@/components/Common/Dialog";
 import { Link } from "raviger";
 import {
   AssetClass,
   assetClassProps,
   AssetData,
-} from "../../Assets/AssetTypes.js";
-import Chip from "../../../CAREUI/display/Chip.js";
+} from "../../Assets/AssetTypes";
+import Chip from "../../../CAREUI/display/Chip";
 import BedActivityTimeline from "./BedActivityTimeline";
 
 interface BedsProps {

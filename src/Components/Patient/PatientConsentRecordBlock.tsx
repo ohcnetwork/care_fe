@@ -1,10 +1,10 @@
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
-} from "../../Common/constants";
+} from "@/common/constants";
 import { FileUploadModel } from "./models";
-import ButtonV2 from "../Common/components/ButtonV2";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import { PatientConsentModel } from "../Facility/models";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { useEffect, useState } from "react";

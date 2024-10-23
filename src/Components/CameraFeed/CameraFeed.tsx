@@ -8,11 +8,11 @@ import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
-import useFullscreen from "../../Common/hooks/useFullscreen";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import useFullscreen from "@/common/hooks/useFullscreen";
+import useBreakpoints from "@/common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
 import VideoPlayer from "./videoPlayer";
-import AssetInfoPopover from "../Common/AssetInfoPopover";
+import AssetInfoPopover from "@/components/Common/AssetInfoPopover";
 
 interface Props {
   children?: React.ReactNode;

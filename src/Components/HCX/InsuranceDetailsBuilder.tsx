@@ -5,7 +5,7 @@ import {
 } from "../Form/FormFields/Utils";
 import FormField, { FieldLabel } from "../Form/FormFields/FormField";
 
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXPolicyModel } from "./models";
 import InsurerAutocomplete from "./InsurerAutocomplete";

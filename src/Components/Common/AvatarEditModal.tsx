@@ -7,11 +7,11 @@ import React, {
 } from "react";
 import { Warn } from "@/Utils/Notifications";
 import useDragAndDrop from "@/Utils/useDragAndDrop";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "./components/ButtonV2";
 import Webcam from "react-webcam";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "./Dialog";
 
 interface Props {
   title: string;

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
+import { DOCTOR_SPECIALIZATION } from "@/common/constants";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import ButtonV2 from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
 import { StaffCapacity } from "./StaffCapacity";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";

@@ -5,15 +5,15 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import {
   USER_LAST_ACTIVE_OPTIONS,
   USER_TYPE_OPTIONS,
-} from "../../Common/constants";
-import useMergeState from "../../Common/hooks/useMergeState";
+} from "@/common/constants";
+import useMergeState from "@/common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import DistrictAutocompleteFormField from "../Common/DistrictAutocompleteFormField";
-import StateAutocompleteFormField from "../Common/StateAutocompleteFormField";
+import DistrictAutocompleteFormField from "@/components/Common/DistrictAutocompleteFormField";
+import StateAutocompleteFormField from "@/components/Common/StateAutocompleteFormField";
 import { useTranslation } from "react-i18next";
 import * as Notify from "../../Utils/Notifications";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";

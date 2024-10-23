@@ -1,4 +1,4 @@
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";

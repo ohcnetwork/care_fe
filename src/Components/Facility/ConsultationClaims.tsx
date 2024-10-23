@@ -2,10 +2,10 @@ import * as Notification from "../../Utils/Notifications";
 
 import ClaimCard from "../HCX/ClaimCard";
 import CreateClaimCard from "../HCX/CreateClaimCard";
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 import { navigate } from "raviger";
 import routes from "../../Redux/api";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { useMessageListener } from "@/common/hooks/useMessageListener";
 import useQuery from "../../Utils/request/useQuery";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

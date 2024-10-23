@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { BED_TYPES } from "../../Common/constants";
+import { BED_TYPES } from "@/common/constants";
 import routes from "../../Redux/api";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import useQuery from "../../Utils/request/useQuery";
-import DialogModal from "../Common/Dialog";
-import ButtonV2 from "../Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import CareIcon from "../../CAREUI/icons/CareIcon";

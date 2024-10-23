@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
-import {
-  NURSING_CARE_PROCEDURES,
-  PAGINATION_LIMIT,
-} from "../../../Common/constants";
+import { NURSING_CARE_PROCEDURES, PAGINATION_LIMIT } from "@/common/constants";
 
-import Pagination from "../../Common/Pagination";
+import Pagination from "@/components/Common/Pagination";
 import { formatDateTime } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import { NursingPlotFields } from "../models";

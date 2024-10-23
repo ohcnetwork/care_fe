@@ -1,18 +1,18 @@
 import { useState } from "react";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { BedModel } from "./models";
-import * as Notification from "../../Utils/Notifications.js";
-import { LOCATION_BED_TYPES } from "../../Common/constants";
+import * as Notification from "../../Utils/Notifications";
+import { LOCATION_BED_TYPES } from "@/common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import useFilters from "../../Common/hooks/useFilters";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import Loading from "@/Components/Common/Loading";
+import useFilters from "@/common/hooks/useFilters";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import Loading from "@/components/Common/Loading";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 import { useTranslation } from "react-i18next";
 interface BedManagementProps {

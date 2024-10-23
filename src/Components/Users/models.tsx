@@ -1,4 +1,4 @@
-import { GENDER_TYPES, UserRole } from "../../Common/constants";
+import { GENDER_TYPES, UserRole } from "@/common/constants";
 import { FeatureFlag } from "../../Utils/featureFlags";
 import { DistrictModel, LocalBodyModel, StateModel } from "../Facility/models";
 

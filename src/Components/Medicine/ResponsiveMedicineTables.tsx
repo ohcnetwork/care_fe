@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import AccordionV2 from "../Common/components/AccordionV2";
+import AccordionV2 from "@/components/Common/components/AccordionV2";
 import { classNames } from "../../Utils/utils";
 
 function getWindowSize() {

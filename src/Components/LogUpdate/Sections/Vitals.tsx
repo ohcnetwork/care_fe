@@ -4,13 +4,13 @@ import {
   fahrenheitToCelsius,
   rangeValueDescription,
 } from "../../../Utils/utils";
-import { meanArterialPressure } from "../../Common/BloodPressureFormField";
+import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import PainChart from "../components/PainChart";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
-import { HEARTBEAT_RHYTHM_CHOICES } from "../../../Common/constants";
+import { HEARTBEAT_RHYTHM_CHOICES } from "@/common/constants";
 import { BloodPressure } from "../../Patient/models";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {

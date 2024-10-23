@@ -1,23 +1,23 @@
 import { useEffect } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
-import ExportMenu from "../Common/Export";
-import { FACILITY_TYPES } from "../../Common/constants";
+import ExportMenu from "@/components/Common/Export";
+import { FACILITY_TYPES } from "@/common/constants";
 import { FacilityCard } from "./FacilityCard";
 import FacilityFilter from "./FacilityFilter";
 import { FacilityModel } from "./models";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import SearchInput from "../Form/SearchInput";
 
 import { navigate } from "raviger";
-import useFilters from "../../Common/hooks/useFilters";
+import useFilters from "@/common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export const FacilityList = () => {
   const {
     qParams,

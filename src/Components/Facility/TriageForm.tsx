@@ -1,17 +1,17 @@
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import Card from "../../CAREUI/display/Card";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { PatientStatsModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import Loading from "@/Components/Common/Loading";
-import Page from "../Common/components/Page";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/components/Page";
 import dayjs from "dayjs";
 import { dateQueryString, scrollTo } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";

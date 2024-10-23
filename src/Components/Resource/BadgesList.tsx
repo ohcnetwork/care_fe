@@ -1,4 +1,4 @@
-import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
+import { SHIFTING_FILTER_ORDER } from "@/common/constants";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 

@@ -1,4 +1,4 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import {
   BLOOD_GROUPS,
@@ -9,7 +9,7 @@ import {
   RATION_CARD_CATEGORY,
   SOCIOECONOMIC_STATUS_CHOICES,
   VACCINES,
-} from "../../Common/constants";
+} from "@/common/constants";
 import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
 import {
   FieldError,
@@ -27,52 +27,52 @@ import {
 } from "../../Utils/utils";
 import { useCallback, useReducer, useRef, useState } from "react";
 import { navigate } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { statusType, useAbortableEffect } from "@/common/utils";
 
-import AccordionV2 from "../Common/components/AccordionV2";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
-import ButtonV2 from "../Common/components/ButtonV2";
+import AccordionV2 from "@/components/Common/components/AccordionV2";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import CollapseV2 from "../Common/components/CollapseV2";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import CollapseV2 from "@/components/Common/components/CollapseV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import DateFormField from "../Form/FormFields/DateFormField";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import Error404 from "../ErrorPages/404";
 import Form from "../Form/Form";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
-import { ILocalBodies } from "../ExternalResult/models.js";
+import { ILocalBodies } from "../ExternalResult/models";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import { PatientModel, Occupation, PatientMeta } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import SelectMenuV2 from "../Form/SelectMenuV2.js";
-import Spinner from "../Common/Spinner";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import Spinner from "@/components/Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import _ from "lodash";
-import countryList from "../../Common/static/countries.json";
+import countryList from "@/common/static/countries.json";
 import { debounce } from "lodash-es";
-import request from "../../Utils/request/request.js";
-import routes from "../../Redux/api.js";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import useQuery from "../../Utils/request/useQuery.js";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useAppHistory from "@/common/hooks/useAppHistory";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
-import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index.js";
-import { AbhaNumberModel } from "../ABDM/types/abha.js";
-import { validatePincode } from "../../Common/validation";
+import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index";
+import { AbhaNumberModel } from "../ABDM/types/abha";
+import { validatePincode } from "@/common/validation";
 import careConfig from "@careConfig";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 
-import Loading from "@/Components/Common/Loading";
-import PageTitle from "@/Components/Common/PageTitle";
-import { RestoreDraftButton } from "@/Utils/AutoSave.js";
-import { FormContextValue } from "../Form/FormContext.js";
+import Loading from "@/components/Common/Loading";
+import PageTitle from "@/components/Common/PageTitle";
+import { RestoreDraftButton } from "@/Utils/AutoSave";
+import { FormContextValue } from "../Form/FormContext";
 
 type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };

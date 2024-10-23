@@ -1,9 +1,9 @@
 import { useReducer, useState, useEffect } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { InventoryItemsModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import Page from "../Common/components/Page";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
+import useAppHistory from "@/common/hooks/useAppHistory";
+import Page from "@/components/Common/components/Page";
 import Card from "../../CAREUI/display/Card";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";

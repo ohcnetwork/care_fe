@@ -1,4 +1,7 @@
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/components/Common/components/ButtonV2";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXPolicyModel } from "./models";

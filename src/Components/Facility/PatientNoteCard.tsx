@@ -4,20 +4,20 @@ import {
   classNames,
   formatName,
 } from "../../Utils/utils";
-import { USER_TYPES_MAP } from "../../Common/constants";
+import { USER_TYPES_MAP } from "@/common/constants";
 import { PatientNotesEditModel, PatientNotesModel } from "./models";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useState } from "react";
 import { Error, Success } from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import { t } from "i18next";
 import dayjs from "dayjs";
-import Spinner from "../Common/Spinner";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import useSlug from "../../Common/hooks/useSlug";
+import Spinner from "@/components/Common/Spinner";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import useSlug from "@/common/hooks/useSlug";
 
 const PatientNoteCard = ({
   note,

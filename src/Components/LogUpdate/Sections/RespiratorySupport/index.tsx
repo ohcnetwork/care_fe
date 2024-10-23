@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { useSlugs } from "../../../../Common/hooks/useSlug";
+import { useSlugs } from "@/common/hooks/useSlug";
 import routes from "../../../../Redux/api";
 import useQuery from "../../../../Utils/request/useQuery";
 import { rangeValueDescription } from "../../../../Utils/utils";
 import { AssetClass } from "../../../Assets/AssetTypes";
-import DialogModal from "../../../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import Beds from "../../../Facility/Consultations/Beds";
 import RadioFormField from "../../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../../Form/FormFields/RangeFormField";
@@ -13,7 +13,7 @@ import OxygenRespiratorySupport from "./OxygenSupport";
 import VentilatorRespiratorySupport from "./Ventilator";
 import { Warn } from "../../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
-import { RESPIRATORY_SUPPORT } from "../../../../Common/constants";
+import { RESPIRATORY_SUPPORT } from "@/common/constants";
 
 const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();

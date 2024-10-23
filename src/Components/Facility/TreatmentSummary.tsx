@@ -1,4 +1,4 @@
-import { GENDER_TYPES } from "../../Common/constants";
+import { GENDER_TYPES } from "@/common/constants";
 import {
   formatDate,
   formatDateTime,
@@ -12,7 +12,7 @@ import {
   ActiveConditionVerificationStatuses,
   ConsultationDiagnosis,
 } from "../Diagnosis/types";
-import PageHeadTitle from "../Common/PageHeadTitle";
+import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import { useTranslation } from "react-i18next";
 import { PatientModel } from "../Patient/models";
 import MedicineRoutes from "../Medicine/routes";

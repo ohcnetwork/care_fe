@@ -3,7 +3,7 @@ import { rangeValueDescription } from "../../../../Utils/utils";
 import RadioFormField from "../../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../../Form/FormFields/RangeFormField";
 import { LogUpdateSectionProps } from "../../utils";
-import { OXYGEN_MODALITY_OPTIONS } from "../../../../Common/constants";
+import { OXYGEN_MODALITY_OPTIONS } from "@/common/constants";
 
 const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();

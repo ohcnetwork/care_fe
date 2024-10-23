@@ -1,4 +1,4 @@
-import { GENDER_TYPES } from "../../../Common/constants";
+import { GENDER_TYPES } from "@/common/constants";
 import { ConsultationModel } from "../models";
 import { useCallback, useEffect, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
@@ -12,7 +12,7 @@ import {
 
 import { Link, navigate, useQueryParams } from "raviger";
 import { triggerGoal } from "../../../Integrations/Plausible";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
 import { ConsultationABGTab } from "./ConsultationABGTab";
 import ConsultationNursingTab from "./ConsultationNursingTab";
@@ -29,7 +29,7 @@ import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
-import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
 import { AbhaNumberModel } from "../../ABDM/types/abha";
 import routes from "../../../Redux/api";
@@ -39,8 +39,8 @@ import Error404 from "../../ErrorPages/404";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../../Utils/request/useQuery";
 
-import Loading from "@/Components/Common/Loading";
-import PageTitle from "@/Components/Common/PageTitle";
+import Loading from "@/components/Common/Loading";
+import PageTitle from "@/components/Common/PageTitle";
 
 export interface ConsultationTabProps {
   consultationId: string;

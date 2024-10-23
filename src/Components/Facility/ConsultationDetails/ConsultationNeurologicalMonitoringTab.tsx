@@ -1,7 +1,7 @@
 import { NeurologicalTable } from "../Consultations/NeurologicalTables";
 import { ConsultationTabProps } from "./index";
 
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 
 export const ConsultationNeurologicalMonitoringTab = (
   props: ConsultationTabProps,

@@ -4,13 +4,13 @@ import {
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
   HEADER_CONTENT_TYPES,
-} from "../../Common/constants";
+} from "@/common/constants";
 import { CreateFileResponse, SampleTestModel } from "./models";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { LinearProgressWithLabel } from "../Files/FileUpload";
-import { Submit } from "../Common/components/ButtonV2";
+import { Submit } from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";

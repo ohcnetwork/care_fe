@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useSlug from "../../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import {
   ConsultationDiagnosis,
   CreateDiagnosis,

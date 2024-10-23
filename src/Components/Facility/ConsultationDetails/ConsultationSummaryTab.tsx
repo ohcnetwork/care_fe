@@ -1,7 +1,7 @@
 import { ConsultationTabProps } from "./index";
 import { PrimaryParametersPlot } from "../Consultations/PrimaryParametersPlot";
 
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 
 export const ConsultationSummaryTab = (props: ConsultationTabProps) => {
   return (

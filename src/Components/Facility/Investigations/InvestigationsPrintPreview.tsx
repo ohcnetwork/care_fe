@@ -4,7 +4,7 @@ import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
 import PrintPreview from "../../../CAREUI/misc/PrintPreview";
 import { useTranslation } from "react-i18next";
-const Loading = lazy(() => import("../../Common/Loading"));
+const Loading = lazy(() => import("@/components/Common/Loading"));
 import { Investigation } from "./Reports/types";
 import careConfig from "@careConfig";
 

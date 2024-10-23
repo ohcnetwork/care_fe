@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import Loading from "../Common/Loading";
-import Page from "../Common/components/Page";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/components/Page";
 import { HIProfile } from "hi-profiles";
 
 interface IProps {

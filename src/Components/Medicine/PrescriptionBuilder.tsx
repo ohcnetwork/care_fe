@@ -1,8 +1,8 @@
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { NormalPrescription, Prescription, PRNPrescription } from "./models";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import CreatePrescriptionForm from "./CreatePrescriptionForm";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import DiscontinuePrescription from "./DiscontinuePrescription";
@@ -10,7 +10,7 @@ import AdministerMedicine from "./AdministerMedicine";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery";
 import MedicineRoutes from "./routes";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
 import { compareBy } from "../../Utils/utils";
 

@@ -4,12 +4,15 @@ import { useState } from "react";
 import useQuery from "../../../Utils/request/useQuery";
 import MedicineRoutes from "../routes";
 import { classNames, formatDateTime } from "../../../Utils/utils";
-import useSlug from "../../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import DiscontinuePrescription from "../DiscontinuePrescription";
 import AdministerMedicine from "../AdministerMedicine";
-import DialogModal from "../../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import PrescriptionDetailCard from "../PrescriptionDetailCard";
-import ButtonV2, { Cancel, Submit } from "../../Common/components/ButtonV2";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import EditPrescriptionForm from "../EditPrescriptionForm";
 import AdministrationEventSeperator from "./AdministrationEventSeperator";

@@ -1,8 +1,8 @@
 import { Prescription } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
-import ReadMore from "../Common/components/Readmore";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ReadMore from "@/components/Common/components/Readmore";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useState } from "react";

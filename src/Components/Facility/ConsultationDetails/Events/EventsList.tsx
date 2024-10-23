@@ -1,14 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { TimelineNode } from "../../../../CAREUI/display/Timeline";
 import PaginatedList from "../../../../CAREUI/misc/PaginatedList";
-import { useSlugs } from "../../../../Common/hooks/useSlug";
+import { useSlugs } from "@/common/hooks/useSlug";
 import routes from "../../../../Redux/api";
 import LoadingLogUpdateCard from "../../Consultations/DailyRounds/LoadingCard";
 import GenericEvent from "./GenericEvent";
 import { getEventIcon } from "./iconMap";
 import { EventGeneric } from "./types";
-import SortDropdownMenu from "../../../Common/SortDropdown";
-import { EVENTS_SORT_OPTIONS } from "../../../../Common/constants";
+import SortDropdownMenu from "@/components/Common/SortDropdown";
+import { EVENTS_SORT_OPTIONS } from "@/common/constants";
 import { QueryParams } from "../../../../Utils/request/types";
 import { useState } from "react";
 

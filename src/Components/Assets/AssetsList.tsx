@@ -1,5 +1,5 @@
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { assetClassProps, AssetData } from "./AssetTypes";
 import { useState, useEffect } from "react";
 import { Link, navigate } from "raviger";
@@ -7,24 +7,24 @@ import AssetFilter from "./AssetFilter";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
+import useFilters from "@/common/hooks/useFilters";
 import { FacilityModel } from "../Facility/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
+import { useIsAuthorized } from "@/common/hooks/useIsAuthorized";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import ExportMenu from "../Common/Export";
+import ExportMenu from "@/components/Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 const AssetsList = () => {
   const { t } = useTranslation();
   const {

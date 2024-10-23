@@ -3,15 +3,15 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { formatName, formatDisplayName } from "../../../Utils/utils";
-import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
-import { Avatar } from "@/Components/Common/Avatar";
-import { Button } from "@/Components/ui/button";
+import useAuthUser, { useAuthContext } from "@/common/hooks/useAuthUser";
+import { Avatar } from "@/components/Common/Avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/Components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 interface SidebarUserCardProps {
   shrinked: boolean;

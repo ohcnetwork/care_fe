@@ -1,12 +1,12 @@
 import { ConsultationTabProps } from "./index";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { navigate } from "raviger";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import InvestigationTab from "../Investigations/investigationsTab";
 import { t } from "i18next";
 
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 export const ConsultationInvestigationsTab = (props: ConsultationTabProps) => {
   return (
     <div>

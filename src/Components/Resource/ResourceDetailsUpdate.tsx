@@ -1,26 +1,26 @@
-import * as Notification from "../../Utils/Notifications.js";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import * as Notification from "../../Utils/Notifications";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { useReducer, useState } from "react";
 import { navigate, useQueryParams } from "raviger";
 import Card from "../../CAREUI/display/Card";
-import CircularProgress from "../Common/components/CircularProgress";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import CircularProgress from "@/components/Common/components/CircularProgress";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import Page from "../Common/components/Page";
-import { RESOURCE_CHOICES } from "../../Common/constants";
+import Page from "@/components/Common/components/Page";
+import { RESOURCE_CHOICES } from "@/common/constants";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocomplete from "../Common/UserAutocompleteFormField";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import { UserModel } from "../Users/models.js";
-import request from "../../Utils/request/request.js";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import useAppHistory from "@/common/hooks/useAppHistory";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { UserModel } from "../Users/models";
+import request from "../../Utils/request/request";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface resourceProps {
   id: string;
 }

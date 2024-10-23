@@ -1,13 +1,13 @@
 import * as _ from "lodash-es";
 import { useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
-import * as Notification from "../../../Utils/Notifications.js";
+import * as Notification from "../../../Utils/Notifications";
 import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 import InvestigationTable from "./InvestigationTable";
 import { useTranslation } from "react-i18next";
-import Page from "../../Common/components/Page";
-import Loading from "@/Components/Common/Loading";
+import Page from "@/components/Common/components/Page";
+import Loading from "@/components/Common/Loading";
 const initialState = {
   changedFields: {},
   initialValues: {},

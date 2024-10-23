@@ -1,21 +1,21 @@
 import { useState } from "react";
-import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel } from "@/components/Common/components/ButtonV2";
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import routes from "../../Redux/api";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { LocationModel } from "./models";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import request from "../../Utils/request/request";
-import * as Notification from "../../Utils/Notifications.js";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import DialogModal from "../Common/Dialog";
-import Uptime from "../Common/Uptime";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import * as Notification from "../../Utils/Notifications";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import DialogModal from "@/components/Common/Dialog";
+import Uptime from "@/components/Common/Uptime";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 import { cn } from "@/lib/utils";
 interface Props {
   facilityId: string;

@@ -7,7 +7,7 @@ import {
   PATIENT_NOTES_THREADS,
   SHIFTING_CHOICES_PEACETIME,
   UserRole,
-} from "../../Common/constants";
+} from "@/common/constants";
 import { FeatureFlag } from "../../Utils/featureFlags";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import {
@@ -20,9 +20,9 @@ import {
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum, UserModel } from "../Users/models";
-import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
-import { RouteToFacility } from "../Common/RouteToFacilitySelect";
+import { InvestigationType } from "@/components/Common/prescription-builder/InvestigationBuilder";
+import { ProcedureType } from "@/components/Common/prescription-builder/ProcedureBuilder";
+import { RouteToFacility } from "@/components/Common/RouteToFacilitySelect";
 
 export interface LocalBodyModel {
   id: number;

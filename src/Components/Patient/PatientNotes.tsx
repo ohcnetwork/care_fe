@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
-import Page from "../Common/components/Page";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import Page from "@/components/Common/components/Page";
+import { useMessageListener } from "@/common/hooks/useMessageListener";
 import { PatientNoteStateType, PatientNotesModel } from "../Facility/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
-import { classNames, keysOf } from "../../Utils/utils.js";
-import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
+import { PATIENT_NOTES_THREADS } from "@/common/constants";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard";
+import { classNames, keysOf } from "../../Utils/utils";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField";
 import { t } from "i18next";
 
 interface PatientNotesProps {

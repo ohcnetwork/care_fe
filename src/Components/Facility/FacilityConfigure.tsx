@@ -1,16 +1,16 @@
 import { useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { navigate } from "raviger";
-import { Submit } from "../Common/components/ButtonV2";
+import { Submit } from "@/components/Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { t } from "i18next";
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 const initForm = {
   name: "",
   state: 0,

@@ -1,7 +1,7 @@
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { AssetData } from "../Assets/AssetTypes";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 
 interface Props {
   className?: string;

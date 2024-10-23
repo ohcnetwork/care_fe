@@ -12,7 +12,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "../Common/components/HelperComponents";
+import { DropdownTransition } from "@/components/Common/components/HelperComponents";
 import { classNames } from "../../Utils/utils";
 import { debounce } from "lodash-es";
 import { useTranslation } from "react-i18next";

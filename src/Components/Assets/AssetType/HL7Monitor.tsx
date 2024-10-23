@@ -1,21 +1,21 @@
 import { SyntheticEvent, useEffect, useState } from "react";
 import { AssetClass, AssetData, ResolvedMiddleware } from "../AssetTypes";
-import * as Notification from "../../../Utils/Notifications.js";
-import Loading from "../../Common/Loading";
-import { checkIfValidIP } from "../../../Common/validation";
+import * as Notification from "../../../Utils/Notifications";
+import Loading from "@/components/Common/Loading";
+import { checkIfValidIP } from "@/common/validation";
 import Card from "../../../CAREUI/display/Card";
-import { Submit } from "../../Common/components/ButtonV2";
+import { Submit } from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import { BedModel } from "../../Facility/models";
 import useQuery from "../../../Utils/request/useQuery";
 import { FieldLabel } from "../../Form/FormFields/FormField";
-import { BedSelect } from "../../Common/BedSelect";
+import { BedSelect } from "@/components/Common/BedSelect";
 
 interface HL7MonitorProps {
   assetId: string;

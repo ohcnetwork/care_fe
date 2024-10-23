@@ -1,8 +1,8 @@
 import { useState } from "react";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { ConsultationModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import {
   EmailValidator,

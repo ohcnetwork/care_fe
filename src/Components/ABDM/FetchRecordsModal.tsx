@@ -1,23 +1,23 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
-import ButtonV2 from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { useState } from "react";
 import {
   MultiSelectFormField,
   SelectFormField,
-} from "../Form/FormFields/SelectFormField.js";
-import { ABDM_CONSENT_PURPOSE, ABDM_HI_TYPE } from "../../Common/constants.js";
-import DateRangeFormField from "../Form/FormFields/DateRangeFormField.js";
+} from "../Form/FormFields/SelectFormField";
+import { ABDM_CONSENT_PURPOSE, ABDM_HI_TYPE } from "@/common/constants";
+import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import DateFormField from "../Form/FormFields/DateFormField.js";
-import request from "../../Utils/request/request.js";
+import DateFormField from "../Form/FormFields/DateFormField";
+import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { useMessageListener } from "../../Common/hooks/useMessageListener.js";
-import { AbhaNumberModel } from "./types/abha.js";
-import { ConsentHIType, ConsentPurpose } from "./types/consent.js";
+import { useMessageListener } from "@/common/hooks/useMessageListener";
+import { AbhaNumberModel } from "./types/abha";
+import { ConsentHIType, ConsentPurpose } from "./types/consent";
 import { useTranslation } from "react-i18next";
 
 const getDate = (value: string | Date) =>

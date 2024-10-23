@@ -1,7 +1,7 @@
 import * as Notification from "../../Utils/Notifications";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuthContext } from "../../Common/hooks/useAuthUser";
+import { useAuthContext } from "@/common/hooks/useAuthUser";
 
 export default function SessionExpired() {
   const { signOut } = useAuthContext();

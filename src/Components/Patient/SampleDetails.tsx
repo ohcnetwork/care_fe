@@ -1,10 +1,10 @@
 import { FlowModel } from "./models";
-import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import { GENDER_TYPES, TEST_TYPE_CHOICES } from "@/common/constants";
 
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "../Files/FileUpload";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import * as _ from "lodash-es";
 import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 
@@ -13,7 +13,7 @@ import { DetailRoute } from "../../Routers/types";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export const SampleDetails = ({ id }: DetailRoute) => {
   const { loading: isLoading, data: sampleDetails } = useQuery(
     routes.getTestSample,

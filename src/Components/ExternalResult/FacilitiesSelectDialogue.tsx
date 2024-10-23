@@ -1,9 +1,9 @@
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useTranslation } from "react-i18next";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 
 interface Props {
   show: boolean;

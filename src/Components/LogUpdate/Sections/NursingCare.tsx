@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { NURSING_CARE_PROCEDURES } from "../../../Common/constants";
+import { NURSING_CARE_PROCEDURES } from "@/common/constants";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField";
 import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";

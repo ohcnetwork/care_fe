@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Link, navigate } from "raviger";
 import ListFilter from "./ListFilter";
-import { RESOURCE_CHOICES } from "../../Common/constants";
+import { RESOURCE_CHOICES } from "@/common/constants";
 import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
-import useFilters from "../../Common/hooks/useFilters";
-import { ExportButton } from "../Common/Export";
-import ButtonV2 from "../Common/components/ButtonV2";
+import useFilters from "@/common/hooks/useFilters";
+import { ExportButton } from "@/components/Common/Export";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import SearchInput from "../Form/SearchInput";
-import Tabs from "../Common/components/Tabs";
+import Tabs from "@/components/Common/components/Tabs";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import KanbanBoard from "../Kanban/Board";
@@ -19,7 +19,7 @@ import { ResourceModel } from "../Facility/models";
 import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import dayjs from "dayjs";
 
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const COMPLETED = ["COMPLETED", "REJECTED"];

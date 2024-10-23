@@ -3,7 +3,7 @@ import { rangeValueDescription } from "../../../Utils/utils";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
-import { INSULIN_INTAKE_FREQUENCY_OPTIONS } from "../../../Common/constants";
+import { INSULIN_INTAKE_FREQUENCY_OPTIONS } from "@/common/constants";
 
 const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();

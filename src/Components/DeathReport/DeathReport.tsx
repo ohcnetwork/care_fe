@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GENDER_TYPES } from "../../Common/constants";
+import { GENDER_TYPES } from "@/common/constants";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
@@ -9,7 +9,7 @@ import {
   formatPatientAge,
   humanizeStrings,
 } from "../../Utils/utils";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import Form from "../Form/Form";
 import { useTranslation } from "react-i18next";
 import { navigate } from "raviger";

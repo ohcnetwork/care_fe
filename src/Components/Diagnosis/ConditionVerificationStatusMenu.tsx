@@ -1,12 +1,14 @@
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import DropdownMenu, {
+  DropdownItem,
+} from "@/components/Common/components/Menu";
 import {
   ConditionVerificationStatus,
   InactiveConditionVerificationStatuses,
 } from "./types";
 import { classNames } from "../../Utils/utils";
-import { ButtonSize } from "../Common/components/ButtonV2";
+import { ButtonSize } from "@/components/Common/components/ButtonV2";
 
 interface Props<T extends ConditionVerificationStatus> {
   disabled?: boolean;

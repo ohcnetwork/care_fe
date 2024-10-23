@@ -4,16 +4,16 @@ import {
   GENDER_TYPES,
   USER_TYPES,
   USER_TYPE_OPTIONS,
-} from "../../Common/constants";
-import { useAbortableEffect } from "../../Common/utils";
+} from "@/common/constants";
+import { useAbortableEffect } from "@/common/utils";
 import {
   validateEmailAddress,
   validateName,
   validatePassword,
   validateUsername,
-} from "../../Common/validation";
-import * as Notification from "../../Utils/Notifications.js";
-import { FacilitySelect } from "../Common/FacilitySelect";
+} from "@/common/validation";
+import * as Notification from "../../Utils/Notifications";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import {
   classNames,
@@ -21,20 +21,20 @@ import {
   parsePhoneNumber,
   scrollTo,
 } from "../../Utils/utils";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import Page from "../Common/components/Page";
+import useAppHistory from "@/common/hooks/useAppHistory";
+import Page from "@/components/Common/components/Page";
 import Card from "../../CAREUI/display/Card";
-import CircularProgress from "../Common/components/CircularProgress";
+import CircularProgress from "@/components/Common/components/CircularProgress";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
@@ -43,7 +43,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface UserProps {
   userId?: number;
 }

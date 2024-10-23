@@ -6,28 +6,28 @@ import {
   AssetService,
   AssetTransaction,
 } from "./AssetTypes";
-import Pagination from "../Common/Pagination";
+import Pagination from "@/components/Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
 import { formatDate, formatDateTime, formatName } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { UserRole, USER_TYPES } from "../../Common/constants";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import { UserRole, USER_TYPES } from "@/common/constants";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
-import Loading from "@/Components/Common/Loading";
-import * as Notification from "../../Utils/Notifications.js";
+import Loading from "@/components/Common/Loading";
+import * as Notification from "../../Utils/Notifications";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import Uptime from "../Common/Uptime";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import Uptime from "@/components/Common/Uptime";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import dayjs from "dayjs";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
 import { AssetServiceEditModal } from "./AssetServiceEditModal";
 import { warrantyAmcValidityChip } from "./AssetsList";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";

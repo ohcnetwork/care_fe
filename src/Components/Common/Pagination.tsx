@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useAbortableEffect, statusType } from "../../Common/utils";
+import { useAbortableEffect, statusType } from "@/common/utils";
 import ButtonV2 from "./components/ButtonV2";
 
 interface PaginationProps {

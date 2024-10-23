@@ -1,20 +1,20 @@
 import { useState, useEffect, Dispatch, SetStateAction } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice, keysOf } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import { useMessageListener } from "@/common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType, PaitentNotesReplyModel } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
-import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard.js";
-import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import { PATIENT_NOTES_THREADS } from "@/common/constants";
+import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";
+import useNotificationSubscriptionState from "@/common/hooks/useNotificationSubscriptionState";
 import { Link } from "raviger";
 import { t } from "i18next";
 

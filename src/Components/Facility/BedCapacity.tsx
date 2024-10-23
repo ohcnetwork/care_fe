@@ -1,11 +1,11 @@
 import { useEffect, useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { CapacityModal, OptionsType } from "./models";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { BED_TYPES } from "../../Common/constants";
+import { BED_TYPES } from "@/common/constants";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";

@@ -2,12 +2,12 @@ import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_TYPE_CHOICES,
-} from "../../Common/constants";
-import { FacilitySelect } from "../Common/FacilitySelect";
+} from "@/common/constants";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import useMergeState from "../../Common/hooks/useMergeState";
+import useMergeState from "@/common/hooks/useMergeState";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import CircularProgress from "../Common/components/CircularProgress";
+import CircularProgress from "@/components/Common/components/CircularProgress";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";

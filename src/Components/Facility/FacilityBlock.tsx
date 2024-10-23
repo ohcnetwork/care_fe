@@ -1,7 +1,7 @@
 import { Link } from "raviger";
 import { FacilityModel } from "./models";
 import { ReactNode } from "react";
-import { Avatar } from "@/Components/Common/Avatar";
+import { Avatar } from "@/components/Common/Avatar";
 
 export default function FacilityBlock(props: {
   facility: FacilityModel;

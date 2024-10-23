@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import CircularProgress from "../Common/components/CircularProgress";
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+import CircularProgress from "@/components/Common/components/CircularProgress";
 import DoctorNote from "./DoctorNote";
 import { PatientNoteStateType, PatientNotesModel } from "./models";
 import routes from "../../Redux/api";

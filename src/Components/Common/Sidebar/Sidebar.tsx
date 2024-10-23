@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
-import useActiveLink from "../../../Common/hooks/useActiveLink";
+import useActiveLink from "@/common/hooks/useActiveLink";
 import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
@@ -13,9 +13,9 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/Components/ui/tooltip";
+} from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
-import { useCareAppNavItems } from "@/Common/hooks/useCareApps";
+import { useCareAppNavItems } from "@/common/hooks/useCareApps";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 

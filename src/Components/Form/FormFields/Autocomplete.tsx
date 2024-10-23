@@ -9,7 +9,7 @@ import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import { useEffect, useState } from "react";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "../../Common/components/HelperComponents";
+import { DropdownTransition } from "@/components/Common/components/HelperComponents";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";

@@ -4,8 +4,8 @@ import {
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
   TELEMEDICINE_ACTIONS,
-} from "../../Common/constants";
-import { loadInvestigations } from "../Common/prescription-builder/InvestigationBuilder";
+} from "@/common/constants";
+import { loadInvestigations } from "@/components/Common/prescription-builder/InvestigationBuilder";
 import { SYMPTOM_CHOICES } from "../Symptoms/types";
 import { Field, ScribeForm } from "./Scribe";
 

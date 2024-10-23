@@ -1,6 +1,6 @@
 import React from "react";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
-import { deepEqual } from "../../Common/utils";
+import { deepEqual } from "@/common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
 import Spinner from "./Spinner";
 import CareIcon from "../../CAREUI/icons/CareIcon";

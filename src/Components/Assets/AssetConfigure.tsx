@@ -1,7 +1,7 @@
-import Loading from "../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import HL7Monitor from "./AssetType/HL7Monitor";
 import ConfigureCamera from "../CameraFeed/ConfigureCamera";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 

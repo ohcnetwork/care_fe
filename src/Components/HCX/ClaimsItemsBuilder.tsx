@@ -6,11 +6,11 @@ import {
 import FormField, { FieldLabel } from "../Form/FormFields/FormField";
 
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXItemModel } from "./models";
 import { ITEM_CATEGORIES } from "./constants";
-import PMJAYProcedurePackageAutocomplete from "../Common/PMJAYProcedurePackageAutocomplete";
+import PMJAYProcedurePackageAutocomplete from "@/components/Common/PMJAYProcedurePackageAutocomplete";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { useTranslation } from "react-i18next";
 

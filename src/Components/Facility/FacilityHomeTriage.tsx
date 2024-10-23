@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
-import ButtonV2 from "../Common/components/ButtonV2";
-import Table from "../Common/components/Table";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import Table from "@/components/Common/components/Table";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import CareIcon from "../../CAREUI/icons/CareIcon";

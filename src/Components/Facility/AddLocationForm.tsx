@@ -1,17 +1,17 @@
 import { useState, SyntheticEvent } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import { navigate } from "raviger";
-import { Submit, Cancel } from "../Common/components/ButtonV2";
+import { Submit, Cancel } from "@/components/Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { AssetLocationType } from "../Assets/AssetTypes";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface Props {
   facilityId: string;
   locationId?: string;

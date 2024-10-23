@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import routes from "../../Redux/api";
 import * as Notify from "../../Utils/Notifications";

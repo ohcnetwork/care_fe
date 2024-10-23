@@ -1,21 +1,21 @@
 import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
-import Spinner from "../Common/Spinner";
-import { NOTIFICATION_EVENTS } from "../../Common/constants";
-import { Error, Success, Warn } from "../../Utils/Notifications.js";
+import Spinner from "@/components/Common/Spinner";
+import { NOTIFICATION_EVENTS } from "@/common/constants";
+import { Error, Success, Warn } from "../../Utils/Notifications";
 import { classNames, formatDateTime } from "../../Utils/utils";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import * as Sentry from "@sentry/browser";
 import {
   ShrinkedSidebarItem,
   SidebarItem,
-} from "../Common/Sidebar/SidebarItem";
+} from "@/components/Common/Sidebar/SidebarItem";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { useTranslation } from "react-i18next";
-import CircularProgress from "../Common/components/CircularProgress";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import CircularProgress from "@/components/Common/components/CircularProgress";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 

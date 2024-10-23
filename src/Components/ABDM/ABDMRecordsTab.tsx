@@ -1,9 +1,9 @@
 import { ConsentArtefactModel, ConsentRequestModel } from "./types/consent";
 import dayjs from "dayjs";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import * as Notification from "../../Utils/Notifications.js";
-import Loading from "../Common/Loading";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import * as Notification from "../../Utils/Notifications";
+import Loading from "@/components/Common/Loading";
 import { classNames, formatName } from "../../Utils/utils";
 import { Link } from "raviger";
 import routes from "../../Redux/api";

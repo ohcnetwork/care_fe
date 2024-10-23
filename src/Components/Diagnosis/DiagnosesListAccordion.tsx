@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { classNames, compareBy } from "../../Utils/utils";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 
 interface Props {
   diagnoses: ConsultationDiagnosis[];

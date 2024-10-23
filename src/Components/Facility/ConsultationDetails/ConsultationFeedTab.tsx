@@ -2,19 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import useQuery from "../../../Utils/request/useQuery";
 import CameraFeed from "../../CameraFeed/CameraFeed";
-import Loading from "../../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import CameraPresetSelect from "../../CameraFeed/CameraPresetSelect";
 import { triggerGoal } from "../../../Integrations/Plausible";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import useOperateCamera, {
   PTZPayload,
 } from "../../CameraFeed/useOperateCamera";
 import request from "../../../Utils/request/request";
 import { classNames, isIOS } from "../../../Utils/utils";
-import ConfirmDialog from "../../Common/ConfirmDialog";
-import useBreakpoints from "../../../Common/hooks/useBreakpoints";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import useBreakpoints from "@/common/hooks/useBreakpoints";
 import { Warn } from "../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
 import {

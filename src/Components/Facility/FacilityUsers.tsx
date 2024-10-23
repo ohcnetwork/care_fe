@@ -1,14 +1,14 @@
 import { useState } from "react";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import * as Notification from "../../Utils/Notifications.js";
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+import * as Notification from "../../Utils/Notifications";
 import { formatName, isUserOnline, relativeTime } from "../../Utils/utils";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
-import Pagination from "../Common/Pagination";
-import UserDetails from "../Common/UserDetails";
-import ButtonV2 from "../Common/components/ButtonV2";
-import Page from "../Common/components/Page";
+import Pagination from "@/components/Common/Pagination";
+import UserDetails from "@/components/Common/UserDetails";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import Page from "@/components/Common/components/Page";
 import LinkFacilityDialog from "../Users/LinkFacilityDialog";
 import UserDeleteDialog from "../Users/UserDeleteDialog";
 import request from "../../Utils/request/request";
@@ -17,7 +17,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { UserFacilities } from "../Users/ManageUsers";
 import { useTranslation } from "react-i18next";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export default function FacilityUsers(props: any) {
   const { t } = useTranslation();
   const { facilityId } = props;

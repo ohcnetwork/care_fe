@@ -1,4 +1,4 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import {
   ADMITTED_TO,
@@ -9,19 +9,19 @@ import {
   PATIENT_SORT_OPTIONS,
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
-} from "../../Common/constants";
+} from "@/common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
 import { ReactNode, useEffect, useState } from "react";
-import { parseOptionId } from "../../Common/utils";
+import { parseOptionId } from "@/common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
 import CountBlock from "../../CAREUI/display/Count";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
-import { ExportMenu } from "../Common/Export";
+import { ExportMenu } from "@/components/Common/Export";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import FilterBadge from "../../CAREUI/display/FilterBadge";
@@ -29,35 +29,35 @@ import PatientFilter from "./PatientFilter";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
-import SortDropdownMenu from "../Common/SortDropdown";
+import SortDropdownMenu from "@/components/Common/SortDropdown";
 import {
   formatPatientAge,
   humanizeStrings,
   isAntenatal,
   parsePhoneNumber,
-} from "../../Utils/utils.js";
-import useFilters from "../../Common/hooks/useFilters";
+} from "../../Utils/utils";
+import useFilters from "@/common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
-import Page from "../Common/components/Page.js";
+import Page from "@/components/Common/components/Page";
 import dayjs from "dayjs";
-import { triggerGoal } from "../../Integrations/Plausible.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
+import { triggerGoal } from "../../Integrations/Plausible";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 import {
   DIAGNOSES_FILTER_LABELS,
   DiagnosesFilterKey,
   FILTER_BY_DIAGNOSES_KEYS,
-} from "./DiagnosesFilter.js";
-import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
-import { getDiagnosesByIds } from "../Diagnosis/utils.js";
-import Tabs from "../Common/components/Tabs.js";
-import { PhoneNumberValidator } from "../Form/FieldValidators.js";
-import { isPatientMandatoryDataFilled } from "./Utils.js";
-import request from "../../Utils/request/request.js";
-import { Avatar } from "../Common/Avatar.js";
+} from "./DiagnosesFilter";
+import { ICD11DiagnosisModel } from "../Diagnosis/types";
+import { getDiagnosesByIds } from "../Diagnosis/utils";
+import Tabs from "@/components/Common/components/Tabs";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
+import { isPatientMandatoryDataFilled } from "./Utils";
+import request from "../../Utils/request/request";
+import { Avatar } from "@/components/Common/Avatar";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;

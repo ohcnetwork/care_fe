@@ -3,14 +3,14 @@ import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import { LinePlot } from "./components/LinePlot";
 import { StackedLinePlot } from "./components/StackedLinePlot";
-import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
+import Pagination from "@/components/Common/Pagination";
+import { PAGINATION_LIMIT } from "@/common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 import dayjs from "../../../Utils/dayjs";
-import { meanArterialPressure } from "../../Common/BloodPressureFormField";
+import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
 import { PrimaryParametersPlotFields } from "../models";
 
 interface PrimaryParametersPlotProps {

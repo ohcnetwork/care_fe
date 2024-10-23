@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import useCanvas from "../../Common/hooks/useCanvas";
+import useCanvas from "@/common/hooks/useCanvas";
 import {
   ChannelOptions,
   IVitalsComponentProps,

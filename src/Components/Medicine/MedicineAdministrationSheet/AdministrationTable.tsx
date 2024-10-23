@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import useRangePagination from "../../../Common/hooks/useRangePagination";
+import useRangePagination from "@/common/hooks/useRangePagination";
 import { classNames, formatDateTime } from "../../../Utils/utils";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { Prescription } from "../models";
 import MedicineAdministrationTableRow from "./AdministrationTableRow";
 

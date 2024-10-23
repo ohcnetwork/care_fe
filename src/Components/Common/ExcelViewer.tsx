@@ -3,7 +3,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2, { Cancel, Submit } from "./components/ButtonV2";
 import DialogModal from "./Dialog";
 import Pagination from "./Pagination";
-import { ParsedData } from "../../Common/schemaParser";
+import { ParsedData } from "@/common/schemaParser";
 
 type FilePreviewProps = {
   title?: ReactNode;

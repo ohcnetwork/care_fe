@@ -2,7 +2,7 @@ import * as Notification from "../../Utils/Notifications";
 
 import { HCXClaimModel, HCXCommunicationModel } from "./models";
 
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { FileUploadModel } from "../Patient/models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";

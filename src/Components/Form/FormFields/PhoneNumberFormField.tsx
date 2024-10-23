@@ -9,7 +9,7 @@ import {
   CountryData,
   humanizeStrings,
 } from "../../../Utils/utils";
-import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
+import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 import {
   FieldError,
   PhoneNumberValidator,

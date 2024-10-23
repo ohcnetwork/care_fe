@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQueryParams } from "raviger";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { LocationSelect } from "../Common/LocationSelect";
+import { LocationSelect } from "@/components/Common/LocationSelect";
 import { AssetClass } from "./AssetTypes";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -12,7 +12,7 @@ import useQuery from "../../Utils/request/useQuery";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import dayjs from "dayjs";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { DateRange } from "../Common/DateRangeInputV2";
+import { DateRange } from "@/components/Common/DateRangeInputV2";
 import { dateQueryString } from "../../Utils/utils";
 
 const getDate = (value: any) =>

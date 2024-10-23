@@ -1,7 +1,7 @@
 import { useState } from "react";
-import DialogModal from "../../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import { AbhaNumberModel } from "../types/abha";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { classNames } from "../../../Utils/utils";
 import CreateWithAadhaar from "./CreateWithAadhaar";
 import { useTranslation } from "react-i18next";

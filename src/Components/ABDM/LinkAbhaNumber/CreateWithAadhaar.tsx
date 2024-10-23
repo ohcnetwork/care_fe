@@ -3,7 +3,9 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { classNames } from "../../../Utils/utils";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { useEffect, useState } from "react";
-import ButtonV2, { ButtonWithTimer } from "../../Common/components/ButtonV2";
+import ButtonV2, {
+  ButtonWithTimer,
+} from "@/components/Common/components/ButtonV2";
 import OtpFormField from "../../Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "../../Form/FormFields/PhoneNumberFormField";
 import { AbhaNumberModel } from "../types/abha";

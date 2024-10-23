@@ -9,13 +9,13 @@ import {
   GENDER_TYPES,
   PATIENT_FILTER_CATEGORIES,
   RATION_CARD_CATEGORY,
-} from "../../Common/constants";
-import useMergeState from "../../Common/hooks/useMergeState";
+} from "@/common/constants";
+import useMergeState from "@/common/hooks/useMergeState";
 import { dateQueryString } from "../../Utils/utils";
-import { DateRange } from "../Common/DateRangeInputV2";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { LocationSelect } from "../Common/LocationSelect";
-import AccordionV2 from "../Common/components/AccordionV2";
+import { DateRange } from "@/components/Common/DateRangeInputV2";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import AccordionV2 from "@/components/Common/components/AccordionV2";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
@@ -31,7 +31,7 @@ import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { useTranslation } from "react-i18next";
 import careConfig from "@careConfig";

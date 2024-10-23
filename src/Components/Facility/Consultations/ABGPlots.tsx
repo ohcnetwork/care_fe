@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LinePlot } from "./components/LinePlot";
-import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
+import Pagination from "@/components/Common/Pagination";
+import { PAGINATION_LIMIT } from "@/common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";

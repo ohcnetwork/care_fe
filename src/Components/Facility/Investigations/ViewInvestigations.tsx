@@ -5,10 +5,10 @@ import { useTranslation } from "react-i18next";
 import { formatDateTime } from "../../../Utils/utils";
 import { InvestigationResponse } from "./Reports/types";
 import { InvestigationSessionType } from "./investigationsTab";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export default function ViewInvestigations(props: {
   isLoading: boolean;
   investigations: InvestigationResponse;

@@ -1,25 +1,25 @@
 import { useState } from "react";
 import BadgesList from "./BadgesList";
-import ButtonV2 from "../Common/components/ButtonV2";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import { ExportButton } from "../Common/Export";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import { ExportButton } from "@/components/Common/Export";
 import ListFilter from "./ListFilter";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import SearchInput from "../Form/SearchInput";
 import { formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
-import useFilters from "../../Common/hooks/useFilters";
+import useFilters from "@/common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import careConfig from "@careConfig";
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 import { IShift } from "./models";
 
 export default function ListView() {

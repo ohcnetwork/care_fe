@@ -1,21 +1,21 @@
 import Card from "../../CAREUI/display/Card";
 
 import { useState, SyntheticEvent } from "react";
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { LOCATION_BED_TYPES } from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { LOCATION_BED_TYPES } from "@/common/constants";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface Props {
   facilityId: string;
   locationId: string;

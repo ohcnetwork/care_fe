@@ -1,12 +1,12 @@
-import useFullscreen from "../../Common/hooks/useFullscreen";
+import useFullscreen from "@/common/hooks/useFullscreen";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
-import useFilters from "../../Common/hooks/useFilters";
-import Loading from "../Common/Loading";
-import Page from "../Common/components/Page";
-import ButtonV2 from "../Common/components/ButtonV2";
+import useFilters from "@/common/hooks/useFilters";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/components/Page";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { LocationSelect } from "../Common/LocationSelect";
-import Pagination from "../Common/Pagination";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import Pagination from "@/components/Common/Pagination";
 import {
   Popover,
   PopoverButton,
@@ -16,7 +16,7 @@ import {
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
-import { SortOption } from "../Common/SortDropdown";
+import { SortOption } from "@/components/Common/SortDropdown";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 import useQuery from "../../Utils/request/useQuery";

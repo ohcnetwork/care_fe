@@ -1,10 +1,10 @@
 import { HCXPolicyModel } from "../HCX/models";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 interface IProps {
   facilityId: string;
   id: string;

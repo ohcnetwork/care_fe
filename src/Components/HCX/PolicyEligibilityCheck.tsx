@@ -1,14 +1,14 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import { useEffect, useState } from "react";
 
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXPolicyModel } from "./models";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import request from "../../Utils/request/request.js";
+import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { useMessageListener } from "@/common/hooks/useMessageListener";
 import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
 

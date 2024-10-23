@@ -1,4 +1,4 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import { BedModel, FacilityModel } from "./models";
 import {
@@ -8,22 +8,22 @@ import {
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   TELEMEDICINE_ACTIONS,
-} from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+} from "@/common/constants";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
-} from "../Common/prescription-builder/InvestigationBuilder";
+} from "@/components/Common/prescription-builder/InvestigationBuilder";
 import { LegacyRef, createRef, useEffect, useRef, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
-} from "../Common/prescription-builder/ProcedureBuilder";
-import { BedSelect } from "../Common/BedSelect";
+} from "@/components/Common/prescription-builder/ProcedureBuilder";
+import { BedSelect } from "@/components/Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import {
   FieldChangeEvent,
   FieldChangeEventHandler,
@@ -33,41 +33,41 @@ import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocomplete from "../Common/UserAutocompleteFormField";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 import { UserBareMinimum } from "../Users/models";
 
 import { navigate } from "raviger";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
 import RouteToFacilitySelect, {
   RouteToFacility,
-} from "../Common/RouteToFacilitySelect.js";
-import { LocationSelect } from "../Common/LocationSelect.js";
-import { classNames } from "../../Utils/utils.js";
+} from "@/components/Common/RouteToFacilitySelect";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import { classNames } from "../../Utils/utils";
 import {
   ConditionVerificationStatuses,
   ConsultationDiagnosis,
   CreateDiagnosis,
-} from "../Diagnosis/types.js";
+} from "../Diagnosis/types";
 import {
   CreateDiagnosesBuilder,
   EditDiagnosesBuilder,
-} from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
-import request from "../../Utils/request/request.js";
-import routes from "../../Redux/api.js";
-import useQuery from "../../Utils/request/useQuery.js";
+} from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 import { t } from "i18next";
-import { Writable } from "../../Utils/types.js";
-import { EncounterSymptom } from "../Symptoms/types.js";
+import { Writable } from "../../Utils/types";
+import { EncounterSymptom } from "../Symptoms/types";
 import {
   EncounterSymptomsBuilder,
   CreateSymptomsBuilder,
-} from "../Symptoms/SymptomsBuilder.js";
+} from "../Symptoms/SymptomsBuilder";
 import careConfig from "@careConfig";
 
-import Loading from "@/Components/Common/Loading";
-import PageTitle from "@/Components/Common/PageTitle";
+import Loading from "@/components/Common/Loading";
+import PageTitle from "@/components/Common/PageTitle";
 
 type BooleanStrings = "true" | "false";
 

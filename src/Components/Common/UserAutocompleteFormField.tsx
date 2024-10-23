@@ -10,7 +10,7 @@ import {
   isUserOnline,
   mergeQueryOptions,
 } from "../../Utils/utils";
-import { UserRole } from "../../Common/constants";
+import { UserRole } from "@/common/constants";
 import { useEffect, useState } from "react";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";

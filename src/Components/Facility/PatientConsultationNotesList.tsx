@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import CircularProgress from "../Common/components/CircularProgress";
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+import CircularProgress from "@/components/Common/components/CircularProgress";
 import routes from "../../Redux/api";
 import { PatientNoteStateType, PatientNotesModel } from "./models";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import DoctorNote from "./DoctorNote";
 import request from "../../Utils/request/request";
 

@@ -1,5 +1,5 @@
 import { ConsultationTabProps } from "./index";
-import PageTitle from "../../Common/PageHeadTitle";
+import PageTitle from "@/components/Common/PageHeadTitle";
 import MedicineAdministrationSheet from "../../Medicine/MedicineAdministrationSheet";
 import { MedicinePrescriptionSummary } from "../../Medicine/MedicinePrescriptionSummary";
 

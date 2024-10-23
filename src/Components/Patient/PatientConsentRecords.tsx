@@ -2,22 +2,22 @@ import { useState } from "react";
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
-} from "../../Common/constants";
+} from "@/common/constants";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import request from "../../Utils/request/request";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatDateTime } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import useFileUpload from "../../Utils/useFileUpload";
 import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
 import useFileManager from "../../Utils/useFileManager";
 import { PatientConsentModel } from "../Facility/models";
-import Tabs from "../Common/components/Tabs";
+import Tabs from "@/components/Common/components/Tabs";
 import { t } from "i18next";
 
 export default function PatientConsentRecords(props: {

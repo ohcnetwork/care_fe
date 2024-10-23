@@ -1,11 +1,11 @@
 import DropdownMenu, {
   DropdownItem,
   DropdownItemProps,
-} from "../../Components/Common/components/Menu";
+} from "@/components/Common/components/Menu";
 
-import ButtonV2 from "../../Components/Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import useExport from "../../Common/hooks/useExport";
+import useExport from "@/common/hooks/useExport";
 import { Route } from "../../Utils/request/types";
 import request from "../../Utils/request/request";
 

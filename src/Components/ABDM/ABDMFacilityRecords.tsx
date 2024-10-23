@@ -2,10 +2,10 @@ import { Link } from "raviger";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { classNames, formatDateTime } from "../../Utils/utils";
-import Loading from "../Common/Loading";
-import Page from "../Common/components/Page";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/components/Page";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 
 interface IProps {

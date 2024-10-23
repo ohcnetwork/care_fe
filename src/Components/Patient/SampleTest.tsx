@@ -1,23 +1,23 @@
 import { navigate } from "raviger";
 
 import { useReducer, useState } from "react";
-import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
-import * as Notification from "../../Utils/Notifications.js";
+import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "@/common/constants";
+import * as Notification from "../../Utils/Notifications";
 import { SampleTestModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import Page from "../Common/components/Page";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import Page from "@/components/Common/components/Page";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 const initForm: SampleTestModel = {
   isFastTrack: false,
   fast_track: "",

@@ -1,7 +1,7 @@
 import { useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications.js";
-import ButtonV2 from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
+import * as Notification from "../../Utils/Notifications";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
 import TextFormField from "../Form/FormFields/TextFormField";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";

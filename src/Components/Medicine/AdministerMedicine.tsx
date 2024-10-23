@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { DosageValue, Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Success } from "../../Utils/Notifications";
@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import dayjs from "../../Utils/dayjs";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import request from "../../Utils/request/request";
 import MedicineRoutes from "./routes";
 import DosageFormField from "../Form/FormFields/DosageFormField";

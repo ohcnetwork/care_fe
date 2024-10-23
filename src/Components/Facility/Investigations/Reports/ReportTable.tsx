@@ -1,6 +1,6 @@
 import { getColorIndex, rowColor, transformData } from "./utils";
 
-import ButtonV2 from "../../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { InvestigationResponse } from "./types";
 import { formatDateTime } from "../../../../Utils/utils";
 import { FC } from "react";

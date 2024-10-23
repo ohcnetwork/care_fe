@@ -4,8 +4,10 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { useMemo, useState } from "react";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { classNames } from "../../../Utils/utils";
-import ButtonV2, { ButtonWithTimer } from "../../Common/components/ButtonV2";
-import Dropdown, { DropdownItem } from "../../Common/components/Menu";
+import ButtonV2, {
+  ButtonWithTimer,
+} from "@/components/Common/components/ButtonV2";
+import Dropdown, { DropdownItem } from "@/components/Common/components/Menu";
 import OtpFormField from "../../Form/FormFields/OtpFormField";
 import * as Notify from "../../../Utils/Notifications";
 import request from "../../../Utils/request/request";

@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { AssetData } from "../Assets/AssetTypes";
 import { getCameraConfig, makeAccessKey } from "../../Utils/transformUtils";
 import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/components/Common/components/ButtonV2";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useOperateCamera from "./useOperateCamera";
 import CameraFeed from "./CameraFeed";
@@ -16,7 +19,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { classNames, compareBy } from "../../Utils/utils";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { CameraPreset, FeedRoutes, GetStatusResponse } from "./routes";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import {
   Listbox,
   ListboxButton,
@@ -24,10 +27,10 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
-import Loading from "../Common/Loading";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { checkIfValidIP } from "../../Common/validation";
+import { checkIfValidIP } from "@/common/validation";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 
 interface Props {

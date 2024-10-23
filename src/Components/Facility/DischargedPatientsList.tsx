@@ -1,8 +1,8 @@
 import { Link, navigate } from "raviger";
 import routes from "../../Redux/api";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import Loading from "../Common/Loading";
+import Loading from "@/components/Common/Loading";
 import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
 import SearchInput from "../Form/SearchInput";
@@ -13,20 +13,20 @@ import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
-} from "../../Common/constants";
+} from "@/common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatPatientAge, humanizeStrings } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import SortDropdownMenu from "../Common/SortDropdown";
-import useFilters from "../../Common/hooks/useFilters";
+import SortDropdownMenu from "@/components/Common/SortDropdown";
+import useFilters from "@/common/hooks/useFilters";
 import PatientFilter from "../Patient/PatientFilter";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { useEffect, useState } from "react";
-import { parseOptionId } from "../../Common/utils";
+import { parseOptionId } from "@/common/utils";
 import {
   DIAGNOSES_FILTER_LABELS,
   DiagnosesFilterKey,
@@ -35,7 +35,7 @@ import {
 import { getDiagnosesByIds } from "../Diagnosis/utils";
 import { ICD11DiagnosisModel } from "./models";
 import FilterBadge from "../../CAREUI/display/FilterBadge";
-import Tabs from "../Common/components/Tabs";
+import Tabs from "@/components/Common/components/Tabs";
 
 const DischargedPatientsList = ({
   facility_external_id,

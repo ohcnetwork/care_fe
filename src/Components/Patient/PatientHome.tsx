@@ -7,7 +7,7 @@ import {
   GENDER_TYPES,
   OCCUPATION_TYPES,
   SAMPLE_TEST_STATUS,
-} from "../../Common/constants";
+} from "@/common/constants";
 import { PatientModel, SampleTestModel } from "./models";
 import {
   classNames,
@@ -18,31 +18,31 @@ import {
   isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
-import CircularProgress from "../Common/components/CircularProgress";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import CircularProgress from "@/components/Common/components/CircularProgress";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import Page from "../Common/components/Page";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import Page from "@/components/Common/components/Page";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
 import { SampleTestCard } from "./SampleTestCard";
-import UserAutocomplete from "../Common/UserAutocompleteFormField";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import request from "../../Utils/request/request";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
-import { Button } from "@/Components/ui/button";
-import Loading from "@/Components/Common/Loading";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import Loading from "@/components/Common/Loading";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;

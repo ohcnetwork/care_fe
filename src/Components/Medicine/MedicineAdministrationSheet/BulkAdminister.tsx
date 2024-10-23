@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Prescription } from "../models";
 import { useState } from "react";
-import ButtonV2 from "../../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import MedicineAdministration from "../MedicineAdministration";

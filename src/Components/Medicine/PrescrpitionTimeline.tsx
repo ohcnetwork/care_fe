@@ -1,5 +1,5 @@
 import dayjs from "../../Utils/dayjs";
-import useSlug from "../../Common/hooks/useSlug";
+import useSlug from "@/common/hooks/useSlug";
 import useQuery from "../../Utils/request/useQuery";
 import { classNames, formatDateTime, formatTime } from "../../Utils/utils";
 import { MedicineAdministrationRecord, Prescription } from "./models";
@@ -9,9 +9,9 @@ import Timeline, {
   TimelineNode,
   TimelineNodeNotes,
 } from "../../CAREUI/display/Timeline";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { useState } from "react";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import request from "../../Utils/request/request";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import CareIcon from "../../CAREUI/icons/CareIcon";

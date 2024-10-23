@@ -1,7 +1,7 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { AvatarProps, Avatar } from "@/Components/Common/Avatar";
+import { AvatarProps, Avatar } from "@/components/Common/Avatar";
 
 interface AvatarEditableProps extends AvatarProps {
   id?: string;

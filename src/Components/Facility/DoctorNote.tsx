@@ -1,5 +1,5 @@
 import InfiniteScroll from "react-infinite-scroll-component";
-import CircularProgress from "../Common/components/CircularProgress";
+import CircularProgress from "@/components/Common/components/CircularProgress";
 import PatientNoteCard from "./PatientNoteCard";
 import { PatientNoteStateType, PatientNotesModel } from "./models";
 import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";

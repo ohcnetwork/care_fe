@@ -1,16 +1,16 @@
 import * as Notification from "../../Utils/Notifications";
 
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
 import { HCXClaimModel, HCXItemModel, HCXPolicyModel } from "./models";
 import { classNames, formatCurrency } from "../../Utils/utils";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ClaimCreatedModal from "./ClaimCreatedModal";
 import ClaimsItemsBuilder from "./ClaimsItemsBuilder";
-import DialogModal from "../Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
 import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { ProcedureType } from "@/components/Common/prescription-builder/ProcedureBuilder";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";

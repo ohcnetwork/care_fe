@@ -1,4 +1,4 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import {
   CONSULTATION_SUGGESTION,
@@ -6,13 +6,13 @@ import {
   PATIENT_CATEGORIES,
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
-} from "../../Common/constants.js";
-import { ConsultationModel, PatientCategory } from "../Facility/models.js";
+} from "@/common/constants";
+import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { Switch, MenuItem, Field, Label } from "@headlessui/react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import dayjs from "../../Utils/dayjs.js";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import dayjs from "../../Utils/dayjs";
 import {
   classNames,
   formatDate,
@@ -20,28 +20,28 @@ import {
   formatName,
   formatPatientAge,
   humanizeStrings,
-} from "../../Utils/utils.js";
-import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
-import DialogModal from "../Common/Dialog.js";
-import ButtonV2 from "../Common/components/ButtonV2.js";
-import Beds from "../Facility/Consultations/Beds.js";
-import { PatientModel } from "./models.js";
-import request from "../../Utils/request/request.js";
-import routes from "../../Redux/api.js";
-import DropdownMenu from "../Common/components/Menu.js";
-import { triggerGoal } from "../../Integrations/Plausible.js";
+} from "../../Utils/utils";
+import ABHAProfileModal from "../ABDM/ABHAProfileModal";
+import DialogModal from "@/components/Common/Dialog";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import Beds from "../Facility/Consultations/Beds";
+import { PatientModel } from "./models";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import DropdownMenu from "@/components/Common/components/Menu";
+import { triggerGoal } from "../../Integrations/Plausible";
 
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import { Mews } from "../Facility/Consultations/Mews.js";
-import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
-import DischargeModal from "../Facility/DischargeModal.js";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import { Mews } from "../Facility/Consultations/Mews";
+import DischargeSummaryModal from "../Facility/DischargeSummaryModal";
+import DischargeModal from "../Facility/DischargeModal";
 import { useTranslation } from "react-i18next";
-import useQuery from "../../Utils/request/useQuery.js";
-import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
-import { AbhaNumberModel } from "../ABDM/types/abha.js";
-import { SkillModel } from "../Users/models.js";
-import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
-import LinkAbhaNumber from "../ABDM/LinkAbhaNumber";
+import useQuery from "../../Utils/request/useQuery";
+import FetchRecordsModal from "../ABDM/FetchRecordsModal";
+import { AbhaNumberModel } from "../ABDM/types/abha";
+import { SkillModel } from "../Users/models";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
+import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index";
 import careConfig from "@careConfig";
 
 const formatSkills = (arr: SkillModel[]) => {

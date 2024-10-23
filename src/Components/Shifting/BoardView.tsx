@@ -1,32 +1,32 @@
 import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
-} from "../../Common/constants";
+} from "@/common/constants";
 
 import BadgesList from "./BadgesList";
-import { ExportButton } from "../Common/Export";
+import { ExportButton } from "@/components/Common/Export";
 import ListFilter from "./ListFilter";
 import SearchInput from "../Form/SearchInput";
 import { formatFilter } from "./Commons";
 
 import { Link, navigate } from "raviger";
-import useFilters from "../../Common/hooks/useFilters";
+import useFilters from "@/common/hooks/useFilters";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import Tabs from "../Common/components/Tabs";
+import Tabs from "@/components/Common/components/Tabs";
 import careConfig from "@careConfig";
 import KanbanBoard from "../Kanban/Board";
 import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import dayjs from "dayjs";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { ShiftingModel } from "../Facility/models";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import PageTitle from "@/Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({

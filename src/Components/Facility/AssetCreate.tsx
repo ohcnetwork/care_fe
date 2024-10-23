@@ -1,7 +1,7 @@
-import * as Notification from "../../Utils/Notifications.js";
+import * as Notification from "../../Utils/Notifications";
 
 import { AssetClass, AssetType } from "../Assets/AssetTypes";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import {
   LegacyRef,
   MutableRefObject,
@@ -14,29 +14,29 @@ import {
 
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import { LocationSelect } from "../Common/LocationSelect";
-import Page from "../Common/components/Page";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import Page from "@/components/Common/components/Page";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import SwitchV2 from "../Common/components/Switch";
+import SwitchV2 from "@/components/Common/components/Switch";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 
 import { navigate } from "raviger";
 import { parseQueryParams } from "../../Utils/primitives";
-import useAppHistory from "../../Common/hooks/useAppHistory";
+import useAppHistory from "@/common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
-import { validateEmailAddress } from "../../Common/validation";
-import { dateQueryString, parsePhoneNumber } from "../../Utils/utils.js";
+import { validateEmailAddress } from "@/common/validation";
+import { dateQueryString, parsePhoneNumber } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
-import DateFormField from "../Form/FormFields/DateFormField.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import request from "../../Utils/request/request.js";
+import DateFormField from "../Form/FormFields/DateFormField";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 const formErrorKeys = [
   "name",
   "asset_class",

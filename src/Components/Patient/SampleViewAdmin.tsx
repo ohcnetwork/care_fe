@@ -6,23 +6,23 @@ import {
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
-} from "../../Common/constants";
+} from "@/common/constants";
 import * as Notification from "../../Utils/Notifications";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import { formatDateTime } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
-import { ExportButton } from "../Common/Export";
+import useFilters from "@/common/hooks/useFilters";
+import { ExportButton } from "@/components/Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import Page from "../Common/components/Page";
+import Page from "@/components/Common/components/Page";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading";
 export default function SampleViewAdmin() {
   const {
     qParams,

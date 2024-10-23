@@ -1,4 +1,4 @@
-import { PATIENT_CATEGORIES } from "../../Common/constants";
+import { PATIENT_CATEGORIES } from "@/common/constants";
 import { PatientCategory } from "../Facility/models";
 
 const PatientCategoryBadge = ({ category }: { category?: PatientCategory }) => {

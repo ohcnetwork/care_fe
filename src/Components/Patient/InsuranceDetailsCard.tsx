@@ -1,4 +1,4 @@
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { HCXPolicyModel } from "../HCX/models";
 import { navigate } from "raviger";
 

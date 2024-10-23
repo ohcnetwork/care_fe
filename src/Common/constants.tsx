@@ -1,16 +1,13 @@
 import {
   PatientCategory,
   SpokeRelationship,
-} from "../Components/Facility/models";
-import { SortOption } from "../Components/Common/SortDropdown";
+} from "@/components/Facility/models";
+import { SortOption } from "@/components/Common/SortDropdown";
 import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
-import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
+import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 import { SchemaType } from "./schemaParser";
-import {
-  ConsentHIType,
-  ConsentPurpose,
-} from "../Components/ABDM/types/consent";
+import { ConsentHIType, ConsentPurpose } from "@/components/ABDM/types/consent";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
