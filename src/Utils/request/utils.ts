@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { LocalStorageKeys } from "../../Common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 import * as Notification from "../Notifications";
 import { QueryParams, RequestOptions } from "./types";
 

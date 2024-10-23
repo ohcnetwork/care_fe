@@ -1,9 +1,9 @@
 /* eslint-disable i18next/no-literal-string */
 import React, { Suspense } from "react";
-import { CareAppsContext, useCareApps } from "./Common/hooks/useCareApps";
+import { CareAppsContext, useCareApps } from "@/common/hooks/useCareApps";
 import { pluginMap } from "./pluginTypes";
-import { UserAssignedModel } from "./Components/Users/models";
-import ErrorBoundary from "./Components/Common/ErrorBoundary";
+import { UserAssignedModel } from "@/components/Users/models";
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
 
 export default function PluginEngine({
   children,
