@@ -6,7 +6,7 @@ import {
   ComboboxOptions,
 } from "@headlessui/react";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
@@ -14,6 +14,7 @@ import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
+import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -105,6 +106,7 @@ type AutocompleteProps<T, V = T> = {
 export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState(""); // Ensure lower case
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     props.onQuery?.(query);
@@ -153,14 +155,30 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       ? options.filter((o) => o.search.includes(query))
       : options;
 
+  const domValue = useValueInjectionObserver<V>({
+    targetElement: menuRef.current,
+    attribute: "data-cui-listbox-value",
+  });
+
+  useEffect(() => {
+    if (props.value !== domValue && typeof domValue !== "undefined")
+      props.onChange(domValue);
+  }, [domValue]);
+
   return (
     <div
+      ref={menuRef}
       className={
         props.requiredError || props.error
           ? "rounded border border-red-500 " + props.className
           : props.className
       }
       id={props.id}
+      data-cui-listbox
+      data-cui-listbox-options={JSON.stringify(
+        options.map((option) => [option.value, option.label?.toString()]),
+      )}
+      data-cui-listbox-value={JSON.stringify(props.value)}
     >
       <Combobox
         immediate

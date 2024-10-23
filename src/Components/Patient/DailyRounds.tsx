@@ -746,8 +746,8 @@ export const DailyRounds = (props: any) => {
                 />
                 <SelectFormField
                   {...field("is_experiencing_dysuria")}
-                  options={[true, false]}
-                  optionLabel={(c) => t(c ? "yes" : "no")}
+                  options={["true", "false"]}
+                  optionLabel={(c) => t(c === "true" ? "yes" : "no")}
                 />
                 <SelectFormField
                   {...selectField(
