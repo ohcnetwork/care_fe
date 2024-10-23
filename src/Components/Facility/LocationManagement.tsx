@@ -287,7 +287,7 @@ const Location = ({
         id="manage-bed-button"
         variant="secondary"
         border
-        className={cn("mt-3 flex w-full items-center justify-between")}
+        className="mt-3 flex w-full items-center justify-between"
         href={totalBeds != null ? `location/${id}/beds` : undefined}
         disabled={totalBeds == null}
       >
