@@ -1,7 +1,7 @@
 import { LazyExoticComponent } from "react";
-import { UserAssignedModel } from "./Components/Users/models";
+import { UserAssignedModel } from "@/components/Users/models";
 import { AppRoutes } from "./Routers/AppRouter";
-import { INavItem } from "./Components/Common/Sidebar/Sidebar";
+import { INavItem } from "@/components/Common/Sidebar/Sidebar";
 import { pluginMap } from "./pluginMap";
 
 // Define the available plugins
