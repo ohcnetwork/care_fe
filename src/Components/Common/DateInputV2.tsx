@@ -341,6 +341,7 @@ const DateInputV2: React.FC<Props> = ({
                         allowTime={!!time}
                         value={value}
                         onChange={onChange}
+                        onFinishInitialTyping={() => close()}
                         error={
                           value &&
                           (!dayjs(value).isValid() ||

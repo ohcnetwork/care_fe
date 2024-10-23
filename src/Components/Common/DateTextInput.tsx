@@ -10,6 +10,7 @@ import { Fragment, KeyboardEvent, useEffect, useState } from "react";
  * @param {boolean} props.allowTime - If true, shows time input fields (hour and minute).
  * @param {Date} props.value - The current date value.
  * @param {function(Date):void} props.onChange - Callback function when date value changes.
+ * @param {function():void} props.onFinishInitialTyping - Callback function when a user successfuly types in the date on the first input
  * @param {String} props.error - Shows an error if specified
  *
  * @returns {JSX.Element} The date text input component.
@@ -18,9 +19,10 @@ export default function DateTextInput(props: {
   allowTime: boolean;
   value?: Date;
   onChange: (date: Date | undefined) => unknown;
+  onFinishInitialTyping?: () => unknown;
   error?: string;
 }) {
-  const { value, onChange, allowTime, error } = props;
+  const { value, onChange, allowTime, error, onFinishInitialTyping } = props;
 
   const [editingText, setDirtyEditingText] = useState({
     date: `${value ? value?.getDate() : ""}`,
@@ -40,6 +42,9 @@ export default function DateTextInput(props: {
       allowTime ? parseInt(et.minute) : 0,
     );
     if (et.year.length > 3 && dayjs(newDate).isValid()) {
+      if (!value && !allowTime) onFinishInitialTyping?.();
+      if (!value && allowTime && et.minute.length > 1)
+        onFinishInitialTyping?.();
       onChange(newDate);
     }
   };
