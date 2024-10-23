@@ -212,7 +212,10 @@ export default function MedicineAdministrationTableRow({
                 {prescription.medicine_object?.generic}
               </span>
             </div>
-
+          </div>
+        </td>
+        <td>
+          <div className="flex justify-center">
             <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
               {prescription.dosage_type !== "TITRATED" ? (
                 <p>{prescription.base_dosage}</p>
