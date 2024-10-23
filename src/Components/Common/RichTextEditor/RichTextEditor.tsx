@@ -1,25 +1,11 @@
-import React, {
-  useRef,
-  useState,
-  useCallback,
-  ChangeEvent,
-  useEffect,
-} from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import MentionsDropdown from "./MentionDropdown";
-import { ExtImage } from "../../../Utils/useFileUpload";
-import imageCompression from "browser-image-compression";
 import DialogModal from "../Dialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import ButtonV2, { Submit } from "../components/ButtonV2";
-import CameraCaptureModal from "./CameraCaptureModal";
-import AudioRecorder from "./AudioRecorder";
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
-import uploadFile from "../../../Utils/request/uploadFile";
-import * as Notification from "../../../Utils/Notifications.js";
-import { CreateFileResponse } from "../../Patient/models";
 import MarkdownPreview from "./MarkdownPreview";
 import { classNames } from "../../../Utils/utils";
+import useFileUpload from "../../../Utils/useFileUpload";
 
 interface RichTextEditorProps {
   initialMarkdown?: string;
@@ -52,9 +38,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
 
   const [mentionFilter, setMentionFilter] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
-  const [modalOpenForAudio, setModalOpenForAudio] = useState(false);
   const [linkDialogState, setLinkDialogState] = useState({
     showDialog: false,
     url: "",
@@ -62,8 +45,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     linkText: "",
   });
 
-  const [tempFiles, setTempFiles] = useState<File[]>([]);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+
+  const fileUpload = useFileUpload({
+    type: "NOTES",
+    category: "UNSPECIFIED",
+    multiple: true,
+    allowAllExtensions: true,
+  });
 
   const insertMarkdown = (prefix: string, suffix: string = prefix) => {
     if (!editorRef.current) return;
@@ -406,110 +395,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     });
   };
 
-  const uploadfile = async (data: CreateFileResponse, file: File) => {
-    const url = data.signed_url;
-    const internal_name = data.internal_name;
-    const newFile = new File([file], `${internal_name}`);
-    return new Promise<void>((resolve, reject) => {
-      uploadFile(
-        url,
-        newFile,
-        "PUT",
-        { "Content-Type": file.type },
-        async (xhr: XMLHttpRequest) => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            Notification.Success({
-              msg: "File Uploaded Successfully",
-            });
-            resolve();
-          } else {
-            Notification.Error({
-              msg: "Error Uploading File: " + xhr.statusText,
-            });
-            reject();
-          }
-        },
-        null,
-        () => {
-          Notification.Error({
-            msg: "Error Uploading File: Network Error",
-          });
-          reject();
-        },
-      );
-    });
-  };
-
-  const setFile = (file: File) => {
-    setTempFiles((prevFiles) => [...prevFiles, file]);
-  };
-
-  const handleFileUpload = async (file: File, noteId: string) => {
-    const category = file.type.includes("audio") ? "AUDIO" : "UNSPECIFIED";
-
-    const { data } = await request(routes.createUpload, {
-      body: {
-        original_name: file.name,
-        file_type: "NOTES",
-        name: file.name.split(".")[0],
-        associating_id: noteId,
-        file_category: category,
-        mime_type: file.type,
-      },
-    });
-
-    if (data) {
-      await uploadfile(data, file);
-      await markUploadComplete(data, noteId);
-    }
-  };
-
-  const onFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) {
-      return;
-    }
-    const f = e.target.files[0];
-    const fileName = f.name;
-
-    const ext: string = fileName.split(".")[1];
-
-    if (ExtImage.includes(ext)) {
-      const options = {
-        initialQuality: 0.6,
-        alwaysKeepResolution: true,
-      };
-      const compressedFile = await imageCompression(f, options);
-      setTempFiles((prevFiles) => [...prevFiles, compressedFile]);
-    } else {
-      setTempFiles((prevFiles) => [...prevFiles, f]);
-    }
-  };
-
-  const markUploadComplete = (data: CreateFileResponse, noteId: string) => {
-    return request(routes.editUpload, {
-      body: { upload_completed: true },
-      pathParams: {
-        id: data.id,
-        fileType: "NOTES",
-        associatingId: noteId,
-      },
-    });
-  };
-
   return (
     <div className="relative m-2">
-      <CameraCaptureModal
-        open={modalOpenForCamera}
-        onClose={() => setModalOpenForCamera(false)}
-        setFile={setFile}
-      />
-
-      <AudioRecorder
-        setFile={setFile}
-        modalOpenForAudio={modalOpenForAudio}
-        setModalOpenForAudio={setModalOpenForAudio}
-      />
-
       {/* toolbar */}
       <div className="flex items-center space-x-1 rounded-t-md border border-gray-300 bg-gray-100 pl-1 sm:space-x-2">
         <button
@@ -627,9 +514,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onKeyDown={onKeyDown}
           />
         )}
-        {tempFiles.length > 0 && (
+        {fileUpload.files.length > 0 && (
           <div className="flex flex-wrap gap-2 p-2">
-            {tempFiles.map((file, index) => (
+            {fileUpload.files.map((file, index) => (
               <div
                 key={index}
                 className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm transition-colors duration-200 hover:bg-gray-200/50"
@@ -637,9 +524,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setTempFiles((prevFiles) =>
-                      prevFiles.filter((f, i) => i !== index),
-                    );
+                    fileUpload.removeFile(index);
                   }}
                   className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
                 >
@@ -665,18 +550,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       {/* toolbar-2 */}
       <div className="flex items-center space-x-1 rounded-b-md border border-gray-300 bg-gray-100 pl-2 sm:space-x-2">
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="tooltip rounded bg-gray-200/50 p-1"
-        >
+        <label className="tooltip cursor-pointer rounded bg-gray-200/50 p-1">
           <CareIcon icon="l-paperclip" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-4">
             Attach File
           </span>
-        </button>
+          <fileUpload.Input multiple />
+        </label>
         <div className="mx-2 h-6 border-l border-gray-400"></div>
         <button
-          onClick={() => setModalOpenForCamera(true)}
+          onClick={() => fileUpload.handleCameraCapture()}
           className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-camera" className="text-lg" />
@@ -685,7 +568,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </span>
         </button>
         <button
-          onClick={() => setModalOpenForAudio(true)}
+          onClick={() => fileUpload.handleAudioCapture()}
           className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-microphone" className="text-lg" />
@@ -713,13 +596,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             Mention
           </span>
         </button>
-        <input
-          ref={fileInputRef}
-          onChange={onFileChange}
-          type="file"
-          className="hidden"
-          accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
-        />
 
         <div className="grow"></div>
         <div>
@@ -729,11 +605,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               if (!editorRef.current) return;
               const id = await onAddNote();
               if (!id) return;
-              for (const file of tempFiles) {
-                await handleFileUpload(file, id);
-              }
+              await fileUpload.handleFileUpload(id);
               onRefetch?.();
-              setTempFiles([]);
+              fileUpload.clearFiles();
               editorRef.current.innerHTML = "";
             }}
             className="flex-none rounded bg-primary-500 p-2 text-white"
@@ -813,6 +687,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </div>
         </div>
       </DialogModal>
+
+      {fileUpload.Dialogues}
     </div>
   );
 };

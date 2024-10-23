@@ -586,7 +586,6 @@ export interface PaitentNotesReplyModel {
 }
 
 export interface PatientNotesModel {
-  count: number;
   id: string;
   note: string;
   facility: BaseFacilityModel;
