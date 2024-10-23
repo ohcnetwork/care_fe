@@ -50,7 +50,7 @@
     "format": "prettier ./src --write",
     "sort-locales": "node ./scripts/sort-locales.js",
     "cy:run": "npm run cypress:run",
-    "cy:parallel": "cypress-parallel -s cy:run -t 8 -d 'cypress/e2e'"
+    "cy:parallel": "cypress-parallel -s cy:run -t 4 -d 'cypress/e2e'"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.1.0",
