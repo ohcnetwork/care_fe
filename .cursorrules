@@ -7,12 +7,12 @@ Care uses a custom useQuery hook to fetch data from the API. APIs are defined in
 Here's an example of how to use the useQuery hook to fetch data from the API:
 
 ```
-useQuery from "@/Common/hooks/useQuery";
+useQuery from "@/common/hooks/useQuery";
 const { data, loading, error } = useQuery(routes.getFacilityUsers, {
   facility_id: "1",
 });
 
-request from "@/Common/utils/request";
+request from "@/common/utils/request";
 const { res } = await request(routes.partialUpdateAsset, {
   pathParams: { external_id: assetId },
   body: data,
