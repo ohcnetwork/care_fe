@@ -12,7 +12,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import { ReactNode, useContext, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { parseOptionId } from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -58,7 +58,6 @@ import request from "../../Utils/request/request.js";
 import { Avatar } from "../Common/Avatar.js";
 
 import Loading from "@/Components/Common/Loading";
-import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar.js";
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;
@@ -83,7 +82,6 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const PatientManager = () => {
-  const { shrinked } = useContext(SidebarShrinkContext);
   const { t } = useTranslation();
   const {
     qParams,
@@ -840,7 +838,7 @@ export const PatientManager = () => {
               </p>
             </ButtonV2>
           </div>
-          <div className="flex w-full flex-col items-center justify-end gap-3 lg:ml-3 lg:w-fit lg:flex-row lg:gap-2">
+          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
             <Tabs
               tabs={[
                 { text: t("live"), value: 0 },
@@ -915,9 +913,7 @@ export const PatientManager = () => {
                   className="mr-5 w-full lg:w-fit"
                 >
                   <CareIcon icon="l-export" />
-                  {(!params.facility || shrinked) && (
-                    <span className="lg:my-[3px]">Export</span>
-                  )}
+                  <span className="lg:my-[3px]">Export</span>
                 </ButtonV2>
               ) : (
                 <ExportMenu
