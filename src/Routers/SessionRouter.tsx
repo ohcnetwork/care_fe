@@ -1,7 +1,8 @@
-import { Login, ResetPassword } from "../Components/Auth";
+import { Login, ResetPassword } from "@/components/Auth";
 import { useRoutes } from "raviger";
-import SessionExpired from "../Components/ErrorPages/SessionExpired";
-import InvalidReset from "../Components/ErrorPages/InvalidReset";
+import SessionExpired from "@/components/ErrorPages/SessionExpired";
+import InvalidReset from "@/components/ErrorPages/InvalidReset";
+import LicensesPage from "@/components/Licenses/LicensesPage";
 
 const routes = {
   "/": () => <Login />,
@@ -9,6 +10,7 @@ const routes = {
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: any) => <ResetPassword token={token} />,
   "/session-expired": () => <SessionExpired />,
+  "/licenses": () => <LicensesPage />,
   "/invalid-reset": () => <InvalidReset />,
 };
 
