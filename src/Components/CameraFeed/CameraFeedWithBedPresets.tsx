@@ -1,32 +1,29 @@
 import { useState } from "react";
-import { AssetBedModel, AssetData } from "../Assets/AssetTypes";
+import { AssetData } from "../Assets/AssetTypes";
 import CameraFeed from "./CameraFeed";
 import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import useSlug from "../../Common/hooks/useSlug";
-import { CameraPresetDropdown } from "./AssetBedSelect";
+import { CameraPresetDropdown } from "./CameraPresetSelect";
 import useOperateCamera from "./useOperateCamera";
 import { classNames } from "../../Utils/utils";
+import { CameraPreset, FeedRoutes } from "./routes";
 
 interface Props {
   asset: AssetData;
 }
 
 export default function LocationFeedTile(props: Props) {
-  const facility = useSlug("facility");
-  const [preset, setPreset] = useState<AssetBedModel>();
-
-  const { data, loading } = useQuery(routes.listAssetBeds, {
-    query: { limit: 100, facility, asset: props.asset?.id },
+  const [preset, setPreset] = useState<CameraPreset>();
+  const { operate, key } = useOperateCamera(props.asset.id);
+  const { data, loading } = useQuery(FeedRoutes.listAssetPresets, {
+    pathParams: { asset_id: props.asset.id },
+    query: { limit: 100 },
   });
-
-  const { operate, key } = useOperateCamera(props.asset.id, true);
 
   return (
     <CameraFeed
       asset={props.asset}
       key={key}
-      preset={preset?.meta.position}
+      preset={preset?.position}
       shortcutsDisabled
       className="overflow-hidden rounded-lg"
       operate={operate}
