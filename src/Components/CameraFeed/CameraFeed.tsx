@@ -12,7 +12,7 @@ import useFullscreen from "../../Common/hooks/useFullscreen";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
 import VideoPlayer from "./videoPlayer";
-import MonitorAssetPopover from "../Common/MonitorAssetPopover";
+import AssetInfoPopover from "../Common/AssetInfoPopover";
 
 interface Props {
   children?: React.ReactNode;
@@ -28,6 +28,7 @@ interface Props {
   shortcutsDisabled?: boolean;
   onMove?: () => void;
   operate: ReturnType<typeof useOperateCamera>["operate"];
+  hideAssetInfo?: boolean;
 }
 
 export default function CameraFeed(props: Props) {
@@ -183,15 +184,18 @@ export default function CameraFeed(props: Props) {
             {props.children}
           </div>
           <div className="flex w-full flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold md:text-sm">
-                {props.asset.name}
-              </span>
-              <MonitorAssetPopover
-                asset={props.asset}
-                className="absolute z-[100] mt-2 w-56 -translate-x-full -translate-y-4 rounded-md bg-white md:w-[350px] md:-translate-x-full md:-translate-y-2"
-              />
-            </div>
+            {!props.hideAssetInfo && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold md:text-sm">
+                  {props.asset.name}
+                </span>
+                <AssetInfoPopover
+                  asset={props.asset}
+                  className="absolute z-[100] mt-2 w-56 -translate-x-full -translate-y-4 rounded-md bg-white md:w-[350px] md:-translate-x-full md:-translate-y-2"
+                />
+              </div>
+            )}
+
             {!isIOS && (
               <div
                 className={classNames(

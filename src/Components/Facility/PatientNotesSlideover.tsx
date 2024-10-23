@@ -137,36 +137,45 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     <div className="flex gap-1">
       {show && (
         <Link
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+          className="tooltip flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
           href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
         >
           <CareIcon
             icon="l-window-maximize"
-            className="text-lg transition-all delay-150 duration-300 ease-out"
+            className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
           />
+          <span className="tooltip-text tooltip-bottom -translate-x-[4.9rem] text-xs">
+            {t("full_screen")}
+          </span>
         </Link>
       )}
       <div
         id="expand_doctor_notes"
         className={classNames(
-          "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
+          "tooltip flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
           show && "rotate-180",
         )}
         onClick={() => setShow(!show)}
       >
         <CareIcon
           icon="l-angle-up"
-          className="text-lg transition-all delay-150 duration-300 ease-out"
+          className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
+        <span className="tooltip-text tooltip-top rotate-[-180deg] text-xs">
+          {t("minimize")}
+        </span>
       </div>
       <div
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+        className="tooltip flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
         onClick={() => setShowPatientNotesPopup(false)}
       >
         <CareIcon
           icon="l-times"
-          className="text-lg transition-all delay-150 duration-300 ease-out"
+          className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
+        <span className="tooltip-text tooltip-bottom -translate-x-11 text-xs">
+          {t("close")}
+        </span>
       </div>
     </div>
   );
@@ -248,13 +257,16 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                 id="add_doctor_note_button"
                 onClick={onAddNote}
                 border={false}
-                className="absolute right-2"
+                className="tooltip absolute right-2"
                 ghost
                 size="small"
                 disabled={!patientActive}
                 authorizeFor={NonReadOnlyUsers}
               >
-                <CareIcon icon="l-message" className="text-lg" />
+                <CareIcon icon="l-message" className="tooltip text-lg" />
+                <span className="tooltip-text tooltip-bottom -translate-x-11 -translate-y-1 text-xs">
+                  {t("send")}
+                </span>
               </ButtonV2>
             </div>
           </DoctorNoteReplyPreviewCard>

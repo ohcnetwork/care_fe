@@ -33,6 +33,7 @@ export type UserModel = UserBareMinimum & {
   phone_number?: string;
   alt_phone_number?: string;
   gender?: GenderType;
+  read_profile_picture_url?: string;
   date_of_birth: Date | null | string;
   is_superuser?: boolean;
   verified?: boolean;
