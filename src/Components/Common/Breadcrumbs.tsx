@@ -1,20 +1,11 @@
+
 import { usePath, Link } from "raviger";
-import { useState } from "react";
-import { classNames } from "../../Utils/utils";
-import { Button } from "@/Components/ui/button";
+import { Button } from "../ui/button";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-
-const MENU_TAGS: { [key: string]: string } = {
-  facility: "Facilities",
-  patients: "Patients",
-  assets: "Assets",
-  sample: "Sample Tests",
-  shifting: "Shiftings",
-  resource: "Resources",
-  users: "Users",
-  notice_board: "Notice Board",
-};
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator, BreadcrumbPage } from "@/Components/ui/breadcrumb";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/ui/dropdown-menu";
+import { useState } from "react";
 
 const capitalize = (string: string) =>
   string
@@ -42,106 +33,119 @@ export default function Breadcrumbs({
 }: BreadcrumbsProps) {
   const { goBack } = useAppHistory();
   const path = usePath();
-  const [showFullPath, setShowFullPath] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const crumbs = path
-    ?.slice(1)
-    .split("/")
-    .map((field, i) => ({
-      name: replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
-      uri:
-        replacements[field]?.uri ||
-        path
-          .split("/")
-          .slice(0, i + 2)
-          .join("/"),
-      style: replacements[field]?.style || "",
-    }));
+  const crumbs =
+    path
+      ?.slice(1)
+      .split("/")
+      .map((field, i) => ({
+        name: replacements[field]?.name || capitalize(field),
+        uri:
+          replacements[field]?.uri ||
+          path
+            .split("/")
+            .slice(0, i + 2)
+            .join("/"),
+      })) || [];
 
-  const renderCrumb = (crumb: any, index: number) => {
-    const isLastItem = index === crumbs!.length - 1;
-    return (
-      <li
-        key={crumb.name}
-        className={classNames("text-sm font-normal", crumb.style)}
-      >
-        <div className="flex items-center">
-          <CareIcon icon="l-angle-right" className="h-4 text-gray-400" />
-          {isLastItem ? (
-            <span className="text-gray-500">{crumb.name}</span>
-          ) : (
-            <Button
-              asChild
-              variant="link"
-              className="p-1 font-light text-gray-500 underline underline-offset-2 hover:text-gray-700"
-            >
-              <Link href={crumb.uri}>{crumb.name}</Link>
-            </Button>
-          )}
-        </div>
-      </li>
-    );
-  };
+  const toggleCrumbs = () => setIsExpanded(!isExpanded);
+
+  const renderCrumb = (crumb: any) => (
+    <BreadcrumbItem key={crumb.uri}>
+      <Link className="text-gray-500" href={crumb.uri}>
+        {crumb.name}
+      </Link>
+      <BreadcrumbSeparator />
+    </BreadcrumbItem>
+  );
 
   return (
-    <nav className={classNames("w-full", className)} aria-label="Breadcrumb">
-      <ol className="flex flex-wrap items-center">
+    <Breadcrumb className={className}>
+      <BreadcrumbList>
         {!hideBack && (
-          <li className="mr-1 flex items-center">
+          <BreadcrumbItem>
             <Button
               variant="link"
               className="px-1 text-sm font-normal text-gray-500 underline underline-offset-2"
-              size="xs"
+              size="sm"
               onClick={() => {
                 if (onBackClick && onBackClick() === false) return;
                 goBack(backUrl);
               }}
             >
-              <CareIcon
-                icon="l-angle-left"
-                className="-ml-2 h-4 text-gray-400"
-              />
-              <span className="pr-1">Back</span>
+              <CareIcon icon="l-angle-left" className="-ml-2 h-4 text-gray-400" />
+              Back
             </Button>
-            <span className="text-xs font-light text-gray-400 no-underline">
-              |
-            </span>
-          </li>
+            <span className="text-xs font-light text-gray-400 no-underline">|</span>
+          </BreadcrumbItem>
         )}
-        <li>
-          <Button
-            asChild
-            variant="link"
-            className="p-1 font-light text-gray-500 underline underline-offset-2 hover:text-gray-700"
-          >
-            <Link href="/">Home</Link>
-          </Button>
-        </li>
-        {crumbs && crumbs.length > 1 && (
+
+        <BreadcrumbItem>
+          <Link href="/" className="text-gray-500 mr-[0.5px]">
+            Home
+          </Link>
+          {crumbs.length > 2 ? null : <BreadcrumbSeparator />}
+        </BreadcrumbItem>
+        {crumbs.length > 2 && (
           <>
-            {!showFullPath && (
-              <li>
-                <div className="flex items-center">
-                  <CareIcon
-                    icon="l-angle-right"
-                    className="h-4 text-gray-400"
-                  />
-                  <Button
-                    variant="link"
-                    className="h-auto p-0 font-light text-gray-500 hover:text-gray-700"
-                    onClick={() => setShowFullPath(true)}
-                  >
+            <BreadcrumbSeparator />
+            <BreadcrumbItem className="md:hidden">
+              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="link" className="p-0 font-normal text-gray-500 hover:text-gray-700">
                     •••
                   </Button>
-                </div>
-              </li>
-            )}
-            {showFullPath && crumbs.slice(0, -1).map(renderCrumb)}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {crumbs.slice(1, -1).map((crumb) => (
+                    <DropdownMenuItem key={crumb.uri}>
+                      <Link href={crumb.uri} className="text-gray-500">
+                        {crumb.name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="md:hidden" />
           </>
         )}
-        {crumbs?.length &&
-          renderCrumb(crumbs[crumbs.length - 1], crumbs.length - 1)}
-      </ol>
-    </nav>
+
+        {crumbs.length > 2 && (
+          <div className="hidden md:flex">
+            {isExpanded ? (
+              <>
+                {crumbs.slice(1, -1).map(renderCrumb)}
+                <Button variant="link" className="p-0 font-normal" onClick={toggleCrumbs}></Button>
+              </>
+            ) : (
+              <div className="flex items-center">
+                <Button variant="link" className="p-0 font-normal" onClick={toggleCrumbs}>
+                  •••
+                </Button>
+                <BreadcrumbSeparator />
+              </div>
+            )}
+          </div>
+        )}
+
+        {crumbs.length > 2 && (
+          <BreadcrumbPage className="text-gray-500">
+            <span className="hidden md:inline">
+              {crumbs[crumbs.length - 1]?.name}
+            </span>
+            <span className="md:hidden">
+              {crumbs[crumbs.length - 1]?.name.length > 15
+                ? `${crumbs[crumbs.length - 1]?.name.slice(0, 15)}...`
+                : crumbs[crumbs.length - 1]?.name}
+            </span>
+          </BreadcrumbPage>
+        )}
+      </BreadcrumbList>
+    </Breadcrumb>
   );
 }
+
+
