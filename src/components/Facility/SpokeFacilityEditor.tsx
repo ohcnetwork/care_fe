@@ -100,7 +100,7 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
             showNOptions={8}
             selected={selectedFacility}
             setSelected={(v) =>
-              (v === null || (!Array.isArray(v) && v)) && setSelectedFacility(v)
+              (v === null || !Array.isArray(v)) && setSelectedFacility(v)
             }
             errors=""
             className="w-full"
