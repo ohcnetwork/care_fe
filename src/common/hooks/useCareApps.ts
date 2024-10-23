@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
-import { INavItem } from "@/components/Common/Sidebar/Sidebar";
 import { PluginManifest } from "@/pluginTypes";
+import { INavItem } from "@/components/Common/Sidebar/Sidebar";
 
 export const CareAppsContext = createContext<PluginManifest[]>([]);
 
