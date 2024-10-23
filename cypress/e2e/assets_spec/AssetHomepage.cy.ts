@@ -78,7 +78,9 @@ describe("Asset Tab", () => {
 
   it("Next/Previous Page", () => {
     assetPagination.navigateToNextPage();
+    assetPagination.verifyNextUrl();
     assetPagination.navigateToPreviousPage();
+    assetPagination.verifyPreviousUrl();
   });
 
   it("Import new asset", () => {
