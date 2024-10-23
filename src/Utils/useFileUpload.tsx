@@ -9,15 +9,15 @@ import {
   CreateFileResponse,
   FileCategory,
   FileUploadModel,
-} from "../Components/Patient/models";
+} from "@/components/Patient/models";
 import request from "./request/request";
 import routes from "../Redux/api";
 import uploadFile from "./request/uploadFile";
-import * as Notification from "./Notifications.js";
+import * as Notification from "./Notifications";
 import imageCompression from "browser-image-compression";
-import { DEFAULT_ALLOWED_EXTENSIONS } from "../Common/constants";
-import CameraCaptureDialog from "../Components/Files/CameraCaptureDialog";
-import AudioCaptureDialog from "../Components/Files/AudioCaptureDialog";
+import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
+import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
+import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
 import { t } from "i18next";
 
 export type FileUploadOptions = {

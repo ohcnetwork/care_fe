@@ -20,9 +20,9 @@ X-Frame-Options = "DENY"
 X-Content-Type-Options = "nosniff"
 Content-Security-Policy-Report-Only = '''
       default-src 'self';
-      script-src 'self' 'nonce-f51b9742' https://plausible.10bedicu.in;
+      script-src 'self' 'nonce-f51b9742' https://plausible.ohc.network;
       style-src 'self' 'unsafe-inline';
-      connect-src 'self' https://plausible.10bedicu.in;
+      connect-src 'self' https://plausible.ohc.network;
       img-src 'self' https://cdn.ohc.network https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
       object-src 'self' https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
       report-uri https://csp-logger.ohc.network/
