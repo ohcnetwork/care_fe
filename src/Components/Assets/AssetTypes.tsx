@@ -150,6 +150,7 @@ export interface AssetTransaction {
   modified_date: string;
 }
 
+export type BoundaryKeys = "x0" | "y0" | "x1" | "y1";
 export interface AssetBedModel {
   id: string;
   asset_object: AssetData;
@@ -159,6 +160,7 @@ export interface AssetBedModel {
   meta: Record<string, any>;
   asset?: string;
   bed?: string;
+  boundary: Record<BoundaryKeys, number> | null;
 }
 
 export type AssetBedBody = Partial<AssetBedModel>;

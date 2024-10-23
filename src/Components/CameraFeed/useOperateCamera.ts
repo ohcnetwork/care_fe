@@ -8,36 +8,44 @@ export interface PTZPayload {
   zoom: number;
 }
 
-interface GetStatusOperation {
+interface BaseOperation {
+  type: string;
+  options?: Record<string, unknown>;
+}
+
+interface GetStatusOperation extends BaseOperation {
   type: "get_status";
 }
 
-interface GetPresetsOperation {
+interface GetPresetsOperation extends BaseOperation {
   type: "get_presets";
 }
 
-interface GoToPresetOperation {
+interface GoToPresetOperation extends BaseOperation {
   type: "goto_preset";
   data: {
     preset: number;
   };
 }
 
-interface AbsoluteMoveOperation {
+interface AbsoluteMoveOperation extends BaseOperation {
   type: "absolute_move";
   data: PTZPayload;
 }
 
-interface RelativeMoveOperation {
+interface RelativeMoveOperation extends BaseOperation {
   type: "relative_move";
   data: PTZPayload;
+  options?: {
+    asset_bed_id?: string;
+  };
 }
 
-interface GetStreamToken {
+interface GetStreamToken extends BaseOperation {
   type: "get_stream_token";
 }
 
-interface ResetFeedOperation {
+interface ResetFeedOperation extends BaseOperation {
   type: "reset";
 }
 
@@ -54,7 +62,10 @@ export type OperationAction =
  * This hook is used to control the PTZ of a camera asset and retrieve other related information.
  * @param id The external id of the camera asset
  */
-export default function useOperateCamera(id: string) {
+export default function useOperateCamera(
+  id: string,
+  options?: Partial<Record<OperationAction["type"], Record<string, unknown>>>,
+) {
   const [key, setKey] = useState(0);
 
   return {
@@ -68,6 +79,7 @@ export default function useOperateCamera(id: string) {
           body: {
             action: {
               type: "get_status",
+              options: options?.get_status,
             },
           },
           silent: true,
@@ -76,7 +88,7 @@ export default function useOperateCamera(id: string) {
 
       return request(FeedRoutes.operateAsset, {
         pathParams: { id },
-        body: { action },
+        body: { action: { ...action, options: options?.[action.type] } },
         silent: true,
       });
     },

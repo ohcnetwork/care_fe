@@ -6,12 +6,13 @@ import { classNames, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState, StreamStatus } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
-import FeedControls from "./FeedControls";
+import FeedControls, { FeedControlsProps } from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
 import useFullscreen from "../../Common/hooks/useFullscreen";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 import { GetPresetsResponse } from "./routes";
 import VideoPlayer from "./videoPlayer";
+import * as Notification from "../../Utils/Notifications.js";
 import AssetInfoPopover from "../Common/AssetInfoPopover";
 
 interface Props {
@@ -28,6 +29,7 @@ interface Props {
   shortcutsDisabled?: boolean;
   onMove?: () => void;
   operate: ReturnType<typeof useOperateCamera>["operate"];
+  additionalControls?: FeedControlsProps["additionalControls"];
   hideAssetInfo?: boolean;
 }
 
@@ -134,15 +136,24 @@ export default function CameraFeed(props: Props) {
       onReset={resetStream}
       onMove={async (data) => {
         setState("moving");
-        const { res } = await props.operate({ type: "relative_move", data });
+        const { res, error } = await props.operate({
+          type: "relative_move",
+          data,
+        });
         props.onMove?.();
         setTimeout(() => {
           setState((state) => (state === "moving" ? undefined : state));
         }, 4000);
+        if (res?.status === 400 && error) {
+          Notification.Error({
+            msg: error.detail,
+          });
+        }
         if (res?.status === 500) {
           setState("host_unreachable");
         }
       }}
+      additionalControls={props.additionalControls}
     />
   );
 

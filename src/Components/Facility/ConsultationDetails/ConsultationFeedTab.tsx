@@ -52,7 +52,9 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
   const asset = preset?.asset_bed.asset_object;
 
-  const { key, operate } = useOperateCamera(asset?.id ?? "");
+  const { key, operate } = useOperateCamera(asset?.id ?? "", {
+    relative_move: { asset_bed_id: preset?.asset_bed.id },
+  });
 
   const presetsQuery = useQuery(FeedRoutes.listBedPresets, {
     pathParams: { bed_id: bed?.id ?? "" },

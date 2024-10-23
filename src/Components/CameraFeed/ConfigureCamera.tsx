@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetData, BoundaryKeys } from "../Assets/AssetTypes";
 import { getCameraConfig, makeAccessKey } from "../../Utils/transformUtils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAuthUser from "../../Common/hooks/useAuthUser";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import useOperateCamera from "./useOperateCamera";
 import CameraFeed from "./CameraFeed";
 import { useTranslation } from "react-i18next";
@@ -29,6 +29,8 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { checkIfValidIP } from "../../Common/validation";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import FeedButton from "./FeedButton";
+import * as Notification from "../../Utils/Notifications.js";
 
 interface Props {
   asset: AssetData;
@@ -36,6 +38,19 @@ interface Props {
 }
 
 type OnvifPreset = { name: string; value: number };
+
+const boundaryKeyMap: Record<
+  BoundaryKeys,
+  {
+    icon: IconName;
+    shortcut: string[][];
+  }
+> = {
+  x0: { icon: "l-border-left", shortcut: [["Option", "Shift", "ArrowLeft"]] },
+  x1: { icon: "l-border-right", shortcut: [["Option", "Shift", "ArrowRight"]] },
+  y0: { icon: "l-border-bottom", shortcut: [["Option", "Shift", "ArrowDown"]] },
+  y1: { icon: "l-border-top", shortcut: [["Option", "Shift", "ArrowUp"]] },
+};
 
 export default function ConfigureCamera(props: Props) {
   const { t } = useTranslation();
@@ -58,6 +73,16 @@ export default function ConfigureCamera(props: Props) {
   }>();
   const [presetName, setPresetName] = useState("");
   const [showUnlinkConfirmation, setShowUnlinkConfirmation] = useState(false);
+
+  const [isSettingBoundary, setIsSettingBoundary] = useState(false);
+  const [boundary, setBoundary] = useState<
+    Record<BoundaryKeys, number | undefined>
+  >({
+    x0: undefined,
+    x1: undefined,
+    y0: undefined,
+    y1: undefined,
+  });
 
   const assetBedsQuery = useQuery(routes.listAssetBeds, {
     query: { asset: props.asset.id, limit: 50 },
@@ -97,11 +122,29 @@ export default function ConfigureCamera(props: Props) {
     prefetch: !!selectedAssetBed?.id,
   });
 
+  const validateBoundary = () => {
+    if (
+      (["x0", "x1", "y0", "y1"] as BoundaryKeys[]).some(
+        (direction) =>
+          boundary[direction] === undefined ||
+          boundary[direction]! < -1 ||
+          boundary[direction]! > 1,
+      )
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => setMeta(props.asset.meta), [props.asset]);
 
   const accessKeyAttributes = getCameraConfig(meta);
 
-  const { operate, key } = useOperateCamera(props.asset.id);
+  const { operate, key } = useOperateCamera(props.asset.id, {
+    relative_move: {
+      asset_bed_id: isSettingBoundary ? undefined : selectedAssetBed?.id,
+    },
+  });
 
   if (!["DistrictAdmin", "StateAdmin"].includes(authUser.user_type)) {
     return (
@@ -118,7 +161,7 @@ export default function ConfigureCamera(props: Props) {
 
   return (
     <div className="flex w-full flex-col gap-4 py-4">
-      <div className="flex w-full flex-col gap-4 md:flex-row-reverse md:items-start">
+      <div className="flex w-full flex-col gap-4 md:items-start xl:flex-row-reverse">
         <form
           className="rounded-lg bg-white p-4 shadow md:w-full"
           onSubmit={async (e) => {
@@ -251,6 +294,95 @@ export default function ConfigureCamera(props: Props) {
                 );
               }
             }}
+            additionalControls={({ inlineView }) =>
+              isSettingBoundary && (
+                <div
+                  className={classNames(
+                    inlineView
+                      ? "absolute right-0 top-6 transition-all delay-100 duration-200 ease-in-out group-hover:right-8 group-hover:delay-0"
+                      : "relative mt-4 flex items-center",
+                  )}
+                >
+                  <div className="grid grid-cols-2 items-center justify-center gap-2">
+                    {(["x0", "x1", "y0", "y1"] as BoundaryKeys[]).map(
+                      (direction) => (
+                        <FeedButton
+                          key={direction}
+                          shortcuts={boundaryKeyMap[direction].shortcut}
+                          helpText={
+                            t("set_as") +
+                            " " +
+                            t("camera_preset__boundary_" + direction)
+                          }
+                          tooltipClassName="tooltip-left translate-y-2 translate-x-1"
+                          onTrigger={async () => {
+                            const { data } = await operate({
+                              type: "get_status",
+                            });
+                            const position = (data as GetStatusResponse).result
+                              ?.position;
+                            if (!position) {
+                              return;
+                            }
+                            if (
+                              direction === "x0" &&
+                              boundary?.x1 &&
+                              position.x >= boundary.x1
+                            ) {
+                              Notification.Warn({
+                                msg: "Left boundary value cannot be greater than right boundary value",
+                              });
+                              return;
+                            }
+                            if (
+                              direction === "x1" &&
+                              boundary?.x0 &&
+                              position.x <= boundary.x0
+                            ) {
+                              Notification.Warn({
+                                msg: "Right boundary value cannot be lesser than left boundary value",
+                              });
+                              return;
+                            }
+                            if (
+                              direction === "y0" &&
+                              boundary?.y1 &&
+                              position.y >= boundary.y1
+                            ) {
+                              Notification.Warn({
+                                msg: "Bottom boundary value cannot be greater than top boundary value",
+                              });
+                              return;
+                            }
+                            if (
+                              direction === "y1" &&
+                              boundary?.y0 &&
+                              position.y <= boundary.y0
+                            ) {
+                              Notification.Warn({
+                                msg: "Top boundary value cannot be lesser than bottom boundary value",
+                              });
+                              return;
+                            }
+                            setBoundary({
+                              ...boundary,
+                              [direction]: ["x0", "x1"].includes(direction)
+                                ? position.x
+                                : position.y,
+                            });
+                          }}
+                        >
+                          <CareIcon
+                            icon={boundaryKeyMap[direction].icon}
+                            className="h-5 w-5"
+                          />
+                        </FeedButton>
+                      ),
+                    )}
+                  </div>
+                </div>
+              )
+            }
             hideAssetInfo
           >
             <div className="flex items-center gap-2">
@@ -419,6 +551,233 @@ export default function ConfigureCamera(props: Props) {
                 </DialogModal>
                 <div className="bg-white p-4">
                   <ul className="grid gap-4 py-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    {isSettingBoundary ? (
+                      <li className="h-full w-full rounded border border-secondary-400 p-3 text-secondary-700 transition-all duration-200 ease-in-out">
+                        <form className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">
+                              {t("boundary")}
+                            </span>
+                            <div className="flex gap-1">
+                              <ButtonV2
+                                type="button"
+                                size="small"
+                                variant="secondary"
+                                ghost
+                                border
+                                onClick={() => {
+                                  setIsSettingBoundary(false);
+                                  setBoundary({
+                                    x0: undefined,
+                                    x1: undefined,
+                                    y0: undefined,
+                                    y1: undefined,
+                                  });
+                                }}
+                              >
+                                <CareIcon icon="l-ban" />
+                                {t("cancel")}
+                              </ButtonV2>
+                              <ButtonV2
+                                type="submit"
+                                size="small"
+                                variant="secondary"
+                                ghost
+                                border
+                                onClick={async (e) => {
+                                  e.preventDefault();
+                                  if (!validateBoundary()) {
+                                    Error({
+                                      msg: t("invalid_boundary_values"),
+                                    });
+                                    return;
+                                  }
+                                  const { res } = await request(
+                                    routes.partialUpdateAssetBed,
+                                    {
+                                      pathParams: {
+                                        external_id: selectedAssetBed.id,
+                                      },
+                                      body: {
+                                        asset: selectedAssetBed.asset_object.id,
+                                        bed: selectedAssetBed.bed_object.id,
+                                        boundary: boundary as Record<
+                                          BoundaryKeys,
+                                          number
+                                        >,
+                                      },
+                                    },
+                                  );
+                                  if (res?.ok) {
+                                    Success({ msg: "Boundary updated" });
+                                    setIsSettingBoundary(false);
+                                    setBoundary({
+                                      x0: undefined,
+                                      x1: undefined,
+                                      y0: undefined,
+                                      y1: undefined,
+                                    });
+                                    assetBedsQuery.refetch(); // TODO: optimize this later
+                                  } else {
+                                    Error({
+                                      msg: t("boundary_update_error"),
+                                    });
+                                  }
+                                }}
+                              >
+                                <CareIcon icon="l-edit-alt" />
+                                {t("update")}
+                              </ButtonV2>
+                            </div>
+                          </div>
+                          <div className="mt-4 grid gap-4 md:grid-cols-2">
+                            {(["x0", "x1", "y0", "y1"] as BoundaryKeys[]).map(
+                              (direction) => (
+                                <>
+                                  <TextFormField
+                                    name={direction}
+                                    id={`boundary-textfield-${direction}`}
+                                    type="number"
+                                    min={
+                                      (
+                                        {
+                                          x1: boundary.x0 ?? -1,
+                                          y1: boundary.y0 ?? -1,
+                                        } as Record<BoundaryKeys, number>
+                                      )[direction] ?? -1
+                                    }
+                                    max={
+                                      (
+                                        {
+                                          x0: boundary.x1 ?? 1,
+                                          y0: boundary.y1 ?? 1,
+                                        } as Record<BoundaryKeys, number>
+                                      )[direction] ?? 1
+                                    }
+                                    label={
+                                      <label>
+                                        {t(
+                                          "camera_preset__boundary_" +
+                                            direction,
+                                        )}
+                                      </label>
+                                    }
+                                    value={
+                                      boundary[direction]?.toString() ?? ""
+                                    }
+                                    className="mt-1"
+                                    onChange={(e) =>
+                                      setBoundary((prev) => ({
+                                        ...prev,
+                                        [direction]: Number(e.value),
+                                      }))
+                                    }
+                                    errorClassName="hidden"
+                                  />
+                                </>
+                              ),
+                            )}
+                          </div>
+                          <p className="mt-3 text-xs text-warning-600">
+                            {t("boundary_manual_edit_warning")}
+                          </p>
+                        </form>
+                      </li>
+                    ) : selectedAssetBed.boundary ? (
+                      <li className="h-full w-full rounded border border-secondary-400 p-3 text-secondary-700 transition-all duration-200 ease-in-out">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">
+                              {t("boundary")}
+                            </span>
+                            <div className="flex gap-1">
+                              <ButtonV2
+                                size="small"
+                                variant="secondary"
+                                ghost
+                                border
+                                onClick={() => {
+                                  const boundary = selectedAssetBed.boundary;
+                                  setIsSettingBoundary(true);
+                                  setBoundary({
+                                    x0: boundary?.x0,
+                                    x1: boundary?.x1,
+                                    y0: boundary?.y0,
+                                    y1: boundary?.y1,
+                                  });
+                                }}
+                              >
+                                <CareIcon icon="l-edit-alt" />
+                                {t("update")}
+                              </ButtonV2>
+                              <ButtonV2
+                                size="small"
+                                variant="secondary"
+                                ghost
+                                border
+                                onClick={async () => {
+                                  const { res } = await request(
+                                    routes.partialUpdateAssetBed,
+                                    {
+                                      pathParams: {
+                                        external_id: selectedAssetBed.id,
+                                      },
+                                      body: {
+                                        asset: selectedAssetBed.asset_object.id,
+                                        bed: selectedAssetBed.bed_object.id,
+                                        boundary: null,
+                                      },
+                                    },
+                                  );
+                                  if (res?.ok) {
+                                    Success({ msg: "Boundary removed" });
+                                    assetBedsQuery.refetch(); // TODO: optimize this later
+                                  } else {
+                                    Error({
+                                      msg: t("boundary_update_error"),
+                                    });
+                                  }
+                                }}
+                              >
+                                <CareIcon icon="l-trash" />
+                                {t("remove")}
+                              </ButtonV2>
+                            </div>
+                          </div>
+                          <div>
+                            <span className="rounded bg-primary-100 px-1 py-0.5 text-xs font-medium text-primary-500">
+                              {t("boundary")}
+                            </span>
+                            <div className="flex flex-wrap gap-4 p-1 font-mono text-xs">
+                              <span>
+                                {t("camera_preset__boundary_x0")}:{" "}
+                                {selectedAssetBed.boundary?.x0}
+                              </span>
+                              <span>
+                                {t("camera_preset__boundary_x1")}:{" "}
+                                {selectedAssetBed.boundary?.x1}
+                              </span>
+                              <span>
+                                {t("camera_preset__boundary_y0")}:{" "}
+                                {selectedAssetBed.boundary?.y0}
+                              </span>
+                              <span>
+                                {t("camera_preset__boundary_y1")}:{" "}
+                                {selectedAssetBed.boundary?.y1}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    ) : (
+                      <li
+                        className="flex h-full w-full cursor-pointer items-center justify-center gap-2 rounded border border-secondary-400 p-3 py-8 font-semibold text-secondary-700 transition-all duration-200 ease-in-out hover:bg-secondary-100"
+                        onClick={() => setIsSettingBoundary(true)}
+                      >
+                        <CareIcon icon="l-plus-circle" className="text-lg" />
+                        {t("add_boundary")}
+                      </li>
+                    )}
                     <li
                       className="flex h-full w-full cursor-pointer items-center justify-center gap-2 rounded border border-secondary-400 p-3 py-8 font-semibold text-secondary-700 transition-all duration-200 ease-in-out hover:bg-secondary-100"
                       onClick={async () => {
@@ -555,8 +914,50 @@ export default function ConfigureCamera(props: Props) {
                             />
                           </div>
                         </DialogModal>
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{preset.name}</span>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">{preset.name}</span>
+                            <div className="flex gap-1">
+                              <ButtonV2
+                                size="small"
+                                variant="secondary"
+                                ghost
+                                border
+                                onClick={() =>
+                                  operate({
+                                    type: "absolute_move",
+                                    data: preset.position!,
+                                  })
+                                }
+                              >
+                                <CareIcon icon="l-eye" />
+                                {t("view")}
+                              </ButtonV2>
+                              <ButtonV2
+                                size="small"
+                                variant="secondary"
+                                ghost
+                                border
+                                onClick={() => {
+                                  setEditPreset({ preset: preset.id });
+                                }}
+                              >
+                                <CareIcon icon="l-edit-alt" />
+                                {t("update")}
+                              </ButtonV2>
+                            </div>
+                          </div>
+                          <div>
+                            <span className="rounded bg-primary-100 px-1 py-0.5 text-xs font-medium text-primary-500">
+                              {t("position")}
+                            </span>
+                            <div className="flex gap-4 p-1 font-mono text-xs">
+                              <span>X: {preset.position?.x}</span>
+                              <span>Y: {preset.position?.y}</span>
+                              <span>Zoom: {preset.position?.zoom}</span>
+                            </div>
+                          </div>
+
                           <span className="text-xs">
                             <RecordMeta
                               prefix="last updated"
@@ -565,35 +966,6 @@ export default function ConfigureCamera(props: Props) {
                               inlineUser
                             />
                           </span>
-                          <div className="mt-3 flex justify-end gap-1">
-                            <ButtonV2
-                              size="small"
-                              variant="secondary"
-                              ghost
-                              border
-                              onClick={() =>
-                                operate({
-                                  type: "absolute_move",
-                                  data: preset.position!,
-                                })
-                              }
-                            >
-                              <CareIcon icon="l-eye" />
-                              {t("view")}
-                            </ButtonV2>
-                            <ButtonV2
-                              size="small"
-                              variant="secondary"
-                              ghost
-                              border
-                              onClick={() => {
-                                setEditPreset({ preset: preset.id });
-                              }}
-                            >
-                              <CareIcon icon="l-edit-alt" />
-                              {t("update")}
-                            </ButtonV2>
-                          </div>
                         </div>
                       </li>
                     ))}
