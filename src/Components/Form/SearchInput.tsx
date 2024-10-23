@@ -63,8 +63,8 @@ const SearchInput = ({
     () => {
       if (value) {
         setValue("");
-        ref.current?.blur();
       }
+      ref.current?.blur();
     },
     {
       ignoreInputFields: false,
