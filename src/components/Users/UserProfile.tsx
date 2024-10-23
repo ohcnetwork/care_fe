@@ -491,6 +491,8 @@ export default function UserProfile() {
           refetchUser();
           Notification.Success({ msg: "Profile picture updated." });
           setEditAvatar(false);
+        } else {
+          onError();
         }
       },
       null,
