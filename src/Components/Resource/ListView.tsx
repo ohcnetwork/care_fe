@@ -1,20 +1,20 @@
 import { navigate } from "raviger";
-import ListFilter from "./ListFilter";
-import { formatFilter } from "./Commons";
-import BadgesList from "./BadgesList";
-import { formatDateTime } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import useFilters from "../../Common/hooks/useFilters";
+import routes from "../../Redux/api";
+import dayjs from "../../Utils/dayjs";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
+import { formatDateTime } from "../../Utils/utils";
 import { ExportButton } from "../Common/Export";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import dayjs from "../../Utils/dayjs";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import request from "../../Utils/request/request";
+import BadgesList from "./BadgesList";
+import { formatFilter } from "./Commons";
+import ListFilter from "./ListFilter";
 
 import Loading from "@/Components/Common/Loading";
 export default function ListView() {
@@ -50,10 +50,7 @@ export default function ListView() {
     }
 
     return data.map((resource: any) => (
-      <div
-        key={`resource_${resource.id}`}
-        className="mt-6 w-full md:w-1/2 md:px-7"
-      >
+      <div key={`resource_${resource.id}`} className="mt-2 w-full md:px-3">
         <div className="h-full overflow-hidden rounded-lg bg-white shadow">
           <div className={"flex h-full flex-col justify-between p-4"}>
             <div>
@@ -73,10 +70,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title="Resource status"
-                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
+                    className="font-small flex items-center text-sm leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-truck" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
+                    <dd className="text-sm font-semibold leading-5 text-secondary-900">
                       {resource.status}
                     </dd>
                   </dt>
@@ -87,7 +84,7 @@ export default function ListView() {
                     className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-plane-departure" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
+                    <dd className="text-sm font-semibold leading-5 text-secondary-900">
                       {(resource.origin_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -95,10 +92,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title="Resource approving facility"
-                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
+                    className="flex items-center text-sm font-semibold leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-user-check" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
+                    <dd className="text-sm font-semibold leading-5 text-secondary-900">
                       {(resource.approving_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -106,11 +103,11 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title=" Assigned facility"
-                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
+                    className="flex items-center text-sm font-semibold leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-plane-arrival" className="m-2" />
 
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
+                    <dd className="text-sm font-semibold leading-5 text-secondary-900">
                       {(resource.assigned_facility_object || {}).name ||
                         "Yet to be decided"}
                     </dd>
@@ -121,7 +118,7 @@ export default function ListView() {
                   <dt
                     title="  Last Modified"
                     className={
-                      "flex items-center text-sm font-medium leading-5 " +
+                      "flex items-center text-sm font-semibold leading-5 " +
                       (dayjs()
                         .subtract(2, "hours")
                         .isBefore(resource.modified_date)
@@ -130,7 +127,7 @@ export default function ListView() {
                     }
                   >
                     <CareIcon icon="l-stopwatch" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5">
+                    <dd className="text-sm font-semibold leading-5">
                       {formatDateTime(resource.modified_date) || "--"}
                     </dd>
                   </dt>
@@ -171,7 +168,7 @@ export default function ListView() {
       breadcrumbs={false}
       options={
         <>
-          <div className="md:px-4">
+          <div className="mt-2 flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
             <SearchInput
               name="title"
               value={qParams.title}
@@ -179,18 +176,14 @@ export default function ListView() {
               placeholder={t("search_resource")}
             />
           </div>
-          <div className="w-32">
-            {/* dummy div to align space as per board view */}
-          </div>
-          <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
+          <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
             <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
               <CareIcon icon="l-list-ul" className="rotate-90" />
               {t("board_view")}
             </ButtonV2>
-
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
           </div>
         </>
       }
@@ -215,8 +208,7 @@ export default function ListView() {
                 {t("refresh_list")}
               </button>
             </div>
-
-            <div className="mb-5 flex flex-wrap md:-mx-4">
+            <div className="mt-4 grid gap-x-2 gap-y-2 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {data?.results && showResourceCardList(data?.results)}
             </div>
             <div>
