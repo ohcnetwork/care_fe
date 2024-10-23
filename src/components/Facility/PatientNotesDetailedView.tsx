@@ -4,7 +4,7 @@ import routes from "../../Redux/api";
 import { PaitentNotesReplyModel, PatientNotesModel } from "./models";
 import request from "../../Utils/request/request";
 import PatientNoteCard from "./PatientNoteCard";
-import RichTextEditor from "@/components/RichTextEditor/RichTextEditor";
+import RichTextEditor from "../Common/RichTextEditor";
 import * as Notification from "../../../src/Utils/Notifications";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";

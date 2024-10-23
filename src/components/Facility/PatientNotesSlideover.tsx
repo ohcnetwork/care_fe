@@ -12,7 +12,7 @@ import useAuthUser from "@/common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "@/common/constants.js";
 import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard.js";
 import useNotificationSubscriptionState from "@/common/hooks/useNotificationSubscriptionState.js";
-import RichTextEditor from "@/components/RichTextEditor/RichTextEditor";
+import RichTextEditor from "../Common/RichTextEditor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
