@@ -48,7 +48,9 @@
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
-    "sort-locales": "node ./scripts/sort-locales.js"
+    "sort-locales": "node ./scripts/sort-locales.js",
+    "cy:run": "npm run cypress:run",
+    "cy:parallel": "cypress-parallel -s cy:run -t 8 -d 'cypress/e2e'"
   },
   "dependencies": {
     "@fontsource/figtree": "^5.1.0",
@@ -118,6 +120,7 @@
     "@vitejs/plugin-react-swc": "^3.6.0",
     "autoprefixer": "^10.4.19",
     "cypress-localstorage-commands": "^2.2.5",
+    "cypress-parallel": "^0.14.0",
     "cypress-split": "^1.23.2",
     "dotenv": "^16.4.5",
     "eslint-config-prettier": "^9.1.0",
