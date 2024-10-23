@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import routes from "../../../Redux/api";
-import useQuery from "../../../Utils/request/useQuery";
+import routes from "@/Redux/api";
+import useQuery from "@/Utils/request/useQuery";
 import useSlug from "@/common/hooks/useSlug";
 
 interface MentionsDropdownProps {

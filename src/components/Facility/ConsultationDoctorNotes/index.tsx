@@ -12,9 +12,9 @@ import { keysOf } from "../../../Utils/utils.js";
 import { PATIENT_NOTES_THREADS } from "@/common/constants.js";
 import useAuthUser from "@/common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
-import RichTextEditor from "../../Common/RichTextEditor/RichTextEditor";
+import RichTextEditor from "@/components/RichTextEditor/RichTextEditor";
 import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
-import Tabs from "../../Common/components/Tabs.js";
+import Tabs from "@/components/Common/components/Tabs";
 import { useTranslation } from "react-i18next";
 
 interface ConsultationDoctorNotesProps {

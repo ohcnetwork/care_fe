@@ -18,7 +18,7 @@ import dayjs from "dayjs";
 import Spinner from "../Common/Spinner";
 import useAuthUser from "@/common/hooks/useAuthUser";
 import useSlug from "@/common/hooks/useSlug";
-import MarkdownPreview from "../Common/RichTextEditor/MarkdownPreview";
+import MarkdownPreview from "@/components/RichTextEditor/MarkdownPreview";
 import { ExtImage } from "../../Utils/useFileUpload";
 import { StateInterface } from "../Files/FileUpload";
 import FilePreviewDialog from "../Common/FilePreviewDialog";

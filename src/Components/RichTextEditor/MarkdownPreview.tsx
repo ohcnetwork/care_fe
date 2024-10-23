@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { UserBareMinimum } from "../../Users/models";
+import { UserBareMinimum } from "../Users/models";
 
 interface CustomLinkProps {
   className?: string;
