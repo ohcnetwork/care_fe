@@ -798,17 +798,17 @@ export const DailyRounds = (props: any) => {
                   {
                     value: 0,
                     className: "text-danger-500",
-                    label: "Low",
+                    label: t("low"),
                   },
                   {
                     value: 90,
                     className: "text-primary-500",
-                    label: "Normal",
+                    label: t("normal"),
                   },
                   {
                     value: 100,
                     className: "text-danger-500",
-                    label: "High",
+                    label: t("high"),
                   },
                 ]}
               />
