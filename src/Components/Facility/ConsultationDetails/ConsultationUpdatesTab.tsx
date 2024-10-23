@@ -690,7 +690,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {showEvents ? (
               <Popover className="relative mt-3">
                 <PopoverButton>
-                  <ButtonV2 className="border p-3" variant="secondary">
+                  <ButtonV2
+                    className="border p-3"
+                    variant={eventsQuery?.ordering ? "primary" : "secondary"}
+                  >
                     <CareIcon icon="l-filter" />
                   </ButtonV2>
                 </PopoverButton>
