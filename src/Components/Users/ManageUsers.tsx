@@ -19,6 +19,7 @@ import {
   formatName,
   isUserOnline,
   relativeTime,
+  formatDisplayName,
 } from "../../Utils/utils";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import Pagination from "../Common/Pagination";
@@ -38,6 +39,7 @@ import UserFilter from "./UserFilter";
 import { showUserDelete } from "../../Utils/permissions";
 
 import Loading from "@/Components/Common/Loading";
+import { Avatar } from "../Common/Avatar";
 export default function ManageUsers() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -196,6 +198,13 @@ export default function ManageUsers() {
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
+                <div className="mb-2 flex-none text-lg">
+                  <Avatar
+                    name={formatDisplayName(user)}
+                    imageUrl={user.read_profile_picture_url}
+                    className="mb-2 h-12 w-12 rounded-full text-black lg:mb-0"
+                  />
+                </div>
                 <div className="flex flex-col flex-wrap justify-between gap-3 @sm:flex-row">
                   {user.username && (
                     <div

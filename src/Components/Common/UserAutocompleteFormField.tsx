@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { UserBareMinimum } from "../Users/models";
+import { Avatar } from "./Avatar";
 
 type BaseProps = FormFieldBaseProps<UserBareMinimum> & {
   placeholder?: string;
@@ -148,11 +149,21 @@ export const LinkedFacilityUsers = (props: LinkedFacilitySearchProps) => {
   );
 };
 
-const userOnlineDot = (user: UserBareMinimum) => (
-  <div
-    className={classNames(
-      "mr-4 size-2.5 rounded-full",
-      isUserOnline(user) ? "bg-primary-500" : "bg-secondary-400",
-    )}
-  />
-);
+const userOnlineDot = (user: UserBareMinimum) => {
+  console.log(user);
+  return (
+    <div className="mr-2 flex items-center">
+      <div
+        className={classNames(
+          "mr-4 size-2.5 rounded-full",
+          isUserOnline(user) ? "bg-primary-500" : "bg-secondary-400",
+        )}
+      />
+      <Avatar
+        name={formatName(user)}
+        imageUrl={user.profile_picture}
+        className="h-8 w-8 rounded-full text-black"
+      />
+    </div>
+  );
+};

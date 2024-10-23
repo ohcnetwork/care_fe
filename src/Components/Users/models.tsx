@@ -21,6 +21,7 @@ export type UserBareMinimum = {
   email: string;
   user_type: UserRole;
   last_login: string | undefined;
+  profile_picture?: string;
 };
 
 export type GenderType = "Male" | "Female" | "Transgender";
