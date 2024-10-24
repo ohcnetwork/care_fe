@@ -5,9 +5,7 @@ const fs = require("fs");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require("path");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const simpleGit = require("simple-git");
 require("dotenv").config({ path: [".env.local", ".env"] });
-
 
 console.log("Preinstall script running");
 
@@ -30,40 +28,39 @@ const appsDir = path.join(__dirname, "..", "apps");
 if (!fs.existsSync(appsDir)) {
   fs.mkdirSync(appsDir);
 }
-const installApp = async (app) => {
+
+const installApp = (app) => {
   const appDir = path.join(appsDir, app.package.split("/")[1]);
 
   console.log(`Cloning ${app.package}...`);
 
-  const git = simpleGit();
+  // Form the clone URL
+  const cloneUrl = `https://github.com/${app.package.replace("github:", "")}.git`;
 
-  try {
-    // Form the clone URL
-    const cloneUrl = `https://github.com/${app.package.replace("github:", "")}.git`;
+  // Use git clone instead of gitget to ensure .git folder is present
+  const branchOption = app.branch ? `--branch ${app.branch}` : "";
 
-    // Clone the repository using simple-git
-    await git.clone(cloneUrl, appDir, {
-      '--branch': app.branch, // Use branch if provided
-    });
+  execSync(
+    `git clone ${branchOption} ${cloneUrl} ${appDir}`,
+    {
+      stdio: "inherit",
+    },
+  );
 
-    // Create a care-package.lock file
-    fs.writeFileSync(
-      path.join(appDir, "care-package.lock"),
-      JSON.stringify(
-        {
-          package: app.package,
-          branch: app.branch,
-        },
-        null,
-        2,
-      ),
-    );
-
-    console.log(`Cloned ${app.package} successfully.`);
-  } catch (error) {
-    console.error(`Error cloning ${app.package}:`, error);
-  }
+  // Create a care-package.lock file
+  fs.writeFileSync(
+    path.join(appDir, "care-package.lock"),
+    JSON.stringify(
+      {
+        package: app.package,
+        branch: app.branch,
+      },
+      null,
+      2,
+    ),
+  );
 };
+
 // Clone or pull care apps
 appsConfig.forEach((app) => {
   const appDir = path.join(appsDir, app.package.split("/")[1]);
