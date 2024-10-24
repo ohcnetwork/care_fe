@@ -27,6 +27,8 @@ import ResourceRoutes from "./routes/ResourceRoutes";
 import { usePluginRoutes } from "@/common/hooks/useCareApps";
 import careConfig from "@careConfig";
 import IconIndex from "../CAREUI/icons/Index";
+import { FHIRQuestionnaire } from "@/components/FHIR/FHIRQuestionnaire";
+import { sampleQuestionnaire } from "@/components/FHIR/sampleQuestionnaire";
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -68,6 +70,12 @@ const Routes: AppRoutes = {
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
   "/icons": () => <IconIndex />,
+  "/fhir/questionnaire": () => (
+    <FHIRQuestionnaire
+      questionnaire={sampleQuestionnaire}
+      onSubmit={() => {}}
+    />
+  ),
 
   // Only include the icon route in development environment
   ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
