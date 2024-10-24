@@ -33,12 +33,20 @@ const installApp = (app) => {
   const appDir = path.join(appsDir, app.package.split("/")[1]);
 
   console.log(`Cloning ${app.package}...`);
+
+  // Form the clone URL
+  const cloneUrl = `https://github.com/${app.package.replace("github:", "")}.git`;
+
+  // Use git clone instead of gitget to ensure .git folder is present
+  const branchOption = app.branch ? `--branch ${app.branch}` : "";
+
   execSync(
-    `npx -y gitget ${app.package}${app.branch ? `#${app.branch}` : ""} apps/${app.package.split("/")[1]} `,
+    `git clone ${branchOption} ${cloneUrl} ${appDir}`,
     {
       stdio: "inherit",
     },
   );
+
   // Create a care-package.lock file
   fs.writeFileSync(
     path.join(appDir, "care-package.lock"),
