@@ -261,7 +261,10 @@ export default function NotificationsList({
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
-    if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
+    if (!navigator.serviceWorker) {
+      return;
+    }
+    if (["NotSubscribed", "SubscribedOnAnotherDevice"].includes(status)) {
       subscribe();
     } else {
       unsubscribe();
@@ -299,36 +302,36 @@ export default function NotificationsList({
   const unsubscribe = () => {
     navigator.serviceWorker.ready
       .then(function (reg) {
-        setIsSubscribing(true);
-        reg.pushManager
-          .getSubscription()
-          .then(function (subscription) {
-            subscription
-              ?.unsubscribe()
-              .then(async function (_successful) {
-                const data = {
-                  pf_endpoint: "",
-                  pf_p256dh: "",
-                  pf_auth: "",
-                };
-
-                await request(routes.updateUserPnconfig, {
-                  pathParams: { username: username },
-                  body: data,
+        if (reg.pushManager !== null && reg.pushManager !== undefined) {
+          setIsSubscribing(true);
+          reg.pushManager
+            .getSubscription()
+            .then(function (subscription) {
+              subscription
+                ?.unsubscribe()
+                .then(async function (_successful) {
+                  const data = {
+                    pf_endpoint: "",
+                    pf_p256dh: "",
+                    pf_auth: "",
+                  };
+                  await request(routes.updateUserPnconfig, {
+                    pathParams: { username: username },
+                    body: data,
+                  });
+                  setIsSubscribed("NotSubscribed");
+                  setIsSubscribing(false);
+                })
+                .catch(function (_e) {
+                  Error({
+                    msg: t("unsubscribe_failed"),
+                  });
                 });
-
-                setIsSubscribed("NotSubscribed");
-                setIsSubscribing(false);
-              })
-              .catch(function (_e) {
-                Error({
-                  msg: t("unsubscribe_failed"),
-                });
-              });
-          })
-          .catch(function (_e) {
-            Error({ msg: t("subscription_error") });
-          });
+            })
+            .catch(function (_e) {
+              Error({ msg: t("subscription_error") });
+            });
+        }
       })
       .catch(function (_e) {
         Sentry.captureException(_e);
