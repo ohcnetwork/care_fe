@@ -1,20 +1,20 @@
 import { useState } from "react";
-import FilePreviewDialog from "../Components/Common/FilePreviewDialog";
-import { FileUploadModel } from "../Components/Patient/models";
-import { StateInterface } from "../Components/Files/FileUpload";
+import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
+import { FileUploadModel } from "@/components/Patient/models";
+import { StateInterface } from "@/components/Files/FileUpload";
 import request from "./request/request";
 import routes from "../Redux/api";
-import DialogModal from "../Components/Common/Dialog";
+import DialogModal from "@/components/Common/Dialog";
 import CareIcon from "../CAREUI/icons/CareIcon";
-import TextAreaFormField from "../Components/Form/FormFields/TextAreaFormField";
-import { Cancel, Submit } from "../Components/Common/components/ButtonV2";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { formatDateTime } from "./utils";
-import * as Notification from "./Notifications.js";
-import TextFormField from "../Components/Form/FormFields/TextFormField";
+import * as Notification from "./Notifications";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
 import {
   FILE_EXTENSIONS,
   PREVIEWABLE_FILE_EXTENSIONS,
-} from "../Common/constants";
+} from "@/common/constants";
 
 export interface FileManagerOptions {
   type: string;
