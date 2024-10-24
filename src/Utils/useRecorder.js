@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Error } from "./Notifications";
+import { useTranslation } from "react-i18next";
 
 const useRecorder = (handleMicPermission) => {
   const [audioURL, setAudioURL] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState(null);
   const [newBlob, setNewBlob] = useState(null);
-
+  const { t } = useTranslation();
   useEffect(() => {
     if (!isRecording && recorder && audioURL) {
       setRecorder(null);
@@ -26,7 +27,7 @@ const useRecorder = (handleMicPermission) => {
           },
           () => {
             Error({
-              msg: "Please grant microphone permission to record audio.",
+              msg: t("audio__permission_message"),
             });
             setIsRecording(false);
             handleMicPermission(false);
