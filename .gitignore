@@ -62,3 +62,6 @@ cypress/fixtures/token.json
 # Care Apps
 /apps/*
 src/pluginMap.ts
+
+# Cypress Parallel generated files
+multi-reporter-config.json
