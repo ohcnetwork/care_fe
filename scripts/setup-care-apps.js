@@ -34,10 +34,7 @@ const installApp = (app) => {
 
   console.log(`Cloning ${app.package}...`);
 
-  // Form the clone URL
   const cloneUrl = `https://github.com/${app.package.replace("github:", "")}.git`;
-
-  // Use git clone instead of gitget to ensure .git folder is present
   const branchOption = app.branch ? ["--branch", app.branch] : [];
 
   spawnSync("git", ["clone", ...branchOption, cloneUrl, appDir]);
