@@ -93,7 +93,8 @@ export default function RangeFormField(props: Props) {
       sliderDelta) *
     100;
 
-  const handleChange = (v: number) => field.handleChange(unit.inversionFn(v));
+  const handleChange = (v: number) =>
+    field.handleChange(unit.inversionFn(props.step === 1 ? Math.round(v) : v));
 
   const displayValue = value != null ? properRoundOf(value) : "";
 

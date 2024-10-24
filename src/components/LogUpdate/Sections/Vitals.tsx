@@ -148,7 +148,7 @@ const BPAttributeEditor = ({
       max={400}
       sliderMin={30}
       sliderMax={270}
-      step={1}
+      step={0.1}
       unit="mmHg"
       valueDescriptions={rangeValueDescription(
         attribute === "systolic"
