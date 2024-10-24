@@ -76,7 +76,7 @@ type AutocompleteProps<T, V = T> = {
   placeholder?: string;
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionImage?: OptionCallback<T, string>;
+  optionImage?: OptionCallback<T, string | undefined>;
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionDisabled?: OptionCallback<T, boolean>;
