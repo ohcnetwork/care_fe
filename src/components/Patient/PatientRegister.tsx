@@ -33,7 +33,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/Components/ui/tooltip";
+} from "@/components/ui/tooltip";
 import AccordionV2 from "@/components/Common/components/AccordionV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
