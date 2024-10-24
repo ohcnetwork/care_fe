@@ -7,15 +7,11 @@ import LoadingLogUpdateCard from "../../Consultations/DailyRounds/LoadingCard";
 import GenericEvent from "./GenericEvent";
 import { getEventIcon } from "./iconMap";
 import { EventGeneric } from "./types";
-import SortDropdownMenu from "@/components/Common/SortDropdown";
-import { EVENTS_SORT_OPTIONS } from "@/common/constants";
 import { QueryParams } from "../../../../Utils/request/types";
-import { useState } from "react";
 
-export default function EventsList() {
+export default function EventsList({ query }: { query: QueryParams }) {
   const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
-  const [query, setQuery] = useState<QueryParams>();
 
   return (
     <PaginatedList
@@ -25,14 +21,6 @@ export default function EventsList() {
     >
       {() => (
         <>
-          <div className="m-1 flex flex-1 justify-end">
-            <SortDropdownMenu
-              options={EVENTS_SORT_OPTIONS}
-              selected={query?.ordering?.toString()}
-              onSelect={setQuery}
-            />
-          </div>
-
           <div className="mt-4 flex w-full flex-col gap-4">
             <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
