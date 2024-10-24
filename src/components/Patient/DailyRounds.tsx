@@ -821,31 +821,6 @@ export const DailyRounds = (props: any) => {
                 ]}
               />
 
-              <RangeAutocompleteFormField
-                {...field("ventilator_spo2")}
-                unit="%"
-                start={0}
-                end={100}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Low",
-                  },
-                  {
-                    value: 90,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "High",
-                  },
-                ]}
-              />
-
               <SelectFormField
                 {...field("rhythm")}
                 placeholder={t("HEARTBEAT_RHYTHM__UNKNOWN")}
@@ -876,7 +851,30 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
-
+          <RangeAutocompleteFormField
+            {...field("ventilator_spo2")}
+            unit="%"
+            start={0}
+            end={100}
+            step={1}
+            thresholds={[
+              {
+                value: 0,
+                className: "text-danger-500",
+                label: t("low"),
+              },
+              {
+                value: 90,
+                className: "text-primary-500",
+                label: t("normal"),
+              },
+              {
+                value: 100,
+                className: "text-danger-500",
+                label: t("high"),
+              },
+            ]}
+          />
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
             <div className="md:col-span-2">
               <hr className="my-4 md:col-span-2" />
