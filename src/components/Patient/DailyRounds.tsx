@@ -35,8 +35,6 @@ import PatientCategorySelect from "./PatientCategorySelect";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { Scribe } from "../Scribe/Scribe";
-import { SCRIBE_FORMS } from "../Scribe/formDetails";
 import { DailyRoundsModel, DailyRoundTypes } from "./models";
 import InvestigationBuilder from "@/components/Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
@@ -54,7 +52,10 @@ import useAuthUser from "@/common/hooks/useAuthUser";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import SymptomsApi from "../Symptoms/api";
 import { scrollTo } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import _ from "lodash";
 import { ICD11DiagnosisModel } from "../Facility/models";
+import { EncounterSymptom, SYMPTOM_CHOICES } from "../Symptoms/types";
 import NursingCare from "../LogUpdate/Sections/NursingCare";
 
 import Loading from "@/components/Common/Loading";
@@ -102,6 +103,12 @@ export const DailyRounds = (props: any) => {
     form: { ...initForm },
     errors: { ...initError },
   };
+
+  const { data: additionalSymptoms, refetch: refetchAdditionalSymptoms } =
+    useQuery(SymptomsApi.list, {
+      pathParams: { consultationId },
+      query: { limit: 100 },
+    });
 
   const DailyRoundsFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -557,75 +564,117 @@ export const DailyRounds = (props: any) => {
       className="mx-auto max-w-4xl"
     >
       <div className="flex w-full justify-end md:m-4">
-        <Scribe
-          facilityId={facilityId}
+        {/*<Scribe
           form={SCRIBE_FORMS.daily_round}
+          existingData={{
+            ...state.form,
+            additional_symptoms: additionalSymptoms?.results.filter(
+              (s) => s.clinical_impression_status !== "entered-in-error",
+            ),
+            icd11_diagnosis: diagnoses,
+          }}
           onFormUpdate={async (fields) => {
             setDiagnosisSuggestions([]);
             // Symptoms
             let rounds_type = fields.rounds_type || state.form.rounds_type;
+            const existingSymptoms = additionalSymptoms?.results.filter(
+              (s) => s.clinical_impression_status !== "entered-in-error",
+            );
+
             if (fields.additional_symptoms) {
-              for (const symptom of fields.additional_symptoms) {
-                const { res } = await request(SymptomsApi.add, {
-                  pathParams: { consultationId },
-                  body: {
-                    ...symptom,
-                  },
-                });
-                if (res?.ok) setSymptomsSeed((s) => s + 1);
-              }
+              await scribeReducer({
+                existingData: existingSymptoms || [],
+                newData: fields.additional_symptoms,
+                comparer: (a, b) => a.symptom === b.symptom,
+                allowedFields: ["onset_date", "cure_date"],
+                onAdd: (stripped, item) =>
+                  request(SymptomsApi.add, {
+                    pathParams: { consultationId },
+                    body: {
+                      ...item,
+                    },
+                  }),
+                onUpdate: (stripped, item) =>
+                  request(SymptomsApi.partialUpdate, {
+                    pathParams: { consultationId, external_id: item.id },
+                    body: stripped,
+                  }),
+                onDelete: (item) =>
+                  request(SymptomsApi.markAsEnteredInError, {
+                    pathParams: { consultationId, external_id: item.id },
+                  }),
+              });
+              setSymptomsSeed((s) => s + 1);
             }
 
             // ICD11 Diagnosis
             if (fields.icd11_diagnosis) {
-              for (const diagnosis of fields.icd11_diagnosis) {
-                // Fetch available diagnoses
+              await scribeReducer({
+                existingData: diagnoses || [],
+                newData: fields.icd11_diagnosis,
+                comparer: (a, b) =>
+                  a.diagnosis_object.id === b.diagnosis_object.id,
+                allowedFields: ["verification_status"],
 
-                const { res: icdRes, data: icdData } = await request(
-                  routes.listICD11Diagnosis,
-                  {
-                    query: { query: diagnosis.diagnosis },
-                  },
-                );
+                onAdd: async (stripped, item) => {
+                  const { res: icdRes, data: icdData } = await request(
+                    routes.listICD11Diagnosis,
+                    {
+                      query: { query: item.diagnosis },
+                    },
+                  );
 
-                if (!icdRes?.ok) {
-                  error({
-                    text: "Failed to fetch ICD11 Diagnosis",
-                  });
-                  continue;
-                }
+                  if (!icdRes?.ok) {
+                    error({
+                      text: "Failed to fetch ICD11 Diagnosis",
+                    });
+                    return;
+                  }
 
-                const availableDiagnosis = icdData?.slice(0, 5);
+                  const availableDiagnosis = icdData?.slice(0, 5);
 
-                if (availableDiagnosis?.length)
-                  setDiagnosisSuggestions(availableDiagnosis);
+                  if (availableDiagnosis?.length)
+                    setDiagnosisSuggestions(availableDiagnosis);
+                },
+                onUpdate: async (stripped, item) => {
+                  const { data, res } = await request(
+                    DiagnosesRoutes.updateConsultationDiagnosis,
+                    {
+                      pathParams: { consultation: consultationId, id: item.id },
+                      body: stripped,
+                    },
+                  );
+                  if (res?.ok && data)
+                    setDiagnoses((diagnoses) =>
+                      diagnoses?.map((d) => (d.id === data.id ? data : d)),
+                    );
+                },
+              });
+
+              if (
+                Object.keys(fields).some((f) =>
+                  ["investigations", "icd11_diagnosis"].includes(f),
+                ) &&
+                roundTypes.some((t) => t.id === "DOCTORS_LOG")
+              ) {
+                rounds_type = "DOCTORS_LOG";
               }
-            }
 
-            if (
-              Object.keys(fields).some((f) =>
-                [
-                  "investigations",
-                  "icd11_diagnosis",
-                  "additional_symptoms",
-                ].includes(f),
-              ) &&
-              roundTypes.some((t) => t === "DOCTORS_LOG")
-            ) {
-              rounds_type = "DOCTORS_LOG";
+              dispatch({
+                type: "set_form",
+                form: { ...state.form, ...fields, rounds_type },
+              });
+              fields.action !== undefined && setPreviousAction(fields.action);
+              fields.review_interval !== undefined &&
+                setPreviousReviewInterval(Number(fields.review_interval));
             }
-
-            dispatch({
-              type: "set_form",
-              form: { ...state.form, ...fields, rounds_type },
-            });
-            fields.action !== undefined && setPreviousAction(fields.action);
-            fields.review_interval !== undefined &&
-              setPreviousReviewInterval(Number(fields.review_interval));
           }}
-        />
+        />*/}
       </div>
-      <form className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11">
+      <form
+        className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11"
+        data-scribe-form
+      >
         <DraftSection
           handleDraftSelect={(newState) => {
             dispatch({ type: "set_state", state: newState });
@@ -663,7 +712,7 @@ export const DailyRounds = (props: any) => {
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <div className="pb-6 md:col-span-2">
+          <div className="pb-6 md:col-span-2" data-scribe-ignore>
             <FieldLabel>Symptoms</FieldLabel>
             <EncounterSymptomsBuilder
               key={symptomsSeed}
@@ -672,10 +721,10 @@ export const DailyRounds = (props: any) => {
                   name: "symptoms_dirty",
                   value: true,
                 });
+                refetchAdditionalSymptoms();
               }}
             />
           </div>
-
           <TextAreaFormField {...field("physical_examination_info")} rows={5} />
           <TextAreaFormField {...field("other_details")} rows={5} />
 
@@ -697,8 +746,8 @@ export const DailyRounds = (props: any) => {
                 />
                 <SelectFormField
                   {...field("is_experiencing_dysuria")}
-                  options={[true, false]}
-                  optionLabel={(c) => t(c ? "yes" : "no")}
+                  options={["true", "false"]}
+                  optionLabel={(c) => t(c === "true" ? "yes" : "no")}
                 />
                 <SelectFormField
                   {...selectField(
@@ -790,6 +839,7 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
+
           {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
             state.form.rounds_type,
           ) && (
@@ -878,7 +928,7 @@ export const DailyRounds = (props: any) => {
           )}
 
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
-            <div className="md:col-span-2">
+            <div className="md:col-span-2" data-scribe-ignore>
               <hr className="my-4 md:col-span-2" />
               <div className="mb-4 mt-8 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
@@ -902,7 +952,7 @@ export const DailyRounds = (props: any) => {
           )}
 
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
-            <div className="md:col-span-2">
+            <div className="md:col-span-2" data-scribe-ignore>
               <hr className="mb-4 mt-8 md:col-span-2" />
               <div className="mb-4 mt-8 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{t("nursing_care")}</h3>
@@ -910,7 +960,10 @@ export const DailyRounds = (props: any) => {
               <NursingCare
                 log={{ nursing: state.form.nursing }}
                 onChange={(log) =>
-                  handleFormFieldChange({ name: "nursing", value: log.nursing })
+                  handleFormFieldChange({
+                    name: "nursing",
+                    value: log.nursing,
+                  })
                 }
               />
             </div>
@@ -918,7 +971,10 @@ export const DailyRounds = (props: any) => {
 
           {state.form.rounds_type === "DOCTORS_LOG" && (
             <>
-              <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2">
+              <div
+                className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2"
+                data-scribe-ignore
+              >
                 <div id="diagnosis-list">
                   <h3 className="mb-4 mt-8 text-lg font-semibold">
                     {t("diagnosis")}
@@ -998,7 +1054,6 @@ export const DailyRounds = (props: any) => {
               </div>
             </>
           )}
-
           {state.form.rounds_type !== "DOCTORS_LOG" && (
             <>
               <hr className="mb-4 mt-8 md:col-span-2" />

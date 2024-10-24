@@ -39,6 +39,7 @@ export type PluginManifest = {
   extends: SupportedPluginExtensions[];
   components: PluginComponentMap;
   navItems: INavItem[];
+  Entry?: () => React.ReactNode;
 };
 
 // Create a type that ensures only available plugins can be used
