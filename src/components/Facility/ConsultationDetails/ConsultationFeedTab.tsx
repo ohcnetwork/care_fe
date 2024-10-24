@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import useQuery from "../../../Utils/request/useQuery";
 import CameraFeed from "../../CameraFeed/CameraFeed";
@@ -23,6 +23,7 @@ import {
   GetStatusResponse,
 } from "../../CameraFeed/routes";
 import StillWatching from "../../CameraFeed/StillWatching";
+import routes from "@/Redux/api";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { t } = useTranslation();
@@ -50,7 +51,23 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     }
   }, []);
 
-  const asset = preset?.asset_bed.asset_object;
+  const bedObjectId = props.consultationData.current_bed?.bed_object?.id || "";
+  const bedsQuery = useQuery(routes.listAssetBeds, {
+    query: {
+      bed_object: bedObjectId,
+      limit: 50,
+    },
+  });
+
+  const bedLocationId = bed?.location_object?.id;
+
+  const matchingAsset = useMemo(() => {
+    return bedsQuery.data?.results.find(
+      (bedItem) => bedItem.asset_object?.location_object?.id === bedLocationId,
+    )?.asset_object;
+  }, [bedsQuery.data, bedLocationId]);
+
+  const asset = preset?.asset_bed?.asset_object ?? matchingAsset;
 
   const { key, operate } = useOperateCamera(asset?.id ?? "");
 
@@ -147,6 +164,10 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
   if (presetsQuery.loading) {
     return <Loading />;
+  }
+
+  if (bedsQuery.loading) {
+    return <div>Loading bed/asset...</div>;
   }
 
   if (!bed || !asset) {
