@@ -101,6 +101,7 @@
     "rehype-raw": "^6.1.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "twemoji": "^14.0.2",
     "use-keyboard-shortcut": "^1.1.6",
     "xlsx": "^0.18.5"
   },
