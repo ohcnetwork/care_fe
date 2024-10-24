@@ -11,12 +11,7 @@ import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import CircularProgress from "@/components/Common/components/CircularProgress";
 import { FieldLabel } from "../../Form/FormFields/FormField";
-<<<<<<< HEAD:src/Components/Facility/Consultations/Beds.tsx
-import Loading from "../../Common/Loading";
-=======
 import Loading from "@/components/Common/Loading";
-import TextFormField from "../../Form/FormFields/TextFormField";
->>>>>>> c62b36dae1e6b6f1a313d3d6fc8bcea1ea80dd71:src/components/Facility/Consultations/Beds.tsx
 import dayjs from "../../../Utils/dayjs";
 import { AssetSelect } from "@/components/Common/AssetSelect";
 import DialogModal from "@/components/Common/Dialog";
