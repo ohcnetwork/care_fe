@@ -183,10 +183,16 @@ Cypress.Commands.add("selectRadioOption", (name: string, value: string) => {
   cy.get(`input[type='radio'][name='${name}'][value=${value}]`).click();
 });
 
-Cypress.Commands.add("clickAndTypeDate", (selector: string, date: string) => {
+Cypress.Commands.add("clickAndTypeDate", (selector, date) => {
   cy.get(selector).scrollIntoView();
   cy.get(selector).click();
-  cy.get("#date-input").click().type(date);
+  cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
+    cy.wrap(el).clear(),
+  );
+  cy.get(`[data-test-id="date-input"]:visible [data-time-input="0"]`)
+    .click()
+    .type(date);
+  cy.get("body").click(0, 0);
 });
 
 Cypress.Commands.add(

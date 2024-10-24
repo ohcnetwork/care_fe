@@ -25,7 +25,7 @@ const getRelativeDateString = (deltaDays = 0) => {
       month: "2-digit",
       year: "numeric",
     })
-    .replace("/", "");
+    .replace(/\//g, "");
 };
 
 describe("Patient Creation with consultation", () => {

@@ -16,9 +16,7 @@ export default class UserProfilePage {
   }
 
   typedate_of_birth(date_of_birth: string) {
-    //check
-    cy.get("#date_of_birth").click();
-    cy.get("#date-input").clear().type(date_of_birth);
+    cy.clickAndTypeDate("#date_of_birth", date_of_birth);
   }
 
   selectGender(gender: string) {

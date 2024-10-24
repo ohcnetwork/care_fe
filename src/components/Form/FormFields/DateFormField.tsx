@@ -14,6 +14,8 @@ type Props = FormFieldBaseProps<Date> & {
   position?: DatePickerPosition;
   disableFuture?: boolean;
   disablePast?: boolean;
+  time?: boolean;
+  popOverClassName?: string;
 };
 
 /**
@@ -44,12 +46,14 @@ const DateFormField = (props: Props) => {
             ? new Date(field.value)
             : field.value
         }
-        onChange={field.handleChange}
+        onChange={field.handleChange as (d?: Date) => void}
         disabled={field.disabled}
         max={props.max ?? (props.disableFuture ? new Date() : undefined)}
         min={props.min ?? (props.disablePast ? yesterday() : undefined)}
         position={props.position ?? "RIGHT"}
         placeholder={props.placeholder}
+        time={props.time}
+        popOverClassName={props.popOverClassName}
       />
     </FormField>
   );
