@@ -34,13 +34,18 @@ export const LinePlot = (props: any) => {
   const {
     title,
     name,
-    xData,
-    yData,
     low = null,
     high = null,
     defaultSpace,
     verticalMarkerData = null,
   } = props;
+  let { xData, yData } = props;
+  const yDatacount = yData.filter((item: any) => !!item).length;
+  if (yDatacount === 0) {
+    yData = [];
+    xData = [];
+  }
+
   let generalOptions: any = {
     grid: {
       top: "40px",
@@ -129,7 +134,7 @@ export const LinePlot = (props: any) => {
     ],
   };
 
-  if (verticalMarkerData) {
+  if (verticalMarkerData && yDatacount > 0) {
     let series = generalOptions.series[0];
     series = {
       ...series,

@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
 import { LinePlot } from "./components/LinePlot";
-import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 import BinaryChronologicalChart from "./components/BinaryChronologicalChart";
-import { VentilatorPlotFields } from "../models";
 import { DailyRoundsModel } from "../../Patient/models";
 import { useTranslation } from "react-i18next";
+import Loading from "../../Common/Loading";
 
 /*
 interface ModalityType {
@@ -31,44 +27,59 @@ const modality: Array<ModalityType> = [
 */
 
 export const VentilatorPlot = ({
-  consultationId,
   dailyRoundsList,
 }: {
-  consultationId: string;
   dailyRoundsList?: DailyRoundsModel[];
 }) => {
   const [results, setResults] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const { t } = useTranslation();
 
   useEffect(() => {
-    const fetchDailyRounds = async (
-      currentPage: number,
-      consultationId: string,
-    ) => {
-      const { res, data } = await request(routes.dailyRoundsAnalyse, {
-        body: { page: currentPage, fields: VentilatorPlotFields },
-        pathParams: {
-          consultationId,
-        },
-      });
-      if (res && res.ok && data) {
-        setResults(data.results);
-        setTotalCount(data.count);
-      }
-    };
+    const { graphData } = getGraphData(dailyRoundsList);
+    setResults(graphData);
+  }, [dailyRoundsList]);
 
-    fetchDailyRounds(currentPage, consultationId);
-  }, [consultationId, currentPage]);
-
-  const handlePagination = (page: number) => {
-    setCurrentPage(page);
+  const getGraphData = (dailyRoundsData?: DailyRoundsModel[]) => {
+    let graphData = {};
+    const graphDataCount = dailyRoundsData?.length ?? 0;
+    if (dailyRoundsData) {
+      graphData = dailyRoundsData.reduce(
+        (acc, currentRound: DailyRoundsModel) => ({
+          ...acc,
+          //@ts-expect-error taken_at should always be available
+          [currentRound.taken_at]: {
+            bilateral_air_entry: currentRound.bilateral_air_entry,
+            etco2: currentRound.etco2,
+            id: currentRound.id,
+            ventilator_fio2: currentRound.ventilator_fio2,
+            ventilator_mean_airway_pressure:
+              currentRound.ventilator_mean_airway_pressure,
+            ventilator_oxygen_modality_flow_rate:
+              currentRound.ventilator_oxygen_modality_flow_rate,
+            ventilator_oxygen_modality_oxygen_rate:
+              currentRound.ventilator_oxygen_modality_oxygen_rate,
+            ventilator_peep: currentRound.ventilator_peep
+              ? Number(currentRound.ventilator_peep)
+              : null,
+            ventilator_pip: currentRound.ventilator_pip,
+            ventilator_pressure_support:
+              currentRound.ventilator_pressure_support,
+            ventilator_resp_rate: currentRound.ventilator_resp_rate,
+            ventilator_spo2: currentRound.ventilator_spo2,
+            ventilator_tidal_volume: currentRound.ventilator_tidal_volume,
+          },
+        }),
+        {},
+      );
+    }
+    return { graphData, graphDataCount };
   };
 
-  const dates = Object.keys(results)
-    .map((p: string) => formatDateTime(p))
-    .reverse();
+  if (!dailyRoundsList) {
+    return <Loading />;
+  }
+
+  const dates = Object.keys(results).map((p: string) => formatDateTime(p));
 
   const getConditionAndLegend = (
     name: string,
@@ -165,7 +176,7 @@ export const VentilatorPlot = ({
       const currentInterfaceOrModality = getModeOrModality(currentRound);
       if (condition) {
         const startIndex = dates.findIndex(
-          (element) => element == currentRound.taken_at,
+          (element) => element == formatDateTime(currentRound.taken_at),
         );
         if (startIndex != -1) {
           while (index < dailyRoundsList.length - 1) {
@@ -200,9 +211,7 @@ export const VentilatorPlot = ({
   };
 
   const yAxisData = (name: string) => {
-    return Object.values(results)
-      .map((p: any) => p[name])
-      .reverse();
+    return Object.values(results).map((p: any) => p[name]);
   };
 
   const bilateral = Object.values(results)
@@ -347,17 +356,6 @@ export const VentilatorPlot = ({
           />
         </div>
       </div>
-
-      {totalCount > PAGINATION_LIMIT && (
-        <div className="mt-4 flex w-full justify-center">
-          <Pagination
-            cPage={currentPage}
-            defaultPerPage={PAGINATION_LIMIT}
-            data={{ totalCount }}
-            onChange={handlePagination}
-          />
-        </div>
-      )}
     </div>
   );
 };
