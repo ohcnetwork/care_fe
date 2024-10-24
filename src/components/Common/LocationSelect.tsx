@@ -15,6 +15,8 @@ interface LocationSelectProps {
   selected: string | string[] | null;
   setSelected: (selected: string | string[] | null) => void;
   errorClassName?: string;
+  bedIsOccupied?: boolean;
+  disableOnOneOrFewer?: boolean;
 }
 
 export const LocationSelect = (props: LocationSelectProps) => {
@@ -23,6 +25,8 @@ export const LocationSelect = (props: LocationSelectProps) => {
     {
       query: {
         limit: 14,
+        bed_is_occupied:
+          props.bedIsOccupied === undefined ? undefined : !props.bedIsOccupied,
       },
       pathParams: {
         facility_external_id: props.facilityId,
@@ -30,6 +34,10 @@ export const LocationSelect = (props: LocationSelectProps) => {
       prefetch: props.facilityId !== undefined,
     },
   );
+
+  if (props.disableOnOneOrFewer && data && data.count <= 1) {
+    props = { ...props, disabled: true };
+  }
 
   return props.multiple ? (
     <AutocompleteMultiSelectFormField

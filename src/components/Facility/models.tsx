@@ -449,6 +449,7 @@ export const PrimaryParametersPlotFields = [
   "ventilator_fio2",
   "rhythm",
   "rhythm_detail",
+  "pain_scale_enhanced",
 ] as const satisfies (keyof DailyRoundsModel)[];
 
 export type PrimaryParametersPlotRes = {
