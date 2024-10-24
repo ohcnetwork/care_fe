@@ -389,16 +389,37 @@ export default function ConfigureCamera(props: Props) {
                     setPresetName("");
                   }}
                 >
-                  <TextFormField
-                    name="preset-name"
-                    className="py-4"
-                    value={presetName}
-                    onChange={({ value }) => setPresetName(value)}
-                    errorClassName="hidden"
-                    placeholder={t("preset_name_placeholder")}
-                    suggestions={presetNameSuggestions}
-                  />
-                  <div className="cui-form-button-group">
+                  <div className="relative w-full">
+                    <TextFormField
+                      name="preset-name"
+                      className="w-full py-4"
+                      value={presetName}
+                      onChange={({ value }) => setPresetName(value)}
+                      errorClassName="hidden"
+                      placeholder={t("preset_name_placeholder")}
+                      suggestions={presetNameSuggestions}
+                    />
+                    {presetName && (
+                      <button
+                        type="button"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-500"
+                        onClick={() => setPresetName("")}
+                      >
+                        <CareIcon icon="l-times-circle" className="text-lg" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="cui-form-button-group mt-4 flex w-full flex-col justify-end space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+                    <Cancel
+                      shadow={false}
+                      onClick={() => {
+                        setCreatePreset(undefined);
+                        setPresetName("");
+                      }}
+                      className="ml-0 w-full sm:ml-2 sm:w-auto"
+                    />
+
                     <Submit
                       onClick={async () => {
                         const { res } = await request(FeedRoutes.createPreset, {
@@ -417,6 +438,7 @@ export default function ConfigureCamera(props: Props) {
                         cameraPresetsQuery.refetch();
                       }}
                       disabled={!presetName}
+                      className="w-full sm:w-auto"
                     />
                   </div>
                 </DialogModal>
