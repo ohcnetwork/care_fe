@@ -1,10 +1,5 @@
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/Components/ui/tooltip";
+
 import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
@@ -48,7 +43,6 @@ import { SkillModel } from "../Users/models.js";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
 import LinkAbhaNumber from "../ABDM/LinkAbhaNumber";
 import careConfig from "@careConfig";
-import { cn } from "@/lib/utils.js";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -137,11 +131,6 @@ export default function PatientInfoCard(props: {
       username: consultation?.treating_physician_object?.username ?? "",
     },
     prefetch: !!consultation?.treating_physician_object?.username,
-  });
-
-  const { data: healthFacility } = useQuery(routes.abdm.healthFacility.get, {
-    pathParams: { facility_id: patient.facility ?? "" },
-    silent: true,
   });
 
   return (
@@ -792,40 +781,25 @@ export default function PatientInfoCard(props: {
                       </MenuItem>
                     </>
                   ) : (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <MenuItem disabled={!healthFacility}>
-                            {({ close, disabled }) => (
-                              <div
-                                className={cn(
-                                  "dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out",
-                                  disabled && "pointer-events-none opacity-30",
-                                )}
-                                onClick={() => {
-                                  close();
-                                  setShowLinkABHANumber(true);
-                                }}
-                              >
-                                <span className="flex w-full items-center justify-start gap-2">
-                                  <CareIcon
-                                    icon="l-link"
-                                    className="text-lg text-primary-500"
-                                  />
-                                  <p>{t("generate_link_abha")}</p>
-                                </span>
-                              </div>
-                            )}
-                          </MenuItem>
-                        </TooltipTrigger>
-
-                        {!healthFacility && (
-                          <TooltipContent className="max-w-sm break-words text-sm">
-                            {t("abha_disabled_due_to_no_health_facility")}
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
+                    <MenuItem>
+                      {({ close }) => (
+                        <div
+                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                          onClick={() => {
+                            close();
+                            setShowLinkABHANumber(true);
+                          }}
+                        >
+                          <span className="flex w-full items-center justify-start gap-2">
+                            <CareIcon
+                              icon="l-link"
+                              className="text-lg text-primary-500"
+                            />
+                            <p>{t("link_abha_profile")}</p>
+                          </span>
+                        </div>
+                      )}
+                    </MenuItem>
                   ))}
               </div>
               <div>
