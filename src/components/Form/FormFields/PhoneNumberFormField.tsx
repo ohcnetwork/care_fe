@@ -167,7 +167,7 @@ const formatPhoneNumber = (
   value: string | undefined,
   types: PhoneNumberType[],
 ) => {
-  if (value == null) {
+  if (!value) {
     return "+91 ";
   }
 
