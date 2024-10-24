@@ -78,7 +78,8 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
     setItem: (item: FacilitySpokeModel | FacilitySpokeRequest) => void,
     processing: boolean,
   ) => {
-    const [selectedFacility, setSelectedFacility] = useState<FacilityModel>();
+    const [selectedFacility, setSelectedFacility] =
+      useState<FacilityModel | null>(null);
 
     useEffect(() => {
       setItem({ ...item, spoke: selectedFacility?.id });
@@ -99,7 +100,7 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
             showNOptions={8}
             selected={selectedFacility}
             setSelected={(v) =>
-              v && !Array.isArray(v) && setSelectedFacility(v)
+              (v === null || !Array.isArray(v)) && setSelectedFacility(v)
             }
             errors=""
             className="w-full"
