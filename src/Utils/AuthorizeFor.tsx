@@ -1,7 +1,7 @@
-import { UserRole } from "../Common/constants";
+import { UserRole } from "@/common/constants";
 import React from "react";
-import useAuthUser from "../Common/hooks/useAuthUser";
-import Error404 from "../Components/ErrorPages/404";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import Error404 from "@/components/ErrorPages/404";
 
 export type AuthorizedForCB = (userType: UserRole) => boolean;
 

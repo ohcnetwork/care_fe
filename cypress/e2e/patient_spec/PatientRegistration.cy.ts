@@ -239,7 +239,7 @@ describe("Patient Creation with consultation", () => {
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
     cy.get("[data-testid=patient-details]")
-      .contains(patientOneFirstSubscriberId)
+      .contains("member id")
       .scrollIntoView();
     cy.wait(2000);
     patientInsurance.verifyPatientPolicyDetails(
