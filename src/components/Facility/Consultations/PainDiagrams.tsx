@@ -1,57 +1,41 @@
 import { useEffect, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
 import { formatDateTime } from "../../../Utils/utils";
 import PainChart from "../../LogUpdate/components/PainChart";
-import { PainDiagramsFields } from "../models";
+import { useTranslation } from "react-i18next";
 
 export const PainDiagrams = (props: any) => {
-  const { consultationId } = props;
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<any>({});
-  const [selectedData, setData] = useState<any>({
+  const { dailyRound } = props;
+  const [results, setResults] = useState({});
+  const [selectedData, setData] = useState({
     data: [],
     id: "",
   });
+  const { t } = useTranslation();
 
   useEffect(() => {
-    const fetchDailyRounds = async (consultationId: string) => {
-      setIsLoading(true);
-      const { res, data: dailyRound } = await request(
-        routes.dailyRoundsAnalyse,
-        {
-          body: { fields: PainDiagramsFields },
-          pathParams: {
-            consultationId,
-          },
-        },
-      );
-      if (res && res.ok && dailyRound?.results) {
-        const keys = Object.keys(dailyRound.results || {}).filter(
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          (key) => dailyRound.results[key].pain_scale_enhanced.length,
+    const filterDailyRounds = () => {
+      if (dailyRound) {
+        const keys = Object.keys(dailyRound || {}).filter(
+          (key) => dailyRound[key].pain_scale_enhanced.length,
         );
         const data: any = {};
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        keys.forEach((key) => (data[key] = dailyRound.results[key]));
+        keys.forEach(
+          (key) =>
+            (data[key] = Object.assign(
+              {},
+              { pain_scale_enhanced: dailyRound[key].pain_scale_enhanced },
+            )),
+        );
 
         setResults(data);
         if (keys.length > 0) {
           setSelectedDateData(data, keys[0]);
         }
       }
-      setIsLoading(false);
     };
 
-    fetchDailyRounds(consultationId);
-  }, [consultationId]);
-
-  useEffect(() => {
-    if (Object.keys(results).length > 0)
-      setSelectedDateData(results, Object.keys(results)[0]);
-  }, [results]);
+    filterDailyRounds();
+  }, [dailyRound]);
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
@@ -73,7 +57,7 @@ export const PainDiagrams = (props: any) => {
   const dropdown = (dates: Array<any>) => {
     return dates && dates.length > 0 ? (
       <div className="mx-auto flex flex-wrap">
-        <div className="p-2">Choose Date and Time</div>
+        <div className="p-2">{t("choose_date_time")}</div>
         <select
           title="date"
           className="relative rounded border-secondary-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-secondary-300 focus:outline-none focus:ring-1 focus:ring-secondary-300"
@@ -97,7 +81,7 @@ export const PainDiagrams = (props: any) => {
           className="border-2 border-secondary-400 py-2 pl-3 pr-8"
           disabled={true}
         >
-          <option>No Data Found</option>
+          <option>{t("no_data_found")}</option>
         </select>
       </div>
     );
@@ -106,7 +90,7 @@ export const PainDiagrams = (props: any) => {
   return (
     <div className="space-y-4">
       {dates && dropdown(dates)}
-      {!isLoading && selectedData.data ? (
+      {selectedData.data ? (
         <PainChart pain={selectedData.data} />
       ) : (
         <div className="h-screen" />
