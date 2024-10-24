@@ -582,7 +582,7 @@ export interface PaitentNotesReplyModel {
   user_type?: UserRole | "RemoteSpecialist";
   created_by_object: BaseUserModel;
   created_date: string;
-  reply_to_object?: PaitentNotesReplyModel;
+  reply_to?: string;
 }
 
 export interface PatientNotesModel {
@@ -599,6 +599,7 @@ export interface PatientNotesModel {
   replies: PaitentNotesReplyModel[];
   files: FileUploadModel[];
   parent_note_object?: PaitentNotesReplyModel;
+  child_notes: PaitentNotesReplyModel[];
   mentioned_users: UserBareMinimum[];
 }
 

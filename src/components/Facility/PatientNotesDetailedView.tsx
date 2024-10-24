@@ -44,9 +44,11 @@ const PatientNotesDetailedView = (props: Props) => {
         note: noteField,
         thread,
         consultation: consultationId,
-        reply_to: noteId,
+        reply_to: reply_to?.id || noteId,
       },
     });
+
+    setReplyTo(undefined);
 
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
@@ -102,71 +104,76 @@ const PatientNotesDetailedView = (props: Props) => {
   }
 
   return (
-    <div className="flex w-[500px] flex-col overflow-hidden rounded-lg border border-gray-300 bg-white px-3 pt-2">
+    <div className="flex w-full flex-col overflow-hidden rounded-lg border border-gray-300 bg-white sm:w-[500px]">
       {state && (
-        <div className="flex flex-col">
-          <div className="flex-1">
-            <div className="mx-1">
-              <div className="flex items-center justify-between">
-                <h4 className="ml-4 text-lg">Note</h4>
-                <button
-                  onClick={() => setThreadViewNote?.("")}
-                  className="btn btn-default mb-2"
-                >
-                  <CareIcon icon="l-times" className="mr-1 text-lg" />
-                  Close
-                </button>
-              </div>
-              <PatientNoteCard
-                note={state}
-                setReload={setReload}
-                allowReply={false}
-              />
+        <div className="flex h-full flex-col">
+          <div className="px-3 pt-2">
+            <div className="mb-2 flex items-center justify-between">
+              <h4 className="text-lg">Note</h4>
+              <button
+                onClick={() => setThreadViewNote?.("")}
+                className="btn btn-default"
+              >
+                <CareIcon icon="l-times" className="mr-1 text-lg" />
+                Close
+              </button>
             </div>
-            <div className="flex items-center justify-between p-2">
-              <h4 className="ml-2 text-lg text-slate-600">Replies</h4>
+            <PatientNoteCard
+              note={state}
+              setReload={setReload}
+              allowReply={false}
+            />
+          </div>
+
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2">
+              <h4 className="text-lg text-slate-600">Replies</h4>
               {state.replies.length > 0 && (
-                <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
-                  {state.replies.length}{" "}
-                  {state.replies.length > 1 ? "replies" : "reply"}
+                <div className="text-sm text-gray-500">
+                  {state.child_notes.length}{" "}
+                  {state.child_notes.length > 1 ? "replies" : "reply"}
                 </div>
               )}
             </div>
-            {
-              <div className="flex max-h-[250px] flex-col-reverse overflow-x-hidden overflow-y-scroll pl-2">
-                {state.replies.map((reply) => (
+
+            <div className="flex-1 overflow-y-auto px-3">
+              {state.child_notes.map((note) => {
+                const parentNote = state.child_notes.find(
+                  (n) => n.id === note.reply_to,
+                );
+                return (
                   <DoctorNoteReplyPreviewCard
-                    key={reply.id}
+                    key={note.id}
                     parentNote={
-                      reply.reply_to_object?.id !== state.id
-                        ? reply.reply_to_object
-                        : undefined
+                      note.reply_to !== state.id ? parentNote : undefined
                     }
                   >
                     <div className="mt-3">
                       <PatientNoteCard
-                        note={reply as PatientNotesModel}
+                        note={note as PatientNotesModel}
                         setReload={setReload}
-                        allowReply={false}
                         setReplyTo={setReplyTo}
                       />
                     </div>
                   </DoctorNoteReplyPreviewCard>
-                ))}
-              </div>
-            }
+                );
+              })}
+            </div>
           </div>
-          <DoctorNoteReplyPreviewCard
-            parentNote={reply_to}
-            cancelReply={() => setReplyTo(undefined)}
-          >
-            <RichTextEditor
-              onAddNote={onAddNote}
-              onChange={setNoteField}
-              initialMarkdown={noteField}
-              onRefetch={() => setReload(true)}
-            />
-          </DoctorNoteReplyPreviewCard>
+
+          <div className="px-3 pb-2">
+            <DoctorNoteReplyPreviewCard
+              parentNote={reply_to}
+              cancelReply={() => setReplyTo(undefined)}
+            >
+              <RichTextEditor
+                onAddNote={onAddNote}
+                onChange={setNoteField}
+                initialMarkdown={noteField}
+                onRefetch={() => setReload(true)}
+              />
+            </DoctorNoteReplyPreviewCard>
+          </div>
         </div>
       )}
     </div>

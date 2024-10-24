@@ -149,7 +149,12 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           ))}
         </div>
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex flex-1 flex-col">
+          <div
+            className={classNames(
+              "flex flex-1 flex-col",
+              threadViewNote && "max-sm:hidden",
+            )}
+          >
             <PatientConsultationNotesList
               state={state}
               setState={setState}

@@ -322,8 +322,8 @@ const PatientNoteCard = ({
                 {mode == "thread-view" && note.replies.length > 0 && (
                   <div className="mt-2 flex items-center text-xs text-gray-500">
                     <CareIcon icon="l-corner-down-right" className="h-3 w-3" />
-                    {note.replies.length}{" "}
-                    {note.replies.length === 1 ? "Reply" : "Replies"}
+                    {note.child_notes.length}{" "}
+                    {note.child_notes.length === 1 ? "Reply" : "Replies"}
                   </div>
                 )}
               </div>
