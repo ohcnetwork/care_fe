@@ -87,11 +87,12 @@ const AvatarEditModal = ({
   };
 
   useEffect(() => {
-    if (selectedFile) {
-      const objectUrl = URL.createObjectURL(selectedFile);
-      setPreview(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+    if (selectedFile?.type.split("/")[0] !== "image") {
+      return;
     }
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
   }, [selectedFile]);
 
   const onSelectFile: ChangeEventHandler<HTMLInputElement> = (e) => {
