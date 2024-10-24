@@ -79,13 +79,10 @@ describe("User Creation", () => {
     );
     userCreationPage.typeIntoElementByIdPostClear("lastName", "Cypress");
     userCreationPage.selectDropdownOption("gender", "Male");
-    userCreationPage.typeIntoElementByIdPostClear(
-      "phoneNumber",
-      "+91" + phone_number,
-    );
+    userCreationPage.typeIntoElementByIdPostClear("phoneNumber", phone_number);
     userCreationPage.typeIntoElementByIdPostClear(
       "altPhoneNumber",
-      "+91" + emergency_phone_number,
+      emergency_phone_number,
     );
     userCreationPage.typeIntoElementByIdPostClear("email", "test@test.com");
     userCreationPage.typeIntoElementByIdPostClear("weekly_working_hours", "14");

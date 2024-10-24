@@ -1,14 +1,14 @@
-import { FacilityConfigure } from "../../Components/Facility/FacilityConfigure";
-import { FacilityCreate } from "../../Components/Facility/FacilityCreate";
-import { FacilityHome } from "../../Components/Facility/FacilityHome";
-import FacilityUsers from "../../Components/Facility/FacilityUsers";
-import { FacilityList } from "../../Components/Facility/FacilityList";
-import { TriageForm } from "../../Components/Facility/TriageForm";
-import ResourceCreate from "../../Components/Resource/ResourceCreate";
-import CentralNursingStation from "../../Components/Facility/CentralNursingStation";
+import { FacilityConfigure } from "@/components/Facility/FacilityConfigure";
+import { FacilityCreate } from "@/components/Facility/FacilityCreate";
+import { FacilityHome } from "@/components/Facility/FacilityHome";
+import FacilityUsers from "@/components/Facility/FacilityUsers";
+import { FacilityList } from "@/components/Facility/FacilityList";
+import { TriageForm } from "@/components/Facility/TriageForm";
+import ResourceCreate from "@/components/Resource/ResourceCreate";
+import CentralNursingStation from "@/components/Facility/CentralNursingStation";
 import FacilityLocationRoutes from "./FacilityLocationRoutes";
 import FacilityInventoryRoutes from "./FacilityInventoryRoutes";
-import DischargedPatientsList from "../../Components/Facility/DischargedPatientsList";
+import DischargedPatientsList from "@/components/Facility/DischargedPatientsList";
 import { AppRoutes } from "../AppRouter";
 
 const FacilityRoutes: AppRoutes = {

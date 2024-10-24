@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
-import ButtonV2 from "../../Components/Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
-import Page from "../../Components/Common/components/Page";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import Page from "@/components/Common/components/Page";
+import useBreakpoints from "@/common/hooks/useBreakpoints";
 import { useTranslation } from "react-i18next";
 import { ZoomControls, ZoomProvider, ZoomTransform } from "../interactive/Zoom";
 
