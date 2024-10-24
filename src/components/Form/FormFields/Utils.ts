@@ -1,6 +1,6 @@
 import { FieldError } from "../FieldValidators";
 
-export type FieldChangeEvent<T> = { name: string; value: T };
+export type FieldChangeEvent<T> = { name: string; value: T; target?: any };
 export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
 
 /**

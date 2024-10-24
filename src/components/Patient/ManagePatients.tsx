@@ -12,8 +12,8 @@ import {
 } from "@/common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import { ReactNode, useEffect, useState } from "react";
-import { parseOptionId } from "@/common/utils";
+import { ReactNode, useEffect, useState, useCallback } from "react";
+import { parseOptionId } from "../../common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
@@ -23,13 +23,13 @@ import CountBlock from "../../CAREUI/display/Count";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import { ExportMenu } from "@/components/Common/Export";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
+
 import FilterBadge from "../../CAREUI/display/FilterBadge";
 import PatientFilter from "./PatientFilter";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import SearchInput from "../Form/SearchInput";
-import SortDropdownMenu from "@/components/Common/SortDropdown";
+
+import SortDropdownMenu from "../Common/SortDropdown";
 import {
   formatPatientAge,
   humanizeStrings,
@@ -48,16 +48,18 @@ import {
   DIAGNOSES_FILTER_LABELS,
   DiagnosesFilterKey,
   FILTER_BY_DIAGNOSES_KEYS,
-} from "./DiagnosesFilter";
-import { ICD11DiagnosisModel } from "../Diagnosis/types";
-import { getDiagnosesByIds } from "../Diagnosis/utils";
-import Tabs from "@/components/Common/components/Tabs";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import { isPatientMandatoryDataFilled } from "./Utils";
-import request from "../../Utils/request/request";
-import { Avatar } from "@/components/Common/Avatar";
+} from "./DiagnosesFilter.js";
+import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
+import { getDiagnosesByIds } from "../Diagnosis/utils.js";
+import Tabs from "../Common/components/Tabs.js";
+
+import { isPatientMandatoryDataFilled } from "./Utils.js";
+import request from "../../Utils/request/request.js";
+import { Avatar } from "../Common/Avatar.js";
 
 import Loading from "@/components/Common/Loading";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;
@@ -106,30 +108,6 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [phoneNumber, _setPhoneNumber] = useState("");
-  const [emergencyPhoneNumber, _setEmergencyPhoneNumber] = useState("");
-
-  const setPhoneNumber = (value: string) => {
-    _setPhoneNumber(value);
-    const error = PhoneNumberValidator()(value);
-    if (!error) {
-      updateQuery({ phone_number: value });
-    }
-    if ((value === "+91" || value === "") && qParams.phone_number) {
-      updateQuery({ phone_number: null });
-    }
-  };
-
-  const setEmergencyPhoneNumber = (value: string) => {
-    _setEmergencyPhoneNumber(value);
-    const error = PhoneNumberValidator()(value);
-    if (!error) {
-      updateQuery({ emergency_phone_number: value });
-    }
-    if ((value === "+91" || value === "") && qParams.emergency_phone_number) {
-      updateQuery({ emergency_phone_number: null });
-    }
-  };
 
   const tabValue =
     qParams.last_consultation__new_discharge_reason ||
@@ -316,14 +294,6 @@ export const PatientManager = () => {
 
   const { loading: isLoading, data } = useQuery(routes.patientList, {
     query: params,
-    onResponse: () => {
-      if (!params.phone_number) {
-        _setPhoneNumber("+91");
-      }
-      if (!params.emergency_phone_number) {
-        _setEmergencyPhoneNumber("+91");
-      }
-    },
   });
 
   const getTheCategoryFromId = () => {
@@ -776,16 +746,56 @@ export const PatientManager = () => {
     );
   }
 
-  const queryField = <T,>(name: string, defaultValue?: T) => {
-    return {
-      name,
-      value: qParams[name] || defaultValue,
-      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-    };
-  };
-
   const onlyAccessibleFacility =
     permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
+  const searchOptions = [
+    {
+      key: "phone_number",
+      label: "Phone Number",
+      type: "phone" as const,
+      placeholder: "Search by phone number",
+      value: qParams.phone_number || "",
+      shortcut_key: "p",
+    },
+    {
+      key: "name",
+      label: "Name",
+      type: "text" as const,
+      placeholder: "Search by patient name",
+      value: qParams.name || "",
+      shortcut_key: "n",
+    },
+    {
+      key: "patient_no",
+      label: "UHID",
+      type: "text" as const,
+      placeholder: "Search by UHID",
+      value: qParams.patient_no || "",
+      shortcut_key: "u",
+    },
+    {
+      key: "emergency_contact_phone_number",
+      label: "Emergency Contact Phone Number",
+      type: "phone" as const,
+      placeholder: "Search by emergency contact phone number",
+      value: qParams.emergency_contact_phone_number || "",
+      shortcut_key: "e",
+    },
+  ];
+
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      if (key === "phone_number" || key === "emergency_contact_phone_number") {
+        if (value.length >= 13 || value === "+91" || value === "") {
+          updateQuery({ [key]: value });
+        }
+      } else {
+        updateQuery({ [key]: value });
+      }
+    },
+    [updateQuery],
+  );
 
   return (
     <Page
@@ -983,43 +993,10 @@ export const PatientManager = () => {
         </div>
         <div className="col-span-3 w-full">
           <div className="mt-2">
-            <div className="mb-4 mt-1 md:flex md:gap-4">
-              <SearchInput
-                label="Search by Patient"
-                placeholder="Enter patient name"
-                {...queryField("name")}
-                className="w-full grow"
-              />
-              <SearchInput
-                label="Search by IP/OP Number"
-                placeholder="Enter IP/OP Number"
-                secondary
-                {...queryField("patient_no")}
-                className="w-full grow"
-              />
-            </div>
-            <div className="mb-4 md:flex md:gap-4">
-              <PhoneNumberFormField
-                label="Search by Primary Number"
-                {...queryField("phone_number", "+91")}
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.value)}
-                types={["mobile", "landline"]}
-                className="w-full grow"
-                error={((phoneNumber || "+91") === "+91" && "") || undefined}
-              />
-              <PhoneNumberFormField
-                label="Search by Emergency Number"
-                {...queryField("emergency_phone_number", "+91")}
-                value={emergencyPhoneNumber}
-                onChange={(e) => setEmergencyPhoneNumber(e.value)}
-                types={["mobile", "landline"]}
-                className="w-full"
-                error={
-                  ((emergencyPhoneNumber || "+91") === "+91" && "") || undefined
-                }
-              />
-            </div>
+            <SearchByMultipleFields
+              options={searchOptions}
+              onSearch={handleSearch}
+            />
           </div>
         </div>
       </div>
