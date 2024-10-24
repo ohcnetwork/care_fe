@@ -1,22 +1,21 @@
 import { useState } from "react";
-import * as Notification from "../../../Utils/Notifications";
-import Page from "@/components/Common/components/Page";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
+import * as Notification from "../../../Utils/Notifications.js";
+import Page from "../../Common/components/Page";
 import { useMessageListener } from "@/common/hooks/useMessageListener";
-import PatientConsultationNotesList from "../PatientConsultationNotesList";
-import { PatientNoteStateType, PaitentNotesReplyModel } from "../models";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import useQuery from "../../../Utils/request/useQuery";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import { classNames, isAppleDevice, keysOf } from "../../../Utils/utils";
-import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField";
-import { PATIENT_NOTES_THREADS } from "@/common/constants";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard";
-import { t } from "i18next";
+import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
+import { PatientNoteStateType, PaitentNotesReplyModel } from "../models.js";
+import routes from "../../../Redux/api.js";
+import request from "../../../Utils/request/request.js";
+import useQuery from "../../../Utils/request/useQuery.js";
+import { classNames } from "../../../Utils/utils.js";
+import { keysOf } from "../../../Utils/utils.js";
+import { PATIENT_NOTES_THREADS } from "@/common/constants.js";
+import useAuthUser from "@/common/hooks/useAuthUser.js";
+import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
+import RichTextEditor from "@/components/Common/RichTextEditor";
+import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
+import Tabs from "@/components/Common/components/Tabs";
+import { useTranslation } from "react-i18next";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -26,7 +25,7 @@ interface ConsultationDoctorNotesProps {
 
 const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const { patientId, facilityId, consultationId } = props;
-
+  const { t } = useTranslation();
   const authUser = useAuthUser();
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"
@@ -39,10 +38,13 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [focused, setFocused] = useState(false);
   const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
+  const [mode, setMode] = useState<"thread-view" | "default-view">(
+    "default-view",
+  );
+  const [threadViewNote, setThreadViewNote] = useState("");
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -61,7 +63,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       return;
     }
 
-    const { res } = await request(routes.addPatientNote, {
+    const { res, data } = await request(routes.addPatientNote, {
       pathParams: {
         patientId: patientId,
       },
@@ -80,6 +82,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       setReload(true);
       setReplyTo(undefined);
     }
+
+    return data?.id;
   };
 
   useQuery(routes.getPatient, {
@@ -105,30 +109,29 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     }
   });
 
-  useKeyboardShortcut(
-    [isAppleDevice ? "Meta" : "Shift", "Enter"],
-    () => {
-      if (focused) {
-        onAddNote();
-      }
-    },
-    {
-      ignoreInputFields: false,
-    },
-  );
-
   return (
     <Page
       title="Discussion Notes"
-      className="flex h-screen flex-col"
+      className="relative flex h-screen flex-col"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
         [patientId]: { name: patientName },
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="relative mx-3 my-2 flex grow flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <div className="absolute inset-x-0 top-0 flex bg-secondary-200 text-sm shadow-md">
+      <div className="right-8 top-0 max-sm:my-1 sm:mx-2 md:absolute">
+        <Tabs
+          className="mt-1 w-full gap-8 lg:w-full"
+          tabs={[
+            { text: "Thread View", value: "thread-view" },
+            { text: "Default View", value: "default-view" },
+          ]}
+          currentTab={mode}
+          onTabChange={(tab) => setMode(tab as "thread-view" | "default-view")}
+        />
+      </div>
+      <div className="relative flex h-full flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white">
+        <div className="sticky top-0 z-10 flex bg-secondary-200 text-sm shadow-md">
           {keysOf(PATIENT_NOTES_THREADS).map((current) => (
             <button
               id={`patient-note-tab-${current}`}
@@ -145,47 +148,49 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             </button>
           ))}
         </div>
-        <PatientConsultationNotesList
-          state={state}
-          setState={setState}
-          reload={reload}
-          setReload={setReload}
-          thread={thread}
-          setReplyTo={setReplyTo}
-        />
-        <DoctorNoteReplyPreviewCard
-          parentNote={reply_to}
-          cancelReply={() => setReplyTo(undefined)}
-        >
-          <div className="relative mx-4 flex items-center">
-            <AutoExpandingTextInputFormField
-              id="doctor_consultation_notes"
-              maxHeight={160}
-              rows={2}
-              name="note"
-              value={noteField}
-              onChange={(e) => setNoteField(e.value)}
-              className="w-full grow"
-              innerClassName="pr-10"
-              errorClassName="hidden"
-              placeholder={t("notes_placeholder")}
-              disabled={!patientActive}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
+        <div className="flex flex-1 overflow-hidden">
+          <div
+            className={classNames(
+              "flex flex-1 flex-col",
+              threadViewNote && "max-sm:hidden",
+            )}
+          >
+            <PatientConsultationNotesList
+              state={state}
+              setState={setState}
+              reload={reload}
+              setReload={setReload}
+              thread={thread}
+              setReplyTo={setReplyTo}
+              mode={mode}
+              setThreadViewNote={setThreadViewNote}
             />
-            <ButtonV2
-              onClick={onAddNote}
-              border={false}
-              className="absolute right-2"
-              ghost
-              size="small"
-              disabled={!patientActive}
-              authorizeFor={NonReadOnlyUsers}
-            >
-              <CareIcon icon="l-message" className="text-lg" />
-            </ButtonV2>
+            <div className="mt-2">
+              <DoctorNoteReplyPreviewCard
+                parentNote={reply_to}
+                cancelReply={() => setReplyTo(undefined)}
+              >
+                <RichTextEditor
+                  initialMarkdown={noteField}
+                  onChange={setNoteField}
+                  onAddNote={onAddNote}
+                  isAuthorized={patientActive}
+                  onRefetch={() => setReload(true)}
+                />
+              </DoctorNoteReplyPreviewCard>
+            </div>
           </div>
-        </DoctorNoteReplyPreviewCard>
+
+          {threadViewNote && (
+            <PatientNotesDetailedView
+              patientId={patientId}
+              consultationId={consultationId}
+              noteId={threadViewNote}
+              thread={thread}
+              setThreadViewNote={setThreadViewNote}
+            />
+          )}
+        </div>
       </div>
     </Page>
   );

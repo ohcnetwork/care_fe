@@ -118,8 +118,8 @@ const editFormReducer = (state: State, action: Action) => {
 };
 
 export default function UserProfile() {
-  const { t } = useTranslation();
   const { signOut, refetchUser } = useAuthContext();
+  const { t } = useTranslation();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const [editAvatar, setEditAvatar] = useState(false);
   const [updateStatus, setUpdateStatus] = useState({

@@ -10,14 +10,24 @@ interface DoctorNoteProps {
   handleNext: () => void;
   disableEdit?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
+  mode?: "thread-view" | "default-view";
+  setThreadViewNote?: (noteId: string) => void;
 }
 
 const DoctorNote = (props: DoctorNoteProps) => {
-  const { state, handleNext, setReload, disableEdit, setReplyTo } = props;
+  const {
+    state,
+    handleNext,
+    setReload,
+    disableEdit,
+    setReplyTo,
+    mode,
+    setThreadViewNote,
+  } = props;
 
   return (
     <div
-      className="m-2 flex h-[390px] grow flex-col-reverse overflow-auto bg-white"
+      className="mt-4 flex h-[500px] grow flex-col-reverse overflow-y-scroll bg-white sm:ml-2"
       id="patient-notes-list"
     >
       {state.notes.length ? (
@@ -29,24 +39,46 @@ const DoctorNote = (props: DoctorNoteProps) => {
               <CircularProgress />
             </div>
           }
-          className="flex h-full flex-col-reverse p-2"
+          className="flex h-full flex-col-reverse overflow-hidden"
           inverse={true}
           dataLength={state.notes.length}
           scrollableTarget="patient-notes-list"
         >
-          {state.notes.map((note) => (
-            <DoctorNoteReplyPreviewCard
-              key={note.id}
-              parentNote={note.reply_to_object}
-            >
-              <PatientNoteCard
-                note={note}
-                setReload={setReload}
-                disableEdit={disableEdit}
-                setReplyTo={setReplyTo}
-              />
-            </DoctorNoteReplyPreviewCard>
-          ))}
+          {state.notes.map((note) => {
+            if (mode === "thread-view" && !note.parent_note_object) {
+              return (
+                <div className="mt-3">
+                  <PatientNoteCard
+                    key={note.id}
+                    note={note}
+                    setReload={setReload}
+                    disableEdit={disableEdit}
+                    setReplyTo={setReplyTo}
+                    mode={mode}
+                    allowThreadView
+                    allowReply={false}
+                    setThreadViewNote={setThreadViewNote}
+                  />
+                </div>
+              );
+            } else if (mode === "default-view") {
+              return (
+                <DoctorNoteReplyPreviewCard
+                  key={note.id}
+                  parentNote={note.reply_to_object}
+                >
+                  <div className="mt-3">
+                    <PatientNoteCard
+                      note={note}
+                      setReload={setReload}
+                      disableEdit={disableEdit}
+                      setReplyTo={setReplyTo}
+                    />
+                  </div>
+                </DoctorNoteReplyPreviewCard>
+              );
+            }
+          })}
         </InfiniteScroll>
       ) : (
         <div className="mt-2 flex h-full items-center justify-center text-2xl font-bold text-secondary-500">

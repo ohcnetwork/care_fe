@@ -567,6 +567,7 @@ export interface BaseUserModel {
   last_name: string;
   user_type: string;
   last_login: string;
+  read_profile_picture_url: string;
 }
 
 export interface PatientNotesEditModel {
@@ -582,6 +583,7 @@ export interface PaitentNotesReplyModel {
   user_type?: UserRole | "RemoteSpecialist";
   created_by_object: BaseUserModel;
   created_date: string;
+  reply_to?: string;
 }
 
 export interface PatientNotesModel {
@@ -595,6 +597,11 @@ export interface PatientNotesModel {
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
   reply_to_object?: PaitentNotesReplyModel;
+  replies: PaitentNotesReplyModel[];
+  files: FileUploadModel[];
+  parent_note_object?: PaitentNotesReplyModel;
+  child_notes: PaitentNotesReplyModel[];
+  mentioned_users: UserBareMinimum[];
 }
 
 export interface PatientNoteStateType {

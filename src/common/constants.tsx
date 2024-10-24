@@ -669,6 +669,11 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
     text: "Patient Note Added",
     icon: "l-notes",
   },
+  {
+    id: "PATIENT_NOTE_MENTIONED",
+    text: "Patient Note Mentioned",
+    icon: "l-at",
+  },
 ];
 
 export const BREATHLESSNESS_LEVEL = [

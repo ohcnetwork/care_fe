@@ -13,17 +13,17 @@ import { PATIENT_NOTES_THREADS } from "@/common/constants";
 import useAuthUser from "@/common/hooks/useAuthUser";
 import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard";
 import { classNames, keysOf } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
 import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField";
-import { t } from "i18next";
 
 interface PatientNotesProps {
-  patientId: any;
-  facilityId: any;
+  patientId: string;
+  facilityId: string;
 }
 
 const PatientNotes = (props: PatientNotesProps) => {
   const { patientId, facilityId } = props;
-
+  const { t } = useTranslation();
   const authUser = useAuthUser();
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"
@@ -36,9 +36,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
-    undefined,
-  );
+  const [reply_to, setReplyTo] = useState<PatientNotesModel>();
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -55,7 +53,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       return;
     }
 
-    const { res } = await request(routes.addPatientNote, {
+    const { res, data } = await request(routes.addPatientNote, {
       pathParams: { patientId: patientId },
       body: {
         note: noteField,
@@ -70,6 +68,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       setState({ ...state, cPage: 1 });
       setReplyTo(undefined);
     }
+    return data?.id;
   };
 
   useEffect(() => {
@@ -110,8 +109,8 @@ const PatientNotes = (props: PatientNotesProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="relative mx-3 my-2 flex grow flex-col rounded-lg border border-secondary-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <div className="absolute inset-x-0 top-0 flex bg-secondary-200 text-sm shadow-md">
+      <div className="relative mx-3 my-2 flex grow flex-col rounded-lg border border-gray-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
+        <div className="absolute inset-x-0 top-0 z-10 flex bg-gray-200 text-sm shadow-md">
           {keysOf(PATIENT_NOTES_THREADS).map((current) => (
             <button
               id={`patient-note-tab-${current}`}

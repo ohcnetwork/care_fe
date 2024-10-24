@@ -2,21 +2,20 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import * as Notification from "../../Utils/Notifications";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames, isAppleDevice, keysOf } from "../../Utils/utils";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
+import { classNames, keysOf } from "../../Utils/utils";
 import { useMessageListener } from "@/common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType, PaitentNotesReplyModel } from "./models";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField";
 import useAuthUser from "@/common/hooks/useAuthUser";
-import { PATIENT_NOTES_THREADS } from "@/common/constants";
-import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";
-import useNotificationSubscriptionState from "@/common/hooks/useNotificationSubscriptionState";
+import { PATIENT_NOTES_THREADS } from "@/common/constants.js";
+import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard.js";
+import useNotificationSubscriptionState from "@/common/hooks/useNotificationSubscriptionState.js";
+import RichTextEditor from "../Common/RichTextEditor";
+import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
 import { Link } from "raviger";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 interface PatientNotesProps {
   patientId: string;
@@ -27,6 +26,7 @@ interface PatientNotesProps {
 
 export default function PatientNotesSlideover(props: PatientNotesProps) {
   const authUser = useAuthUser();
+  const { t } = useTranslation();
   const notificationSubscriptionState = useNotificationSubscriptionState();
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"
@@ -36,7 +36,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
@@ -77,7 +76,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       });
       return;
     }
-    const { res } = await request(routes.addPatientNote, {
+    const { res, data } = await request(routes.addPatientNote, {
       pathParams: { patientId: patientId },
       body: {
         note: noteField,
@@ -93,6 +92,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setReload(true);
       setReplyTo(undefined);
     }
+    return data?.id;
   };
 
   useMessageListener((data) => {
@@ -120,18 +120,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     }
     fetchPatientName();
   }, [patientId]);
-
-  useKeyboardShortcut(
-    [isAppleDevice ? "Meta" : "Shift", "Enter"],
-    () => {
-      if (focused) {
-        onAddNote();
-      }
-    },
-    {
-      ignoreInputFields: false,
-    },
-  );
 
   const notesActionIcons = (
     <div className="flex gap-1">
@@ -189,7 +177,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       className={classNames(
         "fixed bottom-0 z-20 sm:right-8",
         show
-          ? "right-0 h-screen w-screen sm:h-fit sm:w-[400px]"
+          ? "right-0 h-screen w-screen sm:h-fit sm:w-[430px]"
           : "right-8 w-[250px]",
       )}
     >
@@ -233,43 +221,24 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             thread={thread}
             setReplyTo={setReplyTo}
           />
-          <DoctorNoteReplyPreviewCard
-            parentNote={reply_to}
-            cancelReply={() => setReplyTo(undefined)}
-          >
-            <div className="relative mx-4 flex items-center">
-              <AutoExpandingTextInputFormField
-                id="discussion_notes_textarea"
-                maxHeight={160}
-                rows={2}
-                name="note"
-                value={noteField}
-                onChange={(e) => setNoteField(e.value)}
-                className="w-full grow"
-                errorClassName="hidden"
-                innerClassName="pr-10"
-                placeholder={t("notes_placeholder")}
-                disabled={!patientActive}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-              />
-              <ButtonV2
-                id="add_doctor_note_button"
-                onClick={onAddNote}
-                border={false}
-                className="tooltip absolute right-2"
-                ghost
-                size="small"
-                disabled={!patientActive}
-                authorizeFor={NonReadOnlyUsers}
-              >
-                <CareIcon icon="l-message" className="tooltip text-lg" />
-                <span className="tooltip-text tooltip-bottom -translate-x-11 -translate-y-1 text-xs">
-                  {t("send")}
-                </span>
-              </ButtonV2>
-            </div>
-          </DoctorNoteReplyPreviewCard>
+          {patientActive && (
+            <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+              {({ isAuthorized }) => (
+                <DoctorNoteReplyPreviewCard
+                  parentNote={reply_to}
+                  cancelReply={() => setReplyTo(undefined)}
+                >
+                  <RichTextEditor
+                    initialMarkdown={noteField}
+                    onChange={setNoteField}
+                    onAddNote={onAddNote}
+                    isAuthorized={isAuthorized}
+                    onRefetch={() => setReload(true)}
+                  />
+                </DoctorNoteReplyPreviewCard>
+              )}
+            </AuthorizedChild>
+          )}
         </div>
       )}
     </div>

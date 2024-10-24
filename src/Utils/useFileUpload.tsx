@@ -61,7 +61,7 @@ export type FileUploadReturn = {
 };
 
 // Array of image extensions
-const ExtImage: string[] = [
+export const ExtImage: string[] = [
   "jpeg",
   "jpg",
   "png",
