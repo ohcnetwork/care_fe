@@ -24,7 +24,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionImage?: OptionCallback<T, string>;
+  optionImage?: OptionCallback<T, string | undefined>;
   optionDisabled?: OptionCallback<T, boolean>;
   minQueryLength?: number;
   onQuery?: (query: string) => void;
