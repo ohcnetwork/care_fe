@@ -1,0 +1,55 @@
+name: Notify Core Team on Non-Core Questions
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  notify_core_team:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check and Notify
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commenter = context.payload.comment.user.login;
+            const { data: orgMembers } = await github.orgs.listMembers({
+              org: context.repo.owner,
+              role: 'all'
+            });
+            const isOrgMember = orgMembers.some(member => member.login === commenter);
+            if (!isOrgMember) {
+              const commentBody = context.payload.comment.body.toLowerCase();
+              const questionKeywords = ["?", "what", "how", "why", "when", "who"];
+              const isQuestion = questionKeywords.some(keyword => commentBody.includes(keyword));
+              if (isQuestion) {
+                await github.repos.createDispatchEvent({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  event_type: 'notify_core_team',
+                  client_payload: {
+                    issue_number: context.payload.issue.number,
+                    repository: context.repo.repo
+                  }
+                });
+                await github.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.issue.number,
+                  labels: ['question'],
+                });
+                const slackWebhook = process.env.SLACK_WEBHOOK;
+                const issueUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${context.payload.issue.number}`;
+                const message = {
+                  text: `A non-core member posted a question: ${issueUrl}`
+                };
+                await fetch(slackWebhook, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(message)
+                });
+              }
+            }
