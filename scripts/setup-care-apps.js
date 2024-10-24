@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { execSync } = require("child_process");
+const { execSync, spawnSync } = require("child_process");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require("fs");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -38,14 +38,9 @@ const installApp = (app) => {
   const cloneUrl = `https://github.com/${app.package.replace("github:", "")}.git`;
 
   // Use git clone instead of gitget to ensure .git folder is present
-  const branchOption = app.branch ? `--branch ${app.branch}` : "";
+  const branchOption = app.branch ? ["--branch", app.branch] : [];
 
-  execSync(
-    `git clone ${branchOption} ${cloneUrl} ${appDir}`,
-    {
-      stdio: "inherit",
-    },
-  );
+  spawnSync("git", ["clone", ...branchOption, cloneUrl, appDir]);
 
   // Create a care-package.lock file
   fs.writeFileSync(
