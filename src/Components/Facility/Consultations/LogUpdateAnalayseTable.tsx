@@ -38,29 +38,6 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
     return "-";
   };
 
-  const isValidDate = (str: string) => {
-    let ct = 0;
-    for (let i = 0; i < str.length; i++) {
-      if (str[i] == "/") ct++;
-    }
-
-    if (ct == 2) return true;
-    return false;
-  };
-
-  const dateConversion = (str: string) => {
-    const time = str.split(";")[0].trim();
-
-    const date = str.split(";")[1].trim();
-
-    const dd = date.split("/")[0];
-    const mm = date.split("/")[1];
-
-    const yyyy = date.split("/")[2];
-
-    return time + ";" + mm + "/" + dd + "/" + yyyy;
-  };
-
   return (
     <div className="m-2 w-full overflow-hidden overflow-x-auto rounded-lg border border-black shadow md:w-fit">
       <table className="border-collapse rounded-lg border bg-secondary-100">
@@ -73,17 +50,8 @@ const LogUpdateAnalayseTable: React.FC<SharedSectionTableProps> = ({
                   key={date}
                   className="w-40 border border-b-2 border-secondary-500 border-b-black p-1 text-sm font-semibold"
                 >
-                  {/*   DD/MM/YYYY ->  MM/DD/YYYY */}
-                  <p>
-                    {isValidDate(date)
-                      ? formatDate(dateConversion(date))
-                      : formatDate(date)}
-                  </p>
-                  <p>
-                    {isValidDate(date)
-                      ? formatTime(dateConversion(date))
-                      : formatTime(date)}
-                  </p>
+                  <p>{formatDate(date)}</p>
+                  <p>{formatTime(date)}</p>
                 </th>
               </>
             ))}

@@ -6,6 +6,7 @@ import {
   RoutineAnalysisRes,
   RoutineFields,
   NursingPlotFields,
+  DailyRoundsRes,
 } from "../models";
 import Loading from "../../Common/Loading";
 import Pagination from "../../Common/Pagination";
@@ -14,7 +15,6 @@ import {
   NURSING_CARE_PROCEDURES,
 } from "../../../Common/constants";
 import LogUpdateAnalayseTable from "../Consultations/LogUpdateAnalayseTable";
-import { formatDateTime } from "../../../Utils/utils";
 
 import PageTitle from "@/Components/Common/PageTitle";
 import { ConsultationTabProps } from ".";
@@ -94,7 +94,7 @@ const ROUTINE_ROWS = [
 
 const NursingPlot = ({ consultationId }: ConsultationTabProps) => {
   const { t } = useTranslation();
-  const [results, setResults] = useState<any>({});
+  const [results, setResults] = useState<DailyRoundsRes["results"]>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -118,17 +118,28 @@ const NursingPlot = ({ consultationId }: ConsultationTabProps) => {
 
   const handlePagination = (page: number) => setCurrentPage(page);
 
-  const data = Object.entries(results).map((key: any) => ({
-    date: formatDateTime(key[0]),
-    nursing: key[1]["nursing"],
-  }));
+  const data = Object.entries(results).map(([date, result]) => {
+    if ("nursing" in result) {
+      return {
+        date: date,
+        nursing: result.nursing,
+      };
+    } else {
+      return {
+        date: date,
+        nursing: null,
+      };
+    }
+  });
 
   const dataToDisplay = data
     .map((x) =>
-      x.nursing.map((f: any) => {
-        f["date"] = x.date;
-        return f;
-      }),
+      x.nursing
+        ? x.nursing.map((f: any) => {
+            f["date"] = x.date;
+            return f;
+          })
+        : [],
     )
     .reduce((accumulator, value) => accumulator.concat(value), []);
 
