@@ -7,6 +7,18 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator, Breadc
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/ui/dropdown-menu";
 import { useState } from "react";
 
+
+const MENU_TAGS: { [key: string]: string } = {
+  facility: "Facilities",
+  patients: "Patients",
+  assets: "Assets",
+  sample: "Sample Tests",
+  shifting: "Shiftings",
+  resource: "Resources",
+  users: "Users",
+  notice_board: "Notice Board",
+};
+
 const capitalize = (string: string) =>
   string
     .replace(/[_-]/g, " ")
@@ -34,14 +46,14 @@ export default function Breadcrumbs({
   const { goBack } = useAppHistory();
   const path = usePath();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+
 
   const crumbs =
     path
       ?.slice(1)
       .split("/")
       .map((field, i) => ({
-        name: replacements[field]?.name || capitalize(field),
+        name: replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
         uri:
           replacements[field]?.uri ||
           path
@@ -50,51 +62,47 @@ export default function Breadcrumbs({
             .join("/"),
       })) || [];
 
-  const toggleCrumbs = () => setIsExpanded(!isExpanded);
 
-  const renderCrumb = (crumb: any) => (
-    <BreadcrumbItem key={crumb.uri}>
-      <Link className="text-gray-500" href={crumb.uri}>
-        {crumb.name}
-      </Link>
-      <BreadcrumbSeparator />
-    </BreadcrumbItem>
-  );
 
   return (
     <Breadcrumb className={className}>
       <BreadcrumbList>
-        {!hideBack && (
-          <BreadcrumbItem>
-            <Button
-              variant="link"
-              className="px-1 text-sm font-normal text-gray-500 underline underline-offset-2"
-              size="sm"
-              onClick={() => {
-                if (onBackClick && onBackClick() === false) return;
-                goBack(backUrl);
-              }}
-            >
-              <CareIcon icon="l-angle-left" className="-ml-2 h-4 text-gray-400" />
-              Back
-            </Button>
-            <span className="text-xs font-light text-gray-400 no-underline">|</span>
-          </BreadcrumbItem>
-        )}
+        <div className="flex items-center">
+          {!hideBack && (
+            <BreadcrumbItem>
+              <Button
+                variant="link"
+                className="px-1 text-sm font-normal text-gray-500 underline underline-offset-2"
+                size="sm"
+                onClick={() => {
+                  if (onBackClick && onBackClick() === false) return;
+                  goBack(backUrl);
+                }}
+              >
+                <CareIcon icon="l-angle-left" className="-ml-2 h-4 text-gray-400" />
+                Back
+              </Button>
+            </BreadcrumbItem>
+          )}
 
-        <BreadcrumbItem>
-          <Link href="/" className="text-gray-500 mr-[0.5px]">
-            Home
-          </Link>
-          {crumbs.length > 2 ? null : <BreadcrumbSeparator />}
-        </BreadcrumbItem>
+          {!hideBack && (
+            <span className="mr-2 ml-1 text-xs font-light text-gray-400 no-underline">|</span>
+          )}
+
+          <BreadcrumbItem>
+            <Link href="/" className="font-light text-gray-500 underline underline-offset-2 hover:text-gray-700">
+              Home
+            </Link>
+            {crumbs.length > 2 ? null : <BreadcrumbSeparator />}
+          </BreadcrumbItem>
+        </div>
         {crumbs.length > 2 && (
           <>
             <BreadcrumbSeparator />
-            <BreadcrumbItem className="md:hidden">
+            <BreadcrumbItem>
               <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="link" className="p-0 font-normal text-gray-500 hover:text-gray-700">
+                  <Button variant="link" className="p-0 font-normal text-gray-500 hover:text-gray-700 ring-0 border-0 focus-visible:ring-offset-0 focus-visible:ring-0 ">
                     •••
                   </Button>
                 </DropdownMenuTrigger>
@@ -109,26 +117,8 @@ export default function Breadcrumbs({
                 </DropdownMenuContent>
               </DropdownMenu>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="md:hidden" />
+            <BreadcrumbSeparator />
           </>
-        )}
-
-        {crumbs.length > 2 && (
-          <div className="hidden md:flex">
-            {isExpanded ? (
-              <>
-                {crumbs.slice(1, -1).map(renderCrumb)}
-                <Button variant="link" className="p-0 font-normal" onClick={toggleCrumbs}></Button>
-              </>
-            ) : (
-              <div className="flex items-center">
-                <Button variant="link" className="p-0 font-normal" onClick={toggleCrumbs}>
-                  •••
-                </Button>
-                <BreadcrumbSeparator />
-              </div>
-            )}
-          </div>
         )}
 
         {crumbs.length > 2 && (
