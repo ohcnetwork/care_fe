@@ -36,7 +36,7 @@ export default function BoardView() {
   });
 
   const [modalFor, setModalFor] = useState<{
-    external_id?: string | undefined;
+    external_id?: string;
     loading: boolean;
   }>({
     external_id: undefined,
