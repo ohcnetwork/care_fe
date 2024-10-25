@@ -1,11 +1,11 @@
-import LoginPage from "../../pageobject/Login/LoginPage";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import { UserPage } from "../../pageobject/Users/UserSearch";
+import LoginPage from "../../pageobject/Login/LoginPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
+import { UserPage } from "../../pageobject/Users/UserSearch";
 import {
-  generatePhoneNumber,
   generateEmergencyPhoneNumber,
+  generatePhoneNumber,
 } from "../../pageobject/utils/constants";
 
 describe("User Creation", () => {
@@ -66,13 +66,13 @@ describe("User Creation", () => {
   });
 
   it("Update the existing user profile and verify its reflection", () => {
-    userCreationPage.clickElementById("user-profile-name");
-    userCreationPage.clickElementById("profile-button");
+    cy.get("#user-profile-name").click();
+    cy.get("#profile-button").click();
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
       "devdistrictadmin",
     );
-    userCreationPage.clickElementById("edit-cancel-profile-button");
+    cy.get("#edit-cancel-profile-button").click();
     userCreationPage.typeIntoElementByIdPostClear(
       "firstName",
       "District Editted",
@@ -90,7 +90,7 @@ describe("User Creation", () => {
       "date_of_birth",
       "01011998",
     );
-    userCreationPage.clickElementById("submit");
+    cy.submitButton("Update");
     userCreationPage.verifyElementContainsText(
       "contactno-profile-details",
       "+91" + phone_number,
@@ -126,15 +126,16 @@ describe("User Creation", () => {
   });
 
   it("Update the existing user profile Form Mandatory File Error", () => {
-    userCreationPage.clickElementById("user-profile-name");
-    userCreationPage.clickElementById("profile-button");
-    userCreationPage.clickElementById("edit-cancel-profile-button");
+    cy.get("#user-profile-name").click();
+    cy.get("#profile-button").click();
+    cy.get("#edit-cancel-profile-button").click();
+
     userCreationPage.clearIntoElementById("firstName");
     userCreationPage.clearIntoElementById("lastName");
     userCreationPage.clearIntoElementById("phoneNumber");
     userCreationPage.clearIntoElementById("altPhoneNumber");
     userCreationPage.clearIntoElementById("weekly_working_hours");
-    userCreationPage.clickElementById("submit");
+    cy.submitButton("Update");
     userCreationPage.verifyErrorMessages(EXPECTED_PROFILE_ERROR_MESSAGES);
   });
 
@@ -180,8 +181,8 @@ describe("User Creation", () => {
   });
 
   it("create new user form throwing mandatory field error", () => {
-    userCreationPage.clickElementById("addUserButton");
-    userCreationPage.clickElementById("submit");
+    cy.get("#addUserButton").click();
+    cy.submitButton("Save User");
     cy.wait(2000);
     userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
   });
