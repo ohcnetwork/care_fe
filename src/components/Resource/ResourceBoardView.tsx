@@ -67,12 +67,14 @@ export default function BoardView() {
         </div>
 
         <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
-          <SearchInput
-            name="title"
-            value={qParams.title}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder={t("search_resource")}
-          />
+          <div className="w-full md:w-60">
+            <SearchInput
+              name="patient_name"
+              value={qParams.patient_name}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("search_patient")}
+            />
+          </div>
           <Tabs
             tabs={[
               { text: t("active"), value: 0 },
