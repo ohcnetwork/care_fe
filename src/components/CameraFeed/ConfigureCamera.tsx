@@ -412,7 +412,6 @@ export default function ConfigureCamera(props: Props) {
 
                   <div className="cui-form-button-group mt-4 flex w-full flex-col justify-end space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Cancel
-                      shadow={false}
                       onClick={() => {
                         setCreatePreset(undefined);
                         setPresetName("");
