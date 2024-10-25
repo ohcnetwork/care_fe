@@ -164,7 +164,7 @@ const BedCard = ({
 
 export const BedManagement = (props: BedManagementProps) => {
   const { facilityId, locationId } = props;
-  const { qParams, resultsPerPage } = useFilters({});
+  const { qParams, resultsPerPage } = useFilters({ limit: 16 });
   const { t } = useTranslation();
 
   const { data: location } = useQuery(routes.getFacilityAssetLocation, {
