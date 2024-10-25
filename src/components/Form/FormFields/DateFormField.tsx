@@ -1,6 +1,4 @@
-import DateInputV2, {
-  DatePickerPosition,
-} from "@/components/Common/DateInputV2";
+import DateInputV2 from "@/components/Common/DateInputV2";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 import FormField from "./FormField";
@@ -11,10 +9,9 @@ type Props = FormFieldBaseProps<Date> & {
   placeholder?: string;
   max?: Date;
   min?: Date;
-  position?: DatePickerPosition;
   disableFuture?: boolean;
   disablePast?: boolean;
-  time?: boolean;
+  allowTime?: boolean;
   popOverClassName?: string;
 };
 
@@ -50,9 +47,8 @@ const DateFormField = (props: Props) => {
         disabled={field.disabled}
         max={props.max ?? (props.disableFuture ? new Date() : undefined)}
         min={props.min ?? (props.disablePast ? yesterday() : undefined)}
-        position={props.position ?? "RIGHT"}
         placeholder={props.placeholder}
-        time={props.time}
+        allowTime={props.allowTime}
         popOverClassName={props.popOverClassName}
       />
     </FormField>

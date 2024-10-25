@@ -196,7 +196,6 @@ export const AssetServiceEditModal = (props: {
                 label={t("serviced_on")}
                 name="serviced_on"
                 className="mt-2"
-                position="LEFT"
                 value={new Date(form.serviced_on)}
                 max={new Date(props.service_record.created_date)}
                 onChange={(date) => {

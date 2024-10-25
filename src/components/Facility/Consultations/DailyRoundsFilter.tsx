@@ -95,7 +95,7 @@ export default function DailyRoundsFilter(props: Props) {
                   }
                   max={new Date()}
                   errorClassName="hidden"
-                  time
+                  allowTime
                 />
                 <DateFormField
                   {...field("taken_at_before")}
@@ -113,7 +113,7 @@ export default function DailyRoundsFilter(props: Props) {
                   }
                   max={new Date()}
                   errorClassName="hidden"
-                  time
+                  allowTime
                 />
                 <PopoverButton>
                   <ButtonV2

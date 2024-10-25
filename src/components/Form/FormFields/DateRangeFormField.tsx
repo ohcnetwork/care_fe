@@ -10,7 +10,7 @@ type Props = FormFieldBaseProps<DateRange> & {
   min?: Date;
   disableFuture?: boolean;
   disablePast?: boolean;
-  time?: boolean;
+  allowTime?: boolean;
 };
 
 /**
@@ -40,7 +40,7 @@ const DateRangeFormField = (props: Props) => {
         disabled={field.disabled}
         min={props.min || (props.disableFuture ? new Date() : undefined)}
         max={props.max || (props.disablePast ? new Date() : undefined)}
-        time={props.time}
+        allowTime={props.allowTime}
       />
     </FormField>
   );

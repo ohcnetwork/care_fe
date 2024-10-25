@@ -775,7 +775,6 @@ export default function UserProfile() {
                         required
                         className="col-span-6 sm:col-span-3"
                         value={getDate(states.form.date_of_birth)}
-                        position="LEFT"
                         disableFuture={true}
                       />
                       <SelectFormField

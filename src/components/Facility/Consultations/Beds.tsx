@@ -215,8 +215,7 @@ const Beds = (props: BedsProps) => {
               max={new Date()}
               error=""
               errorClassName="hidden"
-              position="TOP-RIGHT"
-              time
+              allowTime
             />
             <div>
               <FieldLabel id="assets-link-label">Link Assets</FieldLabel>

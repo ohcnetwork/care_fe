@@ -321,7 +321,6 @@ const DischargeModal = ({
             value={
               dischargeOrDeathTime ? new Date(dischargeOrDeathTime) : new Date()
             }
-            position="TOP-RIGHT"
             popOverClassName="max-h-[50vh]"
             onChange={(e) => {
               const updates: Record<string, string | undefined> = {
@@ -340,7 +339,7 @@ const DischargeModal = ({
                 ? errors?.death_datetime
                 : errors?.discharge_date
             }
-            time
+            allowTime
           />
 
           {discharge_reason !==

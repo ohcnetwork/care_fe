@@ -150,7 +150,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                           i,
                         )
                       }
-                      time
+                      allowTime
                       errorClassName="hidden"
                       className="w-full"
                       onFocus={() => setActiveIdx(i)}

@@ -9,15 +9,6 @@ import { t } from "i18next";
 import DateTextInput from "./DateTextInput";
 
 type DatePickerType = "date" | "month" | "year";
-export type DatePickerPosition =
-  | "LEFT"
-  | "RIGHT"
-  | "CENTER"
-  | "LEFT-CENTER"
-  | "RIGHT-CENTER"
-  | "TOP-LEFT"
-  | "TOP-RIGHT"
-  | "TOP-CENTER";
 
 interface Props {
   id?: string;
@@ -29,12 +20,11 @@ interface Props {
   max?: Date;
   outOfLimitsErrorMessage?: string;
   onChange: (date: Date | undefined) => void;
-  position?: DatePickerPosition;
   disabled?: boolean;
   placeholder?: string;
   isOpen?: boolean;
   setIsOpen?: (isOpen: boolean) => void;
-  time?: boolean;
+  allowTime?: boolean;
   popOverClassName?: string;
 }
 
@@ -53,7 +43,7 @@ const DateInputV2: React.FC<Props> = ({
   disabled,
   placeholder,
   setIsOpen,
-  time,
+  allowTime,
   isOpen,
   popOverClassName,
 }) => {
@@ -84,7 +74,7 @@ const DateInputV2: React.FC<Props> = ({
   };
 
   const handleChange = (date: Date) => {
-    onChange(time ? date : getDayStart(date));
+    onChange(allowTime ? date : getDayStart(date));
   };
 
   const decrement = () => {
@@ -140,7 +130,7 @@ const DateInputV2: React.FC<Props> = ({
               datePickerHeaderDate.getSeconds(),
             ),
           );
-          if (!time) {
+          if (!allowTime) {
             close();
             setIsOpen?.(false);
           }
@@ -233,10 +223,6 @@ const DateInputV2: React.FC<Props> = ({
     setType("date");
   };
 
-  const showMonthPicker = () => setType("month");
-
-  const showYearPicker = () => setType("year");
-
   useEffect(() => {
     getDayCount(datePickerHeaderDate);
   }, [datePickerHeaderDate]);
@@ -276,7 +262,7 @@ const DateInputV2: React.FC<Props> = ({
     isOpen && popoverButtonRef.current?.click();
   }, [isOpen]);
 
-  const dateFormat = `DD/MM/YYYY${time ? " hh:mm a" : ""}`;
+  const dateFormat = `DD/MM/YYYY${allowTime ? " hh:mm a" : ""}`;
 
   const getPosition = () => {
     const viewportWidth = document.documentElement.clientWidth;
@@ -285,7 +271,7 @@ const DateInputV2: React.FC<Props> = ({
     const popOverX = popoverButtonRef.current?.getBoundingClientRect().x || 0;
     const popOverY = popoverButtonRef.current?.getBoundingClientRect().y || 0;
 
-    const right = popOverX > viewportWidth - (time ? 420 : 300);
+    const right = popOverX > viewportWidth - (allowTime ? 420 : 300);
     const top = popOverY > viewportHeight - 400;
 
     return `${right ? "md:-translate-x-1/2" : ""} ${top ? "md:-translate-y-[calc(100%+50px)]" : ""}`;
@@ -327,7 +313,7 @@ const DateInputV2: React.FC<Props> = ({
                 {open && (
                   <PopoverPanel
                     className={classNames(
-                      `cui-dropdown-base absolute my-0.5 ${time ? "max-h-[80vh] w-full md:h-auto md:w-[400px]" : "w-72"} divide-y-0 rounded p-4`,
+                      `cui-dropdown-base absolute my-0.5 ${allowTime ? "max-h-[80vh] w-full md:h-auto md:w-[400px]" : "w-72"} divide-y-0 rounded p-4`,
                       getPosition(),
                       popOverClassName,
                     )}
@@ -338,7 +324,7 @@ const DateInputV2: React.FC<Props> = ({
                       )}
                     >
                       <DateTextInput
-                        allowTime={!!time}
+                        allowTime={!!allowTime}
                         value={value}
                         onChange={onChange}
                         onFinishInitialTyping={() => close()}
@@ -376,14 +362,14 @@ const DateInputV2: React.FC<Props> = ({
                             <div className="flex items-center justify-center text-sm">
                               {type === "date" && (
                                 <div
-                                  onClick={showMonthPicker}
+                                  onClick={() => setType("month")}
                                   className="cursor-pointer rounded px-3 py-1 text-center font-medium text-black hover:bg-secondary-300"
                                 >
                                   {dayjs(datePickerHeaderDate).format("MMMM")}
                                 </div>
                               )}
                               <div
-                                onClick={showYearPicker}
+                                onClick={() => setType("year")}
                                 className="cursor-pointer rounded px-3 py-1 font-medium text-black hover:bg-secondary-300"
                               >
                                 <p className="text-center">
@@ -537,7 +523,7 @@ const DateInputV2: React.FC<Props> = ({
                             </div>
                           )}
                         </div>
-                        {time && (
+                        {allowTime && (
                           <div className="flex shrink-0 gap-1">
                             {(
                               [

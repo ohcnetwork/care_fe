@@ -184,7 +184,6 @@ const SymptomEntry = (props: {
         disableFuture
         disabled={disabled}
         onChange={props.onChange}
-        position="LEFT"
         errorClassName="hidden"
       />
       <DateFormField
@@ -192,7 +191,6 @@ const SymptomEntry = (props: {
         name="cure_date"
         value={symptom.cure_date ? new Date(symptom.cure_date) : undefined}
         disableFuture
-        position="CENTER"
         placeholder="Date of cure"
         min={new Date(symptom.onset_date)}
         disabled={disabled}
@@ -301,7 +299,6 @@ const AddSymptom = (props: {
         value={onsetDate}
         onChange={({ value }) => setOnsetDate(value)}
         errorClassName="hidden"
-        position="CENTER"
       />
       <div className="flex w-full flex-col gap-2">
         <AutocompleteMultiSelectFormField

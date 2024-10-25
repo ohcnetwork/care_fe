@@ -1195,7 +1195,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                               value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
                             })
                           }
-                          time
+                          allowTime
                           errorClassName="hidden"
                         />
                       </div>
@@ -1242,7 +1242,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
                         })
                       }
-                      time
+                      allowTime
                       errorClassName="hidden"
                     />
                     {dayjs().diff(state.form.encounter_date, "day") > 30 && (
@@ -1281,7 +1281,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                             value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
                           })
                         }
-                        time
+                        allowTime
                         errorClassName="hidden"
                       />
                     </div>

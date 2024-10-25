@@ -219,7 +219,7 @@ export default function MedicineAdministration(props: Props) {
                   max={new Date()}
                   className="w-full"
                   errorClassName="hidden"
-                  time
+                  allowTime
                 />
               </div>
             </div>

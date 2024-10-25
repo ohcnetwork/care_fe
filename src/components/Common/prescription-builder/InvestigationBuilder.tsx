@@ -228,7 +228,7 @@ export default function InvestigationBuilder(
                           i,
                         )
                       }
-                      time
+                      allowTime
                       errorClassName="hidden"
                       className="w-full"
                       onFocus={() => setActiveIdx(i)}
