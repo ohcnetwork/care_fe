@@ -178,10 +178,10 @@ export const BedManagement = (props: BedManagementProps) => {
     <PaginatedList
       route={routes.listFacilityBeds}
       pathParams={{ facility_external_id: facilityId }}
+      perPage={resultsPerPage}
       query={{
         facility: facilityId,
         location: locationId,
-        limit: resultsPerPage,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
       }}
     >
