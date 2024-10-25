@@ -598,7 +598,7 @@ export interface PatientNotesModel {
   reply_to_object?: PaitentNotesReplyModel;
   replies: PaitentNotesReplyModel[];
   files: FileUploadModel[];
-  parent_note_object?: PaitentNotesReplyModel;
+  root_note_object?: PaitentNotesReplyModel;
   child_notes: PaitentNotesReplyModel[];
   mentioned_users: UserBareMinimum[];
 }
