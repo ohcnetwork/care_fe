@@ -4,22 +4,21 @@ import {
   GENDER_TYPES,
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
-} from "../../Common/constants";
-
+} from "../../common/constants.js";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CommentSection from "./CommentsSection";
+import ButtonV2 from "../Common/components/ButtonV2.js";
+import CommentSection from "./CommentsSection.js";
 import ConfirmDialog from "../Common/ConfirmDialog.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import Page from "../Common/components/Page";
+import Page from "../Common/components/Page.js";
 import QRCode from "qrcode.react";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
+import RecordMeta from "../../CAREUI/display/RecordMeta.js";
 import {
   formatDateTime,
   formatName,
   formatPatientAge,
-} from "../../Utils/utils";
+} from "../../Utils/utils.js";
 
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
@@ -30,7 +29,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import { PatientModel } from "../Patient/models.js";
 import careConfig from "@careConfig";
 
-import Loading from "@/Components/Common/Loading";
+import Loading from "@/components/Common/Loading.js";
 export default function ShiftDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -507,7 +506,7 @@ export default function ShiftDetails(props: { id: string }) {
           title={t("shifting_details")}
           backUrl="/shifting/board"
           options={
-            <div className="gap-2 md:flex-row flex flex-col">
+            <div className="flex flex-col gap-2 md:flex-row">
               <ButtonV2
                 tooltip={
                   ["COMPLETED", "CANCELLED"].includes(data?.status || "")
