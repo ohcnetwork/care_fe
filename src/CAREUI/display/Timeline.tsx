@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { PerformedByModel } from "../../Components/HCX/misc";
+import { PerformedByModel } from "@/components/HCX/misc";
 import { classNames, formatName } from "../../Utils/utils";
 import CareIcon, { IconName } from "../icons/CareIcon";
 import RecordMeta from "./RecordMeta";

@@ -81,7 +81,9 @@ describe("Facility Homepage Function", () => {
   it("Search a facility in homepage and pagination", () => {
     // pagination of the facility page
     assetPagination.navigateToNextPage();
+    assetPagination.verifyNextUrl();
     assetPagination.navigateToPreviousPage();
+    assetPagination.verifyPreviousUrl();
     // search for a facility
     manageUserPage.typeFacilitySearch(facilityName);
     facilityPage.verifyFacilityBadgeContent(facilityName);

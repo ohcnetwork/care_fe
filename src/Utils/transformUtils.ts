@@ -1,4 +1,4 @@
-import { AssetData } from "../Components/Assets/AssetTypes";
+import { AssetData } from "@/components/Assets/AssetTypes";
 
 export const getCameraConfig = (meta: AssetData["meta"]) => {
   return {
