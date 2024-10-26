@@ -1,8 +1,8 @@
-import { PerformedByModel } from "../HCX/misc";
+import { UserBareMinimum } from "@/components/Users/models";
 
 export interface IComment {
   id: string;
-  created_by_object: PerformedByModel;
+  created_by_object: UserBareMinimum;
   created_date: string;
   modified_date: string;
   comment: string;
@@ -34,8 +34,8 @@ export interface IResource {
   refering_facility_contact_name: string;
   refering_facility_contact_number: string;
   requested_quantity: number;
-  assigned_to_object: PerformedByModel;
-  created_by_object: PerformedByModel;
+  assigned_to_object: UserBareMinimum;
+  created_by_object: UserBareMinimum;
   created_date: string;
-  last_edited_by_object: PerformedByModel;
+  last_edited_by_object: UserBareMinimum;
 }

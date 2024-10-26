@@ -22,10 +22,15 @@ export type ManagePatientOptionsComponentType = React.FC<{
   patient: PatientModel;
 }>;
 
+export type AdditionalDischargeProceduresComponentType = React.FC<{
+  consultation: ConsultationModel;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   ManagePatientOptions: ManagePatientOptionsComponentType;
+  AdditionalDischargeProcedures: AdditionalDischargeProceduresComponentType;
 };
 
 // Create a type for lazy-loaded components

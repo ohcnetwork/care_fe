@@ -1,7 +1,7 @@
-import { IconName } from "../../CAREUI/icons/CareIcon";
 import { BedModel } from "../Facility/models";
-import { PerformedByModel } from "../HCX/misc";
+import { IconName } from "../../CAREUI/icons/CareIcon";
 import { PatientModel } from "../Patient/models";
+import { UserBareMinimum } from "@/components/Users/models";
 
 export enum AssetLocationType {
   OTHER = "OTHER",
@@ -169,7 +169,7 @@ export interface AssetServiceEdit {
   serviced_on: string;
   note: string;
   edited_on: string;
-  edited_by: PerformedByModel;
+  edited_by: UserBareMinimum;
 }
 export interface AssetService {
   id: string;

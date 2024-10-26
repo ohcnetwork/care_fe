@@ -1,6 +1,7 @@
-import { FacilityModel } from "../Facility/models";
-import { PerformedByModel } from "../HCX/misc";
 import { AssignedToObjectModel, PatientModel } from "../Patient/models";
+
+import { FacilityModel } from "../Facility/models";
+import { UserBareMinimum } from "@/components/Users/models";
 
 export interface IShift {
   id: string;
@@ -34,8 +35,8 @@ export interface IShift {
   ambulance_number: string;
   comments: string;
   created_date: string;
-  created_by_object: PerformedByModel;
-  last_edited_by_object: PerformedByModel;
+  created_by_object: UserBareMinimum;
+  last_edited_by_object: UserBareMinimum;
   is_assigned_to_user: boolean;
   created_by: number;
   last_edited_by: number;
