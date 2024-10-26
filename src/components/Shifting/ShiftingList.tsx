@@ -27,7 +27,7 @@ export default function ListView() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ cacheBlacklist: ["patient_name"] });
+  } = useFilters({ cacheBlacklist: ["patient_name"], limit: 12 });
 
   const [modalFor, setModalFor] = useState<ShiftingModel>();
   const { t } = useTranslation();
@@ -49,6 +49,7 @@ export default function ListView() {
   } = useQuery(routes.listShiftRequests, {
     query: formatFilter({
       ...qParams,
+      limit: resultsPerPage,
       offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     }),
   });
@@ -70,7 +71,7 @@ export default function ListView() {
 
     return (
       <div>
-        <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {data.map((shift, i) => (
             <div
               key={i}

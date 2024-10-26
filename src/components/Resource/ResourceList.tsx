@@ -24,7 +24,7 @@ export default function ListView() {
     advancedFilter,
     resultsPerPage,
     updateQuery,
-  } = useFilters({ cacheBlacklist: ["title"] });
+  } = useFilters({ cacheBlacklist: ["title"], limit: 12 });
 
   const { t } = useTranslation();
 
@@ -35,6 +35,7 @@ export default function ListView() {
   const { loading, data, refetch } = useQuery(routes.listResourceRequests, {
     query: formatFilter({
       ...qParams,
+      limit: resultsPerPage,
       offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     }),
   });
@@ -118,7 +119,7 @@ export default function ListView() {
               </button>
             </div>
 
-            <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {data?.results && showResourceCardList(data?.results)}
             </div>
             <div>
