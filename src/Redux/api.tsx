@@ -17,6 +17,7 @@ import {
 import {
   BedModel,
   CapacityModal,
+  CommentModel,
   ConsultationModel,
   CreateBedBody,
   CurrentBed,
@@ -41,6 +42,8 @@ import {
   PatientNotesModel,
   PatientStatsModel,
   PatientTransferResponse,
+  ResourceModel,
+  ShiftingModel,
   StateModel,
   WardModel,
 } from "@/components/Facility/models";
@@ -50,7 +53,6 @@ import {
   SampleReportModel,
   SampleTestModel,
 } from "@/components/Patient/models";
-import { IComment, IResource } from "@/components/Resource/models";
 import {
   IDeleteBedCapacity,
   ILocalBodies,
@@ -76,7 +78,6 @@ import {
   HCXPolicyModel,
 } from "@/components/HCX/models";
 import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
-import { IShift } from "@/components/Shifting/models";
 import { Investigation } from "@/components/Facility/Investigations/Reports/types";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
@@ -1059,14 +1060,14 @@ const routes = {
   createShift: {
     path: "/api/v1/shift/",
     method: "POST",
-    TBody: Type<Partial<IShift>>(),
+    TBody: Type<Partial<ShiftingModel>>(),
     TRes: Type<PatientModel>(),
   },
   updateShift: {
     path: "/api/v1/shift/{id}/",
     method: "PUT",
-    TBody: Type<IShift>(),
-    TRes: Type<IShift>(),
+    TBody: Type<ShiftingModel>(),
+    TRes: Type<ShiftingModel>(),
   },
   deleteShiftRecord: {
     path: "/api/v1/shift/{id}/",
@@ -1076,17 +1077,17 @@ const routes = {
   listShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
-    TRes: Type<PaginatedResponse<IShift>>(),
+    TRes: Type<PaginatedResponse<ShiftingModel>>(),
   },
   getShiftDetails: {
     path: "/api/v1/shift/{id}/",
     method: "GET",
-    TRes: Type<IShift>(),
+    TRes: Type<ShiftingModel>(),
   },
   completeTransfer: {
     path: "/api/v1/shift/{externalId}/transfer/",
     method: "POST",
-    TBody: Type<IShift>(),
+    TBody: Type<ShiftingModel>(),
     TRes: Type<Partial<PatientModel>>(),
   },
   downloadShiftRequests: {
@@ -1097,13 +1098,13 @@ const routes = {
   getShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
     method: "GET",
-    TRes: Type<PaginatedResponse<IComment>>(),
+    TRes: Type<PaginatedResponse<CommentModel>>(),
   },
   addShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
     method: "POST",
-    TBody: Type<Partial<IComment>>(),
-    TRes: Type<IComment>(),
+    TBody: Type<Partial<CommentModel>>(),
+    TRes: Type<CommentModel>(),
   },
 
   // Notifications
@@ -1235,14 +1236,14 @@ const routes = {
   createResource: {
     path: "/api/v1/resource/",
     method: "POST",
-    TRes: Type<IResource>(),
-    TBody: Type<Partial<IResource>>(),
+    TRes: Type<ResourceModel>(),
+    TBody: Type<Partial<ResourceModel>>(),
   },
   updateResource: {
     path: "/api/v1/resource/{id}/",
     method: "PUT",
-    TRes: Type<IResource>(),
-    TBody: Type<Partial<IResource>>(),
+    TRes: Type<ResourceModel>(),
+    TBody: Type<Partial<ResourceModel>>(),
   },
   deleteResourceRecord: {
     path: "/api/v1/resource/{id}/",
@@ -1254,12 +1255,12 @@ const routes = {
   listResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
-    TRes: Type<PaginatedResponse<IResource>>(),
+    TRes: Type<PaginatedResponse<ResourceModel>>(),
   },
   getResourceDetails: {
     path: "/api/v1/resource/{id}/",
     method: "GET",
-    TRes: Type<IResource>(),
+    TRes: Type<ResourceModel>(),
   },
   downloadResourceRequests: {
     path: "/api/v1/resource/",
@@ -1269,13 +1270,13 @@ const routes = {
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "GET",
-    TRes: Type<PaginatedResponse<IComment>>(),
+    TRes: Type<PaginatedResponse<CommentModel>>(),
   },
   addResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "POST",
-    TRes: Type<IComment>(),
-    TBody: Type<Partial<IComment>>(),
+    TRes: Type<CommentModel>(),
+    TBody: Type<Partial<CommentModel>>(),
   },
 
   // Assets endpoints
