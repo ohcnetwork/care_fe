@@ -4,7 +4,7 @@ import DialogModal from "../Common/Dialog";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import { t } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import useWindowDimensions from "@/common/hooks/useWindowDimensions";
 import * as Notify from "../../Utils/Notifications";
 
 export interface CameraCaptureDialogProps {
