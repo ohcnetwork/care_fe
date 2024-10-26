@@ -1,12 +1,21 @@
-
 import { usePath, Link } from "raviger";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator, BreadcrumbPage } from "@/Components/ui/breadcrumb";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/Components/ui/dropdown-menu";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-
 
 const MENU_TAGS: { [key: string]: string } = {
   facility: "Facilities",
@@ -47,13 +56,13 @@ export default function Breadcrumbs({
   const path = usePath();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-
   const crumbs =
     path
       ?.slice(1)
       .split("/")
       .map((field, i) => ({
-        name: replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
+        name:
+          replacements[field]?.name || MENU_TAGS[field] || capitalize(field),
         uri:
           replacements[field]?.uri ||
           path
@@ -61,8 +70,6 @@ export default function Breadcrumbs({
             .slice(0, i + 2)
             .join("/"),
       })) || [];
-
-
 
   return (
     <Breadcrumb className={className}>
@@ -79,18 +86,26 @@ export default function Breadcrumbs({
                   goBack(backUrl);
                 }}
               >
-                <CareIcon icon="l-angle-left" className="-ml-2 h-4 text-gray-400" />
+                <CareIcon
+                  icon="l-angle-left"
+                  className="-ml-2 h-4 text-gray-400"
+                />
                 Back
               </Button>
             </BreadcrumbItem>
           )}
 
           {!hideBack && (
-            <span className="mr-2 ml-1 text-xs font-light text-gray-400 no-underline">|</span>
+            <span className="ml-1 mr-2 text-xs font-light text-gray-400 no-underline">
+              |
+            </span>
           )}
 
           <BreadcrumbItem>
-            <Link href="/" className="font-light text-gray-500 underline underline-offset-2 hover:text-gray-700">
+            <Link
+              href="/"
+              className="font-light text-gray-500 underline underline-offset-2 hover:text-gray-700"
+            >
               Home
             </Link>
             {crumbs.length > 2 ? null : <BreadcrumbSeparator />}
@@ -100,9 +115,15 @@ export default function Breadcrumbs({
           <>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+              <DropdownMenu
+                open={isDropdownOpen}
+                onOpenChange={setIsDropdownOpen}
+              >
                 <DropdownMenuTrigger asChild>
-                  <Button variant="link" className="p-0 font-normal text-gray-500 hover:text-gray-700 ring-0 border-0 focus-visible:ring-offset-0 focus-visible:ring-0 ">
+                  <Button
+                    variant="link"
+                    className="border-0 p-0 font-normal text-gray-500 ring-0 hover:text-gray-700 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  >
                     •••
                   </Button>
                 </DropdownMenuTrigger>
@@ -137,5 +158,3 @@ export default function Breadcrumbs({
     </Breadcrumb>
   );
 }
-
-
