@@ -1,21 +1,31 @@
-import { LazyExoticComponent } from "react";
-import { UserAssignedModel } from "@/components/Users/models";
 import { AppRoutes } from "./Routers/AppRouter";
+import { ConsultationModel } from "@/components/Facility/models";
 import { INavItem } from "@/components/Common/Sidebar/Sidebar";
+import { LazyExoticComponent } from "react";
+import { PatientModel } from "@/components/Patient/models";
+import { UserAssignedModel } from "@/components/Users/models";
 import { pluginMap } from "./pluginMap";
 
 // Define the available plugins
-export type AvailablePlugin = "@apps/care_livekit_fe";
+export type AvailablePlugin = "@apps/care_livekit_fe" | "@apps/care_hcx_fe";
 
-export type AvailablePluginManifest = "@app-manifest/care_livekit_fe";
+export type AvailablePluginManifest =
+  | "@app-manifest/care_livekit_fe"
+  | "@app-manifest/care_hcx_fe";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
 }>;
 
+export type ManagePatientOptionsComponentType = React.FC<{
+  consultation: ConsultationModel | undefined;
+  patient: PatientModel;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
+  ManagePatientOptions: ManagePatientOptionsComponentType;
 };
 
 // Create a type for lazy-loaded components
