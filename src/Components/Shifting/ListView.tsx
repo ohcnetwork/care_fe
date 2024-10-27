@@ -7,13 +7,10 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useFilters from "../../Common/hooks/useFilters";
 import routes from "../../Redux/api";
-import dayjs from "../../Utils/dayjs";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
-import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
-import ConfirmDialog from "../Common/ConfirmDialog";
 import { ExportButton } from "../Common/Export";
 import SearchInput from "../Form/SearchInput";
 import BadgesList from "./BadgesList";
@@ -21,6 +18,8 @@ import { formatFilter } from "./Commons";
 import ListFilter from "./ListFilter";
 
 import Loading from "@/Components/Common/Loading";
+import { formatDateTime } from "@/Utils/utils";
+import ConfirmDialog from "../Common/ConfirmDialog";
 export default function ListView() {
   const {
     qParams,
@@ -69,127 +68,124 @@ export default function ListView() {
     }
 
     return data.map((shift: any) => (
-      <div key={`shift_${shift.id}`} className="mt-6 w-full">
-        <div className="h-full overflow-hidden rounded-lg bg-white shadow">
-          <div className="flex h-full flex-col justify-between p-4">
-            <div>
-              <div className="flex justify-between">
-                <div className="mb-2 text-xl font-bold capitalize">
-                  {shift.patient_object.name} - {shift.patient_object.age}
-                </div>
-                <div>
-                  {shift.emergency && (
-                    <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
-                      {t("emergency")}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
-                <div className="sm:col-span-1">
-                  <dt
-                    title={t("shifting_status")}
-                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
-                  >
-                    <CareIcon icon="l-truck" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
-                      {shift.status}
-                    </dd>
-                  </dt>
-                </div>
-                <div className="sm:col-span-1">
-                  <dt
-                    title={t("phone_number")}
-                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
-                  >
-                    <CareIcon icon="l-mobile-android" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
-                      {shift.patient_object.phone_number || ""}
-                    </dd>
-                  </dt>
-                </div>
-                <div className="sm:col-span-1">
-                  <dt
-                    title={t("origin_facility")}
-                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
-                  >
-                    <CareIcon icon="l-plane-departure" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
-                      {(shift.origin_facility_object || {}).name}
-                    </dd>
-                  </dt>
-                </div>
-                {careConfig.wartimeShifting && (
-                  <div className="sm:col-span-1">
-                    <dt
-                      title={t("shifting_approving_facility")}
-                      className="flex items-center text-sm font-medium leading-5 text-secondary-500"
-                    >
-                      <CareIcon icon="l-user-check" className="mr-2" />
-                      <dd className="text-sm font-bold leading-5 text-secondary-900">
-                        {(shift.shifting_approving_facility_object || {}).name}
-                      </dd>
-                    </dt>
-                  </div>
-                )}
-                <div className="sm:col-span-1">
-                  <dt
-                    title={t("assigned_facility")}
-                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
-                  >
-                    <CareIcon icon="l-plane-arrival" className="m-2" />
-
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
-                      {shift.assigned_facility_external ||
-                        shift.assigned_facility_object?.name ||
-                        t("yet_to_be_decided")}
-                    </dd>
-                  </dt>
-                </div>
-
-                <div className="sm:col-span-1">
-                  <dt
-                    title={t("last_modified")}
-                    className={
-                      "flex items-center text-sm font-medium leading-5 " +
-                      (dayjs()
-                        .subtract(2, "hours")
-                        .isBefore(shift.modified_date)
-                        ? "text-secondary-900"
-                        : "rounded bg-red-400 p-1 text-white")
-                    }
-                  >
-                    <CareIcon icon="l-stopwatch" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5">
-                      {formatDateTime(shift.modified_date) || "--"}
-                    </dd>
-                  </dt>
-                </div>
-
-                <div className="sm:col-span-1">
-                  <dt
-                    title={t("patient_address")}
-                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
-                  >
-                    <CareIcon icon="l-home" className="mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-secondary-900">
-                      {shift.patient_object.address || "--"}
-                    </dd>
-                  </dt>
-                </div>
-              </dl>
+      <div
+        key={`shift_${shift.id}`}
+        className="w-full border-b-2 border-gray-100"
+      >
+        <div className="border-3 flex grid w-full grid-cols-5 gap-1 overflow-hidden bg-white p-4 shadow">
+          <div className="col-span-1 px-2 text-left">
+            <div className="text-sm font-bold capitalize">
+              {shift.patient_object.name}
             </div>
+            <div className="text-xs font-semibold capitalize">
+              {shift.patient_object.age}
+            </div>
+          </div>
 
-            <div className="mt-2 flex">
-              <ButtonV2
-                onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
-                variant="secondary"
-                border
-                className="w-full"
+          <div className="col-span-1 flex flex-col px-2 text-left">
+            <div className="phone number">
+              <dt
+                title={t("phone_number")}
+                className="flex items-center text-sm font-medium leading-5 text-secondary-500"
               >
-                <CareIcon icon="l-eye" className="mr-2" /> {t("all_details")}
-              </ButtonV2>
+                <CareIcon icon="l-mobile-android" className="mr-2" />
+                <dd className="text-sm font-bold leading-5 text-secondary-900">
+                  {shift.patient_object.phone_number || ""}
+                </dd>
+              </dt>
             </div>
+            <div className="address mt-1">
+              <dt
+                title={t("patient_address")}
+                className="flex items-center text-sm font-medium leading-5 text-secondary-500"
+              >
+                <CareIcon icon="l-home" className="mr-2" />
+                <dd className="font-xs leading-5 text-secondary-900">
+                  {shift.patient_object.address || "--"}
+                </dd>
+              </dt>
+            </div>
+          </div>
+
+          <div className="col-span-1 flex flex-col px-3 text-left">
+            <div className="flex-between mb-2 flex gap-4">
+              <dt
+                title={t("shifting_status")}
+                className={`flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${
+                  shift.status === "COMPLETED"
+                    ? "bg-sky-200"
+                    : "bg-yellow-200 text-yellow-500"
+                }`}
+              >
+                <CareIcon icon="l-truck" className="mr-2" />
+                <dd className="text-sky-600">{shift.status}</dd>
+              </dt>
+              <div>
+                {shift.emergency && (
+                  <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
+                    {t("emergency")}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="text-center">
+              <dt
+                title={t("last_modified")}
+                className={"flex items-center text-sm font-medium leading-5"}
+              >
+                <CareIcon icon="l-stopwatch" className="mr-1" />
+                <dd className="text-xs font-medium leading-5">
+                  {formatDateTime(shift.modified_date) || "--"}
+                </dd>
+              </dt>
+            </div>
+          </div>
+
+          <div className="col-span-1 text-left">
+            <dt
+              title={t("origin_facility")}
+              className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+            >
+              <CareIcon icon="l-plane-departure" className="mr-2" />
+              <dd className="text-sm font-bold leading-5 text-secondary-900">
+                {(shift.origin_facility_object || {}).name}
+              </dd>
+            </dt>
+
+            {careConfig.wartimeShifting && (
+              <dt
+                title={t("shifting_approving_facility")}
+                className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+              >
+                <CareIcon icon="l-user-check" className="mr-2" />
+                <dd className="text-sm font-bold leading-5 text-secondary-900">
+                  {(shift.shifting_approving_facility_object || {}).name}
+                </dd>
+              </dt>
+            )}
+
+            <dt
+              title={t("assigned_facility")}
+              className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+            >
+              <CareIcon icon="l-plane-arrival" className="mr-2" />
+              <dd className="text-sm font-bold leading-5 text-secondary-900">
+                {shift.assigned_facility_external ||
+                  shift.assigned_facility_object?.name ||
+                  t("yet_to_be_decided")}
+              </dd>
+            </dt>
+          </div>
+          <div className="col-span-1 mt-2 flex flex-col text-left">
+            <ButtonV2
+              onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
+              variant="secondary"
+              border
+              className="w-full"
+            >
+              <CareIcon icon="l-eye" className="mr-2" /> {t("all_details")}
+            </ButtonV2>
             {shift.status === "COMPLETED" && shift.assigned_facility && (
               <div className="mt-2">
                 <ButtonV2
@@ -289,10 +285,17 @@ export default function ListView() {
                 {t("refresh_list")}
               </button>
             </div>
-
-            <div className="mb-5 grid gap-x-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {showShiftingCardList(shiftData?.results || [])}
+            <div>
+              <div className="mx-10 mt-5 grid w-full grid-cols-5 gap-2 border-b-2 border-gray-100 p-4 text-sm font-medium">
+                <div className="col-span-1 text-left">PATIENTS</div>
+                <div className="col-span-1 text-left">CONTACT_INFO</div>
+                <div className="col-span-1 text-left">STATUS</div>
+                <div className="col-span-1 text-left">FACILTIES</div>
+                <div className="col-span-1 text-left">ACTIONS</div>
+              </div>
+              <div>{showShiftingCardList(shiftData?.results || [])}</div>
             </div>
+
             <div>
               <Pagination totalCount={shiftData?.count || 0} />
             </div>
