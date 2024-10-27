@@ -1,7 +1,7 @@
 import Webcam from "react-webcam";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "../Common/Dialog";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
 import { t } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useWindowDimensions from "@/common/hooks/useWindowDimensions";
