@@ -161,7 +161,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           icon="l-angle-up"
           className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
-        <span className="tooltip-text tooltip-top rotate-[-180deg] text-xs">
+        <span
+          className={`tooltip-text tooltip-top ${show && "rotate-[-180deg]"} text-xs`}
+        >
           {t("minimize")}
         </span>
       </div>
@@ -173,7 +175,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           icon="l-times"
           className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
-        <span className="tooltip-text tooltip-bottom -translate-x-11 text-xs">
+        <span
+          className={`tooltip-text tooltip-${show ? "bottom -translate-x-11" : "top"} text-xs`}
+        >
           {t("close")}
         </span>
       </div>
