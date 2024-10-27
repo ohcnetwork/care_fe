@@ -3,10 +3,10 @@ import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
 import useQuery, { QueryOptions } from "../../Utils/request/useQuery";
 import ButtonV2, {
   CommonButtonProps,
-} from "../../Components/Common/components/ButtonV2";
+} from "@/components/Common/components/ButtonV2";
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
-import Pagination from "../../Components/Common/Pagination";
+import Pagination from "@/components/Common/Pagination";
 
 const DEFAULT_PER_PAGE_LIMIT = 14;
 

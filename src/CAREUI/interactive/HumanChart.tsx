@@ -1,5 +1,5 @@
 import { Fragment } from "react/jsx-runtime";
-import { HumanBodyPaths, HumanBodyRegion } from "../../Common/constants";
+import { HumanBodyPaths, HumanBodyRegion } from "@/common/constants";
 
 type Props = {
   regionColor: (region: HumanBodyRegion) => string;

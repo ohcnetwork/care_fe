@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
-import useSlug from "../../Common/hooks/useSlug";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import { useIsAuthorized } from "@/common/hooks/useIsAuthorized";
+import useSlug from "@/common/hooks/useSlug";
 import { AuthorizedForCB } from "../../Utils/AuthorizeFor";
 
 interface Props {

@@ -1,4 +1,4 @@
-import ConsultationClaims from "../../Components/Facility/ConsultationClaims";
+import ConsultationClaims from "@/components/Facility/ConsultationClaims";
 import { AppRoutes } from "../AppRouter";
 
 const HCXRoutes: AppRoutes = {

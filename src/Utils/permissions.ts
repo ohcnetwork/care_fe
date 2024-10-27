@@ -1,5 +1,5 @@
-import { USER_TYPES, UserRole } from "../Common/constants";
-import { UserModel } from "../Components/Users/models";
+import { USER_TYPES, UserRole } from "@/common/constants";
+import { UserModel } from "@/components/Users/models";
 
 export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
   // Auth user should be higher in hierarchy than target user

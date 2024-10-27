@@ -58,7 +58,7 @@ class FacilityPage {
   }
 
   fillAddress(address: string) {
-    cy.get("#address").click().clear().type(address);
+    cy.get("#address").click().type(address);
   }
 
   fillPhoneNumber(phoneNumber: string) {

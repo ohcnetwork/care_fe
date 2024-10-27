@@ -26,9 +26,7 @@ describe("Manage User", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    console.log(localStorage);
     cy.clearLocalStorage(/filters--.+/);
-    console.log(localStorage);
     cy.awaitUrl("/users");
   });
 

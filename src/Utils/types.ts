@@ -1,4 +1,4 @@
-import { PerformedByModel } from "../Components/HCX/misc";
+import { PerformedByModel } from "@/components/HCX/misc";
 
 export interface BaseModel {
   readonly id: string;

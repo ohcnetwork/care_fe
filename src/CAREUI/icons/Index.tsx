@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import CareIcon, { IconName } from "./CareIcon";
 import iconPaths from "./UniconPaths.json";
 import { t } from "i18next";
-import PageTitle from "../../Components/Common/PageTitle";
+import PageTitle from "@/components/Common/PageTitle";
 import { useToast } from "@/hooks/use-toast";
 
 const IconIndex: React.FC = () => {

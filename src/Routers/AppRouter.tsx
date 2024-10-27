@@ -1,19 +1,19 @@
 import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
 import { useState, useEffect } from "react";
 
-import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
-import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
-import Error404 from "../Components/ErrorPages/404";
+import ShowPushNotification from "@/components/Notifications/ShowPushNotification";
+import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
+import Error404 from "@/components/ErrorPages/404";
 import {
   DesktopSidebar,
   MobileSidebar,
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
-} from "../Components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS } from "../Common/constants";
-import SessionExpired from "../Components/ErrorPages/SessionExpired";
-import HealthInformation from "../Components/ABDM/HealthInformation";
-import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
+} from "@/components/Common/Sidebar/Sidebar";
+import { BLACKLISTED_PATHS } from "@/common/constants";
+import SessionExpired from "@/components/ErrorPages/SessionExpired";
+import HealthInformation from "@/components/ABDM/HealthInformation";
+import ABDMFacilityRecords from "@/components/ABDM/ABDMFacilityRecords";
 
 import UserRoutes from "./routes/UserRoutes";
 import PatientRoutes from "./routes/PatientRoutes";
@@ -24,7 +24,7 @@ import HCXRoutes from "./routes/HCXRoutes";
 import ShiftingRoutes from "./routes/ShiftingRoutes";
 import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
-import { usePluginRoutes } from "@/Common/hooks/useCareApps";
+import { usePluginRoutes } from "@/common/hooks/useCareApps";
 import careConfig from "@careConfig";
 import IconIndex from "../CAREUI/icons/Index";
 
