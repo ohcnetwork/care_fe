@@ -66,13 +66,13 @@ describe("User Creation", () => {
   });
 
   it("Update the existing user profile and verify its reflection", () => {
-    cy.get("#user-profile-name").click();
-    cy.get("#profile-button").click();
+    userCreationPage.clickProfileName();
+    userCreationPage.clickProfileButton();
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
       "devdistrictadmin",
     );
-    cy.get("#edit-cancel-profile-button").click();
+    userCreationPage.clickEditCancelProfileButton();
     userCreationPage.typeIntoElementByIdPostClear(
       "firstName",
       "District Editted",
@@ -126,9 +126,9 @@ describe("User Creation", () => {
   });
 
   it("Update the existing user profile Form Mandatory File Error", () => {
-    cy.get("#user-profile-name").click();
-    cy.get("#profile-button").click();
-    cy.get("#edit-cancel-profile-button").click();
+    userCreationPage.clickProfileName();
+    userCreationPage.clickProfileButton();
+    userCreationPage.clickEditCancelProfileButton();
 
     userCreationPage.clearIntoElementById("firstName");
     userCreationPage.clearIntoElementById("lastName");
@@ -140,7 +140,7 @@ describe("User Creation", () => {
   });
 
   it("create new user and verify reflection", () => {
-    cy.get("#addUserButton").click();
+    userCreationPage.clickAddUserButton();
     userCreationPage.selectFacility("Dummy Shifting Center");
     userCreationPage.typeIntoElementById("username", username);
     userCreationPage.typeIntoElementById("password", "Test@123");
@@ -161,7 +161,7 @@ describe("User Creation", () => {
     userCreationPage.selectDropdownOption("gender", "Male");
     userCreationPage.selectDropdownOption("state", "Kerala");
     userCreationPage.selectDropdownOption("district", "Ernakulam");
-    cy.get("#submit").click();
+    userCreationPage.clickSubmit();
     userCreationPage.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
@@ -181,7 +181,7 @@ describe("User Creation", () => {
   });
 
   it("create new user form throwing mandatory field error", () => {
-    cy.get("#addUserButton").click();
+    userCreationPage.clickAddUserButton();
     cy.submitButton("Save User");
     cy.wait(2000);
     userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);

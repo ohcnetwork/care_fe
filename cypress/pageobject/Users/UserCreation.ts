@@ -1,5 +1,24 @@
 // UserCreation.ts
 export class UserCreationPage {
+  clickProfileName() {
+    cy.get("#user-profile-name").click();
+  }
+
+  clickProfileButton() {
+    cy.get("#profile-button").click();
+  }
+
+  clickEditCancelProfileButton() {
+    cy.get("#edit-cancel-profile-button").click();
+  }
+
+  clickAddUserButton() {
+    cy.get("#addUserButton").click();
+  }
+  clickSubmit() {
+    cy.get("#submit").click();
+  }
+
   typeIntoElementById(elementId: string, value: string) {
     cy.get("#" + elementId)
       .click()
