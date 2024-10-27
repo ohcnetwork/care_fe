@@ -35,6 +35,8 @@ const VideoConstraints = {
   },
 } as const;
 
+const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
+
 type IVideoConstraint =
   (typeof VideoConstraints)[keyof typeof VideoConstraints];
 
@@ -87,11 +89,12 @@ const AvatarEditModal = ({
   };
 
   useEffect(() => {
-    if (selectedFile) {
-      const objectUrl = URL.createObjectURL(selectedFile);
-      setPreview(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+    if (!isImageFile(selectedFile)) {
+      return;
     }
+    const objectUrl = URL.createObjectURL(selectedFile!);
+    setPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
   }, [selectedFile]);
 
   const onSelectFile: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -99,7 +102,7 @@ const AvatarEditModal = ({
       setSelectedFile(undefined);
       return;
     }
-    if (e.target.files[0]?.type.split("/")[0] !== "image") {
+    if (!isImageFile(e.target.files[0])) {
       Warn({ msg: "Please upload an image file!" });
       return;
     }
@@ -134,7 +137,7 @@ const AvatarEditModal = ({
     dragProps.setDragOver(false);
     setIsDragging(false);
     const droppedFile = e?.dataTransfer?.files[0];
-    if (droppedFile.type.split("/")[0] !== "image")
+    if (!isImageFile(droppedFile))
       return dragProps.setFileDropError("Please drop an image file to upload!");
     setSelectedFile(droppedFile);
   };
