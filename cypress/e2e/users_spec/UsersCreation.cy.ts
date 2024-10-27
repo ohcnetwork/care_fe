@@ -140,7 +140,7 @@ describe("User Creation", () => {
   });
 
   it("create new user and verify reflection", () => {
-    userCreationPage.clickElementById("addUserButton");
+    cy.get("#addUserButton").click();
     userCreationPage.selectFacility("Dummy Shifting Center");
     userCreationPage.typeIntoElementById("username", username);
     userCreationPage.typeIntoElementById("password", "Test@123");
@@ -161,7 +161,7 @@ describe("User Creation", () => {
     userCreationPage.selectDropdownOption("gender", "Male");
     userCreationPage.selectDropdownOption("state", "Kerala");
     userCreationPage.selectDropdownOption("district", "Ernakulam");
-    userCreationPage.clickElementById("submit");
+    cy.get("#submit").click();
     userCreationPage.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);

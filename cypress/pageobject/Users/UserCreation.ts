@@ -1,9 +1,5 @@
 // UserCreation.ts
 export class UserCreationPage {
-  clickElementById(elementId: string) {
-    cy.get("#" + elementId).click();
-  }
-
   typeIntoElementById(elementId: string, value: string) {
     cy.get("#" + elementId)
       .click()
@@ -50,7 +46,7 @@ export class UserCreationPage {
   }
 
   selectHomeFacility(name: string) {
-    this.clickElementById("home_facility");
+    cy.get("#home_facility").click();
     this.selectOptionContainingText(name);
   }
 
@@ -59,12 +55,12 @@ export class UserCreationPage {
     inputElementId: string,
     dateValue: string,
   ) {
-    this.clickElementById(dateElementId);
+    cy.get("#" + dateElementId).click();
     this.typeIntoElementById(inputElementId, dateValue);
   }
 
   selectDropdownOption(dropdownId: string, optionText: string) {
-    this.clickElementById(dropdownId);
+    cy.get("#" + dropdownId).click();
     this.selectOptionContainingText(optionText);
   }
 
