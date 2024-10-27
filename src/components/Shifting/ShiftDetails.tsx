@@ -5,6 +5,10 @@ import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "@/common/constants";
+import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Separator } from "@/components/ui/separator";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
@@ -12,7 +16,7 @@ import CommentSection from "./CommentsSection";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "@/components/Common/components/Page";
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import {
   formatDateTime,
@@ -291,6 +295,194 @@ export default function ShiftDetails(props: { id: string }) {
     );
   };
 
+  // const printData = (data: any) => {
+  // const patientData = data.patient_object;
+  // const consultation = data.patient.last_consultation as ConsultationModel;
+  // const patientGender = GENDER_TYPES.find(
+  // (i) => i.id === patientData?.gender,
+  // )?.text;
+  // return (
+  // <div id="section-to-print" className="print bg-white">
+  // <div>
+  // {data.is_kasp && <img alt="logo" src={careConfig.headerLogo?.dark} />}
+  // </div>
+  // <div className="mx-2">
+  // <div className="mt-6">
+  // <span className="mt-4 font-semibold leading-relaxed">
+  // {t("name_of_hospital")}:{" "}
+  // </span>
+  // {data.is_kasp
+  // ? t("district_program_management_supporting_unit")
+  // : data.origin_facility_object?.name || "--"}
+  // {/* Made static based on #757 */}
+  // </div>
+  // <div className="mt-6 text-center text-xl font-bold">
+  // {t("referral_letter")}
+  // </div>
+  // <div className="mt-4 text-left">
+  // <span className="font-semibold leading-relaxed">
+  // {" "}
+  // {t("date_and_time")}{" "}
+  // </span>
+  // {formatDateTime(data.created_date) || "--"}
+  // </div>
+  // <div className="mt-2 text-left">
+  // <span className="font-semibold leading-relaxed">
+  // {" "}
+  // {t("unique_id")} :
+  // </span>
+  // {data.id}
+  // </div>
+
+  // <div className="mt-4">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("name")}:{" "}
+  // </span>
+  // {patientData?.name}
+  // </div>
+  // </div>
+  // <div className="mt-2 flex justify-between">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("age")}:{" "}
+  // </span>
+  // {patientData ? formatPatientAge(patientData, true) : ""}
+  // </div>
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("gender")}:{" "}
+  // </span>
+  // {patientGender}
+  // </div>
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("phone")}:{" "}
+  // </span>
+  // <span>{patientData?.phone_number || ""}</span>
+  // </div>
+  // </div>
+  // <div className="mt-2 flex text-left">
+  // <span className="font-semibold leading-relaxed">
+  // {t("address")}:{" "}
+  // </span>
+  // <div className="ml-2">
+  // <div className="whitespace-pre-wrap">
+  // {patientData?.address || "-"}
+  // </div>
+  // {patientData?.nationality === "India" && (
+  // <>
+  // <div>
+  // {patientData?.ward_object?.name},
+  // {patientData?.local_body_object?.name}
+  // </div>
+  // <div>{patientData?.district_object?.name || "-"}</div>
+  // <div>{patientData?.state_object?.name}</div>
+  // </>
+  // )}
+  // </div>
+  // </div>
+  // <div className="mt-2 flex justify-between">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("date_of_admission")}:{" "}
+  // </span>
+  // {formatDateTime(
+  // consultation.encounter_date || consultation.created_date,
+  // ) || "-"}
+  // </div>
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("patient_no")}:{" "}
+  // </span>
+  // {consultation.patient_no || "-"}
+  // </div>
+  // </div>
+  // <div className="mt-2 flex justify-between">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("date_of_positive_covid_19_swab")}:{" "}
+  // </span>
+  // {(patientData?.date_of_test &&
+  // formatDateTime(patientData?.date_of_test)) ||
+  // "-"}
+  // </div>
+  // </div>
+
+  // {/* <div className="mt-2 flex justify-between">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("diagnosis")}:{" "}
+  // </span>
+  // {consultation.diagnosis || "-"}
+  // </div>
+  // </div> */}
+
+  // <div className="mt-6 flex justify-between">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("covid_19_cat_gov")}{" "}
+  // </span>
+  // {consultation.category || "-"}
+  // </div>
+  // </div>
+
+  // <div className="mt-2 flex justify-between">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("referred_to")}:{" "}
+  // </span>
+  // {data.assigned_facility_external ||
+  // data.assigned_facility_object?.name ||
+  // "--"}
+  // </div>
+  // </div>
+
+  // <div className="mt-2 flex justify-between">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("reason_for_referral")}:{" "}
+  // </span>
+  // {data.reason || "--"}
+  // </div>
+  // </div>
+  // <div className="mt-2 flex justify-between">
+  // <div>
+  // <span className="font-semibold leading-relaxed">
+  // {t("treatment_summary")}:{" "}
+  // </span>
+  // {consultation.treatment_plan || "-"}
+  // </div>
+  // </div>
+  // <div className="mt-6 flex justify-between">
+  // <div className="flex">
+  // <div>
+  // <div className="">
+  // <QRCode
+  // value={`${window.location.origin}/shifting/ data.id`}
+  // />
+  // </div>
+  // </div>
+  // </div>
+  // <div className="mt-10">
+  // <span className="font-semibold leading-relaxed">
+  // {t("approved_by_district_covid_control_room")}
+  // </span>
+  // </div>
+  // </div>
+  // <div className="mt-20 flex justify-center text-center">
+  // {t("auto_generated_for_care")}
+  // </div>
+  // <div className="font-xs font-secondary-600 text-center font-mono ">
+  // {window.location.origin}/shifting/{data.id}
+  // </div>
+  // </div>
+  // </div>
+  // );
+  // };
+
+  // new code
+
   const printData = (data: any) => {
     const patientData = data.patient_object;
     const consultation = data.patient.last_consultation as ConsultationModel;
@@ -299,182 +491,126 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <div id="section-to-print" className="print bg-white">
-        <div>
-          {data.is_kasp && <img alt="logo" src={careConfig.headerLogo?.dark} />}
-        </div>
-        <div className="mx-2">
-          <div className="mt-6">
-            <span className="mt-4 font-semibold leading-relaxed">
-              {t("name_of_hospital")}:{" "}
-            </span>
-            {data.is_kasp
-              ? t("district_program_management_supporting_unit")
-              : data.origin_facility_object?.name || "--"}
-            {/*  Made static based on #757 */}
-          </div>
-          <div className="mt-6 text-center text-xl font-bold">
-            {t("referral_letter")}
-          </div>
-          <div className="mt-4 text-left">
-            <span className="font-semibold leading-relaxed">
-              {" "}
-              {t("date_and_time")}{" "}
-            </span>
-            {formatDateTime(data.created_date) || "--"}
-          </div>
-          <div className="mt-2 text-left">
-            <span className="font-semibold leading-relaxed">
-              {" "}
-              {t("unique_id")} :
-            </span>
-            {data.id}
-          </div>
-
-          <div className="mt-4">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("name")}:{" "}
-              </span>
-              {patientData?.name}
-            </div>
-          </div>
-          <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("age")}:{" "}
-              </span>
-              {patientData ? formatPatientAge(patientData, true) : ""}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("gender")}:{" "}
-              </span>
-              {patientGender}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("phone")}:{" "}
-              </span>
-              <span>{patientData?.phone_number || ""}</span>
-            </div>
-          </div>
-          <div className="mt-2 flex text-left">
-            <span className="font-semibold leading-relaxed">
-              {t("address")}:{" "}
-            </span>
-            <div className="ml-2">
-              <div className="whitespace-pre-wrap">
-                {patientData?.address || "-"}
+      <PrintPreview title={t("Patient Referral Letter")}>
+        <Card
+          id="section-to-print"
+          className="print mx-auto w-full max-w-3xl bg-white sm:mx-2 sm:my-2"
+        >
+          <CardHeader className="flex flex-col items-start justify-between space-y-2 pb-2 sm:flex-row sm:items-center sm:space-y-0">
+            <CardTitle className="mx-auto my-auto text-lg font-bold sm:text-2xl">
+              {t("referral_letter")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="mx-2 space-y-3 sm:space-y-4">
+            <div className="space-y-4">
+              <div className="flex flex-col-reverse items-start justify-end sm:flex-row sm:items-center">
+                {data.is_kasp && (
+                  <img alt="logo" src={careConfig.headerLogo?.dark} />
+                )}
+                <QRCodeSVG
+                  value={`${window.location.origin}/shifting/${data.id}`}
+                  size={120}
+                />
               </div>
-              {patientData?.nationality === "India" && (
-                <>
-                  <div>
-                    {patientData?.ward_object?.name},
-                    {patientData?.local_body_object?.name}
-                  </div>
-                  <div>{patientData?.district_object?.name || "-"}</div>
-                  <div>{patientData?.state_object?.name}</div>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("date_of_admission")}:{" "}
-              </span>
-              {formatDateTime(
-                consultation.encounter_date || consultation.created_date,
-              ) || "-"}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("patient_no")}:{" "}
-              </span>
-              {consultation.patient_no || "-"}
-            </div>
-          </div>
-          <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("date_of_positive_covid_19_swab")}:{" "}
-              </span>
-              {(patientData?.date_of_test &&
-                formatDateTime(patientData?.date_of_test)) ||
-                "-"}
-            </div>
-          </div>
-
-          {/* <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("diagnosis")}:{" "}
-              </span>
-              {consultation.diagnosis || "-"}
-            </div>
-          </div> */}
-
-          <div className="mt-6 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("covid_19_cat_gov")}{" "}
-              </span>
-              {consultation.category || "-"}
-            </div>
-          </div>
-
-          <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("referred_to")}:{" "}
-              </span>
-              {data.assigned_facility_external ||
-                data.assigned_facility_object?.name ||
-                "--"}
-            </div>
-          </div>
-
-          <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("reason_for_referral")}:{" "}
-              </span>
-              {data.reason || "--"}
-            </div>
-          </div>
-          <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("treatment_summary")}:{" "}
-              </span>
-              {consultation.treatment_plan || "-"}
-            </div>
-          </div>
-          <div className="mt-6 flex justify-between">
-            <div className="flex">
-              <div>
-                <div className="">
-                  <QRCode
-                    value={`${window.location.origin}/shifting/ data.id`}
-                  />
+              {/* <div className="mt-4 text-center text-xl font-bold">
+{t("referral_letter")}
+</div> */}
+              <div className="mt-6">
+                <span className="font-semibold">{t("name_of_hospital")}: </span>
+                {data.is_kasp
+                  ? t("district_program_management_supporting_unit")
+                  : data.origin_facility_object?.name || "--"}
+              </div>
+              <Separator />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <h3 className="mb-1 text-sm font-semibold sm:mb-2 sm:text-base">
+                    Patient Information
+                  </h3>
+                  <p className="text-xs sm:text-sm">
+                    {t("name")}: {patientData?.name}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("age")}: {formatPatientAge(patientData, true)}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("gender")}: {patientGender || "-"}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("phone")}: {patientData?.phone_number || "-"}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="mb-1 text-sm font-semibold sm:mb-2 sm:text-base">
+                    {t("address")}
+                  </h3>
+                  <p className="whitespace-pre-line text-xs sm:text-sm">
+                    {patientData?.address || "-"}
+                  </p>
+                  {patientData?.nationality === "India" && (
+                    <>
+                      <p>
+                        {patientData?.ward_object?.name},{" "}
+                        {patientData?.local_body_object?.name}
+                      </p>
+                      <p>{patientData?.district_object?.name || "-"}</p>
+                      <p>{patientData?.state_object?.name}</p>
+                    </>
+                  )}
                 </div>
               </div>
-            </div>
-            <div className="mt-10">
-              <span className="font-semibold leading-relaxed">
+              <Separator />
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
+                <div>
+                  <p className="text-xs sm:text-sm">
+                    {t("date_of_admission")}:{" "}
+                    {formatDateTime(
+                      consultation.encounter_date || consultation.created_date,
+                    ) || "-"}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("unique_id")}: {data.id}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("patient_no")}: {consultation.patient_no || "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm">
+                    {t("date_of_positive_covid_19_swab")}:{" "}
+                    {(patientData?.date_of_test &&
+                      formatDateTime(patientData.date_of_test)) ||
+                      "-"}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("covid_19_cat_gov")}: {consultation.category || "-"}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("referred_to")}:{" "}
+                    {data.assigned_facility_external ||
+                      data.assigned_facility_object?.name ||
+                      "--"}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("reason_for_referral")}: {data.reason || "--"}
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    {t("treatment_summary")}:{" "}
+                    {consultation.treatment_plan || "-"}
+                  </p>
+                </div>
+              </div>
+              <Separator />
+              <div className="text-muted-foreground mt-6 text-center text-xs sm:text-sm">
                 {t("approved_by_district_covid_control_room")}
-              </span>
+              </div>
+              <div className="text-center text-xs sm:text-sm">
+                {t("auto_generated_for_care")}
+              </div>
             </div>
-          </div>
-          <div className="mt-20 flex justify-center text-center">
-            {t("auto_generated_for_care")}
-          </div>
-          <div className="font-xs font-secondary-600 text-center font-mono">
-            {window.location.origin}/shifting/{data.id}
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      </PrintPreview>
     );
   };
 
@@ -482,15 +618,28 @@ export default function ShiftDetails(props: { id: string }) {
     return <Loading />;
   }
 
+  // <div className="my-4">
+  // <div className="my-4 flex justify-end gap-3">
+  // {/* <ButtonV2 onClick={(_) => window.print()}>
+  // <CareIcon icon="l-print" className="mr-2 text-base" />{" "}
+  // {t("print_referral_letter")}
+  // </ButtonV2> */}
+  // <ButtonV2
+  // onClick={(_) => setIsPrintMode(false)}
+  // variant="secondary"
+  // >
+  // <CareIcon icon="l-times" className="mr-2 text-base" />{" "}
+  // {t("close")}
+  // </ButtonV2>
+  // </div>
+  // {printData(data)}
+  // </div>
+
   return (
     <div>
       {isPrintMode ? (
         <div className="my-4">
-          <div className="my-4 flex justify-end gap-3">
-            <ButtonV2 onClick={(_) => window.print()}>
-              <CareIcon icon="l-print" className="mr-2 text-base" />{" "}
-              {t("print_referral_letter")}
-            </ButtonV2>
+          <div className="my-5 mr-[100px] flex justify-end gap-3 xl:absolute xl:right-6 xl:top-7 xl:justify-end">
             <ButtonV2
               onClick={(_) => setIsPrintMode(false)}
               variant="secondary"
@@ -506,7 +655,7 @@ export default function ShiftDetails(props: { id: string }) {
           title={t("shifting_details")}
           backUrl="/shifting/board"
           options={
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 md:flex-row">
               <ButtonV2
                 tooltip={
                   ["COMPLETED", "CANCELLED"].includes(data?.status || "")
