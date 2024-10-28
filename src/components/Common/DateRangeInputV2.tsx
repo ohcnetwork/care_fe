@@ -14,6 +14,7 @@ type Props = {
   disabled?: boolean;
   max?: Date;
   min?: Date;
+  allowTime?: boolean;
 };
 
 const DateRangeInputV2 = ({ value, onChange, ...props }: Props) => {
@@ -33,9 +34,9 @@ const DateRangeInputV2 = ({ value, onChange, ...props }: Props) => {
           }}
           min={props.min}
           max={end || props.max}
-          position="RIGHT"
           placeholder="Start date"
           disabled={props.disabled}
+          allowTime={props.allowTime}
         />
       </div>
       <div className="flex-auto">
@@ -46,11 +47,11 @@ const DateRangeInputV2 = ({ value, onChange, ...props }: Props) => {
           onChange={(end) => onChange({ start, end })}
           min={start || props.min}
           max={props.max}
-          position="CENTER"
           disabled={props.disabled || !start}
           placeholder="End date"
           isOpen={showEndPicker}
           setIsOpen={setShowEndPicker}
+          allowTime={props.allowTime}
         />
       </div>
     </div>
