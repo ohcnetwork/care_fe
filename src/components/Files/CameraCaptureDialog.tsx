@@ -3,8 +3,9 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "@/components/Common/Dialog";
 import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
 import { t } from "i18next";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useWindowDimensions from "@/common/hooks/useWindowDimensions";
+import * as Notify from "../../Utils/Notifications";
 
 export interface CameraCaptureDialogProps {
   show: boolean;
@@ -24,9 +25,29 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     height: { ideal: 2160 },
     facingMode: "user",
   };
-
+  useEffect(() => {
+    if (!show) return;
+    navigator.mediaDevices.getUserMedia({ video: true }).catch(() => {
+      Notify.Warn({
+        msg: t("camera_permission_denied"),
+      });
+      onHide();
+    });
+  }, [show]);
   const handleSwitchCamera = useCallback(() => {
-    setCameraFacingFront((prevState) => !prevState);
+    const supportedConstraints =
+      navigator.mediaDevices.getSupportedConstraints();
+    if (
+      !isLaptopScreen &&
+      typeof supportedConstraints.facingMode === "string" &&
+      (supportedConstraints.facingMode as string).includes("environment")
+    ) {
+      setCameraFacingFront((prevState) => !prevState);
+    } else {
+      Notify.Warn({
+        msg: t("switch_camera_is_not_available"),
+      });
+    }
   }, []);
 
   const { width } = useWindowDimensions();
