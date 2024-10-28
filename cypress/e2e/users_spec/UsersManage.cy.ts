@@ -38,11 +38,9 @@ describe("Manage User", () => {
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
-    cy.wait(5000);
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickCloseSlideOver();
-    cy.wait(5000);
     manageUserPage.navigateToProfile();
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
@@ -59,7 +57,6 @@ describe("Manage User", () => {
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
-    cy.wait(5000); // temporary hack to fix the failure
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();

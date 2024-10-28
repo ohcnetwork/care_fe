@@ -41,7 +41,7 @@ export class ManageUserPage {
   }
 
   clickCloseSlideOver() {
-    cy.get("#close-slide-over").click({ force: true });
+    cy.get("#close-slide-over").should("be.visible").click();
   }
 
   clickHomeFacilityIcon() {

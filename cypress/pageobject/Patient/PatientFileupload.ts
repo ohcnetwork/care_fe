@@ -20,10 +20,8 @@ export class PatientFileUpload {
 
   recordAudio() {
     cy.get("#record-audio").click();
-    cy.wait(5000);
-    cy.get("#stop-recording").click();
-    cy.wait(1000);
-    cy.get("#save-recording").click();
+    cy.get("#stop-recording").should("be.enabled").click();
+    cy.get("#save-recording").should("be.enabled").click();
   }
 
   clickUploadAudioFile() {
@@ -33,7 +31,6 @@ export class PatientFileUpload {
   }
 
   verifyUploadFilePresence(fileName: string) {
-    cy.wait(2000);
     cy.get("#file-div").scrollIntoView();
     cy.verifyContentPresence("#file-div", [fileName]);
   }

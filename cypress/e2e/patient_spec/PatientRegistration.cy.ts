@@ -119,7 +119,6 @@ describe("Patient Creation with consultation", () => {
     patientPage.verifyPatientIsCreated();
     // Verify the patient details
     patientPage.clickCancelButton();
-    cy.wait(3000);
     patientPage.savePatientUrl();
     patientPage.verifyPatientDashboardDetails(
       patientOneGender,
@@ -157,7 +156,6 @@ describe("Patient Creation with consultation", () => {
     patientPage.verifyStatusCode();
     patientPage.patientformvisibility();
     // change the gender to female and input data to related changed field
-    cy.wait(3000);
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.clickPatientAntenatalStatusYes();
@@ -220,11 +218,9 @@ describe("Patient Creation with consultation", () => {
     }
 
     patientPage.clickUpdatePatient();
-    cy.wait(3000);
     patientPage.verifyPatientUpdated();
     patientPage.visitPatientUrl();
     // Verify Female Gender change reflection, No Medical History and Insurance Details
-    cy.wait(5000);
     patientPage.verifyPatientDashboardDetails(
       patientOneUpdatedGender,
       age,
@@ -241,9 +237,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("[data-testid=patient-details]")
       .contains("member id")
       .scrollIntoView();
-    cy.wait(2000);
     patientInsurance.clickPatientInsuranceViewDetail();
-    cy.wait(3000);
     patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,

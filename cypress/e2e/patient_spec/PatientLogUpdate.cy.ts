@@ -113,7 +113,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.closeNotification();
     // Submit the doctors log update
     cy.submitButton("Save and Continue");
-    cy.wait(2000);
     cy.verifyNotification("Progress Note created successfully");
     cy.closeNotification();
     // modify the relevant critical care log update
@@ -252,7 +251,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.submitButton("Save");
-    cy.wait(2000);
     cy.verifyNotification("Brief Update created successfully");
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
