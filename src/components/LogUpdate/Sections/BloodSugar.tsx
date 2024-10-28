@@ -32,7 +32,7 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
         value={log.insulin_intake_dose}
         min={0}
         max={100}
-        step={1}
+        step={0.1}
       />
       <RadioFormField
         label="Frequency"

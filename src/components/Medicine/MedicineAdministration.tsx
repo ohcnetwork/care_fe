@@ -9,12 +9,12 @@ import { Error, Success } from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import dayjs from "../../Utils/dayjs";
-import TextFormField from "../Form/FormFields/TextFormField";
 import request from "../../Utils/request/request";
 import MedicineRoutes from "./routes";
 import useSlug from "@/common/hooks/useSlug";
 import DosageFormField from "../Form/FormFields/DosageFormField";
 import { AdministrationDosageValidator } from "./validators";
+import DateFormField from "../Form/FormFields/DateFormField";
 
 interface Props {
   prescriptions: Prescription[];
@@ -179,7 +179,7 @@ export default function MedicineAdministration(props: Props) {
                 }
                 errorClassName="hidden"
               />
-              <div className="flex flex-col gap-2 lg:max-w-min">
+              <div className="flex w-full flex-col gap-2 lg:max-w-min">
                 <CheckBoxFormField
                   label="Administer for a time in the past"
                   labelClassName="whitespace-nowrap"
@@ -202,20 +202,24 @@ export default function MedicineAdministration(props: Props) {
                   }}
                   errorClassName="hidden"
                 />
-                <TextFormField
+                <DateFormField
                   name="administered_date"
-                  type="datetime-local"
-                  value={customTime[index]}
+                  value={
+                    customTime[index] ? new Date(customTime[index]) : new Date()
+                  }
                   onChange={({ value }) => {
                     setCustomTime((arr) => {
                       const newArr = [...arr];
-                      newArr[index] = value;
+                      newArr[index] = dayjs(value).format("YYYY-MM-DDTHH:mm");
                       return newArr;
                     });
                   }}
                   disabled={!shouldAdminister[index] || !isCustomTime[index]}
-                  min={dayjs(obj.created_date).format("YYYY-MM-DDTHH:mm")}
-                  max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                  min={new Date(obj.created_date)}
+                  max={new Date()}
+                  className="w-full"
+                  errorClassName="hidden"
+                  allowTime
                 />
               </div>
             </div>

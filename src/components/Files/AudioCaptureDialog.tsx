@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTimer } from "../../Utils/useTimer";
-import { t } from "i18next";
 import useVoiceRecorder from "../../Utils/useVoiceRecorder";
+import { useTranslation } from "react-i18next";
+import * as Notify from "../../Utils/Notifications";
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -20,8 +21,8 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     | "RECORDED";
 
   const { show, onHide, onCapture, autoRecord = false } = props;
-
   const [status, setStatus] = useState<Status | null>(null);
+  const { t } = useTranslation();
 
   const { audioURL, resetRecording, startRecording, stopRecording } =
     useVoiceRecorder((permission: boolean) => {
@@ -35,9 +36,19 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   const timer = useTimer();
 
   const handleStartRecording = () => {
-    setStatus("RECORDING");
-    startRecording();
-    timer.start();
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(() => {
+        setStatus("RECORDING");
+        startRecording();
+        timer.start();
+      })
+      .catch(() => {
+        Notify.Error({
+          msg: t("audio__permission_message"),
+        });
+        setStatus("PERMISSION_DENIED");
+      });
   };
 
   const handleStopRecording = () => {
@@ -87,7 +98,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   }, [show]);
 
   useEffect(() => {
-    if (autoRecord && show && status === "WAITING_TO_RECORD") {
+    if (autoRecord && show && status === "RECORDING") {
       handleStartRecording();
     }
   }, [autoRecord, status, show]);

@@ -494,6 +494,8 @@ export default function UserProfile() {
           refetchUser();
           Notification.Success({ msg: "Profile picture updated." });
           setEditAvatar(false);
+        } else {
+          onError();
         }
       },
       null,
@@ -775,7 +777,6 @@ export default function UserProfile() {
                         required
                         className="col-span-6 sm:col-span-3"
                         value={getDate(states.form.date_of_birth)}
-                        position="LEFT"
                         disableFuture={true}
                       />
                       <SelectFormField
