@@ -5,52 +5,33 @@ import { useTranslation } from "react-i18next";
 type VentilatorTableProps = {
   dailyRoundsList?: DailyRoundsModel[];
 };
-interface VentilatorDailyRounds extends DailyRoundsModel {
-  start_date?: string;
-  end_date?: string;
-}
 
 export default function VentilatorTable(props: VentilatorTableProps) {
   const { t } = useTranslation();
   const { dailyRoundsList } = props;
-  let filteredData: VentilatorDailyRounds[] = [];
+  let sortedData: DailyRoundsModel[] = [];
 
-  const filterAndSortData = (data: DailyRoundsModel[]) => {
-    return data
-      .sort(function (a, b) {
-        const ad = new Date(a.taken_at ?? Date.now());
-        const bd = new Date(b.taken_at ?? Date.now());
-        return ad > bd ? 1 : -1;
-      })
-      .map((item, ind) => {
-        const newItem: VentilatorDailyRounds = item;
-        newItem.start_date = formatDateTime(
-          item.taken_at,
-          "hh:mm A; DD/MM/YYYY",
-        );
-        let endDate = "";
-        if (ind + 1 < data.length) {
-          endDate = data[ind + 1].taken_at ?? endDate;
-        }
-        newItem.end_date = endDate !== "" ? formatDateTime(endDate) : "";
-        return item;
-      })
-      .filter(
-        (round) =>
-          round.ventilator_interface !== null &&
-          round.ventilator_interface !== "UNKNOWN",
-      );
+  const sortData = (data: DailyRoundsModel[]) => {
+    return data.sort(function (a, b) {
+      const ad = new Date(a.taken_at ?? Date.now());
+      const bd = new Date(b.taken_at ?? Date.now());
+      return ad > bd ? 1 : -1;
+    });
   };
 
   const VentilatorTableRow = ({
     dailyRound,
+    start_date,
+    end_date,
   }: {
-    dailyRound: VentilatorDailyRounds;
+    dailyRound: DailyRoundsModel;
+    start_date: string;
+    end_date: string;
   }) => {
     return (
       <tr className="text-center text-sm">
-        <td className="max-w-52 px-2 py-2">{dailyRound.start_date}</td>
-        <td className="max-w-52 px-2 py-2">{dailyRound.end_date}</td>
+        <td className="max-w-52 px-2 py-2">{start_date}</td>
+        <td className="max-w-52 px-2 py-2">{end_date}</td>
         <td className="max-w-52 px-2 py-2">
           {t(`RESPIRATORY_SUPPORT__${dailyRound?.ventilator_interface}`)}
         </td>
@@ -68,6 +49,7 @@ export default function VentilatorTable(props: VentilatorTableProps) {
 
   const getModeOrModality = (round: DailyRoundsModel) => {
     const ventilatorInterface = round.ventilator_interface;
+    if (!ventilatorInterface) return null;
     const modeOrModality =
       ventilatorInterface == "INVASIVE" || ventilatorInterface == "NON_INVASIVE"
         ? round.ventilator_mode
@@ -82,10 +64,13 @@ export default function VentilatorTable(props: VentilatorTableProps) {
     for (let index = 0; index < dailyRoundsList.length; index++) {
       const currentRound = dailyRoundsList[index];
       const currentInterfaceOrModality = getModeOrModality(currentRound);
+      if (!currentInterfaceOrModality) continue;
+      let end_date = "";
       while (index < dailyRoundsList.length - 1) {
         const nextRound = dailyRoundsList[index + 1];
         const nextInterfaceOrModality = getModeOrModality(nextRound);
         if (
+          nextInterfaceOrModality &&
           currentRound.ventilator_interface == nextRound.ventilator_interface &&
           currentInterfaceOrModality == nextInterfaceOrModality
         ) {
@@ -94,8 +79,18 @@ export default function VentilatorTable(props: VentilatorTableProps) {
           break;
         }
       }
-
-      rows.push(<VentilatorTableRow dailyRound={currentRound} />);
+      if (index + 1 < dailyRoundsList.length) {
+        end_date = dailyRoundsList[index + 1].taken_at ?? end_date;
+      }
+      end_date = end_date !== "" ? formatDateTime(end_date) : "";
+      const start_date = formatDateTime(currentRound.taken_at);
+      rows.push(
+        <VentilatorTableRow
+          dailyRound={currentRound}
+          start_date={start_date}
+          end_date={end_date}
+        />,
+      );
     }
     return rows;
   };
@@ -103,7 +98,7 @@ export default function VentilatorTable(props: VentilatorTableProps) {
   if (!dailyRoundsList || dailyRoundsList.length == 0) {
     return;
   } else {
-    filteredData = filterAndSortData(dailyRoundsList);
+    sortedData = sortData(dailyRoundsList);
   }
 
   return (
@@ -122,7 +117,7 @@ export default function VentilatorTable(props: VentilatorTableProps) {
             </th>
           </tr>
         </thead>
-        <tbody>{VentilatorTableBody(filteredData)}</tbody>
+        <tbody>{VentilatorTableBody(sortedData)}</tbody>
       </table>
     </div>
   );

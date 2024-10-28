@@ -192,12 +192,14 @@ export const VentilatorPlot = ({
               break;
             }
           }
+          const position =
+            startIndex === 0 ? "insideMiddleBottom" : "insideMiddleTop";
           markLineData.push({
             name: legend,
             xAxis: dates[startIndex],
             label: {
               show: true,
-              position: "middle",
+              position,
               formatter: "{b}",
               color: "#000000",
               textBorderColor: "#ffffff",
