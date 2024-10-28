@@ -80,6 +80,7 @@ export default function UserAutocomplete(props: UserSearchProps) {
         )}
         optionLabel={formatName}
         optionIcon={userOnlineDot}
+        optionImage={(option) => option.read_profile_picture_url}
         optionDescription={(option) =>
           `${option.user_type} - ${option.username}`
         }
