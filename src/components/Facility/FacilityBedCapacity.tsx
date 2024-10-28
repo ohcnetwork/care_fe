@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BED_TYPES } from "@/common/constants";
 import routes from "../../Redux/api";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
@@ -13,11 +13,19 @@ import { useTranslation } from "react-i18next";
 export const FacilityBedCapacity = (props: any) => {
   const { t } = useTranslation();
 
+  const [isDirty, setIsDirty] = useState(false);
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
 
   const capacityQuery = useQuery(routes.getCapacity, {
     pathParams: { facilityId: props.facilityId },
   });
+  useEffect(() => {
+    if (capacityQuery.data?.results.length === BED_TYPES.length) {
+      setIsDirty(true);
+    } else {
+      setIsDirty(false);
+    }
+  }, [capacityQuery]);
 
   let capacityList: any = null;
   if (!capacityQuery.data || !capacityQuery.data.results.length) {
@@ -88,19 +96,26 @@ export const FacilityBedCapacity = (props: any) => {
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <div className="justify-between md:flex md:pb-2">
           <div className="mb-2 text-xl font-semibold">Bed Capacity</div>
-          <ButtonV2
-            id="facility-add-bedtype"
-            className="w-full md:w-auto"
-            onClick={() => setBedCapacityModalOpen(true)}
-            authorizeFor={NonReadOnlyUsers}
-          >
-            <CareIcon icon="l-bed" className="mr-2 text-lg text-white" />
-            Add More Bed Types
-          </ButtonV2>
+          <div className="group relative inline-block">
+            <ButtonV2
+              id="facility-add-bedtype"
+              className="w-full md:w-auto"
+              onClick={() => setBedCapacityModalOpen(true)}
+              authorizeFor={NonReadOnlyUsers}
+              disabled={isDirty}
+            >
+              <CareIcon icon="l-bed" className="mr-2 text-lg text-white" />
+              Add More Bed Types
+            </ButtonV2>
+            {isDirty && (
+              <div className="absolute bottom-full mb-2 hidden w-max rounded-md bg-gray-800 p-2 text-sm text-white shadow-lg group-hover:block">
+                All Beds Types are Added!
+              </div>
+            )}
+          </div>
         </div>
         <div>{capacityList}</div>
       </div>
-
       {bedCapacityModalOpen && (
         <DialogModal
           show={bedCapacityModalOpen}
