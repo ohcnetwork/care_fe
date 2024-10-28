@@ -29,6 +29,7 @@ import routes from "../../Redux/api";
 import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
 import Loading from "@/components/Common/Loading";
 import careConfig from "@careConfig";
+import DateFormField from "../Form/FormFields/DateFormField";
 import request from "../../Utils/request/request";
 
 interface PreDischargeFormInterface {
@@ -210,6 +211,13 @@ const DischargeModal = ({
 
   const confirmationRequired = encounterDuration.asDays() >= 30;
 
+  const dischargeOrDeathTime =
+    preDischargeForm[
+      discharge_reason ===
+      DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+        ? "death_datetime"
+        : "discharge_date"
+    ];
   if (initialDiagnoses == null) {
     return <Loading />;
   }
@@ -297,7 +305,7 @@ const DischargeModal = ({
               />
             </div>
           )}
-          <TextFormField
+          <DateFormField
             name={
               discharge_reason ===
               DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
@@ -310,34 +318,28 @@ const DischargeModal = ({
                 ? "Date of Death"
                 : "Date and Time of Discharge"
             }
-            type="datetime-local"
             value={
-              preDischargeForm[
-                discharge_reason ===
-                DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
-                  ? "death_datetime"
-                  : "discharge_date"
-              ]
+              dischargeOrDeathTime ? new Date(dischargeOrDeathTime) : new Date()
             }
+            popOverClassName="max-h-[50vh]"
             onChange={(e) => {
               const updates: Record<string, string | undefined> = {
                 discharge_date: undefined,
                 death_datetime: undefined,
               };
-              updates[e.name] = e.value;
+              updates[e.name] = dayjs(e.value).format("YYYY-MM-DDTHH:mm");
               setPreDischargeForm((form) => ({ ...form, ...updates }));
             }}
             required
-            min={dayjs(consultationData?.encounter_date).format(
-              "YYYY-MM-DDTHH:mm",
-            )}
-            max={dayjs().format("YYYY-MM-DDTHH:mm")}
+            min={new Date(consultationData?.encounter_date)}
+            max={new Date()}
             error={
               discharge_reason ===
               DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
                 ? errors?.death_datetime
                 : errors?.discharge_date
             }
+            allowTime
           />
 
           {discharge_reason !==

@@ -8,13 +8,13 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
 import dayjs from "../../Utils/dayjs";
 import useSlug from "@/common/hooks/useSlug";
 import request from "../../Utils/request/request";
 import MedicineRoutes from "./routes";
 import DosageFormField from "../Form/FormFields/DosageFormField";
 import { AdministrationDosageValidator } from "./validators";
+import DateFormField from "../Form/FormFields/DateFormField";
 
 interface Props {
   prescription: Prescription;
@@ -141,14 +141,17 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
               }}
               errorClassName="hidden"
             />
-            <TextFormField
+            <DateFormField
               name="administered_date"
-              type="datetime-local"
-              value={customTime}
-              onChange={({ value }) => setCustomTime(value)}
+              value={customTime ? new Date(customTime) : new Date()}
+              onChange={({ value }) =>
+                setCustomTime(dayjs(value).format("YYYY-MM-DDTHH:mm"))
+              }
               disabled={!isCustomTime}
-              min={dayjs(prescription.created_date).format("YYYY-MM-DDTHH:mm")}
-              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+              min={new Date(prescription.created_date)}
+              max={new Date()}
+              errorClassName="hidden"
+              allowTime
             />
           </div>
         </div>
