@@ -14,14 +14,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const commenter = context.payload.comment.user.login;
-            const { data: orgMembers } = await github.orgs.listMembers({
-              org: context.repo.owner,
-              role: 'all'
-            });
-            const isOrgMember = orgMembers.some(member => member.login === commenter);
+            const coreUsernames = process.env.ALLOWED_USERNAMES.split(',');
+            const isOrgMember = allowedUsernames.includes(commenter);
             if (!isOrgMember) {
               const commentBody = context.payload.comment.body.toLowerCase();
-              const questionKeywords = ["?", "what", "how", "why", "when", "who"];
+              const questionKeywords = process.env.QUESTION_KEYWORDS.split(',');
               const isQuestion = questionKeywords.some(keyword => commentBody.includes(keyword));
               if (isQuestion) {
                 await github.repos.createDispatchEvent({
@@ -37,7 +34,7 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.payload.issue.number,
-                  labels: ['question'],
+                  labels: process.env.QUESTION_LABELS.split(','),
                 });
                 const slackWebhook = process.env.SLACK_WEBHOOK;
                 const issueUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${context.payload.issue.number}`;
