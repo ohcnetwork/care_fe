@@ -1,7 +1,9 @@
 import { usePath, Link } from "raviger";
 import { Button } from "@/components/ui/button";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import useAppHistory from "../../common/hooks/useAppHistory";
+import useAppHistory from "@/common/hooks/useAppHistory";
+import { FaHospital } from "react-icons/fa";
+import { FaFile } from "react-icons/fa6";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,6 +28,11 @@ const MENU_TAGS: { [key: string]: string } = {
   resource: "Resources",
   users: "Users",
   notice_board: "Notice Board",
+};
+
+const iconMapping: { [key: string]: JSX.Element } = {
+  "Critical Care": <FaHospital className="mr-2" />,
+  Assets: <FaFile className="mr-2" />,
 };
 
 const capitalize = (string: string) =>
@@ -130,7 +137,11 @@ export default function Breadcrumbs({
                 <DropdownMenuContent align="start">
                   {crumbs.slice(1, -1).map((crumb) => (
                     <DropdownMenuItem key={crumb.uri}>
-                      <Link href={crumb.uri} className="text-gray-500">
+                      <Link
+                        href={crumb.uri}
+                        className="flex items-center text-gray-500"
+                      >
+                        {iconMapping[crumb.name] || null}
                         {crumb.name}
                       </Link>
                     </DropdownMenuItem>
