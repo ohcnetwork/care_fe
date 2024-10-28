@@ -10,7 +10,7 @@ import useFilters from "@/common/hooks/useFilters";
 
 export const ConsultationVentilatorTab = (props: ConsultationTabProps) => {
   const { consultationId } = props;
-  const { qParams, Pagination, resultsPerPage } = useFilters({});
+  const { qParams, Pagination, resultsPerPage } = useFilters({ limit: 36 });
 
   const { loading: isLoading, data } = useQuery(routes.getDailyReports, {
     pathParams: { consultationId },
