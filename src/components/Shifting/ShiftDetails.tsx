@@ -9,6 +9,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // import { Separator } from "@/components/ui/separator";
+import { Separator } from "../ui/separator";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
