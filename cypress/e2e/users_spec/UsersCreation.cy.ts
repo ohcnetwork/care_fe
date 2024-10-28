@@ -68,61 +68,35 @@ describe("User Creation", () => {
   it("Update the existing user profile and verify its reflection", () => {
     userCreationPage.clickProfileName();
     userCreationPage.clickProfileButton();
-    userCreationPage.verifyElementContainsText(
-      "username-profile-details",
-      "devdistrictadmin",
-    );
+    cy.verifyContentPresence("#username-profile-details", ["devdistrictadmin"]);
+
     userCreationPage.clickEditCancelProfileButton();
-    userCreationPage.typeIntoElementByIdPostClear(
-      "firstName",
-      "District Editted",
-    );
-    userCreationPage.typeIntoElementByIdPostClear("lastName", "Cypress");
-    userCreationPage.selectDropdownOption("gender", "Male");
-    userCreationPage.typeIntoElementByIdPostClear("phoneNumber", phone_number);
-    userCreationPage.typeIntoElementByIdPostClear(
-      "altPhoneNumber",
-      emergency_phone_number,
-    );
-    userCreationPage.typeIntoElementByIdPostClear("email", "test@test.com");
-    userCreationPage.typeIntoElementByIdPostClear("weekly_working_hours", "14");
+    userCreationPage.typeIntoFirstNameAndClear();
+    userCreationPage.typeIntoLastNameAndClear();
+    cy.get("#gender").click().get("[role='option']").contains("Male").click();
+    userCreationPage.typeIntoPhoneNumberAndClear(phone_number);
+    userCreationPage.typeIntoAltPhoneumberAndClear(emergency_phone_number);
+    userCreationPage.typeIntoEmailAndClear();
+    userCreationPage.typeIntoWeeklyWorkingHoursAndClear();
     userCreationPage.typeIntoElementByIdPostClearDob(
       "date_of_birth",
       "01011998",
     );
     cy.submitButton("Update");
-    userCreationPage.verifyElementContainsText(
-      "contactno-profile-details",
+    cy.verifyContentPresence("#contactno-profile-details", [
       "+91" + phone_number,
-    );
-    userCreationPage.verifyElementContainsText(
-      "whatsapp-profile-details",
+    ]);
+    cy.verifyContentPresence("#whatsapp-profile-details", [
       "+91" + emergency_phone_number,
-    );
-    userCreationPage.verifyElementContainsText(
-      "firstname-profile-details",
+    ]);
+    cy.verifyContentPresence("#firstname-profile-details", [
       "District Editted",
-    );
-    userCreationPage.verifyElementContainsText(
-      "lastname-profile-details",
-      "Cypress",
-    );
-    userCreationPage.verifyElementContainsText(
-      "date_of_birth-profile-details",
-      "01/01/1998",
-    );
-    userCreationPage.verifyElementContainsText(
-      "emailid-profile-details",
-      "test@test.com",
-    );
-    userCreationPage.verifyElementContainsText(
-      "gender-profile-details",
-      "Male",
-    );
-    userCreationPage.verifyElementContainsText(
-      "averageworkinghour-profile-details",
-      "14",
-    );
+    ]);
+    cy.verifyContentPresence("#lastname-profile-details", ["Cypress"]);
+    cy.verifyContentPresence("#date_of_birth-profile-details", ["01/01/1998"]);
+    cy.verifyContentPresence("#emailid-profile-details", ["test@test.com"]);
+    cy.verifyContentPresence("#gender-profile-details", ["Male"]);
+    cy.verifyContentPresence("#averageworkinghour-profile-details", ["14"]);
   });
 
   it("Update the existing user profile Form Mandatory File Error", () => {
@@ -130,11 +104,11 @@ describe("User Creation", () => {
     userCreationPage.clickProfileButton();
     userCreationPage.clickEditCancelProfileButton();
 
-    userCreationPage.clearIntoElementById("firstName");
-    userCreationPage.clearIntoElementById("lastName");
-    userCreationPage.clearIntoElementById("phoneNumber");
-    userCreationPage.clearIntoElementById("altPhoneNumber");
-    userCreationPage.clearIntoElementById("weekly_working_hours");
+    userCreationPage.clearFirstName();
+    userCreationPage.clearLastName();
+    userCreationPage.clearPhoneNumber();
+    userCreationPage.clearAltPhoneNumber();
+    userCreationPage.clearWeeklyWorkingHours();
     cy.submitButton("Update");
     userCreationPage.verifyErrorMessages(EXPECTED_PROFILE_ERROR_MESSAGES);
   });
@@ -142,42 +116,45 @@ describe("User Creation", () => {
   it("create new user and verify reflection", () => {
     userCreationPage.clickAddUserButton();
     userCreationPage.selectFacility("Dummy Shifting Center");
-    userCreationPage.typeIntoElementById("username", username);
-    userCreationPage.typeIntoElementById("password", "Test@123");
+    userCreationPage.typeUserName(username);
+    userCreationPage.typePassword();
     userCreationPage.selectHomeFacility("Dummy Shifting Center");
-    userCreationPage.typeIntoElementById("phone_number", phone_number);
-    userCreationPage.setInputDate("date_of_birth", "date-input", "25081999");
-    userCreationPage.selectDropdownOption("user_type", "Doctor");
-    userCreationPage.typeIntoElementById("c_password", "Test@123");
-    userCreationPage.typeIntoElementById("qualification", "MBBS");
-    userCreationPage.typeIntoElementById("doctor_experience_commenced_on", "2");
-    userCreationPage.typeIntoElementById(
-      "doctor_medical_council_registration",
-      "123456789",
-    );
-    userCreationPage.typeIntoElementById("first_name", "cypress test");
-    userCreationPage.typeIntoElementById("last_name", "staff user");
-    userCreationPage.typeIntoElementById("email", "test@test.com");
-    userCreationPage.selectDropdownOption("gender", "Male");
-    userCreationPage.selectDropdownOption("state", "Kerala");
-    userCreationPage.selectDropdownOption("district", "Ernakulam");
+    userCreationPage.typePhoneNumber(phone_number);
+    cy.get("#date_of_birth")
+      .click()
+      .get("#date-input")
+      .click()
+      .type("25081999");
+    cy.get("#user_type")
+      .click()
+      .get("[role='option']")
+      .contains("Doctor")
+      .click();
+    userCreationPage.typeConfirmPassword();
+    userCreationPage.typeQualification();
+    userCreationPage.typeDoctorExperience();
+    userCreationPage.typeDoctorMedicalCouncilRegNo();
+    userCreationPage.typeFirstName();
+    userCreationPage.typeLastName();
+    userCreationPage.typeEmail();
+    cy.get("#gender").click().get("[role='option']").contains("Male").click();
+    cy.get("#state").click().get("[role='option']").contains("Kerala").click();
+    cy.get("#district")
+      .click()
+      .get("[role='option']")
+      .contains("Ernakulam")
+      .click();
     userCreationPage.clickSubmit();
-    userCreationPage.verifyNotification("User added successfully");
+    cy.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
-    userCreationPage.verifyElementContainsText("name", "cypress test");
-    userCreationPage.verifyElementContainsText("role", "Doctor");
-    userCreationPage.verifyElementContainsText("district", "Ernakulam");
-    userCreationPage.verifyElementContainsText(
-      "home_facility",
-      "Dummy Shifting Center",
-    );
-    userCreationPage.verifyElementContainsText("qualification", "MBBS");
-    userCreationPage.verifyElementContainsText("doctor-experience", "2");
-    userCreationPage.verifyElementContainsText(
-      "medical-council-registration",
-      "123456789",
-    );
+    cy.verifyContentPresence("#name", ["cypress test"]);
+    cy.verifyContentPresence("#role", ["Doctor"]);
+    cy.verifyContentPresence("#district", ["Ernakulam"]);
+    cy.verifyContentPresence("#home_facility", ["Dummy Shifting Center"]);
+    cy.verifyContentPresence("#qualification", ["MBBS"]);
+    cy.verifyContentPresence("#doctor-experience", ["2"]);
+    cy.verifyContentPresence("#medical-council-registration", ["123456789"]);
   });
 
   it("create new user form throwing mandatory field error", () => {

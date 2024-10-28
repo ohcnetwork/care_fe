@@ -19,27 +19,82 @@ export class UserCreationPage {
     cy.get("#submit").click();
   }
 
-  typeIntoElementById(elementId: string, value: string) {
-    cy.get("#" + elementId)
-      .click()
-      .type(value);
+  typeIntoFirstNameAndClear() {
+    cy.get("#firstName").click().clear().click().type("District Editted");
+  }
+  typeIntoLastNameAndClear() {
+    cy.get("#lastName").click().clear().click().type("Cypress");
+  }
+  typeIntoPhoneNumberAndClear(phone_number: string) {
+    cy.get("#phoneNumber").click().clear().click().type(phone_number);
+  }
+  typeIntoEmailAndClear() {
+    cy.get("#email").click().clear().click().type("test@test.com");
+  }
+  typeIntoWeeklyWorkingHoursAndClear() {
+    cy.get("#weekly_working_hours").click().clear().click().type("14");
   }
 
-  typeIntoElementByIdPostClear(elementId: string, value: string) {
-    cy.get("#" + elementId)
+  typeIntoAltPhoneumberAndClear(emergency_phone_number: string) {
+    cy.get("#altPhoneNumber")
       .click()
       .clear()
       .click()
-      .type(value);
+      .type(emergency_phone_number);
   }
+
   typeIntoElementByIdPostClearDob(elementId: string, value: string) {
     cy.get("#" + elementId).click();
     cy.get("#date-input").clear().type(value);
   }
-  clearIntoElementById(elementId: string) {
-    cy.get("#" + elementId)
-      .click()
-      .clear();
+
+  clearFirstName() {
+    cy.get("#firstName").click().clear();
+  }
+  clearLastName() {
+    cy.get("#lastName").click().clear();
+  }
+  clearPhoneNumber() {
+    cy.get("#phoneNumber").click().clear();
+  }
+  clearAltPhoneNumber() {
+    cy.get("#altPhoneNumber").click().clear();
+  }
+  clearWeeklyWorkingHours() {
+    cy.get("#weekly_working_hours").click().clear();
+  }
+
+  typeUserName(username: string) {
+    cy.get("#username").click().type(username);
+  }
+  typePassword() {
+    cy.get("#password").click().type("Test@123");
+  }
+  typePhoneNumber(phone_number: string) {
+    cy.get("#phone_number").click().type(phone_number);
+  }
+  typeConfirmPassword() {
+    cy.get("#c_password").click().type("Test@123");
+  }
+  typeQualification() {
+    cy.get("#qualification").click().type("MBBS");
+  }
+  typeDoctorExperience() {
+    cy.get("#doctor_experience_commenced_on").click().type("2");
+  }
+
+  typeDoctorMedicalCouncilRegNo() {
+    cy.get("#doctor_medical_council_registration").click().type("123456789");
+  }
+
+  typeFirstName() {
+    cy.get("#first_name").click().type("cypress test");
+  }
+  typeLastName() {
+    cy.get("#last_name").click().type("staff user");
+  }
+  typeEmail() {
+    cy.get("#email").click().type("test@test.com");
   }
 
   typeIntoInputByName(inputName: string, value: string) {
@@ -47,15 +102,9 @@ export class UserCreationPage {
       .click()
       .type(value);
   }
-
   selectOptionContainingText(text: string) {
     cy.get("[role='option']").contains(text).click();
   }
-
-  verifyNotification(message: string) {
-    cy.verifyNotification(message);
-  }
-
   selectFacility(name: string) {
     this.typeIntoInputByName("facilities", name);
     this.selectOptionContainingText(name);
@@ -67,24 +116,6 @@ export class UserCreationPage {
   selectHomeFacility(name: string) {
     cy.get("#home_facility").click();
     this.selectOptionContainingText(name);
-  }
-
-  setInputDate(
-    dateElementId: string,
-    inputElementId: string,
-    dateValue: string,
-  ) {
-    cy.get("#" + dateElementId).click();
-    this.typeIntoElementById(inputElementId, dateValue);
-  }
-
-  selectDropdownOption(dropdownId: string, optionText: string) {
-    cy.get("#" + dropdownId).click();
-    this.selectOptionContainingText(optionText);
-  }
-
-  verifyElementContainsText(elementId: string, expectedText: string) {
-    cy.get("#" + elementId).should("contain.text", expectedText);
   }
 
   verifyErrorMessages(errorMessages: string[]) {
