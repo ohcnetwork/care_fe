@@ -398,16 +398,8 @@ export default function ConfigureCamera(props: Props) {
                       errorClassName="hidden"
                       placeholder={t("preset_name_placeholder")}
                       suggestions={presetNameSuggestions}
+                      isClear={true}
                     />
-                    {presetName && (
-                      <button
-                        type="button"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-500"
-                        onClick={() => setPresetName("")}
-                      >
-                        <CareIcon icon="l-times-circle" className="text-lg" />
-                      </button>
-                    )}
                   </div>
 
                   <div className="cui-form-button-group mt-4 flex w-full flex-col justify-end space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
