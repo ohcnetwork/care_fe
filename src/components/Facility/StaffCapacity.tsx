@@ -1,16 +1,15 @@
 import { useReducer, useState } from "react";
 import { DOCTOR_SPECIALIZATION } from "@/common/constants";
 import * as Notification from "../../Utils/Notifications";
-import ButtonV2, { Cancel } from "@/components/Common/components/ButtonV2";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { useTranslation } from "react-i18next";
+import Form from "../Form/Form";
 import { DoctorModal } from "./models";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-import { useTranslation } from "react-i18next";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;
@@ -32,18 +31,16 @@ const initialState = {
 
 const doctorCapacityReducer = (state = initialState, action: any) => {
   switch (action.type) {
-    case "set_form": {
+    case "set_form":
+      return { ...state, form: action.form };
+    case "set_error":
+      return { ...state, errors: action.errors };
+    case "set_field":
       return {
         ...state,
-        form: action.form,
+        form: { ...state.form, [action.name]: action.value },
+        errors: { ...state.errors, [action.name]: action.error || "" },
       };
-    }
-    case "set_error": {
-      return {
-        ...state,
-        errors: action.errors,
-      };
-    }
     default:
       return state;
   }
@@ -51,7 +48,6 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
 
 const getAllowedDoctorTypes = (existing?: DoctorModal[]) => {
   if (!existing) return [...DOCTOR_SPECIALIZATION];
-
   return DOCTOR_SPECIALIZATION.map((specialization) => {
     const disabled = existing.some((i) => i.area === specialization.id);
     return { ...specialization, disabled };
@@ -82,150 +78,101 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
 
   const doctorTypes = getAllowedDoctorTypes(specializationsQuery.data?.results);
 
-  const isLastOptionType =
-    doctorTypes.filter((i) => i.disabled).length ===
-    DOCTOR_SPECIALIZATION.length - 1;
-
-  const headerText = !id ? "Add Staff Capacity" : "Edit Staff Capacity";
-  const buttonText = !id
-    ? `Save ${!isLastOptionType ? "& Add More" : "Staff Capacity"}`
-    : "Update Staff Capacity";
-
-  const validateData = () => {
+  const validateData = (form: typeof initForm, fieldName?: string) => {
     const errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field) => {
-      if (!state.form[field]) {
+    const fieldsToValidate = fieldName ? [fieldName] : Object.keys(form);
+    fieldsToValidate.forEach((field) => {
+      if (!form[field]) {
         errors[field] = t("field_required");
         invalidForm = true;
-      }
-      if (field === "count" && state.form[field] < 0) {
+      } else if (field === "count" && form[field] < 0) {
         errors[field] = "Staff count cannot be negative";
         invalidForm = true;
       }
     });
-    if (invalidForm) {
-      dispatch({ type: "set_error", errors });
-      return false;
-    }
     dispatch({ type: "set_error", errors });
-    return true;
+    return !invalidForm;
   };
 
-  const handleFormFieldChange: FieldChangeEventHandler<unknown> = (event) => {
-    const form = { ...state.form, [event.name]: event.value };
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleSubmit = async (e: any) => {
-    const submitBtnID = e.currentTarget?.id;
-    e.preventDefault();
-    const valid = validateData();
-    if (valid) {
-      setIsLoading(true);
-      const data = {
-        area: Number(state.form.area),
-        count: Number(state.form.count),
-      };
-      const { res } = await (id
-        ? request(routes.updateDoctor, {
-            pathParams: { facilityId, id: `${id}` },
-            body: data,
-          })
-        : request(routes.createDoctor, {
-            pathParams: { facilityId },
-            body: data,
-          }));
-      setIsLoading(false);
-      if (res?.ok) {
-        specializationsQuery.refetch();
-        dispatch({ type: "set_form", form: initForm });
-        if (!id) {
-          Notification.Success({ msg: "Staff count added successfully" });
-        } else {
-          Notification.Success({ msg: "Staff count updated successfully" });
-        }
-      }
+  const handleSubmit = async (form: typeof initForm) => {
+    if (!validateData(form)) return;
+    setIsLoading(true);
+    const data = {
+      area: Number(form.area),
+      count: Number(form.count),
+    };
+    const { res } = await (id
+      ? request(routes.updateDoctor, {
+          pathParams: { facilityId, id: `${id}` },
+          body: data,
+        })
+      : request(routes.createDoctor, {
+          pathParams: { facilityId },
+          body: data,
+        }));
+    setIsLoading(false);
+    if (res?.ok) {
+      specializationsQuery.refetch();
+      Notification.Success({
+        msg: id
+          ? "Staff count updated successfully"
+          : "Staff count added successfully",
+      });
       handleUpdate();
-
-      if (submitBtnID === "save-and-exit") handleClose();
     }
   };
 
   return (
     <div className={className}>
       {isLoading || loading || specializationsQuery.loading ? (
-        <div className="flex items-center justify-center">
-          <div role="status">
-            <svg
-              aria-hidden="true"
-              className="mr-2 h-8 w-8 animate-spin fill-primary text-secondary-200 dark:text-secondary-600"
-              viewBox="0 0 100 101"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                fill="currentColor"
-              />
-              <path
-                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                fill="currentFill"
-              />
-            </svg>
-            <span className="sr-only">Loading...</span>
-          </div>
-        </div>
+        <div>Loading...</div>
       ) : (
-        <div className={className}>
-          <div>
-            <FieldLabel className="mb-2" required>
-              Staff Type
-            </FieldLabel>
-            <SelectMenuV2
-              id="area-of-specialization"
-              value={doctorTypes.find((type) => type.id == state.form.area)?.id}
-              options={
-                id ? doctorTypes : doctorTypes.filter((type) => !type.disabled)
-              }
-              optionLabel={(option) => option.text}
-              optionValue={(option) => option.id}
-              requiredError={state.errors.area.length !== 0}
-              onChange={(e) =>
-                handleFormFieldChange({
-                  name: "area",
-                  value: e || "",
-                })
-              }
-              disabled={!!id}
-            />
-            <FieldErrorText error={state.errors.area} />
-          </div>
-          <div>
-            <TextFormField
-              required
-              id="count"
-              label="Count"
-              name="count"
-              type="number"
-              value={state.form.count}
-              onChange={handleFormFieldChange}
-              error={state.errors.count}
-              min={0}
-            />
-          </div>
-          <div className="cui-form-button-group mt-4">
-            <Cancel onClick={() => handleClose()} />
-            {!isLastOptionType && headerText === "Add Staff Capacity" && (
-              <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
-                Save Staff Capacity
-              </ButtonV2>
-            )}
-            <ButtonV2 id="doctor-save" onClick={handleSubmit}>
-              {buttonText}
-            </ButtonV2>
-          </div>
-        </div>
+        <Form
+          defaults={state.form}
+          onSubmit={handleSubmit}
+          onCancel={handleClose}
+          submitLabel={!id ? "Save Staff Capacity" : "Update Staff Capacity"}
+          className="my-auto p-0"
+          noPadding
+          hideRestoreDraft
+        >
+          {(field) => (
+            <>
+              <div>
+                <FieldLabel required>Staff Type</FieldLabel>
+                <SelectMenuV2
+                  id="area-of-specialization"
+                  value={field("area").value}
+                  options={
+                    id
+                      ? doctorTypes
+                      : doctorTypes.filter((type) => !type.disabled)
+                  }
+                  optionLabel={(option) => option.text}
+                  optionValue={(option) => option.id}
+                  onChange={(e: any) =>
+                    field("area").onChange({ name: "area", value: e })
+                  }
+                  disabled={!!id}
+                />
+                <FieldErrorText error={state.errors.area} />
+              </div>
+              <div>
+                <TextFormField
+                  required
+                  id="count"
+                  label="Count"
+                  name="count"
+                  type="number"
+                  value={field("count").value}
+                  onChange={(e: any) => field("count").onChange(e)}
+                />
+                <FieldErrorText error={state.errors.count} />
+              </div>
+            </>
+          )}
+        </Form>
       )}
     </div>
   );

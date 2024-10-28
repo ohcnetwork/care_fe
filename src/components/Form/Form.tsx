@@ -34,6 +34,8 @@ const Form = <T extends FormDetails>({
   const [isLoading, setIsLoading] = useState(!!asyncGetDefaults);
   const [state, dispatch] = useAutoSaveReducer<T>(formReducer, initial);
 
+  const [isDirty, setIsDirty] = useState(false); // Added isDirty state
+
   useEffect(() => {
     if (!asyncGetDefaults) return;
 
@@ -65,6 +67,30 @@ const Form = <T extends FormDetails>({
         type: "set_errors",
         errors: { ...state.errors, ...errors },
       });
+    } else {
+      setIsDirty(false); // Reset isDirty after successful submit
+    }
+  };
+
+  const handleFieldChange = (
+    { name, value }: FieldChangeEvent<T[keyof T]>,
+    validate?: FieldValidator<T[keyof T]>,
+  ) => {
+    // Update field value and set isDirty to true if any change is made
+    dispatch({
+      type: "set_field",
+      name,
+      value,
+      error: validate?.(value),
+    });
+
+    // Compare the new values with the initial values to determine if it's dirty
+    if (typeof props.defaults[name] == typeof value) {
+      //if type of old and new values are same
+      setIsDirty(props.defaults[name] !== value);
+    } else {
+      //stringyfying old value as type of new value is always string
+      setIsDirty(JSON.stringify(props.defaults[name]) !== value);
     }
   };
 
@@ -85,6 +111,7 @@ const Form = <T extends FormDetails>({
         handleDraftSelect={(newState: FormState<T>) => {
           dispatch({ type: "set_state", state: newState });
           props.onDraftRestore?.(newState);
+          setIsDirty(false); // Reset isDirty when draft is restored
         }}
         formData={state.form}
         hidden={props.hideRestoreDraft}
@@ -94,13 +121,8 @@ const Form = <T extends FormDetails>({
             return {
               name,
               id: name,
-              onChange: ({ name, value }: FieldChangeEvent<T[keyof T]>) =>
-                dispatch({
-                  type: "set_field",
-                  name,
-                  value,
-                  error: validate?.(value),
-                }),
+              onChange: (event: FieldChangeEvent<T[keyof T]>) =>
+                handleFieldChange(event, validate),
               value: state.form[name],
               error: state.errors[name],
               disabled,
@@ -118,7 +140,7 @@ const Form = <T extends FormDetails>({
             <Submit
               data-testid="submit-button"
               type="submit"
-              disabled={disabled}
+              disabled={disabled || !isDirty} // Disable submit if form is not dirty
               label={props.submitLabel ?? "Submit"}
             />
           </div>

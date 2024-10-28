@@ -2,13 +2,12 @@ import { useEffect, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications";
 import { CapacityModal, OptionsType } from "./models";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { BED_TYPES } from "@/common/constants";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
+import Form from "../Form/Form";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;
@@ -52,16 +51,10 @@ export const BedCapacity = (props: BedCapacityProps) => {
   const { t } = useTranslation();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
-  const [isLastOptionType, setIsLastOptionType] = useState(false);
   const [bedTypes, setBedTypes] = useState<OptionsType[]>(
     BED_TYPES.map((o) => ({ id: o, text: t(`bed_type__${o}`) })),
   );
   const [isLoading, setIsLoading] = useState(false);
-
-  const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
-  const buttonText = !id
-    ? `Save ${!isLastOptionType ? "& Add More" : "Bed Capacity"}`
-    : "Update Bed Capacity";
 
   async function fetchCapacityBed() {
     setIsLoading(true);
@@ -74,7 +67,11 @@ export const BedCapacity = (props: BedCapacityProps) => {
         const existingData = capacityQuery.data?.results;
         // if all options are diabled
         if (existingData.length === BED_TYPES.length) {
-          return;
+          //showing an error message "can't add more bed types" instead of returning
+          const errors = initForm;
+          errors["bedType"] = "Cannot add more bed types";
+          dispatch({ type: "set_error", errors });
+          setIsLoading(false);
         }
         // disable existing bed types
         const updatedBedTypes = BED_TYPES.map((type) => {
@@ -112,43 +109,28 @@ export const BedCapacity = (props: BedCapacityProps) => {
     fetchCapacityBed();
   }, []);
 
-  useEffect(() => {
-    const lastBedType =
-      bedTypes.filter((i: OptionsType) => i.disabled).length ===
-      BED_TYPES.length - 1;
-    setIsLastOptionType(lastBedType);
-  }, [bedTypes]);
-
-  const handleChange = (e: FieldChangeEvent<unknown>) => {
-    const form = { ...state.form };
-    form[e.name] = e.value;
-    dispatch({ type: "set_form", form });
-  };
-
-  const validateData = () => {
+  //checking validation of the new form data comming from handle submit
+  const validateData = (form: typeof initForm) => {
     const errors = { ...initForm };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field) => {
-      if (!state.form[field]) {
+    Object.keys(form).forEach((field) => {
+      if (!form[field]) {
         errors[field] = t("field_required");
         invalidForm = true;
-      } else if (
-        field === "currentOccupancy" &&
-        Number(state.form[field] < 0)
-      ) {
+      } else if (field === "currentOccupancy" && Number(form[field] < 0)) {
         errors[field] = "Occupied cannot be negative";
         invalidForm = true;
       } else if (
         field === "currentOccupancy" &&
-        Number(state.form[field]) > Number(state.form.totalCapacity)
+        Number(form[field]) > Number(form.totalCapacity)
       ) {
         errors[field] = "Occupied must be less than or equal to total capacity";
         invalidForm = true;
       }
-      if (field === "totalCapacity" && Number(state.form[field]) === 0) {
+      if (field === "totalCapacity" && Number(form[field]) === 0) {
         errors[field] = "Total capacity cannot be 0";
         invalidForm = true;
-      } else if (field === "totalCapacity" && Number(state.form[field]) < 0) {
+      } else if (field === "totalCapacity" && Number(form[field]) < 0) {
         errors[field] = "Total capacity cannot be negative";
         invalidForm = true;
       }
@@ -161,15 +143,16 @@ export const BedCapacity = (props: BedCapacityProps) => {
     return true;
   };
 
-  const handleSubmit = async (e: any, btnType = "Save") => {
-    e.preventDefault();
-    const valid = validateData();
+  // recieving form data from Form.tsx component
+  const handleSubmit = async (form: typeof initForm) => {
+    const valid = validateData(form);
     if (valid) {
       setIsLoading(true);
+      //Converting new data from string to Number
       const bodyData = {
-        room_type: Number(state.form.bedType),
-        total_capacity: Number(state.form.totalCapacity),
-        current_capacity: Number(state.form.currentOccupancy),
+        room_type: Number(form.bedType),
+        total_capacity: Number(form.totalCapacity),
+        current_capacity: Number(form.currentOccupancy),
       };
       const { data } = await request(
         id ? routes.updateCapacity : routes.createCapacity,
@@ -201,7 +184,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
         }
         handleUpdate();
       }
-      if (btnType == "Save and Exit") handleClose();
+      handleClose();
     }
   };
 
@@ -231,62 +214,60 @@ export const BedCapacity = (props: BedCapacityProps) => {
         </div>
       ) : (
         <div className={className}>
-          <SelectFormField
-            name="bedType"
-            id="bed-type"
-            label="Bed Type"
-            required
-            value={state.form.bedType}
-            options={bedTypes.filter((type) => !type.disabled)}
-            optionLabel={(option) => option.text}
-            optionValue={(option) => option.id}
-            onChange={handleChange}
-            disabled={!!id}
-            error={state.errors.bedType}
-          />
-          <div className="flex flex-col gap-7 md:flex-row">
-            <TextFormField
-              className="w-full"
-              id="total-capacity"
-              name="totalCapacity"
-              label="Total Capacity"
-              required
-              type="number"
-              value={state.form.totalCapacity}
-              onChange={handleChange}
-              error={state.errors.totalCapacity}
-              min={1}
-            />
-            <TextFormField
-              className="w-full"
-              id="currently-occupied"
-              label="Currently Occupied"
-              required
-              name="currentOccupancy"
-              type="number"
-              value={state.form.currentOccupancy}
-              onChange={handleChange}
-              error={state.errors.currentOccupancy}
-              min={0}
-              max={state.form.totalCapacity}
-            />
-          </div>
-
-          <div className="cui-form-button-group mt-4">
-            <Cancel onClick={handleClose} />
-            {!isLastOptionType && headerText === "Add Bed Capacity" && (
-              <Submit
-                id="bed-capacity-save-and-exit"
-                onClick={(e) => handleSubmit(e, "Save and Exit")}
-                label="Save Bed Capacity"
-              />
+          <Form
+            defaults={state.form}
+            onSubmit={handleSubmit}
+            onCancel={handleClose}
+            submitLabel={!id ? "Save Bed Capacity" : "Update Bed Capacity"}
+            className="my-auto p-0"
+            noPadding
+            hideRestoreDraft
+          >
+            {(field) => (
+              <>
+                <SelectFormField
+                  name="bedType"
+                  id="bed-type"
+                  label="Bed Type"
+                  required
+                  value={field("bedType").value}
+                  options={bedTypes.filter((type) => !type.disabled)}
+                  optionLabel={(option) => option.text}
+                  optionValue={(option) => option.id}
+                  onChange={(e: any) => field("bedType").onChange(e)}
+                  disabled={!!id}
+                  error={state.errors.bedType}
+                />
+                <div className="flex flex-col gap-7 md:flex-row">
+                  <TextFormField
+                    className="w-full"
+                    id="total-capacity"
+                    name="totalCapacity"
+                    label="Total Capacity"
+                    required
+                    type="number"
+                    value={field("totalCapacity").value}
+                    onChange={(e: any) => field("totalCapacity").onChange(e)}
+                    error={state.errors.totalCapacity}
+                    min={1}
+                  />
+                  <TextFormField
+                    className="w-full"
+                    id="currently-occupied"
+                    label="Currently Occupied"
+                    required
+                    name="currentOccupancy"
+                    type="number"
+                    value={field("currentOccupancy").value}
+                    onChange={(e: any) => field("currentOccupancy").onChange(e)}
+                    error={state.errors.currentOccupancy}
+                    min={0}
+                    max={state.form.totalCapacity}
+                  />
+                </div>
+              </>
             )}
-            <Submit
-              id="bed-capacity-save"
-              onClick={(e) => handleSubmit(e)}
-              label={buttonText}
-            />
-          </div>
+          </Form>
         </div>
       )}
     </div>
