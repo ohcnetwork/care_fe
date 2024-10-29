@@ -324,9 +324,6 @@ export default function ShiftDetails(props: { id: string }) {
                   size={120}
                 />
               </div>
-              {/* <div className="mt-4 text-center text-xl font-bold">
-{t("referral_letter")}
-</div> */}
               <div className="mt-6">
                 <span className="font-semibold">{t("name_of_hospital")}: </span>
                 {data.is_kasp
@@ -429,23 +426,6 @@ export default function ShiftDetails(props: { id: string }) {
   if (loading) {
     return <Loading />;
   }
-
-  // <div className="my-4">
-  // <div className="my-4 flex justify-end gap-3">
-  // {/* <ButtonV2 onClick={(_) => window.print()}>
-  // <CareIcon icon="l-print" className="mr-2 text-base" />{" "}
-  // {t("print_referral_letter")}
-  // </ButtonV2> */}
-  // <ButtonV2
-  // onClick={(_) => setIsPrintMode(false)}
-  // variant="secondary"
-  // >
-  // <CareIcon icon="l-times" className="mr-2 text-base" />{" "}
-  // {t("close")}
-  // </ButtonV2>
-  // </div>
-  // {printData(data)}
-  // </div>
 
   return (
     <div>
