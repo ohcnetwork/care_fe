@@ -329,6 +329,7 @@ export default function ShiftDetails(props: { id: string }) {
                   ? t("district_program_management_supporting_unit")
                   : data.origin_facility_object?.name || "--"}
               </div>
+              <div className="my-4 border-b-2"></div>
               {/* <Separator /> */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
@@ -367,6 +368,7 @@ export default function ShiftDetails(props: { id: string }) {
                   )}
                 </div>
               </div>
+              <div className="my-4 border-b-2"></div>
               {/* <Separator /> */}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
                 <div>
@@ -408,6 +410,7 @@ export default function ShiftDetails(props: { id: string }) {
                   </p>
                 </div>
               </div>
+              <div className="my-4 border-b-2"></div>
               {/* <Separator /> */}
               <div className="text-muted-foreground mt-6 text-center text-xs sm:text-sm">
                 {t("approved_by_district_covid_control_room")}
