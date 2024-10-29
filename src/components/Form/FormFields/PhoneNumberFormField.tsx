@@ -16,7 +16,6 @@ import {
 } from "../FieldValidators";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-// import { useTranslation } from "react-i18next";
 import React from "react";
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 

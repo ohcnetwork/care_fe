@@ -43,13 +43,13 @@ import {
   DIAGNOSES_FILTER_LABELS,
   DiagnosesFilterKey,
   FILTER_BY_DIAGNOSES_KEYS,
-} from "./DiagnosesFilter.js";
+} from "./DiagnosesFilter";
 import { ICD11DiagnosisModel } from "../Diagnosis/types";
 import { getDiagnosesByIds } from "../Diagnosis/utils";
-import Tabs from "../Common/components/Tabs.js";
+import Tabs from "@/components/Common/components/Tabs";
 import { isPatientMandatoryDataFilled } from "./Utils";
 import request from "../../Utils/request/request";
-import { Avatar } from "../Common/Avatar";
+import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
