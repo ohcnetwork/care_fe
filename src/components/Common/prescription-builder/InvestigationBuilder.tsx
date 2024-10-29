@@ -5,6 +5,8 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import { humanizeStrings } from "../../../Utils/utils";
+import DateFormField from "../../Form/FormFields/DateFormField";
+import dayjs from "dayjs";
 
 export type InvestigationType = {
   type?: string[];
@@ -208,25 +210,30 @@ export default function InvestigationBuilder(
                       </div>
                     </div>
                   ) : (
-                    <div className="w-full">
-                      Time<span className="text-danger-500">{" *"}</span>
-                      <input
-                        type="datetime-local"
-                        className="block w-[calc(100%-5px)] rounded border border-secondary-400 bg-secondary-100 px-4 py-2 text-sm hover:bg-secondary-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
-                        value={investigation.time || ""}
-                        onChange={(e) => {
-                          setItem(
-                            {
-                              ...investigation,
-                              time: e.currentTarget.value,
-                            },
-                            i,
-                          );
-                        }}
-                        onFocus={() => setActiveIdx(i)}
-                        onBlur={() => setActiveIdx(null)}
-                      />
-                    </div>
+                    <DateFormField
+                      name="time"
+                      label="Time"
+                      required
+                      value={
+                        !investigation.time
+                          ? new Date()
+                          : new Date(investigation.time)
+                      }
+                      onChange={(e) =>
+                        setItem(
+                          {
+                            ...investigation,
+                            time: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
+                          },
+                          i,
+                        )
+                      }
+                      allowTime
+                      errorClassName="hidden"
+                      className="w-full"
+                      onFocus={() => setActiveIdx(i)}
+                      onBlur={() => setActiveIdx(null)}
+                    />
                   )}
                 </div>
                 <div className="w-full">

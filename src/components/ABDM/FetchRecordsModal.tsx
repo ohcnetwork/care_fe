@@ -193,7 +193,6 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
         label={t("consent_request__expiry")}
         required
         disablePast
-        position="TOP-RIGHT"
       />
 
       <div className="mt-6 flex items-center justify-end">

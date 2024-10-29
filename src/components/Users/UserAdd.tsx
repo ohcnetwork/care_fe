@@ -816,7 +816,6 @@ export const UserAdd = (props: UserProps) => {
               required
               value={getDate(state.form.date_of_birth)}
               onChange={handleDateChange}
-              position="LEFT"
               disableFuture
             />
 
