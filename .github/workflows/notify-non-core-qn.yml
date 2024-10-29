@@ -1,52 +1,80 @@
 name: Notify Core Team on Non-Core Questions
-
 on:
   issue_comment:
     types: [created]
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
   notify_core_team:
     runs-on: ubuntu-latest
+    env:
+      ALLOWED_USERNAMES: ${{ secrets.ALLOWED_USERNAMES }}
+      QUESTION_KEYWORDS: ${{ secrets.QUESTION_KEYWORDS }}
+      QUESTION_LABELS: ${{ secrets.QUESTION_LABELS }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     steps:
       - name: Check and Notify
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            console.log('Script started');
             const commenter = context.payload.comment.user.login;
+            console.log('Commenter:', commenter);
             const coreUsernames = process.env.ALLOWED_USERNAMES.split(',');
-            const isOrgMember = allowedUsernames.includes(commenter);
+            const isOrgMember = coreUsernames.includes(commenter);
+            console.log('Is commenter an org member?', isOrgMember);
+
             if (!isOrgMember) {
               const commentBody = context.payload.comment.body.toLowerCase();
+              console.log('Comment body:', commentBody);
               const questionKeywords = process.env.QUESTION_KEYWORDS.split(',');
+              console.log('Question Keywords:', questionKeywords);
               const isQuestion = questionKeywords.some(keyword => commentBody.includes(keyword));
+              console.log('Is comment a question?', isQuestion);
+
               if (isQuestion) {
-                await github.repos.createDispatchEvent({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  event_type: 'notify_core_team',
-                  client_payload: {
+                try {
+                  console.log('Adding labels to the issue');
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
                     issue_number: context.payload.issue.number,
-                    repository: context.repo.repo
+                    labels: process.env.QUESTION_LABELS.split(',')
+                  });
+                  console.log('Labels added successfully');
+                } catch (error) {
+                  console.error('Error adding labels:', error.message);
+                  if (error.status === 403) {
+                    console.error('Permission denied. Please check GitHub token permissions.');
                   }
-                });
-                await github.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.issue.number,
-                  labels: process.env.QUESTION_LABELS.split(','),
-                });
+                }
+
                 const slackWebhook = process.env.SLACK_WEBHOOK;
+                console.log('Slack Webhook URL:', slackWebhook);
                 const issueUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${context.payload.issue.number}`;
+                console.log('Issue URL:', issueUrl);
+
                 const message = {
-                  text: `A non-core member posted a question: ${issueUrl}`
+                  text: `:question: *An Open Source contributor posted a question:*\n<${issueUrl}| View the issue>`
                 };
-                await fetch(slackWebhook, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(message)
-                });
+                console.log('Slack message:', message);
+
+                try {
+                  await fetch(slackWebhook, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(message)
+                  });
+                  console.log('Slack notification sent successfully');
+                } catch (error) {
+                  console.error('Error sending Slack notification:', error.message);
+                }
               }
             }
+            console.log('Script ended');
