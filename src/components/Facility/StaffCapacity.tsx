@@ -80,22 +80,22 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
 
   const validateData = (form: typeof initForm, fieldName?: string) => {
     const errors = { ...initForm };
-    let invalidForm = false;
+    let validForm = true;
     const fieldsToValidate = fieldName ? [fieldName] : Object.keys(form);
     fieldsToValidate.forEach((field) => {
       if (!form[field]) {
         errors[field] = t("field_required");
-        invalidForm = true;
+        validForm = false;
       } else if (field === "count" && form[field] < 0) {
         errors[field] = "Staff count cannot be negative";
-        invalidForm = true;
+        validForm = false;
       }
     });
     dispatch({ type: "set_error", errors });
-    return !invalidForm;
+    return validForm;
   };
 
-  const handleSubmit = async (form: typeof initForm) => {
+  const handleSubmit = async (form: typeof initForm, btnType?: string) => {
     if (!validateData(form)) return;
     setIsLoading(true);
     const data = {
@@ -121,6 +121,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
       });
       handleUpdate();
     }
+    if (btnType !== "save-and-add-more") handleClose();
   };
 
   return (
@@ -136,6 +137,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
           className="my-auto p-0"
           noPadding
           hideRestoreDraft
+          showSaveAndAddMoreBtn
         >
           {(field) => (
             <>

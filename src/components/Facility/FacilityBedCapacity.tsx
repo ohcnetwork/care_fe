@@ -92,6 +92,7 @@ export const FacilityBedCapacity = (props: any) => {
             id="facility-add-bedtype"
             className="w-full md:w-auto"
             onClick={() => setBedCapacityModalOpen(true)}
+            disabled={BED_TYPES.length === capacityQuery.data?.count}
             authorizeFor={NonReadOnlyUsers}
           >
             <CareIcon icon="l-bed" className="mr-2 text-lg text-white" />

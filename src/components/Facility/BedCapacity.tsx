@@ -65,14 +65,6 @@ export const BedCapacity = (props: BedCapacityProps) => {
       });
       if (capacityQuery?.data) {
         const existingData = capacityQuery.data?.results;
-        // if all options are diabled
-        if (existingData.length === BED_TYPES.length) {
-          //showing an error message "can't add more bed types" instead of returning
-          const errors = initForm;
-          errors["bedType"] = "Cannot add more bed types";
-          dispatch({ type: "set_error", errors });
-          setIsLoading(false);
-        }
         // disable existing bed types
         const updatedBedTypes = BED_TYPES.map((type) => {
           const isExisting = existingData.find(
@@ -112,30 +104,30 @@ export const BedCapacity = (props: BedCapacityProps) => {
   //checking validation of the new form data comming from handle submit
   const validateData = (form: typeof initForm) => {
     const errors = { ...initForm };
-    let invalidForm = false;
+    let validForm = true;
     Object.keys(form).forEach((field) => {
       if (!form[field]) {
         errors[field] = t("field_required");
-        invalidForm = true;
+        validForm = false;
       } else if (field === "currentOccupancy" && Number(form[field] < 0)) {
         errors[field] = "Occupied cannot be negative";
-        invalidForm = true;
+        validForm = false;
       } else if (
         field === "currentOccupancy" &&
         Number(form[field]) > Number(form.totalCapacity)
       ) {
         errors[field] = "Occupied must be less than or equal to total capacity";
-        invalidForm = true;
+        validForm = false;
       }
       if (field === "totalCapacity" && Number(form[field]) === 0) {
         errors[field] = "Total capacity cannot be 0";
-        invalidForm = true;
+        validForm = false;
       } else if (field === "totalCapacity" && Number(form[field]) < 0) {
         errors[field] = "Total capacity cannot be negative";
-        invalidForm = true;
+        validForm = false;
       }
     });
-    if (invalidForm) {
+    if (!validForm) {
       dispatch({ type: "set_error", errors });
       return false;
     }
@@ -144,7 +136,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
   };
 
   // recieving form data from Form.tsx component
-  const handleSubmit = async (form: typeof initForm) => {
+  const handleSubmit = async (form: typeof initForm, btnType?: string) => {
     const valid = validateData(form);
     if (valid) {
       setIsLoading(true);
@@ -184,7 +176,11 @@ export const BedCapacity = (props: BedCapacityProps) => {
         }
         handleUpdate();
       }
-      handleClose();
+      if (
+        btnType !== "save-and-add-more" ||
+        bedTypes.length === BED_TYPES.length
+      )
+        handleClose();
     }
   };
 
@@ -222,6 +218,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
             className="my-auto p-0"
             noPadding
             hideRestoreDraft
+            showSaveAndAddMoreBtn
           >
             {(field) => (
               <>

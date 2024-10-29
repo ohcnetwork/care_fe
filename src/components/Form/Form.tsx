@@ -14,7 +14,7 @@ type Props<T extends FormDetails> = {
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
   validate?: (form: T) => FormErrors<T>;
-  onSubmit: (form: T) => Promise<FormErrors<T> | void>;
+  onSubmit: (form: T, btnType?: string) => Promise<FormErrors<T> | void>;
   onCancel?: () => void;
   noPadding?: true;
   disabled?: boolean;
@@ -23,6 +23,7 @@ type Props<T extends FormDetails> = {
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
   hideRestoreDraft?: boolean;
+  showSaveAndAddMoreBtn?: boolean;
 };
 
 const Form = <T extends FormDetails>({
@@ -48,6 +49,7 @@ const Form = <T extends FormDetails>({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    const buttonId = (event.nativeEvent as SubmitEvent).submitter?.id;
 
     if (validate) {
       const errors = omitBy(validate(state.form), isEmpty) as FormErrors<T>;
@@ -60,15 +62,16 @@ const Form = <T extends FormDetails>({
         return;
       }
     }
+    console.log("event.currentTarget.id: ", buttonId);
 
-    const errors = await props.onSubmit(state.form);
+    const errors = await props.onSubmit(state.form, buttonId);
     if (errors) {
       dispatch({
         type: "set_errors",
         errors: { ...state.errors, ...errors },
       });
     } else {
-      setIsDirty(false); // Reset isDirty after successful submit
+      setIsDirty(false);
     }
   };
 
@@ -76,7 +79,6 @@ const Form = <T extends FormDetails>({
     { name, value }: FieldChangeEvent<T[keyof T]>,
     validate?: FieldValidator<T[keyof T]>,
   ) => {
-    // Update field value and set isDirty to true if any change is made
     dispatch({
       type: "set_field",
       name,
@@ -84,12 +86,9 @@ const Form = <T extends FormDetails>({
       error: validate?.(value),
     });
 
-    // Compare the new values with the initial values to determine if it's dirty
     if (typeof props.defaults[name] == typeof value) {
-      //if type of old and new values are same
       setIsDirty(props.defaults[name] !== value);
     } else {
-      //stringyfying old value as type of new value is always string
       setIsDirty(JSON.stringify(props.defaults[name]) !== value);
     }
   };
@@ -111,7 +110,7 @@ const Form = <T extends FormDetails>({
         handleDraftSelect={(newState: FormState<T>) => {
           dispatch({ type: "set_state", state: newState });
           props.onDraftRestore?.(newState);
-          setIsDirty(false); // Reset isDirty when draft is restored
+          setIsDirty(false);
         }}
         formData={state.form}
         hidden={props.hideRestoreDraft}
@@ -138,11 +137,21 @@ const Form = <T extends FormDetails>({
               label={props.cancelLabel ?? "Cancel"}
             />
             <Submit
+              id="save"
               data-testid="submit-button"
               type="submit"
-              disabled={disabled || !isDirty} // Disable submit if form is not dirty
+              disabled={disabled || !isDirty}
               label={props.submitLabel ?? "Submit"}
             />
+            {props.showSaveAndAddMoreBtn && (
+              <Submit
+                id="save-and-add-more"
+                data-testid="submit-button"
+                type="submit"
+                disabled={disabled || !isDirty}
+                label={"Save & Add More"}
+              />
+            )}
           </div>
         </Provider>
       </DraftSection>
