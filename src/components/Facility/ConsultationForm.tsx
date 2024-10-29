@@ -65,6 +65,7 @@ import {
   CreateSymptomsBuilder,
 } from "../Symptoms/SymptomsBuilder";
 import careConfig from "@careConfig";
+import DateFormField from "../Form/FormFields/DateFormField.js";
 
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
@@ -1178,13 +1179,24 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         ref={fieldRef["death_datetime"]}
                       >
-                        <TextFormField
+                        <DateFormField
                           {...field("death_datetime")}
-                          type="datetime-local"
-                          max={dayjs().format("YYYY-MM-DDTHH:mm")}
-                          required={state.form.suggestion === "DD"}
                           label="Date & Time of Death"
-                          value={state.form.death_datetime}
+                          required={state.form.suggestion === "DD"}
+                          value={
+                            !state.form.death_datetime
+                              ? new Date()
+                              : new Date(state.form.death_datetime)
+                          }
+                          max={new Date()}
+                          onChange={(e) =>
+                            field("death_datetime").onChange({
+                              ...e,
+                              value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
+                            })
+                          }
+                          allowTime
+                          errorClassName="hidden"
                         />
                       </div>
                       <div
@@ -1209,7 +1221,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     )}
                     ref={fieldRef["encounter_date"]}
                   >
-                    <TextFormField
+                    <DateFormField
                       {...field("encounter_date")}
                       required={["A", "DC", "OP"].includes(
                         state.form.suggestion,
@@ -1217,14 +1229,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       label={t(
                         `encounter_date_field_label__${state.form.suggestion}`,
                       )}
-                      type="datetime-local"
-                      value={dayjs(state.form.encounter_date).format(
-                        "YYYY-MM-DDTHH:mm",
-                      )}
-                      max={dayjs().format("YYYY-MM-DDTHH:mm")}
-                      min={dayjs(careConfig.minEncounterDate).format(
-                        "YYYY-MM-DDTHH:mm",
-                      )}
+                      value={
+                        !state.form.encounter_date
+                          ? new Date()
+                          : state.form.encounter_date
+                      }
+                      max={new Date()}
+                      min={careConfig.minEncounterDate}
+                      onChange={(e) =>
+                        field("encounter_date").onChange({
+                          ...e,
+                          value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
+                        })
+                      }
+                      allowTime
+                      errorClassName="hidden"
                     />
                     {dayjs().diff(state.form.encounter_date, "day") > 30 && (
                       <div className="mb-6">
@@ -1252,16 +1271,18 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       )}
                       ref={fieldRef["icu_admission_date"]}
                     >
-                      <TextFormField
+                      <DateFormField
                         {...field("icu_admission_date")}
                         label="Date & Time  of admission to the ICU"
-                        type="datetime-local"
-                        value={
-                          state.form.icu_admission_date &&
-                          dayjs(state.form.icu_admission_date).format(
-                            "YYYY-MM-DDTHH:mm",
-                          )
+                        value={state.form.icu_admission_date || new Date()}
+                        onChange={(e) =>
+                          field("icu_admission_date").onChange({
+                            ...e,
+                            value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
+                          })
                         }
+                        allowTime
+                        errorClassName="hidden"
                       />
                     </div>
                   )}
