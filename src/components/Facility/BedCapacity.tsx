@@ -135,7 +135,6 @@ export const BedCapacity = (props: BedCapacityProps) => {
     return true;
   };
 
-  // recieving form data from Form.tsx component
   const handleSubmit = async (form: typeof initForm, btnType?: string) => {
     const valid = validateData(form);
     if (valid) {

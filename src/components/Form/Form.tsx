@@ -62,7 +62,6 @@ const Form = <T extends FormDetails>({
         return;
       }
     }
-    console.log("event.currentTarget.id: ", buttonId);
 
     const errors = await props.onSubmit(state.form, buttonId);
     if (errors) {
