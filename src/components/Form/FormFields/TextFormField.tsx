@@ -9,12 +9,15 @@ import {
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
+import { Threshold } from "./RangeAutocompleteFormField";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> &
   Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     "onChange"
   > & {
+    unit?: React.ReactNode;
+    thresholds?: Threshold[];
     inputClassName?: string | undefined;
     removeDefaultClasses?: true | undefined;
     leading?: React.ReactNode | undefined;

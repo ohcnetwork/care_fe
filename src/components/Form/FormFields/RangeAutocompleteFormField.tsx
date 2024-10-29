@@ -4,7 +4,7 @@ import { FormFieldBaseProps } from "./Utils";
 import { classNames, compareBy } from "../../../Utils/utils";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
 
-interface Threshold {
+export interface Threshold {
   value: number;
   icon?: React.ReactNode;
   label: string;

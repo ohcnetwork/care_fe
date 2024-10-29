@@ -7,6 +7,7 @@ import dayjs from "../../Utils/dayjs";
 import * as Notification from "../../Utils/Notifications";
 import { t } from "i18next";
 import DateTextInput from "./DateTextInput";
+import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
 
 type DatePickerType = "date" | "month" | "year";
 
@@ -62,6 +63,7 @@ const DateInputV2: React.FC<Props> = ({
   const minutes = dayjs(value).minute();
   const ampm = dayjs(value).hour() > 11 ? "PM" : "AM";
 
+  const dateInputRef = useRef<HTMLDivElement>(null);
   const hourScrollerRef = useRef<HTMLDivElement>(null);
   const minuteScrollerRef = useRef<HTMLDivElement>(null);
 
@@ -277,10 +279,26 @@ const DateInputV2: React.FC<Props> = ({
     return `${right ? "md:-translate-x-1/2" : ""} ${top ? "md:-translate-y-[calc(100%+50px)]" : ""}`;
   };
 
+  const domValue = useValueInjectionObserver<string>({
+    targetElement: dateInputRef.current,
+    attribute: "data-cui-dateinput-value",
+  });
+
+  useEffect(() => {
+    console.log(domValue);
+    if (value !== domValue && typeof domValue !== "undefined")
+      onChange(dayjs(domValue).toDate());
+  }, [domValue]);
+
   return (
     <div>
       <div
+        ref={dateInputRef}
         className={`${containerClassName ?? "container mx-auto text-black"}`}
+        data-cui-dateinput
+        data-cui-dateinput-value={JSON.stringify(
+          dayjs(value).format("YYYY-MM-DDTHH:mm"),
+        )}
       >
         <Popover className="relative">
           {({ open, close }) => {
@@ -292,13 +310,14 @@ const DateInputV2: React.FC<Props> = ({
                   className="w-full"
                   ref={popoverButtonRef}
                 >
-                  <input type="hidden" name="date" />
+                  <input type="hidden" name="date" data-scribe-ignore />
                   <input
                     id={id}
                     name={name}
                     type="text"
                     readOnly
                     disabled={disabled}
+                    data-scribe-ignore
                     className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
                     placeholder={placeholder ?? t("select_date")}
                     value={value ? dayjs(value).format(dateFormat) : ""}

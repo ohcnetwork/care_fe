@@ -58,6 +58,8 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import NursingCare from "../LogUpdate/Sections/NursingCare";
 
 import Loading from "@/components/Common/Loading";
+import TextFormField from "../Form/FormFields/TextFormField";
+import RangeFormField from "../Form/FormFields/RangeFormField";
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -852,13 +854,19 @@ export const DailyRounds = (props: any) => {
           ) && (
             <>
               <TemperatureFormField {...field("temperature")} />
-
-              <RangeAutocompleteFormField
+              <RangeFormField
                 {...field("resp")}
                 unit="bpm"
-                start={0}
-                end={150}
+                min={0}
+                max={150}
                 step={1}
+              />
+              {/*<TextFormField
+                {...field("resp")}
+                type="number"
+                unit="bpm"
+                min={0}
+                max={150}
                 thresholds={[
                   {
                     value: 0,
@@ -876,7 +884,7 @@ export const DailyRounds = (props: any) => {
                     label: "Tachypnea",
                   },
                 ]}
-              />
+              />*/}
 
               <RangeAutocompleteFormField
                 {...field("ventilator_spo2")}
