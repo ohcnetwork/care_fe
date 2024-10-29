@@ -1,6 +1,5 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
-    cy.wait(5000);
     cy.get("#route_to_facility").scrollIntoView();
     cy.get("#route_to_facility").should("be.visible");
     cy.clickAndSelectOption("#route_to_facility", status);
@@ -109,6 +108,5 @@ export class PatientConsultationPage {
       "#consultation-buttons",
       "Edit Consultation Details",
     );
-    cy.wait(3000);
   }
 }

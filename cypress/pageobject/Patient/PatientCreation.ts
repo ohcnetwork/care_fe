@@ -13,7 +13,6 @@ export class PatientPage {
   visitPatient(patientName: string) {
     cy.get("#name").click().type(patientName);
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
-    // cy.wait("@getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
     cy.get("#patient-name-consultation")

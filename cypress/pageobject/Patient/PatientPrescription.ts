@@ -61,8 +61,7 @@ export class PatientPrescription {
   }
 
   enterDiscontinueReason(reason: string) {
-    cy.wait(2000);
-    cy.get("#discontinuedReason").type(reason);
+    cy.get("#discontinuedReason").should("be.visible").type(reason);
   }
 
   enterAdministerDosage(dosage: string) {

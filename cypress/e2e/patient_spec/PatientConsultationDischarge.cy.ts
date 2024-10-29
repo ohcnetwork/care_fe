@@ -76,10 +76,8 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.clickClearButton();
     // select a non-registered facility and perform the discharge
     patientDischarge.typeReferringFacility(referringFreetextFacility);
-    cy.wait(2000);
     cy.submitButton("Confirm Discharge");
     cy.submitButton("Acknowledge & Submit");
-    cy.wait(2000);
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -106,12 +104,10 @@ describe("Patient Discharge based on multiple reason", () => {
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.submitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
-    cy.wait(2000);
     cy.closeNotification();
     // submit the discharge pop-up
     cy.submitButton("Confirm Discharge");
     cy.submitButton("Acknowledge & Submit");
-    cy.wait(2000);
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
