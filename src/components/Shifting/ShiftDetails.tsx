@@ -432,8 +432,8 @@ export default function ShiftDetails(props: { id: string }) {
   return (
     <div>
       {isPrintMode ? (
-        <div className="my-4">
-          <div className="my-5 mr-[100px] flex justify-end gap-3 xl:absolute xl:right-6 xl:top-7 xl:justify-end">
+        <div className="my-4 xl:relative">
+          <div className="relative top-[190px] my-5 mr-[100px] flex justify-end gap-3 xl:absolute xl:right-6 xl:top-7 xl:justify-end">
             <ButtonV2
               onClick={(_) => setIsPrintMode(false)}
               variant="secondary"
