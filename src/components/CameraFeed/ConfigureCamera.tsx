@@ -389,26 +389,23 @@ export default function ConfigureCamera(props: Props) {
                     setPresetName("");
                   }}
                 >
-                  <div className="relative w-full">
-                    <TextFormField
-                      name="preset-name"
-                      className="w-full py-4"
-                      value={presetName}
-                      onChange={({ value }) => setPresetName(value)}
-                      errorClassName="hidden"
-                      placeholder={t("preset_name_placeholder")}
-                      suggestions={presetNameSuggestions}
-                      isClear={true}
-                    />
-                  </div>
+                  <TextFormField
+                    name="preset-name"
+                    className="w-full py-4"
+                    value={presetName}
+                    onChange={({ value }) => setPresetName(value)}
+                    errorClassName="hidden"
+                    placeholder={t("preset_name_placeholder")}
+                    suggestions={presetNameSuggestions}
+                    clearable={true}
+                  />
 
-                  <div className="cui-form-button-group mt-4 flex w-full flex-col justify-end space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+                  <div className="cui-form-button-group">
                     <Cancel
                       onClick={() => {
                         setCreatePreset(undefined);
                         setPresetName("");
                       }}
-                      className="ml-0 w-full sm:ml-2 sm:w-auto"
                     />
 
                     <Submit
@@ -429,7 +426,6 @@ export default function ConfigureCamera(props: Props) {
                         cameraPresetsQuery.refetch();
                       }}
                       disabled={!presetName}
-                      className="w-full sm:w-auto"
                     />
                   </div>
                 </DialogModal>

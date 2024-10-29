@@ -24,7 +24,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> &
     trailingPadding?: string | undefined;
     leadingPadding?: string | undefined;
     suggestions?: string[];
-    isClear?: boolean;
+    clearable?: boolean | undefined;
   };
 
 const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
@@ -36,7 +36,6 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
   const hasTrailing = !!(trailing || trailingFocused);
   const hasIcon = hasLeading || hasTrailing;
   const [showPassword, setShowPassword] = useState(false);
-  const isClear = props.isClear || false;
 
   const getPasswordFieldType = () => {
     return showPassword ? "text" : "password";
@@ -66,7 +65,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         required={field.required}
         onChange={(e) => field.handleChange(e.target.value)}
       />
-      {isClear && field.value && (
+      {props.clearable && field.value && (
         <button
           type="button"
           className="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-500"
