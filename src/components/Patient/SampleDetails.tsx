@@ -25,6 +25,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         if (!(res?.ok && data)) {
           navigate("/not-found");
         }
+        console.log(data);
       },
     },
   );
@@ -411,11 +412,19 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               </div>
             )}
           {sampleDetails?.sample_type && (
-            <div className="md:col-span-2">
+            <div>
               <span className="font-semibold capitalize leading-relaxed">
                 Sample Type:{" "}
               </span>
               {_.startCase(_.camelCase(sampleDetails.sample_type))}
+            </div>
+          )}
+          {sampleDetails?.sample_type === "OTHER TYPE" && (
+            <div>
+              <span className="font-semibold capitalize leading-relaxed">
+                Sample Type Description:
+              </span>
+              {sampleDetails?.sample_type_other}
             </div>
           )}
         </div>
