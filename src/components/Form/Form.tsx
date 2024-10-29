@@ -23,7 +23,7 @@ type Props<T extends FormDetails> = {
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
   hideRestoreDraft?: boolean;
-  showSaveAndAddMoreBtn?: boolean;
+  showSaveAndAddMoreBtn?: string;
 };
 
 const Form = <T extends FormDetails>({
@@ -135,22 +135,22 @@ const Form = <T extends FormDetails>({
               onClick={props.onCancel}
               label={props.cancelLabel ?? "Cancel"}
             />
-            <Submit
-              id="save"
-              data-testid="submit-button"
-              type="submit"
-              disabled={disabled || !isDirty}
-              label={props.submitLabel ?? "Submit"}
-            />
             {props.showSaveAndAddMoreBtn && (
               <Submit
-                id="save-and-add-more"
+                id="save"
                 data-testid="submit-button"
                 type="submit"
                 disabled={disabled || !isDirty}
-                label={"Save & Add More"}
+                label={props.showSaveAndAddMoreBtn ?? "Save "}
               />
             )}
+            <Submit
+              id="save-and-add-more"
+              data-testid="submit-button"
+              type="submit"
+              disabled={disabled || !isDirty}
+              label={props.submitLabel}
+            />
           </div>
         </Provider>
       </DraftSection>

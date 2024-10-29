@@ -51,6 +51,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
   const { t } = useTranslation();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
+  const [isLastOptionType, setIsLastOptionType] = useState(false);
   const [bedTypes, setBedTypes] = useState<OptionsType[]>(
     BED_TYPES.map((o) => ({ id: o, text: t(`bed_type__${o}`) })),
   );
@@ -135,6 +136,18 @@ export const BedCapacity = (props: BedCapacityProps) => {
     return true;
   };
 
+  const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
+  const buttonText = !id
+    ? `Save ${!isLastOptionType ? "& Add More" : "Bed Capacity"}`
+    : "Update Bed Capacity";
+
+  useEffect(() => {
+    const lastBedType =
+      bedTypes.filter((i: OptionsType) => i.disabled).length ===
+      BED_TYPES.length - 1;
+    setIsLastOptionType(lastBedType);
+  }, [bedTypes]);
+
   const handleSubmit = async (form: typeof initForm, btnType?: string) => {
     const valid = validateData(form);
     if (valid) {
@@ -218,11 +231,15 @@ export const BedCapacity = (props: BedCapacityProps) => {
             defaults={state.form}
             onSubmit={handleSubmit}
             onCancel={handleClose}
-            submitLabel={!id ? "Save Bed Capacity" : "Update Bed Capacity"}
+            submitLabel={buttonText}
             className="my-auto p-0"
             noPadding
             hideRestoreDraft
-            showSaveAndAddMoreBtn
+            showSaveAndAddMoreBtn={
+              !isLastOptionType && headerText === "Add Bed Capacity"
+                ? "Save Bed Capacity"
+                : ""
+            }
           >
             {(field) => (
               <>

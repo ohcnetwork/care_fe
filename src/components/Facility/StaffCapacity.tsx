@@ -95,6 +95,15 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
     return validForm;
   };
 
+  const isLastOptionType =
+    doctorTypes.filter((i) => i.disabled).length ===
+    DOCTOR_SPECIALIZATION.length - 1;
+
+  const headerText = !id ? "Add Staff Capacity" : "Edit Staff Capacity";
+  const buttonText = !id
+    ? `Save ${!isLastOptionType ? "& Add More" : "Staff Capacity"}`
+    : "Update Staff Capacity";
+
   const handleSubmit = async (form: typeof initForm, btnType?: string) => {
     if (!validateData(form)) return;
     setIsLoading(true);
@@ -133,11 +142,15 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
           defaults={state.form}
           onSubmit={handleSubmit}
           onCancel={handleClose}
-          submitLabel={!id ? "Save Staff Capacity" : "Update Staff Capacity"}
+          submitLabel={buttonText}
           className="my-auto p-0"
           noPadding
           hideRestoreDraft
-          showSaveAndAddMoreBtn
+          showSaveAndAddMoreBtn={
+            !isLastOptionType && headerText === "Add Staff Capacity"
+              ? "Save Staff Capacity"
+              : ""
+          }
         >
           {(field) => (
             <>
