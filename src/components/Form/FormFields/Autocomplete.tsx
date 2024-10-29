@@ -87,6 +87,7 @@ type AutocompleteProps<T, V = T> = {
   isLoading?: boolean;
   allowRawInput?: boolean;
   error?: string;
+  avatar?: boolean;
 } & (
   | {
       required?: false;
@@ -244,11 +245,13 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                         <div className="flex items-center">
                           <div className="flex flex-col">
                             <div className="relative">
-                              <Avatar
-                                className="mr-2 h-11 w-11 rounded-full"
-                                name={option.label}
-                                imageUrl={option.image}
-                              />
+                              {(option.image || props.avatar) && (
+                                <Avatar
+                                  className="mr-2 h-11 w-11 rounded-full"
+                                  name={option.label}
+                                  imageUrl={option.image}
+                                />
+                              )}
                               <span className="absolute bottom-0 right-0 z-10">
                                 {option.icon}
                               </span>
