@@ -153,8 +153,9 @@ export const BedCapacity = (props: BedCapacityProps) => {
         },
       );
       setIsLoading(false);
+      let updatedBedTypes;
       if (data) {
-        const updatedBedTypes = bedTypes.map((type) => {
+        updatedBedTypes = bedTypes.map((type) => {
           return {
             ...type,
             disabled: data.room_type !== type.id ? type.disabled : true,
@@ -175,9 +176,13 @@ export const BedCapacity = (props: BedCapacityProps) => {
         }
         handleUpdate();
       }
+      const disabledBedTypesLength = updatedBedTypes?.filter(
+        (item) => item.disabled,
+      ).length;
+
       if (
         btnType !== "save-and-add-more" ||
-        bedTypes.length === BED_TYPES.length
+        disabledBedTypesLength === BED_TYPES.length
       )
         handleClose();
     }
