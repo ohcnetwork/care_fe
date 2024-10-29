@@ -12,7 +12,6 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import CircularProgress from "@/components/Common/components/CircularProgress";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import Loading from "@/components/Common/Loading";
-import TextFormField from "../../Form/FormFields/TextFormField";
 import dayjs from "../../../Utils/dayjs";
 import { AssetSelect } from "@/components/Common/AssetSelect";
 import DialogModal from "@/components/Common/Dialog";
@@ -24,6 +23,7 @@ import {
 } from "../../Assets/AssetTypes";
 import Chip from "../../../CAREUI/display/Chip";
 import BedActivityTimeline from "./BedActivityTimeline";
+import DateFormField from "../../Form/FormFields/DateFormField.js";
 
 interface BedsProps {
   facilityId: string;
@@ -204,16 +204,18 @@ const Beds = (props: BedsProps) => {
                 unoccupiedOnly
               />
             </div>
-            <TextFormField
+            <DateFormField
               label="Date of shift"
               id="start_date"
               name="start_date"
-              value={startDate}
-              type="datetime-local"
-              onChange={(e) => setStartDate(e.value)}
-              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+              value={startDate ? new Date(startDate) : new Date()}
+              onChange={(e) =>
+                setStartDate(dayjs(e.value).format("YYYY-MM-DDTHH:mm"))
+              }
+              max={new Date()}
               error=""
               errorClassName="hidden"
+              allowTime
             />
             <div>
               <FieldLabel id="assets-link-label">Link Assets</FieldLabel>

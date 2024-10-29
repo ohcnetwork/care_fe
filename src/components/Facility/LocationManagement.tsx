@@ -14,9 +14,8 @@ import DialogModal from "@/components/Common/Dialog";
 import Uptime from "@/components/Common/Uptime";
 import useAuthUser from "@/common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
-
 import Loading from "@/components/Common/Loading";
-import { cn } from "@/lib/utils";
+
 interface Props {
   facilityId: string;
 }
@@ -287,11 +286,9 @@ const Location = ({
         id="manage-bed-button"
         variant="secondary"
         border
-        className={cn(
-          "mt-3 flex w-full items-center justify-between",
-          totalBeds != null && "opacity-50",
-        )}
+        className="mt-3 flex w-full items-center justify-between"
         href={`location/${id}/beds`}
+        disabled={totalBeds == null}
       >
         Manage Beds
         <span className="flex items-center justify-center gap-2">
