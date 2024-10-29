@@ -17,7 +17,7 @@ import Pagination from "../Common/Pagination";
 export const FacilityStaffList = (props: any) => {
   const { t } = useTranslation();
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
-  const { qParams, resultsPerPage, updatePage } = useFilters({});
+  const { qParams, resultsPerPage, updatePage } = useFilters({ limit: 15 });
   const [totalDoctors, setTotalDoctors] = useState(0);
 
   const { data: doctorsList, refetch } = useQuery(routes.listDoctor, {
