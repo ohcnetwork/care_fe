@@ -212,6 +212,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           options={SAMPLE_TYPE_CHOICES}
           optionLabel={(option) => option.text}
           optionValue={(option) => option.id}
+          id="sample-type"
         />
 
         {state.form.sample_type === "OTHER TYPE" && (
@@ -226,6 +227,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           options={ICMR_CATEGORY}
           optionLabel={(option) => option}
           optionValue={(option) => option}
+          id="icmr-category"
         />
         <div className="mb-6 flex flex-col gap-1">
           <p className="font-medium">
@@ -251,7 +253,11 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           </span>
         </div>
 
-        <TextFormField {...field("icmr_label", "ICMR Label")} required />
+        <TextFormField
+          {...field("icmr_label", "ICMR Label")}
+          required
+          id="icmr-label"
+        />
         <div className="mb-6 w-full flex-none">
           <FieldLabel>Testing Facility</FieldLabel>
           <FacilitySelect
@@ -313,7 +319,11 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
         />
         <div className="mt-4 flex flex-col justify-end gap-2 lg:flex-row">
           <Cancel onClick={() => goBack()} />
-          <Submit onClick={handleSubmit} label={buttonText} />
+          <Submit
+            onClick={handleSubmit}
+            label={buttonText}
+            id="sample-test-submit-btn"
+          />
         </div>
       </form>
     </Page>

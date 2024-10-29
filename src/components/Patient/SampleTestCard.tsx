@@ -76,6 +76,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
 
   return (
     <div
+      id="sample-test-history"
       className={`${
         itemData.result === "POSITIVE"
           ? "border-red-500 bg-red-100 hover:border-red-700"

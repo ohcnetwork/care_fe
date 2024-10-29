@@ -253,7 +253,7 @@ export default function PatientInfoCard(props: {
                 className="mb-2 flex flex-col justify-center text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
-                {patient.name}
+                <span id="patient-name">{patient.name}</span>
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
                   {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
