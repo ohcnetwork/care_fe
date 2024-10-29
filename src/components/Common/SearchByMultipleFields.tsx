@@ -85,16 +85,23 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         setOpen(false);
       }
 
-      options.forEach(() => {
+      options.forEach((option) => {
         if (e.key === "/") {
           setOpen(true);
+        } else if (
+          e.key.toLocaleLowerCase() ===
+            option.shortcut_key.toLocaleLowerCase() &&
+          open
+        ) {
+          e.preventDefault();
+          handleOptionChange(option);
         }
       });
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [focusedIndex]);
+  }, [focusedIndex, open]);
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
