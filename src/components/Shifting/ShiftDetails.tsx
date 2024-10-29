@@ -8,7 +8,6 @@ import {
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { Separator } from "../../components/ui/separator";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
@@ -330,7 +329,7 @@ export default function ShiftDetails(props: { id: string }) {
                   ? t("district_program_management_supporting_unit")
                   : data.origin_facility_object?.name || "--"}
               </div>
-              <Separator />
+              {/* <Separator /> */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <h3 className="mb-1 text-sm font-semibold sm:mb-2 sm:text-base">
@@ -368,7 +367,7 @@ export default function ShiftDetails(props: { id: string }) {
                   )}
                 </div>
               </div>
-              <Separator />
+              {/* <Separator /> */}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
                 <div>
                   <p className="text-xs sm:text-sm">
@@ -409,7 +408,7 @@ export default function ShiftDetails(props: { id: string }) {
                   </p>
                 </div>
               </div>
-              <Separator />
+              {/* <Separator /> */}
               <div className="text-muted-foreground mt-6 text-center text-xs sm:text-sm">
                 {t("approved_by_district_covid_control_room")}
               </div>
