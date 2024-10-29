@@ -509,8 +509,8 @@ const AssetCreate = (props: AssetProps) => {
                 onSubmit={(e) => handleSubmit(e, false)}
                 className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
               >
-                <div className="grid grid-cols-1 items-start gap-x-12">
-                  <div className="grid grid-cols-6 gap-x-6">
+                <div className="grid grid-cols-1 items-start gap-5 gap-x-12">
+                  <div className="grid grid-cols-6 gap-6 gap-x-6">
                     {/* General Details Section */}
                     {sectionTitle("General Details")}
                     {/* Asset Name */}
@@ -530,14 +530,15 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
 
                     {/* Location */}
-                    <FieldLabel className="w-max text-sm" required>
-                      {t("asset_location")}
-                    </FieldLabel>
+
                     <div
                       ref={fieldRef["location"]}
                       className="col-span-6"
                       data-testid="asset-location-input"
                     >
+                      <FieldLabel className="w-max text-sm" required>
+                        {t("asset_location")}
+                      </FieldLabel>
                       <LocationSelect
                         name="Facilities"
                         setSelected={(selectedId) =>
@@ -594,25 +595,21 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                     {/* Divider */}
-                    <div
-                      className="col-span-6"
-                      data-testid="asset-divider-input"
-                    >
-                      <hr
-                        className={
-                          "transition-all " +
-                          (is_working === "true"
-                            ? "my-0 opacity-0"
-                            : "my-4 opacity-100")
-                        }
-                      />
-                    </div>
+
                     {/* Working Status */}
                     <div
                       ref={fieldRef["is_working"]}
                       className="col-span-6"
                       data-testid="asset-working-status-input"
                     >
+                      <hr
+                        className={
+                          "transition-all " +
+                          (is_working === "true"
+                            ? "my-0 opacity-0"
+                            : " my-4 opacity-100")
+                        }
+                      />
                       <SwitchV2
                         className="col-span-6"
                         required
@@ -653,7 +650,9 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                     {/* Divider */}
-                    <div className="col-span-6">
+
+                    {/* Asset QR ID */}
+                    <div className="col-span-6 flex flex-col">
                       <hr
                         className={
                           "transition-all " +
@@ -662,32 +661,31 @@ const AssetCreate = (props: AssetProps) => {
                             : "mb-7 opacity-100")
                         }
                       />
-                    </div>
-                    {/* Asset QR ID */}
-                    <div className="col-span-6 flex flex-row items-center gap-3">
-                      <div className="w-full" data-testid="asset-qr-id-input">
-                        <TextFormField
-                          id="qr_code_id"
-                          name="qr_code_id"
-                          placeholder=""
-                          label={t("asset_qr_id")}
-                          value={qrCodeId}
-                          onChange={(e) => setQrCodeId(e.value)}
-                          error={state.errors.qr_code_id}
-                        />
-                      </div>
-                      <div
-                        className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-secondary-400 px-4 hover:bg-secondary-200"
-                        onClick={() => setIsScannerActive(true)}
-                      >
-                        <CareIcon
-                          icon="l-focus"
-                          className="cursor-pointer text-lg"
-                        />
+                      <div className="flex flex-row items-center gap-3">
+                        <div className="w-full" data-testid="asset-qr-id-input">
+                          <TextFormField
+                            id="qr_code_id"
+                            name="qr_code_id"
+                            placeholder=""
+                            label={t("asset_qr_id")}
+                            value={qrCodeId}
+                            onChange={(e) => setQrCodeId(e.value)}
+                            error={state.errors.qr_code_id}
+                          />
+                        </div>
+                        <div
+                          className="ml-1 mt-1 mt-7 flex h-10 cursor-pointer items-center justify-self-end rounded border border-secondary-400 px-4 hover:bg-secondary-200"
+                          onClick={() => setIsScannerActive(true)}
+                        >
+                          <CareIcon
+                            icon="l-focus"
+                            className="cursor-pointer text-lg"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-6 gap-x-6">
+                  <div className="grid grid-cols-6 gap-6 gap-x-6">
                     {sectionTitle("Warranty Details")}
 
                     {/* Manufacturer */}

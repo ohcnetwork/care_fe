@@ -7,7 +7,6 @@ import {
   formatPhoneNumber as formatPhoneNumberUtil,
   getCountryCode,
   CountryData,
-  // humanizeStrings,
 } from "../../../Utils/utils";
 import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 import {
@@ -22,6 +21,7 @@ import React from "react";
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
 interface Props extends FormFieldBaseProps<string> {
+  myfunc?: (er: FieldError) => void;
   types: PhoneNumberType[];
   placeholder?: string;
   autoComplete?: string;
@@ -71,9 +71,15 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
 
         setError(error);
       },
-      [field, validate],
+      [field, validate, error],
     );
-
+    useEffect(() => {
+      if (field.value!.length > 3) {
+        if (props.myfunc) {
+          props.myfunc(error);
+        }
+      }
+    }, [error]);
     const handleCountryChange = (value: CountryData): void => {
       setCountry(value);
       setValue(conditionPhoneCode(value.code));
@@ -93,15 +99,11 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
       }
     }, [setValue]);
 
-    useEffect(() => {
-      setValue(field.value || "+91");
-    }, []);
-
     return (
       <FormField
         field={{
           ...field,
-          errorClassName: "hidden",
+
           error: field.error || error,
           labelSuffix: field.labelSuffix || "",
         }}
@@ -187,7 +189,7 @@ const CountryCodesList = ({
   const [searchValue, setSearchValue] = useState<string>("");
 
   return (
-    <div className="absolute z-10 w-full rounded-md border border-gray-300 bg-white shadow-lg transition-all duration-300">
+    <div className="absolute z-10 w-full rounded-md border border-secondary-300 bg-white shadow-lg transition-all duration-300">
       <div className="relative m-2">
         <CareIcon
           icon="l-search"

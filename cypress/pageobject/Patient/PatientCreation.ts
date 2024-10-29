@@ -11,7 +11,8 @@ export class PatientPage {
   }
 
   visitPatient(patientName: string) {
-    cy.get("#name").click().type(patientName);
+    cy.get("button").contains("Name").click();
+    cy.get("#name").type(patientName); // Type the patient name
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
     cy.wait(2000);
@@ -68,6 +69,7 @@ export class PatientPage {
   }
 
   typePatientNameList(patientName: string) {
+    cy.get("button").contains("Name").click();
     cy.get("#name").click().type(patientName);
   }
 

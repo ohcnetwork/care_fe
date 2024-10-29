@@ -1,5 +1,4 @@
 import * as Notification from "../../Utils/Notifications";
-
 import {
   ADMITTED_TO,
   CONSENT_TYPE_CHOICES,
@@ -13,8 +12,7 @@ import {
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
 import { ReactNode, useEffect, useState, useCallback } from "react";
-import { parseOptionId } from "../../common/utils";
-
+import { parseOptionId } from "@/common/utils";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -23,13 +21,10 @@ import CountBlock from "../../CAREUI/display/Count";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import { ExportMenu } from "@/components/Common/Export";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-
 import FilterBadge from "../../CAREUI/display/FilterBadge";
 import PatientFilter from "./PatientFilter";
-
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-
-import SortDropdownMenu from "../Common/SortDropdown";
+import SortDropdownMenu from "@/components/Common/SortDropdown";
 import {
   formatPatientAge,
   humanizeStrings,
@@ -49,14 +44,12 @@ import {
   DiagnosesFilterKey,
   FILTER_BY_DIAGNOSES_KEYS,
 } from "./DiagnosesFilter.js";
-import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
-import { getDiagnosesByIds } from "../Diagnosis/utils.js";
+import { ICD11DiagnosisModel } from "../Diagnosis/types";
+import { getDiagnosesByIds } from "../Diagnosis/utils";
 import Tabs from "../Common/components/Tabs.js";
-
-import { isPatientMandatoryDataFilled } from "./Utils.js";
-import request from "../../Utils/request/request.js";
-import { Avatar } from "../Common/Avatar.js";
-
+import { isPatientMandatoryDataFilled } from "./Utils";
+import request from "../../Utils/request/request";
+import { Avatar } from "../Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 

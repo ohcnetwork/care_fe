@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import { FieldError } from "@/components/Form/FieldValidators";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import {
   Command,
@@ -31,7 +32,7 @@ interface SearchOption {
   placeholder: string;
   value: string;
   shortcut_key: string;
-  component?: React.ComponentType<any>;
+  component?: React.ComponentType<HTMLDivElement>;
 }
 
 interface SearchByMultipleFieldsProps {
@@ -59,6 +60,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const [error, setError] = useState<string | undefined | boolean>();
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement !== inputRef.current) {
@@ -83,12 +85,8 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         setOpen(false);
       }
 
-      options.forEach((option) => {
-        if (e.key.toLowerCase() === option.shortcut_key.toLowerCase()) {
-          e.preventDefault();
-
-          handleOptionChange(option);
-        } else if (e.key === "/") {
+      options.forEach(() => {
+        if (e.key === "/") {
           setOpen(true);
         }
       });
@@ -106,8 +104,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     (option: SearchOption) => {
       setSelectedOption(option);
       setSearchValue(option.value || "");
+      setFocusedIndex(options.findIndex((op) => op.key === option.key));
       setOpen(false);
       inputRef.current?.focus();
+      setError(false);
       onSearch(option.key, option.value);
     },
     [onSearch],
@@ -147,6 +147,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         "flex-grow border-none shadow-none focus-visible:ring-0 h-10",
         inputClassName,
       ),
+      myfunc: (er: FieldError) => setError(er),
     };
 
     switch (selectedOption.type) {
@@ -157,6 +158,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             placeholder={t(selectedOption.placeholder)}
             types={["mobile", "landline"]}
             {...commonProps}
+            errorClassName="hidden"
           />
         );
       default:
@@ -199,12 +201,9 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                     <CommandItem
                       key={option.key}
                       onSelect={() => handleOptionChange(option)}
-                      className={
-                        selectedOption.label === option.label ||
-                        focusedIndex === index
-                          ? "bg-gray-200"
-                          : "bg-white"
-                      }
+                      className={`${
+                        focusedIndex === index ? "bg-gray-100" : ""
+                      } hover:bg-secondary-100`}
                     >
                       <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
                       <span className="flex-1">{t(option.label)}</span>
@@ -220,6 +219,11 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         </Popover>
         {renderSearchInput}
       </div>
+      {error && (
+        <div className="error-text ml-3 bg-white text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300">
+          Invalid phone number
+        </div>
+      )}
       <div className="flex flex-wrap gap-2 rounded-b-lg border-x border-b border-gray-200 bg-gray-50 p-2 shadow">
         {options.map((option) => (
           <Button
