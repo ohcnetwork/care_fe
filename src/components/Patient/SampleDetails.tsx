@@ -1,3 +1,4 @@
+
 import { FlowModel } from "./models";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "@/common/constants";
 
@@ -5,7 +6,7 @@ import ButtonV2 from "@/components/Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "../Files/FileUpload";
 import Page from "@/components/Common/components/Page";
-import * as _ from "lodash-es";
+import { startCase, camelCase, capitalize } from "lodash-es";
 import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 
 import { navigate } from "raviger";
@@ -269,11 +270,11 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             <span className="font-semibold leading-relaxed">
               {t("status")}:{" "}
             </span>{" "}
-            {_.startCase(_.camelCase(flow.status))}
+            {startCase(camelCase(flow.status))}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">{t("label")}:</span>{" "}
-            {_.capitalize(flow.notes)}
+            {capitalize(flow.notes)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
@@ -369,7 +370,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 {t("doctors_name")}:{" "}
               </span>
-              {_.startCase(_.camelCase(sampleDetails.doctor_name))}
+              {startCase(camelCase(sampleDetails.doctor_name))}
             </div>
           )}
           {sampleDetails?.diagnosis && (
@@ -450,7 +451,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold capitalize leading-relaxed">
                 {t("sample_type")}:{" "}
               </span>
-              {_.startCase(_.camelCase(sampleDetails.sample_type))}
+              {startCase(camelCase(sampleDetails.sample_type))}
             </div>
           )}
           {sampleDetails?.sample_type === "OTHER TYPE" && (
