@@ -161,7 +161,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
         <span
-          className={`tooltip-text tooltip-${show ? "bottom -translate-x-16" : "top"} text-xs`}
+          className={classNames(
+            "tooltip-text text-xs",
+            show ? "tooltip-bottom -translate-x-16" : "tooltip-top",
+          )}
         >
           {t("minimize")}
         </span>
@@ -175,7 +178,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
         <span
-          className={`tooltip-text tooltip-${show ? "bottom -translate-x-11" : "top"} text-xs`}
+          className={classNames(
+            "tooltip-text text-xs",
+            show ? "tooltip-bottom -translate-x-11" : "tooltip-top",
+          )}
         >
           {t("close")}
         </span>
