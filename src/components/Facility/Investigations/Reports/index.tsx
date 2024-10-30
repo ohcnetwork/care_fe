@@ -1,7 +1,7 @@
 import { useCallback, useReducer, useState } from "react";
 import { InvestigationGroup, InvestigationType } from "..";
 
-import _ from "lodash";
+import { chain } from "lodash-es";
 import { useTranslation } from "react-i18next";
 import routes from "../../../../Redux/api";
 import * as Notification from "../../../../Utils/Notifications";
@@ -172,7 +172,7 @@ const InvestigationReports = ({ id }: any) => {
       ),
     );
 
-    const investigationList = _.chain(data)
+    const investigationList = chain(data)
       .flatMap((i) => i?.data?.results)
       .compact()
       .flatten()
