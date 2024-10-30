@@ -7,6 +7,7 @@ import {
   formatPhoneNumber as formatPhoneNumberUtil,
   getCountryCode,
   CountryData,
+  humanizeStrings,
 } from "../../../Utils/utils";
 import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 import {
@@ -17,10 +18,12 @@ import {
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import React from "react";
+import { useTranslation } from "react-i18next";
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
 interface Props extends FormFieldBaseProps<string> {
   myfunc?: (er: FieldError) => void;
+  help?: boolean;
   types: PhoneNumberType[];
   placeholder?: string;
   autoComplete?: string;
@@ -100,9 +103,11 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
       <FormField
         field={{
           ...field,
-
+          help: props?.help,
           error: field.error || error,
-          labelSuffix: field.labelSuffix || "",
+          labelSuffix: field.labelSuffix || (
+            <PhoneNumberTypesHelp types={props.types} />
+          ),
         }}
       >
         <div className="relative rounded-md">
@@ -154,7 +159,22 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
     );
   },
 );
+const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
+  const { t } = useTranslation();
 
+  return (
+    <div className="tooltip mt-1 pr-1 text-secondary-500">
+      <CareIcon icon="l-question-circle" className="text-lg" />
+      <div className="tooltip-text tooltip-bottom w-64 -translate-x-full whitespace-pre-wrap text-sm">
+        Supports only{" "}
+        <span className="font-bold lowercase">
+          {humanizeStrings(props.types.map((item) => t(item)))}
+        </span>{" "}
+        numbers.
+      </div>
+    </div>
+  );
+};
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
   return code.startsWith("+") ? code : "+" + code;

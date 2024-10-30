@@ -32,6 +32,7 @@ export type FormFieldBaseProps<T> = {
   error?: FieldError;
   onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  help?: boolean;
 };
 
 /**

@@ -170,6 +170,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             types={["mobile", "landline"]}
             {...commonProps}
             errorClassName="hidden"
+            help={false}
           />
         );
       default:

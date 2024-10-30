@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { classNames } from "../../../Utils/utils";
 import { FieldError } from "../FieldValidators";
 import { FormFieldBaseProps } from "./Utils";
-
+import { useState } from "react";
 type LabelProps = {
   id?: string | undefined;
   required?: boolean;
@@ -54,6 +55,15 @@ const FormField = ({
   field?: FormFieldBaseProps<any>;
   children: React.ReactNode;
 }) => {
+  const [phhelp, setPhhelp] = useState(false);
+  useEffect(() => {
+    if ((field && field?.help == undefined) || (field && !("help" in field))) {
+      setPhhelp(true);
+    } else if (field?.help == false) {
+      setPhhelp(false);
+    }
+  }, []);
+
   return (
     <div className={field?.className}>
       <div className="flex items-center justify-between">
@@ -66,8 +76,8 @@ const FormField = ({
             {field?.label}
           </FieldLabel>
         )}
-        {field?.labelSuffix && (
-          <span className="mb-2 text-xs">{field?.labelSuffix}</span>
+        {field?.labelSuffix && phhelp && (
+          <span className="mb-2 text-xs">{field.labelSuffix}</span>
         )}
       </div>
       <div className={field?.className}>{props.children}</div>
