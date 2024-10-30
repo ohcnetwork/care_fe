@@ -59,7 +59,7 @@ import Spinner from "@/components/Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import _ from "lodash";
+import { startCase, toLower } from "lodash-es";
 import countryList from "@/common/static/countries.json";
 import { debounce } from "lodash-es";
 import request from "../../Utils/request/request";
@@ -635,7 +635,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ? formData.last_vaccinated_date
             : null
           : null,
-      name: _.startCase(_.toLower(formData.name)),
+      name: startCase(toLower(formData.name)),
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
       nationality: formData.nationality,

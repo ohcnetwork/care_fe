@@ -1,5 +1,5 @@
 import { SHIFTING_FILTER_ORDER } from "@/common/constants";
-import { useFacilityQuery } from "../Resource/BadgesList";
+import { useFacilityQuery } from "../Resource/ResourceBadges";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
