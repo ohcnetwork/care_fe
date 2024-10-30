@@ -1,8 +1,8 @@
+import { CareAppsContext, useCareApps } from "@/common/hooks/useCareApps";
 /* eslint-disable i18next/no-literal-string */
 import React, { Suspense } from "react";
-import { CareAppsContext, useCareApps } from "@/common/hooks/useCareApps";
-import { pluginMap } from "./pluginTypes";
-import { UserAssignedModel } from "@/components/Users/models";
+import { SupportedPluginComponents, pluginMap } from "./pluginTypes";
+
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 
 export default function PluginEngine({
@@ -27,25 +27,28 @@ export default function PluginEngine({
   );
 }
 
-export function PLUGIN_DoctorConnectButtons({
-  user,
-}: {
-  user: UserAssignedModel;
-}) {
+type PluginProps<K extends keyof SupportedPluginComponents> =
+  React.ComponentProps<SupportedPluginComponents[K]>;
+
+export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
+  __name,
+  ...props
+}: { __name: K } & PluginProps<K>) {
   const plugins = useCareApps();
+
   return (
-    <div>
-      {plugins.map((plugin, index) => {
-        const DoctorConnectButtons = plugin.components.DoctorConnectButtons;
-        if (!DoctorConnectButtons) {
+    <>
+      {plugins.map((plugin) => {
+        const Component = plugin.components[
+          __name
+        ] as React.ComponentType<unknown>;
+
+        if (!Component) {
           return null;
         }
-        return (
-          <div key={index}>
-            <DoctorConnectButtons user={user} />
-          </div>
-        );
+
+        return <Component {...props} key={plugin.plugin} />;
       })}
-    </div>
+    </>
   );
 }

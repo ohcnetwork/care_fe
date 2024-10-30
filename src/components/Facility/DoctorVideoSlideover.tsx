@@ -1,22 +1,23 @@
-import React, { useState } from "react";
-import SlideOver from "../../CAREUI/interactive/SlideOver";
-import { UserAssignedModel } from "../Users/models";
-import { SkillObjectModel } from "../Users/models";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
+import React, { useState } from "react";
 import {
   classNames,
   formatName,
   isUserOnline,
   relativeTime,
 } from "../../Utils/utils";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import { triggerGoal } from "../../Integrations/Plausible";
-import { Warn } from "../../Utils/Notifications";
-import Switch from "../../CAREUI/interactive/Switch";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+
 import Loading from "@/components/Common/Loading";
-import { PLUGIN_DoctorConnectButtons } from "@/PluginEngine";
+import { PLUGIN_Component } from "@/PluginEngine";
+import { SkillObjectModel } from "../Users/models";
+import SlideOver from "../../CAREUI/interactive/SlideOver";
+import Switch from "../../CAREUI/interactive/Switch";
+import { UserAssignedModel } from "../Users/models";
+import { Warn } from "../../Utils/Notifications";
+import routes from "../../Redux/api";
+import { triggerGoal } from "../../Integrations/Plausible";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
 
 const UserGroups = {
   ALL: "All",
@@ -367,7 +368,7 @@ function DoctorConnectButtons(props: {
           <CareIcon icon="l-phone-alt" id="phone-icon" className="h-5 w-5" />
         </div>
       </a>
-      <PLUGIN_DoctorConnectButtons user={user} />
+      <PLUGIN_Component __name="DoctorConnectButtons" user={user} />
     </div>
   );
 }
