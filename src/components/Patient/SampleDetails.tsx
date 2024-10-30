@@ -14,7 +14,10 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
 import Loading from "@/components/Common/Loading";
+import { useTranslation } from "react-i18next";
+
 export const SampleDetails = ({ id }: DetailRoute) => {
+  const { t } = useTranslation();
   const { loading: isLoading, data: sampleDetails } = useQuery(
     routes.getTestSample,
     {
@@ -25,16 +28,15 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         if (!(res?.ok && data)) {
           navigate("/not-found");
         }
-        console.log(data);
       },
     },
   );
 
   const yesOrNoBadge = (param: any) =>
     param ? (
-      <span className="badge badge-pill badge-warning">Yes</span>
+      <span className="badge badge-pill badge-warning">{t("yes")}</span>
     ) : (
-      <span className="badge badge-pill badge-secondary">No</span>
+      <span className="badge badge-pill badge-secondary">{t("no")}</span>
     );
 
   const showPatientCard = (patientData: any) => {
@@ -50,20 +52,24 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="mt-2 flex flex-col gap-2">
             <div>
-              <span className="font-semibold leading-relaxed">Name: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("name")}:{" "}
+              </span>
               {patientData?.name}
             </div>
             {patientData?.is_medical_worker && (
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Medical Worker:{" "}
+                  {t("medical_worker")}:{" "}
                 </span>
-                <span className="badge badge-pill badge-primary">Yes</span>
+                <span className="badge badge-pill badge-primary">
+                  {t("yes")}
+                </span>
               </div>
             )}
             <div>
               <span className="font-semibold leading-relaxed">
-                Disease Status:{" "}
+                {t("disease_status")}:{" "}
               </span>
               <span className="badge badge-pill badge-warning">
                 {patientData?.disease_status}
@@ -71,16 +77,20 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
 
             <div>
-              <span className="font-semibold leading-relaxed">SRF ID: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("srf_id")}:{" "}
+              </span>
               {(patientData?.srf_id && patientData?.srf_id) || "-"}
             </div>
             <div>
-              <span className="font-semibold leading-relaxed">Test Type: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("test_type")}:{" "}
+              </span>
               {(patientData?.test_type && testType) || "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                Date of Test:{" "}
+                {t("date_of_test")}:{" "}
               </span>
               {(patientData?.date_of_test &&
                 formatDateTime(patientData?.date_of_test)) ||
@@ -88,35 +98,43 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
 
             <div>
-              <span className="font-semibold leading-relaxed">Facility: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("facility")}:{" "}
+              </span>
               {patientData?.facility_object?.name || "-"}
             </div>
             {patientData?.date_of_birth ? (
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Date of birth:{" "}
+                  {t("date_of_birth")}:{" "}
                 </span>
                 {patientData?.date_of_birth}
               </div>
             ) : (
               <div>
-                <span className="font-semibold leading-relaxed">Age: </span>
+                <span className="font-semibold leading-relaxed">
+                  {t("age")}:{" "}
+                </span>
                 {formatPatientAge(patientData)}
               </div>
             )}
             <div>
-              <span className="font-semibold leading-relaxed">Gender: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("gender")}:{" "}
+              </span>
               {patientGender}
             </div>
             <div>
-              <span className="font-semibold leading-relaxed">Phone: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("phone")}:{" "}
+              </span>
               <a href={`tel:${patientData?.phone_number}`}>
                 {patientData?.phone_number || "-"}
               </a>
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                Nationality:{" "}
+                {t("nationality")}:{" "}
               </span>
               {patientData?.nationality || "-"}
             </div>
@@ -124,14 +142,14 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           <div className="mt-2 flex flex-col gap-2">
             <div>
               <span className="font-semibold leading-relaxed">
-                Blood Group:{" "}
+                {t("blood_group")}:{" "}
               </span>
               {patientData?.blood_group || "-"}
             </div>
             {patientData?.nationality !== "India" && (
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Passport Number:{" "}
+                  {t("passport_number")}:{" "}
                 </span>
                 {patientData?.passport_no || "-"}
               </div>
@@ -139,56 +157,60 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {patientData?.nationality === "India" && (
               <>
                 <div>
-                  <span className="font-semibold leading-relaxed">State: </span>
+                  <span className="font-semibold leading-relaxed">
+                    {t("state")}:{" "}
+                  </span>
                   {patientData?.state_object?.name}
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">
-                    District:{" "}
+                    {t("district")}:{" "}
                   </span>
                   {patientData?.district_object?.name || "-"}
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">
-                    Local Body:{" "}
+                    {t("local_body")}:{" "}
                   </span>
                   {patientData?.local_body_object?.name || "-"}
                 </div>
               </>
             )}
             <div>
-              <span className="font-semibold leading-relaxed">Address: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("address")}:{" "}
+              </span>
               {patientData?.address || "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                Contact with confirmed carrier:{" "}
+                {t("contact_with_confirmed_carrier")}:{" "}
               </span>
               {yesOrNoBadge(patientData?.contact_with_confirmed_carrier)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                Contact with suspected carrier:{" "}
+                {t("contact_with_suspected_carrier")}:{" "}
               </span>
               {yesOrNoBadge(patientData?.contact_with_suspected_carrier)}
             </div>
             {patientData?.estimated_contact_date && (
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Estimated contact date:{" "}
+                  {t("estimated_contact_date")}:{" "}
                 </span>
                 {formatDateTime(patientData?.estimated_contact_date)}
               </div>
             )}
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
-                Has SARI (Severe Acute Respiratory illness)?:{" "}
+                {t("has_sari")}:{" "}
               </span>
               {yesOrNoBadge(patientData?.has_SARI)}
             </div>
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
-                Domestic/international Travel (within last 28 days):{" "}
+                {t("domestic_international_travel")}:{" "}
               </span>
               {yesOrNoBadge(patientData?.past_travel)}
             </div>
@@ -196,7 +218,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               !!patientData?.countries_travelled.length && (
                 <div className="md:col-span-2">
                   <span className="font-semibold leading-relaxed">
-                    Countries travelled:{" "}
+                    {t("countries_travelled")}:{" "}
                   </span>
                   {patientData?.countries_travelled.join(", ")}
                 </div>
@@ -204,7 +226,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {patientData?.ongoing_medication && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  Ongoing Medications{" "}
+                  {t("ongoing_medications")}{" "}
                 </span>
                 {patientData?.ongoing_medication}
               </div>
@@ -212,7 +234,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {patientData?.allergies && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  Allergies:{" "}
+                  {t("allergies")}:{" "}
                 </span>
                 {patientData?.allergies}
               </div>
@@ -220,7 +242,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {!!patientData?.number_of_aged_dependents && (
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Number Of Aged Dependents (Above 60):{" "}
+                  {t("number_of_aged_dependents")}:{" "}
                 </span>
                 {patientData?.number_of_aged_dependents}
               </div>
@@ -228,7 +250,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {!!patientData?.number_of_chronic_diseased_dependents && (
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Number Of Chronic Diseased Dependents:{" "}
+                  {t("number_of_chronic_diseased_dependents")}:{" "}
                 </span>
                 {patientData?.number_of_chronic_diseased_dependents}
               </div>
@@ -244,19 +266,25 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       <Card key={flow.id}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <span className="font-semibold leading-relaxed">Status: </span>{" "}
+            <span className="font-semibold leading-relaxed">
+              {t("status")}:{" "}
+            </span>{" "}
             {_.startCase(_.camelCase(flow.status))}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Label:</span>{" "}
+            <span className="font-semibold leading-relaxed">{t("label")}:</span>{" "}
             {_.capitalize(flow.notes)}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Created On :</span>{" "}
+            <span className="font-semibold leading-relaxed">
+              {t("created_on")}:
+            </span>{" "}
             {flow.created_date ? formatDateTime(flow.created_date) : "-"}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Modified on:</span>{" "}
+            <span className="font-semibold leading-relaxed">
+              {t("modified_on")}:
+            </span>{" "}
             {flow.modified_date ? formatDateTime(flow.modified_date) : "-"}
           </div>
         </div>
@@ -270,7 +298,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
 
   return (
     <Page
-      title="Sample Test Details"
+      title={t("sample_test_details")}
       backUrl="/sample"
       options={
         sampleDetails?.patient && (
@@ -278,7 +306,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             <ButtonV2
               href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
             >
-              ICMR Specimen Referral Form
+              {t("icmr_specimen_referral_form")}
             </ButtonV2>
           </div>
         )
@@ -288,34 +316,42 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold capitalize leading-relaxed">
-              Status:{" "}
+              {t("status")}:{" "}
             </span>
             {sampleDetails?.status}
           </div>
           <div>
             <span className="font-semibold capitalize leading-relaxed">
-              Result:{" "}
+              {t("result")}:{" "}
             </span>
             {sampleDetails?.result}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Patient: </span>
+            <span className="font-semibold leading-relaxed">
+              {t("patient")}:{" "}
+            </span>
             {sampleDetails?.patient_name}
           </div>
           {sampleDetails?.facility_object && (
             <div>
-              <span className="font-semibold leading-relaxed">Facility: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("facility")}:{" "}
+              </span>
               {sampleDetails?.facility_object.name}
             </div>
           )}
           <div>
-            <span className="font-semibold leading-relaxed">Tested on: </span>
+            <span className="font-semibold leading-relaxed">
+              {t("tested_on")}:{" "}
+            </span>
             {sampleDetails?.date_of_result
               ? formatDateTime(sampleDetails.date_of_result)
               : "-"}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Result on: </span>
+            <span className="font-semibold leading-relaxed">
+              {t("result_on")}:{" "}
+            </span>
             {sampleDetails?.date_of_result
               ? formatDateTime(sampleDetails.date_of_result)
               : "-"}
@@ -323,7 +359,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           {sampleDetails?.fast_track && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
-                Fast track testing reason:{" "}
+                {t("fast_track_testing_reason")}:{" "}
               </span>
               {sampleDetails.fast_track}
             </div>
@@ -331,21 +367,23 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           {sampleDetails?.doctor_name && (
             <div className="capitalize md:col-span-2">
               <span className="font-semibold leading-relaxed">
-                Doctor&apos;s Name:{" "}
+                {t("doctors_name")}:{" "}
               </span>
               {_.startCase(_.camelCase(sampleDetails.doctor_name))}
             </div>
           )}
           {sampleDetails?.diagnosis && (
             <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">Diagnosis: </span>
+              <span className="font-semibold leading-relaxed">
+                {t("diagnosis")}:{" "}
+              </span>
               {sampleDetails.diagnosis}
             </div>
           )}
           {sampleDetails?.diff_diagnosis && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
-                Differential diagnosis:{" "}
+                {t("differential_diagnosis")}:{" "}
               </span>
               {sampleDetails?.diff_diagnosis}
             </div>
@@ -353,52 +391,48 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           {sampleDetails?.etiology_identified && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
-                Etiology identified:{" "}
+                {t("etiology_identified")}:{" "}
               </span>
               {sampleDetails.etiology_identified}
             </div>
           )}
           <div>
             <span className="font-semibold leading-relaxed">
-              Is Atypical presentation{" "}
+              {t("is_atypical_presentation")}{" "}
             </span>
             {yesOrNoBadge(sampleDetails?.is_atypical_presentation)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
-              Is unusual course{" "}
+              {t("is_unusual_course")}{" "}
             </span>
             {yesOrNoBadge(sampleDetails?.is_unusual_course)}
           </div>
           {sampleDetails?.atypical_presentation && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
-                Atypical presentation details:{" "}
+                {t("atypical_presentation_details")}:{" "}
               </span>
               {sampleDetails.atypical_presentation}
             </div>
           )}
           <div>
-            <span className="font-semibold leading-relaxed">
-              SARI - Severe Acute Respiratory illness{" "}
-            </span>
+            <span className="font-semibold leading-relaxed">{t("sari")} </span>
             {yesOrNoBadge(sampleDetails?.has_sari)}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">
-              ARI - Acute Respiratory illness{" "}
-            </span>
+            <span className="font-semibold leading-relaxed">{t("ari")} </span>
             {yesOrNoBadge(sampleDetails?.has_ari)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
-              Contact with confirmed carrier{" "}
+              {t("contact_with_confirmed_carrier")}{" "}
             </span>
             {yesOrNoBadge(sampleDetails?.patient_has_confirmed_contact)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
-              Contact with suspected carrier{" "}
+              {t("contact_with_suspected_carrier")}{" "}
             </span>
             {yesOrNoBadge(sampleDetails?.patient_has_suspected_contact)}
           </div>
@@ -406,7 +440,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             sampleDetails.patient_travel_history.length !== 0 && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
-                  Countries travelled:{" "}
+                  {t("countries_travelled")}:{" "}
                 </span>
                 {sampleDetails.patient_travel_history}
               </div>
@@ -414,7 +448,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           {sampleDetails?.sample_type && (
             <div>
               <span className="font-semibold capitalize leading-relaxed">
-                Sample Type:{" "}
+                {t("sample_type")}:{" "}
               </span>
               {_.startCase(_.camelCase(sampleDetails.sample_type))}
             </div>
@@ -422,7 +456,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           {sampleDetails?.sample_type === "OTHER TYPE" && (
             <div>
               <span className="font-semibold capitalize leading-relaxed">
-                Sample Type Description:
+                {t("sample_type_description")}:{" "}
               </span>
               {sampleDetails?.sample_type_other}
             </div>
@@ -431,12 +465,12 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       </Card>
 
       <div>
-        <h4 className="mt-8">Details of patient</h4>
+        <h4 className="mt-8">{t("details_of_patient")}</h4>
         {showPatientCard(sampleDetails?.patient_object)}
       </div>
 
       <div className="mb-4">
-        <h4 className="mt-8">Sample Test History</h4>
+        <h4 className="mt-8">{t("sample_test_history")}</h4>
         {sampleDetails?.flow &&
           sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
       </div>
