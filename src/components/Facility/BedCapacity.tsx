@@ -137,9 +137,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
   };
 
   const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
-  const buttonText = !id
-    ? `Save ${!isLastOptionType ? "& Add More" : "Bed Capacity"}`
-    : "Update Bed Capacity";
+  const buttonText = !id ? "Save Bed Capacity" : "Update Bed Capacity";
 
   useEffect(() => {
     const lastBedType =
@@ -237,7 +235,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
             hideRestoreDraft
             showSaveAndAddMoreBtn={
               !isLastOptionType && headerText === "Add Bed Capacity"
-                ? "Save Bed Capacity"
+                ? "Save & Add More"
                 : ""
             }
           >

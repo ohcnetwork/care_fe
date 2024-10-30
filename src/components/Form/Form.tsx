@@ -135,22 +135,22 @@ const Form = <T extends FormDetails>({
               onClick={props.onCancel}
               label={props.cancelLabel ?? "Cancel"}
             />
+            <Submit
+              id="save"
+              data-testid="submit-button"
+              type="submit"
+              disabled={disabled || !isDirty}
+              label={props.submitLabel}
+            />
             {props.showSaveAndAddMoreBtn && (
               <Submit
-                id="save"
+                id="save-and-add-more"
                 data-testid="submit-button"
                 type="submit"
                 disabled={disabled || !isDirty}
                 label={props.showSaveAndAddMoreBtn ?? "Save "}
               />
             )}
-            <Submit
-              id="save-and-add-more"
-              data-testid="submit-button"
-              type="submit"
-              disabled={disabled || !isDirty}
-              label={props.submitLabel}
-            />
           </div>
         </Provider>
       </DraftSection>
