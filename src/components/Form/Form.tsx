@@ -148,7 +148,7 @@ const Form = <T extends FormDetails>({
                 data-testid="submit-button"
                 type="submit"
                 disabled={disabled || !isDirty}
-                label={props.showSaveAndAddMoreBtn ?? "Save "}
+                label={props.showSaveAndAddMoreBtn}
               />
             )}
           </div>
