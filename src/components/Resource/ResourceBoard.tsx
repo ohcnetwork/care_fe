@@ -73,7 +73,6 @@ export default function BoardView() {
             placeholder={t("search_resource")}
             className="w-full md:w-60"
           />
-
           <Tabs
             tabs={[
               { text: t("active"), value: 0 },
