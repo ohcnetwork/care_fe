@@ -19,7 +19,7 @@ export default function CountBlock(props: Props) {
         </div>
         <div>
           <dt className="mb-1 truncate text-sm font-semibold text-secondary-700">
-            {t(props.text)}
+            {props.text}
           </dt>
           {props.loading ? (
             <dd className="h-10 w-full max-w-[100px] animate-pulse rounded-lg bg-secondary-300" />
