@@ -66,6 +66,9 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
 
   const specializationsQuery = useQuery(routes.listDoctor, {
     pathParams: { facilityId },
+    query: {
+      limit: DOCTOR_SPECIALIZATION.length - 1,
+    },
   });
 
   const { loading } = useQuery(routes.getDoctor, {

@@ -191,7 +191,6 @@ const SymptomEntry = (props: {
         name="cure_date"
         value={symptom.cure_date ? new Date(symptom.cure_date) : undefined}
         disableFuture
-        position="CENTER"
         placeholder="Date of cure"
         min={new Date(symptom.onset_date)}
         disabled={disabled}
@@ -293,7 +292,6 @@ const AddSymptom = (props: {
   return (
     <div className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap">
       <DateFormField
-        className="w-full md:w-36"
         name="onset_date"
         id="symptoms_onset_date"
         placeholder="Date of onset"
