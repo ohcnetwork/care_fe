@@ -56,6 +56,7 @@ const FormField = ({
   children: React.ReactNode;
 }) => {
   const [phhelp, setPhhelp] = useState(false);
+
   useEffect(() => {
     if ((field && field?.help == undefined) || (field && !("help" in field))) {
       setPhhelp(true);
