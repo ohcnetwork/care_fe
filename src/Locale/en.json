@@ -201,7 +201,7 @@
   "SORT_OPTIONS__taken_at": "Oldest taken date first",
   "Search_by_UHID": "Search by UHID",
   "Search_by_emergency_contact_phone_number": "Search by Emergency Contact Phone Number",
-  "Search_by_patient_name": "Search by Patient Name",
+  "search_by_patient_name": "Search by Patient Name",
   "Search_by_phone_number": "Search by Phone Number",
   "Submit": "Submit",
   "TELEMEDICINE": "Telemedicine",
