@@ -1,13 +1,7 @@
 import { FocusEvent } from "react";
 import { FieldError } from "../FieldValidators";
-interface targettype {
-  value: string;
-}
-export type FieldChangeEvent<T> = {
-  name: string;
-  value: T;
-  target?: targettype;
-};
+
+export type FieldChangeEvent<T> = { name: string; value: T };
 export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
 
 /**

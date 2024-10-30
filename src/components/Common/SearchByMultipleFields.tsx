@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 import { FieldError } from "@/components/Form/FieldValidators";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import {
   Command,
   CommandGroup,
@@ -43,6 +42,11 @@ interface SearchByMultipleFieldsProps {
   inputClassName?: string;
   buttonClassName?: string;
 }
+
+export type eventType = {
+  value: string;
+  target?: { value: string };
+};
 
 const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   options,
@@ -147,7 +151,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     const commonProps = {
       ref: inputRef,
       value: searchValue,
-      onChange: (e: FieldChangeEvent<string>) =>
+      onChange: (e: eventType) =>
         handleSearchChange(e.target ? e.target.value : e.value),
       onKeyDown: handleKeyDown,
       className: cn(

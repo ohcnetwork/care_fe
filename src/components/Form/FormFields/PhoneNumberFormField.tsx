@@ -73,9 +73,11 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
       [field, validate, error],
     );
     useEffect(() => {
-      if (field.value!.length > 3) {
-        if (props.myfunc) {
-          props.myfunc(error);
+      if (field.value) {
+        if (field.value.length > 3) {
+          if (props.myfunc) {
+            props.myfunc(error);
+          }
         }
       }
     }, [error]);
