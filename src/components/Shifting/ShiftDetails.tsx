@@ -330,7 +330,6 @@ export default function ShiftDetails(props: { id: string }) {
                   : data.origin_facility_object?.name || "--"}
               </div>
               <div className="my-4 border-b-2"></div>
-              {/* <Separator /> */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <h3 className="mb-1 text-sm font-semibold sm:mb-2 sm:text-base">
@@ -369,7 +368,6 @@ export default function ShiftDetails(props: { id: string }) {
                 </div>
               </div>
               <div className="my-4 border-b-2"></div>
-              {/* <Separator /> */}
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
                 <div>
                   <p className="text-xs sm:text-sm">
@@ -411,7 +409,6 @@ export default function ShiftDetails(props: { id: string }) {
                 </div>
               </div>
               <div className="my-4 border-b-2"></div>
-              {/* <Separator /> */}
               <div className="text-muted-foreground mt-6 text-center text-xs sm:text-sm">
                 {t("approved_by_district_covid_control_room")}
               </div>

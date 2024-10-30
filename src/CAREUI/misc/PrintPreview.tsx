@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode } from "react";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
@@ -20,26 +20,6 @@ export default function PrintPreview({
   title,
 }: Props) {
   const { t } = useTranslation();
-  const [scale, setScale] = useState(1);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setScale(0.44);
-      } else if (window.innerWidth < 1024) {
-        setScale(0.7);
-      } else {
-        setScale(1);
-      }
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   return (
     <Page title={title}>
@@ -51,7 +31,7 @@ export default function PrintPreview({
           </ButtonV2>
         </div>
 
-        <ZoomProvider initialScale={scale}>
+        <ZoomProvider>
           <ZoomTransform className="origin-top-left bg-white p-4 text-sm shadow-lg transition-all duration-200 ease-in-out sm:p-6 md:p-8 lg:p-10 lg:shadow-2xl print:transform-none">
             <div
               id="section-to-print"
