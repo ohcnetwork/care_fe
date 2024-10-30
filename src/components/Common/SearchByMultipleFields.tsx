@@ -217,7 +217,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                       } hover:bg-secondary-100`}
                     >
                       <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
-                      <span className="flex-1">{t(option.label)}</span>
+                      <span className="flex-1">{t(option.key)}</span>
                       <kbd className="ml-auto text-xs text-gray-400">
                         {option.label.charAt(0).toUpperCase()}
                       </kbd>
@@ -249,7 +249,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
               buttonClassName,
             )}
           >
-            {t(option.label)}
+            {t(option.key)}
           </Button>
         ))}
       </div>
