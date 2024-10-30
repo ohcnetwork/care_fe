@@ -407,7 +407,6 @@ export default function ConfigureCamera(props: Props) {
                         setPresetName("");
                       }}
                     />
-
                     <Submit
                       onClick={async () => {
                         const { res } = await request(FeedRoutes.createPreset, {

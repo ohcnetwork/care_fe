@@ -41,10 +41,6 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
     return showPassword ? "text" : "password";
   };
 
-  const handleClear = () => {
-    field.handleChange("");
-  };
-
   let child = (
     <div className="relative">
       <input
@@ -69,7 +65,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         <button
           type="button"
           className="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-500"
-          onClick={handleClear}
+          onClick={() => field.handleChange("")}
           aria-label="Clear input"
         >
           <CareIcon icon="l-times-circle" className="text-lg" />
