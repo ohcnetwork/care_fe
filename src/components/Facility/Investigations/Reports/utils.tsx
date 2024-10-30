@@ -1,8 +1,8 @@
-import * as _ from "lodash-es";
+import { memoize, chain, findIndex } from "lodash-es";
 import { InvestigationResponse } from "./types";
 
-export const transformData = _.memoize((data: InvestigationResponse) => {
-  const sessions = _.chain(data)
+export const transformData = memoize((data: InvestigationResponse) => {
+  const sessions = chain(data)
     .map((value: any) => {
       return {
         ...value.session_object,
@@ -13,14 +13,14 @@ export const transformData = _.memoize((data: InvestigationResponse) => {
     .uniqBy("session_external_id")
     .orderBy("session_created_date", "desc")
     .value();
-  const groupByInvestigation = _.chain(data)
+  const groupByInvestigation = chain(data)
     .groupBy("investigation_object.external_id")
     .values()
     .value();
   const reqData = groupByInvestigation.map((value: any) => {
     const sessionValues = Array.from({ length: sessions.length });
     value.forEach((val: any) => {
-      const sessionIndex = _.findIndex(sessions, [
+      const sessionIndex = findIndex(sessions, [
         "session_external_id",
         val.session_object.session_external_id,
       ]);
@@ -59,7 +59,7 @@ export const transformData = _.memoize((data: InvestigationResponse) => {
   return { sessions, data: reqData };
 });
 
-export const getColorIndex = _.memoize(
+export const getColorIndex = memoize(
   ({ max, min, value }: { min?: number; max?: number; value?: number }) => {
     if (!max && min && value) {
       // 1 => yellow color
