@@ -72,11 +72,7 @@ import {
   NotificationData,
   PNconfigData,
 } from "@/components/Notifications/models";
-import {
-  HCXClaimModel,
-  HCXCommunicationModel,
-  HCXPolicyModel,
-} from "@/components/HCX/models";
+import { HCXPolicyModel } from "@/components/HCX/models";
 import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
 import { Investigation } from "@/components/Facility/Investigations/Reports/types";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -104,7 +100,6 @@ import {
   IHealthFacility,
   IpartialUpdateHealthFacilityTBody,
 } from "@/components/ABDM/types/health-facility";
-import { PMJAYPackageItem } from "@/components/Common/PMJAYProcedurePackageAutocomplete";
 import { InsurerOptionModel } from "@/components/HCX/InsurerAutocomplete";
 
 /**
@@ -1694,117 +1689,6 @@ const routes = {
         method: "POST",
         TBody: Type<{ policy: string }>(),
         TRes: Type<HCXPolicyModel>(),
-      },
-    },
-
-    claims: {
-      list: {
-        path: "/api/hcx/claim/",
-        method: "GET",
-        TRes: Type<PaginatedResponse<HCXClaimModel>>(),
-      },
-
-      create: {
-        path: "/api/hcx/claim/",
-        method: "POST",
-        TBody: Type<{
-          policy: string;
-          items: {
-            id: string;
-            price: number;
-            category?: string;
-            name: string;
-          }[];
-          consultation: string;
-          use: "preauthorization" | "claim";
-        }>(),
-        TRes: Type<HCXClaimModel>(),
-      },
-
-      get: {
-        path: "/api/hcx/claim/{external_id}/",
-        method: "GET",
-      },
-
-      update: {
-        path: "/api/hcx/claim/{external_id}/",
-        method: "PUT",
-      },
-
-      partialUpdate: {
-        path: "/api/hcx/claim/{external_id}/",
-        method: "PATCH",
-      },
-
-      delete: {
-        path: "/api/hcx/claim/{external_id}/",
-        method: "DELETE",
-      },
-
-      listPMJYPackages: {
-        path: "/api/hcx/pmjy_packages/",
-        method: "GET",
-        TRes: Type<PMJAYPackageItem[]>(),
-      },
-
-      makeClaim: {
-        path: "/api/hcx/make_claim/",
-        method: "POST",
-        TBody: Type<{ claim: string }>(),
-        TRes: Type<unknown>(),
-      },
-    },
-
-    communications: {
-      list: {
-        path: "/api/hcx/communication/",
-        method: "GET",
-        TRes: Type<PaginatedResponse<HCXCommunicationModel>>(),
-      },
-
-      create: {
-        path: "/api/hcx/communication/",
-        method: "POST",
-        TRes: Type<HCXCommunicationModel>(),
-        TBody: Type<{
-          claim: string;
-          content: {
-            type: string;
-            data: string;
-          }[];
-        }>(),
-      },
-
-      get: {
-        path: "/api/hcx/communication/{external_id}/",
-        method: "GET",
-        TRes: Type<HCXCommunicationModel>(),
-      },
-
-      update: {
-        path: "/api/hcx/communication/{external_id}/",
-        method: "PUT",
-        TRes: Type<HCXCommunicationModel>(),
-      },
-
-      partialUpdate: {
-        path: "/api/hcx/communication/{external_id}/",
-        method: "PATCH",
-        TRes: Type<HCXCommunicationModel>(),
-      },
-
-      delete: {
-        path: "/api/hcx/communication/{external_id}/",
-        method: "DELETE",
-      },
-
-      send: {
-        path: "/api/hcx/send_communication/",
-        method: "POST",
-        TRes: Type<void>(),
-        TBody: Type<{
-          communication: string;
-        }>(),
       },
     },
   },
