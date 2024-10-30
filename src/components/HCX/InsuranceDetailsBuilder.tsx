@@ -10,11 +10,11 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXPolicyModel } from "./models";
 import InsurerAutocomplete from "./InsurerAutocomplete";
 import TextFormField from "../Form/FormFields/TextFormField";
+import careConfig from "@careConfig";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { useTranslation } from "react-i18next";
-import careConfig from "@careConfig";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 

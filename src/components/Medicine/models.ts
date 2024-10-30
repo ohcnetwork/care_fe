@@ -1,5 +1,5 @@
-import { PerformedByModel } from "../HCX/misc";
 import { PRESCRIPTION_ROUTES } from "./CreatePrescriptionForm";
+import { UserBareMinimum } from "@/components/Users/models";
 
 export const DOSAGE_UNITS = [
   "mg",
@@ -29,7 +29,7 @@ interface BasePrescription {
   readonly prescription_type?: "DISCHARGE" | "REGULAR";
   readonly discontinued: boolean;
   discontinued_reason?: string;
-  readonly prescribed_by: PerformedByModel;
+  readonly prescribed_by: UserBareMinimum;
   readonly discontinued_date: string;
   readonly last_administration?: MedicineAdministrationRecord;
   readonly is_migrated: boolean;
@@ -72,8 +72,8 @@ export type MedicineAdministrationRecord = {
   notes: string;
   dosage?: DosageValue;
   administered_date?: string;
-  readonly administered_by: PerformedByModel;
-  readonly archived_by: PerformedByModel | undefined;
+  readonly administered_by: UserBareMinimum;
+  readonly archived_by: UserBareMinimum | undefined;
   readonly archived_on: string | undefined;
   readonly created_date: string;
   readonly modified_date: string;
