@@ -948,7 +948,7 @@
   "patient_details_incomplete": "Patient Details Incomplete",
   "patient_face": "Patient Face",
   "patient_name": "Patient name",
-  "patient_no": "OP/IP No",
+  "patient_no": "UHID",
   "patient_notes_thread__Doctors": "Doctor's Discussions",
   "patient_notes_thread__Nurses": "Nurse's Discussions",
   "patient_phone_number": "Patient Phone Number",

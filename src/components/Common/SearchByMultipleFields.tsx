@@ -30,7 +30,7 @@ interface SearchOption {
   type: "text" | "phone";
   placeholder: string;
   value: string;
-  shortcut_key: string;
+  shortcutKey: string;
   component?: React.ComponentType<HTMLDivElement>;
 }
 
@@ -43,7 +43,7 @@ interface SearchByMultipleFieldsProps {
   buttonClassName?: string;
 }
 
-export type eventType = {
+export type EventType = {
   value: string;
   target?: { value: string };
 };
@@ -94,7 +94,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           setOpen(true);
         } else if (
           e.key.toLocaleLowerCase() ===
-            option.shortcut_key.toLocaleLowerCase() &&
+            option.shortcutKey.toLocaleLowerCase() &&
           open
         ) {
           e.preventDefault();
@@ -151,7 +151,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     const commonProps = {
       ref: inputRef,
       value: searchValue,
-      onChange: (e: eventType) =>
+      onChange: (e: EventType) =>
         handleSearchChange(e.target ? e.target.value : e.value),
       onKeyDown: handleKeyDown,
       className: cn(

@@ -749,7 +749,7 @@ export const PatientManager = () => {
       type: "phone" as const,
       placeholder: "Search_by_phone_number",
       value: qParams.phone_number || "",
-      shortcut_key: "p",
+      shortcutKey: "p",
     },
     {
       key: "name",
@@ -757,7 +757,7 @@ export const PatientManager = () => {
       type: "text" as const,
       placeholder: "Search_by_patient_name",
       value: qParams.name || "",
-      shortcut_key: "n",
+      shortcutKey: "n",
     },
     {
       key: "patient_no",
@@ -765,7 +765,7 @@ export const PatientManager = () => {
       type: "text" as const,
       placeholder: "Search_by_UHID",
       value: qParams.patient_no || "",
-      shortcut_key: "u",
+      shortcutKey: "u",
     },
     {
       key: "emergency_contact_phone_number",
@@ -773,7 +773,7 @@ export const PatientManager = () => {
       type: "phone" as const,
       placeholder: "Search_by_emergency_contact_phone_number",
       value: qParams.emergency_contact_phone_number || "",
-      shortcut_key: "e",
+      shortcutKey: "e",
     },
   ];
 
