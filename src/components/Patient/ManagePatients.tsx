@@ -755,7 +755,7 @@ export const PatientManager = () => {
       key: "name",
       label: "Name",
       type: "text" as const,
-      placeholder: "Search_by_patient_name",
+      placeholder: "search_by_patient_name",
       value: qParams.name || "",
       shortcutKey: "n",
     },
@@ -763,7 +763,7 @@ export const PatientManager = () => {
       key: "patient_no",
       label: "UHID",
       type: "text" as const,
-      placeholder: "Search_by_UHID",
+      placeholder: "search_by_UHID",
       value: qParams.patient_no || "",
       shortcutKey: "u",
     },
@@ -771,7 +771,7 @@ export const PatientManager = () => {
       key: "emergency_contact_phone_number",
       label: "Emergency Contact Phone Number",
       type: "phone" as const,
-      placeholder: "Search_by_emergency_contact_phone_number",
+      placeholder: "search_by_emergency_contact_phone_number",
       value: qParams.emergency_contact_phone_number || "",
       shortcutKey: "e",
     },
@@ -976,7 +976,7 @@ export const PatientManager = () => {
         <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
           <div className="flex-1" id="total-patientcount">
             <CountBlock
-              text="Total_Patients"
+              text={t("total_patients")}
               count={data?.count || 0}
               loading={isLoading}
               icon="l-user-injured"

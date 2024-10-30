@@ -1,6 +1,6 @@
 import { classNames } from "../../Utils/utils";
 import CareIcon, { IconName } from "../icons/CareIcon";
-import { useTranslation } from "react-i18next";
+
 interface Props {
   count: number;
   text: string;
@@ -10,7 +10,6 @@ interface Props {
 }
 
 export default function CountBlock(props: Props) {
-  const { t } = useTranslation();
   return (
     <div className={classNames("rounded-lg", props.className)}>
       <dl className="flex gap-3">
@@ -19,7 +18,7 @@ export default function CountBlock(props: Props) {
         </div>
         <div>
           <dt className="mb-1 truncate text-sm font-semibold text-secondary-700">
-            {t(props.text)}
+            {props.text}
           </dt>
           {props.loading ? (
             <dd className="h-10 w-full max-w-[100px] animate-pulse rounded-lg bg-secondary-300" />

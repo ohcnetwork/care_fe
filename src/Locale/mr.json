@@ -64,11 +64,11 @@
   "reset_password": "रिसेट पासवर्ड",
   "send_reset_link": "रीसेट लिंक  पाठवा",
   "Search_by_phone_number": "फोन नंबरद्वारे शोधा",
-  "Search_by_patient_name": "रुग्णाच्या नावाने शोधा",
-  "Search_by_UHID": "UHID द्वारे शोधा",
-  "Search_by_emergency_contact_phone_number": "आपातकालीन संपर्क फोन नंबरद्वारे शोधा",
+  "search_by_patient_name": "रुग्णाच्या नावाने शोधा",
+  "search_by_UHID": "UHID द्वारे शोधा",
+  "search_by_emergency_contact_phone_number": "आपातकालीन संपर्क फोन नंबरद्वारे शोधा",
   "sign_out": "साइन आउट",
   "something_wrong": "काहीतरी चूक झाली! पुन्हा प्रयत्न करा",
-  "Total_Patients": "एकूण रुग्ण",
+  "total_patients": "एकूण रुग्ण",
   "username": "युजरनेम"
 }
