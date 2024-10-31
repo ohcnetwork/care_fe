@@ -100,10 +100,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
       }
     }, [setValue]);
 
-    // Biswanaths change
-
     return (
-      //  ? thingy
       <FormField
         field={{
           ...field,
