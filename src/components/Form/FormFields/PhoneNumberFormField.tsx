@@ -19,6 +19,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import React from "react";
 import { useTranslation } from "react-i18next";
+
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
 interface Props extends FormFieldBaseProps<string> {
@@ -99,15 +100,20 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
       }
     }, [setValue]);
 
+    // Biswanaths change
+
     return (
+      //  ? thingy
       <FormField
         field={{
           ...field,
-          help: props?.help,
+
           error: field.error || error,
-          labelSuffix: field.labelSuffix || (
-            <PhoneNumberTypesHelp types={props.types} />
-          ),
+          labelSuffix:
+            field.labelSuffix ||
+            (props.help == undefined && (
+              <PhoneNumberTypesHelp types={props.types} />
+            )),
         }}
       >
         <div className="relative rounded-md">
