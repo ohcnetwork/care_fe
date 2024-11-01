@@ -11,14 +11,21 @@ import DoctorsCountCard from "./StaffCountCard";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
+import useFilters from "@/common/hooks/useFilters";
+import Pagination from "../Common/Pagination";
 
 export const FacilityStaffList = (props: any) => {
   const { t } = useTranslation();
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
+  const { qParams, resultsPerPage, updatePage } = useFilters({ limit: 15 });
   const [totalDoctors, setTotalDoctors] = useState(0);
 
-  const doctorQuery = useQuery(routes.listDoctor, {
+  const { data: doctorsList, refetch } = useQuery(routes.listDoctor, {
     pathParams: { facilityId: props.facilityId },
+    query: {
+      limit: resultsPerPage,
+      offset: (qParams.page - 1) * resultsPerPage,
+    },
     onResponse: ({ res, data }) => {
       if (res?.ok && data) {
         let totalCount = 0;
@@ -33,7 +40,7 @@ export const FacilityStaffList = (props: any) => {
   });
 
   let doctorList: any = null;
-  if (!doctorQuery.data || !doctorQuery.data.results.length) {
+  if (!doctorsList || !doctorsList.results.length) {
     doctorList = (
       <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         {t("no_staff")}
@@ -50,7 +57,7 @@ export const FacilityStaffList = (props: any) => {
               </div>
               <div id="facility-doctor-totalcapacity">
                 <div className="text-sm font-medium text-[#808080]">
-                  Total Staff
+                  {t("total_staff")}
                 </div>
                 <h2 className="mt-2 text-xl font-bold">{totalDoctors}</h2>
               </div>
@@ -58,25 +65,16 @@ export const FacilityStaffList = (props: any) => {
           </div>
         </div>
 
-        {doctorQuery.data.results.map((data: DoctorModal) => {
-          const removeCurrentDoctorData = (doctorId: number | undefined) => {
-            if (doctorQuery.data !== undefined) {
-              doctorQuery.data?.results.filter(
-                (i: DoctorModal) => i.id !== doctorId,
-              );
-              doctorQuery.refetch();
-            }
-          };
-
+        {doctorsList.results.map((data: DoctorModal) => {
           return (
             <DoctorsCountCard
               facilityId={props.facilityId}
               key={`bed_${data.id}`}
               handleUpdate={async () => {
-                doctorQuery.refetch();
+                refetch();
               }}
               {...data}
-              removeDoctor={removeCurrentDoctorData}
+              removeDoctor={() => refetch()}
             />
           );
         })}
@@ -116,11 +114,17 @@ export const FacilityStaffList = (props: any) => {
             facilityId={props.facilityId}
             handleClose={() => setDoctorCapacityModalOpen(false)}
             handleUpdate={async () => {
-              doctorQuery.refetch();
+              refetch();
             }}
           />
         </DialogModal>
       )}
+      <Pagination
+        cPage={qParams.page}
+        defaultPerPage={resultsPerPage}
+        data={{ totalCount: doctorsList?.count ?? 0 }}
+        onChange={(page) => updatePage(page)}
+      />
     </section>
   );
 };

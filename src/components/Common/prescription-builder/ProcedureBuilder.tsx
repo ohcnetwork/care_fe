@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import dayjs from "dayjs";
+import DateFormField from "../../Form/FormFields/DateFormField";
 
 export type ProcedureType = {
   procedure?: string;
@@ -131,28 +133,29 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                       />
                     </div>
                   ) : (
-                    <div className="w-full">
-                      <div className="mb-1">
-                        Time<span className="text-danger-500">{" *"}</span>
-                      </div>
-                      <input
-                        id="procedure-time"
-                        type="datetime-local"
-                        className="block w-[calc(100%-5px)] rounded border border-secondary-400 bg-secondary-100 px-4 py-2 text-sm hover:bg-secondary-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
-                        value={procedure.time || ""}
-                        onFocus={() => setActiveIdx(i)}
-                        onBlur={() => setActiveIdx(null)}
-                        onChange={(e) => {
-                          setItem(
-                            {
-                              ...procedure,
-                              time: e.currentTarget.value,
-                            },
-                            i,
-                          );
-                        }}
-                      />
-                    </div>
+                    <DateFormField
+                      id="procedure-time"
+                      name="procedure-time"
+                      label="Time"
+                      required
+                      value={
+                        !procedure.time ? new Date() : new Date(procedure.time)
+                      }
+                      onChange={(e) =>
+                        setItem(
+                          {
+                            ...procedure,
+                            time: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
+                          },
+                          i,
+                        )
+                      }
+                      allowTime
+                      errorClassName="hidden"
+                      className="w-full"
+                      onFocus={() => setActiveIdx(i)}
+                      onBlur={() => setActiveIdx(null)}
+                    />
                   )}
                 </div>
 

@@ -29,7 +29,7 @@ export const formatFilter = (params: any) => {
         : filter.emergency === "yes"
           ? "true"
           : "false",
-    limit: 14,
+    limit: filter.limit || 14,
     offset: filter.offset,
     created_date_before: filter.created_date_before || undefined,
     created_date_after: filter.created_date_after || undefined,
