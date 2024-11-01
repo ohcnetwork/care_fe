@@ -1,10 +1,11 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatDateTime, formatName, relativeDate } from "../../Utils/utils";
-import { PerformedByModel } from "../HCX/misc";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { UserBareMinimum } from "@/components/Users/models";
 
 function RelativeDateUserMention(props: {
   actionDate?: string;
-  user?: PerformedByModel;
+  user?: UserBareMinimum;
   tooltipPosition?: "top" | "bottom" | "left" | "right";
   withoutSuffix?: boolean;
 }) {

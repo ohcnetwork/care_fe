@@ -5,32 +5,28 @@ import { useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CircularProgress from "@/components/Common/components/CircularProgress";
-import ClaimCard from "../HCX/ClaimCard";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { ConsultationModel } from "./models";
-import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DISCHARGE_REASONS } from "@/common/constants";
+import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "@/components/Common/Dialog";
+import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
 import { FacilityModel } from "./models";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FieldError } from "../Form/FieldValidators";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXClaimModel } from "../HCX/models";
+import Loading from "@/components/Common/Loading";
+import { PLUGIN_Component } from "@/PluginEngine";
 import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import dayjs from "../../Utils/dayjs";
-import { useMessageListener } from "@/common/hooks/useMessageListener";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useConfirmedAction from "@/common/hooks/useConfirmedAction";
 import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
-import useConfirmedAction from "@/common/hooks/useConfirmedAction";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import routes from "../../Redux/api";
-import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
-import Loading from "@/components/Common/Loading";
-import careConfig from "@careConfig";
-import DateFormField from "../Form/FormFields/DateFormField";
-import request from "../../Utils/request/request";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -76,39 +72,9 @@ const DischargeModal = ({
       referred_to_external: !referred_to?.id ? referred_to?.name : null,
       referred_to: referred_to?.id ? referred_to.id : null,
     });
-  const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
-  const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
   const [facility, setFacility] = useState<FacilityModel | null>(referred_to);
   const [errors, setErrors] = useState<any>({});
-
-  const { refetch: refetchLatestClaim } = useQuery(routes.hcx.claims.list, {
-    query: {
-      consultation: consultationData.id,
-      ordering: "-modified_date",
-      use: "claim",
-      outcome: "complete",
-      limit: 1,
-    },
-    onResponse: (res) => {
-      if (!isCreateClaimLoading) return;
-
-      setIsCreateClaimLoading(false);
-
-      if (res?.data?.results?.length !== 0) {
-        setLatestClaim(res?.data?.results[0]);
-        Notification.Success({
-          msg: t("claim__fetched_claim_approval_results"),
-        });
-        return;
-      }
-
-      setLatestClaim(undefined);
-      Notification.Success({
-        msg: t("claim__error_fetching_claim_approval_results"),
-      });
-    },
-  });
 
   useEffect(() => {
     setPreDischargeForm((prev) => ({
@@ -130,16 +96,6 @@ const DischargeModal = ({
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
-
-  useMessageListener((data) => {
-    if (
-      data.type === "MESSAGE" &&
-      (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
-      data.message === "success"
-    ) {
-      refetchLatestClaim();
-    }
-  });
 
   const validate = () => {
     if (!new_discharge_reason && !discharge_reason) {
@@ -408,23 +364,10 @@ const DischargeModal = ({
           error={errors?.discharge_notes}
         />
 
-        {careConfig.hcx.enabled && (
-          // TODO: if policy and approved pre-auth exists
-          <div className="my-5 rounded p-5 shadow">
-            <h2 className="mb-2">Claim Insurance</h2>
-            {latestClaim ? (
-              <ClaimCard claim={latestClaim} />
-            ) : (
-              <CreateClaimCard
-                consultationId={consultationData.id ?? ""}
-                patientId={consultationData.patient ?? ""}
-                use="claim"
-                isCreating={isCreateClaimLoading}
-                setIsCreating={setIsCreateClaimLoading}
-              />
-            )}
-          </div>
-        )}
+        <PLUGIN_Component
+          __name="AdditionalDischargeProcedures"
+          consultation={consultationData}
+        />
 
         <div className="py-4">
           <span className="text-secondary-700">

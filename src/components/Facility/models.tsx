@@ -23,7 +23,6 @@ import { UserBareMinimum } from "../Users/models";
 import { InvestigationType } from "@/components/Common/prescription-builder/InvestigationBuilder";
 import { ProcedureType } from "@/components/Common/prescription-builder/ProcedureBuilder";
 import { RouteToFacility } from "@/components/Common/RouteToFacilitySelect";
-import { PerformedByModel } from "../HCX/misc";
 
 export interface LocalBodyModel {
   id: number;
@@ -713,8 +712,8 @@ export interface ShiftingModel {
   ambulance_number: string;
   comments: string;
   created_date: string;
-  created_by_object: PerformedByModel;
-  last_edited_by_object: PerformedByModel;
+  created_by_object: UserBareMinimum;
+  last_edited_by_object: UserBareMinimum;
   is_assigned_to_user: boolean;
   created_by: number;
   last_edited_by: number;
@@ -746,15 +745,15 @@ export interface ResourceModel {
   status: string;
   sub_category: string;
   title: string;
-  assigned_to_object: PerformedByModel | null;
-  created_by_object: PerformedByModel | null;
+  assigned_to_object: UserBareMinimum | null;
+  created_by_object: UserBareMinimum | null;
   created_date: string;
-  last_edited_by_object: PerformedByModel;
+  last_edited_by_object: UserBareMinimum;
 }
 
 export interface CommentModel {
   id: string;
-  created_by_object: PerformedByModel;
+  created_by_object: UserBareMinimum;
   created_date: string;
   modified_date: string;
   comment: string;
