@@ -18,12 +18,18 @@ export class SampleTestPage {
   }
 
   visitSampleRequestPage() {
-    cy.get("#sample-test-history").scrollIntoView();
-    cy.get("#sample-test-history")
-      .its("length")
-      .then((count) => {
-        this.sampleTestReportHistory = count || 0;
-      });
+    cy.get("body").then(($body) => {
+      if ($body.find("#sample-test-history").length > 0) {
+        cy.get("#sample-test-history")
+          .its("length")
+          .then((count) => {
+            this.sampleTestReportHistory = count;
+          });
+      } else {
+        // Set to 0 if the element does not exist
+        this.sampleTestReportHistory = 0;
+      }
+    });
     cy.get("#sample-request-btn").scrollIntoView();
     cy.get("#sample-request-btn").should("be.visible").click();
   }
