@@ -73,7 +73,7 @@ describe("User Creation", () => {
     userCreationPage.clickEditCancelProfileButton();
     userCreationPage.typeIntoFirstNameAndClear();
     userCreationPage.typeIntoLastNameAndClear();
-    cy.get("#gender").click().get("[role='option']").contains("Male").click();
+    cy.clickAndSelectOption("#gender", "Male");
     userCreationPage.typeIntoPhoneNumberAndClear(phone_number);
     userCreationPage.typeIntoAltPhoneumberAndClear(emergency_phone_number);
     userCreationPage.typeIntoEmailAndClear();
@@ -103,7 +103,6 @@ describe("User Creation", () => {
     userCreationPage.clickProfileName();
     userCreationPage.clickProfileButton();
     userCreationPage.clickEditCancelProfileButton();
-
     userCreationPage.clearFirstName();
     userCreationPage.clearLastName();
     userCreationPage.clearPhoneNumber();
@@ -120,16 +119,8 @@ describe("User Creation", () => {
     userCreationPage.typePassword();
     userCreationPage.selectHomeFacility("Dummy Shifting Center");
     userCreationPage.typePhoneNumber(phone_number);
-    cy.get("#date_of_birth")
-      .click()
-      .get("#date-input")
-      .click()
-      .type("25081999");
-    cy.get("#user_type")
-      .click()
-      .get("[role='option']")
-      .contains("Doctor")
-      .click();
+    cy.clickAndTypeDate("#date_of_birth", "25081999");
+    cy.clickAndSelectOption("#user_type", "Doctor");
     userCreationPage.typeConfirmPassword();
     userCreationPage.typeQualification();
     userCreationPage.typeDoctorExperience();
@@ -137,13 +128,9 @@ describe("User Creation", () => {
     userCreationPage.typeFirstName();
     userCreationPage.typeLastName();
     userCreationPage.typeEmail();
-    cy.get("#gender").click().get("[role='option']").contains("Male").click();
-    cy.get("#state").click().get("[role='option']").contains("Kerala").click();
-    cy.get("#district")
-      .click()
-      .get("[role='option']")
-      .contains("Ernakulam")
-      .click();
+    cy.clickAndSelectOption("#gender", "Male");
+    cy.clickAndSelectOption("#state", "Kerala");
+    cy.clickAndSelectOption("#district", "Ernakulam");
     userCreationPage.clickSubmit();
     cy.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);

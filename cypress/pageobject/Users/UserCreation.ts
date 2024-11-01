@@ -44,8 +44,7 @@ export class UserCreationPage {
   }
 
   typeIntoElementByIdPostClearDob(elementId: string, value: string) {
-    cy.get("#" + elementId).click();
-    cy.get("#date-input").clear().type(value);
+    cy.clickAndTypeDate("#" + elementId, value);
   }
 
   clearFirstName() {
