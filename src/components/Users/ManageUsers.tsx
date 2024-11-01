@@ -1,11 +1,9 @@
-import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { USER_TYPES } from "@/common/constants";
 import useAuthUser from "@/common/hooks/useAuthUser";
 import useFilters from "@/common/hooks/useFilters";
@@ -24,18 +22,14 @@ import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Pagination from "@/components/Common/Pagination";
 import UserDetails from "@/components/Common/UserDetails";
 import UserDetailComponent from "@/components/Common/UserDetailsComponet";
-import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CircularProgress from "@/components/Common/components/CircularProgress";
 import Page from "@/components/Common/components/Page";
 import { FacilityModel } from "../Facility/models";
-import TextFormField from "../Form/FormFields/TextFormField";
 import SearchInput from "../Form/SearchInput";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
-import SkillsSlideOver from "./SkillsSlideOver";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
-import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
-import { showUserDelete } from "../../Utils/permissions";
 
 import Loading from "@/components/Common/Loading";
 export default function ManageUsers() {
@@ -53,24 +47,11 @@ export default function ManageUsers() {
     cacheBlacklist: ["username"],
   });
   let manageUsers: any = null;
-  const [expandSkillList, setExpandSkillList] = useState(false);
-  const [expandFacilityList, setExpandFacilityList] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [expandWorkingHours, setExpandWorkingHours] = useState(false);
   const authUser = useAuthUser();
-  const [weeklyHours, setWeeklyHours] = useState<string>("0");
   const userIndex = USER_TYPES.indexOf(authUser.user_type);
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-
-  const [userData, setUserData] = useState<{
-    show: boolean;
-    username: string;
-    name: string;
-  }>({ show: false, username: "", name: "" });
-
-  const [weeklyHoursError, setWeeklyHoursError] = useState<string>("");
 
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen = width <= extremeSmallScreenBreakpoint;
@@ -80,27 +61,26 @@ export default function ManageUsers() {
     prefetch: !!qParams.home_facility && qParams.home_facility !== "NONE",
   });
 
-  const {
-    data: userListData,
-    loading: userListLoading,
-    refetch: refetchUserList,
-  } = useQuery(routes.userList, {
-    query: {
-      limit: resultsPerPage.toString(),
-      offset: (
-        (qParams.page ? qParams.page - 1 : 0) * resultsPerPage
-      ).toString(),
-      username: qParams.username,
-      first_name: qParams.first_name,
-      last_name: qParams.last_name,
-      phone_number: qParams.phone_number,
-      alt_phone_number: qParams.alt_phone_number,
-      user_type: qParams.user_type,
-      district_id: qParams.district,
-      home_facility: qParams.home_facility,
-      last_active_days: qParams.last_active_days,
+  const { data: userListData, loading: userListLoading } = useQuery(
+    routes.userList,
+    {
+      query: {
+        limit: resultsPerPage.toString(),
+        offset: (
+          (qParams.page ? qParams.page - 1 : 0) * resultsPerPage
+        ).toString(),
+        username: qParams.username,
+        first_name: qParams.first_name,
+        last_name: qParams.last_name,
+        phone_number: qParams.phone_number,
+        alt_phone_number: qParams.alt_phone_number,
+        user_type: qParams.user_type,
+        district_id: qParams.district,
+        home_facility: qParams.home_facility,
+        last_active_days: qParams.last_active_days,
+      },
     },
-  });
+  );
 
   useEffect(() => {
     if (!qParams.state && qParams.district) {
@@ -129,62 +109,6 @@ export default function ManageUsers() {
       <p>{t("add_new_user")}</p>
     </ButtonV2>
   );
-
-  const handleCancel = () => {
-    setUserData({ show: false, username: "", name: "" });
-  };
-
-  const handleWorkingHourSubmit = async () => {
-    const username = selectedUser;
-    if (!username || !weeklyHours || +weeklyHours < 0 || +weeklyHours > 168) {
-      setWeeklyHoursError("Value should be between 0 and 168");
-      return;
-    }
-    const { res, data, error } = await request(routes.partialUpdateUser, {
-      pathParams: { username },
-      body: { weekly_working_hours: weeklyHours },
-    });
-    if (res && res.status === 200 && data) {
-      Notification.Success({
-        msg: "Working hours updated successfully",
-      });
-      setExpandWorkingHours(false);
-      setSelectedUser(null);
-    } else {
-      Notification.Error({
-        msg: "Error while updating working hours: " + (error || ""),
-      });
-    }
-    setWeeklyHours("0");
-    setWeeklyHoursError("");
-    await refetchUserList();
-  };
-
-  const handleSubmit = async () => {
-    const { res, error } = await request(routes.deleteUser, {
-      pathParams: { username: userData.username },
-    });
-    if (res?.status === 204) {
-      Notification.Success({
-        msg: "User deleted successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while deleting User: " + (error || ""),
-      });
-    }
-
-    setUserData({ show: false, username: "", name: "" });
-    await refetchUserList();
-  };
-
-  const handleDelete = (user: any) => {
-    setUserData({
-      show: true,
-      username: user.username,
-      name: formatName(user),
-    });
-  };
 
   let userList: any[] = [];
   userListData?.results &&
@@ -246,14 +170,6 @@ export default function ManageUsers() {
                       aria-label="Online"
                     />
                   ) : null}
-                  {showUserDelete(authUser, user) && (
-                    <div
-                      className="w-8 cursor-pointer rounded-lg bg-red-50 text-xl text-red-600 hover:bg-red-50 hover:text-red-700"
-                      onClick={() => handleDelete(user)}
-                    >
-                      <CareIcon icon="l-trash" className="ml-[5px]" />
-                    </div>
-                  )}
                 </div>
 
                 <div
@@ -277,60 +193,6 @@ export default function ManageUsers() {
                       value={user.district_object.name}
                     />
                   )}
-                  {user.user_type === "Doctor" && (
-                    <>
-                      <div className="col-span-1">
-                        <UserDetails
-                          id="qualification"
-                          title={t("qualification")}
-                        >
-                          {user.qualification ? (
-                            <span className="font-semibold">
-                              {user.qualification}
-                            </span>
-                          ) : (
-                            <span className="text-secondary-600">
-                              {t("unknown")}
-                            </span>
-                          )}
-                        </UserDetails>
-                      </div>
-                      <div className="col-span-1">
-                        <UserDetails id="doctor-experience" title="Experience">
-                          {user.doctor_experience_commenced_on ? (
-                            <span className="font-semibold">
-                              {dayjs().diff(
-                                user.doctor_experience_commenced_on,
-                                "years",
-                                false,
-                              )}{" "}
-                              years
-                            </span>
-                          ) : (
-                            <span className="text-secondary-600">
-                              {t("unknown")}
-                            </span>
-                          )}
-                        </UserDetails>
-                      </div>
-                      <div className="col-span-2">
-                        <UserDetails
-                          id="medical-council-registration"
-                          title="Medical Council Registration"
-                        >
-                          {user.doctor_medical_council_registration ? (
-                            <span className="font-semibold">
-                              {user.doctor_medical_council_registration}
-                            </span>
-                          ) : (
-                            <span className="text-secondary-600">
-                              {t("unknown")}
-                            </span>
-                          )}
-                        </UserDetails>
-                      </div>
-                    </>
-                  )}
                 </div>
                 {user.local_body_object && (
                   <UserDetails id="local_body" title="Location">
@@ -345,24 +207,6 @@ export default function ManageUsers() {
                     isExtremeSmallScreen ? "flex flex-wrap" : "grid grid-cols-2"
                   }`}
                 >
-                  {user.user_type === "Nurse" && (
-                    <div className="row-span-1">
-                      <UserDetails
-                        id="qualification"
-                        title={t("qualification")}
-                      >
-                        {user.qualification ? (
-                          <span className="font-semibold">
-                            {user.qualification}
-                          </span>
-                        ) : (
-                          <span className="text-secondary-600">
-                            {t("unknown")}
-                          </span>
-                        )}
-                      </UserDetails>
-                    </div>
-                  )}
                   {user.created_by && (
                     <div className="col-span-1">
                       <UserDetails id="created_by" title="Created by">
@@ -388,69 +232,18 @@ export default function ManageUsers() {
                     </div>
                   )}
                 </div>
-                <div>
-                  <UserDetails
-                    id="working-hours"
-                    title="Average weekly working hours"
-                  >
-                    {user.weekly_working_hours ? (
-                      <span className="font-semibold">
-                        {user.weekly_working_hours} hours
-                      </span>
-                    ) : (
-                      <span className="text-secondary-600">-</span>
-                    )}
-                  </UserDetails>
-                </div>
               </div>
-              {user.username && (
-                <div className="mb-0 mt-auto flex w-full flex-col justify-between gap-2 p-4">
-                  <div className="flex flex-col gap-2 @sm:flex-row">
-                    <ButtonV2
-                      id="facilities"
-                      className="flex w-full items-center @sm:w-1/2"
-                      onClick={() => {
-                        setExpandFacilityList(!expandFacilityList);
-                        setSelectedUser(user);
-                      }}
-                    >
-                      <CareIcon icon="l-hospital" className="text-lg" />
-                      <p>{t("linked_facilities")}</p>
-                    </ButtonV2>
-                    <ButtonV2
-                      id="skills"
-                      className="flex w-full items-center @sm:w-1/2"
-                      onClick={() => {
-                        setExpandSkillList(true);
-                        setSelectedUser(user.username);
-                      }}
-                    >
-                      <CareIcon icon="l-award" className="text-xl" />
-                      <p>{t("linked_skills")}</p>
-                    </ButtonV2>
-                  </div>
-                  {["DistrictAdmin", "StateAdmin"].includes(
-                    authUser.user_type,
-                  ) && (
-                    <div>
-                      <ButtonV2
-                        id="avg-workinghour"
-                        className="w-full"
-                        onClick={() => {
-                          setExpandWorkingHours(true);
-                          setSelectedUser(user.username);
-                          setWeeklyHours(user.weekly_working_hours);
-                        }}
-                      >
-                        <CareIcon icon="l-clock" className="text-xl" />
-                        <p className="whitespace-normal md:whitespace-nowrap">
-                          Set Average weekly working hours
-                        </p>
-                      </ButtonV2>
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className="flex h-12 flex-row justify-end bg-secondary-200">
+                <ButtonV2
+                  id="link-user"
+                  className="mr-2 mt-1 h-[35px] w-[80px] self-center text-sm"
+                  ghost
+                  border
+                  onClick={() => navigate(`/users/${user.username}`)}
+                >
+                  {t("view_user")}
+                </ButtonV2>
+              </div>
             </div>
           </div>
         </div>
@@ -482,57 +275,6 @@ export default function ManageUsers() {
 
   return (
     <Page title={t("user_management")} hideBack={true} breadcrumbs={false}>
-      {expandSkillList && (
-        <SkillsSlideOver
-          show={expandSkillList}
-          setShow={setExpandSkillList}
-          username={selectedUser}
-        />
-      )}
-      <SlideOverCustom
-        open={expandFacilityList}
-        setOpen={setExpandFacilityList}
-        slideFrom="right"
-        title={t("linked_facilities")}
-        dialogClass="md:w-[400px]"
-      >
-        <UserFacilities user={selectedUser} />
-      </SlideOverCustom>
-      <SlideOverCustom
-        open={expandWorkingHours}
-        setOpen={(state) => {
-          setExpandWorkingHours(state);
-          setWeeklyHours("0");
-          setWeeklyHoursError("");
-        }}
-        slideFrom="right"
-        title={t("average_weekly_working_hours")}
-        dialogClass="md:w-[400px]"
-      >
-        <div className="px-2">
-          <dt className="mb-3 text-sm font-medium leading-5 text-black">
-            {t("set_average_weekly_working_hours_for")} {selectedUser}
-          </dt>
-          <TextFormField
-            name="weekly_working_hours"
-            id="weekly_working_hours"
-            value={weeklyHours}
-            onChange={(e) => {
-              setWeeklyHours(e.value);
-            }}
-            error={weeklyHoursError}
-            required
-            label=""
-            type="number"
-            min={0}
-            max={168}
-          />
-          <div className="mt-2 text-right">
-            <Submit onClick={handleWorkingHourSubmit} label={t("update")} />
-          </div>
-        </div>
-      </SlideOverCustom>
-
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5">
         <CountBlock
           text="Total Users"
@@ -601,13 +343,6 @@ export default function ManageUsers() {
       <div className="pt-4">
         <div>{manageUsers}</div>
       </div>
-      {userData.show && (
-        <UserDeleteDialog
-          name={userData.name}
-          handleCancel={handleCancel}
-          handleOk={handleSubmit}
-        />
-      )}
     </Page>
   );
 }

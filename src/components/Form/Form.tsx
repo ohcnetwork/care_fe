@@ -1,5 +1,5 @@
 import { isEmpty, omitBy } from "lodash-es";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { classNames } from "../../Utils/utils";
 import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { FieldValidator } from "./FieldValidators";
@@ -23,6 +23,7 @@ type Props<T extends FormDetails> = {
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
   hideRestoreDraft?: boolean;
+  resetFormVals?: boolean;
 };
 
 const Form = <T extends FormDetails>({
@@ -33,6 +34,7 @@ const Form = <T extends FormDetails>({
   const initial = { form: props.defaults, errors: {} };
   const [isLoading, setIsLoading] = useState(!!asyncGetDefaults);
   const [state, dispatch] = useAutoSaveReducer<T>(formReducer, initial);
+  const formVals = useRef(props.defaults);
 
   useEffect(() => {
     if (!asyncGetDefaults) return;
@@ -66,6 +68,13 @@ const Form = <T extends FormDetails>({
         errors: { ...state.errors, ...errors },
       });
     }
+  };
+
+  const handleCancel = () => {
+    if (props.resetFormVals) {
+      dispatch({ type: "set_form", form: formVals.current });
+    }
+    props.onCancel?.();
   };
 
   const { Provider, Consumer } = useMemo(() => createFormContext<T>(), []);
@@ -112,7 +121,7 @@ const Form = <T extends FormDetails>({
           </div>
           <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
             <Cancel
-              onClick={props.onCancel}
+              onClick={handleCancel}
               label={props.cancelLabel ?? "Cancel"}
             />
             <Submit
