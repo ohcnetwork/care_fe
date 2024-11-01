@@ -29,7 +29,6 @@ import Page from "@/components/Common/components/Page";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PatientCategorySelect from "./PatientCategorySelect";
 import RadioFormField from "../Form/FormFields/RadioFormField";
@@ -55,6 +54,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import SymptomsApi from "../Symptoms/api";
 import { scrollTo } from "../../Utils/utils";
 import { ICD11DiagnosisModel } from "../Facility/models";
+import DateFormField from "../Form/FormFields/DateFormField";
 import NursingCare from "../LogUpdate/Sections/NursingCare";
 
 import Loading from "@/components/Common/Loading";
@@ -634,16 +634,24 @@ export const DailyRounds = (props: any) => {
         />
         <div className="flex flex-col gap-6 md:flex-row">
           <div className="w-full md:w-1/3">
-            <TextFormField
+            <DateFormField
               {...field("taken_at")}
-              required
-              className="w-full"
               label="Measured at"
-              type="datetime-local"
-              value={dayjs(state.form.taken_at || undefined).format(
-                "YYYY-MM-DDTHH:mm",
-              )}
-              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+              required
+              value={
+                !state.form.taken_at
+                  ? new Date()
+                  : new Date(state.form.taken_at)
+              }
+              max={new Date()}
+              onChange={(e) =>
+                handleFormFieldChange({
+                  ...e,
+                  value: dayjs(e.value).format("YYYY-MM-DDTHH:mm"),
+                })
+              }
+              allowTime
+              errorClassName="hidden"
             />
           </div>
           <div className="w-full md:w-1/3">

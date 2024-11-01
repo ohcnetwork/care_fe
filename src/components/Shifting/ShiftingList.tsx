@@ -16,9 +16,9 @@ import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
 import { formatDateTime } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
-import BadgesList from "./BadgesList";
-import { formatFilter } from "./Commons";
-import ListFilter from "./ListFilter";
+import BadgesList from "./ShiftingBadges";
+import { formatFilter } from "./ShiftingCommons";
+import ListFilter from "./ShiftingFilters";
 export default function ListView() {
   const {
     qParams,

@@ -117,8 +117,10 @@ const AvatarEditModal = ({
 
     setIsProcessing(true);
     setIsCaptureImgBeingUploaded(true);
-
     await handleUpload(selectedFile, () => {
+      setSelectedFile(undefined);
+      setPreview(undefined);
+      setPreviewImage(null);
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
     });
