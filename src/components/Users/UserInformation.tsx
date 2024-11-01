@@ -14,7 +14,6 @@ import {
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { GenderType } from "./models";
 import dayjs from "../../Utils/dayjs";
-import useAuthUser from "@/common/hooks/useAuthUser";
 import {
   FieldError,
   PhoneNumberValidator,
@@ -119,8 +118,6 @@ export default function UserInformation({ username }: { username: string }) {
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const formVals = useRef(initForm);
   const [editAvatar, setEditAvatar] = useState(false);
-
-  const authUser = useAuthUser();
 
   const {
     data: userData,
@@ -320,7 +317,7 @@ export default function UserInformation({ username }: { username: string }) {
           : null,
     };
     const { res } = await request(routes.partialUpdateUser, {
-      pathParams: { username: authUser.username },
+      pathParams: { username: userData.username },
       body: data,
     });
     if (res?.ok) {
@@ -334,7 +331,7 @@ export default function UserInformation({ username }: { username: string }) {
   const handleAvatarUpload = async (file: File, onError: () => void) => {
     const formData = new FormData();
     formData.append("profile_picture", file);
-    const url = `${careConfig.apiUrl}/api/v1/users/${authUser.username}/profile_picture/`;
+    const url = `${careConfig.apiUrl}/api/v1/users/${userData.username}/profile_picture/`;
 
     uploadFile(
       url,
@@ -361,7 +358,7 @@ export default function UserInformation({ username }: { username: string }) {
 
   const handleAvatarDelete = async (onError: () => void) => {
     const { res } = await request(routes.deleteProfilePicture, {
-      pathParams: { username: authUser.username },
+      pathParams: { username },
     });
     if (res?.ok) {
       Notification.Success({ msg: "Profile picture deleted" });
@@ -377,7 +374,7 @@ export default function UserInformation({ username }: { username: string }) {
       <AvatarEditModal
         title={t("edit_avatar")}
         open={editAvatar}
-        imageUrl={authUser?.read_profile_picture_url}
+        imageUrl={userData?.read_profile_picture_url}
         handleUpload={handleAvatarUpload}
         handleDelete={handleAvatarDelete}
         onClose={() => setEditAvatar(false)}
@@ -386,8 +383,8 @@ export default function UserInformation({ username }: { username: string }) {
         <div className="my-4 flex justify-between">
           <div className="flex items-center">
             <Avatar
-              imageUrl={authUser?.read_profile_picture_url}
-              name={formatDisplayName(authUser)}
+              imageUrl={userData?.read_profile_picture_url}
+              name={formatDisplayName(userData)}
               className="h-20 w-20"
             />
             <div className="my-4 ml-4 flex flex-col gap-2">

@@ -12,6 +12,7 @@ import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications";
 import { UserModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
+import userColumns from "../Common/UserColumns";
 
 export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
   const { t } = useTranslation();
@@ -40,6 +41,8 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
     goBack();
   };
 
+  const userColumnsData = { userData, username: userData.username };
+
   return (
     <>
       {showDeleteDialog && (
@@ -52,32 +55,18 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
         />
       )}
       <div className="mt-10 flex flex-col gap-y-12">
-        <div className="flex flex-col gap-5 sm:flex-row">
-          <div className="sm:w-1/4">
-            <p className="my-1 text-sm leading-5">
-              <p className="mb-2 font-semibold">{t("personal_information")}</p>
-              <p className="text-secondary-600">
-                {t("personal_information_note")}
-              </p>
-            </p>
-          </div>
-          <div className="sm:w-3/4">
-            <UserInformation username={userData.username} />
-          </div>
-        </div>
-
-        <div className="mt-3 flex flex-col gap-5 sm:flex-row">
-          <div className="sm:w-1/4">
-            <p className="my-1 text-sm leading-5">
-              <p className="mb-2 font-semibold">{t("reset_password")}</p>
-              <p className="text-secondary-600">{t("reset_password_note")}</p>
-            </p>
-          </div>
-          <div className="sm:w-3/4">
-            <UserResetPassword />
-          </div>
-        </div>
-
+        {userColumns(
+          t("personal_information"),
+          t("personal_information_note"),
+          UserInformation,
+          userColumnsData,
+        )}
+        {userColumns(
+          t("reset_password"),
+          t("reset_password_note"),
+          UserResetPassword,
+          userColumnsData,
+        )}
         <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
           <div className="sm:w-1/4">
             <p className="my-1 text-sm leading-5">

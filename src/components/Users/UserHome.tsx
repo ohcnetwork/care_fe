@@ -11,12 +11,12 @@ import { classNames, keysOf } from "@/Utils/utils";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-export interface UserDetailProps {
+export interface UserHomeProps {
   username: string;
   tab: string;
 }
 
-export default function UserHome(props: UserDetailProps) {
+export default function UserHome(props: UserHomeProps) {
   const { username, tab } = props;
   const [userData, setUserData] = useState<UserModel>();
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ export default function UserHome(props: UserDetailProps) {
   });
 
   const TABS = {
-    profile: UserSummaryTab,
+    PROFILE: UserSummaryTab,
   };
 
   let currentTab = undefined;
