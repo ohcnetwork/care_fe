@@ -2,7 +2,7 @@ import { SampleTestPage } from "pageobject/Sample/SampleTestCreate";
 
 describe("Sample Test", () => {
   const sampleTestPage = new SampleTestPage();
-  const smapleTestType = "BA/ETA",
+  const sampleTestType = "BA/ETA",
     icmrCategory = "Cat 0",
     icmrLabel = "Test Icmr Label";
 
@@ -14,27 +14,29 @@ describe("Sample Test", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
-    cy.awaitUrl("/patients");
   });
 
-  it("request for new sample test", () => {
+  it("should request a new sample test", () => {
+    sampleTestPage.visitPatientPage();
     sampleTestPage.visitPatientDashboardPage();
     sampleTestPage.visitSampleRequestPage();
 
-    // Filling the form fields
-    sampleTestPage.selectSampleType(smapleTestType);
+    // Fill form fields
+    sampleTestPage.selectSampleType(sampleTestType);
     sampleTestPage.selectIcmrCategory(icmrCategory);
     sampleTestPage.typeIcmrLabel(icmrLabel);
 
-    // Submit Form
+    // Submit the form
     sampleTestPage.submitForm();
 
-    // checking for sample request
+    // Check for sample request notification and history
     sampleTestPage.clickOnNotification();
     sampleTestPage.checkRequestHistory();
   });
 
-  // it("check smaple request on sample page", () => {
-  //   cy.awaitUrl("/sample")
-  // })
+  it("should verify sample request on sample page", () => {
+    sampleTestPage.visitSamplePage();
+    sampleTestPage.searchPatientSample(sampleTestPage.patientName);
+    sampleTestPage.patientSampleMustExist();
+  });
 });

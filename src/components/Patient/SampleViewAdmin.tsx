@@ -146,6 +146,7 @@ export default function SampleViewAdmin() {
                   ? "border-primary-700 bg-primary-100"
                   : "bg-white"
             }`}
+            id="sample-card"
           >
             <div className="flex h-full flex-col justify-between px-6 py-4">
               <div>
@@ -345,6 +346,7 @@ export default function SampleViewAdmin() {
           <div className="flex w-full flex-col gap-3">
             <SearchInput
               name="patient_name"
+              id="search_patient_name"
               value={qParams.patient_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search patient"
