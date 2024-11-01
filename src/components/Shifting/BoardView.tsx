@@ -3,30 +3,30 @@ import {
   SHIFTING_CHOICES_WARTIME,
 } from "@/common/constants";
 
-import BadgesList from "./BadgesList";
 import { ExportButton } from "@/components/Common/Export";
-import ListFilter from "./ListFilter";
 import SearchInput from "../Form/SearchInput";
+import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
+import ListFilter from "./ListFilter";
 
-import { Link, navigate } from "raviger";
+import useAuthUser from "@/common/hooks/useAuthUser";
 import useFilters from "@/common/hooks/useFilters";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import Tabs from "@/components/Common/components/Tabs";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import PageTitle from "@/components/Common/PageTitle";
+import careConfig from "@careConfig";
+import dayjs from "dayjs";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import Tabs from "@/components/Common/components/Tabs";
-import careConfig from "@careConfig";
-import KanbanBoard from "../Kanban/Board";
-import { classNames, formatDateTime, formatName } from "../../Utils/utils";
-import dayjs from "dayjs";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { ShiftingModel } from "../Facility/models";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import request from "../../Utils/request/request";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import routes from "../../Redux/api";
-import PageTitle from "@/components/Common/PageTitle";
+import request from "../../Utils/request/request";
+import { classNames, formatDateTime, formatName } from "../../Utils/utils";
+import { ShiftingModel } from "../Facility/models";
+import KanbanBoard from "../Kanban/Board";
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
@@ -120,6 +120,9 @@ export default function BoardView() {
           />
 
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
             <ButtonV2
               className="py-[11px]"
               onClick={() => navigate("/shifting/list", { query: qParams })}
@@ -127,9 +130,6 @@ export default function BoardView() {
               <CareIcon icon="l-list-ul" />
               {t("list_view")}
             </ButtonV2>
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
           </div>
         </div>
       </div>
