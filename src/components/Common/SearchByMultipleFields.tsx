@@ -170,7 +170,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             {...commonProps}
             errorClassName="hidden"
             help={false}
-            onError={(er: FieldError) => setError(er)}
+            onError={(error: FieldError) => setError(error)}
           />
         );
       default:
