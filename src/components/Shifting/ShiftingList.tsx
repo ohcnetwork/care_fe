@@ -15,6 +15,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
 import { formatDateTime } from "../../Utils/utils";
+import { ShiftingModel } from "../Facility/models";
 import SearchInput from "../Form/SearchInput";
 import BadgesList from "./ShiftingBadges";
 import { formatFilter } from "./ShiftingCommons";
@@ -29,10 +30,15 @@ export default function ListView() {
     resultsPerPage,
   } = useFilters({ cacheBlacklist: ["patient_name"] });
 
-  const [modalFor, setModalFor] = useState({
+  // Adjust the modalFor type definition
+  const [modalFor, setModalFor] = useState<{
+    externalId: string | undefined;
+    loading: boolean;
+  }>({
     externalId: undefined,
     loading: false,
   });
+
   const authUser = useAuthUser();
   const { t } = useTranslation();
 
@@ -57,7 +63,10 @@ export default function ListView() {
     }),
   });
 
-  const showShiftingCardList = (data: any) => {
+  const showShiftingCardList = (data: ShiftingModel[]) => {
+    if (loading) {
+      return <Loading />;
+    }
     if (data && !data.length) {
       return (
         <div className="mt-64 flex flex-1 justify-center text-secondary-600">
@@ -66,7 +75,7 @@ export default function ListView() {
       );
     }
 
-    return data.map((shift: any) => (
+    return data.map((shift: ShiftingModel) => (
       <div
         key={`shift_${shift.id}`}
         className="w-full border-b-2 border-gray-100"
@@ -199,7 +208,12 @@ export default function ListView() {
                         shift.assigned_facility
                     )
                   }
-                  onClick={() => setModalFor(shift.external_id)}
+                  onClick={() =>
+                    setModalFor({
+                      externalId: shift.external_id,
+                      loading: false,
+                    })
+                  }
                 >
                   {t("transfer_to_receiving_facility")}
                 </ButtonV2>
@@ -207,10 +221,14 @@ export default function ListView() {
                   title={t("confirm_transfer_complete")}
                   description={t("mark_transfer_complete_confirmation")}
                   action="Confirm"
-                  show={modalFor === shift.external_id}
+                  show={modalFor.externalId === shift.external_id} // Check the externalId here
                   onClose={() =>
                     setModalFor({ externalId: undefined, loading: false })
                   }
+                  // show={modalFor === shift.external_id}
+                  // onClose={() =>
+                  //   setModalFor({ externalId: undefined, loading: false })
+                  // }
                   onConfirm={() => handleTransferComplete(shift)}
                 />
               </div>
