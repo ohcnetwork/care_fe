@@ -158,7 +158,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         "flex-grow border-none shadow-none focus-visible:ring-0 h-10",
         inputClassName,
       ),
-      phoneFieldError: (er: FieldError) => setError(er),
     };
 
     switch (selectedOption.type) {
@@ -171,6 +170,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             {...commonProps}
             errorClassName="hidden"
             help={false}
+            onError={(er: FieldError) => setError(er)}
           />
         );
       default:
