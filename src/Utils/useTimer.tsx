@@ -27,7 +27,7 @@ export const useTimer = (autoStart = false) => {
   const [time, setTime] = useState(0);
 
   useEffect(() => {
-    let interval: number;
+    let interval: ReturnType<typeof setInterval>;
     if (running) {
       interval = setInterval(() => {
         setTime((prevTime) => prevTime + 1);

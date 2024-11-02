@@ -14,7 +14,7 @@ describe("User Homepage", () => {
   const altPhoneNumber = "8878825662";
   const homeFacility = "Dummy Facility 40";
   const nurseUserName = "dummynurse1";
-  const doctorUserName = "devdoctor";
+  const doctorUserName = "devdoctor1";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();

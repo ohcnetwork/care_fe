@@ -78,7 +78,9 @@ describe("Asset Tab", () => {
 
   it("Next/Previous Page", () => {
     assetPagination.navigateToNextPage();
+    assetPagination.verifyNextUrl();
     assetPagination.navigateToPreviousPage();
+    assetPagination.verifyPreviousUrl();
   });
 
   it("Import new asset", () => {
@@ -99,9 +101,9 @@ describe("Asset Tab", () => {
   it("Export asset", () => {
     assetPage.selectassetimportbutton();
     cy.wait(2000);
-    assetPage.selectjsonexportbutton();
+    assetPage.selectJsonExportButton();
     assetPage.selectassetimportbutton();
-    assetPage.selectcsvexportbutton();
+    assetPage.selectCsvExportButton();
   });
 
   afterEach(() => {

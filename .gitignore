@@ -58,3 +58,7 @@ bun.lockb
 # Cypress
 cypress/downloads
 cypress/fixtures/token.json
+
+# Care Apps
+/apps/*
+src/pluginMap.ts

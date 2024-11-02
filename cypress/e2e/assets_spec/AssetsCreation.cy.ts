@@ -129,7 +129,7 @@ describe("Asset", () => {
       "d5694af2-21e2-4a39-9bad-2fb98d9818bd",
     );
     assetPage.clickConfigureAsset();
-    assetPage.verifyAssetConfiguration(200);
+    assetPage.verifyAssetConfiguration();
   });
 
   it("Add an vital monitor asset and configure it", () => {

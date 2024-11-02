@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { PerformedByModel } from "../../Components/HCX/misc";
+import { PerformedByModel } from "@/components/HCX/misc";
 import { classNames, formatName } from "../../Utils/utils";
 import CareIcon, { IconName } from "../icons/CareIcon";
 import RecordMeta from "./RecordMeta";
@@ -55,7 +55,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
   const { t } = useTranslation();
 
   return (
-    <li className="relative flex gap-x-4">
+    <div className="relative flex gap-x-4">
       <div
         className={classNames(
           props.isLast ? "h-6" : "-bottom-6",
@@ -119,7 +119,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
           {props.children}
         </div>
       </div>
-    </li>
+    </div>
   );
 };
 

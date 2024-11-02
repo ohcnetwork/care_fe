@@ -31,7 +31,10 @@ export default function KeyboardShortcut(props: Props) {
         )}
         {(props.altShortcuts || [props.shortcut]).map((shortcut, idx, arr) => (
           <>
-            <kbd className="hidden items-center px-1.5 font-sans font-medium text-zinc-300 shadow lg:inline-flex">
+            <kbd
+              key={`shortcut-${idx}`}
+              className="hidden items-center px-1.5 font-sans font-medium text-zinc-300 shadow lg:inline-flex"
+            >
               {shortcut.map((key, idx, keys) => (
                 <>
                   {SHORTCUT_KEY_MAP[key] || key}
@@ -42,7 +45,12 @@ export default function KeyboardShortcut(props: Props) {
               ))}
             </kbd>
             {idx !== arr.length - 1 && (
-              <span className="text-zinc-300/60">or</span>
+              <span
+                key={`shortcut-separator-${idx}`}
+                className="text-zinc-300/60"
+              >
+                or
+              </span>
             )}
           </>
         ))}

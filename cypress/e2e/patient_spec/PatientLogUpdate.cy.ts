@@ -113,6 +113,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.closeNotification();
     // Submit the doctors log update
     cy.submitButton("Save and Continue");
+    cy.wait(2000);
     cy.verifyNotification("Progress Note created successfully");
     cy.closeNotification();
     // modify the relevant critical care log update
@@ -302,9 +303,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
       patientRhythm,
     ]);
     patientLogupdate.clickUpdateDetail();
-    patientLogupdate.clickClearButtonInElement("#systolic");
+    patientLogupdate.clearIntoElementById("#systolic");
     patientLogupdate.typeSystolic(patientModifiedSystolic);
-    patientLogupdate.clickClearButtonInElement("#diastolic");
+    patientLogupdate.clearIntoElementById("#diastolic");
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
     cy.verifyNotification("Brief Update updated successfully");
