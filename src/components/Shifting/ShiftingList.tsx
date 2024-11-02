@@ -286,21 +286,20 @@ export default function ListView() {
             </div>
             <div>
               <div className="mx-10 mt-5 grid w-full grid-cols-5 gap-2 border-b-2 border-gray-100 p-4 text-sm font-medium">
-                <div className="col-span-1 text-left">
-                  {t("patients").toUpperCase()}
+                <div className="col-span-1 text-left uppercase">
+                  {t("patients")}
                 </div>
-                <div className="col-span-1 text-left">
-                  {t("contact_info").toUpperCase()}
+                <div className="col-span-1 text-left uppercase">
+                  {t("contact_info")}
                 </div>
-                <div className="col-span-1 text-left">
-                  {t("consent__status").toUpperCase()}
+                <div className="col-span-1 text-left uppercase">
+                  {t("consent__status")}
                 </div>
-                <div className="col-span-1 text-left">
-                  {t("facilities").toUpperCase()}
+                <div className="col-span-1 text-left uppercase">
+                  {t("facilities")}
                 </div>
-                <div className="col-span-1 text-left">
-                  {" "}
-                  {t("LOG_UPDATE_FIELD_LABEL__action").toUpperCase()}
+                <div className="col-span-1 text-left uppercase">
+                  {t("LOG_UPDATE_FIELD_LABEL__action")}
                 </div>
               </div>
               <div>{showShiftingCardList(shiftData?.results || [])}</div>
