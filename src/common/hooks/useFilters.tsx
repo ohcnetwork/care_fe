@@ -61,6 +61,11 @@ export default function useFilters({
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
     setQueryParams(Object.assign({}, qParams, filter), { replace: true });
   };
+  const updateSerchByField = (filter: FilterState) => {
+    filter = hasPagination ? { page: 1, limit, ...filter } : filter;
+    console.log(filter);
+    setQueryParams(Object.assign({}, filter), { replace: true });
+  };
   const updatePage = (page: number) => {
     if (!hasPagination) return;
     setQueryParams(Object.assign({}, qParams, { page }), { replace: true });
@@ -256,6 +261,7 @@ export default function useFilters({
      * To prevent reset to page 1, pass the `page` property along with the obj.
      */
     updateQuery,
+    updateSerchByField,
     /** Temp. alias of `updateQuery` until the new Filters slideover. Do not use. */
     applyFilter: updateQuery,
     /** Updates the query params with the specified page. */

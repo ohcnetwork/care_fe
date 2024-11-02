@@ -81,6 +81,8 @@ export const PatientManager = () => {
   const {
     qParams,
     updateQuery,
+    updateSerchByField,
+    removeFilters,
     advancedFilter,
     Pagination,
     FilterBadges,
@@ -763,31 +765,32 @@ export const PatientManager = () => {
       key: "patient_no",
       label: "UHID",
       type: "text" as const,
-      placeholder: "search_by_UHID",
+      placeholder: "search_by_uhid",
       value: qParams.patient_no || "",
       shortcutKey: "u",
     },
     {
-      key: "emergency_contact_phone_number",
+      key: "emergency_phone_number",
       label: "Emergency Contact Phone Number",
       type: "phone" as const,
-      placeholder: "search_by_emergency_contact_phone_number",
-      value: qParams.emergency_contact_phone_number || "",
+      placeholder: "search_by_emergency_phone_number",
+      value: qParams.emergency_phone_number || "",
       shortcutKey: "e",
     },
   ];
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
-      if (key === "phone_number" || key === "emergency_contact_phone_number") {
-        if (value.length >= 13 || value === "+91" || value === "") {
-          updateQuery({ [key]: value });
+      if (key === "phone_number" || key === "emergency_phone_number") {
+        value.length < 13 ? removeFilters() : null;
+        if (value.length >= 13 || value === "") {
+          updateSerchByField({ [key]: value });
         }
       } else {
-        updateQuery({ [key]: value });
+        updateSerchByField({ [key]: value });
       }
     },
-    [updateQuery],
+    [updateSerchByField],
   );
 
   return (

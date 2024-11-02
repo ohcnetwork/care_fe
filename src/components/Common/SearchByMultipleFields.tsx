@@ -158,7 +158,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         "flex-grow border-none shadow-none focus-visible:ring-0 h-10",
         inputClassName,
       ),
-      myfunc: (er: FieldError) => setError(er),
+      phoneFieldError: (er: FieldError) => setError(er),
     };
 
     switch (selectedOption.type) {

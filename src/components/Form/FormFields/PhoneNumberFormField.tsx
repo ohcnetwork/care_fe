@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next";
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
 interface Props extends FormFieldBaseProps<string> {
-  myfunc?: (er: FieldError) => void;
+  phoneFieldError?: (er: FieldError) => void;
   help?: boolean;
   types: PhoneNumberType[];
   placeholder?: string;
@@ -77,8 +77,8 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
       [field, validate, error],
     );
     useEffect(() => {
-      if (props.myfunc) {
-        props.myfunc(error);
+      if (props.phoneFieldError) {
+        props.phoneFieldError(error);
       }
     }, [error]);
     const handleCountryChange = (value: CountryData): void => {
