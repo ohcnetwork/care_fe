@@ -34,8 +34,8 @@ export default function MedicineAdministrationTable({
                 <p>Dosage &</p>
                 <p>
                   {prescriptions[0]?.dosage_type !== "PRN"
-                    ? t("Frequency")
-                    : t("Indicator")}
+                    ? t("frequency")
+                    : t("indicator")}
                 </p>
               </span>
             </th>
