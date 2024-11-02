@@ -71,7 +71,7 @@ export default function ListView() {
         key={`shift_${shift.id}`}
         className="w-full border-b-2 border-gray-100"
       >
-        <div className="border-3 flex grid w-full grid-cols-5 gap-1 overflow-hidden bg-white p-4 shadow">
+        <div className="border-3 flex grid w-full gap-1 overflow-hidden bg-white p-4 shadow sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
           <div className="col-span-1 px-2 text-left">
             <div className="text-sm font-bold capitalize">
               {shift.patient_object.name}
@@ -285,7 +285,7 @@ export default function ListView() {
               </button>
             </div>
             <div>
-              <div className="mx-10 mt-5 grid w-full grid-cols-5 gap-2 border-b-2 border-gray-100 p-4 text-sm font-medium">
+              <div className="mx-10 mt-5 grid w-full gap-2 border-b-2 border-gray-100 p-4 text-sm font-medium sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
                 <div className="col-span-1 text-left uppercase">
                   {t("patients")}
                 </div>
