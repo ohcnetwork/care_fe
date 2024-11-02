@@ -6,8 +6,8 @@ import ButtonV2 from "@/components/Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import routes from "../../Redux/api";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import { IComment } from "./models";
 import request from "../../Utils/request/request";
+import { CommentModel } from "../Facility/models";
 
 const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");
@@ -63,7 +63,7 @@ const CommentSection = (props: { id: string }) => {
               <PaginatedList.WhenLoading>
                 <CircularProgress className="h-12 w-12" />
               </PaginatedList.WhenLoading>
-              <PaginatedList.Items<IComment>>
+              <PaginatedList.Items<CommentModel>>
                 {(item) => <Comment {...item} />}
               </PaginatedList.Items>
               <div className="flex w-full items-center justify-center">
@@ -83,7 +83,7 @@ export const Comment = ({
   comment,
   created_by_object,
   modified_date,
-}: IComment) => (
+}: CommentModel) => (
   <div className="mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800">
     <div className="w-full">
       <p className="break-words">{comment}</p>
