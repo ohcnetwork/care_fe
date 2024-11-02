@@ -101,8 +101,12 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
 
   const headerText = !id ? "Add Staff Capacity" : "Edit Staff Capacity";
   const buttonText = !id ? "Save Staff Capacity" : "Update Staff Capacity";
+  const additionalButtonLabel =
+    !isLastOptionType && headerText === "Add Staff Capacity"
+      ? "Save & Add More"
+      : "";
 
-  const handleSubmit = async (form: typeof initForm, btnType?: string) => {
+  const handleSubmit = async (form: typeof initForm, source?: string) => {
     if (!validateData(form)) return;
     setIsLoading(true);
     const data = {
@@ -128,7 +132,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
       });
       handleUpdate();
     }
-    if (btnType !== "save-and-add-more") handleClose();
+    if (source !== "save-and-add-more") handleClose();
   };
 
   return (
@@ -144,11 +148,13 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
           className="my-auto p-0"
           noPadding
           hideRestoreDraft
-          showSaveAndAddMoreBtn={
-            !isLastOptionType && headerText === "Add Staff Capacity"
-              ? "Save & Add More"
-              : ""
-          }
+          additionalButtons={[
+            {
+              id: "save-and-add-more",
+              type: "submit",
+              label: additionalButtonLabel,
+            },
+          ]}
         >
           {(field) => (
             <>

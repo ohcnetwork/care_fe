@@ -14,7 +14,7 @@ type Props<T extends FormDetails> = {
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
   validate?: (form: T) => FormErrors<T>;
-  onSubmit: (form: T, btnType?: string) => Promise<FormErrors<T> | void>;
+  onSubmit: (form: T, source?: string) => Promise<FormErrors<T> | void>;
   onCancel?: () => void;
   noPadding?: true;
   disabled?: boolean;
@@ -23,7 +23,11 @@ type Props<T extends FormDetails> = {
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
   hideRestoreDraft?: boolean;
-  showSaveAndAddMoreBtn?: string;
+  additionalButtons?: {
+    type: "submit" | "button";
+    label: string;
+    id: string;
+  }[];
 };
 
 const Form = <T extends FormDetails>({
@@ -35,7 +39,7 @@ const Form = <T extends FormDetails>({
   const [isLoading, setIsLoading] = useState(!!asyncGetDefaults);
   const [state, dispatch] = useAutoSaveReducer<T>(formReducer, initial);
 
-  const [isDirty, setIsDirty] = useState(false); // Added isDirty state
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     if (!asyncGetDefaults) return;
@@ -65,12 +69,11 @@ const Form = <T extends FormDetails>({
 
     const errors = await props.onSubmit(state.form, buttonId);
     if (errors) {
+      setIsDirty(false);
       dispatch({
         type: "set_errors",
         errors: { ...state.errors, ...errors },
       });
-    } else {
-      setIsDirty(false);
     }
   };
 
@@ -142,15 +145,18 @@ const Form = <T extends FormDetails>({
               disabled={disabled || !isDirty}
               label={props.submitLabel}
             />
-            {props.showSaveAndAddMoreBtn && (
-              <Submit
-                id="save-and-add-more"
-                data-testid="submit-button"
-                type="submit"
-                disabled={disabled || !isDirty}
-                label={props.showSaveAndAddMoreBtn}
-              />
-            )}
+            {props.additionalButtons?.map((btn) => {
+              if (btn.label) {
+                return (
+                  <Submit
+                    id={btn.id}
+                    type={btn.type}
+                    disabled={disabled || !isDirty}
+                    label={btn.label}
+                  />
+                );
+              }
+            })}
           </div>
         </Provider>
       </DraftSection>

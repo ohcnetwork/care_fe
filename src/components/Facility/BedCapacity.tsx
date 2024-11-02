@@ -146,11 +146,10 @@ export const BedCapacity = (props: BedCapacityProps) => {
     setIsLastOptionType(lastBedType);
   }, [bedTypes]);
 
-  const handleSubmit = async (form: typeof initForm, btnType?: string) => {
+  const handleSubmit = async (form: typeof initForm, source?: string) => {
     const valid = validateData(form);
     if (valid) {
       setIsLoading(true);
-      //Converting new data from string to Number
       const bodyData = {
         room_type: Number(form.bedType),
         total_capacity: Number(form.totalCapacity),
@@ -192,12 +191,17 @@ export const BedCapacity = (props: BedCapacityProps) => {
       ).length;
 
       if (
-        btnType !== "save-and-add-more" ||
+        source !== "save-and-add-more" ||
         disabledBedTypesLength === BED_TYPES.length
       )
         handleClose();
     }
   };
+
+  const additionalButtonLabel =
+    !isLastOptionType && headerText === "Add Bed Capacity"
+      ? "Save & Add More"
+      : "";
 
   return (
     <div className={className}>
@@ -233,11 +237,13 @@ export const BedCapacity = (props: BedCapacityProps) => {
             className="my-auto p-0"
             noPadding
             hideRestoreDraft
-            showSaveAndAddMoreBtn={
-              !isLastOptionType && headerText === "Add Bed Capacity"
-                ? "Save & Add More"
-                : ""
-            }
+            additionalButtons={[
+              {
+                id: "save-and-add-more",
+                type: "submit",
+                label: additionalButtonLabel,
+              },
+            ]}
           >
             {(field) => (
               <>
