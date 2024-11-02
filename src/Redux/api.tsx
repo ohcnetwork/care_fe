@@ -1,8 +1,8 @@
 import {
   ConsentRequestModel,
   CreateConsentTBody,
-} from "../Components/ABDM/types/consent";
-import { HealthInformationModel } from "../Components/ABDM/types/health-information";
+} from "@/components/ABDM/types/consent";
+import { HealthInformationModel } from "@/components/ABDM/types/health-information";
 import {
   AssetBedBody,
   AssetBedModel,
@@ -13,10 +13,11 @@ import {
   AssetTransaction,
   AvailabilityRecord,
   PatientAssetBed,
-} from "../Components/Assets/AssetTypes";
+} from "@/components/Assets/AssetTypes";
 import {
   BedModel,
   CapacityModal,
+  CommentModel,
   ConsultationModel,
   CreateBedBody,
   CurrentBed,
@@ -41,70 +42,65 @@ import {
   PatientNotesModel,
   PatientStatsModel,
   PatientTransferResponse,
+  ResourceModel,
+  ShiftingModel,
   StateModel,
   WardModel,
-} from "../Components/Facility/models";
+} from "@/components/Facility/models";
 import {
   DailyRoundsModel,
   PatientModel,
   SampleReportModel,
   SampleTestModel,
-} from "../Components/Patient/models";
-import { IComment, IResource } from "../Components/Resource/models";
+} from "@/components/Patient/models";
 import {
   IDeleteBedCapacity,
   ILocalBodies,
   ILocalBodyByDistrict,
-} from "../Components/ExternalResult/models";
+} from "@/components/ExternalResult/models";
 import {
   InvestigationGroup,
   InvestigationType,
-} from "../Components/Facility/Investigations";
+} from "@/components/Facility/Investigations";
 import {
   DupPatientModel,
   PatientConsentModel,
   PatientTransferRequest,
-} from "../Components/Facility/models";
-import { MedibaseMedicine, Prescription } from "../Components/Medicine/models";
+} from "@/components/Facility/models";
+import { MedibaseMedicine, Prescription } from "@/components/Medicine/models";
 import {
   NotificationData,
   PNconfigData,
-} from "../Components/Notifications/models";
-import {
-  HCXClaimModel,
-  HCXCommunicationModel,
-  HCXPolicyModel,
-} from "../Components/HCX/models";
-import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
-import { IShift } from "../Components/Shifting/models";
-import { Investigation } from "../Components/Facility/Investigations/Reports/types";
+} from "@/components/Notifications/models";
+import { HCXPolicyModel } from "@/components/HCX/models";
+import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
+import { Investigation } from "@/components/Facility/Investigations/Reports/types";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
   CreateFileRequest,
   CreateFileResponse,
   FileUploadModel,
-} from "../Components/Patient/models";
+} from "@/components/Patient/models";
 import {
   SkillModel,
   SkillObjectModel,
   UpdatePasswordForm,
   UserAssignedModel,
   UserModel,
-} from "../Components/Users/models";
+} from "@/components/Users/models";
 import {
   EventGeneric,
   type Type,
-} from "../Components/Facility/ConsultationDetails/Events/types";
-import { InvestigationSessionType } from "../Components/Facility/Investigations/investigationsTab";
-import { AbhaNumberModel } from "../Components/ABDM/types/abha";
-import { ScribeModel } from "../Components/Scribe/Scribe";
+} from "@/components/Facility/ConsultationDetails/Events/types";
+import { InvestigationSessionType } from "@/components/Facility/Investigations/investigationsTab";
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import { ScribeModel } from "@/components/Scribe/Scribe";
 import {
   IcreateHealthFacilityTBody,
   IHealthFacility,
   IpartialUpdateHealthFacilityTBody,
-} from "../Components/ABDM/types/health-facility";
-import { PMJAYPackageItem } from "@/Components/Common/PMJAYProcedurePackageAutocomplete";
-import { InsurerOptionModel } from "@/Components/HCX/InsurerAutocomplete";
+} from "@/components/ABDM/types/health-facility";
+import { InsurerOptionModel } from "@/components/HCX/InsurerAutocomplete";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1059,14 +1055,14 @@ const routes = {
   createShift: {
     path: "/api/v1/shift/",
     method: "POST",
-    TBody: Type<Partial<IShift>>(),
+    TBody: Type<Partial<ShiftingModel>>(),
     TRes: Type<PatientModel>(),
   },
   updateShift: {
     path: "/api/v1/shift/{id}/",
     method: "PUT",
-    TBody: Type<IShift>(),
-    TRes: Type<IShift>(),
+    TBody: Type<ShiftingModel>(),
+    TRes: Type<ShiftingModel>(),
   },
   deleteShiftRecord: {
     path: "/api/v1/shift/{id}/",
@@ -1076,17 +1072,17 @@ const routes = {
   listShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
-    TRes: Type<PaginatedResponse<IShift>>(),
+    TRes: Type<PaginatedResponse<ShiftingModel>>(),
   },
   getShiftDetails: {
     path: "/api/v1/shift/{id}/",
     method: "GET",
-    TRes: Type<IShift>(),
+    TRes: Type<ShiftingModel>(),
   },
   completeTransfer: {
     path: "/api/v1/shift/{externalId}/transfer/",
     method: "POST",
-    TBody: Type<IShift>(),
+    TBody: Type<ShiftingModel>(),
     TRes: Type<Partial<PatientModel>>(),
   },
   downloadShiftRequests: {
@@ -1097,13 +1093,13 @@ const routes = {
   getShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
     method: "GET",
-    TRes: Type<PaginatedResponse<IComment>>(),
+    TRes: Type<PaginatedResponse<CommentModel>>(),
   },
   addShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
     method: "POST",
-    TBody: Type<Partial<IComment>>(),
-    TRes: Type<IComment>(),
+    TBody: Type<Partial<CommentModel>>(),
+    TRes: Type<CommentModel>(),
   },
 
   // Notifications
@@ -1235,14 +1231,14 @@ const routes = {
   createResource: {
     path: "/api/v1/resource/",
     method: "POST",
-    TRes: Type<IResource>(),
-    TBody: Type<Partial<IResource>>(),
+    TRes: Type<ResourceModel>(),
+    TBody: Type<Partial<ResourceModel>>(),
   },
   updateResource: {
     path: "/api/v1/resource/{id}/",
     method: "PUT",
-    TRes: Type<IResource>(),
-    TBody: Type<Partial<IResource>>(),
+    TRes: Type<ResourceModel>(),
+    TBody: Type<Partial<ResourceModel>>(),
   },
   deleteResourceRecord: {
     path: "/api/v1/resource/{id}/",
@@ -1254,12 +1250,12 @@ const routes = {
   listResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
-    TRes: Type<PaginatedResponse<IResource>>(),
+    TRes: Type<PaginatedResponse<ResourceModel>>(),
   },
   getResourceDetails: {
     path: "/api/v1/resource/{id}/",
     method: "GET",
-    TRes: Type<IResource>(),
+    TRes: Type<ResourceModel>(),
   },
   downloadResourceRequests: {
     path: "/api/v1/resource/",
@@ -1269,13 +1265,13 @@ const routes = {
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "GET",
-    TRes: Type<PaginatedResponse<IComment>>(),
+    TRes: Type<PaginatedResponse<CommentModel>>(),
   },
   addResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "POST",
-    TRes: Type<IComment>(),
-    TBody: Type<Partial<IComment>>(),
+    TRes: Type<CommentModel>(),
+    TBody: Type<Partial<CommentModel>>(),
   },
 
   // Assets endpoints
@@ -1693,117 +1689,6 @@ const routes = {
         method: "POST",
         TBody: Type<{ policy: string }>(),
         TRes: Type<HCXPolicyModel>(),
-      },
-    },
-
-    claims: {
-      list: {
-        path: "/api/hcx/claim/",
-        method: "GET",
-        TRes: Type<PaginatedResponse<HCXClaimModel>>(),
-      },
-
-      create: {
-        path: "/api/hcx/claim/",
-        method: "POST",
-        TBody: Type<{
-          policy: string;
-          items: {
-            id: string;
-            price: number;
-            category?: string;
-            name: string;
-          }[];
-          consultation: string;
-          use: "preauthorization" | "claim";
-        }>(),
-        TRes: Type<HCXClaimModel>(),
-      },
-
-      get: {
-        path: "/api/hcx/claim/{external_id}/",
-        method: "GET",
-      },
-
-      update: {
-        path: "/api/hcx/claim/{external_id}/",
-        method: "PUT",
-      },
-
-      partialUpdate: {
-        path: "/api/hcx/claim/{external_id}/",
-        method: "PATCH",
-      },
-
-      delete: {
-        path: "/api/hcx/claim/{external_id}/",
-        method: "DELETE",
-      },
-
-      listPMJYPackages: {
-        path: "/api/hcx/pmjy_packages/",
-        method: "GET",
-        TRes: Type<PMJAYPackageItem[]>(),
-      },
-
-      makeClaim: {
-        path: "/api/hcx/make_claim/",
-        method: "POST",
-        TBody: Type<{ claim: string }>(),
-        TRes: Type<unknown>(),
-      },
-    },
-
-    communications: {
-      list: {
-        path: "/api/hcx/communication/",
-        method: "GET",
-        TRes: Type<PaginatedResponse<HCXCommunicationModel>>(),
-      },
-
-      create: {
-        path: "/api/hcx/communication/",
-        method: "POST",
-        TRes: Type<HCXCommunicationModel>(),
-        TBody: Type<{
-          claim: string;
-          content: {
-            type: string;
-            data: string;
-          }[];
-        }>(),
-      },
-
-      get: {
-        path: "/api/hcx/communication/{external_id}/",
-        method: "GET",
-        TRes: Type<HCXCommunicationModel>(),
-      },
-
-      update: {
-        path: "/api/hcx/communication/{external_id}/",
-        method: "PUT",
-        TRes: Type<HCXCommunicationModel>(),
-      },
-
-      partialUpdate: {
-        path: "/api/hcx/communication/{external_id}/",
-        method: "PATCH",
-        TRes: Type<HCXCommunicationModel>(),
-      },
-
-      delete: {
-        path: "/api/hcx/communication/{external_id}/",
-        method: "DELETE",
-      },
-
-      send: {
-        path: "/api/hcx/send_communication/",
-        method: "POST",
-        TRes: Type<void>(),
-        TBody: Type<{
-          communication: string;
-        }>(),
       },
     },
   },

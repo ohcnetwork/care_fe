@@ -18,8 +18,7 @@ export class UserCreationPage {
       .type(value);
   }
   typeIntoElementByIdPostClearDob(elementId: string, value: string) {
-    cy.get("#" + elementId).click();
-    cy.get("#date-input").clear().type(value);
+    cy.clickAndTypeDate("#" + elementId, value);
   }
   clearIntoElementById(elementId: string) {
     cy.get("#" + elementId)
@@ -54,13 +53,8 @@ export class UserCreationPage {
     this.selectOptionContainingText(name);
   }
 
-  setInputDate(
-    dateElementId: string,
-    inputElementId: string,
-    dateValue: string,
-  ) {
-    this.clickElementById(dateElementId);
-    this.typeIntoElementById(inputElementId, dateValue);
+  setInputDate(dateElementId: string, dateValue: string) {
+    cy.clickAndTypeDate("#" + dateElementId, dateValue);
   }
 
   selectDropdownOption(dropdownId: string, optionText: string) {

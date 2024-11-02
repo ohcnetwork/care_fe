@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
-import { AuthUserContext } from "../Common/hooks/useAuthUser";
-import Loading from "../Components/Common/Loading";
+import { AuthUserContext } from "@/common/hooks/useAuthUser";
+import Loading from "@/components/Common/Loading";
 import routes from "../Redux/api";
 import useQuery from "../Utils/request/useQuery";
-import { LocalStorageKeys } from "../Common/constants";
+import { LocalStorageKeys } from "@/common/constants";
 import request from "../Utils/request/request";
 import { navigate } from "raviger";
 import careConfig from "@careConfig";

@@ -1,8 +1,8 @@
-import { ShiftCreate } from "../../Components/Patient/ShiftCreate";
-import ShiftDetails from "../../Components/Shifting/ShiftDetails";
-import { ShiftDetailsUpdate } from "../../Components/Shifting/ShiftDetailsUpdate";
-import ListView from "../../Components/Shifting/ListView";
-import BoardView from "../../Components/Shifting/BoardView";
+import { ShiftCreate } from "@/components/Patient/ShiftCreate";
+import ShiftDetails from "@/components/Shifting/ShiftDetails";
+import { ShiftDetailsUpdate } from "@/components/Shifting/ShiftDetailsUpdate";
+import ListView from "@/components/Shifting/ShiftingList";
+import BoardView from "@/components/Shifting/ShiftingBoard";
 import { Redirect } from "raviger";
 import { AppRoutes } from "../AppRouter";
 
