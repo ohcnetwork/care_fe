@@ -1,34 +1,47 @@
-import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
-import { useState, useEffect } from "react";
-
-import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
-import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
-import Error404 from "../Components/ErrorPages/404";
 import {
   DesktopSidebar,
   MobileSidebar,
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
-} from "../Components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS } from "../Common/constants";
-import SessionExpired from "../Components/ErrorPages/SessionExpired";
-import HealthInformation from "../Components/ABDM/HealthInformation";
-import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
+} from "@/components/Common/Sidebar/Sidebar";
+import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { useEffect, useState } from "react";
 
-import UserRoutes from "./routes/UserRoutes";
-import PatientRoutes from "./routes/PatientRoutes";
-import SampleRoutes from "./routes/SampleRoutes";
-import FacilityRoutes from "./routes/FacilityRoutes";
-import ConsultationRoutes from "./routes/ConsultationRoutes";
-import HCXRoutes from "./routes/HCXRoutes";
-import ShiftingRoutes from "./routes/ShiftingRoutes";
+import ABDMFacilityRecords from "@/components/ABDM/ABDMFacilityRecords";
 import AssetRoutes from "./routes/AssetRoutes";
-import ResourceRoutes from "./routes/ResourceRoutes";
-import { DetailRoute } from "./types";
-import careConfig from "@careConfig";
+import { BLACKLISTED_PATHS } from "@/common/constants";
+import ConsultationRoutes from "./routes/ConsultationRoutes";
+import Error404 from "@/components/ErrorPages/404";
+import FacilityRoutes from "./routes/FacilityRoutes";
+import HealthInformation from "@/components/ABDM/HealthInformation";
 import IconIndex from "../CAREUI/icons/Index";
+import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
+import PatientRoutes from "./routes/PatientRoutes";
+import ResourceRoutes from "./routes/ResourceRoutes";
+import SampleRoutes from "./routes/SampleRoutes";
+import SessionExpired from "@/components/ErrorPages/SessionExpired";
+import ShiftingRoutes from "./routes/ShiftingRoutes";
+import ShowPushNotification from "@/components/Notifications/ShowPushNotification";
+import UserRoutes from "./routes/UserRoutes";
+import careConfig from "@careConfig";
+import { usePluginRoutes } from "@/common/hooks/useCareApps";
 
-const Routes = {
+export type RouteParams<T extends string> =
+  T extends `${string}:${infer Param}/${infer Rest}`
+    ? { [K in Param | keyof RouteParams<Rest>]: string }
+    : T extends `${string}:${infer Param}`
+      ? { [K in Param]: string }
+      : Record<string, never>;
+
+export type RouteFunction<T extends string> = (
+  params: RouteParams<T>,
+) => JSX.Element;
+
+export type AppRoutes = {
+  [K in string]: RouteFunction<K>;
+};
+
+const Routes: AppRoutes = {
   "/": () => <Redirect to="/facility" />,
 
   ...AssetRoutes,
@@ -40,15 +53,13 @@ const Routes = {
   ...ShiftingRoutes,
   ...UserRoutes,
 
-  "/notifications/:id": ({ id }: DetailRoute) => (
-    <ShowPushNotification id={id} />
-  ),
+  "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
   "/notice_board": () => <NoticeBoard />,
 
-  "/abdm/health-information/:id": ({ id }: { id: string }) => (
+  "/abdm/health-information/:id": ({ id }) => (
     <HealthInformation artefactId={id} />
   ),
-  "/facility/:facilityId/abdm": ({ facilityId }: any) => (
+  "/facility/:facilityId/abdm": ({ facilityId }) => (
     <ABDMFacilityRecords facilityId={facilityId} />
   ),
 
@@ -61,14 +72,20 @@ const Routes = {
 };
 
 export default function AppRouter() {
+  const pluginRoutes = usePluginRoutes();
+
   let routes = Routes;
 
-  if (careConfig.hcx.enabled) {
-    routes = { ...HCXRoutes, ...routes };
-  }
-
   useRedirect("/user", "/users");
+
+  // Merge in Plugin Routes
+  routes = {
+    ...pluginRoutes,
+    ...routes,
+  };
+
   const pages = useRoutes(routes) || <Error404 />;
+
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -146,7 +163,7 @@ export default function AppRouter() {
             id="pages"
             className="flex-1 overflow-y-scroll bg-gray-100 pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto mt-4 rounded-t-lg border bg-gray-50 p-3 shadow-lg">
+            <div className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow">
               {pages}
             </div>
           </main>

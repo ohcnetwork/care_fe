@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import useFilters from "../../Common/hooks/useFilters";
-import ButtonV2 from "../../Components/Common/components/ButtonV2";
+import useFilters from "@/common/hooks/useFilters";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../icons/CareIcon";
 import SlideOver from "./SlideOver";
 import { ReactNode } from "react";

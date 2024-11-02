@@ -31,6 +31,7 @@ interface ImportMetaEnv {
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_MIN_ENCOUNTER_DATE?: string;
   readonly REACT_ALLOWED_LOCALES?: string;
+  readonly REACT_ENABLED_APPS?: string;
 
   // Plugins related envs...
   readonly REACT_PLAUSIBLE_SERVER_URL?: string;

@@ -59,10 +59,10 @@ export class AssetPage {
     cy.get("[data-testid=asset-support-email-input] input").type(supportEmail);
     cy.get("[data-testid=asset-vendor-name-input] input").type(vendorName);
     cy.get("[data-testid=asset-serial-number-input] input").type(serialNumber);
-    cy.get(
-      "[data-testid=asset-last-serviced-on-input] input[type='text']",
-    ).click();
-    cy.get("#date-input").click().type(lastServicedOn);
+    cy.clickAndTypeDate(
+      "[data-testid=asset-last-serviced-on-input]",
+      lastServicedOn,
+    );
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 
@@ -117,10 +117,10 @@ export class AssetPage {
     cy.get("[data-testid=asset-vendor-name-input] input")
       .clear()
       .type(vendorName);
-    cy.get(
-      "[data-testid=asset-last-serviced-on-input] input[type='text']",
-    ).click();
-    cy.get("#date-input").click().clear().type(lastServicedOn);
+    cy.clickAndTypeDate(
+      "[data-testid=asset-last-serviced-on-input]",
+      lastServicedOn,
+    );
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
@@ -149,14 +149,12 @@ export class AssetPage {
     cy.intercept(/\/api\/v1\/asset/).as("asset");
   }
 
-  verifyAssetConfiguration(statusCode: number) {
-    cy.wait("@asset").then((interception) => {
-      expect(interception.response.statusCode).to.equal(statusCode);
-    });
+  verifyAssetConfiguration() {
+    cy.wait("@asset").its("response.statusCode").should("eq", 200);
   }
 
   clickConfigureAsset() {
-    cy.get("#submit").contains("Set Configuration").click();
+    cy.get("#submit").contains("Update").click();
   }
 
   clickConfigureVital() {
@@ -222,22 +220,16 @@ export class AssetPage {
     cy.get("[data-testid=import-asset-button]").click();
   }
 
-  selectjsonexportbutton() {
+  selectJsonExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
     cy.get("#export-json-option").click();
-    cy.wait("@getJsonexport").then(({ request, response }) => {
-      expect(response.statusCode).to.eq(200);
-      expect(request.url).to.include("json=true");
-    });
+    cy.wait("@getJsonexport").its("response.statusCode").should("eq", 200);
   }
 
-  selectcsvexportbutton() {
+  selectCsvExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
     cy.get("#export-csv-option").click();
-    cy.wait("@getCsvexport").then(({ request, response }) => {
-      expect(response.statusCode).to.eq(200);
-      expect(request.url).to.include("csv=true");
-    });
+    cy.wait("@getCsvexport").its("response.statusCode").should("eq", 200);
   }
 
   selectImportOption() {
@@ -275,8 +267,7 @@ export class AssetPage {
   }
 
   enterAssetservicedate(text: string) {
-    cy.get("input[name='last_serviced_on']").click();
-    cy.get("#date-input").click().type(text);
+    cy.clickAndTypeDate("input[name='last_serviced_on']", text);
   }
 
   scrollintoWarrantyDetails() {

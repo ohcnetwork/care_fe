@@ -1,25 +1,19 @@
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import ResourceDetails from "../../Components/Resource/ResourceDetails";
-import { ResourceDetailsUpdate } from "../../Components/Resource/ResourceDetailsUpdate";
-import ListView from "../../Components/Resource/ListView";
-import BoardView from "../../Components/Resource/ResourceBoardView";
+import ResourceDetails from "@/components/Resource/ResourceDetails";
+import { ResourceDetailsUpdate } from "@/components/Resource/ResourceDetailsUpdate";
 import { Redirect } from "raviger";
-import { DetailRoute } from "../types";
+import { AppRoutes } from "../AppRouter";
+import BoardView from "@/components/Resource/ResourceBoard";
+import ListView from "@/components/Resource/ResourceList";
 
 const getDefaultView = () =>
   localStorage.getItem("defaultResourceView") === "list" ? "list" : "board";
 
-export default {
+const ResourceRoutes: AppRoutes = {
   "/resource": () => <Redirect to={`/resource/${getDefaultView()}`} />,
-  "/resource/board": () => (
-    <DndProvider backend={HTML5Backend}>
-      <BoardView />
-    </DndProvider>
-  ),
+  "/resource/board": () => <BoardView />,
   "/resource/list": () => <ListView />,
-  "/resource/:id": ({ id }: DetailRoute) => <ResourceDetails id={id} />,
-  "/resource/:id/update": ({ id }: DetailRoute) => (
-    <ResourceDetailsUpdate id={id} />
-  ),
+  "/resource/:id": ({ id }) => <ResourceDetails id={id} />,
+  "/resource/:id/update": ({ id }) => <ResourceDetailsUpdate id={id} />,
 };
+
+export default ResourceRoutes;

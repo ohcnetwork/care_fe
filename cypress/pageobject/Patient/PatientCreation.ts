@@ -10,7 +10,7 @@ export class PatientPage {
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
 
-  visitPatient(patientName) {
+  visitPatient(patientName: string) {
     cy.get("#name").click().type(patientName);
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
@@ -22,7 +22,7 @@ export class PatientPage {
   }
 
   selectFacility(facilityName: string) {
-    cy.searchAndSelectOption("input[name='facilities']", facilityName);
+    cy.typeAndSelectOption("input[name='facilities']", facilityName);
     cy.submitButton("Select");
   }
 
@@ -52,9 +52,7 @@ export class PatientPage {
 
   typePatientDateOfBirth(dateOfBirth: string) {
     cy.clickAndSelectOption("#patientAge", "DOB");
-    cy.get("#date_of_birth").scrollIntoView();
-    cy.get("#date_of_birth").should("be.visible").click();
-    cy.get("#date-input").click().type(dateOfBirth);
+    cy.clickAndTypeDate("#date_of_birth", dateOfBirth);
   }
 
   typePatientAge(age: string) {
@@ -80,13 +78,11 @@ export class PatientPage {
   }
 
   typeLastMenstruationStartDate(date: string) {
-    cy.get("#last_menstruation_start_date").click();
-    cy.get("#date-input").click().type(date);
+    cy.clickAndTypeDate("#last_menstruation_start_date", date);
   }
 
   typeDateOfDelivery(date: string) {
-    cy.get("#date_of_delivery").click();
-    cy.get("#date-input").click().type(date);
+    cy.clickAndTypeDate("#date_of_delivery", date);
   }
 
   clickPermanentAddress() {
@@ -114,7 +110,7 @@ export class PatientPage {
   }
 
   selectPatientOccupation(occupation: string) {
-    cy.searchAndSelectOption("#occupation", occupation);
+    cy.typeAndSelectOption("#occupation", occupation);
   }
 
   selectSocioeconomicStatus(value: string) {
@@ -165,16 +161,16 @@ export class PatientPage {
   }
 
   verifyPatientDashboardDetails(
-    gender,
-    age,
-    patientName,
-    phoneNumber,
-    emergencyPhoneNumber,
-    yearOfBirth,
-    bloodGroup,
-    occupation,
-    socioeconomicStatus = null,
-    domesticHealthcareSupport = null,
+    gender: string,
+    age: number,
+    patientName: string,
+    phoneNumber: string,
+    emergencyPhoneNumber: string,
+    yearOfBirth: string,
+    bloodGroup: string,
+    occupation: string,
+    socioeconomicStatus: string | null = null,
+    domesticHealthcareSupport: string | null = null,
     isAntenatal = false,
     isPostPartum = false,
   ) {
@@ -202,12 +198,12 @@ export class PatientPage {
   }
 
   verifyPatientLocationDetails(
-    patientAddress,
-    patientPincode,
-    patientState,
-    patientDistrict,
-    patientLocalbody,
-    patientWard,
+    patientAddress: string,
+    patientPincode: number,
+    patientState: string,
+    patientDistrict: string,
+    patientLocalbody: string,
+    patientWard: string,
   ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");

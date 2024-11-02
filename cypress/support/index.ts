@@ -15,7 +15,7 @@ declare global {
       getAttached(selector: string): Chainable<Subject>;
       clearAllFilters(): Chainable<Subject>;
       submitButton(buttonText?: string): Chainable<Element>;
-      searchAndSelectOption(
+      typeAndSelectOption(
         element: string,
         referance: string,
       ): Chainable<Element>;

@@ -1,24 +1,27 @@
 import { Redirect } from "raviger";
-import InventoryList from "../../Components/Facility/InventoryList";
-import InventoryLog from "../../Components/Facility/InventoryLog";
-import MinQuantityList from "../../Components/Facility/MinQuantityList";
-import { SetInventoryForm } from "../../Components/Facility/SetInventoryForm";
+import InventoryList from "@/components/Facility/InventoryList";
+import InventoryLog from "@/components/Facility/InventoryLog";
+import MinQuantityList from "@/components/Facility/MinQuantityList";
+import { SetInventoryForm } from "@/components/Facility/SetInventoryForm";
+import { AppRoutes } from "../AppRouter";
 
-export default {
-  "/facility/:facilityId/inventory": ({ facilityId }: any) => (
+const FacilityInventoryRoutes: AppRoutes = {
+  "/facility/:facilityId/inventory": ({ facilityId }) => (
     <InventoryList facilityId={facilityId} />
   ),
-  "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }: any) => (
+  "/facility/:facilityId/inventory/min_quantity/set": ({ facilityId }) => (
     <SetInventoryForm facilityId={facilityId} />
   ),
-  "/facility/:facilityId/inventory/min_quantity/list": ({
-    facilityId,
-  }: any) => <MinQuantityList facilityId={facilityId} />,
-  "/facility/:facilityId/inventory/min_quantity": ({ facilityId }: any) => (
+  "/facility/:facilityId/inventory/min_quantity/list": ({ facilityId }) => (
+    <MinQuantityList facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/inventory/min_quantity": ({ facilityId }) => (
     <Redirect to={`/facility/${facilityId}/inventory/min_quantity/list`} />
   ),
   "/facility/:facilityId/inventory/:inventoryId": ({
     facilityId,
     inventoryId,
-  }: any) => <InventoryLog facilityId={facilityId} inventoryId={inventoryId} />,
+  }) => <InventoryLog facilityId={facilityId} inventoryId={inventoryId} />,
 };
+
+export default FacilityInventoryRoutes;

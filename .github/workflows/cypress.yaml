@@ -70,7 +70,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies 📦
-        run: npm install
+        run: npm run install-all
 
       - name: Build ⚙️
         run: npm run build

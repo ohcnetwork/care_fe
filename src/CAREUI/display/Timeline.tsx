@@ -1,14 +1,15 @@
-import { createContext, useContext } from "react";
-import { useTranslation } from "react-i18next";
-import { PerformedByModel } from "../../Components/HCX/misc";
-import { classNames, formatName } from "../../Utils/utils";
 import CareIcon, { IconName } from "../icons/CareIcon";
+import { classNames, formatName } from "../../Utils/utils";
+import { createContext, useContext } from "react";
+
 import RecordMeta from "./RecordMeta";
+import { UserBareMinimum } from "@/components/Users/models";
+import { useTranslation } from "react-i18next";
 
 export interface TimelineEvent<TType = string> {
   type: TType;
   timestamp: string;
-  by: PerformedByModel | undefined;
+  by: UserBareMinimum | undefined;
   icon: IconName;
   iconStyle?: string;
   iconWrapperStyle?: string;
@@ -55,7 +56,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
   const { t } = useTranslation();
 
   return (
-    <li className="relative flex gap-x-4">
+    <div className="relative flex gap-x-4">
       <div
         className={classNames(
           props.isLast ? "h-6" : "-bottom-6",
@@ -119,7 +120,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
           {props.children}
         </div>
       </div>
-    </li>
+    </div>
   );
 };
 

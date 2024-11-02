@@ -26,7 +26,7 @@
     "cpus": 4
   },
   "waitFor": "onCreateCommand",
-  "postCreateCommand": "npm install",
+  "postCreateCommand": "npm run install-all",
   "postAttachCommand": {
     "server": "npm run dev"
   },

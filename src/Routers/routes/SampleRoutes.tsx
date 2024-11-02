@@ -1,25 +1,23 @@
-import { SampleDetails } from "../../Components/Patient/SampleDetails";
-import SampleReport from "../../Components/Patient/SamplePreview";
-import { SampleTest } from "../../Components/Patient/SampleTest";
-import SampleViewAdmin from "../../Components/Patient/SampleViewAdmin";
-import { DetailRoute, RouteParams } from "../types";
+import { SampleDetails } from "@/components/Patient/SampleDetails";
+import SampleReport from "@/components/Patient/SamplePreview";
+import { SampleTest } from "@/components/Patient/SampleTest";
+import SampleViewAdmin from "@/components/Patient/SampleViewAdmin";
+import { AppRoutes } from "../AppRouter";
 
-export default {
+const SampleRoutes: AppRoutes = {
   "/sample": () => <SampleViewAdmin />,
-  "/sample/:id": ({ id }: DetailRoute) => <SampleDetails id={id} />,
+  "/sample/:id": ({ id }) => <SampleDetails id={id} />,
   "/patient/:patientId/test_sample/:sampleId/icmr_sample": ({
     patientId,
     sampleId,
-  }: RouteParams<"patientId" | "sampleId">) => (
-    <SampleReport id={patientId} sampleId={sampleId} />
-  ),
+  }) => <SampleReport id={patientId} sampleId={sampleId} />,
   "/facility/:facilityId/patient/:patientId/sample-test": ({
     facilityId,
     patientId,
-  }: RouteParams<"facilityId" | "patientId">) => (
-    <SampleTest facilityId={facilityId} patientId={patientId} />
+  }) => <SampleTest facilityId={facilityId} patientId={patientId} />,
+  "/facility/:facilityId/patient/:patientId/sample/:id": ({ id }) => (
+    <SampleDetails id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/sample/:id": ({
-    id,
-  }: DetailRoute) => <SampleDetails id={id} />,
 };
+
+export default SampleRoutes;
