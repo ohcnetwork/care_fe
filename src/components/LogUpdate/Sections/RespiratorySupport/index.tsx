@@ -51,6 +51,38 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
     }
   }, [warnForNoLinkedVentilator]);
 
+  const handleChange = (c: any) => {
+    let resetData = {};
+    if (["OXYGEN_SUPPORT", "UNKNOWN"].includes(c.value)) {
+      resetData = {
+        ...resetData,
+        ventilator_spo2: undefined,
+        ventilator_fio2: undefined,
+        ventilator_peep: undefined,
+        ventilator_pip: undefined,
+        ventilator_mean_airway_pressure: undefined,
+        ventilator_resp_rate: undefined,
+        ventilator_pressure_support: undefined,
+        ventilator_tidal_volume: undefined,
+        ventilator_mode: undefined,
+      };
+    }
+    if (["INVASIVE", "NON_INVASIVE", "UNKNOWN"].includes(c.value)) {
+      resetData = {
+        ...resetData,
+        ventilator_spo2: undefined,
+        ventilator_oxygen_modality_flow_rate: undefined,
+        ventilator_oxygen_modality_oxygen_rate: undefined,
+        ventilator_oxygen_modality: undefined,
+      };
+    }
+    onChange({
+      ventilator_interface: (c.value ||
+        "UNKNOWN") as typeof log.ventilator_interface,
+      ...resetData,
+    });
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <RadioFormField
@@ -94,12 +126,7 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
         optionValue={(c) => c.value}
         name="respiratory_support"
         value={log.ventilator_interface}
-        onChange={(c) =>
-          onChange({
-            ventilator_interface: (c.value ||
-              "UNKNOWN") as typeof log.ventilator_interface,
-          })
-        }
+        onChange={handleChange}
       />
 
       <DialogModal

@@ -17,6 +17,13 @@ import {
   RequiredFieldValidator,
 } from "../Form/FieldValidators";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import { Occupation, PatientMeta, PatientModel } from "./models";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   compareBy,
   dateQueryString,
@@ -25,12 +32,13 @@ import {
   parsePhoneNumber,
   scrollTo,
 } from "../../Utils/utils";
-import { useCallback, useReducer, useRef, useState } from "react";
-import { navigate } from "raviger";
 import { statusType, useAbortableEffect } from "@/common/utils";
+import { useCallback, useReducer, useRef, useState } from "react";
 
+import { AbhaNumberModel } from "../ABDM/types/abha";
 import AccordionV2 from "@/components/Common/components/AccordionV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import { Button } from "@/components/ui/button";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
@@ -41,38 +49,35 @@ import DialogModal from "@/components/Common/Dialog";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import Error404 from "../ErrorPages/404";
 import Form from "../Form/Form";
+import { FormContextValue } from "../Form/FormContext";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import { ILocalBodies } from "../ExternalResult/models";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
-import { PatientModel, Occupation, PatientMeta } from "./models";
+import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index";
+import Loading from "@/components/Common/Loading";
+import PageTitle from "@/components/Common/PageTitle";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
+import { RestoreDraftButton } from "@/Utils/AutoSave";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import Spinner from "@/components/Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import _ from "lodash";
+import careConfig from "@careConfig";
+import { startCase, toLower } from "lodash-es";
 import countryList from "@/common/static/countries.json";
 import { debounce } from "lodash-es";
+import { navigate } from "raviger";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useAppHistory from "@/common/hooks/useAppHistory";
 import useAuthUser from "@/common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
-import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index";
-import { AbhaNumberModel } from "../ABDM/types/abha";
 import { validatePincode } from "@/common/validation";
-import careConfig from "@careConfig";
-import { Button } from "@/components/ui/button";
-
-import Loading from "@/components/Common/Loading";
-import PageTitle from "@/components/Common/PageTitle";
-import { RestoreDraftButton } from "@/Utils/AutoSave";
-import { FormContextValue } from "../Form/FormContext";
 
 type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
@@ -372,6 +377,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [id],
   );
 
+  const { data: healthFacility } = useQuery(routes.abdm.healthFacility.get, {
+    pathParams: { facility_id: facilityId },
+    silent: true,
+  });
+
   useQuery(routes.hcx.policies.list, {
     query: {
       patient: id,
@@ -625,7 +635,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ? formData.last_vaccinated_date
             : null
           : null,
-      name: _.startCase(_.toLower(formData.name)),
+      name: startCase(toLower(formData.name)),
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
       nationality: formData.nationality,
@@ -1015,16 +1025,28 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               </div>
               {!state.form.abha_number && (
                 <div className="flex justify-center md:justify-end">
-                  <Button
-                    variant="outline_primary"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setShowLinkAbhaNumberModal(true);
-                    }}
-                  >
-                    <CareIcon icon="l-user-square" className="mr-2" />
-                    <span>Generate/Link ABHA Number</span>
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="outline_primary"
+                          disabled={!healthFacility}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setShowLinkAbhaNumberModal(true);
+                          }}
+                        >
+                          <CareIcon icon="l-user-square" className="mr-2" />
+                          <span>{t("generate_link_abha")}</span>
+                        </Button>
+                      </TooltipTrigger>
+                      {!healthFacility && (
+                        <TooltipContent className="max-w-sm break-words text-sm">
+                          {t("abha_disabled_due_to_no_health_facility")}
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               )}
               {showAlertMessage.show && (
@@ -1197,7 +1219,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               {...field("date_of_birth")}
                               errorClassName="hidden"
                               required
-                              position="LEFT"
                               disableFuture
                             />
                           </div>
@@ -1308,7 +1329,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           containerClassName="w-full"
                           {...field("last_menstruation_start_date")}
                           label="Last Menstruation Start Date"
-                          position="LEFT"
                           disableFuture
                           required
                         />
@@ -1333,7 +1353,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       containerClassName="w-full"
                       {...field("date_of_delivery")}
                       label="Date of Delivery"
-                      position="LEFT"
                       disableFuture
                       required
                     />
@@ -1705,7 +1724,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 {...field("last_vaccinated_date")}
                                 label="Last Date of Vaccination"
                                 disableFuture={true}
-                                position="LEFT"
                               />
                             </div>
                           </div>
@@ -1737,7 +1755,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               {...field("date_declared_positive")}
                               label="Date Patient is Declared Positive for COVID"
                               disableFuture
-                              position="LEFT"
                             />
                           </div>
                         </CollapseV2>
@@ -1748,7 +1765,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           id="date_of_test"
                           label="Date of Sample given for COVID Test"
                           disableFuture
-                          position="LEFT"
                         />
                       </div>
                     </div>

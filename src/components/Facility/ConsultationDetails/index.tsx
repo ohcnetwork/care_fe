@@ -78,7 +78,7 @@ export const ConsultationDetails = (props: any) => {
   }
   const [showDoctors, setShowDoctors] = useState(false);
   const [qParams, _] = useQueryParams();
-  const [patientData, setPatientData] = useState<PatientModel>({});
+  const [patientData, setPatientData] = useState<PatientModel>();
   const [abhaNumberData, setAbhaNumberData] = useState<AbhaNumberModel>();
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
 
@@ -137,7 +137,7 @@ export const ConsultationDetails = (props: any) => {
         address: getPatientAddress(data),
         comorbidities: getPatientComorbidities(data),
         is_declared_positive: data.is_declared_positive ? "Yes" : "No",
-        is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
+        is_vaccinated: patientData?.is_vaccinated ? "Yes" : "No",
       } as any);
     },
   });
@@ -162,7 +162,7 @@ export const ConsultationDetails = (props: any) => {
         setActiveShiftingData(shiftRequestsQuery.data.results);
       }
     },
-    [consultationId, patientData.is_vaccinated],
+    [consultationId, patientData?.is_vaccinated],
   );
 
   useEffect(() => {
@@ -178,7 +178,7 @@ export const ConsultationDetails = (props: any) => {
     });
   }, [patientDataQuery.data?.id]);
 
-  if (!consultationData || patientDataQuery.loading) {
+  if (!patientData || !consultationData || patientDataQuery.loading) {
     return <Loading />;
   }
 

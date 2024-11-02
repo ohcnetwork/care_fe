@@ -236,7 +236,7 @@ export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 16, text: "General Surgeon" },
   { id: 17, text: "Geriatrician" },
   { id: 18, text: "Hematologist" },
-  { id: 29, text: "Immunologist" },
+  { id: 19, text: "Immunologist" },
   { id: 20, text: "Infectious Disease Specialist" },
   { id: 21, text: "MBBS doctor" },
   { id: 22, text: "Medical Officer" },

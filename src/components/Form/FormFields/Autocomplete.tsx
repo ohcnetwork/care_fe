@@ -14,7 +14,6 @@ import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
-
 type OptionCallback<T, R> = (option: T) => R;
 
 type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
@@ -84,6 +83,7 @@ type AutocompleteProps<T, V = T> = {
   isLoading?: boolean;
   allowRawInput?: boolean;
   error?: string;
+  avatar?: boolean;
 } & (
   | {
       required?: false;

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications";
-import CommentSection from "./CommentSection";
+import CommentSection from "./ResourceCommentSection";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
 import Page from "@/components/Common/components/Page";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
@@ -322,7 +322,7 @@ export default function ResourceDetails(props: { id: string }) {
 
               <div className="md:col-span-2 md:row-span-2">
                 <div className="font-semibold leading-relaxed">Reason: </div>
-                <div className="ml-2">{data.reason || "--"}</div>
+                <div className="break-words">{data.reason || "--"}</div>
               </div>
             </div>
 
@@ -357,7 +357,7 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
               <div className="mt-1 text-sm leading-5 text-secondary-900">
                 <div className="text-sm">
-                  {formatName(data.created_by_object)}
+                  {data.created_by_object && formatName(data.created_by_object)}
                 </div>
                 <div className="text-xs">
                   {data.created_date && formatDateTime(data.created_date)}
