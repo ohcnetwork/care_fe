@@ -1,4 +1,4 @@
-import { PerformedByModel } from "../HCX/misc";
+import { UserBareMinimum } from "@/components/Users/models";
 
 export type ICD11DiagnosisModel = {
   id: string;
@@ -33,7 +33,7 @@ export interface ConsultationDiagnosis {
   verification_status: ConditionVerificationStatus;
   is_principal: boolean;
   readonly is_migrated: boolean;
-  readonly created_by: PerformedByModel;
+  readonly created_by: UserBareMinimum;
   readonly created_date: string;
   readonly modified_date: string;
 }
