@@ -50,10 +50,10 @@ jobs:
       - name: Wait for Backend to be Up
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 1
-          max_attempts: 5
+          timeout_minutes: 2
+          max_attempts: 10
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
-          on_retry_command: sleep 5
+          on_retry_command: sleep 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -97,6 +97,19 @@ jobs:
       - name: Determine PR Origin
         id: pr_origin
         run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
+
+      - name: Wait for Backend Health Check
+        run: |
+          for i in {1..10}; do
+            response=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:9000/health)
+            if [ "$response" -eq 200 ]; then
+              echo "Backend is healthy!"
+              break
+            else
+              echo "Waiting for backend to be healthy..."
+              sleep 10
+            fi
+          done
 
       - name: Cypress Run for Non-Forked PRs
         if: steps.pr_origin.outputs.is_forked == 'false'
