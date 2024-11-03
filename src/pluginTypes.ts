@@ -2,9 +2,10 @@ import { AppRoutes } from "./Routers/AppRouter";
 import { ConsultationModel } from "@/components/Facility/models";
 import { INavItem } from "@/components/Common/Sidebar/Sidebar";
 import { LazyExoticComponent } from "react";
-import { PatientModel } from "@/components/Patient/models";
 import { UserAssignedModel } from "@/components/Users/models";
 import { pluginMap } from "./pluginMap";
+import { PatientInfoCardProps } from "./components/Patient/PatientInfoCard";
+import { PatientModel } from "./components/Patient/models";
 
 // Define the available plugins
 export type AvailablePlugin = "@apps/care_livekit_fe" | "@apps/care_hcx_fe";
@@ -16,6 +17,8 @@ export type AvailablePluginManifest =
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserAssignedModel;
 }>;
+
+export type ExtendPatientInfoCardComponentType = React.FC<PatientInfoCardProps>;
 
 export type ManagePatientOptionsComponentType = React.FC<{
   consultation: ConsultationModel | undefined;
@@ -29,8 +32,10 @@ export type AdditionalDischargeProceduresComponentType = React.FC<{
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
+  ExtendPatientInfoCard: ExtendPatientInfoCardComponentType;
   ManagePatientOptions: ManagePatientOptionsComponentType;
   AdditionalDischargeProcedures: AdditionalDischargeProceduresComponentType;
+  ConsultationContextEnabler: React.FC;
 };
 
 // Create a type for lazy-loaded components
