@@ -77,6 +77,14 @@ jobs:
           sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install ./google-chrome-stable_current_amd64.deb
 
+      - name: Start Frontend Server in Background 🌐
+        run: |
+          nohup npx vite preview --host &
+
+      - name: Wait for Frontend to be Up 🕒
+        run: |
+          npx wait-on http://localhost:4000 --timeout 300000  # Wait for frontend
+
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
         run: |
