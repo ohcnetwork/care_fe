@@ -63,7 +63,6 @@ export default function useFilters({
   };
   const updateSerchByField = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
-    console.log(filter);
     setQueryParams(Object.assign({}, filter), { replace: true });
   };
   const updatePage = (page: number) => {

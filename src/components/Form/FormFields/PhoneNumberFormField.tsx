@@ -24,7 +24,7 @@ const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
 interface Props extends FormFieldBaseProps<string> {
   onError?: (error: FieldError) => void;
-  help?: boolean;
+  phoneNumberHelp?: boolean;
   types: PhoneNumberType[];
   placeholder?: string;
   autoComplete?: string;
@@ -108,7 +108,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
           error: field.error || error,
           labelSuffix:
             field.labelSuffix ||
-            (props.help == undefined && (
+            (props.phoneNumberHelp == undefined && (
               <PhoneNumberTypesHelp types={props.types} />
             )),
         }}

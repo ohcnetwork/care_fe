@@ -74,12 +74,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         setFocusedIndex((prevIndex) =>
           prevIndex === options.length - 1 ? 0 : prevIndex + 1,
         );
-        console.log(focusedIndex);
       } else if (e.key === "ArrowUp") {
         setFocusedIndex((prevIndex) =>
           prevIndex === 0 ? options.length - 1 : prevIndex - 1,
         );
-        console.log(focusedIndex);
       } else if (e.key === "Enter") {
         handleOptionChange(options[focusedIndex]);
       }
@@ -134,7 +132,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      console.log(e.key);
       if (e.key === "Escape") {
         setSearchValue("");
         onSearch(selectedOption.key, "");
@@ -169,7 +166,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             types={["mobile", "landline"]}
             {...commonProps}
             errorClassName="hidden"
-            help={false}
+            phoneNumberHelp={false}
             onError={(error: FieldError) => setError(error)}
           />
         );
@@ -213,9 +210,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                     <CommandItem
                       key={option.key}
                       onSelect={() => handleOptionChange(option)}
-                      className={`${
-                        focusedIndex === index ? "bg-gray-100" : ""
-                      } hover:bg-secondary-100`}
+                      className={cn({
+                        "bg-gray-100": focusedIndex === index,
+                        "hover:bg-secondary-100": true,
+                      })}
                     >
                       <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
                       <span className="flex-1">{t(option.key)}</span>
@@ -233,7 +231,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       </div>
       {error && (
         <div className="error-text ml-3 bg-white text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300">
-          Invalid phone number
+          {t("invalid_phone_number")}
         </div>
       )}
       <div className="flex flex-wrap gap-2 rounded-b-lg border-x border-b border-gray-200 bg-gray-50 p-2 shadow">
