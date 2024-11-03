@@ -10,6 +10,7 @@ import Error404 from "../ErrorPages/404";
 import { classNames, keysOf } from "@/Utils/utils";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
+import LinkedFacilitiesTab from "./LinkedFacilitiesTab";
 
 export interface UserHomeProps {
   username: string;
@@ -34,6 +35,7 @@ export default function UserHome(props: UserHomeProps) {
 
   const TABS = {
     PROFILE: UserSummaryTab,
+    FACILITIES: LinkedFacilitiesTab,
   };
 
   let currentTab = undefined;

@@ -1,0 +1,297 @@
+import { useState } from "react";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import routes from "@/Redux/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { FacilityModel } from "../Facility/models";
+import { UserModel } from "./models";
+import * as Notification from "../../Utils/Notifications";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ConfirmFacilityModal from "./ConfirmFacilityModal";
+import { useTranslation } from "react-i18next";
+
+const initModalProps: {
+  selectedFacility?: FacilityModel;
+  type: string;
+  toggle: boolean;
+} = {
+  toggle: false,
+  selectedFacility: undefined,
+  type: "",
+};
+
+export default function LinkedFacilities({
+  userData,
+}: {
+  userData: UserModel;
+}) {
+  const [facility, setFacility] = useState<any>(null);
+  const [userFacilities, setUserFacilities] = useState<
+    FacilityModel[] | null
+  >();
+  const [homeFacility, setHomeFacility] = useState<FacilityModel | undefined>();
+  const [modalProps, setModalProps] = useState(initModalProps);
+  const { t } = useTranslation();
+
+  const { refetch: refetchUserFacilities } = useQuery(routes.userListFacility, {
+    pathParams: { username: userData.username },
+    query: { limit: 36 },
+    onResponse({ res, data }) {
+      if (res?.status === 200 && data) {
+        let userFacilities = data?.results;
+        if (userData.home_facility_object) {
+          const homeFacility = data?.results.find(
+            (facility) => facility.id === userData.home_facility_object?.id,
+          );
+          userFacilities = userFacilities.filter(
+            (facility) => facility.id !== homeFacility?.id,
+          );
+          setHomeFacility(homeFacility);
+        }
+        setUserFacilities(userFacilities);
+      }
+    },
+  });
+
+  const handleOnClick = (type: string, selectedFacility: FacilityModel) => {
+    switch (type) {
+      case "clear_home_facility":
+      case "unlink_facility":
+      case "replace_home_facility":
+        setModalProps({
+          selectedFacility,
+          type: type,
+          toggle: true,
+        });
+        break;
+      case "set_home_facility":
+        replaceHomeFacility(selectedFacility);
+        break;
+    }
+  };
+
+  const handleModalCancel = () => {
+    setModalProps(initModalProps);
+  };
+
+  const handleModalOk = () => {
+    switch (modalProps.type) {
+      case "unlink_facility":
+        unlinkFacility();
+        break;
+      case "clear_home_facility":
+        clearHomeFacility();
+        break;
+      case "replace_home_facility":
+        replaceHomeFacility();
+        break;
+    }
+    setModalProps(initModalProps);
+  };
+
+  const replaceHomeFacility = async (facility?: FacilityModel) => {
+    const selectedFacility = facility ?? modalProps.selectedFacility;
+    const { res } = await request(routes.partialUpdateUser, {
+      pathParams: { username: userData.username },
+      body: { home_facility: selectedFacility?.id?.toString() },
+    });
+    if (!res?.ok) {
+      Notification.Error({
+        msg: "Error while updating Home facility",
+      });
+    } else {
+      userData.home_facility_object = selectedFacility;
+      setHomeFacility(selectedFacility);
+      Notification.Success({
+        msg: "Home Facility updated successfully",
+      });
+    }
+    await refetchUserFacilities();
+  };
+
+  const clearHomeFacility = async () => {
+    const { res } = await request(routes.clearHomeFacility, {
+      pathParams: { username: userData.username },
+    });
+
+    if (!res?.ok) {
+      Notification.Error({
+        msg: "Error while clearing home facility",
+      });
+    } else {
+      userData.home_facility_object = undefined;
+      setHomeFacility(undefined);
+      Notification.Success({
+        msg: "Home Facility cleared successfully",
+      });
+    }
+    await refetchUserFacilities();
+  };
+
+  const unlinkFacility = async () => {
+    const { res } = await request(routes.deleteUserFacility, {
+      pathParams: { username: userData.username },
+      body: { facility: modalProps.selectedFacility?.id?.toString() },
+    });
+    if (!res?.ok) {
+      Notification.Error({
+        msg: "Error while unlinking home facility",
+      });
+    } else {
+      Notification.Success({
+        msg: "Facility unlinked successfully",
+      });
+    }
+    await refetchUserFacilities();
+  };
+
+  const linkFacility = async (
+    username: string,
+    facility: FacilityModel | null,
+  ) => {
+    //setIsLoading(true);
+    const { res } = await request(routes.addUserFacility, {
+      pathParams: { username },
+      body: { facility: facility?.id?.toString() },
+    });
+
+    if (!res?.ok) {
+      Notification.Error({
+        msg: "Error while linking facility",
+      });
+    } else {
+      Notification.Success({
+        msg: "Facility linked successfully",
+      });
+    }
+    await refetchUserFacilities();
+    //setIsLoading(false);
+    setFacility(null);
+  };
+
+  const renderFacilityButtons = (facility: FacilityModel) => {
+    if (!facility) return;
+    return (
+      <div id={`facility_${facility.id}`} key={`facility_${facility.id}`}>
+        <DropdownMenu>
+          <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
+            <div className="rounded p-1 text-sm">{facility.name}</div>
+            <DropdownMenuTrigger>
+              <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
+                <CareIcon icon="l-setting" className="text-sm" />
+              </div>
+            </DropdownMenuTrigger>
+          </div>
+
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onClick={() =>
+                handleOnClick(
+                  homeFacility ? "replace_home_facility" : "set_home_facility",
+                  facility,
+                )
+              }
+            >
+              {t("set_home_facility")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleOnClick("unlink_facility", facility)}
+            >
+              {t("unlink_this_facility")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  };
+
+  const renderHomeFacilityButton = (homeFacility: FacilityModel) => {
+    return (
+      <div
+        id={`facility_${homeFacility.id}`}
+        key={`facility_${homeFacility.id}`}
+      >
+        <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
+          <div className="rounded p-1 text-sm">{homeFacility.name}</div>
+          <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
+            <button
+              onClick={() => handleOnClick("clear_home_facility", homeFacility)}
+              title={t("clear_home_facility")}
+              aria-label={t("clear_home_facility")}
+            >
+              <CareIcon icon="l-multiply" className="text-sm" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {modalProps.toggle && (
+        <ConfirmFacilityModal
+          username={userData.username}
+          currentFacility={modalProps.selectedFacility}
+          homeFacility={homeFacility}
+          handleCancel={handleModalCancel}
+          handleOk={handleModalOk}
+          type={modalProps.type}
+        />
+      )}
+      <div className="flex flex-col gap-y-6 rounded bg-white p-4 shadow">
+        <div className="flex flex-row gap-3">
+          <FacilitySelect
+            multiple={false}
+            name="facility"
+            exclude_user={userData.username}
+            showAll={false}
+            showNOptions={8}
+            selected={facility}
+            setSelected={setFacility}
+            errors=""
+            className="z-10 w-full"
+          />
+          <ButtonV2
+            id="link-facility"
+            name="Add"
+            className="mt-1 rounded-lg px-6 py-[11px] text-base"
+            onClick={() => linkFacility(userData.username, facility)}
+          >
+            {t("add_facility")}
+          </ButtonV2>
+        </div>
+
+        {homeFacility && (
+          <div className="flex flex-col gap-2">
+            <p className="text-xs">{t("home_facility")}</p>
+            <div className="flex flex-row gap-3">
+              {renderHomeFacilityButton(homeFacility)}
+            </div>
+          </div>
+        )}
+        {userFacilities && userFacilities.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-xs">{t("linked_facilities")}</p>
+
+            <div className="flex flex-row flex-wrap gap-3">
+              {userFacilities.map((facility: FacilityModel) => {
+                if (homeFacility?.id === facility.id) {
+                  return null;
+                }
+                return renderFacilityButtons(facility);
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

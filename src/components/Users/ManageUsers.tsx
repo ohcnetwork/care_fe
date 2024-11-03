@@ -27,7 +27,6 @@ import CircularProgress from "@/components/Common/components/CircularProgress";
 import Page from "@/components/Common/components/Page";
 import { FacilityModel } from "../Facility/models";
 import SearchInput from "../Form/SearchInput";
-import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserFilter from "./UserFilter";
 
@@ -364,26 +363,6 @@ export function UserFacilities(props: { user: any }) {
     isHomeFacility: boolean;
   }>({ show: false, userName: "", facility: undefined, isHomeFacility: false });
   const authUser = useAuthUser();
-
-  const [replaceHomeFacility, setReplaceHomeFacility] = useState<{
-    show: boolean;
-    userName: string;
-    previousFacility?: FacilityModel;
-    newFacility?: FacilityModel;
-  }>({
-    show: false,
-    userName: "",
-    previousFacility: undefined,
-    newFacility: undefined,
-  });
-  const hideReplaceHomeFacilityModal = () => {
-    setReplaceHomeFacility({
-      show: false,
-      previousFacility: undefined,
-      userName: "",
-      newFacility: undefined,
-    });
-  };
   const hideUnlinkFacilityModal = () => {
     setUnlinkFacilityData({
       show: false,
@@ -609,13 +588,6 @@ export function UserFacilities(props: { user: any }) {
                                   onClick={() => {
                                     if (user?.home_facility_object) {
                                       // has previous home facility
-                                      setReplaceHomeFacility({
-                                        show: true,
-                                        userName: username,
-                                        previousFacility:
-                                          user?.home_facility_object,
-                                        newFacility: facility,
-                                      });
                                     } else {
                                       // no previous home facility
                                       updateHomeFacility(username, facility);
@@ -680,28 +652,6 @@ export function UserFacilities(props: { user: any }) {
             </div>
           )}
         </div>
-      )}
-      {replaceHomeFacility.show && (
-        <ConfirmHomeFacilityUpdateDialog
-          previousFacilityName={
-            replaceHomeFacility.previousFacility?.name || ""
-          }
-          userName={replaceHomeFacility.userName}
-          newFacilityName={replaceHomeFacility.newFacility?.name || ""}
-          handleCancel={hideReplaceHomeFacilityModal}
-          handleOk={() => {
-            updateHomeFacility(
-              replaceHomeFacility.userName,
-              replaceHomeFacility.newFacility,
-            );
-            setReplaceHomeFacility({
-              show: false,
-              previousFacility: undefined,
-              userName: "",
-              newFacility: undefined,
-            });
-          }}
-        />
       )}
     </div>
   );
