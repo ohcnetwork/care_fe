@@ -19,6 +19,12 @@ jobs:
     env:
       REACT_CARE_API_URL: http://localhost:9000
     steps:
+      - name: Cache Docker Images
+        uses: actions/cache@v2
+        with:
+          path: /tmp/docker
+          key: ${{ runner.os }}-docker-${{ hashFiles('care/Dockerfile') }}
+
       - name: Checkout 📥
         uses: actions/checkout@v3
 
