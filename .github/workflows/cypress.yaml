@@ -1,8 +1,6 @@
 name: Cypress Tests
 
 on:
-  schedule:
-    - cron: "30 22 * * *"
   pull_request:
     branches:
       - develop
@@ -14,6 +12,10 @@ jobs:
     permissions: write-all
     if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4]
     env:
       REACT_CARE_API_URL: http://localhost:9000
     steps:
@@ -77,35 +79,48 @@ jobs:
           sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install ./google-chrome-stable_current_amd64.deb
 
-      - name: Start Frontend Server in Background 🌐
-        run: |
-          nohup npx vite preview --host &
-
-      - name: Wait for Frontend to be Up 🕒
-        run: |
-          npx wait-on http://localhost:4000 --timeout 300000  # Wait for frontend
-
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
-        run: |
-          npx cypress run --record --parallel --ci-build-id ${{ github.run_id }} --group "UI-Chrome" --spec "cypress/e2e/**/*.cy.ts"
+        uses: cypress-io/github-action@v5
+        with:
+          env: SKIP_PREFLIGHT_CHECK=true
+          install: false
+          start: "npx vite preview --host"
+          wait-on: "http://localhost:4000"
+          wait-on-timeout: 300
+          browser: chrome
+          record: true
+          parallel: true
+          group: "UI-Chrome"
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
-          COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
-          COMMIT_INFO_SHA: ${{ github.event.pull_request.head.sha }}
+          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
+          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
 
       - name: Cypress run for Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'true'
-        run: |
-          npx cypress-split run --group "UI-Chrome" --ci-build-id ${{ github.run_id }} --spec "cypress/e2e/**/*.cy.ts" --env CYPRESS_SPLIT_TESTS="true"
+        uses: cypress-io/github-action@v5
+        with:
+          env: SKIP_PREFLIGHT_CHECK=true
+          install: false
+          start: "npx vite preview --host"
+          wait-on: "http://localhost:4000"
+          wait-on-timeout: 300
+          browser: chrome
+          record: true
+          parallel: true
+          group: "UI-Chrome"
         env:
+          CYPRESS_SPLIT_TESTS: "true"
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
-          COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
-          COMMIT_INFO_SHA: ${{ github.event.pull_request.head.sha }}
+          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
+          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
+          SPLIT: ${{ strategy.job-total }}
+          SPLIT_INDEX: ${{ strategy.job-index }}
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v3
