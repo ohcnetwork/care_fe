@@ -10,6 +10,7 @@ on:
 jobs:
   setup:
     name: Setup Backend and Frontend
+    if: github.repository == 'ohcnetwork/care_fe'  # Ensures job runs only for the care_fe repository
     runs-on: ubuntu-latest
     outputs:
       backend_url: ${{ steps.backend-url.outputs.backend_url }}
@@ -79,6 +80,7 @@ jobs:
 
   test:
     name: Run Cypress Tests
+    if: github.repository == 'ohcnetwork/care_fe'  # Ensures job runs only for the care_fe repository
     needs: setup
     runs-on: ubuntu-latest
     env:
