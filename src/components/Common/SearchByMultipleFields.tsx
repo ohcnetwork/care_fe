@@ -43,7 +43,7 @@ interface SearchByMultipleFieldsProps {
   buttonClassName?: string;
 }
 
-export type EventType = {
+type EventType = {
   value: string;
   target?: { value: string };
 };
@@ -166,7 +166,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             types={["mobile", "landline"]}
             {...commonProps}
             errorClassName="hidden"
-            phoneNumberHelp={false}
+            showHelp={false}
             onError={(error: FieldError) => setError(error)}
           />
         );

@@ -81,8 +81,6 @@ export const PatientManager = () => {
   const {
     qParams,
     updateQuery,
-    updateSerchByField,
-    removeFilters,
     advancedFilter,
     Pagination,
     FilterBadges,
@@ -781,16 +779,26 @@ export const PatientManager = () => {
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
-      if (key === "phone_number" || key === "emergency_phone_number") {
-        value.length < 13 ? removeFilters() : null;
-        if (value.length >= 13 || value === "") {
-          updateSerchByField({ [key]: value });
-        }
-      } else {
-        updateSerchByField({ [key]: value });
-      }
+      const updatedQuery = {
+        phone_number:
+          key === "phone_number"
+            ? value.length >= 13 || value === ""
+              ? value
+              : undefined
+            : undefined,
+        name: key === "name" ? value : undefined,
+        patient_no: key === "patient_no" ? value : undefined,
+        emergency_phone_number:
+          key === "emergency_phone_number"
+            ? value.length >= 13 || value === ""
+              ? value
+              : undefined
+            : undefined,
+      };
+
+      updateQuery(updatedQuery);
     },
-    [updateSerchByField],
+    [updateQuery],
   );
 
   return (
