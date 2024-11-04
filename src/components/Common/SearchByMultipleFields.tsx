@@ -166,7 +166,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             types={["mobile", "landline"]}
             {...commonProps}
             errorClassName="hidden"
-            showHelp={false}
+            hideHelp={false}
             onError={(error: FieldError) => setError(error)}
           />
         );
