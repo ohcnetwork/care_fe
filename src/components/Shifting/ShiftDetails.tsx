@@ -90,7 +90,7 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("age") +
       ":" +
-      +(data?.patient_object
+      (data?.patient_object
         ? formatPatientAge(data.patient_object, true)
         : "") +
       "\n" +
