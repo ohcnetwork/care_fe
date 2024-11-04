@@ -238,7 +238,7 @@ export default function ManageUsers() {
                   className="mr-2 mt-1 h-[35px] w-[80px] self-center text-sm"
                   ghost
                   border
-                  onClick={() => navigate(`/users/${user.username}`)}
+                  onClick={() => navigate(`/users/detail/${user.username}`)}
                 >
                   {t("view_user")}
                 </ButtonV2>
