@@ -107,7 +107,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
           error: field.error || error,
           labelSuffix:
             field.labelSuffix ||
-            (props.hideHelp == false ? null : (
+            (props.hideHelp ? null : (
               <PhoneNumberTypesHelp types={props.types} />
             )),
         }}
