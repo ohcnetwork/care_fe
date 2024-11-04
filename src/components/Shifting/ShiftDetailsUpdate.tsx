@@ -179,7 +179,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     const validForm = validateForm(form);
 
     if (validForm) {
-      console.log("form: ", form);
       if (!discharged && form.status === "PATIENT EXPIRED") {
         setDischargeReason(
           DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id,
@@ -293,7 +292,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       />
       <Card className="mx-auto mt-4 w-full max-w-4xl md:p-6 lg:p-8">
         <Form
-          className="grid grid-cols-1 gap-4 md:grid-cols-2"
+          className=""
           defaults={state.form}
           onSubmit={handleSubmit}
           onCancel={() => goBack()}
@@ -301,7 +300,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           hideRestoreDraft
         >
           {(field) => (
-            <>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <SelectFormField
                 name="status"
                 label={t("status")}
@@ -553,7 +552,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 onChange={(e: any) => field("comments").onChange(e)}
                 error={field("comments").error}
               />
-            </>
+            </div>
           )}
         </Form>
       </Card>
