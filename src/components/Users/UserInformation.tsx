@@ -41,10 +41,6 @@ type EditForm = {
   video_connect_link: string | undefined;
   phoneNumber: string;
   altPhoneNumber: string;
-  user_type: string | undefined;
-  qualification: string | undefined;
-  doctor_experience_commenced_on: number | string | undefined;
-  doctor_medical_council_registration: string | undefined;
   weekly_working_hours: string | null | undefined;
 };
 type ErrorForm = {
@@ -56,10 +52,6 @@ type ErrorForm = {
   video_connect_link: string | undefined;
   phoneNumber: string;
   altPhoneNumber: string;
-  user_type: string | undefined;
-  qualification: string | undefined;
-  doctor_experience_commenced_on: number | string | undefined;
-  doctor_medical_council_registration: string | undefined;
   weekly_working_hours: string | undefined;
 };
 type State = {
@@ -79,10 +71,6 @@ const initForm: EditForm = {
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
-  user_type: "",
-  qualification: undefined,
-  doctor_experience_commenced_on: undefined,
-  doctor_medical_council_registration: undefined,
   weekly_working_hours: undefined,
 };
 
@@ -139,14 +127,6 @@ export default function UserInformation({ username }: { username: string }) {
         video_connect_link: result.data.video_connect_link,
         phoneNumber: result.data.phone_number?.toString() || "",
         altPhoneNumber: result.data.alt_phone_number?.toString() || "",
-        user_type: result.data.user_type,
-        qualification: result.data.qualification,
-        doctor_experience_commenced_on: dayjs().diff(
-          dayjs(result.data.doctor_experience_commenced_on),
-          "years",
-        ),
-        doctor_medical_council_registration:
-          result.data.doctor_medical_council_registration,
         weekly_working_hours: result.data.weekly_working_hours,
       };
       dispatch({
@@ -216,32 +196,6 @@ export default function UserInformation({ username }: { username: string }) {
             errors[field] = "Enter a valid email address";
           }
           return;
-        case "doctor_experience_commenced_on":
-          if (states.form.user_type === "Doctor" && !states.form[field]) {
-            errors[field] = t("field_required");
-          } else if (
-            (states.form.user_type === "Doctor" &&
-              Number(states.form.doctor_experience_commenced_on) >= 100) ||
-            Number(states.form.doctor_experience_commenced_on) < 0
-          ) {
-            errors[field] =
-              "Doctor experience should be at least 0 years and less than 100 years.";
-          }
-          return;
-        case "qualification":
-          if (
-            (states.form.user_type === "Doctor" ||
-              states.form.user_type === "Nurse") &&
-            !states.form[field]
-          ) {
-            errors[field] = t("field_required");
-          }
-          return;
-        case "doctor_medical_council_registration":
-          if (states.form.user_type === "Doctor" && !states.form[field]) {
-            errors[field] = t("field_required");
-          }
-          return;
         case "weekly_working_hours":
           if (
             states.form[field] &&
@@ -291,25 +245,6 @@ export default function UserInformation({ username }: { username: string }) {
       alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
       gender: states.form.gender,
       date_of_birth: dateQueryString(states.form.date_of_birth),
-      qualification:
-        states.form.user_type === "Doctor" || states.form.user_type === "Nurse"
-          ? states.form.qualification
-          : undefined,
-      doctor_experience_commenced_on:
-        states.form.user_type === "Doctor"
-          ? dayjs()
-              .subtract(
-                parseInt(
-                  (states.form.doctor_experience_commenced_on as string) ?? "0",
-                ),
-                "years",
-              )
-              .format("YYYY-MM-DD")
-          : undefined,
-      doctor_medical_council_registration:
-        states.form.user_type === "Doctor"
-          ? states.form.doctor_medical_council_registration
-          : undefined,
       weekly_working_hours:
         states.form.weekly_working_hours &&
         states.form.weekly_working_hours !== ""
@@ -476,37 +411,7 @@ export default function UserInformation({ username }: { username: string }) {
                       required
                       type="email"
                     />
-                    {(states.form.user_type === "Doctor" ||
-                      states.form.user_type === "Nurse") && (
-                      <TextFormField
-                        {...field("qualification")}
-                        required
-                        className="flex-1"
-                        label={t("qualification")}
-                        placeholder={t("qualification")}
-                      />
-                    )}
                   </div>
-                  {states.form.user_type === "Doctor" && (
-                    <>
-                      <TextFormField
-                        {...field("doctor_experience_commenced_on")}
-                        required
-                        className="col-span-6 sm:col-span-3"
-                        type="number"
-                        min={0}
-                        label={t("years_of_experience")}
-                        placeholder={t("years_of_experience_of_the_doctor")}
-                      />
-                      <TextFormField
-                        {...field("doctor_medical_council_registration")}
-                        required
-                        className="col-span-6 sm:col-span-3"
-                        label={t("medical_council_registration")}
-                        placeholder={t("doctor_s_medical_council_registration")}
-                      />
-                    </>
-                  )}
                   <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
                     <TextFormField
                       {...field("weekly_working_hours")}
