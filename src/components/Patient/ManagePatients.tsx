@@ -834,7 +834,7 @@ export const PatientManager = () => {
             >
               <CareIcon icon="l-plus" className="text-lg" />
               <p id="add-patient-div" className="lg:my-[2px]">
-                Add Patient Details
+                Add Patient
               </p>
             </ButtonV2>
           </div>

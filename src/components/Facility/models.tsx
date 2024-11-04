@@ -19,7 +19,7 @@ import {
   PatientModel,
 } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
-import { UserBareMinimum, UserModel } from "../Users/models";
+import { UserBareMinimum } from "../Users/models";
 import { InvestigationType } from "@/components/Common/prescription-builder/InvestigationBuilder";
 import { ProcedureType } from "@/components/Common/prescription-builder/ProcedureBuilder";
 import { RouteToFacility } from "@/components/Common/RouteToFacilitySelect";
@@ -681,20 +681,44 @@ export type PatientTransferResponse = {
 };
 
 export interface ShiftingModel {
-  assigned_facility: string;
-  assigned_facility_external: string | null;
-  assigned_facility_object: FacilityModel;
-  created_date: string;
-  emergency: boolean;
-  external_id: string;
-  id: string;
-  modified_date: string;
-  origin_facility_object: FacilityModel;
-  patient: string;
-  patient_object: PatientModel;
   shifting_approving_facility_object: FacilityModel | null;
   status: (typeof SHIFTING_CHOICES_PEACETIME)[number]["text"];
-  assigned_to_object?: UserModel;
+  id: string;
+  patient_object: PatientModel;
+  emergency: boolean;
+  origin_facility_object: FacilityModel;
+  origin_facility: string;
+  shifting_approving_facility: string;
+  assigned_facility_external: string | null;
+  assigned_facility: string | null;
+  is_up_shift: boolean;
+  assigned_to: number;
+  patient_category: string;
+  assigned_facility_object: FacilityModel;
+  assigned_facility_external_object: FacilityModel;
+  modified_date: string;
+  external_id: string;
+  assigned_to_object?: AssignedToObjectModel;
+  refering_facility_contact_name: string;
+  refering_facility_contact_number: string;
+  is_kasp: boolean;
+  vehicle_preference: string;
+  preferred_vehicle_choice: string;
+  assigned_facility_type: string;
+  breathlessness_level: string;
+  reason: string;
+  ambulance_driver_name: string;
+  ambulance_phone_number: string | undefined;
+  ambulance_number: string;
+  comments: string;
+  created_date: string;
+  created_by_object: UserBareMinimum;
+  last_edited_by_object: UserBareMinimum;
+  is_assigned_to_user: boolean;
+  created_by: number;
+  last_edited_by: number;
+  patient: string | PatientModel;
+  initial_status?: string;
 }
 
 export interface ResourceModel {
@@ -704,16 +728,12 @@ export interface ResourceModel {
   assigned_facility_object: FacilityModel | null;
   assigned_quantity: number;
   assigned_to: string | null;
-  assigned_to_object: UserModel | null;
   category: string;
   created_by: number;
-  created_by_object: UserModel;
-  created_date: string;
   emergency: boolean;
   id: string;
   is_assigned_to_user: boolean;
   last_edited_by: number;
-  last_edited_by_object: UserModel;
   modified_date: string;
   origin_facility: string;
   origin_facility_object: FacilityModel;
@@ -725,4 +745,17 @@ export interface ResourceModel {
   status: string;
   sub_category: string;
   title: string;
+  assigned_to_object: UserBareMinimum | null;
+  created_by_object: UserBareMinimum | null;
+  created_date: string;
+  last_edited_by_object: UserBareMinimum;
+}
+
+export interface CommentModel {
+  id: string;
+  created_by_object: UserBareMinimum;
+  created_date: string;
+  modified_date: string;
+  comment: string;
+  created_by: number;
 }

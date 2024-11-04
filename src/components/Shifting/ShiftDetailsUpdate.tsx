@@ -12,7 +12,7 @@ import {
 } from "@/common/constants";
 import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
-import { ConsultationModel } from "../Facility/models";
+import { ConsultationModel, ShiftingModel } from "../Facility/models";
 import DischargeModal from "../Facility/DischargeModal";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -31,7 +31,6 @@ import Page from "@/components/Common/components/Page";
 import { LinkedFacilityUsers } from "@/components/Common/UserAutocompleteFormField";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import { IShift } from "./models";
 import request from "../../Utils/request/request";
 import { PatientModel } from "../Patient/models";
 import useAuthUser from "@/common/hooks/useAuthUser";
@@ -197,7 +196,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       }
 
       setIsLoading(true);
-      const data: Partial<IShift> = {
+      const data: Partial<ShiftingModel> = {
         origin_facility: form.origin_facility_object?.id,
         shifting_approving_facility:
           form?.shifting_approving_facility_object?.id,
