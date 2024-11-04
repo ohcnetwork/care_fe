@@ -219,7 +219,7 @@ export default function PatientConsentRecords(props: {
                   onClick={fileUpload.clearFiles}
                   disabled={fileUpload.uploading}
                 >
-                  <CareIcon icon="l-trash-alt" className="" />
+                  <CareIcon icon="l-trash-alt" className="h-5" />
                 </ButtonV2>
               </>
             ) : (

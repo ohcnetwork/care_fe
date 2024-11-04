@@ -461,7 +461,7 @@ const AssetManage = (props: AssetManageProps) => {
                   data-testid="asset-delete-button"
                   className="inline-flex"
                 >
-                  <CareIcon icon="l-trash" className="h-4" />
+                  <CareIcon icon="l-trash" className="h-5" />
                   <span className="md:hidden">{t("delete")}</span>
                 </ButtonV2>
               )}
