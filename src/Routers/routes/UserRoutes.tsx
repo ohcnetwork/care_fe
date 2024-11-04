@@ -6,13 +6,13 @@ import UserHome from "@/components/Users/UserHome";
 
 const UserRoutes: AppRoutes = {
   "/users": () => <ManageUsers />,
-  "/users/detail/:username": ({ username }) => (
+  "/users/add": () => <UserAdd />,
+  "/users/:username": ({ username }) => (
     <UserHome username={username} tab={"profile"} />
   ),
-  "/users/detail/:username/:tab": ({ username, tab }) => (
+  "/users/:username/:tab": ({ username, tab }) => (
     <UserHome username={username} tab={tab} />
   ),
-  "/users/add": () => <UserAdd />,
   "/user/profile": () => <UserProfile />,
 };
 

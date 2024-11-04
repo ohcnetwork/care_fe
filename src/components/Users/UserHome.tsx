@@ -84,7 +84,7 @@ export default function UserHome(props: UserHomeProps) {
                               ? "border-b-2 border-primary-500 text-primary-600 hover:border-secondary-300"
                               : "text-secondary-700 hover:text-secondary-700",
                           )}
-                          href={`/users/detail/${username}/${p.toLocaleLowerCase()}`}
+                          href={`/users/${username}/${p.toLocaleLowerCase()}`}
                         >
                           <div className="px-3 py-1.5">
                             {t(`USERMANAGEMENT_TAB__${p}`)}

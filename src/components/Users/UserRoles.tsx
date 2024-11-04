@@ -216,7 +216,7 @@ export default function UserRoles({ username }: { username: string }) {
 
   return (
     <>
-      <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+      <div className="overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
         {!isLoading && (
           <div className="space-y-4">
             <Form<EditForm>
@@ -241,7 +241,7 @@ export default function UserRoles({ username }: { username: string }) {
                         o.role + (o.readOnly ? " (Read Only)" : "")
                       }
                       optionValue={(o) => o.id}
-                      className="flex-1"
+                      className="z-40 flex-1"
                     />
                     {(states.form.user_type === "Doctor" ||
                       states.form.user_type === "Nurse") && (
