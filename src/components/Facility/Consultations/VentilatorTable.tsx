@@ -1,4 +1,4 @@
-import { formatDateTime } from "@/Utils/utils";
+import { compareByDateString, formatDateTime } from "@/Utils/utils";
 import { DailyRoundsModel } from "../../Patient/models";
 import { useTranslation } from "react-i18next";
 
@@ -12,11 +12,7 @@ export default function VentilatorTable(props: VentilatorTableProps) {
   let sortedData: DailyRoundsModel[] = [];
 
   const sortData = (data: DailyRoundsModel[]) => {
-    return data.sort(function (a, b) {
-      const ad = new Date(a.taken_at ?? Date.now());
-      const bd = new Date(b.taken_at ?? Date.now());
-      return ad > bd ? 1 : -1;
-    });
+    return data.sort(compareByDateString("taken_at"));
   };
 
   const VentilatorTableRow = ({
