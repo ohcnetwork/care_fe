@@ -1,8 +1,6 @@
 name: Cypress Tests
 
 on:
-  schedule:
-    - cron: "30 22 * * *"
   pull_request:
     branches:
       - develop
@@ -17,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1, 2, 3, 4, 5, 6, 7, 8]
+        containers: [1, 2, 3, 4]
     env:
       REACT_CARE_API_URL: http://localhost:9000
     steps:
