@@ -812,6 +812,7 @@
   "manage_bed_presets": "Manage Presets of Bed",
   "manage_prescriptions": "Manage Prescriptions",
   "manage_preset": "Manage preset {{ name }}",
+  "manage_user": "Manage User",
   "manufacturer": "Manufacturer",
   "map_acronym": "M.A.P.",
   "mark_all_as_read": "Mark all as Read",

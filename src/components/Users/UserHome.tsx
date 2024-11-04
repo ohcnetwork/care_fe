@@ -7,7 +7,7 @@ import useQuery from "@/Utils/request/useQuery";
 import { UserModel } from "./models";
 import Loading from "../Common/Loading";
 import Error404 from "../ErrorPages/404";
-import { classNames, keysOf } from "@/Utils/utils";
+import { classNames, formatName, keysOf } from "@/Utils/utils";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import LinkedFacilitiesTab from "./LinkedFacilitiesTab";
@@ -58,10 +58,11 @@ export default function UserHome(props: UserHomeProps) {
   return (
     <>
       <Page
-        title={""}
+        title={formatName(userData) || userData.username || t("manage_user")}
         crumbsReplacements={{ [username]: { name: username } }}
         focusOnLoad={true}
         backUrl="/users"
+        hideTitleOnPage
       >
         {
           <>
