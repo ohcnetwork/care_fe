@@ -11,6 +11,7 @@ import { classNames, keysOf } from "@/Utils/utils";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import LinkedFacilitiesTab from "./LinkedFacilitiesTab";
+import RoleAndSkillsTab from "./RoleAndSkillsTab";
 
 export interface UserHomeProps {
   username: string;
@@ -35,6 +36,7 @@ export default function UserHome(props: UserHomeProps) {
 
   const TABS = {
     PROFILE: UserSummaryTab,
+    ROLE_SKILLS: RoleAndSkillsTab,
     FACILITIES: LinkedFacilitiesTab,
   };
 
@@ -68,7 +70,7 @@ export default function UserHome(props: UserHomeProps) {
               <div className="overflow-x-auto sm:flex sm:items-baseline">
                 <div className="mt-4 sm:mt-0">
                   <nav
-                    className="flex space-x-6 overflow-x-auto pl-2"
+                    className="flex space-x-6 overflow-x-auto"
                     id="usermanagement_tab_nav"
                   >
                     {keysOf(TABS).map((p) => {

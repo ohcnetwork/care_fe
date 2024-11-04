@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import { SkillModel, SkillObjectModel } from "../Users/models";
+import { SkillModel } from "../Users/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 
@@ -13,8 +13,8 @@ interface SkillSelectProps {
   multiple?: boolean;
   showNOptions?: number;
   disabled?: boolean;
-  selected: SkillObjectModel | SkillObjectModel[] | null;
-  setSelected: (selected: SkillObjectModel) => void;
+  selected: SkillModel | SkillModel[] | null;
+  setSelected: (selected: SkillModel) => void;
   userSkills?: SkillModel[];
 }
 
