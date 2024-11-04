@@ -97,6 +97,7 @@ export default function BoardView() {
             value={qParams.patient_name}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("search_patient")}
+            className="w-full md:w-60"
           />
 
           <Tabs
