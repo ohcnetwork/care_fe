@@ -256,7 +256,6 @@ export default function useFilters({
      * To prevent reset to page 1, pass the `page` property along with the obj.
      */
     updateQuery,
-
     /** Temp. alias of `updateQuery` until the new Filters slideover. Do not use. */
     applyFilter: updateQuery,
     /** Updates the query params with the specified page. */
