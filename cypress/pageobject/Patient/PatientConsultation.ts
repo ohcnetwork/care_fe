@@ -13,6 +13,7 @@ export class PatientConsultationPage {
   selectSymptomsDate(date: string) {
     cy.clickAndTypeDate("#symptoms_onset_date", date);
   }
+
   clickAddSymptom() {
     cy.get("#add-symptom").click();
   }
@@ -110,5 +111,20 @@ export class PatientConsultationPage {
       "Edit Consultation Details",
     );
     cy.wait(3000);
+  }
+
+  clickViewConsultationButton() {
+    cy.verifyAndClickElement(
+      "#view_consulation_updates",
+      "View Consultation / Consultation Updates",
+    );
+  }
+
+  clickManagePatientButton() {
+    cy.verifyAndClickElement("#show-more", "Manage Patient");
+  }
+
+  clickClaimsButton() {
+    cy.verifyAndClickElement("#consultation-buttons", "Claims");
   }
 }

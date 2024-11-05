@@ -69,6 +69,7 @@ export default function HCXPolicyEligibilityCheck({
     <div className={className}>
       <div className="flex items-center gap-2 max-sm:flex-col">
         <SelectFormField
+          id="select-insurance-policy"
           required
           name="policy"
           labelClassName="hidden"
@@ -137,6 +138,7 @@ export default function HCXPolicyEligibilityCheck({
           )}
         />
         <ButtonV2
+          id="check-eligibity"
           className="whitespace-nowrap py-3 max-sm:w-full"
           onClick={checkEligibility}
           disabled={

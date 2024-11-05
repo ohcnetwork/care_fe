@@ -63,6 +63,10 @@ class PatientInsurance {
       }
     });
   }
+
+  selectHcxInsurer(insurer: string) {
+    cy.typeAndSelectOption("#insurer", insurer);
+  }
 }
 
 export default PatientInsurance;
