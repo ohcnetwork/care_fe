@@ -119,7 +119,7 @@ export default function ListView() {
             <div className="3xl:flex-row mb-2 flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row">
               <dt
                 title={t("shifting_status")}
-                className={`inline-block flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${
+                className={`mt-1 flex h-5 shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${
                   shift.status === "COMPLETED"
                     ? "bg-sky-200"
                     : "bg-yellow-200 text-yellow-500"
