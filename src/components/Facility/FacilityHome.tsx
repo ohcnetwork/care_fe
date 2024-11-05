@@ -157,6 +157,30 @@ export const FacilityHome = ({ facilityId }: Props) => {
     }
   };
 
+  const isAuthorizedToRegisterPatientsterAuth = () => {
+    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+    if (
+      !showAllFacilityUsers.includes(authUser.user_type) &&
+      authUser.home_facility_object?.id === facilityId
+    ) {
+      return true;
+    }
+    if (
+      authUser.user_type === "DistrictAdmin" &&
+      authUser.district === facilityData?.district
+    ) {
+      return true;
+    }
+    if (
+      authUser.user_type === "StateAdmin" &&
+      authUser.state === facilityData?.state
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -461,17 +485,19 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-              <ButtonV2
-                variant="primary"
-                ghost
-                border
-                className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() => navigate(`/facility/${facilityId}/patient`)}
-                authorizeFor={NonReadOnlyUsers}
-              >
-                <CareIcon icon="l-plus" className="text-lg" />
-                <span className="text-sm">{t("add_details_of_patient")}</span>
-              </ButtonV2>
+              {isAuthorizedToRegisterPatientsterAuth() && (
+                <ButtonV2
+                  variant="primary"
+                  ghost
+                  border
+                  className="mt-2 flex w-full flex-row justify-center md:w-auto"
+                  onClick={() => navigate(`/facility/${facilityId}/patient`)}
+                  authorizeFor={NonReadOnlyUsers}
+                >
+                  <CareIcon icon="l-plus" className="text-lg" />
+                  <span className="text-sm">{t("add_details_of_patient")}</span>
+                </ButtonV2>
+              )}
               <ButtonV2
                 id="view-patient-facility-list"
                 variant="primary"
