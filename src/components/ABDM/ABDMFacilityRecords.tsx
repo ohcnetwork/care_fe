@@ -185,7 +185,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
               </div>
             </div>
             {consentsResult?.results.length === 0 && (
-              <div className="flex min-h-[200px] items-center justify-center p-4">
+              <div className="flex min-h-[12rem] items-center justify-center p-4">
                 <p className="text-2xl font-bold text-secondary-600">
                   {t("no_records_found")}
                 </p>
