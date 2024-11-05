@@ -146,16 +146,15 @@ const Form = <T extends FormDetails>({
               label={props.submitLabel}
             />
             {props.additionalButtons?.map((btn) => {
-              if (btn.label) {
-                return (
-                  <Submit
-                    id={btn.id}
-                    type={btn.type}
-                    disabled={disabled || !isDirty}
-                    label={btn.label}
-                  />
-                );
-              }
+              return (
+                <Submit
+                  key={btn.id}
+                  id={btn.id}
+                  type={btn.type}
+                  disabled={disabled || !isDirty}
+                  label={btn.label}
+                />
+              );
             })}
           </div>
         </Provider>
