@@ -1,13 +1,26 @@
 import { SampleTestPage } from "pageobject/Sample/SampleTestCreate";
+import { PatientPage } from "pageobject/Patient/PatientCreation";
+import LoginPage from "pageobject/Login/LoginPage";
 
 describe("Sample Test", () => {
   const sampleTestPage = new SampleTestPage();
-  const sampleTestType = "BA/ETA",
-    icmrCategory = "Cat 0",
-    icmrLabel = "Test Icmr Label";
+  const patientPage = new PatientPage();
+  const loginPage = new LoginPage();
+
+  const patientName = "Dummy Patient 11";
+  const sampleTestType = "BA/ETA";
+  const icmrCategory = "Cat 0";
+  const icmrLabel = "Test Icmr Label";
+  const doctorName = "Dr. John Doe";
+  const atypicalDetails = "Patient showing unusual symptoms";
+  const diagnosis = "Suspected respiratory infection";
+  const etiologyIdentified = "Bacterial infection suspected";
+  const differentialDiagnosis = "Possibly a viral infection";
+  const fastTrackReason =
+    "The patient has a high risk of complications and requires immediate testing.";
 
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -17,26 +30,54 @@ describe("Sample Test", () => {
   });
 
   it("should request a new sample test", () => {
-    sampleTestPage.visitPatientPage();
-    sampleTestPage.visitPatientDashboardPage();
+    // Ensure patient list API is loaded before proceeding
+    cy.awaitUrl("/patients");
+    patientPage.visitPatient(patientName);
+    cy.verifyAndClickElement("#patient-details", "Patient Details");
+    sampleTestPage.interceptPatientDetailsAPI();
+    sampleTestPage.verifyPatientDetailsResponse();
+
+    // Ensure sample request API is loaded
     sampleTestPage.visitSampleRequestPage();
 
-    // Fill form fields
+    // Fill form fields using helper functions
     sampleTestPage.selectSampleType(sampleTestType);
     sampleTestPage.selectIcmrCategory(icmrCategory);
-    sampleTestPage.typeIcmrLabel(icmrLabel);
+    sampleTestPage.fillIcmrLabel(icmrLabel);
+    sampleTestPage.fillFastTrackReason(fastTrackReason);
+    sampleTestPage.fillDoctorName(doctorName);
+    sampleTestPage.fillAtypicalPresentation(atypicalDetails);
+    sampleTestPage.fillDiagnosis(diagnosis);
+    sampleTestPage.fillEtiology(etiologyIdentified);
+    sampleTestPage.fillDiffDiagnosis(differentialDiagnosis);
+    sampleTestPage.checkHasSari();
+    sampleTestPage.checkHasAri();
+    sampleTestPage.checkIsUnusualCourse();
 
-    // Submit the form
-    sampleTestPage.submitForm();
+    // Submit the form and verify notification
+    cy.submitButton("Confirm your request to send sample for testing");
+    cy.verifyNotification("Sample test created successfully");
 
-    // Check for sample request notification and history
-    sampleTestPage.clickOnNotification();
-    sampleTestPage.checkRequestHistory();
-  });
+    // Check the updated request history
+    sampleTestPage.interceptSampleTestReq();
+    sampleTestPage.verifySampleTestReq();
+    sampleTestPage.checkRequestHistory(fastTrackReason);
 
-  it("should verify sample request on sample page", () => {
-    sampleTestPage.visitSamplePage();
-    sampleTestPage.searchPatientSample(sampleTestPage.patientName);
-    sampleTestPage.patientSampleMustExist();
+    // Ensure sample page API is loaded before proceeding
+    cy.awaitUrl("/sample");
+
+    sampleTestPage.searchPatientSample(patientName);
+    sampleTestPage.interceptGetSampleTestReq();
+    sampleTestPage.verifyGetSampleTestReq();
+    sampleTestPage.verifyPatientName(patientName);
+    sampleTestPage.clickOnSampleDetailsBtn();
+    sampleTestPage.verifyGetSampleTestReq();
+    sampleTestPage.verifyPatientTestDetails(
+      patientName,
+      fastTrackReason,
+      diagnosis,
+      differentialDiagnosis,
+      etiologyIdentified,
+    );
   });
 });

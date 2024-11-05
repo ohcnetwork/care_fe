@@ -276,22 +276,29 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           />
         </div>
         <CheckBoxFormField
+          id="is_fast_track"
           {...field("isFastTrack", "Is fast-track testing required?")}
         />
         {state.form.isFastTrack && (
           <TextAreaFormField
+            id="fast_track"
             {...field("fast_track", "Reasons for fast-track testing")}
             required
           />
         )}
 
-        <TextFormField {...field("doctor_name", "Doctor's Name")} />
+        <TextFormField
+          id="doctor_name"
+          {...field("doctor_name", "Doctor's Name")}
+        />
         <CheckBoxFormField
+          id="is_atypical_presentation"
           {...field("is_atypical_presentation", "Is atypical presentation?")}
         />
         {state.form.is_atypical_presentation && (
           <div>
             <TextAreaFormField
+              id="atypical_presentation"
               {...field(
                 "atypical_presentation",
                 "Atypical presentation details",
@@ -300,21 +307,29 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
             />
           </div>
         )}
-        <TextAreaFormField {...field("diagnosis", "Diagnosis")} />
         <TextAreaFormField
+          id="diagnosis"
+          {...field("diagnosis", "Diagnosis")}
+        />
+        <TextAreaFormField
+          id="etiology_identified"
           {...field("etiology_identified", "Etiology identified")}
         />
         <TextAreaFormField
+          id="diff_diagnosis"
           {...field("diff_diagnosis", "Differential diagnosis")}
         />
 
         <CheckBoxFormField
+          id="has_sari"
           {...field("has_sari", "Has SARI (Severe Acute Respiratory illness)?")}
         />
         <CheckBoxFormField
+          id="has_ari"
           {...field("has_ari", "Has ARI (Acute Respiratory illness)?")}
         />
         <CheckBoxFormField
+          id="is_unusual_course"
           {...field("is_unusual_course", "Is unusual course?")}
         />
         <div className="mt-4 flex flex-col justify-end gap-2 lg:flex-row">

@@ -299,7 +299,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Patient: </span>
-            {sampleDetails?.patient_name}
+            <span id="patient_name">{sampleDetails?.patient_name}</span>
           </div>
           {sampleDetails?.facility_object && (
             <div>
@@ -324,7 +324,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 Fast track testing reason:{" "}
               </span>
-              {sampleDetails.fast_track}
+              <span id="fast_track_reason">{sampleDetails.fast_track}</span>
             </div>
           )}
           {sampleDetails?.doctor_name && (
@@ -332,13 +332,15 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 Doctor&apos;s Name:{" "}
               </span>
-              {startCase(camelCase(sampleDetails.doctor_name))}
+              <span id="doctor_name">
+                {startCase(camelCase(sampleDetails.doctor_name))}
+              </span>
             </div>
           )}
           {sampleDetails?.diagnosis && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">Diagnosis: </span>
-              {sampleDetails.diagnosis}
+              <span id="diagnosis">{sampleDetails.diagnosis}</span>
             </div>
           )}
           {sampleDetails?.diff_diagnosis && (
@@ -346,7 +348,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 Differential diagnosis:{" "}
               </span>
-              {sampleDetails?.diff_diagnosis}
+              <span id="diff_diagnosis">{sampleDetails?.diff_diagnosis}</span>
             </div>
           )}
           {sampleDetails?.etiology_identified && (
@@ -354,7 +356,9 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 Etiology identified:{" "}
               </span>
-              {sampleDetails.etiology_identified}
+              <span id="etiology_identified">
+                {sampleDetails.etiology_identified}
+              </span>
             </div>
           )}
           <div>
