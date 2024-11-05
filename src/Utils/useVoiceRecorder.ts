@@ -67,19 +67,22 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   }, [recorder, isRecording]);
 
   const setupAudioAnalyser = () => {
-    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 32;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
-    source = audioContext.createMediaStreamSource(recorder?.stream as MediaStream);
+    source = audioContext.createMediaStreamSource(
+      recorder?.stream as MediaStream,
+    );
     source.connect(analyser);
 
     const updateWaveform = () => {
       if (isRecording) {
         analyser?.getByteFrequencyData(dataArray);
-        const normalizedWaveform = Array.from(dataArray).map(value =>
+        const normalizedWaveform = Array.from(dataArray).map((value) =>
           Math.min(100, (value / 255) * 100),
         );
         setWaveform(normalizedWaveform);
@@ -96,7 +99,7 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
 
   const stopRecording = () => {
     setIsRecording(false);
-    setWaveform([])
+    setWaveform([]);
   };
 
   const resetRecording = () => {

@@ -16,7 +16,6 @@ import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
 import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
 
-import { Avatar } from "@/components/Common/Avatar";
 type OptionCallback<T, R> = (option: T) => R;
 
 type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
