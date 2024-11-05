@@ -80,7 +80,7 @@ export default function ListView() {
         key={`shift_${shift.id}`}
         className="w-full border-b-2 border-gray-100"
       >
-        <div className="border-3 flex grid w-full gap-1 overflow-hidden bg-white p-4 shadow sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
+        <div className="border-3 mx-3 flex grid w-full gap-1 overflow-hidden bg-white p-4 shadow sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-5">
           <div className="col-span-1 px-2 text-left">
             <div className="text-sm font-bold capitalize">
               {shift.patient_object.name}
@@ -116,10 +116,10 @@ export default function ListView() {
           </div>
 
           <div className="col-span-1 flex flex-col px-3 text-left">
-            <div className="flex-between mb-2 flex gap-4">
+            <div className="3xl:flex-row mb-2 flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row">
               <dt
                 title={t("shifting_status")}
-                className={`flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${
+                className={`flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${
                   shift.status === "COMPLETED"
                     ? "bg-sky-200"
                     : "bg-yellow-200 text-yellow-500"
@@ -128,6 +128,7 @@ export default function ListView() {
                 <CareIcon icon="l-truck" className="mr-2" />
                 <dd className="text-sky-600">{shift.status}</dd>
               </dt>
+
               <div>
                 {shift.emergency && (
                   <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
@@ -303,20 +304,20 @@ export default function ListView() {
               </button>
             </div>
             <div>
-              <div className="mx-10 mt-5 grid w-full gap-2 border-b-2 border-gray-100 p-4 text-sm font-medium sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
-                <div className="col-span-1 text-left uppercase">
+              <div className="mx-5 mt-5 grid w-full gap-2 border-b-2 border-gray-100 p-4 text-sm font-medium sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-5">
+                <div className="col-span-1 uppercase sm:text-center md:text-center lg:block lg:text-left">
                   {t("patients")}
                 </div>
-                <div className="col-span-1 text-left uppercase">
+                <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
                   {t("contact_info")}
                 </div>
-                <div className="col-span-1 text-left uppercase">
+                <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
                   {t("consent__status")}
                 </div>
-                <div className="col-span-1 text-left uppercase">
+                <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
                   {t("facilities")}
                 </div>
-                <div className="col-span-1 text-left uppercase">
+                <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
                   {t("LOG_UPDATE_FIELD_LABEL__action")}
                 </div>
               </div>
