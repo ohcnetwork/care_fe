@@ -3,50 +3,69 @@ export class UserCreationPage {
   clickProfileName() {
     cy.get("#user-profile-name").click();
   }
-
   clickProfileButton() {
     cy.get("#profile-button").click();
   }
-
-  clickEditCancelProfileButton() {
+  clickEditProfileButton() {
     cy.get("#edit-cancel-profile-button").click();
   }
-
   clickAddUserButton() {
     cy.get("#addUserButton").click();
   }
-  clickSubmit() {
-    cy.get("#submit").click();
+  typeUserName(username: string) {
+    cy.get("#username").click().type(username);
+  }
+  typeFirstName(firstName: string) {
+    cy.get("#first_name").click().type(firstName);
+  }
+  typeLastName(lastName: string) {
+    cy.get("#last_name").click().type(lastName);
+  }
+  typeEmail(email: string) {
+    cy.get("#email").click().type(email);
   }
 
-  typeIntoFirstNameAndClear() {
-    cy.get("#firstName").click().clear().click().type("District Editted");
+  typePassword(password: string) {
+    cy.get("#password").click().type(password);
   }
-  typeIntoLastNameAndClear() {
-    cy.get("#lastName").click().clear().click().type("Cypress");
+  typePhoneNumber(phone_number: string) {
+    cy.get("#phone_number").click().type(phone_number);
   }
-  typeIntoPhoneNumberAndClear(phone_number: string) {
-    cy.get("#phoneNumber").click().clear().click().type(phone_number);
+  typeConfirmPassword(password: string) {
+    cy.get("#c_password").click().type(password);
   }
-  typeIntoEmailAndClear() {
-    cy.get("#email").click().clear().click().type("test@test.com");
+  typeQualification(qualification: string) {
+    cy.get("#qualification").click().type(qualification);
   }
-  typeIntoWeeklyWorkingHoursAndClear() {
-    cy.get("#weekly_working_hours").click().clear().click().type("14");
+  typeDoctorExperience(experince: string) {
+    cy.get("#doctor_experience_commenced_on").click().type(experince);
   }
 
-  typeIntoAltPhoneumberAndClear(emergency_phone_number: string) {
-    cy.get("#altPhoneNumber")
-      .click()
-      .clear()
-      .click()
-      .type(emergency_phone_number);
+  typeDoctorMedicalCouncilRegNo(reg_no: string) {
+    cy.get("#doctor_medical_council_registration").click().type(reg_no);
+  }
+
+  typeWeeklyWorkingHours(working_hrs: string) {
+    cy.get("#weekly_working_hours").click().type(working_hrs);
+  }
+
+  typeAltPhoneumber(emergency_phone_number: string) {
+    cy.get("#altPhoneNumber").click().type(emergency_phone_number);
   }
 
   typeIntoElementByIdPostClearDob(elementId: string, value: string) {
     cy.clickAndTypeDate("#" + elementId, value);
   }
 
+  typeIntoInputByName(inputName: string, value: string) {
+    cy.get("input[name='" + inputName + "']")
+      .click()
+      .type(value);
+  }
+
+  typeDate(dob: string) {
+    cy.clickAndTypeDate("#date_of_birth", dob);
+  }
   clearFirstName() {
     cy.get("#firstName").click().clear();
   }
@@ -63,46 +82,25 @@ export class UserCreationPage {
     cy.get("#weekly_working_hours").click().clear();
   }
 
-  typeUserName(username: string) {
-    cy.get("#username").click().type(username);
+  clearEmail() {
+    cy.get("#email").click().clear();
   }
-  typePassword() {
-    cy.get("#password").click().type("Test@123");
-  }
-  typePhoneNumber(phone_number: string) {
-    cy.get("#phone_number").click().type(phone_number);
-  }
-  typeConfirmPassword() {
-    cy.get("#c_password").click().type("Test@123");
-  }
-  typeQualification() {
-    cy.get("#qualification").click().type("MBBS");
-  }
-  typeDoctorExperience() {
-    cy.get("#doctor_experience_commenced_on").click().type("2");
+  selectUserType(role: string) {
+    cy.clickAndSelectOption("#user_type", role);
   }
 
-  typeDoctorMedicalCouncilRegNo() {
-    cy.get("#doctor_medical_council_registration").click().type("123456789");
+  selectHomeFacility(name: string) {
+    cy.get("#home_facility").click();
+    this.selectOptionContainingText(name);
   }
-
-  typeFirstName() {
-    cy.get("#first_name").click().type("cypress test");
+  selectGender(gender: string) {
+    cy.clickAndSelectOption("#gender", gender);
   }
-  typeLastName() {
-    cy.get("#last_name").click().type("staff user");
+  selectState(state: string) {
+    cy.clickAndSelectOption("#state", state);
   }
-  typeEmail() {
-    cy.get("#email").click().type("test@test.com");
-  }
-
-  typeIntoInputByName(inputName: string, value: string) {
-    cy.get("input[name='" + inputName + "']")
-      .click()
-      .type(value);
-  }
-  selectOptionContainingText(text: string) {
-    cy.get("[role='option']").contains(text).click();
+  selectDistrict(district: string) {
+    cy.clickAndSelectOption("#district", district);
   }
   selectFacility(name: string) {
     this.typeIntoInputByName("facilities", name);
@@ -112,9 +110,8 @@ export class UserCreationPage {
       .click();
   }
 
-  selectHomeFacility(name: string) {
-    cy.get("#home_facility").click();
-    this.selectOptionContainingText(name);
+  selectOptionContainingText(text: string) {
+    cy.get("[role='option']").contains(text).click();
   }
 
   verifyErrorMessages(errorMessages: string[]) {

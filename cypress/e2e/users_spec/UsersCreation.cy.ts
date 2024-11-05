@@ -53,6 +53,27 @@ describe("User Creation", () => {
     "This field is required",
     "Please enter valid phone number",
   ];
+  const userName = "devdistrictadmin";
+  const firstName = "District Editted";
+  const lastName = "Cypress";
+  const gender = "Male";
+  const email = "test@test.com";
+  const password = "Test@123";
+  const qualification = "MBBS";
+  const experince = "2";
+  const reg_no = "123456789";
+  const firstName_ = "cypress test";
+  const lastName_ = "staff user";
+  const state = "Kerala";
+  const district = "Ernakulam";
+  const role = "Doctor";
+  const home_facility = "Dummy Shifting Center";
+  const weekly_working_hrs = "12";
+  const dob_id = "date_of_birth";
+  const dob = "01011998";
+  const formatted_dob = "01/01/1998";
+  const update_btn = "Update";
+  const save_btn = "Save User";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -68,85 +89,86 @@ describe("User Creation", () => {
   it("Update the existing user profile and verify its reflection", () => {
     userCreationPage.clickProfileName();
     userCreationPage.clickProfileButton();
-    cy.verifyContentPresence("#username-profile-details", ["devdistrictadmin"]);
-
-    userCreationPage.clickEditCancelProfileButton();
-    userCreationPage.typeIntoFirstNameAndClear();
-    userCreationPage.typeIntoLastNameAndClear();
-    cy.clickAndSelectOption("#gender", "Male");
-    userCreationPage.typeIntoPhoneNumberAndClear(phone_number);
-    userCreationPage.typeIntoAltPhoneumberAndClear(emergency_phone_number);
-    userCreationPage.typeIntoEmailAndClear();
-    userCreationPage.typeIntoWeeklyWorkingHoursAndClear();
-    userCreationPage.typeIntoElementByIdPostClearDob(
-      "date_of_birth",
-      "01011998",
-    );
-    cy.submitButton("Update");
+    cy.verifyContentPresence("#username-profile-details", [userName]);
+    userCreationPage.clickEditProfileButton();
+    userCreationPage.clearFirstName();
+    userCreationPage.typeFirstName(firstName);
+    userCreationPage.clearLastName();
+    userCreationPage.typeLastName(lastName);
+    userCreationPage.selectGender(gender);
+    userCreationPage.clearPhoneNumber();
+    userCreationPage.typePhoneNumber(phone_number);
+    userCreationPage.clearAltPhoneNumber();
+    userCreationPage.typeAltPhoneumber(emergency_phone_number);
+    userCreationPage.clearEmail();
+    userCreationPage.typeEmail(email);
+    userCreationPage.clearWeeklyWorkingHours();
+    userCreationPage.typeWeeklyWorkingHours(weekly_working_hrs);
+    userCreationPage.typeIntoElementByIdPostClearDob(dob_id, dob);
+    cy.submitButton(update_btn);
     cy.verifyContentPresence("#contactno-profile-details", [
       "+91" + phone_number,
     ]);
     cy.verifyContentPresence("#whatsapp-profile-details", [
       "+91" + emergency_phone_number,
     ]);
-    cy.verifyContentPresence("#firstname-profile-details", [
-      "District Editted",
+    cy.verifyContentPresence("#firstname-profile-details", [firstName]);
+    cy.verifyContentPresence("#lastname-profile-details", [lastName]);
+    cy.verifyContentPresence("#date_of_birth-profile-details", [formatted_dob]);
+    cy.verifyContentPresence("#emailid-profile-details", [email]);
+    cy.verifyContentPresence("#gender-profile-details", [gender]);
+    cy.verifyContentPresence("#averageworkinghour-profile-details", [
+      weekly_working_hrs,
     ]);
-    cy.verifyContentPresence("#lastname-profile-details", ["Cypress"]);
-    cy.verifyContentPresence("#date_of_birth-profile-details", ["01/01/1998"]);
-    cy.verifyContentPresence("#emailid-profile-details", ["test@test.com"]);
-    cy.verifyContentPresence("#gender-profile-details", ["Male"]);
-    cy.verifyContentPresence("#averageworkinghour-profile-details", ["14"]);
   });
 
   it("Update the existing user profile Form Mandatory File Error", () => {
     userCreationPage.clickProfileName();
     userCreationPage.clickProfileButton();
-    userCreationPage.clickEditCancelProfileButton();
+    userCreationPage.clickEditProfileButton();
     userCreationPage.clearFirstName();
     userCreationPage.clearLastName();
     userCreationPage.clearPhoneNumber();
     userCreationPage.clearAltPhoneNumber();
     userCreationPage.clearWeeklyWorkingHours();
-    cy.submitButton("Update");
+    cy.submitButton(update_btn);
     userCreationPage.verifyErrorMessages(EXPECTED_PROFILE_ERROR_MESSAGES);
   });
 
   it("create new user and verify reflection", () => {
     userCreationPage.clickAddUserButton();
-    userCreationPage.selectFacility("Dummy Shifting Center");
+    userCreationPage.selectFacility(home_facility);
     userCreationPage.typeUserName(username);
-    userCreationPage.typePassword();
-    userCreationPage.selectHomeFacility("Dummy Shifting Center");
+    userCreationPage.typePassword(password);
+    userCreationPage.selectHomeFacility(home_facility);
     userCreationPage.typePhoneNumber(phone_number);
-    cy.clickAndTypeDate("#date_of_birth", "25081999");
-    cy.clickAndSelectOption("#user_type", "Doctor");
-    userCreationPage.typeConfirmPassword();
-    userCreationPage.typeQualification();
-    userCreationPage.typeDoctorExperience();
-    userCreationPage.typeDoctorMedicalCouncilRegNo();
-    userCreationPage.typeFirstName();
-    userCreationPage.typeLastName();
-    userCreationPage.typeEmail();
-    cy.clickAndSelectOption("#gender", "Male");
-    cy.clickAndSelectOption("#state", "Kerala");
-    cy.clickAndSelectOption("#district", "Ernakulam");
-    userCreationPage.clickSubmit();
+    userCreationPage.selectUserType(role);
+    userCreationPage.typeConfirmPassword(password);
+    userCreationPage.typeQualification(qualification);
+    userCreationPage.typeDoctorExperience(experince);
+    userCreationPage.typeDoctorMedicalCouncilRegNo(reg_no);
+    userCreationPage.typeFirstName(firstName_);
+    userCreationPage.typeLastName(lastName_);
+    userCreationPage.typeEmail(email);
+    userCreationPage.selectGender(gender);
+    userCreationPage.selectState(state);
+    userCreationPage.selectDistrict(district);
+    cy.clickSubmit();
     cy.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
-    cy.verifyContentPresence("#name", ["cypress test"]);
-    cy.verifyContentPresence("#role", ["Doctor"]);
-    cy.verifyContentPresence("#district", ["Ernakulam"]);
-    cy.verifyContentPresence("#home_facility", ["Dummy Shifting Center"]);
-    cy.verifyContentPresence("#qualification", ["MBBS"]);
-    cy.verifyContentPresence("#doctor-experience", ["2"]);
-    cy.verifyContentPresence("#medical-council-registration", ["123456789"]);
+    cy.verifyContentPresence("#name", [firstName_]);
+    cy.verifyContentPresence("#role", [role]);
+    cy.verifyContentPresence("#district", [district]);
+    cy.verifyContentPresence("#home_facility", [home_facility]);
+    cy.verifyContentPresence("#qualification", [qualification]);
+    cy.verifyContentPresence("#doctor-experience", [experince]);
+    cy.verifyContentPresence("#medical-council-registration", [reg_no]);
   });
 
   it("create new user form throwing mandatory field error", () => {
     userCreationPage.clickAddUserButton();
-    cy.submitButton("Save User");
+    cy.submitButton(save_btn);
     cy.wait(2000);
     userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
   });
