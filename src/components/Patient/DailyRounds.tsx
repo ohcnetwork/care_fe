@@ -56,6 +56,7 @@ import NursingCare from "../LogUpdate/Sections/NursingCare";
 
 import Loading from "@/components/Common/Loading";
 import TextFormField from "../Form/FormFields/TextFormField";
+import { PLUGIN_Component } from "@/PluginEngine";
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -553,6 +554,7 @@ export const DailyRounds = (props: any) => {
       }
       className="mx-auto max-w-4xl"
     >
+      <PLUGIN_Component __name="Scribe" />
       <form
         className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11"
         data-scribe-form

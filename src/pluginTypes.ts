@@ -26,11 +26,14 @@ export type AdditionalDischargeProceduresComponentType = React.FC<{
   consultation: ConsultationModel;
 }>;
 
+export type ScribeComponentType = React.FC;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   ManagePatientOptions: ManagePatientOptionsComponentType;
   AdditionalDischargeProcedures: AdditionalDischargeProceduresComponentType;
+  Scribe: ScribeComponentType;
 };
 
 // Create a type for lazy-loaded components
@@ -54,7 +57,6 @@ export type PluginManifest = {
   extends: SupportedPluginExtensions[];
   components: PluginComponentMap;
   navItems: INavItem[];
-  Entry?: () => React.ReactNode;
 };
 
 // Create a type that ensures only available plugins can be used
