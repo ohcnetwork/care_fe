@@ -5,9 +5,9 @@ import { formatDateTime, formatName } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
 import routes from "../../Redux/api";
-import { IComment } from "../Resource/models";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import request from "../../Utils/request/request";
+import { CommentModel } from "../Facility/models";
 
 interface CommentSectionProps {
   id: string;
@@ -67,7 +67,7 @@ const CommentSection = (props: CommentSectionProps) => {
             <PaginatedList.WhenLoading>
               <CircularProgress />
             </PaginatedList.WhenLoading>
-            <PaginatedList.Items<IComment>>
+            <PaginatedList.Items<CommentModel>>
               {(item) => <Comment {...item} />}
             </PaginatedList.Items>
             <div className="flex w-full items-center justify-center">
@@ -87,7 +87,7 @@ export const Comment = ({
   comment,
   created_by_object,
   modified_date,
-}: IComment) => {
+}: CommentModel) => {
   const { t } = useTranslation();
   return (
     <div

@@ -1,4 +1,4 @@
-import * as _ from "lodash-es";
+import { set, chain } from "lodash-es";
 import { useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications";
@@ -89,7 +89,7 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
 
   const handleValueChange = (value: any, name: string) => {
     const changedFields = { ...state.changedFields };
-    _.set(changedFields, name, value);
+    set(changedFields, name, value);
     dispatch({ type: "set_changed_fields", changedFields });
   };
 
@@ -147,7 +147,7 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
   };
 
   const handleUpdateCancel = useCallback(() => {
-    const changedValues = _.chain(state.initialValues)
+    const changedValues = chain(state.initialValues)
       .map((val: any, _key: string) => ({
         id: val?.id,
         initialValue: val?.notes || val?.value || null,

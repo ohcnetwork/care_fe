@@ -44,7 +44,7 @@ export const formatFilter = (params: any) => {
         : filter.is_up_shift === "yes"
           ? "true"
           : "false",
-    limit: limit,
+    limit: filter.limit || limit,
     offset: filter.offset,
     patient_name: filter.patient_name || undefined,
     created_date_before: filter.created_date_before || undefined,

@@ -1,6 +1,6 @@
 import { alert, Stack, defaultModules } from "@pnotify/core";
 import * as PNotifyMobile from "@pnotify/mobile";
-import _ from "lodash-es";
+import { startCase, camelCase } from "lodash-es";
 
 defaultModules.set(PNotifyMobile, {});
 
@@ -44,7 +44,7 @@ const notifyError = (error) => {
     errorMsg = error.detail;
   } else {
     for (let [key, value] of Object.entries(error)) {
-      let keyName = _.startCase(_.camelCase(key));
+      let keyName = startCase(camelCase(key));
       if (Array.isArray(value)) {
         const uniques = [...new Set(value)];
         errorMsg += `${keyName} - ${uniques.splice(0, 5).join(", ")}`;
