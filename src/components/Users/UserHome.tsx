@@ -12,10 +12,15 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import LinkedFacilitiesTab from "./LinkedFacilitiesTab";
 import RoleAndSkillsTab from "./RoleAndSkillsTab";
+import { userChildProps } from "../Common/UserColumns";
 
 export interface UserHomeProps {
   username: string;
   tab: string;
+}
+export interface tabChildProp {
+  body: (childProps: userChildProps) => JSX.Element | undefined;
+  name?: string;
 }
 
 export default function UserHome(props: UserHomeProps) {
@@ -34,10 +39,22 @@ export default function UserHome(props: UserHomeProps) {
     },
   });
 
-  const TABS = {
-    PROFILE: UserSummaryTab,
-    ROLE_SKILLS: RoleAndSkillsTab,
-    FACILITIES: LinkedFacilitiesTab,
+  const roleInfoBeVisible = () => {
+    if (["Doctor", "Nurse"].includes(userData?.user_type ?? "")) return true;
+    return false;
+  };
+
+  const TABS: {
+    PROFILE: tabChildProp;
+    ROLE_SKILLS: tabChildProp;
+    FACILITIES: tabChildProp;
+  } = {
+    PROFILE: { body: UserSummaryTab },
+    ROLE_SKILLS: {
+      body: RoleAndSkillsTab,
+      name: roleInfoBeVisible() ? "ROLE_SKILLS" : "SKILLS",
+    },
+    FACILITIES: { body: LinkedFacilitiesTab },
   };
 
   let currentTab = undefined;
@@ -53,7 +70,7 @@ export default function UserHome(props: UserHomeProps) {
     return <Loading />;
   }
 
-  const SelectedTab = TABS[currentTab];
+  const SelectedTab = TABS[currentTab].body;
 
   return (
     <>
@@ -75,6 +92,7 @@ export default function UserHome(props: UserHomeProps) {
                     id="usermanagement_tab_nav"
                   >
                     {keysOf(TABS).map((p) => {
+                      const tabName = TABS[p]?.name ?? p;
                       return (
                         <Link
                           key={p}
@@ -87,7 +105,7 @@ export default function UserHome(props: UserHomeProps) {
                           href={`/users/${username}/${p.toLocaleLowerCase()}`}
                         >
                           <div className="px-3 py-1.5">
-                            {t(`USERMANAGEMENT_TAB__${p}`)}
+                            {t(`USERMANAGEMENT_TAB__${tabName}`)}
                           </div>
                         </Link>
                       );

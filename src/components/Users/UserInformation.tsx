@@ -137,28 +137,28 @@ export default function UserInformation({ username }: { username: string }) {
     },
   });
 
-  const validateForm = () => {
+  const validateForm = (form: EditForm) => {
     const errors: Partial<Record<keyof EditForm, FieldError>> = {};
-    Object.keys(states.form).forEach((field) => {
+    Object.keys(form).forEach((field) => {
       switch (field) {
         case "firstName":
         case "lastName":
         case "gender":
-          errors[field] = RequiredFieldValidator()(states.form[field]);
+          errors[field] = RequiredFieldValidator()(form[field]);
           return;
         case "date_of_birth":
-          if (!states.form[field]) {
+          if (!form[field]) {
             errors[field] = "Enter a valid date of birth";
           } else if (
-            !dayjs(states.form[field]).isValid() ||
-            dayjs(states.form[field]).isAfter(dayjs().subtract(17, "year"))
+            !dayjs(form[field]).isValid() ||
+            dayjs(form[field]).isAfter(dayjs().subtract(17, "year"))
           ) {
             errors[field] = "Enter a valid date of birth";
           }
           return;
         case "phoneNumber":
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumber(states.form[field]);
+          const phoneNumber = parsePhoneNumber(form[field]);
 
           // eslint-disable-next-line no-case-declarations
           let is_valid = false;
@@ -166,50 +166,46 @@ export default function UserInformation({ username }: { username: string }) {
             is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
           }
 
-          if (!states.form[field] || !is_valid) {
+          if (!form[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
           }
           return;
         case "altPhoneNumber":
           // eslint-disable-next-line no-case-declarations
           let alt_is_valid = false;
-          if (states.form[field] && states.form[field] !== "+91") {
-            const altPhoneNumber = parsePhoneNumber(states.form[field]);
+          if (form[field] && form[field] !== "+91") {
+            const altPhoneNumber = parsePhoneNumber(form[field]);
             if (altPhoneNumber) {
               alt_is_valid =
                 PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
             }
           }
 
-          if (
-            states.form[field] &&
-            states.form[field] !== "+91" &&
-            !alt_is_valid
-          ) {
+          if (form[field] && form[field] !== "+91" && !alt_is_valid) {
             errors[field] = "Please enter valid mobile number";
           }
           return;
         case "email":
-          if (!states.form[field]) {
+          if (!form[field]) {
             errors[field] = t("field_required");
-          } else if (!validateEmailAddress(states.form[field])) {
+          } else if (!validateEmailAddress(form[field])) {
             errors[field] = "Enter a valid email address";
           }
           return;
         case "weekly_working_hours":
           if (
-            states.form[field] &&
-            (Number(states.form[field]) < 0 ||
-              Number(states.form[field]) > 168 ||
-              !/^\d+$/.test(states.form[field] ?? ""))
+            form[field] &&
+            (Number(form[field]) < 0 ||
+              Number(form[field]) > 168 ||
+              !/^\d+$/.test(form[field] ?? ""))
           ) {
             errors[field] =
               "Average weekly working hours must be a number between 0 and 168";
           }
           return;
         case "video_connect_link":
-          if (states.form[field]) {
-            if (isValidUrl(states.form[field]) === false) {
+          if (form[field]) {
+            if (isValidUrl(form[field]) === false) {
               errors[field] = "Please enter a valid url";
             }
           }
@@ -219,8 +215,8 @@ export default function UserInformation({ username }: { username: string }) {
     return errors;
   };
 
-  const getDate = (value: any) =>
-    value && dayjs(value).isValid() && dayjs(value).toDate();
+  const getDate = (value: string | Date | null) =>
+    value && dayjs(value).isValid() ? dayjs(value).toDate() : undefined;
 
   const handleCancel = () => {
     dispatch({
@@ -233,22 +229,19 @@ export default function UserInformation({ username }: { username: string }) {
     return <Loading />;
   }
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: EditForm) => {
     const data = {
-      username: userData.username,
-      first_name: states.form.firstName,
-      last_name: states.form.lastName,
-      email: states.form.email,
-      video_connect_link: states.form.video_connect_link,
-      phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
-      alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
-      gender: states.form.gender,
-      date_of_birth: dateQueryString(states.form.date_of_birth),
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      video_connect_link: formData.video_connect_link,
+      phone_number: parsePhoneNumber(formData.phoneNumber) ?? "",
+      alt_phone_number: parsePhoneNumber(formData.altPhoneNumber) ?? "",
+      gender: formData.gender,
+      date_of_birth: dateQueryString(formData.date_of_birth),
       weekly_working_hours:
-        states.form.weekly_working_hours &&
-        states.form.weekly_working_hours !== ""
-          ? states.form.weekly_working_hours
+        formData.weekly_working_hours && formData.weekly_working_hours !== ""
+          ? formData.weekly_working_hours
           : null,
     };
     const { res } = await request(routes.partialUpdateUser, {

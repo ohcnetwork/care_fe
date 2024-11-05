@@ -9,9 +9,6 @@ import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
 import Loading from "@/components/Common/Loading";
 import Form from "../Form/Form";
-import { USER_TYPE_OPTIONS, USER_TYPES, UserRole } from "@/common/constants";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import useAuthUser from "@/common/hooks/useAuthUser";
 
 type EditForm = {
   user_type: string | undefined;
@@ -71,7 +68,6 @@ export default function UserRoles({ username }: { username: string }) {
   const { t } = useTranslation();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const formVals = useRef(initForm);
-  const authUser = useAuthUser();
 
   const {
     data: userData,
@@ -148,58 +144,28 @@ export default function UserRoles({ username }: { username: string }) {
     return <Loading />;
   }
 
-  const userIndex = USER_TYPES.indexOf(authUser.user_type);
-  const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
-  const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
-  let userTypes;
-  if (authUser.is_superuser) {
-    userTypes = [...USER_TYPE_OPTIONS];
-  } else {
-    switch (authUser.user_type) {
-      case "StaffReadOnly":
-        userTypes = readOnlyUsers.slice(0, 1);
-        break;
-      case "DistrictReadOnlyAdmin":
-        userTypes = readOnlyUsers.slice(0, 2);
-        break;
-      case "StateReadOnlyAdmin":
-        userTypes = readOnlyUsers.slice(0, 3);
-        break;
-      case "Pharmacist":
-        userTypes = USER_TYPE_OPTIONS.slice(0, 1);
-        break;
-      default:
-        // Exception to allow Staff to Create Doctors
-        userTypes = defaultAllowedUserTypes;
-    }
-    // Temporarily allows creation of users with elevated permissions due to introduction of new roles.
-    if (authUser.user_type === "Nurse" || authUser.user_type === "Staff") {
-      userTypes.push(USER_TYPE_OPTIONS[6]);
-    }
-  }
+  if (!["Doctor", "Nurse"].includes(states.form.user_type ?? "")) return;
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: EditForm) => {
     const data = {
-      user_type: states.form.user_type as UserRole,
       qualification:
-        states.form.user_type === "Doctor" || states.form.user_type === "Nurse"
-          ? states.form.qualification
+        formData.user_type === "Doctor" || formData.user_type === "Nurse"
+          ? formData.qualification
           : undefined,
       doctor_experience_commenced_on:
-        states.form.user_type === "Doctor"
+        formData.user_type === "Doctor"
           ? dayjs()
               .subtract(
                 parseInt(
-                  (states.form.doctor_experience_commenced_on as string) ?? "0",
+                  (formData.doctor_experience_commenced_on as string) ?? "0",
                 ),
                 "years",
               )
               .format("YYYY-MM-DD")
           : undefined,
       doctor_medical_council_registration:
-        states.form.user_type === "Doctor"
-          ? states.form.doctor_medical_council_registration
+        formData.user_type === "Doctor"
+          ? formData.doctor_medical_council_registration
           : undefined,
     };
     const { res } = await request(routes.partialUpdateUser, {
@@ -232,17 +198,6 @@ export default function UserRoles({ username }: { username: string }) {
               {(field) => (
                 <>
                   <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-                    <SelectFormField
-                      {...field("user_type")}
-                      required
-                      label="User Type"
-                      options={userTypes}
-                      optionLabel={(o) =>
-                        o.role + (o.readOnly ? " (Read Only)" : "")
-                      }
-                      optionValue={(o) => o.id}
-                      className="z-40 flex-1"
-                    />
                     {(states.form.user_type === "Doctor" ||
                       states.form.user_type === "Nurse") && (
                       <TextFormField
@@ -255,11 +210,11 @@ export default function UserRoles({ username }: { username: string }) {
                     )}
                   </div>
                   {states.form.user_type === "Doctor" && (
-                    <>
+                    <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
                       <TextFormField
                         {...field("doctor_experience_commenced_on")}
                         required
-                        className="col-span-6 sm:col-span-3"
+                        className="flex-1"
                         type="number"
                         min={0}
                         label={t("years_of_experience")}
@@ -268,11 +223,11 @@ export default function UserRoles({ username }: { username: string }) {
                       <TextFormField
                         {...field("doctor_medical_council_registration")}
                         required
-                        className="col-span-6 sm:col-span-3"
+                        className="flex-1"
                         label={t("medical_council_registration")}
                         placeholder={t("doctor_s_medical_council_registration")}
                       />
-                    </>
+                    </div>
                   )}
                 </>
               )}

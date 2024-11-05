@@ -8,7 +8,7 @@ export type userChildProps = {
 export default function userColumns(
   heading: string,
   note: string,
-  Child: (childProps: userChildProps) => JSX.Element,
+  Child: (childProps: userChildProps) => JSX.Element | undefined,
   childProps: userChildProps,
 ) {
   return (
