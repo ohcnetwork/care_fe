@@ -591,7 +591,7 @@ export const PatientHome = (props: any) => {
                       </p>
                     </div>
                   )}
-                <div className="mb-6 rounded-sm bg-white p-2 text-center shadow">
+                <div className="my-3 rounded-sm bg-white p-2 text-center shadow md:my-0 md:mb-6">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
                       <div className="text-sm font-normal leading-5 text-secondary-500">

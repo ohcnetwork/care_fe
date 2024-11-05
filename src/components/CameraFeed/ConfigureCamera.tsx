@@ -391,14 +391,22 @@ export default function ConfigureCamera(props: Props) {
                 >
                   <TextFormField
                     name="preset-name"
-                    className="py-4"
+                    className="w-full py-4"
                     value={presetName}
                     onChange={({ value }) => setPresetName(value)}
                     errorClassName="hidden"
                     placeholder={t("preset_name_placeholder")}
                     suggestions={presetNameSuggestions}
+                    clearable={true}
                   />
+
                   <div className="cui-form-button-group">
+                    <Cancel
+                      onClick={() => {
+                        setCreatePreset(undefined);
+                        setPresetName("");
+                      }}
+                    />
                     <Submit
                       onClick={async () => {
                         const { res } = await request(FeedRoutes.createPreset, {
