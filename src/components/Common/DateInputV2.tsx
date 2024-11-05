@@ -285,7 +285,6 @@ const DateInputV2: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    console.log(domValue);
     if (value !== domValue && typeof domValue !== "undefined")
       onChange(dayjs(domValue).toDate());
   }, [domValue]);
