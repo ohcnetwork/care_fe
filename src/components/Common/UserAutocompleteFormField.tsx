@@ -87,6 +87,7 @@ export default function UserAutocomplete(props: UserSearchProps) {
         optionValue={(option) => option}
         onQuery={setQuery}
         isLoading={loading}
+        avatar
       />
     </FormField>
   );

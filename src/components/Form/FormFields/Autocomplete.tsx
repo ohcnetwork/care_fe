@@ -243,7 +243,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   >
                     {({ focus }) => (
                       <div className="flex flex-row gap-2">
-                        {option?.image && (
+                        {(option?.image || props.avatar) && (
                           <Avatar
                             className="h-11 w-11 rounded-full"
                             name={option.label}
