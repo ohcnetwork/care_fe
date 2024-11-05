@@ -147,14 +147,14 @@ export const AutocompleteMutliSelect = <T, V>(
                 ref={comboButtonRef}
                 className="absolute inset-y-0 right-0 flex items-center pr-2"
               >
-                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
+                <div className="text-lg text-secondary-900">
                   {props.isLoading ? (
                     <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
                     <CareIcon
                       id="dropdown-toggle"
                       icon="l-angle-down"
-                      className="-mb-1.5"
+                      className="text-lg"
                     />
                   )}
                 </div>
