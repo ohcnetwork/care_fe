@@ -806,5 +806,7 @@
   "working_status": "வேலை நிலை",
   "yes": "ஆம்",
   "yet_to_be_decided": "இன்னும் முடிவு செய்யப்படவில்லை",
+  "you_need_at_least_a_location_to_create_an_assest": "ஒரு அசெஸ்ட்டை உருவாக்க குறைந்தபட்சம் ஒரு இருப்பிடமாவது தேவை.",
+  "zoom_in": "பெரிதாக்கவும்",
   "zoom_out": "சிறிதாக்கவும்"
 }
