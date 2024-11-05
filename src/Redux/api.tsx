@@ -94,7 +94,6 @@ import {
 } from "@/components/Facility/ConsultationDetails/Events/types";
 import { InvestigationSessionType } from "@/components/Facility/Investigations/investigationsTab";
 import { AbhaNumberModel } from "@/components/ABDM/types/abha";
-import { ScribeModel } from "@/components/Scribe/Scribe";
 import {
   IcreateHealthFacilityTBody,
   IHealthFacility,
@@ -121,36 +120,6 @@ export interface LoginCredentials {
 }
 
 const routes = {
-  createScribe: {
-    path: "/api/care_scribe/scribe/",
-    method: "POST",
-    TReq: Type<ScribeModel>(),
-    TRes: Type<ScribeModel>(),
-  },
-  getScribe: {
-    path: "/api/care_scribe/scribe/{external_id}/",
-    method: "GET",
-    TRes: Type<ScribeModel>(),
-  },
-  updateScribe: {
-    path: "/api/care_scribe/scribe/{external_id}/",
-    method: "PUT",
-    TReq: Type<ScribeModel>(),
-    TRes: Type<ScribeModel>(),
-  },
-  createScribeFileUpload: {
-    path: "/api/care_scribe/scribe_file/",
-    method: "POST",
-    TBody: Type<CreateFileRequest>(),
-    TRes: Type<CreateFileResponse>(),
-  },
-  editScribeFileUpload: {
-    path: "/api/care_scribe/scribe_file/{id}/?file_type={fileType}&associating_id={associatingId}",
-    method: "PATCH",
-    TBody: Type<Partial<FileUploadModel>>(),
-    TRes: Type<FileUploadModel>(),
-  },
-
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",
