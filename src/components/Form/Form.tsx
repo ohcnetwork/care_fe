@@ -14,11 +14,7 @@ type Props<T extends FormDetails> = {
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
   validate?: (form: T) => FormErrors<T>;
-  onSubmit: (
-    form: T,
-    source?: string,
-    discharged?: boolean,
-  ) => Promise<FormErrors<T> | void>;
+  onSubmit: (form: T, source?: string) => Promise<FormErrors<T> | void>;
   onCancel?: () => void;
   noPadding?: true;
   disabled?: boolean;

@@ -321,7 +321,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   !["DESTINATION APPROVED"].includes(option.text)
                 }
                 optionSelectedLabel={(option) => option.text}
-                onChange={(e: any) => field("status").onChange(e)}
+                onChange={(e) => field("status").onChange(e)}
                 className="w-full bg-white md:col-span-1 md:leading-5"
               />
 
@@ -333,7 +333,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     name="assigned_to"
                     label={t("assigned_to")}
                     value={field("assigned_to").value}
-                    onChange={(e: any) => field("assigned_to").onChange(e)}
+                    onChange={(e) => field("assigned_to").onChange(e)}
                     facilityId={
                       state.form?.shifting_approving_facility_object?.id
                     }
@@ -350,12 +350,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     name="shifting_approving_facility"
                     facilityType={1300}
                     selected={field("shifting_approving_facility").value}
-                    setSelected={(obj) =>
+                    setSelected={(obj: any) => {
                       field("shifting_approving_facility_object").onChange({
                         name: "shifting_approving_facility",
                         value: obj,
-                      })
-                    }
+                      });
+                      field("approving_facility").onChange({
+                        name: "approving_facility",
+                        value: obj.id,
+                      });
+                    }}
                     errors={field("shifting_approving_facility_object").error}
                   />
                 </div>
@@ -383,10 +387,14 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     "COMPLETED",
                   ].includes(state.form.status)}
                   selected={field("assigned_facility_object").value}
-                  setSelected={(obj) => {
-                    return field("assigned_facility_object").onChange({
+                  setSelected={(obj: any) => {
+                    field("assigned_facility_object").onChange({
                       name: "assigned_facility_object",
                       value: obj,
+                    });
+                    field("assigned_facility").onChange({
+                      name: "assigned_facility",
+                      value: obj.id,
                     });
                   }}
                   errors={field("assigned_facility_object").error}
@@ -397,7 +405,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 label={t("is_this_an_emergency")}
                 name="emergency"
                 value={field("emergency").value?.toString()}
-                onChange={(e: any) => {
+                onChange={(e) => {
                   field("emergency").onChange(e);
                 }}
                 options={[
@@ -419,7 +427,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   ]}
                   optionValue={(option) => option.value}
                   optionLabel={(option) => option.label}
-                  onChange={(e: any) => {
+                  onChange={(e) => {
                     field("is_kasp").onChange(e);
                   }}
                 />
@@ -435,7 +443,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 ]}
                 optionValue={(option) => option.value}
                 optionLabel={(option) => option.label}
-                onChange={(e: any) => {
+                onChange={(e) => {
                   field("is_up_shift").onChange(e);
                 }}
               />
@@ -444,7 +452,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 required={true}
                 name="patient_category"
                 value={field("patient_category").value}
-                onChange={(e: any) => {
+                onChange={(e) => {
                   field("patient_category").onChange(e);
                 }}
                 label="Patient Category"
@@ -461,7 +469,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     options={vehicleOptions}
                     optionLabel={(option) => option}
                     optionValue={(option) => option}
-                    onChange={(e: any) =>
+                    onChange={(e) =>
                       field("preferred_vehicle_choice").onChange(e)
                     }
                     className="mt-2 h-11 w-full bg-white shadow-sm md:leading-5"
@@ -475,7 +483,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     options={facilityOptions}
                     optionLabel={(option) => option}
                     optionValue={(option) => option}
-                    onChange={(e: any) =>
+                    onChange={(e) =>
                       field("assigned_facility_type").onChange(e)
                     }
                     className="mt-2 h-11 w-full bg-white shadow-sm md:col-span-1 md:leading-5"
@@ -489,9 +497,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     options={BREATHLESSNESS_LEVEL}
                     optionLabel={(option) => option}
                     optionValue={(option) => option}
-                    onChange={(e: any) =>
-                      field("breathlessness_level").onChange(e)
-                    }
+                    onChange={(e) => field("breathlessness_level").onChange(e)}
                     className="mt-2 h-11 w-full bg-white shadow-sm md:col-span-1 md:leading-5"
                   />
                 </>
@@ -505,7 +511,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 required
                 placeholder={t("type_your_reason_here") + "*"}
                 value={field("reason").value}
-                onChange={(e: any) => field("reason").onChange(e)}
+                onChange={(e) => field("reason").onChange(e)}
                 error={field("reason").error}
               />
 
@@ -515,9 +521,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 name="ambulance_driver_name"
                 placeholder="Name of ambulance driver"
                 value={field("ambulance_driver_name").value}
-                onChange={(e: any) =>
-                  field("ambulance_driver_name").onChange(e)
-                }
+                onChange={(e) => field("ambulance_driver_name").onChange(e)}
               />
 
               <PhoneNumberFormField
@@ -525,9 +529,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 name="ambulance_phone_number"
                 label="Ambulance Phone Number"
                 value={field("ambulance_phone_number").value}
-                onChange={(e: any) =>
-                  field("ambulance_phone_number").onChange(e)
-                }
+                onChange={(e) => field("ambulance_phone_number").onChange(e)}
                 error={field("ambulance_phone_number").error}
                 types={["mobile", "landline"]}
               />
@@ -538,7 +540,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 className="md:col-span-1"
                 placeholder="Ambulance No."
                 value={field("ambulance_number").value}
-                onChange={(e: any) => field("ambulance_number").onChange(e)}
+                onChange={(e) => field("ambulance_number").onChange(e)}
                 error={field("ambulance_number").error}
               />
 
@@ -549,7 +551,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 label={t("any_other_comments")}
                 placeholder={t("type_any_extra_comments_here")}
                 value={field("comments").value}
-                onChange={(e: any) => field("comments").onChange(e)}
+                onChange={(e) => field("comments").onChange(e)}
                 error={field("comments").error}
               />
             </div>

@@ -190,7 +190,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                     name="status"
                     value={field("status").value}
                     options={resourceStatusOptions}
-                    onChange={(e: any) => field("status").onChange(e)}
+                    onChange={(e) => field("status").onChange(e)}
                     optionLabel={(option) => option}
                   />
                 </div>
@@ -202,7 +202,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                       <UserAutocomplete
                         label="Assigned To"
                         value={field("assigned_to_object").value}
-                        onChange={(e: any) => {
+                        onChange={(e) => {
                           field("assigned_to_object").onChange({
                             name: "assigned_to_object",
                             value: e.value,
@@ -267,9 +267,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                     name="requested_quantity"
                     type="number"
                     value={field("requested_quantity").value}
-                    onChange={(e: any) =>
-                      field("requested_quantity").onChange(e)
-                    }
+                    onChange={(e) => field("requested_quantity").onChange(e)}
                     error={state.errors.requested_quantity}
                   />
                 </div>
@@ -279,9 +277,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                     type="number"
                     label="Approved Quantity"
                     value={field("assigned_quantity").value}
-                    onChange={(e: any) =>
-                      field("assigned_quantity").onChange(e)
-                    }
+                    onChange={(e) => field("assigned_quantity").onChange(e)}
                     disabled={state.form.status !== "PENDING"}
                     error={state.errors.assigned_quantity}
                   />
@@ -294,7 +290,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                     label="Request Title*"
                     placeholder="Type your title here"
                     value={field("title").value}
-                    onChange={(e: any) => field("title").onChange(e)}
+                    onChange={(e) => field("title").onChange(e)}
                     error={state.errors.title}
                   />
                 </div>
@@ -305,7 +301,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                     name="reason"
                     placeholder="Type your description here"
                     value={field("reason").value}
-                    onChange={(e: any) => field("reason").onChange(e)}
+                    onChange={(e) => field("reason").onChange(e)}
                     label="Description of request*"
                     error={state.errors.reason}
                   />
@@ -314,7 +310,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 <div>
                   <RadioFormField
                     name="emergency"
-                    onChange={(e: any) => field("emergency").onChange(e)}
+                    onChange={(e) => field("emergency").onChange(e)}
                     label={"Is this an emergency?"}
                     options={[true, false]}
                     optionLabel={(o) => (o ? "Yes" : "No")}
