@@ -24,6 +24,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> &
     trailingPadding?: string | undefined;
     leadingPadding?: string | undefined;
     suggestions?: string[];
+    clearable?: boolean | undefined;
   };
 
 const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
@@ -41,24 +42,36 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
   };
 
   let child = (
-    <input
-      {...props}
-      ref={ref as React.Ref<HTMLInputElement>}
-      id={field.id}
-      className={classNames(
-        "cui-input-base peer",
-        hasLeading && (props.leadingPadding || "pl-10"),
-        hasTrailing && (props.trailingPadding || "pr-10"),
-        field.error && "border-danger-500",
-        props.inputClassName,
+    <div className="relative">
+      <input
+        {...props}
+        ref={ref as React.Ref<HTMLInputElement>}
+        id={field.id}
+        className={classNames(
+          "cui-input-base peer",
+          hasLeading && (props.leadingPadding || "pl-10"),
+          hasTrailing && (props.trailingPadding || "pr-10"),
+          field.error && "border-danger-500",
+          props.inputClassName,
+        )}
+        disabled={field.disabled}
+        type={props.type === "password" ? getPasswordFieldType() : props.type}
+        name={field.name}
+        value={field.value}
+        required={field.required}
+        onChange={(e) => field.handleChange(e.target.value)}
+      />
+      {props.clearable && field.value && (
+        <button
+          type="button"
+          className="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-500"
+          onClick={() => field.handleChange("")}
+          aria-label="Clear input"
+        >
+          <CareIcon icon="l-times-circle" className="text-lg" />
+        </button>
       )}
-      disabled={field.disabled}
-      type={props.type === "password" ? getPasswordFieldType() : props.type}
-      name={field.name}
-      value={field.value}
-      required={field.required}
-      onChange={(e) => field.handleChange(e.target.value)}
-    />
+    </div>
   );
 
   if (props.type === "password") {

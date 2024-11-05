@@ -302,7 +302,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       backUrl="/sample"
       options={
         sampleDetails?.patient && (
-          <div className="flex justify-end">
+          <div className="my-2 flex justify-center md:justify-end">
             <ButtonV2
               href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
             >
