@@ -294,7 +294,7 @@ const AddSymptom = (props: {
       <DateFormField
         name="onset_date"
         id="symptoms_onset_date"
-        placeholder="Date of onset"
+        placeholder="onset Date"
         disableFuture
         value={onsetDate}
         onChange={({ value }) => setOnsetDate(value)}
