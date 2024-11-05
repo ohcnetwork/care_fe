@@ -721,7 +721,7 @@ export const DailyRounds = (props: any) => {
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <div className="pb-6 md:col-span-2" data-scribe-ignore>
+          <div className="pb-6 md:col-span-2">
             <FieldLabel>Symptoms</FieldLabel>
             <EncounterSymptomsBuilder
               key={symptomsSeed}
@@ -793,12 +793,12 @@ export const DailyRounds = (props: any) => {
 
               <BloodPressureFormField {...field("bp")} id="bloodPressure" />
 
-              <RangeAutocompleteFormField
+              <TextFormField
                 {...field("pulse")}
-                unit="bpm"
-                start={0}
-                end={200}
-                step={1}
+                labelSuffix="bpm"
+                type="number"
+                min={0}
+                max={200}
                 thresholds={[
                   {
                     value: 0,
@@ -822,12 +822,12 @@ export const DailyRounds = (props: any) => {
 
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
             <>
-              <RangeAutocompleteFormField
+              <TextFormField
                 {...field("blood_sugar_level")}
-                unit="mg/dL"
-                start={0}
-                end={700}
-                step={1}
+                labelSuffix="mg/dL"
+                min={0}
+                max={700}
+                type="number"
                 thresholds={[
                   {
                     value: 0,
@@ -854,17 +854,10 @@ export const DailyRounds = (props: any) => {
           ) && (
             <>
               <TemperatureFormField {...field("temperature")} />
-              <RangeFormField
-                {...field("resp")}
-                unit="bpm"
-                min={0}
-                max={150}
-                step={1}
-              />
-              {/*<TextFormField
+              <TextFormField
                 {...field("resp")}
                 type="number"
-                unit="bpm"
+                labelSuffix="bpm"
                 min={0}
                 max={150}
                 thresholds={[
@@ -884,14 +877,14 @@ export const DailyRounds = (props: any) => {
                     label: "Tachypnea",
                   },
                 ]}
-              />*/}
+              />
 
-              <RangeAutocompleteFormField
+              <TextFormField
                 {...field("ventilator_spo2")}
-                unit="%"
-                start={0}
-                end={100}
-                step={1}
+                labelSuffix="%"
+                type="number"
+                min={0}
+                max={100}
                 thresholds={[
                   {
                     value: 0,
