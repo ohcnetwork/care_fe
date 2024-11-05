@@ -120,7 +120,7 @@ export default function PatientConsentRecords(props: {
               : patient?.last_consultation?.suggestion_text,
         },
       }}
-      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`}
+      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
     >
       {fileUpload.Dialogues}
       {fileManager.Dialogues}
