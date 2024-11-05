@@ -6,7 +6,7 @@ import {
   ComboboxOptions,
 } from "@headlessui/react";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "@/components/Common/components/HelperComponents";
@@ -14,7 +14,6 @@ import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
-import { Avatar } from "@/components/Common/Avatar";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -25,7 +24,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionImage?: OptionCallback<T, string | undefined>;
+  optionImage?: OptionCallback<T, ReactNode | undefined>;
   optionDisabled?: OptionCallback<T, boolean>;
   minQueryLength?: number;
   onQuery?: (query: string) => void;
@@ -77,7 +76,7 @@ type AutocompleteProps<T, V = T> = {
   placeholder?: string;
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionImage?: OptionCallback<T, string | undefined>;
+  optionImage?: OptionCallback<T, ReactNode | undefined>;
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionDisabled?: OptionCallback<T, boolean>;
@@ -88,7 +87,6 @@ type AutocompleteProps<T, V = T> = {
   isLoading?: boolean;
   allowRawInput?: boolean;
   error?: string;
-  avatar?: boolean;
 } & (
   | {
       required?: false;
@@ -243,13 +241,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   >
                     {({ focus }) => (
                       <div className="flex flex-row gap-2">
-                        {(option?.image || props.avatar) && (
-                          <Avatar
-                            className="h-11 w-11 rounded-full"
-                            name={option.label}
-                            imageUrl={option.image}
-                          />
-                        )}
+                        {option?.image}
                         <div className="flex flex-grow flex-col">
                           <div className="flex justify-between">
                             <span>{option.label}</span>
