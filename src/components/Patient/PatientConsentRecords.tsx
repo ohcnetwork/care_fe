@@ -109,7 +109,7 @@ export default function PatientConsentRecords(props: {
         [patientId]: { name: patient?.name },
         consultation: {
           name: "Consultation",
-          uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`,
+          uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
         },
         [consultationId]: {
           name:
