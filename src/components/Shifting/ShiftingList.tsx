@@ -42,7 +42,7 @@ export default function ListView() {
   const authUser = useAuthUser();
   const { t } = useTranslation();
 
-  const handleTransferComplete = async (shift: any) => {
+  const handleTransferComplete = async (shift: ShiftingModel) => {
     setModalFor({ ...modalFor, loading: true });
     await request(routes.completeTransfer, {
       pathParams: { externalId: shift.external_id },
