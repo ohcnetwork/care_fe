@@ -6,7 +6,7 @@ import { UpdatePasswordForm } from "./models";
 import useAuthUser from "@/common/hooks/useAuthUser";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-import { validateRule } from "./UserAdd";
+import { validateRule } from "./UserAddEditForm";
 import { useTranslation } from "react-i18next";
 
 export default function UserResetPassword() {

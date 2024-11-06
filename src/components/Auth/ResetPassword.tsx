@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "@/common/constants";
 import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { validateRule } from "../Users/UserAdd";
+import { validateRule } from "../Users/UserAddEditForm";
 import { validatePassword } from "@/common/validation";
 import routes from "../../Redux/api";
 

@@ -27,7 +27,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
-import { validateRule } from "./UserAdd";
+import { validateRule } from "./UserAddEditForm";
 import { useTranslation } from "react-i18next";
 import AvatarEditable from "@/components/Common/AvatarEditable";
 import Page from "@/components/Common/components/Page";

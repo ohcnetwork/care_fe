@@ -9,7 +9,7 @@ import ButtonV2, {
 import OtpFormField from "../../Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "../../Form/FormFields/PhoneNumberFormField";
 import { AbhaNumberModel } from "../types/abha";
-import { validateRule } from "../../Users/UserAdd";
+import { validateRule } from "../../Users/UserAddEditForm";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import * as Notify from "../../../Utils/Notifications";
