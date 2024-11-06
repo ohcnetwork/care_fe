@@ -15,7 +15,7 @@ import CommentSection from "./CommentsSection";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "@/components/Common/components/Page";
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import {
   formatDateTime,
@@ -318,7 +318,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {data.is_kasp && (
                   <img alt="logo" src={careConfig.headerLogo?.dark} />
                 )}
-                <QRCode
+                <QRCodeSVG
                   value={`${window.location.origin}/shifting/${data.id}`}
                   size={120}
                 />
