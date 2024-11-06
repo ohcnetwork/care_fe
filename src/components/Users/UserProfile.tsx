@@ -1,10 +1,40 @@
-import { useState, useReducer, FormEvent } from "react";
+import careConfig from "@careConfig";
+import { FormEvent, useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import AvatarEditModal from "@/components/Common/AvatarEditModal";
+import AvatarEditable from "@/components/Common/AvatarEditable";
+import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
+import LanguageSelector from "@/components/Common/LanguageSelector";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
+import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import { validateRule } from "@/components/Users/UserAdd";
+import {
+  GenderType,
+  SkillModel,
+  UpdatePasswordForm,
+} from "@/components/Users/models";
+
+import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+
 import { GENDER_TYPES, LocalStorageKeys } from "@/common/constants";
 import { validateEmailAddress } from "@/common/validation";
-import * as Notification from "../../Utils/Notifications";
-import LanguageSelector from "@/components/Common/LanguageSelector";
-import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
+
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import uploadFile from "@/Utils/request/uploadFile";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   dateQueryString,
@@ -14,27 +44,6 @@ import {
   parsePhoneNumber,
   sleep,
 } from "@/Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { GenderType, SkillModel, UpdatePasswordForm } from "./models";
-import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
-import dayjs from "../../Utils/dayjs";
-import useAuthUser, { useAuthContext } from "@/common/hooks/useAuthUser";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { validateRule } from "./UserAdd";
-import { useTranslation } from "react-i18next";
-import AvatarEditable from "@/components/Common/AvatarEditable";
-import Page from "@/components/Common/components/Page";
-import Loading from "@/components/Common/Loading";
-import AvatarEditModal from "@/components/Common/AvatarEditModal";
-import uploadFile from "@/Utils/request/uploadFile";
-import careConfig from "@careConfig";
 
 type EditForm = {
   firstName: string;

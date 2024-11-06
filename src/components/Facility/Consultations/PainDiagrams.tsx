@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { formatDateTime } from "../../../Utils/utils";
-import PainChart from "../../LogUpdate/components/PainChart";
 import { useTranslation } from "react-i18next";
+
+import PainChart from "@/components/LogUpdate/components/PainChart";
+
+import { formatDateTime } from "@/Utils/utils";
 
 export const PainDiagrams = (props: any) => {
   const { dailyRound } = props;

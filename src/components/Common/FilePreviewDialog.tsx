@@ -1,11 +1,13 @@
-import CircularProgress from "./components/CircularProgress";
-import { useTranslation } from "react-i18next";
-import { StateInterface } from "../Files/FileUpload";
 import { Dispatch, ReactNode, SetStateAction, useState } from "react";
-import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import ButtonV2, { Cancel } from "./components/ButtonV2";
-import DialogModal from "./Dialog";
-import PDFViewer from "./PDFViewer";
+import { useTranslation } from "react-i18next";
+
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Cancel } from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import DialogModal from "@/components/Common/Dialog";
+import PDFViewer from "@/components/Common/PDFViewer";
+import { StateInterface } from "@/components/Files/FileUpload";
 
 export const zoom_values = [
   "scale-25",

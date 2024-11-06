@@ -1,10 +1,13 @@
 /* eslint-disable i18next/no-literal-string */
-import React, { useState } from "react";
-import CareIcon, { IconName } from "./CareIcon";
-import iconPaths from "./UniconPaths.json";
 import { t } from "i18next";
+import React, { useState } from "react";
+
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import iconPaths from "@/CAREUI/icons/UniconPaths.json";
+
 import PageTitle from "@/components/Common/PageTitle";
-import { useToast } from "@/hooks/use-toast";
+
+import { useToast } from "@/hooks/useToast";
 
 const IconIndex: React.FC = () => {
   const { toast } = useToast();

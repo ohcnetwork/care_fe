@@ -1,7 +1,13 @@
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
 import {
   ConsentRequestModel,
   CreateConsentTBody,
 } from "@/components/ABDM/types/consent";
+import {
+  IHealthFacility,
+  IcreateHealthFacilityTBody,
+  IpartialUpdateHealthFacilityTBody,
+} from "@/components/ABDM/types/health-facility";
 import { HealthInformationModel } from "@/components/ABDM/types/health-information";
 import {
   AssetBedBody,
@@ -14,6 +20,22 @@ import {
   AvailabilityRecord,
   PatientAssetBed,
 } from "@/components/Assets/AssetTypes";
+import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
+import {
+  IDeleteBedCapacity,
+  ILocalBodies,
+  ILocalBodyByDistrict,
+} from "@/components/ExternalResult/models";
+import {
+  EventGeneric,
+  type Type,
+} from "@/components/Facility/ConsultationDetails/Events/types";
+import {
+  InvestigationGroup,
+  InvestigationType,
+} from "@/components/Facility/Investigations";
+import { Investigation } from "@/components/Facility/Investigations/Reports/types";
+import { InvestigationSessionType } from "@/components/Facility/Investigations/investigationsTab";
 import {
   BedModel,
   CapacityModal,
@@ -48,39 +70,29 @@ import {
   WardModel,
 } from "@/components/Facility/models";
 import {
+  DupPatientModel,
+  PatientConsentModel,
+  PatientTransferRequest,
+} from "@/components/Facility/models";
+import { InsurerOptionModel } from "@/components/HCX/InsurerAutocomplete";
+import { HCXPolicyModel } from "@/components/HCX/models";
+import { MedibaseMedicine, Prescription } from "@/components/Medicine/models";
+import {
+  NotificationData,
+  PNconfigData,
+} from "@/components/Notifications/models";
+import {
   DailyRoundsModel,
   PatientModel,
   SampleReportModel,
   SampleTestModel,
 } from "@/components/Patient/models";
 import {
-  IDeleteBedCapacity,
-  ILocalBodies,
-  ILocalBodyByDistrict,
-} from "@/components/ExternalResult/models";
-import {
-  InvestigationGroup,
-  InvestigationType,
-} from "@/components/Facility/Investigations";
-import {
-  DupPatientModel,
-  PatientConsentModel,
-  PatientTransferRequest,
-} from "@/components/Facility/models";
-import { MedibaseMedicine, Prescription } from "@/components/Medicine/models";
-import {
-  NotificationData,
-  PNconfigData,
-} from "@/components/Notifications/models";
-import { HCXPolicyModel } from "@/components/HCX/models";
-import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
-import { Investigation } from "@/components/Facility/Investigations/Reports/types";
-import { PaginatedResponse } from "../Utils/request/types";
-import {
   CreateFileRequest,
   CreateFileResponse,
   FileUploadModel,
 } from "@/components/Patient/models";
+import { ScribeModel } from "@/components/Scribe/Scribe";
 import {
   SkillModel,
   SkillObjectModel,
@@ -88,19 +100,8 @@ import {
   UserAssignedModel,
   UserModel,
 } from "@/components/Users/models";
-import {
-  EventGeneric,
-  type Type,
-} from "@/components/Facility/ConsultationDetails/Events/types";
-import { InvestigationSessionType } from "@/components/Facility/Investigations/investigationsTab";
-import { AbhaNumberModel } from "@/components/ABDM/types/abha";
-import { ScribeModel } from "@/components/Scribe/Scribe";
-import {
-  IcreateHealthFacilityTBody,
-  IHealthFacility,
-  IpartialUpdateHealthFacilityTBody,
-} from "@/components/ABDM/types/health-facility";
-import { InsurerOptionModel } from "@/components/HCX/InsurerAutocomplete";
+
+import { PaginatedResponse } from "@/Utils/request/types";
 
 /**
  * A fake function that returns an empty object casted to type T

@@ -1,7 +1,6 @@
-import { ConsultationTabProps } from "./index";
-import { ABGPlots } from "../Consultations/ABGPlots";
-
 import PageTitle from "@/components/Common/PageTitle";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import { ABGPlots } from "@/components/Facility/Consultations/ABGPlots";
 
 export const ConsultationABGTab = (props: ConsultationTabProps) => {
   return (

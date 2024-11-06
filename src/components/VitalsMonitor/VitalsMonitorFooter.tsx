@@ -1,4 +1,4 @@
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetData } from "@/components/Assets/AssetTypes";
 import AssetInfoPopover from "@/components/Common/AssetInfoPopover";
 
 interface IVitalsMonitorFooterProps {

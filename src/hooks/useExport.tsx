@@ -1,5 +1,6 @@
-import dayjs from "../../Utils/dayjs";
 import { useState } from "react";
+
+import dayjs from "@/Utils/dayjs";
 
 export default function useExport() {
   const [isExporting, setIsExporting] = useState(false);

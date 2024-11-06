@@ -1,19 +1,20 @@
+import { ConsultationDetails } from "@/components/Facility/ConsultationDetails";
+import ConsultationDoctorNotes from "@/components/Facility/ConsultationDoctorNotes";
 import { ConsultationForm } from "@/components/Facility/ConsultationForm";
 import Investigation from "@/components/Facility/Investigations";
+import InvestigationPrintPreview from "@/components/Facility/Investigations/InvestigationsPrintPreview";
 import ShowInvestigation from "@/components/Facility/Investigations/ShowInvestigation";
+import TreatmentSummary from "@/components/Facility/TreatmentSummary";
+import CriticalCareEditor from "@/components/LogUpdate/CriticalCareEditor";
+import CriticalCarePreview from "@/components/LogUpdate/CriticalCarePreview";
 import ManagePrescriptions from "@/components/Medicine/ManagePrescriptions";
+import PrescriptionsPrintPreview from "@/components/Medicine/PrintPreview";
 import { DailyRoundListDetails } from "@/components/Patient/DailyRoundListDetails";
 import { DailyRounds } from "@/components/Patient/DailyRounds";
-import { ConsultationDetails } from "@/components/Facility/ConsultationDetails";
-import TreatmentSummary from "@/components/Facility/TreatmentSummary";
-import ConsultationDoctorNotes from "@/components/Facility/ConsultationDoctorNotes";
-import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
-import CriticalCareEditor from "@/components/LogUpdate/CriticalCareEditor";
-import PrescriptionsPrintPreview from "@/components/Medicine/PrintPreview";
-import CriticalCarePreview from "@/components/LogUpdate/CriticalCarePreview";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
-import InvestigationPrintPreview from "@/components/Facility/Investigations/InvestigationsPrintPreview";
-import { AppRoutes } from "../AppRouter";
+import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
+
+import { AppRoutes } from "@/Routers/AppRouter";
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/consultation": ({
