@@ -40,7 +40,10 @@ export const LinePlot = (props: any) => {
     verticalMarkerData = null,
   } = props;
   let { xData, yData } = props;
-  const yDatacount = yData.filter((item: any) => !!item).length;
+  const yDatacount = yData.filter(
+    (item: number | null): item is number =>
+      item !== null && !Number.isNaN(item),
+  ).length;
   if (yDatacount === 0) {
     yData = [];
     xData = [];

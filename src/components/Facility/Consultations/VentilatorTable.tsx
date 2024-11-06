@@ -24,6 +24,22 @@ export default function VentilatorTable(props: VentilatorTableProps) {
     start_date: string;
     end_date: string;
   }) => {
+    const getModeText = () => {
+      const {
+        ventilator_interface,
+        ventilator_mode,
+        ventilator_oxygen_modality,
+      } = dailyRound;
+      switch (ventilator_interface) {
+        case "INVASIVE":
+        case "NON_INVASIVE":
+          return t(`VENTILATOR_MODE__${ventilator_mode}`);
+        case "OXYGEN_SUPPORT":
+          return t(`OXYGEN_MODALITY__${ventilator_oxygen_modality}`);
+        default:
+          return null;
+      }
+    };
     return (
       <tr className="text-center text-sm">
         <td className="max-w-52 px-2 py-2">{start_date}</td>
@@ -31,14 +47,7 @@ export default function VentilatorTable(props: VentilatorTableProps) {
         <td className="max-w-52 px-2 py-2">
           {t(`RESPIRATORY_SUPPORT__${dailyRound?.ventilator_interface}`)}
         </td>
-        <td className="max-w-52 px-2 py-2">
-          {dailyRound?.ventilator_interface == "INVASIVE" ||
-          dailyRound?.ventilator_interface == "NON_INVASIVE"
-            ? t(`VENTILATOR_MODE__${dailyRound?.ventilator_mode}`)
-            : dailyRound?.ventilator_interface == "OXYGEN_SUPPORT"
-              ? t(`OXYGEN_MODALITY__${dailyRound?.ventilator_oxygen_modality}`)
-              : null}
-        </td>
+        <td className="max-w-52 px-2 py-2">{getModeText()}</td>
       </tr>
     );
   };
@@ -61,7 +70,6 @@ export default function VentilatorTable(props: VentilatorTableProps) {
       const currentRound = dailyRoundsList[index];
       const currentInterfaceOrModality = getModeOrModality(currentRound);
       if (!currentInterfaceOrModality) continue;
-      let end_date = "";
       while (index < dailyRoundsList.length - 1) {
         const nextRound = dailyRoundsList[index + 1];
         const nextInterfaceOrModality = getModeOrModality(nextRound);
@@ -75,13 +83,14 @@ export default function VentilatorTable(props: VentilatorTableProps) {
           break;
         }
       }
-      if (index + 1 < dailyRoundsList.length) {
-        end_date = dailyRoundsList[index + 1].taken_at ?? end_date;
-      }
-      end_date = end_date !== "" ? formatDateTime(end_date) : "";
+      const end_date =
+        index + 1 < dailyRoundsList.length
+          ? formatDateTime(dailyRoundsList[index + 1].taken_at)
+          : "";
       const start_date = formatDateTime(currentRound.taken_at);
       rows.push(
         <VentilatorTableRow
+          key={`${currentRound.id}`}
           dailyRound={currentRound}
           start_date={start_date}
           end_date={end_date}

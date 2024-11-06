@@ -40,37 +40,32 @@ export const VentilatorPlot = ({
   }, [dailyRoundsList]);
 
   const getGraphData = (dailyRoundsData?: DailyRoundsModel[]) => {
-    let graphData = {};
+    const graphData = {};
     const graphDataCount = dailyRoundsData?.length ?? 0;
     if (dailyRoundsData) {
-      graphData = dailyRoundsData.reduce(
-        (acc, currentRound: DailyRoundsModel) => ({
-          ...acc,
-          //@ts-expect-error taken_at should always be available
-          [currentRound.taken_at]: {
-            bilateral_air_entry: currentRound.bilateral_air_entry,
-            etco2: currentRound.etco2,
-            id: currentRound.id,
-            ventilator_fio2: currentRound.ventilator_fio2,
-            ventilator_mean_airway_pressure:
-              currentRound.ventilator_mean_airway_pressure,
-            ventilator_oxygen_modality_flow_rate:
-              currentRound.ventilator_oxygen_modality_flow_rate,
-            ventilator_oxygen_modality_oxygen_rate:
-              currentRound.ventilator_oxygen_modality_oxygen_rate,
-            ventilator_peep: currentRound.ventilator_peep
-              ? Number(currentRound.ventilator_peep)
-              : null,
-            ventilator_pip: currentRound.ventilator_pip,
-            ventilator_pressure_support:
-              currentRound.ventilator_pressure_support,
-            ventilator_resp_rate: currentRound.ventilator_resp_rate,
-            ventilator_spo2: currentRound.ventilator_spo2,
-            ventilator_tidal_volume: currentRound.ventilator_tidal_volume,
-          },
-        }),
-        {},
-      );
+      dailyRoundsData.forEach((currentRound: DailyRoundsModel) => {
+        // @ts-expect-error taken_at should always be available
+        graphData[currentRound.taken_at] = {
+          bilateral_air_entry: currentRound.bilateral_air_entry,
+          etco2: currentRound.etco2,
+          id: currentRound.id,
+          ventilator_fio2: currentRound.ventilator_fio2,
+          ventilator_mean_airway_pressure:
+            currentRound.ventilator_mean_airway_pressure,
+          ventilator_oxygen_modality_flow_rate:
+            currentRound.ventilator_oxygen_modality_flow_rate,
+          ventilator_oxygen_modality_oxygen_rate:
+            currentRound.ventilator_oxygen_modality_oxygen_rate,
+          ventilator_peep: currentRound.ventilator_peep
+            ? Number(currentRound.ventilator_peep)
+            : null,
+          ventilator_pip: currentRound.ventilator_pip,
+          ventilator_pressure_support: currentRound.ventilator_pressure_support,
+          ventilator_resp_rate: currentRound.ventilator_resp_rate,
+          ventilator_spo2: currentRound.ventilator_spo2,
+          ventilator_tidal_volume: currentRound.ventilator_tidal_volume,
+        };
+      });
     }
     return { graphData, graphDataCount };
   };
@@ -170,24 +165,26 @@ export const VentilatorPlot = ({
   const getMarkLineData = (name: string) => {
     const markLineData = [];
     if (!dailyRoundsList) return [];
-    for (let index = 0; index < dailyRoundsList.length; index++) {
+    let index = 0;
+    while (index < dailyRoundsList.length) {
       const currentRound = dailyRoundsList[index];
       const { condition, legend } = getConditionAndLegend(name, currentRound);
       const currentInterfaceOrModality = getModeOrModality(currentRound);
       if (condition) {
         const startIndex = dates.findIndex(
-          (element) => element == formatDateTime(currentRound.taken_at),
+          (element) => element === formatDateTime(currentRound.taken_at),
         );
-        if (startIndex != -1) {
-          while (index < dailyRoundsList.length - 1) {
-            const nextRound = dailyRoundsList[index + 1];
+        if (startIndex !== -1) {
+          let nextIndex = index + 1;
+          while (nextIndex < dailyRoundsList.length) {
+            const nextRound = dailyRoundsList[nextIndex];
             const nextInterfaceOrModality = getModeOrModality(nextRound);
             if (
-              currentRound.ventilator_interface ==
+              currentRound.ventilator_interface ===
                 nextRound.ventilator_interface &&
-              currentInterfaceOrModality == nextInterfaceOrModality
+              currentInterfaceOrModality === nextInterfaceOrModality
             ) {
-              index += 1;
+              nextIndex += 1;
             } else {
               break;
             }
@@ -206,7 +203,12 @@ export const VentilatorPlot = ({
               textBorderWidth: 2,
             },
           });
+          index = nextIndex;
+        } else {
+          index += 1;
         }
+      } else {
+        index += 1;
       }
     }
     return markLineData;
