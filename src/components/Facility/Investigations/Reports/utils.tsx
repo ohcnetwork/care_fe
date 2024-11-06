@@ -1,5 +1,5 @@
-import { findIndex, memoize } from "lodash-es";
 import * as _ from "lodash-es";
+import { findIndex, memoize } from "lodash-es";
 
 import { InvestigationResponse } from "@/components/Facility/Investigations/Reports/types";
 
