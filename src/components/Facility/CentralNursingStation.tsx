@@ -41,13 +41,12 @@ interface Props {
 
 export default function CentralNursingStation({ facilityId }: Props) {
   const breakpointValues = {
-    default: 6, // Default value if no breakpoints match
-    fourK: 9, // Value for screens wider than 2080px defined in useBrekpoint hook
+    default: 6,
+    fourK: 9,
   };
   const PER_PAGE_LIMIT = useBreakpoints(breakpointValues);
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
-
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
