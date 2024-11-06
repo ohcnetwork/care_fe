@@ -1,13 +1,16 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import {
   ActiveConditionVerificationStatuses,
   ConditionVerificationStatus,
   ConsultationDiagnosis,
-} from "./types";
-import { useTranslation } from "react-i18next";
-import { classNames, compareBy } from "../../Utils/utils";
-import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
+} from "@/components/Diagnosis/types";
+
+import { classNames, compareBy } from "@/Utils/utils";
 
 interface Props {
   diagnoses: ConsultationDiagnosis[];

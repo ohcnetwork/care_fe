@@ -1,21 +1,26 @@
 import { navigate } from "raviger";
-import ListFilter from "./ResourceFilter";
-import { formatFilter } from "./ResourceCommons";
-import BadgesList from "./ResourceBadges";
-import useFilters from "@/common/hooks/useFilters";
-import { ExportButton } from "@/components/Common/Export";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import Page from "@/components/Common/components/Page";
-import SearchInput from "../Form/SearchInput";
-import request from "../../Utils/request/request";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { ExportButton } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
-import { ResourceModel } from "../Facility/models";
-import ResourceBlock from "./ResourceBlock";
+import Page from "@/components/Common/Page";
+import { ResourceModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+import BadgesList from "@/components/Resource/ResourceBadges";
+import ResourceBlock from "@/components/Resource/ResourceBlock";
+import { formatFilter } from "@/components/Resource/ResourceCommons";
+import ListFilter from "@/components/Resource/ResourceFilter";
+
+import useFilters from "@/hooks/useFilters";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 export default function ListView() {
   const {
     qParams,

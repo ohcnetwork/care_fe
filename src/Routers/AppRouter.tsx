@@ -1,30 +1,34 @@
+import careConfig from "@careConfig";
+import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { useEffect, useState } from "react";
+
+import IconIndex from "@/CAREUI/icons/Index";
+
+import ABDMFacilityRecords from "@/components/ABDM/ABDMFacilityRecords";
+import HealthInformation from "@/components/ABDM/HealthInformation";
 import {
   DesktopSidebar,
   MobileSidebar,
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
 } from "@/components/Common/Sidebar/Sidebar";
-import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
-import { useEffect, useState } from "react";
-
-import ABDMFacilityRecords from "@/components/ABDM/ABDMFacilityRecords";
-import AssetRoutes from "./routes/AssetRoutes";
-import { BLACKLISTED_PATHS } from "@/common/constants";
-import ConsultationRoutes from "./routes/ConsultationRoutes";
 import Error404 from "@/components/ErrorPages/404";
-import FacilityRoutes from "./routes/FacilityRoutes";
-import HealthInformation from "@/components/ABDM/HealthInformation";
-import IconIndex from "../CAREUI/icons/Index";
-import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
-import PatientRoutes from "./routes/PatientRoutes";
-import ResourceRoutes from "./routes/ResourceRoutes";
-import SampleRoutes from "./routes/SampleRoutes";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
-import ShiftingRoutes from "./routes/ShiftingRoutes";
+import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
 import ShowPushNotification from "@/components/Notifications/ShowPushNotification";
-import UserRoutes from "./routes/UserRoutes";
-import careConfig from "@careConfig";
-import { usePluginRoutes } from "@/common/hooks/useCareApps";
+
+import { usePluginRoutes } from "@/hooks/useCareApps";
+
+import { BLACKLISTED_PATHS } from "@/common/constants";
+
+import AssetRoutes from "@/Routers/routes/AssetRoutes";
+import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
+import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
+import PatientRoutes from "@/Routers/routes/PatientRoutes";
+import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
+import SampleRoutes from "@/Routers/routes/SampleRoutes";
+import ShiftingRoutes from "@/Routers/routes/ShiftingRoutes";
+import UserRoutes from "@/Routers/routes/UserRoutes";
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`

@@ -1,17 +1,21 @@
-import { useReducer, useState, useEffect } from "react";
-import Card from "../../CAREUI/display/Card";
-import * as Notification from "../../Utils/Notifications";
-import Page from "@/components/Common/components/Page";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+import { useEffect, useReducer, useState } from "react";
 
+import Card from "@/CAREUI/display/Card";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 const initForm = {
   id: "",
   quantity: "",

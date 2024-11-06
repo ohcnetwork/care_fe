@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
-import { PrescriptionDropdown } from "./PrescriptionDropdown";
-import { PrescriptionMultiDropdown } from "./PrescriptionMultiselect";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
-import { humanizeStrings } from "../../../Utils/utils";
-import DateFormField from "../../Form/FormFields/DateFormField";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { PrescriptionDropdown } from "@/components/Common/prescription-builder/PrescriptionDropdown";
+import { PrescriptionMultiDropdown } from "@/components/Common/prescription-builder/PrescriptionMultiselect";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { humanizeStrings } from "@/Utils/utils";
 
 export type InvestigationType = {
   type?: string[];

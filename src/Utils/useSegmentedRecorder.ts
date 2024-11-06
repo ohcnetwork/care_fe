@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import * as Notify from "./Notifications";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import * as Notify from "@/Utils/Notifications";
 
 const useSegmentedRecording = () => {
   const [isRecording, setIsRecording] = useState(false);

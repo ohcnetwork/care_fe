@@ -1,18 +1,25 @@
 import { useCallback, useState } from "react";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
-import { SkillModel, SkillObjectModel } from "./models";
-import { SkillSelect } from "@/components/Common/SkillSelect";
-import UnlinkSkillDialog from "./UnlinkSkillDialog";
-import * as Notification from "../../Utils/Notifications";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import AuthorizeFor from "../../Utils/AuthorizeFor";
-import { useIsAuthorized } from "@/common/hooks/useIsAuthorized";
-import { AddSkillsPlaceholder, SkillsArray } from "./SkillsSlideOverComponents";
 import { useTranslation } from "react-i18next";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import useQuery from "../../Utils/request/useQuery";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
+
+import SlideOverCustom from "@/CAREUI/interactive/SlideOver";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import { SkillSelect } from "@/components/Common/SkillSelect";
+import {
+  AddSkillsPlaceholder,
+  SkillsArray,
+} from "@/components/Users/SkillsSlideOverComponents";
+import UnlinkSkillDialog from "@/components/Users/UnlinkSkillDialog";
+import { SkillModel, SkillObjectModel } from "@/components/Users/models";
+
+import { useIsAuthorized } from "@/hooks/useIsAuthorized";
+
+import AuthorizeFor from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface IProps {
   username: string;

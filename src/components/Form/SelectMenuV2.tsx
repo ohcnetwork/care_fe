@@ -5,12 +5,14 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { ReactNode, useEffect, useRef } from "react";
-import { classNames } from "../../Utils/utils";
-import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { dropdownOptionClassNames } from "@/components/Form/MultiSelectMenuV2";
+
 import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
+import { classNames } from "@/Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 

@@ -1,18 +1,20 @@
 import { navigate, useQueryParams } from "raviger";
 import { useEffect, useReducer, useState } from "react";
-import * as Notification from "../../../Utils/Notifications";
-import { TestTable } from "./Table";
-
 import { useTranslation } from "react-i18next";
-import Card from "../../../CAREUI/display/Card";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import useQuery from "../../../Utils/request/useQuery";
-import { Submit } from "@/components/Common/components/ButtonV2";
-import Page from "@/components/Common/components/Page";
-import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
 
+import Card from "@/CAREUI/display/Card";
+
+import { Submit } from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { TestTable } from "@/components/Facility/Investigations/Table";
+import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 const initialState = {
   form: {},
 };

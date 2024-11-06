@@ -1,4 +1,14 @@
 import { useTranslation } from "react-i18next";
+
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import PupilSizeSelect from "@/components/LogUpdate/components/PupilSizeSelect";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
+
 import {
   CONSCIOUSNESS_LEVEL,
   EYE_OPEN_SCALE,
@@ -7,11 +17,6 @@ import {
   PUPIL_REACTION_OPTIONS,
   VERBAL_RESPONSE_SCALE,
 } from "@/common/constants";
-import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
-import RadioFormField from "../../Form/FormFields/RadioFormField";
-import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import PupilSizeSelect from "../components/PupilSizeSelect";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();

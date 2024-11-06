@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
 import { Link } from "raviger";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useTimer } from "../../Utils/useTimer";
-import useVoiceRecorder from "../../Utils/useVoiceRecorder";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import * as Notify from "../../Utils/Notifications";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { useTimer } from "@/hooks/useTimer";
+
+import * as Notify from "@/Utils/Notifications";
+
+import useVoiceRecorder from "../../Utils/useVoiceRecorder";
 
 export interface AudioCaptureDialogProps {
   show: boolean;

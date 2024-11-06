@@ -1,5 +1,6 @@
-import { DailyRoundsModel } from "../../Patient/models";
-import { formatDateTime, humanizeStrings } from "../../../Utils/utils";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import { formatDateTime, humanizeStrings } from "@/Utils/utils";
 
 const getRespScore = (value?: number) => {
   if (typeof value !== "number") return;

@@ -1,16 +1,20 @@
-import { DailyRoundsModel } from "../../Patient/models";
-import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAssistantLogUpdateCard";
-import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
 import { useTranslation } from "react-i18next";
-import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
-import routes from "../../../Redux/api";
-import PaginatedList from "../../../CAREUI/misc/PaginatedList";
-import { ConsultationModel } from "../models";
-import { useSlugs } from "@/common/hooks/useSlug";
 
-import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
-import { QueryParams } from "../../../Utils/request/types";
+import Timeline, { TimelineNode } from "@/CAREUI/display/Timeline";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import DefaultLogUpdateCard from "@/components/Facility/Consultations/DailyRounds/DefaultLogUpdateCard";
+import LoadingLogUpdateCard from "@/components/Facility/Consultations/DailyRounds/LoadingCard";
+import VirtualNursingAssistantLogUpdateCard from "@/components/Facility/Consultations/DailyRounds/VirtualNursingAssistantLogUpdateCard";
+import { ConsultationModel } from "@/components/Facility/models";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import { useSlugs } from "@/hooks/useSlug";
+
 import { UserRole } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import { QueryParams } from "@/Utils/request/types";
 
 interface Props {
   consultation: ConsultationModel;
