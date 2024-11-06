@@ -382,6 +382,7 @@ const InvestigationReports = ({ id }: any) => {
                   <ButtonV2
                     onClick={() => handleSessionPage("PREV")}
                     disabled={nextSessionDisabled}
+                    className="ml-3"
                   >
                     {isLoading.tableData ? "Loading..." : t("prev_sessions")}
                   </ButtonV2>

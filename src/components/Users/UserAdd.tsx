@@ -150,16 +150,25 @@ const getDate = (value: any) =>
 export const validateRule = (
   condition: boolean,
   content: JSX.Element | string,
+  isInitialState: boolean,
 ) => {
   return (
     <div>
-      {condition ? (
+      {isInitialState ? (
+        <CareIcon icon="l-circle" className="text-xl text-gray-500" />
+      ) : condition ? (
         <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
       ) : (
         <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
       )}{" "}
       <span
-        className={classNames(condition ? "text-primary-500" : "text-red-500")}
+        className={classNames(
+          isInitialState
+            ? "text-black"
+            : condition
+              ? "text-primary-500"
+              : "text-red-500",
+        )}
       >
         {content}
       </span>
@@ -791,24 +800,28 @@ export const UserAdd = (props: UserProps) => {
                     {validateRule(
                       usernameInput.length >= 4 && usernameInput.length <= 16,
                       "Username should be 4-16 characters long",
+                      !state.form.username,
                     )}
                   </div>
                   <div>
                     {validateRule(
                       /^[a-z0-9._-]*$/.test(usernameInput),
                       "Username can only contain lowercase letters, numbers, and . _ -",
+                      !state.form.username,
                     )}
                   </div>
                   <div>
                     {validateRule(
                       /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
                       "Username must start and end with a letter or number",
+                      !state.form.username,
                     )}
                   </div>
                   <div>
                     {validateRule(
                       !/(?:[._-]{2,})/.test(usernameInput),
                       "Username can't contain consecutive special characters . _ -",
+                      !state.form.username,
                     )}
                   </div>
                 </div>
@@ -840,18 +853,22 @@ export const UserAdd = (props: UserProps) => {
                   {validateRule(
                     state.form.password?.length >= 8,
                     "Password should be atleast 8 characters long",
+                    !state.form.password,
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toUpperCase(),
                     "Password should contain at least 1 lowercase letter",
+                    !state.form.password,
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toLowerCase(),
                     "Password should contain at least 1 uppercase letter",
+                    !state.form.password,
                   )}
                   {validateRule(
                     /\d/.test(state.form.password),
                     "Password should contain at least 1 number",
+                    !state.form.password,
                   )}
                 </div>
               )}
@@ -872,6 +889,7 @@ export const UserAdd = (props: UserProps) => {
                 validateRule(
                   state.form.c_password === state.form.password,
                   "Confirm password should match the entered password",
+                  !state.form.password,
                 )}
             </div>
             <TextFormField

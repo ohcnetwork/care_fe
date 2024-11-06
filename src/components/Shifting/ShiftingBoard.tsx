@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -9,11 +9,12 @@ import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { ExportButton } from "@/components/Common/Export";
+import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import Tabs from "@/components/Common/Tabs";
 import { ShiftingModel } from "@/components/Facility/models";
 import SearchInput from "@/components/Form/SearchInput";
-import KanbanBoard from "@/components/Kanban/Board";
+import type { KanbanBoardType } from "@/components/Kanban/Board";
 import BadgesList from "@/components/Shifting/ShiftingBadges";
 import ShiftingBlock from "@/components/Shifting/ShiftingBlock";
 import { formatFilter } from "@/components/Shifting/ShiftingCommons";
@@ -28,6 +29,10 @@ import {
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+
+const KanbanBoard = lazy(
+  () => import("@/components/Kanban/Board"),
+) as KanbanBoardType;
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
@@ -127,47 +132,55 @@ export default function BoardView() {
           </div>
         </div>
       </div>
-      <KanbanBoard<ShiftingModel>
-        title={<BadgesList {...{ qParams, FilterBadges }} />}
-        sections={boardFilter.map((board) => ({
-          id: board.text,
-          title: (
-            <h3 className="flex h-8 items-center text-xs">
-              {board.label || board.text}{" "}
-              <ExportButton
-                action={async () => {
-                  const { data } = await request(routes.downloadShiftRequests, {
-                    query: {
-                      ...formatFilter({ ...qParams, status: board.text }),
-                      csv: true,
-                    },
-                  });
-                  return data ?? null;
-                }}
-                filenamePrefix={`shift_requests_${board.label || board.text}`}
-              />
-            </h3>
-          ),
-          fetchOptions: (id) => ({
-            route: routes.listShiftRequests,
-            options: {
-              query: formatFilter({
-                ...qParams,
-                status: id,
-              }),
-            },
-          }),
-        }))}
-        onDragEnd={(result) => {
-          if (result.source.droppableId !== result.destination?.droppableId)
-            navigate(
-              `/shifting/${result.draggableId}/update?status=${result.destination?.droppableId}`,
-            );
-        }}
-        itemRender={(shift) => (
-          <ShiftingBlock onTransfer={() => setModalFor(shift)} shift={shift} />
-        )}
-      />
+      <Suspense fallback={<Loading />}>
+        <KanbanBoard<ShiftingModel>
+          title={<BadgesList {...{ qParams, FilterBadges }} />}
+          sections={boardFilter.map((board) => ({
+            id: board.text,
+            title: (
+              <h3 className="flex h-8 items-center text-xs">
+                {board.label || board.text}{" "}
+                <ExportButton
+                  action={async () => {
+                    const { data } = await request(
+                      routes.downloadShiftRequests,
+                      {
+                        query: {
+                          ...formatFilter({ ...qParams, status: board.text }),
+                          csv: true,
+                        },
+                      },
+                    );
+                    return data ?? null;
+                  }}
+                  filenamePrefix={`shift_requests_${board.label || board.text}`}
+                />
+              </h3>
+            ),
+            fetchOptions: (id) => ({
+              route: routes.listShiftRequests,
+              options: {
+                query: formatFilter({
+                  ...qParams,
+                  status: id,
+                }),
+              },
+            }),
+          }))}
+          onDragEnd={(result) => {
+            if (result.source.droppableId !== result.destination?.droppableId)
+              navigate(
+                `/shifting/${result.draggableId}/update?status=${result.destination?.droppableId}`,
+              );
+          }}
+          itemRender={(shift) => (
+            <ShiftingBlock
+              onTransfer={() => setModalFor(shift)}
+              shift={shift}
+            />
+          )}
+        />
+      </Suspense>
       <ConfirmDialog
         title={t("confirm_transfer_complete")}
         description={t("mark_this_transfer_as_complete_question")}

@@ -71,7 +71,7 @@ describe("Patient Creation with consultation", () => {
   const patientOccupation = "Student";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
