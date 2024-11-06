@@ -50,7 +50,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
-
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
