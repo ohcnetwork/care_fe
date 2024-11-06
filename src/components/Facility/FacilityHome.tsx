@@ -47,6 +47,7 @@ import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import careConfig from "@careConfig";
 import uploadFile from "@/Utils/request/uploadFile";
 import { sleep } from "@/Utils/utils";
+import { PatientRegisterAuth } from "../Patient/PatientRegister";
 
 type Props = {
   facilityId: string;
@@ -155,30 +156,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
     } else {
       onError();
     }
-  };
-
-  const isAuthorizedToRegisterPatientsterAuth = () => {
-    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-    if (
-      !showAllFacilityUsers.includes(authUser.user_type) &&
-      authUser.home_facility_object?.id === facilityId
-    ) {
-      return true;
-    }
-    if (
-      authUser.user_type === "DistrictAdmin" &&
-      authUser.district === facilityData?.district
-    ) {
-      return true;
-    }
-    if (
-      authUser.user_type === "StateAdmin" &&
-      authUser.state === facilityData?.state
-    ) {
-      return true;
-    }
-
-    return false;
   };
 
   if (isLoading) {
@@ -485,7 +462,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-              {isAuthorizedToRegisterPatientsterAuth() && (
+              {PatientRegisterAuth(authUser, facilityData, facilityId) && (
                 <ButtonV2
                   variant="primary"
                   ghost

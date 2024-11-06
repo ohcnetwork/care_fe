@@ -10,7 +10,12 @@ import {
   SOCIOECONOMIC_STATUS_CHOICES,
   VACCINES,
 } from "@/common/constants";
-import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
+import {
+  DistrictModel,
+  DupPatientModel,
+  FacilityModel,
+  WardModel,
+} from "../Facility/models";
 import {
   FieldError,
   PhoneNumberValidator,
@@ -78,6 +83,7 @@ import useAuthUser from "@/common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
 import { validatePincode } from "@/common/validation";
+import { UserModel } from "../Users/models";
 
 type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
@@ -904,31 +910,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     return <Loading />;
   }
 
-  const PatientRegisterAuth = () => {
-    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-    if (
-      !showAllFacilityUsers.includes(authUser.user_type) &&
-      authUser.home_facility_object?.id === facilityId
-    ) {
-      return true;
-    }
-    if (
-      authUser.user_type === "DistrictAdmin" &&
-      authUser.district === facilityObject?.district
-    ) {
-      return true;
-    }
-    if (
-      authUser.user_type === "StateAdmin" &&
-      authUser.state === facilityObject?.state
-    ) {
-      return true;
-    }
-
-    return false;
-  };
-
-  if (!isLoading && facilityId && facilityObject && !PatientRegisterAuth()) {
+  if (
+    !isLoading &&
+    facilityId &&
+    facilityObject &&
+    !PatientRegisterAuth(authUser, facilityObject, facilityId)
+  ) {
     return <Error404 />;
   }
 
@@ -1874,3 +1861,31 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     </Form>
   );
 };
+
+export function PatientRegisterAuth(
+  authUser: UserModel,
+  facilityObject: FacilityModel | undefined,
+  facilityId: string,
+) {
+  const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+  if (
+    !showAllFacilityUsers.includes(authUser.user_type) &&
+    authUser.home_facility_object?.id === facilityId
+  ) {
+    return true;
+  }
+  if (
+    authUser.user_type === "DistrictAdmin" &&
+    authUser.district === facilityObject?.district
+  ) {
+    return true;
+  }
+  if (
+    authUser.user_type === "StateAdmin" &&
+    authUser.state === facilityObject?.state
+  ) {
+    return true;
+  }
+
+  return false;
+}
