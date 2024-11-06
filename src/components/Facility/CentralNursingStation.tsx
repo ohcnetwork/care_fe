@@ -4,6 +4,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -23,11 +24,10 @@ import { getVitalsMonitorSocketUrl } from "@/components/VitalsMonitor/utils";
 
 import useFilters from "@/hooks/useFilters";
 import useFullscreen from "@/hooks/useFullscreen";
+import useWindowDimensions from "@/hooks/useWindowDimensions";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
-
-const PER_PAGE_LIMIT = 6;
 
 const SORT_OPTIONS: SortOption[] = [
   { isAscending: true, value: "bed__name" },
@@ -43,9 +43,20 @@ interface Props {
 export default function CentralNursingStation({ facilityId }: Props) {
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
+  const [PER_PAGE_LIMIT, setPerPageLimit] = useState(6);
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
+  const getDimension = useWindowDimensions();
+
+  useEffect(() => {
+    if (getDimension.width > 2080) {
+      setPerPageLimit(9);
+    } else {
+      setPerPageLimit(6);
+    }
+  }, [getDimension]);
+
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
