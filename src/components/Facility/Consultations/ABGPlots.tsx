@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { LinePlot } from "./components/LinePlot";
+
 import Pagination from "@/components/Common/Pagination";
+import { LinePlot } from "@/components/Facility/Consultations/components/LinePlot";
+import { ABGPlotsFields } from "@/components/Facility/models";
+
 import { PAGINATION_LIMIT } from "@/common/constants";
-import { formatDateTime } from "../../../Utils/utils";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import { ABGPlotsFields } from "../models";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 export const ABGPlots = (props: any) => {
   const { consultationId } = props;

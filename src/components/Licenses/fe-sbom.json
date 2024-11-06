@@ -75921,19 +75921,14 @@
     },
     {
       "ref": "@googlemaps/react-wrapper@1.1.42",
-      "dependsOn": [
-        "@googlemaps/js-api-loader@1.16.8",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["@googlemaps/js-api-loader@1.16.8", "react@18.3.1"]
     },
     {
       "ref": "@googlemaps/js-api-loader@1.16.8"
     },
     {
       "ref": "react@18.3.1",
-      "dependsOn": [
-        "loose-envify@1.4.0"
-      ]
+      "dependsOn": ["loose-envify@1.4.0"]
     },
     {
       "ref": "@googlemaps/typescript-guards@2.0.3"
@@ -75969,27 +75964,18 @@
     },
     {
       "ref": "@floating-ui/dom@1.6.11",
-      "dependsOn": [
-        "@floating-ui/core@1.6.8",
-        "@floating-ui/utils@0.2.8"
-      ]
+      "dependsOn": ["@floating-ui/core@1.6.8", "@floating-ui/utils@0.2.8"]
     },
     {
       "ref": "@floating-ui/core@1.6.8",
-      "dependsOn": [
-        "@floating-ui/utils@0.2.8"
-      ]
+      "dependsOn": ["@floating-ui/utils@0.2.8"]
     },
     {
       "ref": "@floating-ui/utils@0.2.8"
     },
     {
       "ref": "react-dom@18.3.1",
-      "dependsOn": [
-        "loose-envify@1.4.0",
-        "react@18.3.1",
-        "scheduler@0.23.2"
-      ]
+      "dependsOn": ["loose-envify@1.4.0", "react@18.3.1", "scheduler@0.23.2"]
     },
     {
       "ref": "tabbable@6.2.0"
@@ -76028,29 +76014,19 @@
     },
     {
       "ref": "@react-aria/ssr@3.9.6",
-      "dependsOn": [
-        "@swc/helpers@0.5.13",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["@swc/helpers@0.5.13", "react@18.3.1"]
     },
     {
       "ref": "@react-stately/utils@3.10.4",
-      "dependsOn": [
-        "@swc/helpers@0.5.13",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["@swc/helpers@0.5.13", "react@18.3.1"]
     },
     {
       "ref": "@swc/helpers@0.5.13",
-      "dependsOn": [
-        "tslib@2.7.0"
-      ]
+      "dependsOn": ["tslib@2.7.0"]
     },
     {
       "ref": "@react-types/shared@3.25.0",
-      "dependsOn": [
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react@18.3.1"]
     },
     {
       "ref": "clsx@2.1.1"
@@ -76074,15 +76050,11 @@
     },
     {
       "ref": "@pnotify/mobile@5.2.0",
-      "dependsOn": [
-        "@pnotify/core@5.2.0"
-      ]
+      "dependsOn": ["@pnotify/core@5.2.0"]
     },
     {
       "ref": "@radix-ui/react-icons@1.3.0",
-      "dependsOn": [
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react@18.3.1"]
     },
     {
       "ref": "@radix-ui/react-slot@1.1.0",
@@ -76094,17 +76066,11 @@
     },
     {
       "ref": "@radix-ui/react-compose-refs@1.1.0",
-      "dependsOn": [
-        "@types/react@18.3.2",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["@types/react@18.3.2", "react@18.3.1"]
     },
     {
       "ref": "@types/react@18.3.2",
-      "dependsOn": [
-        "@types/prop-types@15.7.13",
-        "csstype@3.1.3"
-      ]
+      "dependsOn": ["@types/prop-types@15.7.13", "csstype@3.1.3"]
     },
     {
       "ref": "@radix-ui/react-toast@1.2.2",
@@ -76145,10 +76111,7 @@
     },
     {
       "ref": "@radix-ui/react-collection@1.1.0|@radix-ui/react-context@1.1.0",
-      "dependsOn": [
-        "@types/react@18.3.2",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["@types/react@18.3.2", "react@18.3.1"]
     },
     {
       "ref": "@radix-ui/react-primitive@2.0.0",
@@ -76162,16 +76125,11 @@
     },
     {
       "ref": "@types/react-dom@18.3.0",
-      "dependsOn": [
-        "@types/react@18.3.2"
-      ]
+      "dependsOn": ["@types/react@18.3.2"]
     },
     {
       "ref": "@radix-ui/react-context@1.1.1",
-      "dependsOn": [
-        "@types/react@18.3.2",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["@types/react@18.3.2", "react@18.3.1"]
     },
     {
       "ref": "@radix-ui/react-dismissable-layer@1.1.1",
@@ -76189,10 +76147,7 @@
     },
     {
       "ref": "@radix-ui/react-use-callback-ref@1.1.0",
-      "dependsOn": [
-        "@types/react@18.3.2",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["@types/react@18.3.2", "react@18.3.1"]
     },
     {
       "ref": "@radix-ui/react-use-escape-keydown@1.1.0",
@@ -76215,10 +76170,7 @@
     },
     {
       "ref": "@radix-ui/react-use-layout-effect@1.1.0",
-      "dependsOn": [
-        "@types/react@18.3.2",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["@types/react@18.3.2", "react@18.3.1"]
     },
     {
       "ref": "@radix-ui/react-presence@1.1.1",
@@ -76271,19 +76223,14 @@
     },
     {
       "ref": "@sentry/core@8.33.1",
-      "dependsOn": [
-        "@sentry/types@8.33.1",
-        "@sentry/utils@8.33.1"
-      ]
+      "dependsOn": ["@sentry/types@8.33.1", "@sentry/utils@8.33.1"]
     },
     {
       "ref": "@sentry/types@8.33.1"
     },
     {
       "ref": "@sentry/utils@8.33.1",
-      "dependsOn": [
-        "@sentry/types@8.33.1"
-      ]
+      "dependsOn": ["@sentry/types@8.33.1"]
     },
     {
       "ref": "@sentry-internal/feedback@8.33.1",
@@ -76313,9 +76260,7 @@
     },
     {
       "ref": "@tailwindcss/container-queries@0.1.1",
-      "dependsOn": [
-        "tailwindcss@3.4.13"
-      ]
+      "dependsOn": ["tailwindcss@3.4.13"]
     },
     {
       "ref": "tailwindcss@3.4.13",
@@ -76346,10 +76291,7 @@
     },
     {
       "ref": "tailwindcss@3.4.13|postcss-selector-parser@6.1.2",
-      "dependsOn": [
-        "cssesc@3.0.0",
-        "util-deprecate@1.0.2"
-      ]
+      "dependsOn": ["cssesc@3.0.0", "util-deprecate@1.0.2"]
     },
     {
       "ref": "tailwindcss@3.4.13|resolve@1.22.8",
@@ -76361,10 +76303,7 @@
     },
     {
       "ref": "@tailwindcss/forms@0.5.9",
-      "dependsOn": [
-        "mini-svg-data-uri@1.4.4",
-        "tailwindcss@3.4.13"
-      ]
+      "dependsOn": ["mini-svg-data-uri@1.4.4", "tailwindcss@3.4.13"]
     },
     {
       "ref": "mini-svg-data-uri@1.4.4"
@@ -76390,10 +76329,7 @@
     },
     {
       "ref": "postcss-selector-parser@6.0.10",
-      "dependsOn": [
-        "cssesc@3.0.0",
-        "util-deprecate@1.0.2"
-      ]
+      "dependsOn": ["cssesc@3.0.0", "util-deprecate@1.0.2"]
     },
     {
       "ref": "cssesc@3.0.0"
@@ -76403,9 +76339,7 @@
     },
     {
       "ref": "@types/cypress@1.1.3",
-      "dependsOn": [
-        "cypress@13.15.0"
-      ]
+      "dependsOn": ["cypress@13.15.0"]
     },
     {
       "ref": "cypress@13.15.0",
@@ -76465,45 +76399,33 @@
     },
     {
       "ref": "@types/lodash-es@4.17.12",
-      "dependsOn": [
-        "@types/lodash@4.17.10"
-      ]
+      "dependsOn": ["@types/lodash@4.17.10"]
     },
     {
       "ref": "@types/lodash@4.17.10"
     },
     {
       "ref": "@types/node@22.7.5",
-      "dependsOn": [
-        "undici-types@6.19.8"
-      ]
+      "dependsOn": ["undici-types@6.19.8"]
     },
     {
       "ref": "undici-types@6.19.8"
     },
     {
       "ref": "@types/qrcode.react@1.0.5",
-      "dependsOn": [
-        "@types/react@18.3.2"
-      ]
+      "dependsOn": ["@types/react@18.3.2"]
     },
     {
       "ref": "@types/react-copy-to-clipboard@5.0.7",
-      "dependsOn": [
-        "@types/react@18.3.2"
-      ]
+      "dependsOn": ["@types/react@18.3.2"]
     },
     {
       "ref": "@types/react-csv@1.1.10",
-      "dependsOn": [
-        "@types/react@18.3.2"
-      ]
+      "dependsOn": ["@types/react@18.3.2"]
     },
     {
       "ref": "@types/react-google-recaptcha@2.1.9",
-      "dependsOn": [
-        "@types/react@18.3.2"
-      ]
+      "dependsOn": ["@types/react@18.3.2"]
     },
     {
       "ref": "@types/prop-types@15.7.13"
@@ -76573,9 +76495,7 @@
     },
     {
       "ref": "debug@4.3.7",
-      "dependsOn": [
-        "ms@2.1.3"
-      ]
+      "dependsOn": ["ms@2.1.3"]
     },
     {
       "ref": "globby@11.1.0",
@@ -76590,30 +76510,22 @@
     },
     {
       "ref": "is-glob@4.0.3",
-      "dependsOn": [
-        "is-extglob@2.1.1"
-      ]
+      "dependsOn": ["is-extglob@2.1.1"]
     },
     {
       "ref": "minimatch@9.0.5",
-      "dependsOn": [
-        "brace-expansion@2.0.1"
-      ]
+      "dependsOn": ["brace-expansion@2.0.1"]
     },
     {
       "ref": "brace-expansion@2.0.1",
-      "dependsOn": [
-        "balanced-match@1.0.2"
-      ]
+      "dependsOn": ["balanced-match@1.0.2"]
     },
     {
       "ref": "semver@7.6.3"
     },
     {
       "ref": "ts-api-utils@1.3.0",
-      "dependsOn": [
-        "typescript@5.6.2"
-      ]
+      "dependsOn": ["typescript@5.6.2"]
     },
     {
       "ref": "eslint@8.57.1",
@@ -76660,16 +76572,11 @@
     },
     {
       "ref": "eslint@8.57.1|minimatch@3.1.2",
-      "dependsOn": [
-        "eslint@8.57.1|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["eslint@8.57.1|brace-expansion@1.1.11"]
     },
     {
       "ref": "eslint@8.57.1|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "@typescript-eslint/type-utils@7.18.0",
@@ -76693,10 +76600,7 @@
     },
     {
       "ref": "@eslint-community/eslint-utils@4.4.0",
-      "dependsOn": [
-        "eslint-visitor-keys@3.4.3",
-        "eslint@8.57.1"
-      ]
+      "dependsOn": ["eslint-visitor-keys@3.4.3", "eslint@8.57.1"]
     },
     {
       "ref": "eslint-visitor-keys@3.4.3"
@@ -76717,16 +76621,11 @@
     },
     {
       "ref": "@eslint/eslintrc@2.1.4|minimatch@3.1.2",
-      "dependsOn": [
-        "@eslint/eslintrc@2.1.4|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["@eslint/eslintrc@2.1.4|brace-expansion@1.1.11"]
     },
     {
       "ref": "@eslint/eslintrc@2.1.4|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "ajv@6.12.6",
@@ -76747,25 +76646,18 @@
     },
     {
       "ref": "globals@13.24.0",
-      "dependsOn": [
-        "type-fest@0.20.2"
-      ]
+      "dependsOn": ["type-fest@0.20.2"]
     },
     {
       "ref": "ignore@5.3.2"
     },
     {
       "ref": "import-fresh@3.3.0",
-      "dependsOn": [
-        "parent-module@1.0.1",
-        "resolve-from@4.0.0"
-      ]
+      "dependsOn": ["parent-module@1.0.1", "resolve-from@4.0.0"]
     },
     {
       "ref": "js-yaml@4.1.0",
-      "dependsOn": [
-        "argparse@2.0.1"
-      ]
+      "dependsOn": ["argparse@2.0.1"]
     },
     {
       "ref": "balanced-match@1.0.2"
@@ -76789,16 +76681,11 @@
     },
     {
       "ref": "@humanwhocodes/config-array@0.13.0|minimatch@3.1.2",
-      "dependsOn": [
-        "@humanwhocodes/config-array@0.13.0|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["@humanwhocodes/config-array@0.13.0|brace-expansion@1.1.11"]
     },
     {
       "ref": "@humanwhocodes/config-array@0.13.0|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "@humanwhocodes/object-schema@2.0.3"
@@ -76808,35 +76695,25 @@
     },
     {
       "ref": "@nodelib/fs.walk@1.2.8",
-      "dependsOn": [
-        "@nodelib/fs.scandir@2.1.5",
-        "fastq@1.17.1"
-      ]
+      "dependsOn": ["@nodelib/fs.scandir@2.1.5", "fastq@1.17.1"]
     },
     {
       "ref": "@nodelib/fs.scandir@2.1.5",
-      "dependsOn": [
-        "@nodelib/fs.stat@2.0.5",
-        "run-parallel@1.2.0"
-      ]
+      "dependsOn": ["@nodelib/fs.stat@2.0.5", "run-parallel@1.2.0"]
     },
     {
       "ref": "@nodelib/fs.stat@2.0.5"
     },
     {
       "ref": "run-parallel@1.2.0",
-      "dependsOn": [
-        "queue-microtask@1.2.3"
-      ]
+      "dependsOn": ["queue-microtask@1.2.3"]
     },
     {
       "ref": "queue-microtask@1.2.3"
     },
     {
       "ref": "fastq@1.17.1",
-      "dependsOn": [
-        "reusify@1.0.4"
-      ]
+      "dependsOn": ["reusify@1.0.4"]
     },
     {
       "ref": "reusify@1.0.4"
@@ -76855,39 +76732,26 @@
     },
     {
       "ref": "uri-js@4.4.1",
-      "dependsOn": [
-        "punycode@2.3.1"
-      ]
+      "dependsOn": ["punycode@2.3.1"]
     },
     {
       "ref": "punycode@2.3.1"
     },
     {
       "ref": "chalk@4.1.2",
-      "dependsOn": [
-        "ansi-styles@4.3.0",
-        "chalk@4.1.2|supports-color@7.2.0"
-      ]
+      "dependsOn": ["ansi-styles@4.3.0", "chalk@4.1.2|supports-color@7.2.0"]
     },
     {
       "ref": "chalk@4.1.2|supports-color@7.2.0",
-      "dependsOn": [
-        "has-flag@4.0.0"
-      ]
+      "dependsOn": ["has-flag@4.0.0"]
     },
     {
       "ref": "cross-spawn@7.0.3",
-      "dependsOn": [
-        "path-key@3.1.1",
-        "shebang-command@2.0.0",
-        "which@2.0.2"
-      ]
+      "dependsOn": ["path-key@3.1.1", "shebang-command@2.0.0", "which@2.0.2"]
     },
     {
       "ref": "doctrine@3.0.0",
-      "dependsOn": [
-        "esutils@2.0.3"
-      ]
+      "dependsOn": ["esutils@2.0.3"]
     },
     {
       "ref": "esutils@2.0.3"
@@ -76897,66 +76761,47 @@
     },
     {
       "ref": "eslint-scope@7.2.2",
-      "dependsOn": [
-        "esrecurse@4.3.0",
-        "estraverse@5.3.0"
-      ]
+      "dependsOn": ["esrecurse@4.3.0", "estraverse@5.3.0"]
     },
     {
       "ref": "esrecurse@4.3.0",
-      "dependsOn": [
-        "estraverse@5.3.0"
-      ]
+      "dependsOn": ["estraverse@5.3.0"]
     },
     {
       "ref": "estraverse@5.3.0"
     },
     {
       "ref": "acorn-jsx@5.3.2",
-      "dependsOn": [
-        "acorn@8.12.1"
-      ]
+      "dependsOn": ["acorn@8.12.1"]
     },
     {
       "ref": "acorn@8.12.1"
     },
     {
       "ref": "esquery@1.6.0",
-      "dependsOn": [
-        "estraverse@5.3.0"
-      ]
+      "dependsOn": ["estraverse@5.3.0"]
     },
     {
       "ref": "file-entry-cache@6.0.1",
-      "dependsOn": [
-        "flat-cache@3.2.0"
-      ]
+      "dependsOn": ["flat-cache@3.2.0"]
     },
     {
       "ref": "flat-cache@3.2.0",
-      "dependsOn": [
-        "flatted@3.3.1",
-        "keyv@4.5.4",
-        "rimraf@3.0.2"
-      ]
+      "dependsOn": ["flatted@3.3.1", "keyv@4.5.4", "rimraf@3.0.2"]
     },
     {
       "ref": "flatted@3.3.1"
     },
     {
       "ref": "keyv@4.5.4",
-      "dependsOn": [
-        "json-buffer@3.0.1"
-      ]
+      "dependsOn": ["json-buffer@3.0.1"]
     },
     {
       "ref": "json-buffer@3.0.1"
     },
     {
       "ref": "rimraf@3.0.2",
-      "dependsOn": [
-        "rimraf@3.0.2|glob@7.2.3"
-      ]
+      "dependsOn": ["rimraf@3.0.2|glob@7.2.3"]
     },
     {
       "ref": "rimraf@3.0.2|glob@7.2.3",
@@ -76971,63 +76816,44 @@
     },
     {
       "ref": "rimraf@3.0.2|minimatch@3.1.2",
-      "dependsOn": [
-        "rimraf@3.0.2|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["rimraf@3.0.2|brace-expansion@1.1.11"]
     },
     {
       "ref": "rimraf@3.0.2|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "fs.realpath@1.0.0"
     },
     {
       "ref": "inflight@1.0.6",
-      "dependsOn": [
-        "once@1.4.0",
-        "wrappy@1.0.2"
-      ]
+      "dependsOn": ["once@1.4.0", "wrappy@1.0.2"]
     },
     {
       "ref": "inherits@2.0.4"
     },
     {
       "ref": "once@1.4.0",
-      "dependsOn": [
-        "wrappy@1.0.2"
-      ]
+      "dependsOn": ["wrappy@1.0.2"]
     },
     {
       "ref": "path-is-absolute@1.0.1"
     },
     {
       "ref": "find-up@5.0.0",
-      "dependsOn": [
-        "locate-path@6.0.0",
-        "path-exists@4.0.0"
-      ]
+      "dependsOn": ["locate-path@6.0.0", "path-exists@4.0.0"]
     },
     {
       "ref": "locate-path@6.0.0",
-      "dependsOn": [
-        "p-locate@5.0.0"
-      ]
+      "dependsOn": ["p-locate@5.0.0"]
     },
     {
       "ref": "p-locate@5.0.0",
-      "dependsOn": [
-        "p-limit@3.1.0"
-      ]
+      "dependsOn": ["p-limit@3.1.0"]
     },
     {
       "ref": "p-limit@3.1.0",
-      "dependsOn": [
-        "yocto-queue@0.1.0"
-      ]
+      "dependsOn": ["yocto-queue@0.1.0"]
     },
     {
       "ref": "yocto-queue@0.1.0"
@@ -77037,9 +76863,7 @@
     },
     {
       "ref": "glob-parent@6.0.2",
-      "dependsOn": [
-        "is-glob@4.0.3"
-      ]
+      "dependsOn": ["is-glob@4.0.3"]
     },
     {
       "ref": "type-fest@0.20.2"
@@ -77061,19 +76885,14 @@
     },
     {
       "ref": "levn@0.4.1",
-      "dependsOn": [
-        "prelude-ls@1.2.1",
-        "type-check@0.4.0"
-      ]
+      "dependsOn": ["prelude-ls@1.2.1", "type-check@0.4.0"]
     },
     {
       "ref": "prelude-ls@1.2.1"
     },
     {
       "ref": "type-check@0.4.0",
-      "dependsOn": [
-        "prelude-ls@1.2.1"
-      ]
+      "dependsOn": ["prelude-ls@1.2.1"]
     },
     {
       "ref": "natural-compare@1.4.0"
@@ -77091,9 +76910,7 @@
     },
     {
       "ref": "strip-ansi@6.0.1",
-      "dependsOn": [
-        "ansi-regex@5.0.1"
-      ]
+      "dependsOn": ["ansi-regex@5.0.1"]
     },
     {
       "ref": "text-table@0.2.0"
@@ -77103,10 +76920,7 @@
     },
     {
       "ref": "@vitejs/plugin-react-swc@3.7.1",
-      "dependsOn": [
-        "@swc/core@1.7.26",
-        "vite@5.4.8"
-      ]
+      "dependsOn": ["@swc/core@1.7.26", "vite@5.4.8"]
     },
     {
       "ref": "@swc/core@1.7.26",
@@ -77129,9 +76943,7 @@
     },
     {
       "ref": "@swc/types@0.1.12",
-      "dependsOn": [
-        "@swc/counter@0.1.3"
-      ]
+      "dependsOn": ["@swc/counter@0.1.3"]
     },
     {
       "ref": "vite@5.4.8",
@@ -77145,9 +76957,7 @@
     },
     {
       "ref": "vite@5.4.8|esbuild@0.21.5",
-      "dependsOn": [
-        "vite@5.4.8|@esbuild/linux-x64@0.21.5"
-      ]
+      "dependsOn": ["vite@5.4.8|@esbuild/linux-x64@0.21.5"]
     },
     {
       "ref": "vite@5.4.8|@esbuild/linux-x64@0.21.5"
@@ -77163,28 +76973,21 @@
     },
     {
       "ref": "barcode-detector@2.2.10",
-      "dependsOn": [
-        "@types/dom-webcodecs@0.1.12",
-        "zxing-wasm@1.2.14"
-      ]
+      "dependsOn": ["@types/dom-webcodecs@0.1.12", "zxing-wasm@1.2.14"]
     },
     {
       "ref": "@types/dom-webcodecs@0.1.12"
     },
     {
       "ref": "zxing-wasm@1.2.14",
-      "dependsOn": [
-        "@types/emscripten@1.39.13"
-      ]
+      "dependsOn": ["@types/emscripten@1.39.13"]
     },
     {
       "ref": "@types/emscripten@1.39.13"
     },
     {
       "ref": "webrtc-adapter@9.0.1",
-      "dependsOn": [
-        "sdp@3.2.0"
-      ]
+      "dependsOn": ["sdp@3.2.0"]
     },
     {
       "ref": "sdp@3.2.0"
@@ -77221,11 +77024,7 @@
     },
     {
       "ref": "update-browserslist-db@1.1.1",
-      "dependsOn": [
-        "browserslist@4.24.0",
-        "escalade@3.2.0",
-        "picocolors@1.1.0"
-      ]
+      "dependsOn": ["browserslist@4.24.0", "escalade@3.2.0", "picocolors@1.1.0"]
     },
     {
       "ref": "escalade@3.2.0"
@@ -77244,11 +77043,7 @@
     },
     {
       "ref": "postcss@8.4.47",
-      "dependsOn": [
-        "nanoid@3.3.7",
-        "picocolors@1.1.0",
-        "source-map-js@1.2.1"
-      ]
+      "dependsOn": ["nanoid@3.3.7", "picocolors@1.1.0", "source-map-js@1.2.1"]
     },
     {
       "ref": "axios@1.7.7",
@@ -77274,18 +77069,14 @@
     },
     {
       "ref": "combined-stream@1.0.8",
-      "dependsOn": [
-        "delayed-stream@1.0.0"
-      ]
+      "dependsOn": ["delayed-stream@1.0.0"]
     },
     {
       "ref": "delayed-stream@1.0.0"
     },
     {
       "ref": "mime-types@2.1.35",
-      "dependsOn": [
-        "mime-db@1.52.0"
-      ]
+      "dependsOn": ["mime-db@1.52.0"]
     },
     {
       "ref": "mime-db@1.52.0"
@@ -77298,9 +77089,7 @@
     },
     {
       "ref": "browser-image-compression@2.0.2",
-      "dependsOn": [
-        "uzip@0.20201231.0"
-      ]
+      "dependsOn": ["uzip@0.20201231.0"]
     },
     {
       "ref": "uzip@0.20201231.0"
@@ -77321,25 +77110,18 @@
     },
     {
       "ref": "easy-table@1.2.0",
-      "dependsOn": [
-        "ansi-regex@5.0.1",
-        "wcwidth@1.0.1"
-      ]
+      "dependsOn": ["ansi-regex@5.0.1", "wcwidth@1.0.1"]
     },
     {
       "ref": "ansi-regex@5.0.1"
     },
     {
       "ref": "wcwidth@1.0.1",
-      "dependsOn": [
-        "defaults@1.0.4"
-      ]
+      "dependsOn": ["defaults@1.0.4"]
     },
     {
       "ref": "defaults@1.0.4",
-      "dependsOn": [
-        "clone@1.0.4"
-      ]
+      "dependsOn": ["clone@1.0.4"]
     },
     {
       "ref": "clone@1.0.4"
@@ -77352,45 +77134,35 @@
     },
     {
       "ref": "class-variance-authority@0.7.0",
-      "dependsOn": [
-        "class-variance-authority@0.7.0|clsx@2.0.0"
-      ]
+      "dependsOn": ["class-variance-authority@0.7.0|clsx@2.0.0"]
     },
     {
       "ref": "class-variance-authority@0.7.0|clsx@2.0.0"
     },
     {
       "ref": "cross-env@7.0.3",
-      "dependsOn": [
-        "cross-spawn@7.0.3"
-      ]
+      "dependsOn": ["cross-spawn@7.0.3"]
     },
     {
       "ref": "path-key@3.1.1"
     },
     {
       "ref": "shebang-command@2.0.0",
-      "dependsOn": [
-        "shebang-regex@3.0.0"
-      ]
+      "dependsOn": ["shebang-regex@3.0.0"]
     },
     {
       "ref": "shebang-regex@3.0.0"
     },
     {
       "ref": "which@2.0.2",
-      "dependsOn": [
-        "isexe@2.0.0"
-      ]
+      "dependsOn": ["isexe@2.0.0"]
     },
     {
       "ref": "isexe@2.0.0"
     },
     {
       "ref": "cypress-localstorage-commands@2.2.6",
-      "dependsOn": [
-        "cypress@13.15.0"
-      ]
+      "dependsOn": ["cypress@13.15.0"]
     },
     {
       "ref": "cypress-split@1.24.0",
@@ -77407,35 +77179,25 @@
     },
     {
       "ref": "@actions/core@1.11.1",
-      "dependsOn": [
-        "@actions/exec@1.1.1",
-        "@actions/http-client@2.2.3"
-      ]
+      "dependsOn": ["@actions/exec@1.1.1", "@actions/http-client@2.2.3"]
     },
     {
       "ref": "@actions/exec@1.1.1",
-      "dependsOn": [
-        "@actions/io@1.1.3"
-      ]
+      "dependsOn": ["@actions/io@1.1.3"]
     },
     {
       "ref": "@actions/io@1.1.3"
     },
     {
       "ref": "@actions/http-client@2.2.3",
-      "dependsOn": [
-        "tunnel@0.0.6",
-        "undici@5.28.4"
-      ]
+      "dependsOn": ["tunnel@0.0.6", "undici@5.28.4"]
     },
     {
       "ref": "tunnel@0.0.6"
     },
     {
       "ref": "undici@5.28.4",
-      "dependsOn": [
-        "@fastify/busboy@2.1.1"
-      ]
+      "dependsOn": ["@fastify/busboy@2.1.1"]
     },
     {
       "ref": "@fastify/busboy@2.1.1"
@@ -77445,31 +77207,22 @@
     },
     {
       "ref": "console.table@0.10.0",
-      "dependsOn": [
-        "console.table@0.10.0|easy-table@1.1.0"
-      ]
+      "dependsOn": ["console.table@0.10.0|easy-table@1.1.0"]
     },
     {
       "ref": "console.table@0.10.0|easy-table@1.1.0",
-      "dependsOn": [
-        "wcwidth@1.0.1"
-      ]
+      "dependsOn": ["wcwidth@1.0.1"]
     },
     {
       "ref": "ms@2.1.3"
     },
     {
       "ref": "fast-shuffle@6.1.0",
-      "dependsOn": [
-        "pcg@1.0.0"
-      ]
+      "dependsOn": ["pcg@1.0.0"]
     },
     {
       "ref": "pcg@1.0.0",
-      "dependsOn": [
-        "long@5.2.3",
-        "ramda@0.29.0"
-      ]
+      "dependsOn": ["long@5.2.3", "ramda@0.29.0"]
     },
     {
       "ref": "long@5.2.3"
@@ -77496,16 +77249,11 @@
     },
     {
       "ref": "find-cypress-specs@1.43.4|minimatch@3.1.2",
-      "dependsOn": [
-        "find-cypress-specs@1.43.4|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["find-cypress-specs@1.43.4|brace-expansion@1.1.11"]
     },
     {
       "ref": "find-cypress-specs@1.43.4|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "find-test-names@1.28.18",
@@ -77520,9 +77268,7 @@
     },
     {
       "ref": "@babel/parser@7.25.7",
-      "dependsOn": [
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/types@7.25.7"]
     },
     {
       "ref": "@babel/types@7.25.7",
@@ -77534,10 +77280,7 @@
     },
     {
       "ref": "@babel/plugin-syntax-jsx@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/core@7.25.7",
@@ -77567,9 +77310,7 @@
     },
     {
       "ref": "acorn-walk@8.3.4",
-      "dependsOn": [
-        "acorn@8.12.1"
-      ]
+      "dependsOn": ["acorn@8.12.1"]
     },
     {
       "ref": "simple-bin-help@1.8.0"
@@ -77579,15 +77320,11 @@
     },
     {
       "ref": "require-and-forget@1.0.1",
-      "dependsOn": [
-        "require-and-forget@1.0.1|debug@4.3.4"
-      ]
+      "dependsOn": ["require-and-forget@1.0.1|debug@4.3.4"]
     },
     {
       "ref": "require-and-forget@1.0.1|debug@4.3.4",
-      "dependsOn": [
-        "require-and-forget@1.0.1|ms@2.1.2"
-      ]
+      "dependsOn": ["require-and-forget@1.0.1|ms@2.1.2"]
     },
     {
       "ref": "require-and-forget@1.0.1|ms@2.1.2"
@@ -77613,25 +77350,18 @@
     },
     {
       "ref": "shelljs@0.8.5|minimatch@3.1.2",
-      "dependsOn": [
-        "shelljs@0.8.5|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["shelljs@0.8.5|brace-expansion@1.1.11"]
     },
     {
       "ref": "shelljs@0.8.5|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "interpret@1.4.0"
     },
     {
       "ref": "rechoir@0.6.2",
-      "dependsOn": [
-        "rechoir@0.6.2|resolve@1.22.8"
-      ]
+      "dependsOn": ["rechoir@0.6.2|resolve@1.22.8"]
     },
     {
       "ref": "rechoir@0.6.2|resolve@1.22.8",
@@ -77643,9 +77373,7 @@
     },
     {
       "ref": "is-core-module@2.15.1",
-      "dependsOn": [
-        "hasown@2.0.2"
-      ]
+      "dependsOn": ["hasown@2.0.2"]
     },
     {
       "ref": "path-parse@1.0.7"
@@ -77692,10 +77420,7 @@
     },
     {
       "ref": "array-buffer-byte-length@1.0.1",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "is-array-buffer@3.0.4"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "is-array-buffer@3.0.4"]
     },
     {
       "ref": "call-bind@1.0.7",
@@ -77736,10 +77461,7 @@
     },
     {
       "ref": "is-arguments@1.1.1",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "has-tostringtag@1.0.2"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "has-tostringtag@1.0.2"]
     },
     {
       "ref": "is-map@2.0.3"
@@ -77749,65 +77471,42 @@
     },
     {
       "ref": "is-string@1.0.7",
-      "dependsOn": [
-        "has-tostringtag@1.0.2"
-      ]
+      "dependsOn": ["has-tostringtag@1.0.2"]
     },
     {
       "ref": "isarray@2.0.5"
     },
     {
       "ref": "stop-iteration-iterator@1.0.0",
-      "dependsOn": [
-        "internal-slot@1.0.7"
-      ]
+      "dependsOn": ["internal-slot@1.0.7"]
     },
     {
       "ref": "internal-slot@1.0.7",
-      "dependsOn": [
-        "es-errors@1.3.0",
-        "hasown@2.0.2",
-        "side-channel@1.0.6"
-      ]
+      "dependsOn": ["es-errors@1.3.0", "hasown@2.0.2", "side-channel@1.0.6"]
     },
     {
       "ref": "has-tostringtag@1.0.2",
-      "dependsOn": [
-        "has-symbols@1.0.3"
-      ]
+      "dependsOn": ["has-symbols@1.0.3"]
     },
     {
       "ref": "is-array-buffer@3.0.4",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "get-intrinsic@1.2.4"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "get-intrinsic@1.2.4"]
     },
     {
       "ref": "is-date-object@1.0.5",
-      "dependsOn": [
-        "has-tostringtag@1.0.2"
-      ]
+      "dependsOn": ["has-tostringtag@1.0.2"]
     },
     {
       "ref": "is-regex@1.1.4",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "has-tostringtag@1.0.2"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "has-tostringtag@1.0.2"]
     },
     {
       "ref": "is-shared-array-buffer@1.0.3",
-      "dependsOn": [
-        "call-bind@1.0.7"
-      ]
+      "dependsOn": ["call-bind@1.0.7"]
     },
     {
       "ref": "object-is@1.1.6",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "define-properties@1.2.1"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "define-properties@1.2.1"]
     },
     {
       "ref": "define-properties@1.2.1",
@@ -77859,31 +77558,22 @@
     },
     {
       "ref": "is-bigint@1.0.4",
-      "dependsOn": [
-        "has-bigints@1.0.2"
-      ]
+      "dependsOn": ["has-bigints@1.0.2"]
     },
     {
       "ref": "has-bigints@1.0.2"
     },
     {
       "ref": "is-boolean-object@1.1.2",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "has-tostringtag@1.0.2"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "has-tostringtag@1.0.2"]
     },
     {
       "ref": "is-number-object@1.0.7",
-      "dependsOn": [
-        "has-tostringtag@1.0.2"
-      ]
+      "dependsOn": ["has-tostringtag@1.0.2"]
     },
     {
       "ref": "is-symbol@1.0.4",
-      "dependsOn": [
-        "has-symbols@1.0.3"
-      ]
+      "dependsOn": ["has-symbols@1.0.3"]
     },
     {
       "ref": "which-collection@1.0.2",
@@ -77899,10 +77589,7 @@
     },
     {
       "ref": "is-weakset@2.0.3",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "get-intrinsic@1.2.4"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "get-intrinsic@1.2.4"]
     },
     {
       "ref": "which-typed-array@1.1.15",
@@ -77958,26 +77645,18 @@
     },
     {
       "ref": "enhanced-resolve@5.17.1",
-      "dependsOn": [
-        "graceful-fs@4.2.11",
-        "tapable@2.2.1"
-      ]
+      "dependsOn": ["graceful-fs@4.2.11", "tapable@2.2.1"]
     },
     {
       "ref": "module-definition@6.0.0",
-      "dependsOn": [
-        "ast-module-types@6.0.0",
-        "node-source-walk@7.0.0"
-      ]
+      "dependsOn": ["ast-module-types@6.0.0", "node-source-walk@7.0.0"]
     },
     {
       "ref": "ast-module-types@6.0.0"
     },
     {
       "ref": "node-source-walk@7.0.0",
-      "dependsOn": [
-        "@babel/parser@7.25.7"
-      ]
+      "dependsOn": ["@babel/parser@7.25.7"]
     },
     {
       "ref": "module-lookup-amd@9.0.2",
@@ -78004,23 +77683,15 @@
     },
     {
       "ref": "module-lookup-amd@9.0.2|minimatch@3.1.2",
-      "dependsOn": [
-        "module-lookup-amd@9.0.2|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["module-lookup-amd@9.0.2|brace-expansion@1.1.11"]
     },
     {
       "ref": "module-lookup-amd@9.0.2|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "requirejs-config-file@4.0.0",
-      "dependsOn": [
-        "esprima@4.0.1",
-        "stringify-object@3.3.0"
-      ]
+      "dependsOn": ["esprima@4.0.1", "stringify-object@3.3.0"]
     },
     {
       "ref": "esprima@4.0.1"
@@ -78041,29 +77712,21 @@
     },
     {
       "ref": "sass-lookup@6.0.1",
-      "dependsOn": [
-        "sass-lookup@6.0.1|commander@12.1.0"
-      ]
+      "dependsOn": ["sass-lookup@6.0.1|commander@12.1.0"]
     },
     {
       "ref": "sass-lookup@6.0.1|commander@12.1.0"
     },
     {
       "ref": "stylus-lookup@6.0.0",
-      "dependsOn": [
-        "stylus-lookup@6.0.0|commander@12.1.0"
-      ]
+      "dependsOn": ["stylus-lookup@6.0.0|commander@12.1.0"]
     },
     {
       "ref": "stylus-lookup@6.0.0|commander@12.1.0"
     },
     {
       "ref": "tsconfig-paths@4.2.0",
-      "dependsOn": [
-        "json5@2.2.3",
-        "minimist@1.2.8",
-        "strip-bom@3.0.0"
-      ]
+      "dependsOn": ["json5@2.2.3", "minimist@1.2.8", "strip-bom@3.0.0"]
     },
     {
       "ref": "json5@2.2.3"
@@ -78099,16 +77762,11 @@
     },
     {
       "ref": "@dependents/detective-less@5.0.0",
-      "dependsOn": [
-        "gonzales-pe@4.3.0",
-        "node-source-walk@7.0.0"
-      ]
+      "dependsOn": ["gonzales-pe@4.3.0", "node-source-walk@7.0.0"]
     },
     {
       "ref": "gonzales-pe@4.3.0",
-      "dependsOn": [
-        "minimist@1.2.8"
-      ]
+      "dependsOn": ["minimist@1.2.8"]
     },
     {
       "ref": "detective-amd@6.0.0",
@@ -78133,23 +77791,15 @@
     },
     {
       "ref": "get-amd-module-type@6.0.0",
-      "dependsOn": [
-        "ast-module-types@6.0.0",
-        "node-source-walk@7.0.0"
-      ]
+      "dependsOn": ["ast-module-types@6.0.0", "node-source-walk@7.0.0"]
     },
     {
       "ref": "detective-cjs@6.0.0",
-      "dependsOn": [
-        "ast-module-types@6.0.0",
-        "node-source-walk@7.0.0"
-      ]
+      "dependsOn": ["ast-module-types@6.0.0", "node-source-walk@7.0.0"]
     },
     {
       "ref": "detective-es6@5.0.0",
-      "dependsOn": [
-        "node-source-walk@7.0.0"
-      ]
+      "dependsOn": ["node-source-walk@7.0.0"]
     },
     {
       "ref": "detective-postcss@7.0.0",
@@ -78182,17 +77832,11 @@
     },
     {
       "ref": "detective-sass@6.0.0",
-      "dependsOn": [
-        "gonzales-pe@4.3.0",
-        "node-source-walk@7.0.0"
-      ]
+      "dependsOn": ["gonzales-pe@4.3.0", "node-source-walk@7.0.0"]
     },
     {
       "ref": "detective-scss@5.0.0",
-      "dependsOn": [
-        "gonzales-pe@4.3.0",
-        "node-source-walk@7.0.0"
-      ]
+      "dependsOn": ["gonzales-pe@4.3.0", "node-source-walk@7.0.0"]
     },
     {
       "ref": "detective-stylus@5.0.0"
@@ -78256,23 +77900,15 @@
     },
     {
       "ref": "@vue/compiler-dom@3.5.11",
-      "dependsOn": [
-        "@vue/compiler-core@3.5.11",
-        "@vue/shared@3.5.11"
-      ]
+      "dependsOn": ["@vue/compiler-core@3.5.11", "@vue/shared@3.5.11"]
     },
     {
       "ref": "@vue/compiler-ssr@3.5.11",
-      "dependsOn": [
-        "@vue/compiler-dom@3.5.11",
-        "@vue/shared@3.5.11"
-      ]
+      "dependsOn": ["@vue/compiler-dom@3.5.11", "@vue/shared@3.5.11"]
     },
     {
       "ref": "magic-string@0.30.11",
-      "dependsOn": [
-        "@jridgewell/sourcemap-codec@1.5.0"
-      ]
+      "dependsOn": ["@jridgewell/sourcemap-codec@1.5.0"]
     },
     {
       "ref": "@jridgewell/sourcemap-codec@1.5.0"
@@ -78286,34 +77922,25 @@
     },
     {
       "ref": "tinyglobby@0.2.9|fdir@6.4.0",
-      "dependsOn": [
-        "tinyglobby@0.2.9|picomatch@4.0.2"
-      ]
+      "dependsOn": ["tinyglobby@0.2.9|picomatch@4.0.2"]
     },
     {
       "ref": "tinyglobby@0.2.9|picomatch@4.0.2"
     },
     {
       "ref": "tsx@4.19.1",
-      "dependsOn": [
-        "esbuild@0.23.1",
-        "get-tsconfig@4.8.1"
-      ]
+      "dependsOn": ["esbuild@0.23.1", "get-tsconfig@4.8.1"]
     },
     {
       "ref": "esbuild@0.23.1",
-      "dependsOn": [
-        "@esbuild/linux-x64@0.23.1"
-      ]
+      "dependsOn": ["@esbuild/linux-x64@0.23.1"]
     },
     {
       "ref": "@esbuild/linux-x64@0.23.1"
     },
     {
       "ref": "get-tsconfig@4.8.1",
-      "dependsOn": [
-        "resolve-pkg-maps@1.0.0"
-      ]
+      "dependsOn": ["resolve-pkg-maps@1.0.0"]
     },
     {
       "ref": "resolve-pkg-maps@1.0.0"
@@ -78323,9 +77950,7 @@
     },
     {
       "ref": "dir-glob@3.0.1",
-      "dependsOn": [
-        "path-type@4.0.0"
-      ]
+      "dependsOn": ["path-type@4.0.0"]
     },
     {
       "ref": "path-type@4.0.0"
@@ -78342,9 +77967,7 @@
     },
     {
       "ref": "fast-glob@3.3.2|glob-parent@5.1.2",
-      "dependsOn": [
-        "is-glob@4.0.3"
-      ]
+      "dependsOn": ["is-glob@4.0.3"]
     },
     {
       "ref": "merge2@1.4.1"
@@ -78398,11 +78021,7 @@
     },
     {
       "ref": "http-signature@1.4.0",
-      "dependsOn": [
-        "assert-plus@1.0.0",
-        "jsprim@2.0.2",
-        "sshpk@1.18.0"
-      ]
+      "dependsOn": ["assert-plus@1.0.0", "jsprim@2.0.2", "sshpk@1.18.0"]
     },
     {
       "ref": "assert-plus@1.0.0"
@@ -78449,43 +78068,32 @@
     },
     {
       "ref": "asn1@0.2.6",
-      "dependsOn": [
-        "safer-buffer@2.1.2"
-      ]
+      "dependsOn": ["safer-buffer@2.1.2"]
     },
     {
       "ref": "safer-buffer@2.1.2"
     },
     {
       "ref": "bcrypt-pbkdf@1.0.2",
-      "dependsOn": [
-        "tweetnacl@0.14.5"
-      ]
+      "dependsOn": ["tweetnacl@0.14.5"]
     },
     {
       "ref": "tweetnacl@0.14.5"
     },
     {
       "ref": "dashdash@1.14.1",
-      "dependsOn": [
-        "assert-plus@1.0.0"
-      ]
+      "dependsOn": ["assert-plus@1.0.0"]
     },
     {
       "ref": "ecc-jsbn@0.1.2",
-      "dependsOn": [
-        "jsbn@0.1.1",
-        "safer-buffer@2.1.2"
-      ]
+      "dependsOn": ["jsbn@0.1.1", "safer-buffer@2.1.2"]
     },
     {
       "ref": "jsbn@0.1.1"
     },
     {
       "ref": "getpass@0.1.7",
-      "dependsOn": [
-        "assert-plus@1.0.0"
-      ]
+      "dependsOn": ["assert-plus@1.0.0"]
     },
     {
       "ref": "is-typedarray@1.0.0"
@@ -78501,9 +78109,7 @@
     },
     {
       "ref": "qs@6.13.0",
-      "dependsOn": [
-        "side-channel@1.0.6"
-      ]
+      "dependsOn": ["side-channel@1.0.6"]
     },
     {
       "ref": "safe-buffer@5.2.1"
@@ -78525,10 +78131,7 @@
     },
     {
       "ref": "url-parse@1.5.10",
-      "dependsOn": [
-        "querystringify@2.2.0",
-        "requires-port@1.0.0"
-      ]
+      "dependsOn": ["querystringify@2.2.0", "requires-port@1.0.0"]
     },
     {
       "ref": "querystringify@2.2.0"
@@ -78538,22 +78141,15 @@
     },
     {
       "ref": "tunnel-agent@0.6.0",
-      "dependsOn": [
-        "safe-buffer@5.2.1"
-      ]
+      "dependsOn": ["safe-buffer@5.2.1"]
     },
     {
       "ref": "@cypress/xvfb@1.2.4",
-      "dependsOn": [
-        "@cypress/xvfb@1.2.4|debug@3.2.7",
-        "lodash.once@4.1.1"
-      ]
+      "dependsOn": ["@cypress/xvfb@1.2.4|debug@3.2.7", "lodash.once@4.1.1"]
     },
     {
       "ref": "@cypress/xvfb@1.2.4|debug@3.2.7",
-      "dependsOn": [
-        "ms@2.1.3"
-      ]
+      "dependsOn": ["ms@2.1.3"]
     },
     {
       "ref": "lodash.once@4.1.1"
@@ -78575,10 +78171,7 @@
     },
     {
       "ref": "buffer@5.7.1",
-      "dependsOn": [
-        "base64-js@1.5.1",
-        "ieee754@1.2.1"
-      ]
+      "dependsOn": ["base64-js@1.5.1", "ieee754@1.2.1"]
     },
     {
       "ref": "base64-js@1.5.1"
@@ -78591,15 +78184,11 @@
     },
     {
       "ref": "ansi-styles@4.3.0",
-      "dependsOn": [
-        "color-convert@2.0.1"
-      ]
+      "dependsOn": ["color-convert@2.0.1"]
     },
     {
       "ref": "color-convert@2.0.1",
-      "dependsOn": [
-        "color-name@1.1.4"
-      ]
+      "dependsOn": ["color-name@1.1.4"]
     },
     {
       "ref": "has-flag@4.0.0"
@@ -78609,32 +78198,22 @@
     },
     {
       "ref": "cli-cursor@3.1.0",
-      "dependsOn": [
-        "restore-cursor@3.1.0"
-      ]
+      "dependsOn": ["restore-cursor@3.1.0"]
     },
     {
       "ref": "restore-cursor@3.1.0",
-      "dependsOn": [
-        "onetime@5.1.2",
-        "signal-exit@3.0.7"
-      ]
+      "dependsOn": ["onetime@5.1.2", "signal-exit@3.0.7"]
     },
     {
       "ref": "onetime@5.1.2",
-      "dependsOn": [
-        "mimic-fn@2.1.0"
-      ]
+      "dependsOn": ["mimic-fn@2.1.0"]
     },
     {
       "ref": "signal-exit@3.0.7"
     },
     {
       "ref": "cli-table3@0.6.5",
-      "dependsOn": [
-        "@colors/colors@1.5.0",
-        "string-width@4.2.3"
-      ]
+      "dependsOn": ["@colors/colors@1.5.0", "string-width@4.2.3"]
     },
     {
       "ref": "@colors/colors@1.5.0"
@@ -78664,10 +78243,7 @@
     },
     {
       "ref": "enquirer@2.4.1",
-      "dependsOn": [
-        "ansi-colors@4.1.3",
-        "strip-ansi@6.0.1"
-      ]
+      "dependsOn": ["ansi-colors@4.1.3", "strip-ansi@6.0.1"]
     },
     {
       "ref": "ansi-colors@4.1.3"
@@ -78691,22 +78267,15 @@
     },
     {
       "ref": "get-stream@5.2.0",
-      "dependsOn": [
-        "pump@3.0.2"
-      ]
+      "dependsOn": ["pump@3.0.2"]
     },
     {
       "ref": "pump@3.0.2",
-      "dependsOn": [
-        "end-of-stream@1.4.4",
-        "once@1.4.0"
-      ]
+      "dependsOn": ["end-of-stream@1.4.4", "once@1.4.0"]
     },
     {
       "ref": "end-of-stream@1.4.4",
-      "dependsOn": [
-        "once@1.4.0"
-      ]
+      "dependsOn": ["once@1.4.0"]
     },
     {
       "ref": "human-signals@1.1.1"
@@ -78719,9 +78288,7 @@
     },
     {
       "ref": "npm-run-path@4.0.1",
-      "dependsOn": [
-        "path-key@3.1.1"
-      ]
+      "dependsOn": ["path-key@3.1.1"]
     },
     {
       "ref": "mimic-fn@2.1.0"
@@ -78731,9 +78298,7 @@
     },
     {
       "ref": "executable@4.1.1",
-      "dependsOn": [
-        "pify@2.3.0"
-      ]
+      "dependsOn": ["pify@2.3.0"]
     },
     {
       "ref": "pify@2.3.0"
@@ -78749,22 +78314,15 @@
     },
     {
       "ref": "@types/yauzl@2.10.3",
-      "dependsOn": [
-        "@types/node@22.7.5"
-      ]
+      "dependsOn": ["@types/node@22.7.5"]
     },
     {
       "ref": "yauzl@2.10.0",
-      "dependsOn": [
-        "buffer-crc32@0.2.13",
-        "fd-slicer@1.1.0"
-      ]
+      "dependsOn": ["buffer-crc32@0.2.13", "fd-slicer@1.1.0"]
     },
     {
       "ref": "figures@3.2.0",
-      "dependsOn": [
-        "figures@3.2.0|escape-string-regexp@1.0.5"
-      ]
+      "dependsOn": ["figures@3.2.0|escape-string-regexp@1.0.5"]
     },
     {
       "ref": "figures@3.2.0|escape-string-regexp@1.0.5"
@@ -78786,44 +78344,32 @@
     },
     {
       "ref": "jsonfile@6.1.0",
-      "dependsOn": [
-        "graceful-fs@4.2.11",
-        "universalify@2.0.1"
-      ]
+      "dependsOn": ["graceful-fs@4.2.11", "universalify@2.0.1"]
     },
     {
       "ref": "universalify@2.0.1"
     },
     {
       "ref": "getos@3.2.1",
-      "dependsOn": [
-        "async@3.2.6"
-      ]
+      "dependsOn": ["async@3.2.6"]
     },
     {
       "ref": "async@3.2.6"
     },
     {
       "ref": "is-ci@3.0.1",
-      "dependsOn": [
-        "ci-info@3.9.0"
-      ]
+      "dependsOn": ["ci-info@3.9.0"]
     },
     {
       "ref": "ci-info@3.9.0"
     },
     {
       "ref": "is-installed-globally@0.4.0",
-      "dependsOn": [
-        "global-dirs@3.0.1",
-        "is-path-inside@3.0.3"
-      ]
+      "dependsOn": ["global-dirs@3.0.1", "is-path-inside@3.0.3"]
     },
     {
       "ref": "global-dirs@3.0.1",
-      "dependsOn": [
-        "ini@2.0.0"
-      ]
+      "dependsOn": ["ini@2.0.0"]
     },
     {
       "ref": "ini@2.0.0"
@@ -78855,10 +78401,7 @@
     },
     {
       "ref": "cli-truncate@2.1.0",
-      "dependsOn": [
-        "slice-ansi@3.0.0",
-        "string-width@4.2.3"
-      ]
+      "dependsOn": ["slice-ansi@3.0.0", "string-width@4.2.3"]
     },
     {
       "ref": "slice-ansi@3.0.0",
@@ -78901,25 +78444,18 @@
     },
     {
       "ref": "ansi-escapes@4.3.2",
-      "dependsOn": [
-        "ansi-escapes@4.3.2|type-fest@0.21.3"
-      ]
+      "dependsOn": ["ansi-escapes@4.3.2|type-fest@0.21.3"]
     },
     {
       "ref": "ansi-escapes@4.3.2|type-fest@0.21.3"
     },
     {
       "ref": "p-map@4.0.0",
-      "dependsOn": [
-        "aggregate-error@3.1.0"
-      ]
+      "dependsOn": ["aggregate-error@3.1.0"]
     },
     {
       "ref": "aggregate-error@3.1.0",
-      "dependsOn": [
-        "clean-stack@2.2.0",
-        "indent-string@4.0.0"
-      ]
+      "dependsOn": ["clean-stack@2.2.0", "indent-string@4.0.0"]
     },
     {
       "ref": "clean-stack@2.2.0"
@@ -78932,9 +78468,7 @@
     },
     {
       "ref": "rxjs@7.8.1",
-      "dependsOn": [
-        "tslib@2.7.0"
-      ]
+      "dependsOn": ["tslib@2.7.0"]
     },
     {
       "ref": "through@2.3.8"
@@ -78944,10 +78478,7 @@
     },
     {
       "ref": "log-symbols@4.1.0",
-      "dependsOn": [
-        "chalk@4.1.2",
-        "is-unicode-supported@0.1.0"
-      ]
+      "dependsOn": ["chalk@4.1.2", "is-unicode-supported@0.1.0"]
     },
     {
       "ref": "is-unicode-supported@0.1.0"
@@ -78963,18 +78494,14 @@
     },
     {
       "ref": "request-progress@3.0.0",
-      "dependsOn": [
-        "throttleit@1.0.1"
-      ]
+      "dependsOn": ["throttleit@1.0.1"]
     },
     {
       "ref": "throttleit@1.0.1"
     },
     {
       "ref": "supports-color@8.1.1",
-      "dependsOn": [
-        "has-flag@4.0.0"
-      ]
+      "dependsOn": ["has-flag@4.0.0"]
     },
     {
       "ref": "tmp@0.2.3"
@@ -78987,9 +78514,7 @@
     },
     {
       "ref": "fd-slicer@1.1.0",
-      "dependsOn": [
-        "pend@1.2.0"
-      ]
+      "dependsOn": ["pend@1.2.0"]
     },
     {
       "ref": "pend@1.2.0"
@@ -79005,10 +78530,7 @@
     },
     {
       "ref": "echarts@5.5.1",
-      "dependsOn": [
-        "echarts@5.5.1|tslib@2.3.0",
-        "zrender@5.6.0"
-      ]
+      "dependsOn": ["echarts@5.5.1|tslib@2.3.0", "zrender@5.6.0"]
     },
     {
       "ref": "echarts@5.5.1|tslib@2.3.0"
@@ -79018,25 +78540,18 @@
     },
     {
       "ref": "zrender@5.6.0",
-      "dependsOn": [
-        "zrender@5.6.0|tslib@2.3.0"
-      ]
+      "dependsOn": ["zrender@5.6.0|tslib@2.3.0"]
     },
     {
       "ref": "zrender@5.6.0|tslib@2.3.0"
     },
     {
       "ref": "eslint-config-prettier@9.1.0",
-      "dependsOn": [
-        "eslint@8.57.1"
-      ]
+      "dependsOn": ["eslint@8.57.1"]
     },
     {
       "ref": "eslint-plugin-i18next@6.1.0",
-      "dependsOn": [
-        "lodash@4.17.21",
-        "requireindex@1.1.0"
-      ]
+      "dependsOn": ["lodash@4.17.21", "requireindex@1.1.0"]
     },
     {
       "ref": "requireindex@1.1.0"
@@ -79077,16 +78592,11 @@
     },
     {
       "ref": "estree-util-visit@2.0.0",
-      "dependsOn": [
-        "@types/estree-jsx@1.0.5",
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/estree-jsx@1.0.5", "@types/unist@3.0.3"]
     },
     {
       "ref": "@types/estree-jsx@1.0.5",
-      "dependsOn": [
-        "@types/estree@1.0.6"
-      ]
+      "dependsOn": ["@types/estree@1.0.6"]
     },
     {
       "ref": "@types/estree@1.0.6"
@@ -79096,10 +78606,7 @@
     },
     {
       "ref": "remark-mdx@3.0.1",
-      "dependsOn": [
-        "mdast-util-mdx@3.0.0",
-        "micromark-extension-mdxjs@3.0.0"
-      ]
+      "dependsOn": ["mdast-util-mdx@3.0.0", "micromark-extension-mdxjs@3.0.0"]
     },
     {
       "ref": "remark-parse@11.0.0",
@@ -79112,9 +78619,7 @@
     },
     {
       "ref": "remark-parse@11.0.0|@types/mdast@4.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "remark-parse@11.0.0|mdast-util-from-markdown@2.0.1",
@@ -79135,9 +78640,7 @@
     },
     {
       "ref": "remark-parse@11.0.0|mdast-util-to-string@4.0.0",
-      "dependsOn": [
-        "remark-parse@11.0.0|@types/mdast@4.0.4"
-      ]
+      "dependsOn": ["remark-parse@11.0.0|@types/mdast@4.0.4"]
     },
     {
       "ref": "remark-parse@11.0.0|micromark@4.0.0",
@@ -79174,9 +78677,7 @@
     },
     {
       "ref": "remark-parse@11.0.0|unist-util-stringify-position@4.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "remark-stringify@11.0.0",
@@ -79188,16 +78689,11 @@
     },
     {
       "ref": "remark-stringify@11.0.0|@types/mdast@4.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "synckit@0.9.2",
-      "dependsOn": [
-        "@pkgr/core@0.1.1",
-        "tslib@2.7.0"
-      ]
+      "dependsOn": ["@pkgr/core@0.1.1", "tslib@2.7.0"]
     },
     {
       "ref": "unified-engine@11.2.1",
@@ -79227,9 +78723,7 @@
     },
     {
       "ref": "unified-engine@11.2.1|@types/node@20.16.11",
-      "dependsOn": [
-        "undici-types@6.19.8"
-      ]
+      "dependsOn": ["undici-types@6.19.8"]
     },
     {
       "ref": "unified-engine@11.2.1|glob@10.4.5",
@@ -79244,17 +78738,11 @@
     },
     {
       "ref": "unified-engine@11.2.1|jackspeak@3.4.3",
-      "dependsOn": [
-        "@isaacs/cliui@8.0.2",
-        "@pkgjs/parseargs@0.11.0"
-      ]
+      "dependsOn": ["@isaacs/cliui@8.0.2", "@pkgjs/parseargs@0.11.0"]
     },
     {
       "ref": "unified-engine@11.2.1|path-scurry@1.11.1",
-      "dependsOn": [
-        "unified-engine@11.2.1|lru-cache@10.4.3",
-        "minipass@7.1.2"
-      ]
+      "dependsOn": ["unified-engine@11.2.1|lru-cache@10.4.3", "minipass@7.1.2"]
     },
     {
       "ref": "unified-engine@11.2.1|lru-cache@10.4.3"
@@ -79280,15 +78768,11 @@
     },
     {
       "ref": "@types/concat-stream@2.0.3",
-      "dependsOn": [
-        "@types/node@22.7.5"
-      ]
+      "dependsOn": ["@types/node@22.7.5"]
     },
     {
       "ref": "@types/debug@4.1.12",
-      "dependsOn": [
-        "@types/ms@0.7.34"
-      ]
+      "dependsOn": ["@types/ms@0.7.34"]
     },
     {
       "ref": "@types/ms@0.7.34"
@@ -79318,9 +78802,7 @@
     },
     {
       "ref": "string_decoder@1.3.0",
-      "dependsOn": [
-        "safe-buffer@5.2.1"
-      ]
+      "dependsOn": ["safe-buffer@5.2.1"]
     },
     {
       "ref": "typedarray@0.0.6"
@@ -79359,9 +78841,7 @@
     },
     {
       "ref": "@isaacs/cliui@8.0.2|strip-ansi@7.1.0",
-      "dependsOn": [
-        "@isaacs/cliui@8.0.2|ansi-regex@6.1.0"
-      ]
+      "dependsOn": ["@isaacs/cliui@8.0.2|ansi-regex@6.1.0"]
     },
     {
       "ref": "@isaacs/cliui@8.0.2|ansi-regex@6.1.0"
@@ -79383,10 +78863,7 @@
     },
     {
       "ref": "load-plugin@6.0.3",
-      "dependsOn": [
-        "@npmcli/config@8.3.4",
-        "import-meta-resolve@4.1.0"
-      ]
+      "dependsOn": ["@npmcli/config@8.3.4", "import-meta-resolve@4.1.0"]
     },
     {
       "ref": "@npmcli/config@8.3.4",
@@ -79409,9 +78886,7 @@
     },
     {
       "ref": "@npmcli/config@8.3.4|nopt@7.2.1",
-      "dependsOn": [
-        "@npmcli/config@8.3.4|abbrev@2.0.0"
-      ]
+      "dependsOn": ["@npmcli/config@8.3.4|abbrev@2.0.0"]
     },
     {
       "ref": "@npmcli/config@8.3.4|abbrev@2.0.0"
@@ -79438,10 +78913,7 @@
     },
     {
       "ref": "@npmcli/map-workspaces@3.0.6|jackspeak@3.4.3",
-      "dependsOn": [
-        "@isaacs/cliui@8.0.2",
-        "@pkgjs/parseargs@0.11.0"
-      ]
+      "dependsOn": ["@isaacs/cliui@8.0.2", "@pkgjs/parseargs@0.11.0"]
     },
     {
       "ref": "@npmcli/map-workspaces@3.0.6|path-scurry@1.11.1",
@@ -79494,10 +78966,7 @@
     },
     {
       "ref": "@npmcli/package-json@5.2.1|jackspeak@3.4.3",
-      "dependsOn": [
-        "@isaacs/cliui@8.0.2",
-        "@pkgjs/parseargs@0.11.0"
-      ]
+      "dependsOn": ["@isaacs/cliui@8.0.2", "@pkgjs/parseargs@0.11.0"]
     },
     {
       "ref": "@npmcli/package-json@5.2.1|path-scurry@1.11.1",
@@ -79534,24 +79003,18 @@
     },
     {
       "ref": "@npmcli/git@5.0.8|which@4.0.0",
-      "dependsOn": [
-        "@npmcli/git@5.0.8|isexe@3.1.1"
-      ]
+      "dependsOn": ["@npmcli/git@5.0.8|isexe@3.1.1"]
     },
     {
       "ref": "@npmcli/git@5.0.8|isexe@3.1.1"
     },
     {
       "ref": "@npmcli/promise-spawn@7.0.2",
-      "dependsOn": [
-        "@npmcli/promise-spawn@7.0.2|which@4.0.0"
-      ]
+      "dependsOn": ["@npmcli/promise-spawn@7.0.2|which@4.0.0"]
     },
     {
       "ref": "@npmcli/promise-spawn@7.0.2|which@4.0.0",
-      "dependsOn": [
-        "@npmcli/promise-spawn@7.0.2|isexe@3.1.1"
-      ]
+      "dependsOn": ["@npmcli/promise-spawn@7.0.2|isexe@3.1.1"]
     },
     {
       "ref": "@npmcli/promise-spawn@7.0.2|isexe@3.1.1"
@@ -79567,9 +79030,7 @@
     },
     {
       "ref": "npm-install-checks@6.3.0",
-      "dependsOn": [
-        "semver@7.6.3"
-      ]
+      "dependsOn": ["semver@7.6.3"]
     },
     {
       "ref": "npm-package-arg@11.0.3",
@@ -79582,9 +79043,7 @@
     },
     {
       "ref": "hosted-git-info@7.0.2",
-      "dependsOn": [
-        "hosted-git-info@7.0.2|lru-cache@10.4.3"
-      ]
+      "dependsOn": ["hosted-git-info@7.0.2|lru-cache@10.4.3"]
     },
     {
       "ref": "hosted-git-info@7.0.2|lru-cache@10.4.3"
@@ -79600,10 +79059,7 @@
     },
     {
       "ref": "promise-retry@2.0.1",
-      "dependsOn": [
-        "err-code@2.0.3",
-        "retry@0.12.0"
-      ]
+      "dependsOn": ["err-code@2.0.3", "retry@0.12.0"]
     },
     {
       "ref": "err-code@2.0.3"
@@ -79621,24 +79077,15 @@
     },
     {
       "ref": "validate-npm-package-license@3.0.4",
-      "dependsOn": [
-        "spdx-correct@3.2.0",
-        "spdx-expression-parse@3.0.1"
-      ]
+      "dependsOn": ["spdx-correct@3.2.0", "spdx-expression-parse@3.0.1"]
     },
     {
       "ref": "spdx-correct@3.2.0",
-      "dependsOn": [
-        "spdx-expression-parse@3.0.1",
-        "spdx-license-ids@3.0.20"
-      ]
+      "dependsOn": ["spdx-expression-parse@3.0.1", "spdx-license-ids@3.0.20"]
     },
     {
       "ref": "spdx-expression-parse@3.0.1",
-      "dependsOn": [
-        "spdx-exceptions@2.5.0",
-        "spdx-license-ids@3.0.20"
-      ]
+      "dependsOn": ["spdx-exceptions@2.5.0", "spdx-license-ids@3.0.20"]
     },
     {
       "ref": "spdx-license-ids@3.0.20"
@@ -79654,25 +79101,18 @@
     },
     {
       "ref": "@babel/code-frame@7.25.7",
-      "dependsOn": [
-        "@babel/highlight@7.25.7",
-        "picocolors@1.1.0"
-      ]
+      "dependsOn": ["@babel/highlight@7.25.7", "picocolors@1.1.0"]
     },
     {
       "ref": "error-ex@1.3.2",
-      "dependsOn": [
-        "is-arrayish@0.2.1"
-      ]
+      "dependsOn": ["is-arrayish@0.2.1"]
     },
     {
       "ref": "trough@2.2.0"
     },
     {
       "ref": "unist-util-inspect@8.1.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "vfile-message@4.0.2",
@@ -79683,9 +79123,7 @@
     },
     {
       "ref": "vfile-message@4.0.2|unist-util-stringify-position@4.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "vfile-reporter@8.1.1",
@@ -79713,9 +79151,7 @@
     },
     {
       "ref": "vfile-reporter@8.1.1|strip-ansi@7.1.0",
-      "dependsOn": [
-        "vfile-reporter@8.1.1|ansi-regex@6.1.0"
-      ]
+      "dependsOn": ["vfile-reporter@8.1.1|ansi-regex@6.1.0"]
     },
     {
       "ref": "vfile-reporter@8.1.1|ansi-regex@6.1.0"
@@ -79725,9 +79161,7 @@
     },
     {
       "ref": "vfile-reporter@8.1.1|unist-util-stringify-position@4.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "@types/supports-color@8.1.3"
@@ -79737,24 +79171,15 @@
     },
     {
       "ref": "vfile-sort@4.0.0",
-      "dependsOn": [
-        "vfile-message@4.0.2",
-        "vfile@6.0.3"
-      ]
+      "dependsOn": ["vfile-message@4.0.2", "vfile@6.0.3"]
     },
     {
       "ref": "vfile@6.0.3",
-      "dependsOn": [
-        "@types/unist@3.0.3",
-        "vfile-message@4.0.2"
-      ]
+      "dependsOn": ["@types/unist@3.0.3", "vfile-message@4.0.2"]
     },
     {
       "ref": "vfile-statistics@3.0.0",
-      "dependsOn": [
-        "vfile-message@4.0.2",
-        "vfile@6.0.3"
-      ]
+      "dependsOn": ["vfile-message@4.0.2", "vfile@6.0.3"]
     },
     {
       "ref": "yaml@2.3.1"
@@ -79781,25 +79206,15 @@
     },
     {
       "ref": "unist-util-is@6.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "unist-util-visit-parents@6.0.1",
-      "dependsOn": [
-        "@types/unist@3.0.3",
-        "unist-util-is@6.0.0"
-      ]
+      "dependsOn": ["@types/unist@3.0.3", "unist-util-is@6.0.0"]
     },
     {
       "ref": "uvu@0.5.6",
-      "dependsOn": [
-        "dequal@2.0.3",
-        "diff@5.2.0",
-        "kleur@4.1.5",
-        "sade@1.8.1"
-      ]
+      "dependsOn": ["dequal@2.0.3", "diff@5.2.0", "kleur@4.1.5", "sade@1.8.1"]
     },
     {
       "ref": "dequal@2.0.3"
@@ -79812,19 +79227,14 @@
     },
     {
       "ref": "sade@1.8.1",
-      "dependsOn": [
-        "mri@1.2.0"
-      ]
+      "dependsOn": ["mri@1.2.0"]
     },
     {
       "ref": "mri@1.2.0"
     },
     {
       "ref": "eslint-plugin-markdown@3.0.1",
-      "dependsOn": [
-        "eslint@8.57.1",
-        "mdast-util-from-markdown@0.8.5"
-      ]
+      "dependsOn": ["eslint@8.57.1", "mdast-util-from-markdown@0.8.5"]
     },
     {
       "ref": "mdast-util-from-markdown@0.8.5",
@@ -79838,9 +79248,7 @@
     },
     {
       "ref": "@types/mdast@3.0.15",
-      "dependsOn": [
-        "@types/mdast@3.0.15|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["@types/mdast@3.0.15|@types/unist@2.0.11"]
     },
     {
       "ref": "@types/mdast@3.0.15|@types/unist@2.0.11"
@@ -79850,10 +79258,7 @@
     },
     {
       "ref": "micromark@2.11.4",
-      "dependsOn": [
-        "debug@4.3.7",
-        "parse-entities@2.0.0"
-      ]
+      "dependsOn": ["debug@4.3.7", "parse-entities@2.0.0"]
     },
     {
       "ref": "parse-entities@2.0.0",
@@ -79877,10 +79282,7 @@
     },
     {
       "ref": "is-alphanumerical@1.0.4",
-      "dependsOn": [
-        "is-alphabetical@1.0.4",
-        "is-decimal@1.0.4"
-      ]
+      "dependsOn": ["is-alphabetical@1.0.4", "is-decimal@1.0.4"]
     },
     {
       "ref": "is-alphabetical@1.0.4"
@@ -79893,9 +79295,7 @@
     },
     {
       "ref": "unist-util-stringify-position@2.0.3",
-      "dependsOn": [
-        "unist-util-stringify-position@2.0.3|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["unist-util-stringify-position@2.0.3|@types/unist@2.0.11"]
     },
     {
       "ref": "unist-util-stringify-position@2.0.3|@types/unist@2.0.11"
@@ -79929,15 +79329,11 @@
     },
     {
       "ref": "mdast-util-mdx@3.0.0|@types/mdast@4.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-mdx@3.0.0|mdast-util-to-string@4.0.0",
-      "dependsOn": [
-        "mdast-util-mdx@3.0.0|@types/mdast@4.0.4"
-      ]
+      "dependsOn": ["mdast-util-mdx@3.0.0|@types/mdast@4.0.4"]
     },
     {
       "ref": "mdast-util-mdx@3.0.0|micromark@4.0.0",
@@ -79974,9 +79370,7 @@
     },
     {
       "ref": "mdast-util-mdx@3.0.0|unist-util-stringify-position@4.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "decode-named-character-reference@1.0.2",
@@ -79989,15 +79383,11 @@
     },
     {
       "ref": "devlop@1.1.0",
-      "dependsOn": [
-        "dequal@2.0.3"
-      ]
+      "dependsOn": ["dequal@2.0.3"]
     },
     {
       "ref": "micromark-util-decode-numeric-character-reference@2.0.1",
-      "dependsOn": [
-        "micromark-util-symbol@2.0.0"
-      ]
+      "dependsOn": ["micromark-util-symbol@2.0.0"]
     },
     {
       "ref": "micromark-util-decode-string@2.0.0",
@@ -80010,9 +79400,7 @@
     },
     {
       "ref": "micromark-util-normalize-identifier@2.0.0",
-      "dependsOn": [
-        "micromark-util-symbol@2.0.0"
-      ]
+      "dependsOn": ["micromark-util-symbol@2.0.0"]
     },
     {
       "ref": "micromark-util-symbol@2.0.0"
@@ -80050,16 +79438,11 @@
     },
     {
       "ref": "micromark-util-character@2.1.0",
-      "dependsOn": [
-        "micromark-util-symbol@2.0.0",
-        "micromark-util-types@2.0.0"
-      ]
+      "dependsOn": ["micromark-util-symbol@2.0.0", "micromark-util-types@2.0.0"]
     },
     {
       "ref": "micromark-util-chunked@2.0.0",
-      "dependsOn": [
-        "micromark-util-symbol@2.0.0"
-      ]
+      "dependsOn": ["micromark-util-symbol@2.0.0"]
     },
     {
       "ref": "micromark-util-combine-extensions@2.0.0",
@@ -80070,9 +79453,7 @@
     },
     {
       "ref": "micromark-util-resolve-all@2.0.0",
-      "dependsOn": [
-        "micromark-util-types@2.0.0"
-      ]
+      "dependsOn": ["micromark-util-types@2.0.0"]
     },
     {
       "ref": "micromark-util-subtokenize@2.0.1",
@@ -80096,15 +79477,11 @@
     },
     {
       "ref": "mdast-util-mdx-expression@2.0.1|@types/hast@3.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-mdx-expression@2.0.1|@types/mdast@4.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-mdx-expression@2.0.1|mdast-util-from-markdown@2.0.1",
@@ -80125,9 +79502,7 @@
     },
     {
       "ref": "mdast-util-mdx-expression@2.0.1|mdast-util-to-string@4.0.0",
-      "dependsOn": [
-        "mdast-util-mdx-expression@2.0.1|@types/mdast@4.0.4"
-      ]
+      "dependsOn": ["mdast-util-mdx-expression@2.0.1|@types/mdast@4.0.4"]
     },
     {
       "ref": "mdast-util-mdx-expression@2.0.1|micromark@4.0.0",
@@ -80164,9 +79539,7 @@
     },
     {
       "ref": "mdast-util-mdx-expression@2.0.1|unist-util-stringify-position@4.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-to-markdown@2.1.0",
@@ -80183,15 +79556,11 @@
     },
     {
       "ref": "mdast-util-to-markdown@2.1.0|@types/mdast@4.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-to-markdown@2.1.0|mdast-util-to-string@4.0.0",
-      "dependsOn": [
-        "mdast-util-to-markdown@2.1.0|@types/mdast@4.0.4"
-      ]
+      "dependsOn": ["mdast-util-to-markdown@2.1.0|@types/mdast@4.0.4"]
     },
     {
       "ref": "mdast-util-mdx-jsx@3.1.3",
@@ -80212,15 +79581,11 @@
     },
     {
       "ref": "mdast-util-mdx-jsx@3.1.3|@types/hast@3.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-mdx-jsx@3.1.3|@types/mdast@4.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-mdx-jsx@3.1.3|mdast-util-from-markdown@2.0.1",
@@ -80241,9 +79606,7 @@
     },
     {
       "ref": "mdast-util-mdx-jsx@3.1.3|mdast-util-to-string@4.0.0",
-      "dependsOn": [
-        "mdast-util-mdx-jsx@3.1.3|@types/mdast@4.0.4"
-      ]
+      "dependsOn": ["mdast-util-mdx-jsx@3.1.3|@types/mdast@4.0.4"]
     },
     {
       "ref": "mdast-util-mdx-jsx@3.1.3|micromark@4.0.0",
@@ -80280,9 +79643,7 @@
     },
     {
       "ref": "mdast-util-mdx-jsx@3.1.3|unist-util-stringify-position@4.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-mdx-jsx@3.1.3|parse-entities@4.0.1",
@@ -80354,15 +79715,11 @@
     },
     {
       "ref": "mdast-util-mdxjs-esm@2.0.1|@types/hast@3.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-mdxjs-esm@2.0.1|@types/mdast@4.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "mdast-util-mdxjs-esm@2.0.1|mdast-util-from-markdown@2.0.1",
@@ -80383,9 +79740,7 @@
     },
     {
       "ref": "mdast-util-mdxjs-esm@2.0.1|mdast-util-to-string@4.0.0",
-      "dependsOn": [
-        "mdast-util-mdxjs-esm@2.0.1|@types/mdast@4.0.4"
-      ]
+      "dependsOn": ["mdast-util-mdxjs-esm@2.0.1|@types/mdast@4.0.4"]
     },
     {
       "ref": "mdast-util-mdxjs-esm@2.0.1|micromark@4.0.0",
@@ -80422,9 +79777,7 @@
     },
     {
       "ref": "mdast-util-mdxjs-esm@2.0.1|unist-util-stringify-position@4.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "micromark-extension-mdxjs@3.0.0",
@@ -80481,15 +79834,11 @@
     },
     {
       "ref": "unist-util-position-from-estree@2.0.0",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "@types/acorn@4.0.6",
-      "dependsOn": [
-        "@types/estree@1.0.6"
-      ]
+      "dependsOn": ["@types/estree@1.0.6"]
     },
     {
       "ref": "micromark-extension-mdx-jsx@3.0.1",
@@ -80512,9 +79861,7 @@
     },
     {
       "ref": "micromark-extension-mdx-md@2.0.0",
-      "dependsOn": [
-        "micromark-util-types@2.0.0"
-      ]
+      "dependsOn": ["micromark-util-types@2.0.0"]
     },
     {
       "ref": "micromark-extension-mdxjs-esm@3.0.0",
@@ -80588,9 +79935,7 @@
     },
     {
       "ref": "mdast-util-phrasing@4.1.0|@types/mdast@4.0.4",
-      "dependsOn": [
-        "@types/unist@3.0.3"
-      ]
+      "dependsOn": ["@types/unist@3.0.3"]
     },
     {
       "ref": "zwitch@2.0.4"
@@ -80610,9 +79955,7 @@
     },
     {
       "ref": "prettier-linter-helpers@1.0.0",
-      "dependsOn": [
-        "fast-diff@1.3.0"
-      ]
+      "dependsOn": ["fast-diff@1.3.0"]
     },
     {
       "ref": "fast-diff@1.3.0"
@@ -80625,9 +79968,7 @@
     },
     {
       "ref": "eslint-plugin-react-hooks@4.6.2",
-      "dependsOn": [
-        "eslint@8.57.1"
-      ]
+      "dependsOn": ["eslint@8.57.1"]
     },
     {
       "ref": "eslint-plugin-react@7.37.1",
@@ -80655,22 +79996,15 @@
     },
     {
       "ref": "eslint-plugin-react@7.37.1|doctrine@2.1.0",
-      "dependsOn": [
-        "esutils@2.0.3"
-      ]
+      "dependsOn": ["esutils@2.0.3"]
     },
     {
       "ref": "eslint-plugin-react@7.37.1|minimatch@3.1.2",
-      "dependsOn": [
-        "eslint-plugin-react@7.37.1|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["eslint-plugin-react@7.37.1|brace-expansion@1.1.11"]
     },
     {
       "ref": "eslint-plugin-react@7.37.1|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "eslint-plugin-react@7.37.1|semver@6.3.1"
@@ -80688,9 +80022,7 @@
     },
     {
       "ref": "es-define-property@1.0.0",
-      "dependsOn": [
-        "get-intrinsic@1.2.4"
-      ]
+      "dependsOn": ["get-intrinsic@1.2.4"]
     },
     {
       "ref": "es-errors@1.3.0"
@@ -80711,23 +80043,15 @@
     },
     {
       "ref": "define-data-property@1.1.4",
-      "dependsOn": [
-        "es-define-property@1.0.0",
-        "es-errors@1.3.0",
-        "gopd@1.0.1"
-      ]
+      "dependsOn": ["es-define-property@1.0.0", "es-errors@1.3.0", "gopd@1.0.1"]
     },
     {
       "ref": "gopd@1.0.1",
-      "dependsOn": [
-        "get-intrinsic@1.2.4"
-      ]
+      "dependsOn": ["get-intrinsic@1.2.4"]
     },
     {
       "ref": "has-property-descriptors@1.0.2",
-      "dependsOn": [
-        "es-define-property@1.0.0"
-      ]
+      "dependsOn": ["es-define-property@1.0.0"]
     },
     {
       "ref": "es-abstract@1.23.3",
@@ -80795,48 +80119,30 @@
     },
     {
       "ref": "available-typed-arrays@1.0.7",
-      "dependsOn": [
-        "possible-typed-array-names@1.0.0"
-      ]
+      "dependsOn": ["possible-typed-array-names@1.0.0"]
     },
     {
       "ref": "possible-typed-array-names@1.0.0"
     },
     {
       "ref": "data-view-buffer@1.0.1",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "es-errors@1.3.0",
-        "is-data-view@1.0.1"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "es-errors@1.3.0", "is-data-view@1.0.1"]
     },
     {
       "ref": "is-data-view@1.0.1",
-      "dependsOn": [
-        "is-typed-array@1.1.13"
-      ]
+      "dependsOn": ["is-typed-array@1.1.13"]
     },
     {
       "ref": "data-view-byte-length@1.0.1",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "es-errors@1.3.0",
-        "is-data-view@1.0.1"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "es-errors@1.3.0", "is-data-view@1.0.1"]
     },
     {
       "ref": "data-view-byte-offset@1.0.0",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "es-errors@1.3.0",
-        "is-data-view@1.0.1"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "es-errors@1.3.0", "is-data-view@1.0.1"]
     },
     {
       "ref": "es-object-atoms@1.0.0",
-      "dependsOn": [
-        "es-errors@1.3.0"
-      ]
+      "dependsOn": ["es-errors@1.3.0"]
     },
     {
       "ref": "es-set-tostringtag@2.0.3",
@@ -80871,42 +80177,29 @@
     },
     {
       "ref": "get-symbol-description@1.0.2",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "es-errors@1.3.0",
-        "get-intrinsic@1.2.4"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "es-errors@1.3.0", "get-intrinsic@1.2.4"]
     },
     {
       "ref": "globalthis@1.0.4",
-      "dependsOn": [
-        "define-properties@1.2.1",
-        "gopd@1.0.1"
-      ]
+      "dependsOn": ["define-properties@1.2.1", "gopd@1.0.1"]
     },
     {
       "ref": "has-proto@1.0.3"
     },
     {
       "ref": "hasown@2.0.2",
-      "dependsOn": [
-        "function-bind@1.1.2"
-      ]
+      "dependsOn": ["function-bind@1.1.2"]
     },
     {
       "ref": "is-typed-array@1.1.13",
-      "dependsOn": [
-        "which-typed-array@1.1.15"
-      ]
+      "dependsOn": ["which-typed-array@1.1.15"]
     },
     {
       "ref": "is-negative-zero@2.0.3"
     },
     {
       "ref": "is-weakref@1.0.2",
-      "dependsOn": [
-        "call-bind@1.0.7"
-      ]
+      "dependsOn": ["call-bind@1.0.7"]
     },
     {
       "ref": "object-inspect@1.13.2"
@@ -80922,11 +80215,7 @@
     },
     {
       "ref": "safe-regex-test@1.0.3",
-      "dependsOn": [
-        "call-bind@1.0.7",
-        "es-errors@1.3.0",
-        "is-regex@1.1.4"
-      ]
+      "dependsOn": ["call-bind@1.0.7", "es-errors@1.3.0", "is-regex@1.1.4"]
     },
     {
       "ref": "string.prototype.trim@1.2.9",
@@ -80973,9 +80262,7 @@
     },
     {
       "ref": "for-each@0.3.3",
-      "dependsOn": [
-        "is-callable@1.2.7"
-      ]
+      "dependsOn": ["is-callable@1.2.7"]
     },
     {
       "ref": "typed-array-byte-offset@1.0.2",
@@ -81021,9 +80308,7 @@
     },
     {
       "ref": "es-shim-unscopables@1.0.2",
-      "dependsOn": [
-        "hasown@2.0.2"
-      ]
+      "dependsOn": ["hasown@2.0.2"]
     },
     {
       "ref": "array.prototype.flatmap@1.3.2",
@@ -81104,21 +80389,15 @@
     },
     {
       "ref": "is-async-function@2.0.0",
-      "dependsOn": [
-        "has-tostringtag@1.0.2"
-      ]
+      "dependsOn": ["has-tostringtag@1.0.2"]
     },
     {
       "ref": "is-finalizationregistry@1.0.2",
-      "dependsOn": [
-        "call-bind@1.0.7"
-      ]
+      "dependsOn": ["call-bind@1.0.7"]
     },
     {
       "ref": "is-generator-function@1.0.10",
-      "dependsOn": [
-        "has-tostringtag@1.0.2"
-      ]
+      "dependsOn": ["has-tostringtag@1.0.2"]
     },
     {
       "ref": "set-function-name@2.0.2",
@@ -81207,10 +80486,7 @@
     },
     {
       "ref": "string.prototype.repeat@1.0.0",
-      "dependsOn": [
-        "define-properties@1.2.1",
-        "es-abstract@1.23.3"
-      ]
+      "dependsOn": ["define-properties@1.2.1", "es-abstract@1.23.3"]
     },
     {
       "ref": "events@3.3.0"
@@ -81231,15 +80507,11 @@
     },
     {
       "ref": "glob@11.0.0|minimatch@10.0.1",
-      "dependsOn": [
-        "brace-expansion@2.0.1"
-      ]
+      "dependsOn": ["brace-expansion@2.0.1"]
     },
     {
       "ref": "jackspeak@4.0.2",
-      "dependsOn": [
-        "@isaacs/cliui@8.0.2"
-      ]
+      "dependsOn": ["@isaacs/cliui@8.0.2"]
     },
     {
       "ref": "BomRef.qgrhp0ekde8.abe968v9i38",
@@ -81251,9 +80523,7 @@
     },
     {
       "ref": "BomRef.d9l57m837oo.ge6autjksu8",
-      "dependsOn": [
-        "ansi-regex@5.0.1"
-      ]
+      "dependsOn": ["ansi-regex@5.0.1"]
     },
     {
       "ref": "wrap-ansi@7.0.0",
@@ -81287,60 +80557,43 @@
     },
     {
       "ref": "wrap-ansi@8.1.0|strip-ansi@7.1.0",
-      "dependsOn": [
-        "wrap-ansi@8.1.0|ansi-regex@6.1.0"
-      ]
+      "dependsOn": ["wrap-ansi@8.1.0|ansi-regex@6.1.0"]
     },
     {
       "ref": "wrap-ansi@8.1.0|ansi-regex@6.1.0"
     },
     {
       "ref": "path-scurry@2.0.0",
-      "dependsOn": [
-        "path-scurry@2.0.0|lru-cache@11.0.1",
-        "minipass@7.1.2"
-      ]
+      "dependsOn": ["path-scurry@2.0.0|lru-cache@11.0.1", "minipass@7.1.2"]
     },
     {
       "ref": "path-scurry@2.0.0|lru-cache@11.0.1"
     },
     {
       "ref": "hi-profiles@1.1.0",
-      "dependsOn": [
-        "react-dom@18.3.1",
-        "react-icons@4.12.0",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react-dom@18.3.1", "react-icons@4.12.0", "react@18.3.1"]
     },
     {
       "ref": "react-icons@4.12.0",
-      "dependsOn": [
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react@18.3.1"]
     },
     {
       "ref": "husky@8.0.3"
     },
     {
       "ref": "i18next-browser-languagedetector@7.2.1",
-      "dependsOn": [
-        "@babel/runtime@7.25.7"
-      ]
+      "dependsOn": ["@babel/runtime@7.25.7"]
     },
     {
       "ref": "@babel/runtime@7.25.7",
-      "dependsOn": [
-        "regenerator-runtime@0.14.1"
-      ]
+      "dependsOn": ["regenerator-runtime@0.14.1"]
     },
     {
       "ref": "regenerator-runtime@0.14.1"
     },
     {
       "ref": "i18next@23.15.2",
-      "dependsOn": [
-        "@babel/runtime@7.25.7"
-      ]
+      "dependsOn": ["@babel/runtime@7.25.7"]
     },
     {
       "ref": "lint-staged@13.3.0",
@@ -81365,9 +80618,7 @@
     },
     {
       "ref": "lint-staged@13.3.0|debug@4.3.4",
-      "dependsOn": [
-        "lint-staged@13.3.0|ms@2.1.2"
-      ]
+      "dependsOn": ["lint-staged@13.3.0|ms@2.1.2"]
     },
     {
       "ref": "lint-staged@13.3.0|ms@2.1.2"
@@ -81397,18 +80648,14 @@
     },
     {
       "ref": "lint-staged@13.3.0|npm-run-path@5.3.0",
-      "dependsOn": [
-        "lint-staged@13.3.0|path-key@4.0.0"
-      ]
+      "dependsOn": ["lint-staged@13.3.0|path-key@4.0.0"]
     },
     {
       "ref": "lint-staged@13.3.0|path-key@4.0.0"
     },
     {
       "ref": "lint-staged@13.3.0|onetime@6.0.0",
-      "dependsOn": [
-        "lint-staged@13.3.0|mimic-fn@4.0.0"
-      ]
+      "dependsOn": ["lint-staged@13.3.0|mimic-fn@4.0.0"]
     },
     {
       "ref": "lint-staged@13.3.0|mimic-fn@4.0.0"
@@ -81461,9 +80708,7 @@
     },
     {
       "ref": "lint-staged@13.3.0|strip-ansi@7.1.0",
-      "dependsOn": [
-        "lint-staged@13.3.0|ansi-regex@6.1.0"
-      ]
+      "dependsOn": ["lint-staged@13.3.0|ansi-regex@6.1.0"]
     },
     {
       "ref": "lint-staged@13.3.0|log-update@5.0.1",
@@ -81477,18 +80722,14 @@
     },
     {
       "ref": "lint-staged@13.3.0|ansi-escapes@5.0.0",
-      "dependsOn": [
-        "lint-staged@13.3.0|type-fest@1.4.0"
-      ]
+      "dependsOn": ["lint-staged@13.3.0|type-fest@1.4.0"]
     },
     {
       "ref": "lint-staged@13.3.0|type-fest@1.4.0"
     },
     {
       "ref": "lint-staged@13.3.0|cli-cursor@4.0.0",
-      "dependsOn": [
-        "lint-staged@13.3.0|restore-cursor@4.0.0"
-      ]
+      "dependsOn": ["lint-staged@13.3.0|restore-cursor@4.0.0"]
     },
     {
       "ref": "lint-staged@13.3.0|restore-cursor@4.0.0",
@@ -81499,9 +80740,7 @@
     },
     {
       "ref": "lint-staged@13.3.0|restore-cursor@4.0.0|onetime@5.1.2",
-      "dependsOn": [
-        "lint-staged@13.3.0|restore-cursor@4.0.0|mimic-fn@2.1.0"
-      ]
+      "dependsOn": ["lint-staged@13.3.0|restore-cursor@4.0.0|mimic-fn@2.1.0"]
     },
     {
       "ref": "lint-staged@13.3.0|restore-cursor@4.0.0|mimic-fn@2.1.0"
@@ -81511,10 +80750,7 @@
     },
     {
       "ref": "lint-staged@13.3.0|micromatch@4.0.5",
-      "dependsOn": [
-        "braces@3.0.3",
-        "picomatch@2.3.1"
-      ]
+      "dependsOn": ["braces@3.0.3", "picomatch@2.3.1"]
     },
     {
       "ref": "lilconfig@2.1.0"
@@ -81524,21 +80760,15 @@
     },
     {
       "ref": "braces@3.0.3",
-      "dependsOn": [
-        "fill-range@7.1.1"
-      ]
+      "dependsOn": ["fill-range@7.1.1"]
     },
     {
       "ref": "fill-range@7.1.1",
-      "dependsOn": [
-        "to-regex-range@5.0.1"
-      ]
+      "dependsOn": ["to-regex-range@5.0.1"]
     },
     {
       "ref": "to-regex-range@5.0.1",
-      "dependsOn": [
-        "is-number@7.0.0"
-      ]
+      "dependsOn": ["is-number@7.0.0"]
     },
     {
       "ref": "is-number@7.0.0"
@@ -81554,15 +80784,11 @@
     },
     {
       "ref": "local-cypress@1.2.6",
-      "dependsOn": [
-        "local-cypress@1.2.6|debug@4.3.4"
-      ]
+      "dependsOn": ["local-cypress@1.2.6|debug@4.3.4"]
     },
     {
       "ref": "local-cypress@1.2.6|debug@4.3.4",
-      "dependsOn": [
-        "local-cypress@1.2.6|ms@2.1.2"
-      ]
+      "dependsOn": ["local-cypress@1.2.6|ms@2.1.2"]
     },
     {
       "ref": "local-cypress@1.2.6|ms@2.1.2"
@@ -81572,9 +80798,7 @@
     },
     {
       "ref": "lucide-react@0.446.0",
-      "dependsOn": [
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react@18.3.1"]
     },
     {
       "ref": "postcss-loader@7.3.4",
@@ -81598,9 +80822,7 @@
     },
     {
       "ref": "parent-module@1.0.1",
-      "dependsOn": [
-        "callsites@3.1.0"
-      ]
+      "dependsOn": ["callsites@3.1.0"]
     },
     {
       "ref": "callsites@3.1.0"
@@ -81659,10 +80881,7 @@
     },
     {
       "ref": "webpack@5.95.0|eslint-scope@5.1.1",
-      "dependsOn": [
-        "esrecurse@4.3.0",
-        "webpack@5.95.0|estraverse@4.3.0"
-      ]
+      "dependsOn": ["esrecurse@4.3.0", "webpack@5.95.0|estraverse@4.3.0"]
     },
     {
       "ref": "webpack@5.95.0|estraverse@4.3.0"
@@ -81731,15 +80950,11 @@
     },
     {
       "ref": "@webassemblyjs/ieee754@1.11.6",
-      "dependsOn": [
-        "@xtuc/ieee754@1.2.0"
-      ]
+      "dependsOn": ["@xtuc/ieee754@1.2.0"]
     },
     {
       "ref": "@webassemblyjs/leb128@1.11.6",
-      "dependsOn": [
-        "@xtuc/long@4.2.2"
-      ]
+      "dependsOn": ["@xtuc/long@4.2.2"]
     },
     {
       "ref": "@webassemblyjs/utf8@1.11.6"
@@ -81766,19 +80981,14 @@
     },
     {
       "ref": "@webassemblyjs/wast-printer@1.12.1",
-      "dependsOn": [
-        "@webassemblyjs/ast@1.12.1",
-        "@xtuc/long@4.2.2"
-      ]
+      "dependsOn": ["@webassemblyjs/ast@1.12.1", "@xtuc/long@4.2.2"]
     },
     {
       "ref": "@xtuc/ieee754@1.2.0"
     },
     {
       "ref": "acorn-import-attributes@1.9.5",
-      "dependsOn": [
-        "acorn@8.12.1"
-      ]
+      "dependsOn": ["acorn@8.12.1"]
     },
     {
       "ref": "chrome-trace-event@1.0.4"
@@ -81811,9 +81021,7 @@
     },
     {
       "ref": "ajv-keywords@3.5.2",
-      "dependsOn": [
-        "ajv@6.12.6"
-      ]
+      "dependsOn": ["ajv@6.12.6"]
     },
     {
       "ref": "terser-webpack-plugin@5.3.10",
@@ -81846,15 +81054,11 @@
     },
     {
       "ref": "serialize-javascript@6.0.2",
-      "dependsOn": [
-        "randombytes@2.1.0"
-      ]
+      "dependsOn": ["randombytes@2.1.0"]
     },
     {
       "ref": "randombytes@2.1.0",
-      "dependsOn": [
-        "safe-buffer@5.2.1"
-      ]
+      "dependsOn": ["safe-buffer@5.2.1"]
     },
     {
       "ref": "terser@5.34.1",
@@ -81870,10 +81074,7 @@
     },
     {
       "ref": "watchpack@2.4.2",
-      "dependsOn": [
-        "glob-to-regexp@0.4.1",
-        "graceful-fs@4.2.11"
-      ]
+      "dependsOn": ["glob-to-regexp@0.4.1", "graceful-fs@4.2.11"]
     },
     {
       "ref": "webpack-sources@3.2.3"
@@ -81883,15 +81084,11 @@
     },
     {
       "ref": "prettier-plugin-tailwindcss@0.6.8",
-      "dependsOn": [
-        "prettier@3.3.3"
-      ]
+      "dependsOn": ["prettier@3.3.3"]
     },
     {
       "ref": "loose-envify@1.4.0",
-      "dependsOn": [
-        "js-tokens@4.0.0"
-      ]
+      "dependsOn": ["js-tokens@4.0.0"]
     },
     {
       "ref": "js-tokens@4.0.0"
@@ -81904,15 +81101,11 @@
     },
     {
       "ref": "qrcode.react@3.2.0",
-      "dependsOn": [
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react@18.3.1"]
     },
     {
       "ref": "raviger@4.1.2",
-      "dependsOn": [
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react@18.3.1"]
     },
     {
       "ref": "react-copy-to-clipboard@5.1.0",
@@ -81924,18 +81117,14 @@
     },
     {
       "ref": "copy-to-clipboard@3.3.3",
-      "dependsOn": [
-        "toggle-selection@1.0.6"
-      ]
+      "dependsOn": ["toggle-selection@1.0.6"]
     },
     {
       "ref": "toggle-selection@1.0.6"
     },
     {
       "ref": "react-dnd-html5-backend@16.0.1",
-      "dependsOn": [
-        "dnd-core@16.0.1"
-      ]
+      "dependsOn": ["dnd-core@16.0.1"]
     },
     {
       "ref": "dnd-core@16.0.1",
@@ -81953,9 +81142,7 @@
     },
     {
       "ref": "redux@4.2.1",
-      "dependsOn": [
-        "@babel/runtime@7.25.7"
-      ]
+      "dependsOn": ["@babel/runtime@7.25.7"]
     },
     {
       "ref": "react-dnd-scrolling@1.3.10",
@@ -81971,18 +81158,14 @@
     },
     {
       "ref": "hoist-non-react-statics@3.3.2",
-      "dependsOn": [
-        "react-is@16.13.1"
-      ]
+      "dependsOn": ["react-is@16.13.1"]
     },
     {
       "ref": "lodash.throttle@4.1.1"
     },
     {
       "ref": "raf@3.4.1",
-      "dependsOn": [
-        "performance-now@2.1.0"
-      ]
+      "dependsOn": ["performance-now@2.1.0"]
     },
     {
       "ref": "react-dnd@16.0.1",
@@ -82003,16 +81186,11 @@
     },
     {
       "ref": "@types/hoist-non-react-statics@3.3.5",
-      "dependsOn": [
-        "@types/react@18.3.2",
-        "hoist-non-react-statics@3.3.2"
-      ]
+      "dependsOn": ["@types/react@18.3.2", "hoist-non-react-statics@3.3.2"]
     },
     {
       "ref": "scheduler@0.23.2",
-      "dependsOn": [
-        "loose-envify@1.4.0"
-      ]
+      "dependsOn": ["loose-envify@1.4.0"]
     },
     {
       "ref": "react-google-recaptcha@3.1.0",
@@ -82041,19 +81219,14 @@
     },
     {
       "ref": "html-parse-stringify@3.0.1",
-      "dependsOn": [
-        "void-elements@3.1.0"
-      ]
+      "dependsOn": ["void-elements@3.1.0"]
     },
     {
       "ref": "void-elements@3.1.0"
     },
     {
       "ref": "react-infinite-scroll-component@6.1.0",
-      "dependsOn": [
-        "react@18.3.1",
-        "throttle-debounce@2.3.0"
-      ]
+      "dependsOn": ["react@18.3.1", "throttle-debounce@2.3.0"]
     },
     {
       "ref": "throttle-debounce@2.3.0"
@@ -82113,15 +81286,11 @@
     },
     {
       "ref": "react-markdown@8.0.7|mdast-util-to-string@3.2.0",
-      "dependsOn": [
-        "@types/mdast@3.0.15"
-      ]
+      "dependsOn": ["@types/mdast@3.0.15"]
     },
     {
       "ref": "react-markdown@8.0.7|micromark-util-decode-numeric-character-reference@1.1.0",
-      "dependsOn": [
-        "react-markdown@8.0.7|micromark-util-symbol@1.1.0"
-      ]
+      "dependsOn": ["react-markdown@8.0.7|micromark-util-symbol@1.1.0"]
     },
     {
       "ref": "react-markdown@8.0.7|micromark-util-symbol@1.1.0"
@@ -82147,9 +81316,7 @@
     },
     {
       "ref": "react-markdown@8.0.7|micromark-util-normalize-identifier@1.1.0",
-      "dependsOn": [
-        "react-markdown@8.0.7|micromark-util-symbol@1.1.0"
-      ]
+      "dependsOn": ["react-markdown@8.0.7|micromark-util-symbol@1.1.0"]
     },
     {
       "ref": "react-markdown@8.0.7|micromark@3.2.0",
@@ -82238,9 +81405,7 @@
     },
     {
       "ref": "react-markdown@8.0.7|micromark-util-chunked@1.1.0",
-      "dependsOn": [
-        "react-markdown@8.0.7|micromark-util-symbol@1.1.0"
-      ]
+      "dependsOn": ["react-markdown@8.0.7|micromark-util-symbol@1.1.0"]
     },
     {
       "ref": "react-markdown@8.0.7|micromark-util-classify-character@1.1.0",
@@ -82255,9 +81420,7 @@
     },
     {
       "ref": "react-markdown@8.0.7|micromark-util-resolve-all@1.1.0",
-      "dependsOn": [
-        "react-markdown@8.0.7|micromark-util-types@1.1.0"
-      ]
+      "dependsOn": ["react-markdown@8.0.7|micromark-util-types@1.1.0"]
     },
     {
       "ref": "react-markdown@8.0.7|micromark-util-subtokenize@1.1.0",
@@ -82277,9 +81440,7 @@
     },
     {
       "ref": "react-markdown@8.0.7|unist-util-stringify-position@3.0.3",
-      "dependsOn": [
-        "react-markdown@8.0.7|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["react-markdown@8.0.7|@types/unist@2.0.11"]
     },
     {
       "ref": "react-markdown@8.0.7|unified@10.1.2",
@@ -82312,9 +81473,7 @@
     },
     {
       "ref": "react-markdown@8.0.7|unist-util-is@5.2.1",
-      "dependsOn": [
-        "react-markdown@8.0.7|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["react-markdown@8.0.7|@types/unist@2.0.11"]
     },
     {
       "ref": "react-markdown@8.0.7|unist-util-visit-parents@5.1.3",
@@ -82332,9 +81491,7 @@
     },
     {
       "ref": "@types/hast@2.3.10",
-      "dependsOn": [
-        "@types/hast@2.3.10|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["@types/hast@2.3.10|@types/unist@2.0.11"]
     },
     {
       "ref": "@types/hast@2.3.10|@types/unist@2.0.11"
@@ -82407,9 +81564,7 @@
     },
     {
       "ref": "remark-rehype@10.1.0|unist-util-stringify-position@3.0.3",
-      "dependsOn": [
-        "remark-rehype@10.1.0|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["remark-rehype@10.1.0|@types/unist@2.0.11"]
     },
     {
       "ref": "remark-rehype@10.1.0|vfile-message@3.1.4",
@@ -82444,9 +81599,7 @@
     },
     {
       "ref": "mdast-util-to-hast@12.3.0|unist-util-is@5.2.1",
-      "dependsOn": [
-        "mdast-util-to-hast@12.3.0|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["mdast-util-to-hast@12.3.0|@types/unist@2.0.11"]
     },
     {
       "ref": "mdast-util-to-hast@12.3.0|unist-util-visit-parents@5.1.3",
@@ -82476,9 +81629,7 @@
     },
     {
       "ref": "mdast-util-definitions@5.1.2|unist-util-is@5.2.1",
-      "dependsOn": [
-        "mdast-util-definitions@5.1.2|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["mdast-util-definitions@5.1.2|@types/unist@2.0.11"]
     },
     {
       "ref": "mdast-util-definitions@5.1.2|unist-util-visit-parents@5.1.3",
@@ -82495,9 +81646,7 @@
     },
     {
       "ref": "unist-util-position@4.0.4",
-      "dependsOn": [
-        "unist-util-position@4.0.4|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["unist-util-position@4.0.4|@types/unist@2.0.11"]
     },
     {
       "ref": "unist-util-position@4.0.4|@types/unist@2.0.11"
@@ -82510,9 +81659,7 @@
     },
     {
       "ref": "style-to-object@0.4.4",
-      "dependsOn": [
-        "inline-style-parser@0.1.1"
-      ]
+      "dependsOn": ["inline-style-parser@0.1.1"]
     },
     {
       "ref": "inline-style-parser@0.1.1"
@@ -82541,16 +81688,11 @@
     },
     {
       "ref": "merge-refs@1.3.0",
-      "dependsOn": [
-        "@types/react@18.3.2"
-      ]
+      "dependsOn": ["@types/react@18.3.2"]
     },
     {
       "ref": "pdfjs-dist@4.4.168",
-      "dependsOn": [
-        "canvas@2.11.2",
-        "path2d@0.2.1"
-      ]
+      "dependsOn": ["canvas@2.11.2", "path2d@0.2.1"]
     },
     {
       "ref": "canvas@2.11.2",
@@ -82579,38 +81721,26 @@
     },
     {
       "ref": "https-proxy-agent@5.0.1",
-      "dependsOn": [
-        "agent-base@6.0.2",
-        "debug@4.3.7"
-      ]
+      "dependsOn": ["agent-base@6.0.2", "debug@4.3.7"]
     },
     {
       "ref": "agent-base@6.0.2",
-      "dependsOn": [
-        "debug@4.3.7"
-      ]
+      "dependsOn": ["debug@4.3.7"]
     },
     {
       "ref": "make-dir@3.1.0",
-      "dependsOn": [
-        "make-dir@3.1.0|semver@6.3.1"
-      ]
+      "dependsOn": ["make-dir@3.1.0|semver@6.3.1"]
     },
     {
       "ref": "make-dir@3.1.0|semver@6.3.1"
     },
     {
       "ref": "node-fetch@2.7.0",
-      "dependsOn": [
-        "whatwg-url@5.0.0"
-      ]
+      "dependsOn": ["whatwg-url@5.0.0"]
     },
     {
       "ref": "whatwg-url@5.0.0",
-      "dependsOn": [
-        "tr46@0.0.3",
-        "webidl-conversions@3.0.1"
-      ]
+      "dependsOn": ["tr46@0.0.3", "webidl-conversions@3.0.1"]
     },
     {
       "ref": "tr46@0.0.3"
@@ -82620,9 +81750,7 @@
     },
     {
       "ref": "nopt@5.0.0",
-      "dependsOn": [
-        "abbrev@1.1.1"
-      ]
+      "dependsOn": ["abbrev@1.1.1"]
     },
     {
       "ref": "abbrev@1.1.1"
@@ -82638,10 +81766,7 @@
     },
     {
       "ref": "are-we-there-yet@2.0.0",
-      "dependsOn": [
-        "delegates@1.0.0",
-        "readable-stream@3.6.2"
-      ]
+      "dependsOn": ["delegates@1.0.0", "readable-stream@3.6.2"]
     },
     {
       "ref": "delegates@1.0.0"
@@ -82674,9 +81799,7 @@
     },
     {
       "ref": "wide-align@1.1.5",
-      "dependsOn": [
-        "string-width@4.2.3"
-      ]
+      "dependsOn": ["string-width@4.2.3"]
     },
     {
       "ref": "set-blocking@2.0.0"
@@ -82703,15 +81826,11 @@
     },
     {
       "ref": "fs-minipass@2.1.0",
-      "dependsOn": [
-        "fs-minipass@2.1.0|minipass@3.3.6"
-      ]
+      "dependsOn": ["fs-minipass@2.1.0|minipass@3.3.6"]
     },
     {
       "ref": "fs-minipass@2.1.0|minipass@3.3.6",
-      "dependsOn": [
-        "fs-minipass@2.1.0|yallist@4.0.0"
-      ]
+      "dependsOn": ["fs-minipass@2.1.0|yallist@4.0.0"]
     },
     {
       "ref": "fs-minipass@2.1.0|yallist@4.0.0"
@@ -82725,9 +81844,7 @@
     },
     {
       "ref": "minizlib@2.1.2|minipass@3.3.6",
-      "dependsOn": [
-        "minizlib@2.1.2|yallist@4.0.0"
-      ]
+      "dependsOn": ["minizlib@2.1.2|yallist@4.0.0"]
     },
     {
       "ref": "minizlib@2.1.2|yallist@4.0.0"
@@ -82748,9 +81865,7 @@
     },
     {
       "ref": "decompress-response@4.2.1",
-      "dependsOn": [
-        "mimic-response@2.1.0"
-      ]
+      "dependsOn": ["mimic-response@2.1.0"]
     },
     {
       "ref": "mimic-response@2.1.0"
@@ -82766,9 +81881,7 @@
     },
     {
       "ref": "warning@4.0.3",
-      "dependsOn": [
-        "loose-envify@1.4.0"
-      ]
+      "dependsOn": ["loose-envify@1.4.0"]
     },
     {
       "ref": "react-redux@8.1.3",
@@ -82794,28 +81907,19 @@
     },
     {
       "ref": "use-sync-external-store@1.2.2",
-      "dependsOn": [
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react@18.3.1"]
     },
     {
       "ref": "react-webcam@7.2.0",
-      "dependsOn": [
-        "react-dom@18.3.1",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react-dom@18.3.1", "react@18.3.1"]
     },
     {
       "ref": "redux-devtools-extension@2.13.9",
-      "dependsOn": [
-        "redux@4.2.1"
-      ]
+      "dependsOn": ["redux@4.2.1"]
     },
     {
       "ref": "redux-thunk@2.4.2",
-      "dependsOn": [
-        "redux@4.2.1"
-      ]
+      "dependsOn": ["redux@4.2.1"]
     },
     {
       "ref": "rehype-raw@6.1.1",
@@ -82851,9 +81955,7 @@
     },
     {
       "ref": "rehype-raw@6.1.1|unist-util-stringify-position@3.0.3",
-      "dependsOn": [
-        "rehype-raw@6.1.1|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["rehype-raw@6.1.1|@types/unist@2.0.11"]
     },
     {
       "ref": "rehype-raw@6.1.1|vfile-message@3.1.4",
@@ -82891,9 +81993,7 @@
     },
     {
       "ref": "hast-util-raw@7.2.3|unist-util-is@5.2.1",
-      "dependsOn": [
-        "hast-util-raw@7.2.3|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["hast-util-raw@7.2.3|@types/unist@2.0.11"]
     },
     {
       "ref": "hast-util-raw@7.2.3|unist-util-visit-parents@5.1.3",
@@ -82913,9 +82013,7 @@
     },
     {
       "ref": "hast-util-raw@7.2.3|unist-util-stringify-position@3.0.3",
-      "dependsOn": [
-        "hast-util-raw@7.2.3|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["hast-util-raw@7.2.3|@types/unist@2.0.11"]
     },
     {
       "ref": "hast-util-raw@7.2.3|vfile-message@3.1.4",
@@ -82953,9 +82051,7 @@
     },
     {
       "ref": "hast-util-from-parse5@7.1.2|unist-util-stringify-position@3.0.3",
-      "dependsOn": [
-        "hast-util-from-parse5@7.1.2|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["hast-util-from-parse5@7.1.2|@types/unist@2.0.11"]
     },
     {
       "ref": "hast-util-from-parse5@7.1.2|vfile-message@3.1.4",
@@ -82976,9 +82072,7 @@
     },
     {
       "ref": "hast-util-parse-selector@3.1.1",
-      "dependsOn": [
-        "@types/hast@2.3.10"
-      ]
+      "dependsOn": ["@types/hast@2.3.10"]
     },
     {
       "ref": "vfile-location@4.1.0",
@@ -83001,9 +82095,7 @@
     },
     {
       "ref": "vfile-location@4.1.0|unist-util-stringify-position@3.0.3",
-      "dependsOn": [
-        "vfile-location@4.1.0|@types/unist@2.0.11"
-      ]
+      "dependsOn": ["vfile-location@4.1.0|@types/unist@2.0.11"]
     },
     {
       "ref": "vfile-location@4.1.0|vfile-message@3.1.4",
@@ -83034,10 +82126,7 @@
     },
     {
       "ref": "snyk@1.1293.1",
-      "dependsOn": [
-        "@sentry/node@7.119.1",
-        "global-agent@3.0.0"
-      ]
+      "dependsOn": ["@sentry/node@7.119.1", "global-agent@3.0.0"]
     },
     {
       "ref": "@sentry/node@7.119.1",
@@ -83061,9 +82150,7 @@
     },
     {
       "ref": "@sentry/node@7.119.1|@sentry/utils@7.119.1",
-      "dependsOn": [
-        "@sentry/node@7.119.1|@sentry/types@7.119.1"
-      ]
+      "dependsOn": ["@sentry/node@7.119.1|@sentry/types@7.119.1"]
     },
     {
       "ref": "@sentry-internal/tracing@7.119.1",
@@ -83085,9 +82172,7 @@
     },
     {
       "ref": "@sentry-internal/tracing@7.119.1|@sentry/utils@7.119.1",
-      "dependsOn": [
-        "@sentry-internal/tracing@7.119.1|@sentry/types@7.119.1"
-      ]
+      "dependsOn": ["@sentry-internal/tracing@7.119.1|@sentry/types@7.119.1"]
     },
     {
       "ref": "@sentry/integrations@7.119.1",
@@ -83110,21 +82195,15 @@
     },
     {
       "ref": "@sentry/integrations@7.119.1|@sentry/utils@7.119.1",
-      "dependsOn": [
-        "@sentry/integrations@7.119.1|@sentry/types@7.119.1"
-      ]
+      "dependsOn": ["@sentry/integrations@7.119.1|@sentry/types@7.119.1"]
     },
     {
       "ref": "localforage@1.10.0",
-      "dependsOn": [
-        "lie@3.1.1"
-      ]
+      "dependsOn": ["lie@3.1.1"]
     },
     {
       "ref": "lie@3.1.1",
-      "dependsOn": [
-        "immediate@3.0.6"
-      ]
+      "dependsOn": ["immediate@3.0.6"]
     },
     {
       "ref": "immediate@3.0.6"
@@ -83148,9 +82227,7 @@
     },
     {
       "ref": "matcher@3.0.0",
-      "dependsOn": [
-        "escape-string-regexp@4.0.0"
-      ]
+      "dependsOn": ["escape-string-regexp@4.0.0"]
     },
     {
       "ref": "roarr@2.15.4",
@@ -83174,9 +82251,7 @@
     },
     {
       "ref": "serialize-error@7.0.1",
-      "dependsOn": [
-        "serialize-error@7.0.1|type-fest@0.13.1"
-      ]
+      "dependsOn": ["serialize-error@7.0.1|type-fest@0.13.1"]
     },
     {
       "ref": "serialize-error@7.0.1|type-fest@0.13.1"
@@ -83186,9 +82261,7 @@
     },
     {
       "ref": "tailwindcss-animate@1.0.7",
-      "dependsOn": [
-        "tailwindcss@3.4.13"
-      ]
+      "dependsOn": ["tailwindcss@3.4.13"]
     },
     {
       "ref": "@alloc/quick-lru@5.2.0"
@@ -83207,34 +82280,25 @@
     },
     {
       "ref": "chokidar@3.6.0|glob-parent@5.1.2",
-      "dependsOn": [
-        "is-glob@4.0.3"
-      ]
+      "dependsOn": ["is-glob@4.0.3"]
     },
     {
       "ref": "anymatch@3.1.3",
-      "dependsOn": [
-        "normalize-path@3.0.0",
-        "picomatch@2.3.1"
-      ]
+      "dependsOn": ["normalize-path@3.0.0", "picomatch@2.3.1"]
     },
     {
       "ref": "normalize-path@3.0.0"
     },
     {
       "ref": "is-binary-path@2.1.0",
-      "dependsOn": [
-        "binary-extensions@2.3.0"
-      ]
+      "dependsOn": ["binary-extensions@2.3.0"]
     },
     {
       "ref": "binary-extensions@2.3.0"
     },
     {
       "ref": "readdirp@3.6.0",
-      "dependsOn": [
-        "picomatch@2.3.1"
-      ]
+      "dependsOn": ["picomatch@2.3.1"]
     },
     {
       "ref": "didyoumean@1.2.2"
@@ -83244,10 +82308,7 @@
     },
     {
       "ref": "micromatch@4.0.8",
-      "dependsOn": [
-        "braces@3.0.3",
-        "picomatch@2.3.1"
-      ]
+      "dependsOn": ["braces@3.0.3", "picomatch@2.3.1"]
     },
     {
       "ref": "is-extglob@2.1.1"
@@ -83274,16 +82335,11 @@
     },
     {
       "ref": "read-cache@1.0.0",
-      "dependsOn": [
-        "pify@2.3.0"
-      ]
+      "dependsOn": ["pify@2.3.0"]
     },
     {
       "ref": "postcss-js@4.0.1",
-      "dependsOn": [
-        "camelcase-css@2.0.1",
-        "postcss@8.4.47"
-      ]
+      "dependsOn": ["camelcase-css@2.0.1", "postcss@8.4.47"]
     },
     {
       "ref": "camelcase-css@2.0.1"
@@ -83311,10 +82367,7 @@
     },
     {
       "ref": "postcss-nested@6.2.0|postcss-selector-parser@6.1.2",
-      "dependsOn": [
-        "cssesc@3.0.0",
-        "util-deprecate@1.0.2"
-      ]
+      "dependsOn": ["cssesc@3.0.0", "util-deprecate@1.0.2"]
     },
     {
       "ref": "sucrase@3.35.0",
@@ -83344,17 +82397,11 @@
     },
     {
       "ref": "sucrase@3.35.0|jackspeak@3.4.3",
-      "dependsOn": [
-        "@isaacs/cliui@8.0.2",
-        "@pkgjs/parseargs@0.11.0"
-      ]
+      "dependsOn": ["@isaacs/cliui@8.0.2", "@pkgjs/parseargs@0.11.0"]
     },
     {
       "ref": "sucrase@3.35.0|path-scurry@1.11.1",
-      "dependsOn": [
-        "sucrase@3.35.0|lru-cache@10.4.3",
-        "minipass@7.1.2"
-      ]
+      "dependsOn": ["sucrase@3.35.0|lru-cache@10.4.3", "minipass@7.1.2"]
     },
     {
       "ref": "sucrase@3.35.0|lru-cache@10.4.3"
@@ -83383,15 +82430,11 @@
     },
     {
       "ref": "thenify-all@1.6.0",
-      "dependsOn": [
-        "thenify@3.3.1"
-      ]
+      "dependsOn": ["thenify@3.3.1"]
     },
     {
       "ref": "thenify@3.3.1",
-      "dependsOn": [
-        "any-promise@1.3.0"
-      ]
+      "dependsOn": ["any-promise@1.3.0"]
     },
     {
       "ref": "pirates@4.0.6"
@@ -83401,10 +82444,7 @@
     },
     {
       "ref": "use-keyboard-shortcut@1.1.6",
-      "dependsOn": [
-        "react-dom@18.3.1",
-        "react@18.3.1"
-      ]
+      "dependsOn": ["react-dom@18.3.1", "react@18.3.1"]
     },
     {
       "ref": "uuid@10.0.0"
@@ -83463,15 +82503,11 @@
     },
     {
       "ref": "@babel/highlight@7.25.7|ansi-styles@3.2.1",
-      "dependsOn": [
-        "@babel/highlight@7.25.7|color-convert@1.9.3"
-      ]
+      "dependsOn": ["@babel/highlight@7.25.7|color-convert@1.9.3"]
     },
     {
       "ref": "@babel/highlight@7.25.7|color-convert@1.9.3",
-      "dependsOn": [
-        "@babel/highlight@7.25.7|color-name@1.1.3"
-      ]
+      "dependsOn": ["@babel/highlight@7.25.7|color-name@1.1.3"]
     },
     {
       "ref": "@babel/highlight@7.25.7|color-name@1.1.3"
@@ -83481,9 +82517,7 @@
     },
     {
       "ref": "@babel/highlight@7.25.7|supports-color@5.5.0",
-      "dependsOn": [
-        "@babel/highlight@7.25.7|has-flag@3.0.0"
-      ]
+      "dependsOn": ["@babel/highlight@7.25.7|has-flag@3.0.0"]
     },
     {
       "ref": "@babel/highlight@7.25.7|has-flag@3.0.0"
@@ -83510,16 +82544,11 @@
     },
     {
       "ref": "vscode-languageclient@7.0.0|minimatch@3.1.2",
-      "dependsOn": [
-        "vscode-languageclient@7.0.0|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["vscode-languageclient@7.0.0|brace-expansion@1.1.11"]
     },
     {
       "ref": "vscode-languageclient@7.0.0|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "vscode-languageserver-protocol@3.16.0",
@@ -83539,9 +82568,7 @@
     },
     {
       "ref": "vscode-languageserver@7.0.0",
-      "dependsOn": [
-        "vscode-languageserver-protocol@3.16.0"
-      ]
+      "dependsOn": ["vscode-languageserver-protocol@3.16.0"]
     },
     {
       "ref": "vscode-uri@3.0.8"
@@ -83657,9 +82684,7 @@
     },
     {
       "ref": "workbox-build@7.1.1|magic-string@0.25.9",
-      "dependsOn": [
-        "sourcemap-codec@1.4.8"
-      ]
+      "dependsOn": ["sourcemap-codec@1.4.8"]
     },
     {
       "ref": "workbox-build@7.1.1|json-schema-traverse@1.0.0"
@@ -83677,22 +82702,15 @@
     },
     {
       "ref": "workbox-build@7.1.1|minimatch@3.1.2",
-      "dependsOn": [
-        "workbox-build@7.1.1|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["workbox-build@7.1.1|brace-expansion@1.1.11"]
     },
     {
       "ref": "workbox-build@7.1.1|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "workbox-build@7.1.1|source-map@0.8.0-beta.0",
-      "dependsOn": [
-        "workbox-build@7.1.1|whatwg-url@7.1.0"
-      ]
+      "dependsOn": ["workbox-build@7.1.1|whatwg-url@7.1.0"]
     },
     {
       "ref": "workbox-build@7.1.1|whatwg-url@7.1.0",
@@ -83704,9 +82722,7 @@
     },
     {
       "ref": "workbox-build@7.1.1|tr46@1.0.1",
-      "dependsOn": [
-        "punycode@2.3.1"
-      ]
+      "dependsOn": ["punycode@2.3.1"]
     },
     {
       "ref": "workbox-build@7.1.1|webidl-conversions@4.0.2"
@@ -83757,9 +82773,7 @@
     },
     {
       "ref": "lru-cache@5.1.1",
-      "dependsOn": [
-        "yallist@3.1.1"
-      ]
+      "dependsOn": ["yallist@3.1.1"]
     },
     {
       "ref": "yallist@3.1.1"
@@ -83776,17 +82790,11 @@
     },
     {
       "ref": "@babel/helper-module-imports@7.25.7",
-      "dependsOn": [
-        "@babel/traverse@7.25.7",
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/traverse@7.25.7", "@babel/types@7.25.7"]
     },
     {
       "ref": "@babel/helper-simple-access@7.25.7",
-      "dependsOn": [
-        "@babel/traverse@7.25.7",
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/traverse@7.25.7", "@babel/types@7.25.7"]
     },
     {
       "ref": "@babel/traverse@7.25.7",
@@ -83805,10 +82813,7 @@
     },
     {
       "ref": "@babel/helpers@7.25.7",
-      "dependsOn": [
-        "@babel/template@7.25.7",
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/template@7.25.7", "@babel/types@7.25.7"]
     },
     {
       "ref": "@babel/template@7.25.7",
@@ -83932,17 +82937,11 @@
     },
     {
       "ref": "@babel/plugin-bugfix-safari-class-field-initializer-scope@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining@7.25.7",
@@ -83955,10 +82954,7 @@
     },
     {
       "ref": "@babel/helper-skip-transparent-expression-wrappers@7.25.7",
-      "dependsOn": [
-        "@babel/traverse@7.25.7",
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/traverse@7.25.7", "@babel/types@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-optional-chaining@7.25.7",
@@ -83979,128 +82975,75 @@
     },
     {
       "ref": "@babel/plugin-proposal-private-property-in-object@7.21.0-placeholder-for-preset-env.2",
-      "dependsOn": [
-        "@babel/core@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-async-generators@7.8.4",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-class-properties@7.12.13",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-class-static-block@7.14.5",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-dynamic-import@7.8.3",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-export-namespace-from@7.8.3",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-import-assertions@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-import-attributes@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-import-meta@7.10.4",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-json-strings@7.8.3",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-logical-assignment-operators@7.10.4",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-nullish-coalescing-operator@7.8.3",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-numeric-separator@7.10.4",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-object-rest-spread@7.8.3",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-optional-catch-binding@7.8.3",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-optional-chaining@7.8.3",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-private-property-in-object@7.14.5",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-top-level-await@7.14.5",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-syntax-unicode-sets-regex@7.18.6",
@@ -84124,9 +83067,7 @@
     },
     {
       "ref": "@babel/helper-annotate-as-pure@7.25.7",
-      "dependsOn": [
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/types@7.25.7"]
     },
     {
       "ref": "regexpu-core@6.1.1",
@@ -84141,9 +83082,7 @@
     },
     {
       "ref": "regenerate-unicode-properties@10.2.0",
-      "dependsOn": [
-        "regenerate@1.4.2"
-      ]
+      "dependsOn": ["regenerate@1.4.2"]
     },
     {
       "ref": "regenerate@1.4.2"
@@ -84153,9 +83092,7 @@
     },
     {
       "ref": "regjsparser@0.11.1",
-      "dependsOn": [
-        "jsesc@3.0.2"
-      ]
+      "dependsOn": ["jsesc@3.0.2"]
     },
     {
       "ref": "unicode-match-property-ecmascript@2.0.0",
@@ -84175,10 +83112,7 @@
     },
     {
       "ref": "@babel/plugin-transform-arrow-functions@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-async-generator-functions@7.25.7",
@@ -84218,17 +83152,11 @@
     },
     {
       "ref": "@babel/plugin-transform-block-scoped-functions@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-block-scoping@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-class-properties@7.25.7",
@@ -84256,16 +83184,11 @@
     },
     {
       "ref": "@babel/helper-member-expression-to-functions@7.25.7",
-      "dependsOn": [
-        "@babel/traverse@7.25.7",
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/traverse@7.25.7", "@babel/types@7.25.7"]
     },
     {
       "ref": "@babel/helper-optimise-call-expression@7.25.7",
-      "dependsOn": [
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/types@7.25.7"]
     },
     {
       "ref": "@babel/helper-replace-supers@7.25.7",
@@ -84310,10 +83233,7 @@
     },
     {
       "ref": "@babel/plugin-transform-destructuring@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-dotall-regex@7.25.7",
@@ -84325,10 +83245,7 @@
     },
     {
       "ref": "@babel/plugin-transform-duplicate-keys@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-duplicate-named-capturing-groups-regex@7.25.7",
@@ -84356,10 +83273,7 @@
     },
     {
       "ref": "@babel/helper-builder-binary-assignment-operator-visitor@7.25.7",
-      "dependsOn": [
-        "@babel/traverse@7.25.7",
-        "@babel/types@7.25.7"
-      ]
+      "dependsOn": ["@babel/traverse@7.25.7", "@babel/types@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-export-namespace-from@7.25.7",
@@ -84396,10 +83310,7 @@
     },
     {
       "ref": "@babel/plugin-transform-literals@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-logical-assignment-operators@7.25.7",
@@ -84411,10 +83322,7 @@
     },
     {
       "ref": "@babel/plugin-transform-member-expression-literals@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-modules-amd@7.25.7",
@@ -84461,10 +83369,7 @@
     },
     {
       "ref": "@babel/plugin-transform-new-target@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-nullish-coalescing-operator@7.25.7",
@@ -84494,10 +83399,7 @@
     },
     {
       "ref": "@babel/plugin-transform-parameters@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-object-super@7.25.7",
@@ -84535,10 +83437,7 @@
     },
     {
       "ref": "@babel/plugin-transform-property-literals@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-regenerator@7.25.7",
@@ -84550,23 +83449,15 @@
     },
     {
       "ref": "regenerator-transform@0.15.2",
-      "dependsOn": [
-        "@babel/runtime@7.25.7"
-      ]
+      "dependsOn": ["@babel/runtime@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-reserved-words@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-shorthand-properties@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-spread@7.25.7",
@@ -84578,31 +83469,19 @@
     },
     {
       "ref": "@babel/plugin-transform-sticky-regex@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-template-literals@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-typeof-symbol@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-unicode-escapes@7.25.7",
-      "dependsOn": [
-        "@babel/core@7.25.7",
-        "@babel/helper-plugin-utils@7.25.7"
-      ]
+      "dependsOn": ["@babel/core@7.25.7", "@babel/helper-plugin-utils@7.25.7"]
     },
     {
       "ref": "@babel/plugin-transform-unicode-property-regex@7.25.7",
@@ -84681,9 +83560,7 @@
     },
     {
       "ref": "core-js-compat@3.38.1",
-      "dependsOn": [
-        "browserslist@4.24.0"
-      ]
+      "dependsOn": ["browserslist@4.24.0"]
     },
     {
       "ref": "babel-plugin-polyfill-regenerator@0.6.2",
@@ -84763,15 +83640,11 @@
     },
     {
       "ref": "@surma/rollup-plugin-off-main-thread@2.2.3|magic-string@0.25.9",
-      "dependsOn": [
-        "sourcemap-codec@1.4.8"
-      ]
+      "dependsOn": ["sourcemap-codec@1.4.8"]
     },
     {
       "ref": "ejs@3.1.10",
-      "dependsOn": [
-        "jake@10.9.2"
-      ]
+      "dependsOn": ["jake@10.9.2"]
     },
     {
       "ref": "jake@10.9.2",
@@ -84784,28 +83657,19 @@
     },
     {
       "ref": "jake@10.9.2|minimatch@3.1.2",
-      "dependsOn": [
-        "jake@10.9.2|brace-expansion@1.1.11"
-      ]
+      "dependsOn": ["jake@10.9.2|brace-expansion@1.1.11"]
     },
     {
       "ref": "jake@10.9.2|brace-expansion@1.1.11",
-      "dependsOn": [
-        "balanced-match@1.0.2",
-        "concat-map@0.0.1"
-      ]
+      "dependsOn": ["balanced-match@1.0.2", "concat-map@0.0.1"]
     },
     {
       "ref": "filelist@1.0.4",
-      "dependsOn": [
-        "filelist@1.0.4|minimatch@5.1.6"
-      ]
+      "dependsOn": ["filelist@1.0.4|minimatch@5.1.6"]
     },
     {
       "ref": "filelist@1.0.4|minimatch@5.1.6",
-      "dependsOn": [
-        "brace-expansion@2.0.1"
-      ]
+      "dependsOn": ["brace-expansion@2.0.1"]
     },
     {
       "ref": "fast-uri@3.0.2"
@@ -84848,9 +83712,7 @@
     },
     {
       "ref": "unique-string@2.0.0",
-      "dependsOn": [
-        "crypto-random-string@2.0.0"
-      ]
+      "dependsOn": ["crypto-random-string@2.0.0"]
     },
     {
       "ref": "crypto-random-string@2.0.0"
@@ -84860,10 +83722,7 @@
     },
     {
       "ref": "workbox-background-sync@7.1.0",
-      "dependsOn": [
-        "idb@7.1.1",
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["idb@7.1.1", "workbox-core@7.1.0"]
     },
     {
       "ref": "idb@7.1.1"
@@ -84873,22 +83732,15 @@
     },
     {
       "ref": "workbox-broadcast-update@7.1.0",
-      "dependsOn": [
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["workbox-core@7.1.0"]
     },
     {
       "ref": "workbox-cacheable-response@7.1.0",
-      "dependsOn": [
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["workbox-core@7.1.0"]
     },
     {
       "ref": "workbox-expiration@7.1.0",
-      "dependsOn": [
-        "idb@7.1.1",
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["idb@7.1.1", "workbox-core@7.1.0"]
     },
     {
       "ref": "workbox-google-analytics@7.1.0",
@@ -84901,21 +83753,15 @@
     },
     {
       "ref": "workbox-routing@7.1.0",
-      "dependsOn": [
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["workbox-core@7.1.0"]
     },
     {
       "ref": "workbox-strategies@7.1.0",
-      "dependsOn": [
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["workbox-core@7.1.0"]
     },
     {
       "ref": "workbox-navigation-preload@7.1.0",
-      "dependsOn": [
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["workbox-core@7.1.0"]
     },
     {
       "ref": "workbox-precaching@7.1.0",
@@ -84927,9 +83773,7 @@
     },
     {
       "ref": "workbox-range-requests@7.1.0",
-      "dependsOn": [
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["workbox-core@7.1.0"]
     },
     {
       "ref": "workbox-recipes@7.1.0",
@@ -84944,20 +83788,14 @@
     },
     {
       "ref": "workbox-streams@7.1.0",
-      "dependsOn": [
-        "workbox-core@7.1.0",
-        "workbox-routing@7.1.0"
-      ]
+      "dependsOn": ["workbox-core@7.1.0", "workbox-routing@7.1.0"]
     },
     {
       "ref": "workbox-sw@7.1.0"
     },
     {
       "ref": "workbox-window@7.1.0",
-      "dependsOn": [
-        "@types/trusted-types@2.0.7",
-        "workbox-core@7.1.0"
-      ]
+      "dependsOn": ["@types/trusted-types@2.0.7", "workbox-core@7.1.0"]
     },
     {
       "ref": "@types/trusted-types@2.0.7"
@@ -84995,10 +83833,7 @@
     },
     {
       "ref": "source-map-support@0.5.21",
-      "dependsOn": [
-        "buffer-from@1.1.2",
-        "source-map@0.6.1"
-      ]
+      "dependsOn": ["buffer-from@1.1.2", "source-map@0.6.1"]
     },
     {
       "ref": "xlsx@0.18.5",
@@ -85017,10 +83852,7 @@
     },
     {
       "ref": "cfb@1.2.2",
-      "dependsOn": [
-        "adler-32@1.3.1",
-        "crc-32@1.2.2"
-      ]
+      "dependsOn": ["adler-32@1.3.1", "crc-32@1.2.2"]
     },
     {
       "ref": "crc-32@1.2.2"
@@ -85030,9 +83862,7 @@
     },
     {
       "ref": "ssf@0.11.2",
-      "dependsOn": [
-        "frac@1.1.2"
-      ]
+      "dependsOn": ["frac@1.1.2"]
     },
     {
       "ref": "frac@1.1.2"

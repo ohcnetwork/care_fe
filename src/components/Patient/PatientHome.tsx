@@ -1,6 +1,28 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
+import { useTranslation } from "react-i18next";
+
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import { ConsultationCard } from "@/components/Facility/ConsultationCard";
+import { ConsultationModel } from "@/components/Facility/models";
+import { InsuranceDetialsCard } from "@/components/Patient/InsuranceDetailsCard";
+import { SampleTestCard } from "@/components/Patient/SampleTestCard";
+import { PatientModel, SampleTestModel } from "@/components/Patient/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
 
 import {
   DISCHARGE_REASONS,
@@ -8,7 +30,14 @@ import {
   OCCUPATION_TYPES,
   SAMPLE_TEST_STATUS,
 } from "@/common/constants";
-import { PatientModel, SampleTestModel } from "./models";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   formatDate,
@@ -17,32 +46,7 @@ import {
   formatPatientAge,
   isAntenatal,
   isPostPartum,
-} from "../../Utils/utils";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Chip from "../../CAREUI/display/Chip";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { ConsultationCard } from "../Facility/ConsultationCard";
-import { ConsultationModel } from "../Facility/models";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import Page from "@/components/Common/components/Page";
-import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
-import { SampleTestCard } from "./SampleTestCard";
-import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
-import dayjs from "../../Utils/dayjs";
-import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
-import request from "../../Utils/request/request";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import Loading from "@/components/Common/Loading";
+} from "@/Utils/utils";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import useAuthUser from "@/common/hooks/useAuthUser";
+
+import useAuthUser from "@/hooks/useAuthUser";
 
 export default function FeedWatermark() {
   const me = useAuthUser();

@@ -1,6 +1,7 @@
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { NotificationData } from "./models";
+import { NotificationData } from "@/components/Notifications/models";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export default function ShowPushNotification({ id }: { id: string }) {
   useQuery(routes.getNotificationData, {

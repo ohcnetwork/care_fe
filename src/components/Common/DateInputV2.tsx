@@ -1,12 +1,14 @@
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
+import { t } from "i18next";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
-import dayjs from "../../Utils/dayjs";
-import * as Notification from "../../Utils/Notifications";
-import { t } from "i18next";
-import DateTextInput from "./DateTextInput";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import DateTextInput from "@/components/Common/DateTextInput";
+
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import { classNames } from "@/Utils/utils";
 
 type DatePickerType = "date" | "month" | "year";
 

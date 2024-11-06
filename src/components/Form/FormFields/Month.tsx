@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
-import AutocompleteFormField from "./Autocomplete";
-import FormField from "./FormField";
-import TextFormField from "./TextFormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+
+import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
+import FormField from "@/components/Form/FormFields/FormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
 
 type Props = FormFieldBaseProps<Date> & {
   suffix?: (value?: Date) => React.ReactNode;

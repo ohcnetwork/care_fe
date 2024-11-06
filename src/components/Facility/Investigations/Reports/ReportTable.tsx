@@ -1,9 +1,14 @@
-import { getColorIndex, rowColor, transformData } from "./utils";
-
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { InvestigationResponse } from "./types";
-import { formatDateTime } from "../../../../Utils/utils";
 import { FC } from "react";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { InvestigationResponse } from "@/components/Facility/Investigations/Reports/types";
+import {
+  getColorIndex,
+  rowColor,
+  transformData,
+} from "@/components/Facility/Investigations/Reports/utils";
+
+import { formatDateTime } from "@/Utils/utils";
 
 const ReportRow = ({ data, name, min, max }: any) => {
   return (

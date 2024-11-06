@@ -1,19 +1,22 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { ConsultationModel } from "./models";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { ConsultationModel } from "@/components/Facility/models";
 import {
   EmailValidator,
   MultiValidator,
   RequiredFieldValidator,
-} from "../Form/FieldValidators";
-import { Error, Success } from "../../Utils/Notifications";
-import { useTranslation } from "react-i18next";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
+} from "@/components/Form/FieldValidators";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import { Error, Success } from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface Props {
   show: boolean;

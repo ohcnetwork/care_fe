@@ -1,4 +1,4 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 export interface Step {
   id: number;

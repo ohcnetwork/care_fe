@@ -1,7 +1,11 @@
 import { t } from "i18next";
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
-import { FormErrors } from "../Form/Utils";
-import { Prescription } from "./models";
+
+import {
+  FieldError,
+  RequiredFieldValidator,
+} from "@/components/Form/FieldValidators";
+import { FormErrors } from "@/components/Form/Utils";
+import { Prescription } from "@/components/Medicine/models";
 
 export const PrescriptionFormValidator = () => {
   return (form: Prescription): FormErrors<Prescription> => {

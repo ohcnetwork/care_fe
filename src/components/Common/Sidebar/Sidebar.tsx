@@ -1,21 +1,29 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
-import SidebarUserCard from "./SidebarUserCard";
-import NotificationItem from "../../Notifications/NotificationsList";
-import useActiveLink from "@/common/hooks/useActiveLink";
-import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
-import SlideOver from "../../../CAREUI/interactive/SlideOver";
-import { classNames } from "../../../Utils/utils";
-import { Link } from "raviger";
 import careConfig from "@careConfig";
+import { Link } from "raviger";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useTranslation } from "react-i18next";
-import { useCareAppNavItems } from "@/common/hooks/useCareApps";
+
+import {
+  ShrinkedSidebarItem,
+  SidebarItem,
+} from "@/components/Common/Sidebar/SidebarItem";
+import SidebarUserCard from "@/components/Common/Sidebar/SidebarUserCard";
+import NotificationItem from "@/components/Notifications/NotificationsList";
+
+import useActiveLink from "@/hooks/useActiveLink";
+import { useCareAppNavItems } from "@/hooks/useCareApps";
+
+import { classNames } from "@/Utils/utils";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 

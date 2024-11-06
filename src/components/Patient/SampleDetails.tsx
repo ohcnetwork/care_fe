@@ -1,19 +1,21 @@
-import { FlowModel } from "./models";
+import { camelCase, capitalize, startCase } from "lodash-es";
+import { navigate } from "raviger";
+
+import Card from "@/CAREUI/display/Card";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { FileUpload } from "@/components/Files/FileUpload";
+import { FlowModel } from "@/components/Patient/models";
+
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "@/common/constants";
 
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Card from "../../CAREUI/display/Card";
-import { FileUpload } from "../Files/FileUpload";
-import Page from "@/components/Common/components/Page";
-import { startCase, camelCase, capitalize } from "lodash-es";
-import { formatDateTime, formatPatientAge } from "../../Utils/utils";
+import { DetailRoute } from "@/Routers/types";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
-import { navigate } from "raviger";
-import { DetailRoute } from "../../Routers/types";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-
-import Loading from "@/components/Common/Loading";
 export const SampleDetails = ({ id }: DetailRoute) => {
   const { loading: isLoading, data: sampleDetails } = useQuery(
     routes.getTestSample,
