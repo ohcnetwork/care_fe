@@ -1,5 +1,5 @@
 import { Link, navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GENDER_TYPES,
   USER_TYPES,
@@ -18,10 +18,10 @@ import { FacilityModel } from "../Facility/models";
 import {
   classNames,
   dateQueryString,
+  isValidUrl,
   parsePhoneNumber,
   scrollTo,
 } from "../../Utils/utils";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -30,12 +30,11 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import useAppHistory from "@/common/hooks/useAppHistory";
 import Page from "@/components/Common/components/Page";
-import Card from "../../CAREUI/display/Card";
 import CircularProgress from "@/components/Common/components/CircularProgress";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import { useAutoSaveReducer } from "../../Utils/AutoSave";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "@/common/hooks/useAuthUser";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
+import { FieldError, PhoneNumberValidator } from "../Form/FieldValidators";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
@@ -44,8 +43,10 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
+import { GenderType } from "./models";
+import Form from "../Form/Form";
 interface UserProps {
-  userId?: number;
+  username?: string;
 }
 
 interface StateObj {
@@ -54,26 +55,28 @@ interface StateObj {
 }
 
 type UserForm = {
-  user_type: string;
+  user_type?: string;
   gender: string;
-  password: string;
-  c_password: string;
-  facilities: Array<string>;
-  home_facility: FacilityModel | null;
-  username: string;
+  password?: string;
+  c_password?: string;
+  facilities?: Array<string>;
+  home_facility?: FacilityModel | null;
+  username?: string;
   first_name: string;
   last_name: string;
   email: string;
   phone_number: string;
   alt_phone_number: string;
-  phone_number_is_whatsapp: boolean;
-  date_of_birth: Date | null;
-  state: number;
-  district: number;
-  local_body: number;
-  qualification: string | undefined;
-  doctor_experience_commenced_on: string | undefined;
-  doctor_medical_council_registration: string | undefined;
+  phone_number_is_whatsapp?: boolean;
+  date_of_birth: Date | null | string;
+  state?: number;
+  district?: number;
+  local_body?: number;
+  qualification?: string | undefined;
+  doctor_experience_commenced_on?: string | undefined;
+  doctor_medical_council_registration?: string | undefined;
+  video_connect_link?: string;
+  weekly_working_hours?: string | null;
 };
 
 const initForm: UserForm = {
@@ -165,7 +168,84 @@ export const validateRule = (
 export const UserAdd = (props: UserProps) => {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-  const { userId } = props;
+  const { username } = props;
+  const editUser = username ? true : false;
+  const formVals = useRef(initForm);
+
+  const { data: userData, refetch: refetchUserData } = useQuery(
+    routes.getUserDetails,
+    {
+      pathParams: {
+        username: username ?? "",
+      },
+      prefetch: editUser,
+      onResponse: (result) => {
+        if (!editUser || !result || !result.res || !result.data) return;
+        const formData: UserForm = {
+          first_name: result.data.first_name,
+          last_name: result.data.last_name,
+          date_of_birth: result.data.date_of_birth || null,
+          gender: result.data.gender || "Male",
+          email: result.data.email,
+          video_connect_link: result.data.video_connect_link,
+          phone_number: result.data.phone_number?.toString() || "",
+          alt_phone_number: result.data.alt_phone_number?.toString() || "",
+          weekly_working_hours: result.data.weekly_working_hours,
+        };
+        dispatch({
+          type: "set_form",
+          form: formData,
+        });
+        formVals.current = formData;
+      },
+    },
+  );
+
+  const handleEditSubmit = async (formData: UserForm) => {
+    const data = {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      video_connect_link: formData.video_connect_link,
+      phone_number: parsePhoneNumber(formData.phone_number) ?? "",
+      alt_phone_number: parsePhoneNumber(formData.alt_phone_number) ?? "",
+      gender: formData.gender as GenderType,
+      date_of_birth: dateQueryString(formData.date_of_birth),
+      qualification:
+        formData.user_type === "Doctor" || formData.user_type === "Nurse"
+          ? formData.qualification
+          : undefined,
+      doctor_experience_commenced_on:
+        formData.user_type === "Doctor"
+          ? dayjs()
+              .subtract(
+                parseInt(
+                  (formData.doctor_experience_commenced_on as string) ?? "0",
+                ),
+                "years",
+              )
+              .format("YYYY-MM-DD")
+          : undefined,
+      doctor_medical_council_registration:
+        formData.user_type === "Doctor"
+          ? formData.doctor_medical_council_registration
+          : undefined,
+      weekly_working_hours:
+        formData.weekly_working_hours && formData.weekly_working_hours !== ""
+          ? formData.weekly_working_hours
+          : null,
+    };
+    const { res } = await request(routes.partialUpdateUser, {
+      pathParams: { username: authUser.username },
+      body: data,
+    });
+    if (res?.ok) {
+      Notification.Success({
+        msg: "Details updated successfully",
+      });
+      await refetchUserData();
+    }
+  };
 
   const [state, dispatch] = useAutoSaveReducer<UserForm>(
     user_create_reducer,
@@ -243,14 +323,13 @@ export const UserAdd = (props: UserProps) => {
     userTypes.push(USER_TYPE_OPTIONS[6]); // Temperorily allows creation of users with elevated permissions due to introduction of new roles.
   }
 
-  const headerText = !userId ? "Add User" : "Update User";
-  const buttonText = !userId ? "Save User" : "Update Details";
+  const headerText = !editUser ? "Add User" : "Update User";
   const showLocalbody = ![
     "Pharmacist",
     "Volunteer",
     "Doctor",
     ...STAFF_OR_NURSE_USER,
-  ].includes(state.form.user_type);
+  ].includes(state.form.user_type ?? "");
 
   const { loading: isDistrictLoading } = useQuery(routes.getDistrictByState, {
     prefetch: !!(selectedStateId > 0),
@@ -306,7 +385,7 @@ export const UserAdd = (props: UserProps) => {
     }
   };
 
-  const handleFieldChange = (event: FieldChangeEvent<unknown>) => {
+  const handleFieldChange = (event: FieldChangeEvent<unknown>, field?: any) => {
     const errors = { ...state.errors, [event.name]: "" };
     dispatch({
       type: "set_form",
@@ -316,6 +395,7 @@ export const UserAdd = (props: UserProps) => {
       },
     });
     dispatch({ type: "set_errors", errors });
+    if (field) field(event.name).onChange(event);
   };
 
   useAbortableEffect(() => {
@@ -341,178 +421,169 @@ export const UserAdd = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const validateForm = () => {
-    const errors = { ...initError };
-    let invalidForm = false;
-    Object.keys(state.form).forEach((field) => {
+  const validateForm = (formData: UserForm) => {
+    const errors: Partial<Record<keyof UserForm, FieldError>> = {};
+    Object.keys(formData).forEach((field) => {
       switch (field) {
         case "facilities":
           if (
-            state.form[field].length === 0 &&
+            formData.facilities &&
+            formData.user_type &&
+            formData["facilities"].length === 0 &&
             STAFF_OR_NURSE_USER.includes(authUser.user_type) &&
-            STAFF_OR_NURSE_USER.includes(state.form.user_type)
+            STAFF_OR_NURSE_USER.includes(formData.user_type)
           ) {
             errors[field] =
               "Please select atleast one of the facilities you are linked to";
-            invalidForm = true;
           }
           return;
         case "user_type":
-          if (!state.form[field]) {
+          if (!formData[field]) {
             errors[field] = "Please select the User Type";
-            invalidForm = true;
           }
           return;
         case "doctor_experience_commenced_on":
-          if (state.form.user_type === "Doctor" && !state.form[field]) {
+          if (formData.user_type === "Doctor" && !formData[field]) {
             errors[field] = t("field_required");
-            invalidForm = true;
           } else if (
-            state.form.user_type === "Doctor" &&
-            Number(state.form.doctor_experience_commenced_on) > 100
+            formData.user_type === "Doctor" &&
+            Number(formData.doctor_experience_commenced_on) > 100
           ) {
             errors[field] = "Doctor experience should be less than 100 years";
-            invalidForm = true;
           }
           return;
         case "qualification":
           if (
-            (state.form.user_type === "Doctor" ||
-              state.form.user_type === "Nurse") &&
-            !state.form[field]
+            (formData.user_type === "Doctor" ||
+              formData.user_type === "Nurse") &&
+            !formData[field]
           ) {
             errors[field] = t("field_required");
-            invalidForm = true;
           }
           return;
         case "doctor_medical_council_registration":
-          if (state.form.user_type === "Doctor" && !state.form[field]) {
+          if (formData.user_type === "Doctor" && !formData[field]) {
             errors[field] = t("field_required");
-            invalidForm = true;
           }
           return;
         case "first_name":
         case "last_name":
-          state.form[field] = state.form[field].trim();
-          if (!state.form[field]) {
+          formData[field] = formData[field].trim();
+          if (!formData[field]) {
             errors[field] = `${field
               .split("_")
               .map((word) => word[0].toUpperCase() + word.slice(1))
               .join(" ")} is required`;
-            invalidForm = true;
-          } else if (!validateName(state.form[field])) {
+          } else if (!validateName(formData[field])) {
             errors[field] = "Please enter a valid name";
-            invalidForm = true;
           }
           return;
         case "gender":
-          if (!state.form[field]) {
+          if (!formData[field]) {
             errors[field] = "Please select the Gender";
-            invalidForm = true;
           }
           return;
         case "username":
-          if (!state.form[field]) {
+          if (!formData[field]) {
             errors[field] = "Please enter the username";
-            invalidForm = true;
-          } else if (!validateUsername(state.form[field])) {
+          } else if (!validateUsername(formData[field])) {
             errors[field] =
               "Please enter a 4-16 characters long username with lowercase letters, digits and . _ - only and it should not start or end with . _ -";
-            invalidForm = true;
           } else if (usernameExists !== userExistsEnums.available) {
             errors[field] = "This username already exists";
-            invalidForm = true;
           }
           return;
         case "password":
-          if (!state.form[field]) {
+          if (!formData[field]) {
             errors[field] = "Please enter the password";
-            invalidForm = true;
-          } else if (!validatePassword(state.form[field])) {
+          } else if (!validatePassword(formData[field])) {
             errors.password =
               "Password should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long";
-            invalidForm = true;
           }
           return;
         case "c_password":
-          if (!state.form.password) {
+          if (!formData.password) {
             errors.c_password = "Confirm password is required";
-            invalidForm = true;
-          } else if (state.form.password !== state.form.c_password) {
+          } else if (formData.password !== formData.c_password) {
             errors.c_password = "Passwords not matching";
-            invalidForm = true;
           }
           return;
         case "phone_number":
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumber(state.form[field]);
+          const phoneNumber = parsePhoneNumber(formData[field]);
           // eslint-disable-next-line no-case-declarations
           let is_valid = false;
           if (phoneNumber) {
             is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
           }
-          if (!state.form[field] || !is_valid) {
+          if (!formData[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
-            invalidForm = true;
           }
           return;
 
         case "alt_phone_number":
           // eslint-disable-next-line no-case-declarations
           let alt_is_valid = false;
-          if (state.form[field] && state.form[field] !== "+91") {
-            const altPhoneNumber = parsePhoneNumber(state.form[field]);
+          if (formData[field] && formData[field] !== "+91") {
+            const altPhoneNumber = parsePhoneNumber(formData[field]);
             if (altPhoneNumber) {
               alt_is_valid =
                 PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
             }
           }
-          if (
-            state.form[field] &&
-            state.form[field] !== "+91" &&
-            !alt_is_valid
-          ) {
+          if (formData[field] && formData[field] !== "+91" && !alt_is_valid) {
             errors[field] = "Please enter valid mobile number";
-            invalidForm = true;
           }
           return;
         case "email":
-          state.form[field] = state.form[field].trim();
+          formData[field] = formData[field].trim();
           if (
-            state.form[field].length === 0 ||
-            !validateEmailAddress(state.form[field])
+            formData[field].length === 0 ||
+            !validateEmailAddress(formData[field])
           ) {
             errors[field] = "Please enter a valid email address";
-            invalidForm = true;
           }
           return;
         case "date_of_birth":
-          if (!state.form[field]) {
+          if (!formData[field]) {
             errors[field] = "Please enter date in DD/MM/YYYY format";
-            invalidForm = true;
           } else if (
-            dayjs(state.form[field]).isAfter(dayjs().subtract(1, "year"))
+            dayjs(formData[field]).isAfter(dayjs().subtract(1, "year"))
           ) {
             errors[field] = "Enter a valid date of birth";
-            invalidForm = true;
           }
           return;
         case "state":
-          if (!Number(state.form[field])) {
+          if (!Number(formData[field])) {
             errors[field] = "Please select the state";
-            invalidForm = true;
           }
           return;
         case "district":
-          if (!Number(state.form[field])) {
+          if (!Number(formData[field])) {
             errors[field] = "Please select the district";
-            invalidForm = true;
           }
           return;
         case "local_body":
-          if (showLocalbody && !Number(state.form[field])) {
+          if (showLocalbody && !Number(formData[field])) {
             errors[field] = "Please select the local body";
-            invalidForm = true;
+          }
+          return;
+        case "weekly_working_hours":
+          if (
+            formData[field] &&
+            (Number(formData[field]) < 0 ||
+              Number(formData[field]) > 168 ||
+              !/^\d+$/.test(formData[field] ?? ""))
+          ) {
+            errors[field] =
+              "Average weekly working hours must be a number between 0 and 168";
+          }
+          return;
+        case "video_connect_link":
+          if (formData[field]) {
+            if (isValidUrl(formData[field]) === false) {
+              errors[field] = "Please enter a valid url";
+            }
           }
           return;
 
@@ -520,102 +591,92 @@ export const UserAdd = (props: UserProps) => {
           return;
       }
     });
-    if (invalidForm) {
-      dispatch({ type: "set_errors", errors });
-      const firstError = Object.keys(errors).find((e) => errors[e]);
-      if (firstError) {
-        scrollTo(firstError);
-      }
-      return false;
+
+    const firstError = Object.values(errors).find((e) => e);
+    if (firstError) {
+      scrollTo(firstError);
     }
     dispatch({ type: "set_errors", errors });
-    return true;
+    return errors;
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const validated = validateForm();
-    if (validated) {
-      setIsLoading(true);
-      const data = {
-        user_type: state.form.user_type,
-        gender: state.form.gender,
-        password: state.form.password,
-        facilities: state.form.facilities ? state.form.facilities : undefined,
-        home_facility: state.form.home_facility ?? undefined,
-        username: state.form.username,
-        first_name: state.form.first_name ? state.form.first_name : undefined,
-        last_name: state.form.last_name ? state.form.last_name : undefined,
-        email: state.form.email,
-        state: state.form.state,
-        district: state.form.district,
-        local_body: showLocalbody ? state.form.local_body : null,
-        phone_number:
-          state.form.phone_number === "+91"
-            ? ""
-            : parsePhoneNumber(state.form.phone_number),
-        alt_phone_number:
-          parsePhoneNumber(
-            state.form.phone_number_is_whatsapp
-              ? state.form.phone_number === "+91"
-                ? ""
-                : state.form.phone_number
-              : state.form.alt_phone_number === "+91"
-                ? ""
-                : state.form.alt_phone_number,
-          ) ?? "",
-        date_of_birth: dateQueryString(state.form.date_of_birth),
-        qualification:
-          state.form.user_type === "Doctor" || state.form.user_type == "Nurse"
-            ? state.form.qualification
-            : undefined,
-        doctor_experience_commenced_on:
-          state.form.user_type === "Doctor"
-            ? dayjs()
-                .subtract(
-                  parseInt(state.form.doctor_experience_commenced_on ?? "0"),
-                  "years",
-                )
-                .format("YYYY-MM-DD")
-            : undefined,
-        doctor_medical_council_registration:
-          state.form.user_type === "Doctor"
-            ? state.form.doctor_medical_council_registration
-            : undefined,
-      };
+  const handleSubmit = async (formData: UserForm) => {
+    setIsLoading(true);
+    const data = {
+      user_type: formData.user_type,
+      gender: formData.gender,
+      password: formData.password,
+      facilities: formData.facilities ? formData.facilities : undefined,
+      home_facility: formData.home_facility ?? undefined,
+      username: formData.username,
+      first_name: formData.first_name ? formData.first_name : undefined,
+      last_name: formData.last_name ? formData.last_name : undefined,
+      email: formData.email,
+      state: formData.state,
+      district: formData.district,
+      local_body: showLocalbody ? formData.local_body : null,
+      phone_number:
+        formData.phone_number === "+91"
+          ? ""
+          : parsePhoneNumber(formData.phone_number),
+      alt_phone_number:
+        parsePhoneNumber(
+          formData.phone_number_is_whatsapp
+            ? formData.phone_number === "+91"
+              ? ""
+              : formData.phone_number
+            : formData.alt_phone_number === "+91"
+              ? ""
+              : formData.alt_phone_number,
+        ) ?? "",
+      date_of_birth: dateQueryString(formData.date_of_birth),
+      qualification:
+        formData.user_type === "Doctor" || formData.user_type == "Nurse"
+          ? formData.qualification
+          : undefined,
+      doctor_experience_commenced_on:
+        formData.user_type === "Doctor"
+          ? dayjs()
+              .subtract(
+                parseInt(formData.doctor_experience_commenced_on ?? "0"),
+                "years",
+              )
+              .format("YYYY-MM-DD")
+          : undefined,
+      doctor_medical_council_registration:
+        formData.user_type === "Doctor"
+          ? formData.doctor_medical_council_registration
+          : undefined,
+    };
 
-      const { res } = await request(routes.addUser, {
-        body: data,
-      });
-      if (res?.ok) {
-        dispatch({ type: "set_form", form: initForm });
-        if (!userId) {
-          Notification.Success({
-            msg: "User added successfully",
-          });
-        } else {
-          Notification.Success({
-            msg: "User updated successfully",
-          });
-        }
-        navigate("/users");
+    const { res } = await request(routes.addUser, {
+      body: data,
+    });
+    if (res?.ok) {
+      dispatch({ type: "set_form", form: initForm });
+      if (!username) {
+        Notification.Success({
+          msg: "User added successfully",
+        });
+      } else {
+        Notification.Success({
+          msg: "User updated successfully",
+        });
       }
-      setIsLoading(false);
+      navigate("/users");
     }
+    setIsLoading(false);
   };
 
   if (isLoading) {
     return <Loading />;
   }
 
-  const field = (name: string) => {
-    return {
-      id: name,
-      name,
-      onChange: handleFieldChange,
-      value: (state.form as any)[name],
-      error: (state.errors as any)[name],
-    };
+  const handleCancel = () => {
+    dispatch({
+      type: "set_form",
+      form: formVals.current,
+    });
   };
 
   return (
@@ -633,329 +694,436 @@ export const UserAdd = (props: UserProps) => {
       }
       backUrl="/users"
     >
-      <Card>
-        <form onSubmit={(e) => handleSubmit(e)}>
-          <DraftSection
-            handleDraftSelect={(newState) => {
-              dispatch({ type: "set_state", state: newState });
-            }}
-            formData={state.form}
-          />
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="md:col-span-2">
-              <FieldLabel>Facilities</FieldLabel>
-              <FacilitySelect
-                multiple={true}
-                name="facilities"
-                selected={selectedFacility}
-                setSelected={setFacility}
-                errors={state.errors.facilities}
-                showAll={false}
-              />
-            </div>
-            <SelectFormField
-              {...field("user_type")}
-              required
-              label="User Type"
-              options={userTypes}
-              optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
-              optionValue={(o) => o.id}
-            />
-
-            {(state.form.user_type === "Doctor" ||
-              state.form.user_type === "Nurse") && (
-              <TextFormField
-                {...field("qualification")}
-                required
-                label={t("qualification")}
-                placeholder={t("qualification")}
-              />
-            )}
-            {state.form.user_type === "Doctor" && (
-              <>
-                <TextFormField
-                  {...field("doctor_experience_commenced_on")}
-                  required
-                  min={0}
-                  type="number"
-                  label="Years of experience"
-                  placeholder="Years of experience of the Doctor"
-                />
-
-                <TextFormField
-                  {...field("doctor_medical_council_registration")}
-                  required
-                  label="Medical Council Registration"
-                  placeholder="Doctor's medical council registration number"
-                />
-              </>
-            )}
-
-            <SelectFormField
-              {...field("home_facility")}
-              label="Home facility"
-              options={selectedFacility ?? []}
-              optionLabel={(option) => option.name}
-              optionValue={(option) => option.id}
-              onChange={handleFieldChange}
-            />
-
-            <div>
-              <PhoneNumberFormField
-                {...field("phone_number")}
-                placeholder="Phone Number"
-                label="Phone Number"
-                required
-                types={["mobile", "landline"]}
-              />
-              <CheckBoxFormField
-                name="phone_number_is_whatsapp"
-                value={state.form.phone_number_is_whatsapp}
-                onChange={handleFieldChange}
-                label="Is the phone number a WhatsApp number?"
-              />
-            </div>
-
-            <PhoneNumberFormField
-              {...field("alt_phone_number")}
-              placeholder="WhatsApp Phone Number"
-              label="Whatsapp Number"
-              disabled={state.form.phone_number_is_whatsapp}
-              types={["mobile"]}
-            />
-
-            <div>
-              <TextFormField
-                {...field("username")}
-                label="Username"
-                placeholder="Username"
-                required
-                autoComplete="new-username"
-                value={usernameInput}
-                onChange={(e) => {
-                  handleFieldChange(e);
-                  setUsernameInput(e.value);
-                }}
-                onFocus={() => setUsernameInputInFocus(true)}
-                onBlur={() => {
-                  setUsernameInputInFocus(false);
-                }}
-              />
-              {usernameInputInFocus && (
-                <div className="text-small pl-2 text-secondary-500">
-                  <div>
-                    {usernameExists !== userExistsEnums.idle && (
-                      <>
-                        {usernameExists === userExistsEnums.checking ? (
-                          <span>
-                            <CareIcon
-                              icon="l-record-audio"
-                              className="text-xl"
-                            />{" "}
-                            checking...
-                          </span>
-                        ) : (
-                          <>
-                            {usernameExists === userExistsEnums.exists ? (
-                              <div>
-                                <CareIcon
-                                  icon="l-times-circle"
-                                  className="text-xl text-red-500"
-                                />{" "}
-                                <span className="text-red-500">
-                                  Username is not available
-                                </span>
-                              </div>
-                            ) : (
-                              <div>
-                                <CareIcon
-                                  icon="l-check-circle"
-                                  className="text-xl text-green-500"
-                                />{" "}
-                                <span className="text-primary-500">
-                                  Username is available
-                                </span>
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <div>
-                    {validateRule(
-                      usernameInput.length >= 4 && usernameInput.length <= 16,
-                      "Username should be 4-16 characters long",
-                    )}
-                  </div>
-                  <div>
-                    {validateRule(
-                      /^[a-z0-9._-]*$/.test(usernameInput),
-                      "Username can only contain lowercase letters, numbers, and . _ -",
-                    )}
-                  </div>
-                  <div>
-                    {validateRule(
-                      /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
-                      "Username must start and end with a letter or number",
-                    )}
-                  </div>
-                  <div>
-                    {validateRule(
-                      !/(?:[._-]{2,})/.test(usernameInput),
-                      "Username can't contain consecutive special characters . _ -",
-                    )}
-                  </div>
+      <Form<UserForm>
+        disabled={isLoading}
+        defaults={userData ? state.form : initForm}
+        validate={validateForm}
+        onCancel={editUser ? handleCancel : () => goBack()}
+        onSubmit={editUser ? handleEditSubmit : handleSubmit}
+        onDraftRestore={(newState) => {
+          dispatch({ type: "set_state", state: newState });
+        }}
+        hideRestoreDraft={editUser}
+        noPadding
+        resetFormVals
+      >
+        {(field) => (
+          <>
+            <div className="my-4 flex flex-col gap-y-2">
+              {!editUser && (
+                <div className="w-full">
+                  <FieldLabel>Facilities</FieldLabel>
+                  <FacilitySelect
+                    multiple={true}
+                    name="facilities"
+                    selected={selectedFacility}
+                    setSelected={setFacility}
+                    errors={state.errors.facilities}
+                    showAll={false}
+                  />
                 </div>
               )}
-            </div>
-
-            <DateFormField
-              {...field("date_of_birth")}
-              label="Date of Birth"
-              required
-              value={getDate(state.form.date_of_birth)}
-              onChange={handleDateChange}
-              position="LEFT"
-              disableFuture
-            />
-
-            <div>
-              <TextFormField
-                {...field("password")}
-                label="Password"
-                placeholder="Password"
-                required
-                autoComplete="new-password"
-                type="password"
-                onFocus={() => setPasswordInputInFocus(true)}
-                onBlur={() => setPasswordInputInFocus(false)}
-              />
-              {passwordInputInFocus && (
-                <div className="text-small pl-2 text-secondary-500">
-                  {validateRule(
-                    state.form.password?.length >= 8,
-                    "Password should be atleast 8 characters long",
-                  )}
-                  {validateRule(
-                    state.form.password !== state.form.password.toUpperCase(),
-                    "Password should contain at least 1 lowercase letter",
-                  )}
-                  {validateRule(
-                    state.form.password !== state.form.password.toLowerCase(),
-                    "Password should contain at least 1 uppercase letter",
-                  )}
-                  {validateRule(
-                    /\d/.test(state.form.password),
-                    "Password should contain at least 1 number",
-                  )}
+              {!editUser && (
+                <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+                  <SelectFormField
+                    {...field("user_type")}
+                    required
+                    label="User Type"
+                    options={userTypes}
+                    optionLabel={(o) =>
+                      o.role + (o.readOnly ? " (Read Only)" : "")
+                    }
+                    onChange={(e) => {
+                      handleFieldChange(e, field);
+                    }}
+                    optionValue={(o) => o.id}
+                    className="flex-1"
+                  />
+                  <SelectFormField
+                    {...field("home_facility")}
+                    label="Home facility"
+                    options={selectedFacility ?? []}
+                    optionLabel={(option) => option.name}
+                    optionValue={(option) => option.id}
+                    onChange={(e) => {
+                      handleFieldChange(e, field);
+                    }}
+                    className="flex-1"
+                  />
                 </div>
               )}
-            </div>
-            <div>
-              <TextFormField
-                {...field("c_password")}
-                label="Confirm Password"
-                placeholder="Confirm Password"
-                required
-                type="password"
-                autoComplete="off"
-                onFocus={() => setConfirmPasswordInputInFocus(true)}
-                onBlur={() => setConfirmPasswordInputInFocus(false)}
-              />
-              {confirmPasswordInputInFocus &&
-                state.form.c_password.length > 0 &&
-                validateRule(
-                  state.form.c_password === state.form.password,
-                  "Confirm password should match the entered password",
+              {(state.form.user_type === "Doctor" ||
+                state.form.user_type === "Nurse") && (
+                <TextFormField
+                  {...field("qualification")}
+                  required
+                  label={t("qualification")}
+                  placeholder={t("qualification")}
+                  onChange={(e) => {
+                    handleFieldChange(e, field);
+                  }}
+                  className="flex-1"
+                />
+              )}
+              {state.form.user_type === "Doctor" && (
+                <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+                  <TextFormField
+                    {...field("doctor_experience_commenced_on")}
+                    required
+                    min={0}
+                    type="number"
+                    label="Years of experience"
+                    placeholder="Years of experience of the Doctor"
+                    onChange={(e) => {
+                      handleFieldChange(e, field);
+                    }}
+                    className="flex-1"
+                  />
+
+                  <TextFormField
+                    {...field("doctor_medical_council_registration")}
+                    required
+                    label="Medical Council Registration"
+                    placeholder="Doctor's medical council registration number"
+                    onChange={(e) => {
+                      handleFieldChange(e, field);
+                    }}
+                    className="flex-1"
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+                <div className="flex flex-1 flex-col">
+                  <PhoneNumberFormField
+                    {...field("phone_number")}
+                    placeholder="Phone Number"
+                    label="Phone Number"
+                    required
+                    types={["mobile", "landline"]}
+                    onChange={(e) => {
+                      handleFieldChange(e, field);
+                    }}
+                    className=""
+                  />
+                  {!editUser && (
+                    <CheckBoxFormField
+                      name="phone_number_is_whatsapp"
+                      value={state.form.phone_number_is_whatsapp}
+                      onChange={(e) => {
+                        handleFieldChange(e, field);
+                      }}
+                      label="Is the phone number a WhatsApp number?"
+                    />
+                  )}
+                </div>
+                <PhoneNumberFormField
+                  {...field("alt_phone_number")}
+                  placeholder="WhatsApp Phone Number"
+                  label="Whatsapp Number"
+                  disabled={state.form.phone_number_is_whatsapp}
+                  types={["mobile"]}
+                  onChange={(e) => {
+                    handleFieldChange(e, field);
+                  }}
+                  className="flex-1"
+                />
+              </div>
+
+              <div>
+                {!editUser && (
+                  <TextFormField
+                    {...field("username")}
+                    label="Username"
+                    placeholder="Username"
+                    required
+                    autoComplete="new-username"
+                    value={usernameInput}
+                    onChange={(e) => {
+                      handleFieldChange(e, field);
+                      setUsernameInput(e.value);
+                    }}
+                    onFocus={() => setUsernameInputInFocus(true)}
+                    onBlur={() => {
+                      setUsernameInputInFocus(false);
+                    }}
+                  />
                 )}
-            </div>
-            <TextFormField
-              {...field("first_name")}
-              label="First name"
-              placeholder="First name"
-              required
-            />
-            <TextFormField
-              {...field("last_name")}
-              label="Last name"
-              placeholder="Last name"
-              required
-            />
-            <TextFormField
-              {...field("email")}
-              label="Email"
-              placeholder="Email"
-              required
-            />
-            <SelectFormField
-              {...field("gender")}
-              label="Gender"
-              required
-              value={state.form.gender}
-              options={GENDER_TYPES}
-              optionLabel={(o) => o.text}
-              optionValue={(o) => o.text}
-            />
+                {!editUser && usernameInputInFocus && (
+                  <div className="text-small pl-2 text-secondary-500">
+                    <div>
+                      {usernameExists !== userExistsEnums.idle && (
+                        <>
+                          {usernameExists === userExistsEnums.checking ? (
+                            <span>
+                              <CareIcon
+                                icon="l-record-audio"
+                                className="text-xl"
+                              />{" "}
+                              checking...
+                            </span>
+                          ) : (
+                            <>
+                              {usernameExists === userExistsEnums.exists ? (
+                                <div>
+                                  <CareIcon
+                                    icon="l-times-circle"
+                                    className="text-xl text-red-500"
+                                  />{" "}
+                                  <span className="text-red-500">
+                                    Username is not available
+                                  </span>
+                                </div>
+                              ) : (
+                                <div>
+                                  <CareIcon
+                                    icon="l-check-circle"
+                                    className="text-xl text-green-500"
+                                  />{" "}
+                                  <span className="text-primary-500">
+                                    Username is available
+                                  </span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <div>
+                      {validateRule(
+                        usernameInput.length >= 4 && usernameInput.length <= 16,
+                        "Username should be 4-16 characters long",
+                      )}
+                    </div>
+                    <div>
+                      {validateRule(
+                        /^[a-z0-9._-]*$/.test(usernameInput),
+                        "Username can only contain lowercase letters, numbers, and . _ -",
+                      )}
+                    </div>
+                    <div>
+                      {validateRule(
+                        /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
+                        "Username must start and end with a letter or number",
+                      )}
+                    </div>
+                    <div>
+                      {validateRule(
+                        !/(?:[._-]{2,})/.test(usernameInput),
+                        "Username can't contain consecutive special characters . _ -",
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-            {isStateLoading ? (
-              <CircularProgress />
-            ) : (
-              <SelectFormField
-                {...field("state")}
-                label="State"
-                required
-                placeholder="Choose State"
-                options={states}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-                onChange={(e) => {
-                  handleFieldChange(e);
-                  if (e) setSelectedStateId(e.value);
-                }}
-              />
-            )}
-
-            {isDistrictLoading ? (
-              <CircularProgress />
-            ) : (
-              <SelectFormField
-                {...field("district")}
-                label="District"
-                required
-                placeholder="Choose District"
-                options={districts}
-                optionLabel={(o) => o.name}
-                optionValue={(o) => o.id}
-                onChange={(e) => {
-                  handleFieldChange(e);
-                  if (e) setSelectedDistrictId(e.value);
-                }}
-              />
-            )}
-
-            {showLocalbody &&
-              (isLocalbodyLoading ? (
-                <CircularProgress />
-              ) : (
-                <SelectFormField
-                  {...field("local_body")}
-                  label="Local Body"
+              {!editUser && (
+                <>
+                  <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+                    <div className="flex flex-1 flex-col">
+                      <TextFormField
+                        {...field("password")}
+                        label="Password"
+                        placeholder="Password"
+                        required
+                        autoComplete="new-password"
+                        type="password"
+                        onFocus={() => setPasswordInputInFocus(true)}
+                        onBlur={() => setPasswordInputInFocus(false)}
+                        onChange={(e) => {
+                          handleFieldChange(e, field);
+                        }}
+                      />
+                      {passwordInputInFocus && state.form.password && (
+                        <div className="text-small pl-2 text-secondary-500">
+                          {validateRule(
+                            state.form.password.length >= 8,
+                            "Password should be atleast 8 characters long",
+                          )}
+                          {validateRule(
+                            state.form.password !==
+                              state.form.password.toUpperCase(),
+                            "Password should contain at least 1 lowercase letter",
+                          )}
+                          {validateRule(
+                            state.form.password !==
+                              state.form.password.toLowerCase(),
+                            "Password should contain at least 1 uppercase letter",
+                          )}
+                          {validateRule(
+                            /\d/.test(state.form.password),
+                            "Password should contain at least 1 number",
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-1 flex-col">
+                      <TextFormField
+                        {...field("c_password")}
+                        label="Confirm Password"
+                        placeholder="Confirm Password"
+                        required
+                        type="password"
+                        autoComplete="off"
+                        onFocus={() => setConfirmPasswordInputInFocus(true)}
+                        onBlur={() => setConfirmPasswordInputInFocus(false)}
+                        onChange={(e) => {
+                          handleFieldChange(e, field);
+                        }}
+                      />
+                      {confirmPasswordInputInFocus &&
+                        state.form.c_password &&
+                        state.form.c_password.length > 0 &&
+                        validateRule(
+                          state.form.c_password === state.form.password,
+                          "Confirm password should match the entered password",
+                        )}
+                    </div>
+                  </div>
+                </>
+              )}
+              <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+                <TextFormField
+                  {...field("first_name")}
                   required
-                  position="above"
-                  placeholder="Choose Local Body"
-                  options={localBodies}
-                  optionLabel={(o) => o.name}
-                  optionValue={(o) => o.id}
+                  label={t("first_name")}
+                  className="flex-1"
+                  onChange={(e) => {
+                    handleFieldChange(e, field);
+                  }}
                 />
-              ))}
-          </div>
-          <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
-            <Cancel onClick={() => goBack()} />
-            <Submit onClick={handleSubmit} label={buttonText} />
-          </div>
-        </form>
-      </Card>
+                <TextFormField
+                  {...field("last_name")}
+                  required
+                  label={t("last_name")}
+                  className="flex-1"
+                  onChange={(e) => {
+                    handleFieldChange(e, field);
+                  }}
+                />
+              </div>
+              <TextFormField
+                {...field("email")}
+                label={t("email")}
+                placeholder="Email"
+                required
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                }}
+              />
+              <div className="flex flex-col justify-between gap-x-3 sm:flex-row sm:items-center">
+                <DateFormField
+                  {...field("date_of_birth")}
+                  label="Date of Birth"
+                  required
+                  value={getDate(state.form.date_of_birth)}
+                  onChange={handleDateChange}
+                  position="LEFT"
+                  disableFuture
+                  className="flex-1"
+                />
+                <SelectFormField
+                  {...field("gender")}
+                  label={t("gender")}
+                  required
+                  value={state.form.gender}
+                  options={GENDER_TYPES}
+                  optionLabel={(o) => o.text}
+                  optionValue={(o) => o.text}
+                  onChange={(e) => {
+                    handleFieldChange(e, field);
+                  }}
+                  className="flex-1"
+                />
+              </div>
+
+              {editUser && (
+                <>
+                  <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+                    <TextFormField
+                      {...field("weekly_working_hours")}
+                      label={t("average_weekly_working_hours")}
+                      className="flex-1"
+                      type="number"
+                      min={0}
+                      max={168}
+                      onChange={(e) => {
+                        handleFieldChange(e, field);
+                      }}
+                    />
+                    <TextFormField
+                      {...field("video_connect_link")}
+                      label={t("video_conference_link")}
+                      className="flex-1"
+                      type="url"
+                      onChange={(e) => {
+                        handleFieldChange(e, field);
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {!editUser && (
+                <>
+                  {isStateLoading ? (
+                    <CircularProgress />
+                  ) : (
+                    <SelectFormField
+                      {...field("state")}
+                      label="State"
+                      required
+                      placeholder="Choose State"
+                      options={states}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      onChange={(e) => {
+                        handleFieldChange(e, field);
+                        if (e) setSelectedStateId(e.value);
+                      }}
+                    />
+                  )}
+
+                  {isDistrictLoading ? (
+                    <CircularProgress />
+                  ) : (
+                    <SelectFormField
+                      {...field("district")}
+                      label="District"
+                      required
+                      placeholder="Choose District"
+                      options={districts}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      onChange={(e) => {
+                        handleFieldChange(e, field);
+                        if (e) setSelectedDistrictId(e.value);
+                      }}
+                    />
+                  )}
+
+                  {showLocalbody &&
+                    (isLocalbodyLoading ? (
+                      <CircularProgress />
+                    ) : (
+                      <SelectFormField
+                        {...field("local_body")}
+                        label="Local Body"
+                        required
+                        position="above"
+                        placeholder="Choose Local Body"
+                        options={localBodies}
+                        optionLabel={(o) => o.name}
+                        optionValue={(o) => o.id}
+                      />
+                    ))}
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </Form>
     </Page>
   );
 };

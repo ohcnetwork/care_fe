@@ -7,6 +7,7 @@ import UserHome from "@/components/Users/UserHome";
 const UserRoutes: AppRoutes = {
   "/users": () => <ManageUsers />,
   "/users/add": () => <UserAdd />,
+  "/users/edit/:username": ({ username }) => <UserAdd username={username} />,
   "/users/:username": ({ username }) => (
     <UserHome username={username} tab={"profile"} />
   ),
