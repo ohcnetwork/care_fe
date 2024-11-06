@@ -1,7 +1,7 @@
 import { useCallback, useReducer, useState } from "react";
 import { InvestigationGroup, InvestigationType } from "..";
 
-import * as _ from "lodash-es";
+import * as _ from "lodash";
 import { useTranslation } from "react-i18next";
 import routes from "../../../../Redux/api";
 import * as Notification from "../../../../Utils/Notifications";
