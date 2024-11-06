@@ -1,15 +1,18 @@
 import { useReducer, useState } from "react";
-import { DOCTOR_SPECIALIZATION } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import TextFormField from "../Form/FormFields/TextFormField";
 import { useTranslation } from "react-i18next";
+
+import { DOCTOR_SPECIALIZATION } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
+import * as Notification from "../../Utils/Notifications";
 import Form from "../Form/Form";
-import { DoctorModal } from "./models";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import { DoctorModal } from "./models";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;

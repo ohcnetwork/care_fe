@@ -1,16 +1,20 @@
-import { useState } from "react";
-import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import { navigate } from "raviger";
-import * as Notification from "../../Utils/Notifications";
-import CommentSection from "./ResourceCommentSection";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Page from "@/components/Common/components/Page";
+import { useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import CommentSection from "@/components/Resource/ResourceCommentSection";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime, formatName } from "@/Utils/utils";
+
 export default function ResourceDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =

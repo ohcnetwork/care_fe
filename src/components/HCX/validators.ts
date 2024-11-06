@@ -1,6 +1,7 @@
-import { FieldValidator } from "../Form/FieldValidators";
-import { HCXPolicyModel } from "./models";
 import { t } from "i18next";
+
+import { FieldValidator } from "@/components/Form/FieldValidators";
+import { HCXPolicyModel } from "@/components/HCX/models";
 
 const HCXPolicyValidator: FieldValidator<HCXPolicyModel> = (
   value,

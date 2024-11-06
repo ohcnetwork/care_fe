@@ -1,6 +1,8 @@
 import { MutableRefObject } from "react";
-import { AssetClass, AssetData } from "../Assets/AssetTypes";
-import { getCameraConfig } from "../../Utils/transformUtils";
+
+import { AssetClass, AssetData } from "@/components/Assets/AssetTypes";
+
+import { getCameraConfig } from "@/Utils/transformUtils";
 
 export const calculateVideoDelay = (
   ref: MutableRefObject<HTMLVideoElement | null>,

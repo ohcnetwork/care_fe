@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { BED_TYPES } from "@/common/constants";
-import routes from "../../Redux/api";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import useQuery from "../../Utils/request/useQuery";
-import DialogModal from "@/components/Common/Dialog";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { BedCapacity } from "./BedCapacity";
-import BedTypeCard from "./BedTypeCard";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import { BedCapacity } from "@/components/Facility/BedCapacity";
+import BedTypeCard from "@/components/Facility/BedTypeCard";
+
+import { BED_TYPES } from "@/common/constants";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export const FacilityBedCapacity = (props: any) => {
   const { t } = useTranslation();

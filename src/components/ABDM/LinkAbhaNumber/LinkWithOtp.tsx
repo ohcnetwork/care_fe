@@ -1,18 +1,20 @@
-import { useTranslation } from "react-i18next";
-import { AbhaNumberModel } from "../types/abha";
-import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { useMemo, useState } from "react";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import { classNames } from "../../../Utils/utils";
-import ButtonV2, {
-  ButtonWithTimer,
-} from "@/components/Common/components/ButtonV2";
-import Dropdown, { DropdownItem } from "@/components/Common/components/Menu";
-import OtpFormField from "../../Form/FormFields/OtpFormField";
-import * as Notify from "../../../Utils/Notifications";
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
-import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
+import { useTranslation } from "react-i18next";
+
+import useMultiStepForm, {
+  InjectedStepProps,
+} from "@/components/ABDM/LinkAbhaNumber/useMultiStepForm";
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
+import Dropdown, { DropdownItem } from "@/components/Common/Menu";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import OtpFormField from "@/components/Form/FormFields/OtpFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import * as Notify from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { classNames } from "@/Utils/utils";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 

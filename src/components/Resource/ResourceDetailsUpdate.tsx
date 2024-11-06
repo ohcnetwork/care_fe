@@ -1,24 +1,30 @@
-import * as Notification from "../../Utils/Notifications";
-import { useReducer, useState } from "react";
 import { navigate, useQueryParams } from "raviger";
-import Card from "../../CAREUI/display/Card";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import Page from "@/components/Common/components/Page";
-import { RESOURCE_CHOICES } from "@/common/constants";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+import { useReducer, useState } from "react";
 
+import Card from "@/CAREUI/display/Card";
+
+import CircularProgress from "@/components/Common/CircularProgress";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { RESOURCE_CHOICES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
+import UserAutocomplete from "../Common/UserAutocompleteFormField";
 import Form from "../Form/Form";
+import { FieldLabel } from "../Form/FormFields/FormField";
+
 interface resourceProps {
   id: string;
 }

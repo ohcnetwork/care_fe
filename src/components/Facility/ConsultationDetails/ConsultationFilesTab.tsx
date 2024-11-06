@@ -1,5 +1,5 @@
-import { ConsultationTabProps } from "./index";
-import { FileUpload } from "../../Files/FileUpload";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import { FileUpload } from "@/components/Files/FileUpload";
 
 export const ConsultationFilesTab = (props: ConsultationTabProps) => {
   return (

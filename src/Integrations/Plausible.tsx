@@ -1,7 +1,8 @@
-import { useLocationChange } from "raviger";
-import Script from "@/components/Common/Script";
-import { useEffect } from "react";
 import careConfig from "@careConfig";
+import { useLocationChange } from "raviger";
+import { useEffect } from "react";
+
+import Script from "@/components/Common/Script";
 
 export default function Plausible() {
   useLocationChange(() => {

@@ -1,10 +1,14 @@
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import useRangePagination from "@/common/hooks/useRangePagination";
-import { classNames, formatDateTime } from "../../../Utils/utils";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { Prescription } from "../models";
-import MedicineAdministrationTableRow from "./AdministrationTableRow";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import MedicineAdministrationTableRow from "@/components/Medicine/MedicineAdministrationSheet/AdministrationTableRow";
+import { Prescription } from "@/components/Medicine/models";
+
+import useRangePagination from "@/hooks/useRangePagination";
+
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface Props {
   prescriptions: Prescription[];
