@@ -332,6 +332,7 @@ export const Login = (props: { forgot?: boolean }) => {
                             setForgotPassword(true);
                           }}
                           type="button"
+                          id="forgot-pass-btn"
                           className="text-sm text-primary-400 hover:text-primary-500"
                         >
                           {t("forget_password")}
@@ -367,6 +368,7 @@ export const Login = (props: { forgot?: boolean }) => {
                     setForgotPassword(false);
                   }}
                   type="button"
+                  id="back-to-login-btn"
                   className="mb-4 text-sm text-primary-400 hover:text-primary-500"
                 >
                   <div className="flex justify-center">
@@ -400,6 +402,7 @@ export const Login = (props: { forgot?: boolean }) => {
                       ) : (
                         <button
                           type="submit"
+                          id="send-reset-link-btn"
                           className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
                         >
                           {t("send_reset_link")}
