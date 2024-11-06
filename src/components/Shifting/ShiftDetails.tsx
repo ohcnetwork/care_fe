@@ -8,7 +8,7 @@ import {
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CommentSection from "./CommentsSection";
+import CommentSection from "./ShiftingCommentsSection";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "@/components/Common/components/Page";
@@ -90,7 +90,7 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("age") +
       ":" +
-      +(data?.patient_object
+      (data?.patient_object
         ? formatPatientAge(data.patient_object, true)
         : "") +
       "\n" +

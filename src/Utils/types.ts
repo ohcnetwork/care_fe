@@ -1,11 +1,11 @@
-import { PerformedByModel } from "@/components/HCX/misc";
+import { UserBareMinimum } from "@/components/Users/models";
 
 export interface BaseModel {
   readonly id: string;
   readonly modified_date: string;
   readonly created_date: string;
-  readonly created_by: PerformedByModel;
-  readonly updated_by: PerformedByModel;
+  readonly created_by: UserBareMinimum;
+  readonly updated_by: UserBareMinimum;
 }
 
 export type Writable<T> = {

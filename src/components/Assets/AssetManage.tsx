@@ -432,7 +432,7 @@ const AssetManage = (props: AssetManageProps) => {
                 data-testid="asset-update-button"
                 authorizeFor={NonReadOnlyUsers}
               >
-                <CareIcon icon="l-pen" className="mr-1 h-4" />
+                <CareIcon icon="l-pen" className="text-lg" />
                 {t("update")}
               </ButtonV2>
               {asset?.asset_class &&
@@ -449,7 +449,7 @@ const AssetManage = (props: AssetManageProps) => {
                     id="configure-asset"
                     data-testid="asset-configure-button"
                   >
-                    <CareIcon icon="l-setting" className="h-4" />
+                    <CareIcon icon="l-setting" className="text-lg" />
                     {t("configure")}
                   </ButtonV2>
                 )}
@@ -459,10 +459,9 @@ const AssetManage = (props: AssetManageProps) => {
                   onClick={() => setShowDeleteDialog(true)}
                   variant="danger"
                   data-testid="asset-delete-button"
-                  className="inline-flex"
                 >
-                  <CareIcon icon="l-trash" className="h-4" />
-                  <span className="md:hidden">{t("delete")}</span>
+                  <CareIcon icon="l-trash" className="text-lg" />
+                  <span>{t("delete")}</span>
                 </ButtonV2>
               )}
             </div>

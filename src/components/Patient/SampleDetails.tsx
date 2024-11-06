@@ -5,7 +5,7 @@ import ButtonV2 from "@/components/Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "../Files/FileUpload";
 import Page from "@/components/Common/components/Page";
-import * as _ from "lodash-es";
+import { startCase, camelCase, capitalize } from "lodash-es";
 import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 
 import { navigate } from "raviger";
@@ -244,11 +244,11 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Status: </span>{" "}
-            {_.startCase(_.camelCase(flow.status))}
+            {startCase(camelCase(flow.status))}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Label:</span>{" "}
-            {_.capitalize(flow.notes)}
+            {capitalize(flow.notes)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Created On :</span>{" "}
@@ -273,7 +273,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       backUrl="/sample"
       options={
         sampleDetails?.patient && (
-          <div className="flex justify-end">
+          <div className="my-2 flex justify-center md:justify-end">
             <ButtonV2
               href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
             >
@@ -332,7 +332,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 Doctor&apos;s Name:{" "}
               </span>
-              {_.startCase(_.camelCase(sampleDetails.doctor_name))}
+              {startCase(camelCase(sampleDetails.doctor_name))}
             </div>
           )}
           {sampleDetails?.diagnosis && (
@@ -415,7 +415,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold capitalize leading-relaxed">
                 Sample Type:{" "}
               </span>
-              {_.startCase(_.camelCase(sampleDetails.sample_type))}
+              {startCase(camelCase(sampleDetails.sample_type))}
             </div>
           )}
         </div>
