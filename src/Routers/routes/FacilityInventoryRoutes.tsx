@@ -1,8 +1,8 @@
 import { Redirect } from "raviger";
-import InventoryList from "../../Components/Facility/InventoryList";
-import InventoryLog from "../../Components/Facility/InventoryLog";
-import MinQuantityList from "../../Components/Facility/MinQuantityList";
-import { SetInventoryForm } from "../../Components/Facility/SetInventoryForm";
+import InventoryList from "@/components/Facility/InventoryList";
+import InventoryLog from "@/components/Facility/InventoryLog";
+import MinQuantityList from "@/components/Facility/MinQuantityList";
+import { SetInventoryForm } from "@/components/Facility/SetInventoryForm";
 import { AppRoutes } from "../AppRouter";
 
 const FacilityInventoryRoutes: AppRoutes = {

@@ -124,7 +124,12 @@ export default function SlideOver({
                     <h1 className="w-full text-xl font-black">{title}</h1>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto p-4">{children}</div>
+                <div
+                  className="flex-1 overflow-auto p-4"
+                  data-test-id="slide-over-container"
+                >
+                  {children}
+                </div>
               </div>
             )}
           </DialogPanel>

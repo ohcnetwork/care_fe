@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import useQuery from "./request/useQuery";
 import routes from "../Redux/api";
-import useAuthUser from "../Common/hooks/useAuthUser";
-import { FacilityModel } from "../Components/Facility/models";
+import useAuthUser from "@/common/hooks/useAuthUser";
+import { FacilityModel } from "@/components/Facility/models";
 
 export type FeatureFlag = "SCRIBE_ENABLED"; // "HCX_ENABLED" | "ABDM_ENABLED" |
 

@@ -79,13 +79,10 @@ describe("User Creation", () => {
     );
     userCreationPage.typeIntoElementByIdPostClear("lastName", "Cypress");
     userCreationPage.selectDropdownOption("gender", "Male");
-    userCreationPage.typeIntoElementByIdPostClear(
-      "phoneNumber",
-      "+91" + phone_number,
-    );
+    userCreationPage.typeIntoElementByIdPostClear("phoneNumber", phone_number);
     userCreationPage.typeIntoElementByIdPostClear(
       "altPhoneNumber",
-      "+91" + emergency_phone_number,
+      emergency_phone_number,
     );
     userCreationPage.typeIntoElementByIdPostClear("email", "test@test.com");
     userCreationPage.typeIntoElementByIdPostClear("weekly_working_hours", "14");
@@ -148,7 +145,7 @@ describe("User Creation", () => {
     userCreationPage.typeIntoElementById("password", "Test@123");
     userCreationPage.selectHomeFacility("Dummy Shifting Center");
     userCreationPage.typeIntoElementById("phone_number", phone_number);
-    userCreationPage.setInputDate("date_of_birth", "date-input", "25081999");
+    userCreationPage.setInputDate("date_of_birth", "25081999");
     userCreationPage.selectDropdownOption("user_type", "Doctor");
     userCreationPage.typeIntoElementById("c_password", "Test@123");
     userCreationPage.typeIntoElementById("qualification", "MBBS");

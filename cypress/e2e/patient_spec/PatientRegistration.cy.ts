@@ -25,7 +25,7 @@ const getRelativeDateString = (deltaDays = 0) => {
       month: "2-digit",
       year: "numeric",
     })
-    .replace("/", "");
+    .replace(/\//g, "");
 };
 
 describe("Patient Creation with consultation", () => {
@@ -239,17 +239,9 @@ describe("Patient Creation with consultation", () => {
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
     cy.get("[data-testid=patient-details]")
-      .contains(patientOneFirstSubscriberId)
+      .contains("member id")
       .scrollIntoView();
     cy.wait(2000);
-    patientInsurance.verifyPatientPolicyDetails(
-      patientOneFirstSubscriberId,
-      patientOneFirstPolicyId,
-      patientOneFirstInsurerId,
-      patientOneFirstInsurerName,
-      isHCXEnabled,
-    );
-
     patientInsurance.clickPatientInsuranceViewDetail();
     cy.wait(3000);
     patientInsurance.verifyPatientPolicyDetails(

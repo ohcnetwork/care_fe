@@ -1,5 +1,5 @@
 import { useLocationChange } from "raviger";
-import Script from "../Components/Common/Script";
+import Script from "@/components/Common/Script";
 import { useEffect } from "react";
 import careConfig from "@careConfig";
 

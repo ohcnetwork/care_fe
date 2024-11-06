@@ -1,7 +1,7 @@
-import AssetConfigure from "../../Components/Assets/AssetConfigure";
-import AssetManage from "../../Components/Assets/AssetManage";
-import AssetsList from "../../Components/Assets/AssetsList";
-import AssetCreate from "../../Components/Facility/AssetCreate";
+import AssetConfigure from "@/components/Assets/AssetConfigure";
+import AssetManage from "@/components/Assets/AssetManage";
+import AssetsList from "@/components/Assets/AssetsList";
+import AssetCreate from "@/components/Facility/AssetCreate";
 import { AppRoutes } from "../AppRouter";
 
 const AssetRoutes: AppRoutes = {
