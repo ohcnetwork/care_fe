@@ -190,6 +190,16 @@ const DateInputV2: React.FC<Props> = ({
     year = datePickerHeaderDate.getFullYear(),
   ) => {
     const date = new Date(year, month, day);
+    if (
+      min &&
+      max &&
+      min.getDate() === max.getDate() &&
+      day === min.getDate() &&
+      month === min.getMonth() &&
+      year === min.getFullYear()
+    ) {
+      return true;
+    }
     if (min) if (date < min) return false;
     if (max) if (date > max) return false;
     return true;
@@ -432,8 +442,15 @@ const DateInputV2: React.FC<Props> = ({
                                     );
                                     newDate.setDate(d);
                                     selected =
-                                      value.toDateString() ===
-                                      newDate.toDateString();
+                                      value &&
+                                      dayjs(value).isSame(
+                                        new Date(
+                                          datePickerHeaderDate.getFullYear(),
+                                          datePickerHeaderDate.getMonth(),
+                                          d,
+                                        ),
+                                        "day",
+                                      );
                                   }
 
                                   const baseClasses =
