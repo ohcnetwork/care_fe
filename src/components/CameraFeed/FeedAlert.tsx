@@ -1,7 +1,10 @@
 import { Transition } from "@headlessui/react";
 import { useEffect, useState } from "react";
-import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
+
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { classNames } from "@/Utils/utils";
+
 export type StreamStatus = "playing" | "stop" | "loading" | "offline";
 
 export type FeedAlertState =

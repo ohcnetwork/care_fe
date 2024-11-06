@@ -1,18 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AssetData } from "../Assets/AssetTypes";
-import useOperateCamera, { PTZPayload } from "./useOperateCamera";
-import { getStreamUrl } from "./utils";
-import { classNames, isIOS } from "../../Utils/utils";
-import FeedAlert, { FeedAlertState, StreamStatus } from "./FeedAlert";
-import FeedNetworkSignal from "./FeedNetworkSignal";
-import NoFeedAvailable from "./NoFeedAvailable";
-import FeedControls from "./FeedControls";
-import FeedWatermark from "./FeedWatermark";
-import useFullscreen from "@/common/hooks/useFullscreen";
-import useBreakpoints from "@/common/hooks/useBreakpoints";
-import { GetPresetsResponse } from "./routes";
-import VideoPlayer from "./videoPlayer";
+
+import { AssetData } from "@/components/Assets/AssetTypes";
+import FeedAlert, {
+  FeedAlertState,
+  StreamStatus,
+} from "@/components/CameraFeed/FeedAlert";
+import FeedControls from "@/components/CameraFeed/FeedControls";
+import FeedNetworkSignal from "@/components/CameraFeed/FeedNetworkSignal";
+import FeedWatermark from "@/components/CameraFeed/FeedWatermark";
+import NoFeedAvailable from "@/components/CameraFeed/NoFeedAvailable";
+import { GetPresetsResponse } from "@/components/CameraFeed/routes";
+import useOperateCamera, {
+  PTZPayload,
+} from "@/components/CameraFeed/useOperateCamera";
+import { getStreamUrl } from "@/components/CameraFeed/utils";
+import VideoPlayer from "@/components/CameraFeed/videoPlayer";
 import AssetInfoPopover from "@/components/Common/AssetInfoPopover";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
+import useFullscreen from "@/hooks/useFullscreen";
+
+import { classNames, isIOS } from "@/Utils/utils";
 
 interface Props {
   children?: React.ReactNode;

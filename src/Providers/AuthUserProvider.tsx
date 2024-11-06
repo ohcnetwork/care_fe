@@ -1,12 +1,16 @@
-import { useCallback, useEffect } from "react";
-import { AuthUserContext } from "@/common/hooks/useAuthUser";
-import Loading from "@/components/Common/Loading";
-import routes from "../Redux/api";
-import useQuery from "../Utils/request/useQuery";
-import { LocalStorageKeys } from "@/common/constants";
-import request from "../Utils/request/request";
-import { navigate } from "raviger";
 import careConfig from "@careConfig";
+import { navigate } from "raviger";
+import { useCallback, useEffect } from "react";
+
+import Loading from "@/components/Common/Loading";
+
+import { AuthUserContext } from "@/hooks/useAuthUser";
+
+import { LocalStorageKeys } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   children: React.ReactNode;

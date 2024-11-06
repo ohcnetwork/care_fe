@@ -1,5 +1,11 @@
-import { FieldErrorText, FieldLabel } from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
 
 export default function CheckBoxFormField(props: FormFieldBaseProps<boolean>) {
   const field = useFormFieldPropsResolver(props);

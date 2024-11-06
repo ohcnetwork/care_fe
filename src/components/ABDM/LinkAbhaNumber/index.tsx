@@ -1,12 +1,14 @@
 import { useState } from "react";
-import DialogModal from "@/components/Common/Dialog";
-import { AbhaNumberModel } from "../types/abha";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { classNames } from "../../../Utils/utils";
-import CreateWithAadhaar from "./CreateWithAadhaar";
 import { useTranslation } from "react-i18next";
-import LinkWithOtp from "./LinkWithOtp";
-import LinkWithQr from "./LinkWithQr";
+
+import CreateWithAadhaar from "@/components/ABDM/LinkAbhaNumber/CreateWithAadhaar";
+import LinkWithOtp from "@/components/ABDM/LinkAbhaNumber/LinkWithOtp";
+import LinkWithQr from "@/components/ABDM/LinkAbhaNumber/LinkWithQr";
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+
+import { classNames } from "@/Utils/utils";
 
 interface ILinkAbhaNumberProps {
   show: boolean;

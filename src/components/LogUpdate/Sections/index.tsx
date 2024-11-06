@@ -1,15 +1,19 @@
 import React from "react";
-import ABGAnalysis from "./ABGAnalysis";
-import BloodSugar from "./BloodSugar";
-import Dialysis from "./Dialysis";
-import IOBalance from "./IOBalance";
-import NeurologicalMonitoring from "./NeurologicalMonitoring";
-import NursingCare from "./NursingCare";
-import PressureSore from "./PressureSore/PressureSore";
-import RespiratorySupport from "./RespiratorySupport";
-import Vitals from "./Vitals";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
-import { DailyRoundTypes } from "../../Patient/models";
+
+import ABGAnalysis from "@/components/LogUpdate/Sections/ABGAnalysis";
+import BloodSugar from "@/components/LogUpdate/Sections/BloodSugar";
+import Dialysis from "@/components/LogUpdate/Sections/Dialysis";
+import IOBalance from "@/components/LogUpdate/Sections/IOBalance";
+import NeurologicalMonitoring from "@/components/LogUpdate/Sections/NeurologicalMonitoring";
+import NursingCare from "@/components/LogUpdate/Sections/NursingCare";
+import PressureSore from "@/components/LogUpdate/Sections/PressureSore/PressureSore";
+import RespiratorySupport from "@/components/LogUpdate/Sections/RespiratorySupport";
+import Vitals from "@/components/LogUpdate/Sections/Vitals";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
+import { DailyRoundTypes } from "@/components/Patient/models";
 
 const LogUpdateSections = {
   Vitals,

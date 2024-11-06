@@ -1,7 +1,8 @@
-import * as Notification from "../../Utils/Notifications";
-import { useEffect } from "react";
 import { Link } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+
+import * as Notification from "@/Utils/Notifications";
 
 export default function InvalidReset() {
   const { t } = useTranslation();
