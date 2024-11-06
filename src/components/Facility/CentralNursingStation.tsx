@@ -212,7 +212,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           {t("no_vitals_present")}
         </div>
       ) : (
-        <div className="3xl:grid-cols-3 mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2">
+        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 min-[2080px]:grid-cols-3">
           {data.map((props, i) => (
             <div className="overflow-hidden text-clip" key={i}>
               <HL7PatientVitalsMonitor
