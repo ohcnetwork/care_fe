@@ -15,7 +15,7 @@ const medicineIndicator = "Test Indicator";
 
 describe("Patient Medicine Administration", () => {
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

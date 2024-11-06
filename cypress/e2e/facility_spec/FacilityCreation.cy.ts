@@ -59,7 +59,7 @@ describe("Facility Creation", () => {
   const triageErrorMessage = ["This field is required"];
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
