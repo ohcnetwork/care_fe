@@ -544,7 +544,13 @@ export default function ManageUsers() {
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5">
         <CountBlock
           text="Total Users"
-          count={userListData?.count || 0}
+          count={
+            userListLoading ||
+            districtDataLoading ||
+            userListData?.count === undefined
+              ? null
+              : userListData.count
+          }
           loading={userListLoading || districtDataLoading}
           icon="l-user-injured"
           className="flex-1"

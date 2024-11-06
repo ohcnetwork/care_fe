@@ -281,7 +281,9 @@ const DischargedPatientsList = ({
           <div className="flex-1">
             <CountBlock
               text="Discharged Patients"
-              count={count}
+              count={
+                facilityQuery.loading || count === undefined ? null : count
+              }
               loading={facilityQuery.loading}
               icon="l-user-injured"
               className="pb-12"

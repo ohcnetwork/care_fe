@@ -359,7 +359,7 @@ const AssetsList = () => {
       <div className="mt-5 gap-3 space-y-2 lg:flex">
         <CountBlock
           text="Total Assets"
-          count={totalCount}
+          count={loading || totalCount === undefined ? null : totalCount}
           loading={loading}
           icon="l-monitor-heart-rate"
           className="flex-1"
