@@ -64,7 +64,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
         qParams.monitors_without_patient === "true" ? undefined : "true",
     },
   });
-
   const totalCount = query.data?.count ?? 0;
   const data = query.data?.results.map((obj) => ({
     patientAssetBed: obj,
