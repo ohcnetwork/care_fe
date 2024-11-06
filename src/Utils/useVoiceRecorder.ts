@@ -19,22 +19,27 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   }, [isRecording, recorder, audioURL]);
 
   useEffect(() => {
+    const initializeRecorder = async () => {
+      try {
+        const fetchedRecorder = await requestRecorder();
+        setRecorder(fetchedRecorder);
+        handleMicPermission(true);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Please grant microphone permission to record audio.";
+        Notify.Error({
+          msg: errorMessage,
+        });
+        setIsRecording(false);
+        handleMicPermission(false);
+      }
+    };
     // Lazily obtain recorder the first time we are recording.
     if (recorder === null) {
       if (isRecording) {
-        requestRecorder().then(
-          (fetchedRecorder) => {
-            setRecorder(fetchedRecorder);
-            handleMicPermission(true);
-          },
-          () => {
-            Notify.Error({
-              msg: "Please grant microphone permission to record audio.",
-            });
-            setIsRecording(false);
-            handleMicPermission(false);
-          },
-        );
+        initializeRecorder();
       }
       return;
     }
@@ -87,7 +92,6 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
           Math.min(100, (value / 255) * 100),
         );
         setWaveform(normalizedWaveform);
-        requestAnimationFrame(updateWaveform);
         animationFrameId = requestAnimationFrame(updateWaveform);
       } else {
         cancelAnimationFrame(animationFrameId);
@@ -126,7 +130,28 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
 };
 
 async function requestRecorder() {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  return new MediaRecorder(stream);
+  const constraints: MediaStreamConstraints = {
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      // iOS Safari requires these constraints
+      sampleRate: 44100,
+      channelCount: 1,
+    },
+  };
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    // iOS Safari requires a different mime type
+    const options = {
+      mimeType: MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : "audio/mp4",
+    };
+    return new MediaRecorder(stream, options);
+  } catch (error) {
+    throw new Error(
+      `Failed to initialize recorder: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
 }
 export default useVoiceRecorder;
