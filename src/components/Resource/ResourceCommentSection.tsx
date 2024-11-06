@@ -1,13 +1,16 @@
 import { useState } from "react";
-import * as Notification from "../../Utils/Notifications";
-import { formatDateTime, formatName } from "../../Utils/utils";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import routes from "../../Redux/api";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import request from "../../Utils/request/request";
-import { CommentModel } from "../Facility/models";
+
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import { CommentModel } from "@/components/Facility/models";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");

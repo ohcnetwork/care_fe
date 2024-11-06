@@ -1,24 +1,29 @@
-import { useState } from "react";
 import { navigate } from "raviger";
-import ListFilter from "./ResourceFilter";
-import { RESOURCE_CHOICES } from "@/common/constants";
-import BadgesList from "./ResourceBadges";
-import { formatFilter } from "./ResourceCommons";
-import useFilters from "@/common/hooks/useFilters";
-import { ExportButton } from "@/components/Common/Export";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import SearchInput from "../Form/SearchInput";
-import Tabs from "@/components/Common/components/Tabs";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import KanbanBoard from "../Kanban/Board";
-import { ResourceModel } from "../Facility/models";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { ExportButton } from "@/components/Common/Export";
 import PageTitle from "@/components/Common/PageTitle";
-import ResourceBlock from "./ResourceBlock";
+import Tabs from "@/components/Common/Tabs";
+import { ResourceModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+import KanbanBoard from "@/components/Kanban/Board";
+import BadgesList from "@/components/Resource/ResourceBadges";
+import ResourceBlock from "@/components/Resource/ResourceBlock";
+import { formatFilter } from "@/components/Resource/ResourceCommons";
+import ListFilter from "@/components/Resource/ResourceFilter";
+
+import useFilters from "@/hooks/useFilters";
+
+import { RESOURCE_CHOICES } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const COMPLETED = ["COMPLETED", "REJECTED"];

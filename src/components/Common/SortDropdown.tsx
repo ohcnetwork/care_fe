@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DropdownMenu, { DropdownItem } from "./components/Menu";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
 
 export interface SortOption {
   isAscending: boolean;

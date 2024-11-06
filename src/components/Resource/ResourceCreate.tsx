@@ -1,33 +1,37 @@
-import { useReducer, useState } from "react";
-
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import * as Notification from "../../Utils/Notifications";
 import { navigate } from "raviger";
+import { useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
 import {
   OptionsType,
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "@/common/constants";
-import { parsePhoneNumber } from "../../Utils/utils";
 import { phonePreg } from "@/common/validation";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import { useTranslation } from "react-i18next";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import Card from "../../CAREUI/display/Card";
-import Page from "@/components/Common/components/Page";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 
-import Loading from "@/components/Common/Loading";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
+
 interface resourceProps {
   facilityId: number;
 }

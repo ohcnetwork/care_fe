@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
+
 import PatientCategoryBadge from "@/components/Common/PatientCategoryBadge";
-import { DailyRoundsModel, NameQuantity } from "../../../Patient/models";
-import { PatientCategory } from "../../models";
+import { PatientCategory } from "@/components/Facility/models";
+import { DailyRoundsModel, NameQuantity } from "@/components/Patient/models";
 
 interface Props<T extends keyof DailyRoundsModel> {
   attributeKey: T;

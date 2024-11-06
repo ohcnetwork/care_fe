@@ -1,5 +1,6 @@
-import KeyboardShortcut from "../../CAREUI/interactive/KeyboardShortcut";
-import { classNames } from "../../Utils/utils";
+import KeyboardShortcut from "@/CAREUI/interactive/KeyboardShortcut";
+
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   className?: string;

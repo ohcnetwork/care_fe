@@ -1,16 +1,20 @@
-import { useReducer, useState, useEffect } from "react";
-import * as Notification from "../../Utils/Notifications";
-import { InventoryItemsModel } from "./models";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import Page from "@/components/Common/components/Page";
-import Card from "../../CAREUI/display/Card";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+import { useEffect, useReducer, useState } from "react";
+
+import Card from "@/CAREUI/display/Card";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import Page from "@/components/Common/Page";
+import { InventoryItemsModel } from "@/components/Facility/models";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 const initForm = {
   id: "",

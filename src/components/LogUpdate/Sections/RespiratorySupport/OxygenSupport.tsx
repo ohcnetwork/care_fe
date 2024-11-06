@@ -1,9 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { rangeValueDescription } from "../../../../Utils/utils";
-import RadioFormField from "../../../Form/FormFields/RadioFormField";
-import RangeFormField from "../../../Form/FormFields/RangeFormField";
-import { LogUpdateSectionProps } from "../../utils";
+
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import RangeFormField from "@/components/Form/FormFields/RangeFormField";
+import { LogUpdateSectionProps } from "@/components/LogUpdate/utils";
+
 import { OXYGEN_MODALITY_OPTIONS } from "@/common/constants";
+
+import { rangeValueDescription } from "@/Utils/utils";
 
 const OxygenRespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();

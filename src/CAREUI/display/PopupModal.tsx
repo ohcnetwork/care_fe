@@ -1,9 +1,12 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { classNames } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import useBreakpoints from "@/common/hooks/useBreakpoints";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
+
+import { classNames } from "@/Utils/utils";
 
 type Props = {
   show: boolean;

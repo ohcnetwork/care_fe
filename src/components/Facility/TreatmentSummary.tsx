@@ -1,23 +1,23 @@
-import { GENDER_TYPES } from "@/common/constants";
-import {
-  formatDate,
-  formatDateTime,
-  formatPatientAge,
-} from "../../Utils/utils";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { ConsultationModel } from "./models";
+import careConfig from "@careConfig";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+
+import PrintPreview from "@/CAREUI/misc/PrintPreview";
+
+import PageHeadTitle from "@/components/Common/PageHeadTitle";
 import {
   ActiveConditionVerificationStatuses,
   ConsultationDiagnosis,
-} from "../Diagnosis/types";
-import PageHeadTitle from "@/components/Common/PageHeadTitle";
-import { useTranslation } from "react-i18next";
-import { PatientModel } from "../Patient/models";
-import MedicineRoutes from "../Medicine/routes";
-import PrintPreview from "../../CAREUI/misc/PrintPreview";
-import careConfig from "@careConfig";
+} from "@/components/Diagnosis/types";
+import { ConsultationModel } from "@/components/Facility/models";
+import MedicineRoutes from "@/components/Medicine/routes";
+import { PatientModel } from "@/components/Patient/models";
+
+import { GENDER_TYPES } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDate, formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 export interface ITreatmentSummaryProps {
   consultationId: string;

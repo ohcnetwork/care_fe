@@ -1,11 +1,17 @@
-import dayjs from "../../../Utils/dayjs";
-import { MedicineAdministrationRecord, Prescription } from "../models";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames, formatDateTime } from "../../../Utils/utils";
-import DialogModal from "@/components/Common/Dialog";
-import PrescrpitionActivityTimeline from "../PrescrpitionTimeline";
 import { useState } from "react";
-import PrescriptionDetailCard from "../PrescriptionDetailCard";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import DialogModal from "@/components/Common/Dialog";
+import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
+import PrescrpitionActivityTimeline from "@/components/Medicine/PrescrpitionTimeline";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "@/components/Medicine/models";
+
+import dayjs from "@/Utils/dayjs";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface Props {
   administrations: MedicineAdministrationRecord[];

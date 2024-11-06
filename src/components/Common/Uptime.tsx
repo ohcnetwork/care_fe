@@ -1,10 +1,15 @@
 import { Popover, PopoverPanel } from "@headlessui/react";
 import { useEffect, useRef, useState } from "react";
-import { AssetStatus, AvailabilityRecord } from "../Assets/AssetTypes";
-import { classNames } from "../../Utils/utils";
-import dayjs from "../../Utils/dayjs";
-import useQuery from "../../Utils/request/useQuery";
-import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
+
+import {
+  AssetStatus,
+  AvailabilityRecord,
+} from "@/components/Assets/AssetTypes";
+
+import dayjs from "@/Utils/dayjs";
+import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames } from "@/Utils/utils";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",
