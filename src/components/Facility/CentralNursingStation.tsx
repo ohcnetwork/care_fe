@@ -47,7 +47,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const PER_PAGE_LIMIT = useBreakpoints(breakpointValues);
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
-
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
