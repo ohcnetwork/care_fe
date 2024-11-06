@@ -13,7 +13,11 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
-export const ResetPassword = (props: any) => {
+interface ResetPasswordProps {
+  token: string;
+}
+
+const ResetPassword = (props: ResetPasswordProps) => {
   const initForm: any = {
     password: "",
     confirm: "",
@@ -172,3 +176,5 @@ export const ResetPassword = (props: any) => {
     </div>
   );
 };
+
+export default ResetPassword;

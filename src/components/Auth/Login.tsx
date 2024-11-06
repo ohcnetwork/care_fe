@@ -1,9 +1,8 @@
 import careConfig from "@careConfig";
+import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import LegendInput from "@/CAREUI/interactive/LegendInput";
@@ -20,7 +19,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { classNames } from "@/Utils/utils";
 
-export const Login = (props: { forgot?: boolean }) => {
+const Login = (props: { forgot?: boolean }) => {
   const { signIn } = useAuthContext();
   const {
     mainLogo,
@@ -29,8 +28,8 @@ export const Login = (props: { forgot?: boolean }) => {
     stateLogo,
     customLogo,
     customLogoAlt,
-    customDescription,
   } = careConfig;
+  const customDescriptionHtml = __CUSTOM_DESCRIPTION_HTML__;
   const initForm: any = {
     username: "",
     password: "",
@@ -194,14 +193,14 @@ export const Login = (props: { forgot?: boolean }) => {
             <h1 className="text-4xl font-black leading-tight tracking-wider text-white lg:text-5xl">
               {t("care")}
             </h1>
-            {customDescription ? (
+            {customDescriptionHtml ? (
               <div className="py-6">
-                <ReactMarkdown
-                  rehypePlugins={[rehypeRaw]}
+                <div
                   className="max-w-xl text-secondary-400"
-                >
-                  {customDescription || t("goal")}
-                </ReactMarkdown>
+                  dangerouslySetInnerHTML={{
+                    __html: __CUSTOM_DESCRIPTION_HTML__,
+                  }}
+                />
               </div>
             ) : (
               <div className="max-w-xl py-6 pl-1 text-base font-semibold text-secondary-400 md:text-lg lg:text-xl">
@@ -251,14 +250,14 @@ export const Login = (props: { forgot?: boolean }) => {
                 {t("contribute_github")}
               </a>
               <span className="mx-2 text-primary-400">|</span>
-              <a
+              <Link
                 href="/licenses"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-400 hover:text-primary-500"
               >
                 {t("third_party_software_licenses")}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -421,3 +420,5 @@ export const Login = (props: { forgot?: boolean }) => {
     </div>
   );
 };
+
+export default Login;
