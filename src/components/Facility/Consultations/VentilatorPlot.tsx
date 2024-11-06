@@ -26,21 +26,34 @@ const modality: Array<ModalityType> = [
 ];
 */
 
+interface graphDataProps {
+  [key: string]: {
+    bilateral_air_entry?: boolean;
+    etco2?: number;
+    id?: string;
+    ventilator_fio2?: number;
+    ventilator_mean_airway_pressure?: number;
+    ventilator_oxygen_modality_flow_rate?: number;
+    ventilator_oxygen_modality_oxygen_rate?: number;
+    ventilator_peep?: number | null;
+    ventilator_pip?: number;
+    ventilator_pressure_support?: number;
+    ventilator_resp_rate?: number;
+    ventilator_spo2?: number;
+    ventilator_tidal_volume?: number;
+  };
+}
+
 export const VentilatorPlot = ({
   dailyRoundsList,
 }: {
   dailyRoundsList?: DailyRoundsModel[];
 }) => {
-  const [results, setResults] = useState({});
+  const [results, setResults] = useState<graphDataProps>({});
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const { graphData } = getGraphData(dailyRoundsList);
-    setResults(graphData);
-  }, [dailyRoundsList]);
-
   const getGraphData = (dailyRoundsData?: DailyRoundsModel[]) => {
-    const graphData = {};
+    const graphData: graphDataProps = {};
     const graphDataCount = dailyRoundsData?.length ?? 0;
     if (dailyRoundsData) {
       dailyRoundsData.forEach((currentRound: DailyRoundsModel) => {
@@ -70,6 +83,11 @@ export const VentilatorPlot = ({
     return { graphData, graphDataCount };
   };
 
+  useEffect(() => {
+    const { graphData } = getGraphData(dailyRoundsList);
+    setResults(graphData);
+  }, [dailyRoundsList]);
+
   if (!dailyRoundsList) {
     return <Loading />;
   }
@@ -90,22 +108,23 @@ export const VentilatorPlot = ({
       case "ventilator_tidal_volume":
       case "ventilator_peep":
         condition =
-          (currentRound.ventilator_interface == "INVASIVE" ||
-            currentRound.ventilator_interface == "NON_INVASIVE") &&
+          (currentRound.ventilator_interface === "INVASIVE" ||
+            currentRound.ventilator_interface === "NON_INVASIVE") &&
           !!currentRound.ventilator_mode;
         break;
       case "ventilator_fio2":
         condition =
-          currentRound.ventilator_interface == "OXYGEN_SUPPORT" &&
-          currentRound.ventilator_oxygen_modality == "HIGH_FLOW_NASAL_CANNULA";
+          currentRound.ventilator_interface === "OXYGEN_SUPPORT" &&
+          currentRound.ventilator_oxygen_modality === "HIGH_FLOW_NASAL_CANNULA";
         break;
       case "ventilator_spo2":
         condition =
-          currentRound.ventilator_interface == "OXYGEN_SUPPORT" &&
-          (currentRound.ventilator_oxygen_modality == "NASAL_PRONGS" ||
-            currentRound.ventilator_oxygen_modality == "SIMPLE_FACE_MASK" ||
-            currentRound.ventilator_oxygen_modality == "NON_REBREATHING_MASK" ||
-            currentRound.ventilator_oxygen_modality ==
+          currentRound.ventilator_interface === "OXYGEN_SUPPORT" &&
+          (currentRound.ventilator_oxygen_modality === "NASAL_PRONGS" ||
+            currentRound.ventilator_oxygen_modality === "SIMPLE_FACE_MASK" ||
+            currentRound.ventilator_oxygen_modality ===
+              "NON_REBREATHING_MASK" ||
+            currentRound.ventilator_oxygen_modality ===
               "HIGH_FLOW_NASAL_CANNULA");
         break;
       case "etco2":
@@ -117,10 +136,10 @@ export const VentilatorPlot = ({
         break;
       case "ventilator_oxygen_modality_oxygen_rate":
         condition =
-          currentRound.ventilator_interface == "OXYGEN_SUPPORT" &&
-          (currentRound.ventilator_oxygen_modality == "NASAL_PRONGS" ||
-            currentRound.ventilator_oxygen_modality == "SIMPLE_FACE_MASK" ||
-            currentRound.ventilator_oxygen_modality == "NON_REBREATHING_MASK");
+          currentRound.ventilator_interface === "OXYGEN_SUPPORT" &&
+          (currentRound.ventilator_oxygen_modality === "NASAL_PRONGS" ||
+            currentRound.ventilator_oxygen_modality === "SIMPLE_FACE_MASK" ||
+            currentRound.ventilator_oxygen_modality === "NON_REBREATHING_MASK");
         break;
     }
     switch (currentRound.ventilator_interface) {
@@ -153,13 +172,16 @@ export const VentilatorPlot = ({
 
   const getModeOrModality = (round: DailyRoundsModel) => {
     const ventilatorInterface = round.ventilator_interface;
-    const modeOrModality =
-      ventilatorInterface == "INVASIVE" || ventilatorInterface == "NON_INVASIVE"
-        ? round.ventilator_mode
-        : ventilatorInterface == "OXYGEN_SUPPORT"
-          ? round.ventilator_oxygen_modality
-          : null;
-    return modeOrModality;
+    if (!ventilatorInterface) return null;
+    switch (ventilatorInterface) {
+      case "INVASIVE":
+      case "NON_INVASIVE":
+        return round.ventilator_mode;
+      case "OXYGEN_SUPPORT":
+        return round.ventilator_oxygen_modality;
+      default:
+        return null;
+    }
   };
 
   const getMarkLineData = (name: string) => {
@@ -214,12 +236,12 @@ export const VentilatorPlot = ({
     return markLineData;
   };
 
-  const yAxisData = (name: string) => {
-    return Object.values(results).map((p: any) => p[name]);
+  const yAxisData = (name: keyof graphDataProps[string]) => {
+    return Object.values(results).map((p) => p[name]);
   };
 
   const bilateral = Object.values(results)
-    .map((p: any, i) => {
+    .map((p, i) => {
       return {
         value: p.bilateral_air_entry,
         timestamp: Object.keys(results)[i],

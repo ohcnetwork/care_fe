@@ -9,11 +9,6 @@ type VentilatorTableProps = {
 export default function VentilatorTable(props: VentilatorTableProps) {
   const { t } = useTranslation();
   const { dailyRoundsList } = props;
-  let sortedData: DailyRoundsModel[] = [];
-
-  const sortData = (data: DailyRoundsModel[]) => {
-    return data.sort(compareByDateString("taken_at"));
-  };
 
   const VentilatorTableRow = ({
     dailyRound,
@@ -55,13 +50,15 @@ export default function VentilatorTable(props: VentilatorTableProps) {
   const getModeOrModality = (round: DailyRoundsModel) => {
     const ventilatorInterface = round.ventilator_interface;
     if (!ventilatorInterface) return null;
-    const modeOrModality =
-      ventilatorInterface == "INVASIVE" || ventilatorInterface == "NON_INVASIVE"
-        ? round.ventilator_mode
-        : ventilatorInterface == "OXYGEN_SUPPORT"
-          ? round.ventilator_oxygen_modality
-          : null;
-    return modeOrModality;
+    switch (ventilatorInterface) {
+      case "INVASIVE":
+      case "NON_INVASIVE":
+        return round.ventilator_mode;
+      case "OXYGEN_SUPPORT":
+        return round.ventilator_oxygen_modality;
+      default:
+        return null;
+    }
   };
 
   const VentilatorTableBody = (dailyRoundsList: DailyRoundsModel[]) => {
@@ -100,11 +97,12 @@ export default function VentilatorTable(props: VentilatorTableProps) {
     return rows;
   };
 
-  if (!dailyRoundsList || dailyRoundsList.length == 0) {
+  if (!dailyRoundsList?.length) {
     return;
-  } else {
-    sortedData = sortData(dailyRoundsList);
   }
+  const sortedData: DailyRoundsModel[] = dailyRoundsList.sort(
+    compareByDateString("taken_at"),
+  );
 
   return (
     <div className="my-3 w-full overflow-x-scroll rounded-lg border bg-white px-4 pt-3 shadow">
