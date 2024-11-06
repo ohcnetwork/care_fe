@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import _ from "lodash";
 import { memoize, findIndex } from "lodash-es";
 import { InvestigationResponse } from "./types";
 

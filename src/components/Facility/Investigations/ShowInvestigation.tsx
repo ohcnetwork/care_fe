@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import _ from "lodash";
 import { set } from "lodash-es";
 import { useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
