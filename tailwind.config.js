@@ -15,11 +15,15 @@ const secondary = {
 };
 
 /** @type {import('tailwindcss').Config} */
+
 module.exports = {
   important: true,
   darkMode: ["class"],
   theme: {
     extend: {
+      screens: {
+        fourK: "130rem",
+      },
       fontFamily: {
         sans: ["Figtree", "sans-serif"],
       },

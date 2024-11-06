@@ -4,7 +4,6 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -22,9 +21,9 @@ import HL7PatientVitalsMonitor from "@/components/VitalsMonitor/HL7PatientVitals
 import useVitalsAspectRatioConfig from "@/components/VitalsMonitor/useVitalsAspectRatioConfig";
 import { getVitalsMonitorSocketUrl } from "@/components/VitalsMonitor/utils";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
 import useFullscreen from "@/hooks/useFullscreen";
-import useWindowDimensions from "@/hooks/useWindowDimensions";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
@@ -41,21 +40,17 @@ interface Props {
 }
 
 export default function CentralNursingStation({ facilityId }: Props) {
+  const breakpointValues = {
+    default: 6, // Default value if no breakpoints match
+    "3xl": 9, // Value for screens wider than 1920px
+  };
+  const PER_PAGE_LIMIT = useBreakpoints(breakpointValues);
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
-  const [PER_PAGE_LIMIT, setPerPageLimit] = useState(6);
+
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
-  const getDimension = useWindowDimensions();
-
-  useEffect(() => {
-    if (getDimension.width > 2080) {
-      setPerPageLimit(9);
-    } else {
-      setPerPageLimit(6);
-    }
-  }, [getDimension]);
 
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
@@ -227,7 +222,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           {t("no_vitals_present")}
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 min-[2080px]:grid-cols-3">
+        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 fourK:grid-cols-3">
           {data.map((props, i) => (
             <div className="overflow-hidden text-clip" key={i}>
               <HL7PatientVitalsMonitor
