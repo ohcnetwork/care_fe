@@ -303,7 +303,10 @@ export default function NotificationsList({
     try {
       const reg = await navigator.serviceWorker.ready;
 
-      if (!reg.pushManager) return;
+      if (!reg.pushManager) {
+        Error({ msg: t("unsubscribe_failed") });
+        return;
+      }
 
       setIsSubscribing(true);
 
@@ -313,32 +316,27 @@ export default function NotificationsList({
         try {
           await subscription.unsubscribe();
 
-          const data = {
-            pf_endpoint: "",
-            pf_p256dh: "",
-            pf_auth: "",
-          };
-
           await request(routes.updateUserPnconfig, {
             pathParams: { username },
-            body: data,
+            body: {
+              pf_endpoint: "",
+              pf_p256dh: "",
+              pf_auth: "",
+            },
           });
 
           setIsSubscribed("NotSubscribed");
         } catch (e) {
           Error({ msg: t("unsubscribe_failed") });
-        } finally {
-          setIsSubscribing(false);
         }
-      } else {
-        setIsSubscribing(false);
       }
     } catch (e) {
       Sentry.captureException(e);
       Error({ msg: t("subscription_error") });
+    } finally {
+      setIsSubscribing(false);
     }
   };
-
   async function subscribe() {
     setIsSubscribing(true);
     const response = await request(routes.getPublicKey);
