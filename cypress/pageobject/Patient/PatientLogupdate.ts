@@ -59,11 +59,11 @@ class PatientLogupdate {
   }
 
   typeRespiratory(respiratory: string) {
-    cy.typeAndSelectOption("#resp", respiratory);
+    cy.get("#resp").click().type(respiratory);
   }
 
   typeSpo2(spo: string) {
-    cy.typeAndSelectOption("#ventilator_spo2", spo);
+    cy.get("#ventilator_spo2").click().type(spo);
   }
 
   selectRhythm(rhythm: string) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Error } from "./Notifications";
+import * as Notify from "./Notifications";
 
 const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   const [audioURL, setAudioURL] = useState("");
@@ -28,7 +28,7 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
             handleMicPermission(true);
           },
           () => {
-            Error({
+            Notify.Error({
               msg: "Please grant microphone permission to record audio.",
             });
             setIsRecording(false);
@@ -67,6 +67,7 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
   }, [recorder, isRecording]);
 
   const setupAudioAnalyser = () => {
+    let animationFrameId: number;
     audioContext = new (window.AudioContext ||
       (window as any).webkitAudioContext)();
     analyser = audioContext.createAnalyser();
@@ -87,6 +88,11 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
         );
         setWaveform(normalizedWaveform);
         requestAnimationFrame(updateWaveform);
+        animationFrameId = requestAnimationFrame(updateWaveform);
+      } else {
+        cancelAnimationFrame(animationFrameId);
+        source?.disconnect();
+        analyser?.disconnect();
       }
     };
 
