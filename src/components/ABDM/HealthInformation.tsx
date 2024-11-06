@@ -1,9 +1,11 @@
-import { useTranslation } from "react-i18next";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/components/Page";
 import { HIProfile } from "hi-profiles";
+import { useTranslation } from "react-i18next";
+
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 interface IProps {
   artefactId: string;

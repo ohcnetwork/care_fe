@@ -1,9 +1,11 @@
-import { useCallback } from "react";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import { FacilityModel } from "../Facility/models";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
 import { t } from "i18next";
+import { useCallback } from "react";
+
+import { FacilityModel } from "@/components/Facility/models";
+import AutoCompleteAsync from "@/components/Form/AutoCompleteAsync";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface FacilitySelectProps {
   name: string;

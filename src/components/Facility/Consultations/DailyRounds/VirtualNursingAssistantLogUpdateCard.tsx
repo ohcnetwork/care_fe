@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { DailyRoundsModel } from "../../../Patient/models";
-import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
+
+import LogUpdateCardAttribute from "@/components/Facility/Consultations/DailyRounds/LogUpdateCardAttribute";
+import { DailyRoundsModel } from "@/components/Patient/models";
 
 // TODO: remove this method once events module is ready
 const getDeepDiff = <T extends object>(a: any, b?: any): Partial<T> => {

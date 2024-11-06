@@ -1,22 +1,29 @@
-import { useCallback, useReducer, useState } from "react";
-import { InvestigationGroup, InvestigationType } from "..";
-
 import { chain } from "lodash-es";
+import { useCallback, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
-import routes from "../../../../Redux/api";
-import * as Notification from "../../../../Utils/Notifications";
-import request from "../../../../Utils/request/request";
-import { PaginatedResponse } from "../../../../Utils/request/types";
-import useQuery from "../../../../Utils/request/useQuery";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
 import Loading from "@/components/Common/Loading";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import Page from "@/components/Common/components/Page";
-import AutocompleteMultiSelectFormField from "../../../Form/FormFields/AutocompleteMultiselect";
-import { FieldChangeEvent } from "../../../Form/FormFields/Utils";
-import ReportTable from "./ReportTable";
-import { Investigation, InvestigationResponse } from "./types";
-import { formatPatientAge } from "../../../../Utils/utils";
+import Page from "@/components/Common/Page";
+import {
+  InvestigationGroup,
+  InvestigationType,
+} from "@/components/Facility/Investigations";
+import ReportTable from "@/components/Facility/Investigations/Reports/ReportTable";
+import {
+  Investigation,
+  InvestigationResponse,
+} from "@/components/Facility/Investigations/Reports/types";
+import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { PaginatedResponse } from "@/Utils/request/types";
+import useQuery from "@/Utils/request/useQuery";
+import { formatPatientAge } from "@/Utils/utils";
 
 const RESULT_PER_PAGE = 14;
 interface InitialState {

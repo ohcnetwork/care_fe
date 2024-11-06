@@ -20,7 +20,7 @@ describe("Manage User", () => {
   const linkedskill = "General Medicine";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

@@ -1,14 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import routes from "../../Redux/api";
-import * as Notify from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import { UserModel } from "../Users/models";
-import useSegmentedRecording from "../../Utils/useSegmentedRecorder";
-import uploadFile from "../../Utils/request/uploadFile";
-import { useFeatureFlags } from "../../Utils/featureFlags";
+import React, { useEffect, useRef, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { UserModel } from "@/components/Users/models";
+
+import * as Notify from "@/Utils/Notifications";
+import { useFeatureFlags } from "@/Utils/featureFlags";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import uploadFile from "@/Utils/request/uploadFile";
+import useSegmentedRecording from "@/Utils/useSegmentedRecorder";
 
 interface FieldOption {
   id: string | number;

@@ -1,4 +1,3 @@
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import {
   DetailedHTMLProps,
   InputHTMLAttributes,
@@ -6,9 +5,15 @@ import {
   useState,
 } from "react";
 
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import FormField from "./FormField";
-import { classNames } from "../../../Utils/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import { classNames } from "@/Utils/utils";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> &
   Omit<

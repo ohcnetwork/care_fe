@@ -1,3 +1,5 @@
+import React from "react";
+
 import request from "@/Utils/request/request";
 import {
   MutationRoute,
@@ -5,7 +7,6 @@ import {
   RequestResult,
 } from "@/Utils/request/types";
 import { mergeRequestOptions } from "@/Utils/request/utils";
-import React from "react";
 
 export default function useMutation<TData, TBody>(
   route: MutationRoute<TData, TBody>,

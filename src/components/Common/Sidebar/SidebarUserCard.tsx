@@ -1,10 +1,9 @@
-import React from "react";
 import { Link } from "raviger";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { formatName, formatDisplayName } from "../../../Utils/utils";
-import useAuthUser, { useAuthContext } from "@/common/hooks/useAuthUser";
-import { Avatar } from "@/components/Common/Avatar";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import { Avatar } from "@/components/Common/Avatar";
+
+import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+
+import { formatDisplayName, formatName } from "@/Utils/utils";
 
 interface SidebarUserCardProps {
   shrinked: boolean;

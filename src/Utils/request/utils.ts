@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction } from "react";
+
 import { LocalStorageKeys } from "@/common/constants";
-import * as Notification from "../Notifications";
-import { QueryParams, RequestOptions } from "./types";
+
+import * as Notification from "@/Utils/Notifications";
+import { QueryParams, RequestOptions } from "@/Utils/request/types";
 
 export function makeUrl(
   path: string,

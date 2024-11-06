@@ -1,24 +1,34 @@
-import { useState } from "react";
 import { navigate } from "raviger";
-import ListFilter from "./ResourceFilter";
-import { RESOURCE_CHOICES } from "@/common/constants";
-import BadgesList from "./ResourceBadges";
-import { formatFilter } from "./ResourceCommons";
-import useFilters from "@/common/hooks/useFilters";
-import { ExportButton } from "@/components/Common/Export";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
+import { Suspense, lazy, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import SearchInput from "../Form/SearchInput";
-import Tabs from "@/components/Common/components/Tabs";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import KanbanBoard from "../Kanban/Board";
-import { ResourceModel } from "../Facility/models";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { ExportButton } from "@/components/Common/Export";
+import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
-import ResourceBlock from "./ResourceBlock";
+import Tabs from "@/components/Common/Tabs";
+import { ResourceModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+import type { KanbanBoardType } from "@/components/Kanban/Board";
+import BadgesList from "@/components/Resource/ResourceBadges";
+import ResourceBlock from "@/components/Resource/ResourceBlock";
+import { formatFilter } from "@/components/Resource/ResourceCommons";
+import ListFilter from "@/components/Resource/ResourceFilter";
+
+import useFilters from "@/hooks/useFilters";
+
+import { RESOURCE_CHOICES } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+
+const KanbanBoard = lazy(
+  () => import("@/components/Kanban/Board"),
+) as KanbanBoardType;
+
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const COMPLETED = ["COMPLETED", "REJECTED"];
@@ -92,49 +102,51 @@ export default function BoardView() {
           </div>
         </div>
       </div>
-
-      <KanbanBoard<ResourceModel>
-        title={<BadgesList {...{ appliedFilters, FilterBadges }} />}
-        sections={boardFilter.map((board) => ({
-          id: board,
-          title: (
-            <h3 className="flex h-8 items-center text-xs">
-              {board}{" "}
-              <ExportButton
-                action={async () => {
-                  const { data } = await request(
-                    routes.downloadResourceRequests,
-                    {
-                      query: {
-                        ...formatFilter({ ...qParams, status: board }),
-                        csv: true,
+      <Suspense fallback={<Loading />}>
+        <KanbanBoard<ResourceModel>
+          title={<BadgesList {...{ appliedFilters, FilterBadges }} />}
+          sections={boardFilter.map((board) => ({
+            id: board,
+            title: (
+              <h3 className="flex h-8 items-center text-xs">
+                {board}{" "}
+                <ExportButton
+                  action={async () => {
+                    const { data } = await request(
+                      routes.downloadResourceRequests,
+                      {
+                        query: {
+                          ...formatFilter({ ...qParams, status: board }),
+                          csv: true,
+                        },
                       },
-                    },
-                  );
-                  return data ?? null;
-                }}
-                filenamePrefix={`resource_requests_${board}`}
-              />
-            </h3>
-          ),
-          fetchOptions: (id) => ({
-            route: routes.listResourceRequests,
-            options: {
-              query: formatFilter({
-                ...qParams,
-                status: id,
-              }),
-            },
-          }),
-        }))}
-        onDragEnd={(result) => {
-          if (result.source.droppableId !== result.destination?.droppableId)
-            navigate(
-              `/resource/${result.draggableId}/update?status=${result.destination?.droppableId}`,
-            );
-        }}
-        itemRender={(resource) => <ResourceBlock resource={resource} />}
-      />
+                    );
+                    return data ?? null;
+                  }}
+                  filenamePrefix={`resource_requests_${board}`}
+                />
+              </h3>
+            ),
+            fetchOptions: (id) => ({
+              route: routes.listResourceRequests,
+              options: {
+                query: formatFilter({
+                  ...qParams,
+                  status: id,
+                }),
+              },
+            }),
+          }))}
+          onDragEnd={(result) => {
+            if (result.source.droppableId !== result.destination?.droppableId)
+              navigate(
+                `/resource/${result.draggableId}/update?status=${result.destination?.droppableId}`,
+              );
+          }}
+          itemRender={(resource) => <ResourceBlock resource={resource} />}
+        />
+      </Suspense>
+
       <ListFilter {...advancedFilter} key={window.location.search} />
     </div>
   );

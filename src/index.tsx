@@ -1,9 +1,10 @@
-import { createRoot } from "react-dom/client";
-import App from "./App";
-import "./i18n";
 import * as Sentry from "@sentry/browser";
-import "./style/index.css";
+import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
+
+import App from "@/App";
+import "@/i18n";
+import "@/style/index.css";
 
 if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
