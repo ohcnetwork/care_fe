@@ -49,7 +49,7 @@ export const ABGPlots = (props: any) => {
   return (
     <div>
       <div className="grid-row-1 grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="PH"
             name="PH"
@@ -59,7 +59,7 @@ export const ABGPlots = (props: any) => {
             high={7.45}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="PCO2 (mm Hg)"
             name="PCO2"
@@ -69,7 +69,7 @@ export const ABGPlots = (props: any) => {
             high={45}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="PO2 (mm Hg)"
             name="PO2"
@@ -79,7 +79,7 @@ export const ABGPlots = (props: any) => {
             high={200}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="HCO3  (mmol/L)"
             name="HCO3"
@@ -89,7 +89,7 @@ export const ABGPlots = (props: any) => {
             high={26}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Base Excess  (mmol/L)"
             name="Base Excess"
@@ -99,7 +99,7 @@ export const ABGPlots = (props: any) => {
             high={2}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Lactate  (mmol/L)"
             name="Lactate"
@@ -110,7 +110,7 @@ export const ABGPlots = (props: any) => {
             high={2}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Sodium  (mmol/L)"
             name="Sodium"
@@ -120,7 +120,7 @@ export const ABGPlots = (props: any) => {
             high={145}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Potassium  (mmol/L)"
             name="Potassium"
@@ -130,7 +130,7 @@ export const ABGPlots = (props: any) => {
             high={5.5}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="FIO2(Ventilator)(%)"
             name="fio2"
