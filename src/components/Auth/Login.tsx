@@ -1,20 +1,24 @@
+import careConfig from "@careConfig";
 import { useEffect, useState } from "react";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
-import * as Notification from "../../Utils/Notifications";
-import LegendInput from "../../CAREUI/interactive/LegendInput";
-import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CircularProgress from "@/components/Common/components/CircularProgress";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { useAuthContext } from "@/common/hooks/useAuthUser";
-import FiltersCache from "../../Utils/FiltersCache";
-import { classNames } from "../../Utils/utils";
-import BrowserWarning from "../ErrorPages/BrowserWarning";
-import careConfig from "@careConfig";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import LegendInput from "@/CAREUI/interactive/LegendInput";
+
+import CircularProgress from "@/components/Common/CircularProgress";
+import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
+import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
+
+import { useAuthContext } from "@/hooks/useAuthUser";
+
+import FiltersCache from "@/Utils/FiltersCache";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { classNames } from "@/Utils/utils";
 
 export const Login = (props: { forgot?: boolean }) => {
   const { signIn } = useAuthContext();

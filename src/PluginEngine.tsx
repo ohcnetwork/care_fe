@@ -1,9 +1,11 @@
-import { CareAppsContext, useCareApps } from "@/common/hooks/useCareApps";
 /* eslint-disable i18next/no-literal-string */
 import React, { Suspense } from "react";
-import { SupportedPluginComponents, pluginMap } from "./pluginTypes";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+
+import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
+
+import { SupportedPluginComponents, pluginMap } from "@/pluginTypes";
 
 export default function PluginEngine({
   children,

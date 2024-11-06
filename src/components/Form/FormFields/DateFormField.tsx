@@ -1,8 +1,11 @@
 import DateInputV2 from "@/components/Common/DateInputV2";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
 
-import FormField from "./FormField";
-import { classNames } from "../../../Utils/utils";
+import { classNames } from "@/Utils/utils";
 
 type Props = FormFieldBaseProps<Date> & {
   containerClassName?: string;

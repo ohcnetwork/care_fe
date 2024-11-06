@@ -1,16 +1,22 @@
 import { useReducer, useState } from "react";
-import { DOCTOR_SPECIALIZATION } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import ButtonV2, { Cancel } from "@/components/Common/components/ButtonV2";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import { DoctorModal } from "./models";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
+
+import ButtonV2, { Cancel } from "@/components/Common/ButtonV2";
+import { DoctorModal } from "@/components/Facility/models";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/components/Form/FormFields/FormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEventHandler } from "@/components/Form/FormFields/Utils";
+import SelectMenuV2 from "@/components/Form/SelectMenuV2";
+
+import { DOCTOR_SPECIALIZATION } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;

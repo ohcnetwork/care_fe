@@ -1,9 +1,11 @@
+import careConfig from "@careConfig";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { classNames } from "../../Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import careConfig from "@careConfig";
-import { LANGUAGES } from "../../i18n";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { classNames } from "@/Utils/utils";
+import { LANGUAGES } from "@/i18n";
 
 export const LanguageSelector = (props: any) => {
   const { i18n } = useTranslation();

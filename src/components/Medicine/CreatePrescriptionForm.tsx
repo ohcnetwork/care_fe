@@ -1,6 +1,6 @@
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 
-import useSlug from "@/common/hooks/useSlug";
 import { RequiredFieldValidator } from "@/components/Form/FieldValidators";
 import Form from "@/components/Form/Form";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
@@ -15,9 +15,11 @@ import {
 } from "@/components/Medicine/models";
 import MedicineRoutes from "@/components/Medicine/routes";
 import { PrescriptionFormValidator } from "@/components/Medicine/validators";
+
+import useSlug from "@/hooks/useSlug";
+
 import { Success } from "@/Utils/Notifications";
 import useMutation from "@/Utils/request/useMutation";
-import dayjs from "dayjs";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;

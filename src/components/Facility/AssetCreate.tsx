@@ -1,7 +1,5 @@
-import * as Notification from "../../Utils/Notifications";
-
-import { AssetClass, AssetType } from "../Assets/AssetTypes";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
+import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
+import { navigate } from "raviger";
 import {
   LegacyRef,
   MutableRefObject,
@@ -11,32 +9,39 @@ import {
   useReducer,
   useState,
 } from "react";
-
-import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import { LocationSelect } from "@/components/Common/LocationSelect";
-import Page from "@/components/Common/components/Page";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import SwitchV2 from "@/components/Common/components/Switch";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-
-import { navigate } from "raviger";
-import { parseQueryParams } from "../../Utils/primitives";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import useVisibility from "../../Utils/useVisibility";
-import { validateEmailAddress } from "@/common/validation";
-import { dateQueryString, parsePhoneNumber } from "../../Utils/utils";
-import dayjs from "../../Utils/dayjs";
-import DateFormField from "../Form/FormFields/DateFormField";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
 
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { AssetClass, AssetType } from "@/components/Assets/AssetTypes";
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import Page from "@/components/Common/Page";
+import SwitchV2 from "@/components/Common/Switch";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useVisibility from "@/hooks/useVisibility";
+
+import { validateEmailAddress } from "@/common/validation";
+
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import { parseQueryParams } from "@/Utils/primitives";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { dateQueryString, parsePhoneNumber } from "@/Utils/utils";
+
 const formErrorKeys = [
   "name",
   "asset_class",

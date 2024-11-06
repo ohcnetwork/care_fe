@@ -10,10 +10,11 @@ import {
   VisualMapComponent,
   VisualMapPiecewiseComponent,
 } from "echarts/components";
-
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
-import { properRoundOf } from "../../../../Utils/utils";
+
+import { properRoundOf } from "@/Utils/utils";
+
 echarts.use([
   BarChart,
   LineChart,

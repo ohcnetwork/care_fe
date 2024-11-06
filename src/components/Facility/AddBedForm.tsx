@@ -1,21 +1,25 @@
-import Card from "../../CAREUI/display/Card";
-
-import { useState, SyntheticEvent } from "react";
-import * as Notification from "../../Utils/Notifications";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { LOCATION_BED_TYPES } from "@/common/constants";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import Page from "@/components/Common/components/Page";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import request from "../../Utils/request/request";
+import { SyntheticEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Card from "@/CAREUI/display/Card";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { LOCATION_BED_TYPES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 interface Props {
   facilityId: string;
   locationId: string;

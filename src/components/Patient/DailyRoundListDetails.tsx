@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { DailyRoundsModel } from "./models";
-import Page from "@/components/Common/components/Page";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { formatDateTime } from "../../Utils/utils";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
 import { useTranslation } from "react-i18next";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime } from "@/Utils/utils";
+
 export const DailyRoundListDetails = (props: any) => {
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId, id } = props;

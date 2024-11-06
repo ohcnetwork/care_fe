@@ -1,12 +1,15 @@
 import { useState } from "react";
-import Pagination from "@/components/Common/Pagination";
-import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import Page from "@/components/Common/components/Page";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import Pagination from "@/components/Common/Pagination";
+import { MinQuantityRequiredModal } from "@/components/Facility/MinQuantityRequiredModal";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
   let inventoryItem: any = null;

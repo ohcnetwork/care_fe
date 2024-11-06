@@ -1,11 +1,15 @@
-import Webcam from "react-webcam";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "@/components/Common/Dialog";
-import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
 import { t } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
-import useWindowDimensions from "@/common/hooks/useWindowDimensions";
-import * as Notify from "../../Utils/Notifications";
+import Webcam from "react-webcam";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+
+import useWindowDimensions from "@/hooks/useWindowDimensions";
+
+import * as Notify from "@/Utils/Notifications";
 
 export interface CameraCaptureDialogProps {
   show: boolean;
