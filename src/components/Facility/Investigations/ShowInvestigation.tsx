@@ -1,4 +1,5 @@
-import { set, chain } from "lodash-es";
+import * as _ from "lodash-es";
+import { set } from "lodash-es";
 import { useCallback, useReducer } from "react";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications";
@@ -147,7 +148,7 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
   };
 
   const handleUpdateCancel = useCallback(() => {
-    const changedValues = chain(state.initialValues)
+    const changedValues = _.chain(state.initialValues)
       .map((val: any, _key: string) => ({
         id: val?.id,
         initialValue: val?.notes || val?.value || null,

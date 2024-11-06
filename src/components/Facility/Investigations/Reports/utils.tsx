@@ -1,8 +1,9 @@
-import { memoize, chain, findIndex } from "lodash-es";
+import * as _ from "lodash-es";
+import { memoize, findIndex } from "lodash-es";
 import { InvestigationResponse } from "./types";
 
 export const transformData = memoize((data: InvestigationResponse) => {
-  const sessions = chain(data)
+  const sessions = _.chain(data)
     .map((value: any) => {
       return {
         ...value.session_object,
@@ -13,7 +14,7 @@ export const transformData = memoize((data: InvestigationResponse) => {
     .uniqBy("session_external_id")
     .orderBy("session_created_date", "desc")
     .value();
-  const groupByInvestigation = chain(data)
+  const groupByInvestigation = _.chain(data)
     .groupBy("investigation_object.external_id")
     .values()
     .value();
