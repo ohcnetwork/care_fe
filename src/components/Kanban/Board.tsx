@@ -190,3 +190,5 @@ export function KanbanSection<T extends { id: string }>(
     </Droppable>
   );
 }
+
+export type KanbanBoardType = typeof KanbanBoard;

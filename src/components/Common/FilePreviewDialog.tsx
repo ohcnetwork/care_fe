@@ -1,4 +1,11 @@
-import { Dispatch, ReactNode, SetStateAction, useState } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  Suspense,
+  lazy,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -6,8 +13,9 @@ import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import ButtonV2, { Cancel } from "@/components/Common/ButtonV2";
 import CircularProgress from "@/components/Common/CircularProgress";
 import DialogModal from "@/components/Common/Dialog";
-import PDFViewer from "@/components/Common/PDFViewer";
 import { StateInterface } from "@/components/Files/FileUpload";
+
+const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 
 export const zoom_values = [
   "scale-25",
@@ -137,14 +145,16 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   } ${getRotationClass(file_state.rotation)}`}
                 />
               ) : file_state.extension === "pdf" ? (
-                <PDFViewer
-                  url={fileUrl}
-                  onDocumentLoadSuccess={(numPages: number) => {
-                    setPage(1);
-                    setNumPages(numPages);
-                  }}
-                  pageNumber={page}
-                />
+                <Suspense fallback={<CircularProgress />}>
+                  <PDFViewer
+                    url={fileUrl}
+                    onDocumentLoadSuccess={(numPages: number) => {
+                      setPage(1);
+                      setNumPages(numPages);
+                    }}
+                    pageNumber={page}
+                  />
+                </Suspense>
               ) : previewExtensions.includes(file_state.extension) ? (
                 <iframe
                   sandbox=""
