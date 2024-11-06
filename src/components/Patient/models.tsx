@@ -1,4 +1,10 @@
 import {
+  ConsultationModel,
+  PatientCategory,
+} from "@/components/Facility/models";
+import { UserBareMinimum } from "@/components/Users/models";
+
+import {
   APPETITE_CHOICES,
   BLADDER_DRAINAGE_CHOICES,
   BLADDER_ISSUE_CHOICES,
@@ -23,9 +29,6 @@ import {
   URINATION_FREQUENCY_CHOICES,
   VENTILATOR_MODE_OPTIONS,
 } from "@/common/constants";
-import { ConsultationModel, PatientCategory } from "../Facility/models";
-
-import { UserBareMinimum } from "@/components/Users/models";
 
 export interface FlowModel {
   id?: number;

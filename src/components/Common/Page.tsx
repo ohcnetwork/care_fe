@@ -1,7 +1,9 @@
 import { RefObject, useContext, useEffect } from "react";
-import PageTitle, { PageTitleProps } from "../PageTitle";
-import { classNames } from "../../../Utils/utils";
-import { SidebarShrinkContext } from "../Sidebar/Sidebar";
+
+import PageTitle, { PageTitleProps } from "@/components/Common/PageTitle";
+import { SidebarShrinkContext } from "@/components/Common/Sidebar/Sidebar";
+
+import { classNames } from "@/Utils/utils";
 
 interface PageProps extends PageTitleProps {
   children: React.ReactNode | React.ReactNode[];

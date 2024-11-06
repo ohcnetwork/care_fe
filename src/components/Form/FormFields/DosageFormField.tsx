@@ -1,6 +1,6 @@
-import { DOSAGE_UNITS, DosageValue } from "../../Medicine/models";
-import NumericWithUnitsFormField from "./NumericWithUnitsFormField";
-import { FormFieldBaseProps } from "./Utils";
+import NumericWithUnitsFormField from "@/components/Form/FormFields/NumericWithUnitsFormField";
+import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
+import { DOSAGE_UNITS, DosageValue } from "@/components/Medicine/models";
 
 type Props = FormFieldBaseProps<DosageValue> & {
   placeholder?: string;

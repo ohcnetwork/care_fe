@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { RadioInput } from "../../../Form/FormFields/RadioFormField";
-import { DailyRoundsModel } from "../../../Patient/models";
+
+import { RadioInput } from "@/components/Form/FormFields/RadioFormField";
+import { DailyRoundsModel } from "@/components/Patient/models";
 
 type Value = DailyRoundsModel["ventilator_mode"];
 

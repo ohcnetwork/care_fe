@@ -1,17 +1,23 @@
 import { useTranslation } from "react-i18next";
+
+import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import RangeFormField from "@/components/Form/FormFields/RangeFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import PainChart from "@/components/LogUpdate/components/PainChart";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
+import { BloodPressure } from "@/components/Patient/models";
+
+import { HEARTBEAT_RHYTHM_CHOICES } from "@/common/constants";
+
 import {
   celsiusToFahrenheit,
   fahrenheitToCelsius,
   rangeValueDescription,
-} from "../../../Utils/utils";
-import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
-import RadioFormField from "../../Form/FormFields/RadioFormField";
-import RangeFormField from "../../Form/FormFields/RangeFormField";
-import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import PainChart from "../components/PainChart";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
-import { HEARTBEAT_RHYTHM_CHOICES } from "@/common/constants";
-import { BloodPressure } from "../../Patient/models";
+} from "@/Utils/utils";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();

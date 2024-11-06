@@ -1,13 +1,16 @@
-import { useState } from "react";
 import { navigate } from "raviger";
-import Pagination from "@/components/Common/Pagination";
-import { classNames } from "../../Utils/utils";
-import Page from "@/components/Common/components/Page";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import { useState } from "react";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import Pagination from "@/components/Common/Pagination";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames } from "@/Utils/utils";
+
 export default function InventoryList(props: any) {
   const { facilityId }: any = props;
   let inventoryItem: any = null;

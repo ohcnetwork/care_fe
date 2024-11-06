@@ -1,35 +1,33 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import QRCode from "qrcode.react";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { useTranslation } from "react-i18next";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { ConsultationModel } from "@/components/Facility/models";
+import { PatientModel } from "@/components/Patient/models";
+import CommentSection from "@/components/Shifting/ShiftingCommentsSection";
 
 import {
   GENDER_TYPES,
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "@/common/constants";
-import { Link, navigate } from "raviger";
-import { useState } from "react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CommentSection from "./ShiftingCommentsSection";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import Page from "@/components/Common/components/Page";
-import QRCode from "qrcode.react";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-} from "../../Utils/utils";
 
-import { useTranslation } from "react-i18next";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import { ConsultationModel } from "../Facility/models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { PatientModel } from "../Patient/models";
-import careConfig from "@careConfig";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
-import Loading from "@/components/Common/Loading";
 export default function ShiftDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);

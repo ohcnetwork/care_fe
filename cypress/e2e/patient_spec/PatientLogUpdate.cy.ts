@@ -41,7 +41,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const domicilaryPatient = "Dummy Patient 11";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { PrescriptionDropdown } from "./PrescriptionDropdown";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 import dayjs from "dayjs";
-import DateFormField from "../../Form/FormFields/DateFormField";
+import { useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { PrescriptionDropdown } from "@/components/Common/prescription-builder/PrescriptionDropdown";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
 
 export type ProcedureType = {
   procedure?: string;

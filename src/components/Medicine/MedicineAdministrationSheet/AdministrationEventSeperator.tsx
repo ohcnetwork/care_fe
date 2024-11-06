@@ -1,4 +1,4 @@
-import { formatDateTime } from "../../../Utils/utils";
+import { formatDateTime } from "@/Utils/utils";
 
 export default function AdministrationEventSeperator({ date }: { date: Date }) {
   // Show date if it's 00:00

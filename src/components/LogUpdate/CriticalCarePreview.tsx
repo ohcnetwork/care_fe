@@ -1,23 +1,26 @@
-import { useTranslation } from "react-i18next";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Loading from "@/components/Common/Loading";
-import Card from "../../CAREUI/display/Card";
 import React, { useEffect } from "react";
-import { ABGAnalysisFields } from "./Sections/ABGAnalysis";
+import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
+
+import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import { ABGAnalysisFields } from "@/components/LogUpdate/Sections/ABGAnalysis";
+import { IOBalanceSections } from "@/components/LogUpdate/Sections/IOBalance";
+import PressureSore from "@/components/LogUpdate/Sections/PressureSore/PressureSore";
+import { VentilatorFields } from "@/components/LogUpdate/Sections/RespiratorySupport/Ventilator";
+import PainChart from "@/components/LogUpdate/components/PainChart";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 import {
+  ValueDescription,
   classNames,
   properRoundOf,
   rangeValueDescription,
-  ValueDescription,
-} from "../../Utils/utils";
-import { VentilatorFields } from "./Sections/RespiratorySupport/Ventilator";
-import PressureSore from "./Sections/PressureSore/PressureSore";
-import { IOBalanceSections } from "./Sections/IOBalance";
-import PainChart from "./components/PainChart";
-import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
-import { DailyRoundsModel } from "../Patient/models";
+} from "@/Utils/utils";
 
 type Props = {
   facilityId: string;
