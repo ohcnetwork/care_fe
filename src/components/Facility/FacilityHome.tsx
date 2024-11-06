@@ -461,7 +461,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-
               <ButtonV2
                 variant="primary"
                 ghost
