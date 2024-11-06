@@ -42,7 +42,7 @@ interface Props {
 export default function CentralNursingStation({ facilityId }: Props) {
   const breakpointValues = {
     default: 6, // Default value if no breakpoints match
-    "3xl": 9, // Value for screens wider than 1920px
+    fourK: 9, // Value for screens wider than 2080px defined in useBrekpoint hook
   };
   const PER_PAGE_LIMIT = useBreakpoints(breakpointValues);
   const { t } = useTranslation();

@@ -22,7 +22,7 @@ module.exports = {
   theme: {
     extend: {
       screens: {
-        fourK: "130rem",
+        fourK: "130rem", // rem is used insted of pixel
       },
       fontFamily: {
         sans: ["Figtree", "sans-serif"],
