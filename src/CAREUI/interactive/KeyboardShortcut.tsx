@@ -1,6 +1,7 @@
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import { classNames, isAppleDevice } from "../../Utils/utils";
 import { Fragment } from "react/jsx-runtime";
+import useKeyboardShortcut from "use-keyboard-shortcut";
+
+import { classNames, isAppleDevice } from "../../Utils/utils";
 
 interface Props {
   children?: React.ReactNode;
