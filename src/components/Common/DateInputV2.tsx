@@ -442,15 +442,8 @@ const DateInputV2: React.FC<Props> = ({
                                     );
                                     newDate.setDate(d);
                                     selected =
-                                      value &&
-                                      dayjs(value).isSame(
-                                        new Date(
-                                          datePickerHeaderDate.getFullYear(),
-                                          datePickerHeaderDate.getMonth(),
-                                          d,
-                                        ),
-                                        "day",
-                                      );
+                                      value.toDateString() ===
+                                      newDate.toDateString();
                                   }
 
                                   const baseClasses =
