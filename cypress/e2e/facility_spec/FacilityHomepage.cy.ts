@@ -25,7 +25,7 @@ describe("Facility Homepage Function", () => {
   const facilityType = "Private Hospital";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

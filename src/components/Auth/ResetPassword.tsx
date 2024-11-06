@@ -131,18 +131,22 @@ export const ResetPassword = (props: any) => {
                   {validateRule(
                     form.password?.length >= 8,
                     "Password should be atleast 8 characters long",
+                    !form.password,
                   )}
                   {validateRule(
                     form.password !== form.password.toUpperCase(),
                     "Password should contain at least 1 lowercase letter",
+                    !form.password,
                   )}
                   {validateRule(
                     form.password !== form.password.toLowerCase(),
                     "Password should contain at least 1 uppercase letter",
+                    !form.password,
                   )}
                   {validateRule(
                     /\d/.test(form.password),
                     "Password should contain at least 1 number",
+                    !form.password,
                   )}
                 </div>
               )}
@@ -157,9 +161,11 @@ export const ResetPassword = (props: any) => {
               />
               {confirmPasswordInputInFocus &&
                 form.confirm.length > 0 &&
+                form.password.length > 0 &&
                 validateRule(
                   form.confirm === form.password,
                   "Confirm password should match the entered password",
+                  !form.password && form.password.length > 0,
                 )}
             </div>
             <div className="grid p-4 sm:flex sm:justify-between">
