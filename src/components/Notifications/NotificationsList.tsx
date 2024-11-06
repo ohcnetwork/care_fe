@@ -299,45 +299,44 @@ export default function NotificationsList({
 
   let manageResults: any = null;
 
-  const unsubscribe = () => {
-    navigator.serviceWorker.ready
-      .then(function (reg) {
-        if (reg.pushManager) {
-          setIsSubscribing(true);
-          reg.pushManager
-            .getSubscription()
-            .then(function (subscription) {
-              subscription
-                ?.unsubscribe()
-                .then(async function (_successful) {
-                  const data = {
-                    pf_endpoint: "",
-                    pf_p256dh: "",
-                    pf_auth: "",
-                  };
+  const unsubscribe = async () => {
+    try {
+      const reg = await navigator.serviceWorker.ready;
 
-                  await request(routes.updateUserPnconfig, {
-                    pathParams: { username: username },
-                    body: data,
-                  });
+      if (!reg.pushManager) return;
 
-                  setIsSubscribed("NotSubscribed");
-                  setIsSubscribing(false);
-                })
-                .catch(function (_e) {
-                  Error({
-                    msg: t("unsubscribe_failed"),
-                  });
-                });
-            })
-            .catch(function (_e) {
-              Error({ msg: t("subscription_error") });
-            });
+      setIsSubscribing(true);
+
+      const subscription = await reg.pushManager.getSubscription();
+
+      if (subscription) {
+        try {
+          await subscription.unsubscribe();
+
+          const data = {
+            pf_endpoint: "",
+            pf_p256dh: "",
+            pf_auth: "",
+          };
+
+          await request(routes.updateUserPnconfig, {
+            pathParams: { username },
+            body: data,
+          });
+
+          setIsSubscribed("NotSubscribed");
+        } catch (e) {
+          Error({ msg: t("unsubscribe_failed") });
+        } finally {
+          setIsSubscribing(false);
         }
-      })
-      .catch(function (_e) {
-        Sentry.captureException(_e);
-      });
+      } else {
+        setIsSubscribing(false);
+      }
+    } catch (e) {
+      Sentry.captureException(e);
+      Error({ msg: t("subscription_error") });
+    }
   };
 
   async function subscribe() {
