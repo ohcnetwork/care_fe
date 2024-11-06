@@ -1,8 +1,13 @@
 import { useTranslation } from "react-i18next";
+
+import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
+
 import { NURSING_CARE_PROCEDURES } from "@/common/constants";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
-import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField";
-import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
 
 const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();

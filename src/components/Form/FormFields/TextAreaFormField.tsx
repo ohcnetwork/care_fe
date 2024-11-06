@@ -1,7 +1,12 @@
 import { forwardRef } from "react";
-import FormField from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import { classNames } from "../../../Utils/utils";
+
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import { classNames } from "@/Utils/utils";
 
 export type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;

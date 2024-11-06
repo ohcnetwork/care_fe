@@ -1,10 +1,11 @@
 import { useState } from "react";
+
 import {
   ActiveConditionVerificationStatuses,
   ConsultationDiagnosis,
   CreateDiagnosis,
-} from "../types";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField";
+} from "@/components/Diagnosis/types";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 
 type Option = CreateDiagnosis | ConsultationDiagnosis;
 

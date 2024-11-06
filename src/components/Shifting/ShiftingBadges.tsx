@@ -1,9 +1,13 @@
-import { SHIFTING_FILTER_ORDER } from "@/common/constants";
-import { useFacilityQuery } from "../Resource/ResourceBadges";
 import { useTranslation } from "react-i18next";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { formatName } from "../../Utils/utils";
+
+import { useFacilityQuery } from "@/components/Resource/ResourceBadges";
+
+import { SHIFTING_FILTER_ORDER } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatName } from "@/Utils/utils";
+
 export default function BadgesList(props: any) {
   const { qParams, FilterBadges } = props;
 

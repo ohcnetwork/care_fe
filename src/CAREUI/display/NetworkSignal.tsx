@@ -1,5 +1,6 @@
-import { classNames } from "../../Utils/utils";
-import CareIcon from "../icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   /**

@@ -1,32 +1,35 @@
-import * as Notification from "../../Utils/Notifications";
-
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
 import { useEffect, useState } from "react";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { ConsultationModel } from "./models";
-import { DISCHARGE_REASONS } from "@/common/constants";
-import DateFormField from "../Form/FormFields/DateFormField";
-import DialogModal from "@/components/Common/Dialog";
-import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
-import { FacilityModel } from "./models";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { FieldError } from "../Form/FieldValidators";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import Loading from "@/components/Common/Loading";
-import { PLUGIN_Component } from "@/PluginEngine";
-import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import dayjs from "../../Utils/dayjs";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useConfirmedAction from "@/common/hooks/useConfirmedAction";
-import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import DialogModal from "@/components/Common/Dialog";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Loading from "@/components/Common/Loading";
+import { EditDiagnosesBuilder } from "@/components/Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
+import { ConsultationModel } from "@/components/Facility/models";
+import { FacilityModel } from "@/components/Facility/models";
+import { FieldError } from "@/components/Form/FieldValidators";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import PrescriptionBuilder from "@/components/Medicine/PrescriptionBuilder";
+
+import useConfirmedAction from "@/hooks/useConfirmedAction";
+
+import { DISCHARGE_REASONS } from "@/common/constants";
+
+import { PLUGIN_Component } from "@/PluginEngine";
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;

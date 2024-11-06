@@ -1,6 +1,7 @@
-import { BedModel } from "../Facility/models";
-import { IconName } from "../../CAREUI/icons/CareIcon";
-import { PatientModel } from "../Patient/models";
+import { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { BedModel } from "@/components/Facility/models";
+import { PatientModel } from "@/components/Patient/models";
 import { UserBareMinimum } from "@/components/Users/models";
 
 export enum AssetLocationType {
