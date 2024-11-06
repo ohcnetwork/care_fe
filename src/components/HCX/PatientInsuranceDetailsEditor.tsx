@@ -1,17 +1,16 @@
-import ButtonV2, {
-  Cancel,
-  Submit,
-} from "@/components/Common/components/ButtonV2";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXPolicyModel } from "./models";
-import HCXPolicyValidator from "./validators";
-import InsuranceDetailsBuilder from "./InsuranceDetailsBuilder";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import InsuranceDetailsBuilder from "@/components/HCX/InsuranceDetailsBuilder";
+import { HCXPolicyModel } from "@/components/HCX/models";
+import HCXPolicyValidator from "@/components/HCX/validators";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   patient: string;

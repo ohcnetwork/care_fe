@@ -1,20 +1,23 @@
-import { Autocomplete } from "../Form/FormFields/Autocomplete";
-import FormField from "../Form/FormFields/FormField";
+import { useEffect, useState } from "react";
+
+import { Autocomplete } from "@/components/Form/FormFields/Autocomplete";
+import FormField from "@/components/Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
+} from "@/components/Form/FormFields/Utils";
+import { UserBareMinimum } from "@/components/Users/models";
+
+import { UserRole } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   formatName,
   isUserOnline,
   mergeQueryOptions,
-} from "../../Utils/utils";
-import { UserRole } from "@/common/constants";
-import { useEffect, useState } from "react";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { UserBareMinimum } from "../Users/models";
+} from "@/Utils/utils";
 
 type BaseProps = FormFieldBaseProps<UserBareMinimum> & {
   placeholder?: string;

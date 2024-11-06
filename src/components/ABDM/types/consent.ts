@@ -1,5 +1,5 @@
-import { UserBaseModel } from "../../Users/models";
-import { AbhaNumberModel } from "./abha";
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import { UserBaseModel } from "@/components/Users/models";
 
 export type ConsentPurpose =
   | "CAREMGT"

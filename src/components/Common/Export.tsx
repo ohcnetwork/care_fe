@@ -1,13 +1,15 @@
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import DropdownMenu, {
   DropdownItem,
   DropdownItemProps,
-} from "@/components/Common/components/Menu";
+} from "@/components/Common/Menu";
 
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useExport from "@/common/hooks/useExport";
-import { Route } from "../../Utils/request/types";
-import request from "../../Utils/request/request";
+import useExport from "@/hooks/useExport";
+
+import request from "@/Utils/request/request";
+import { Route } from "@/Utils/request/types";
 
 interface ExportItem {
   options?: DropdownItemProps;

@@ -1,27 +1,31 @@
-import useFullscreen from "@/common/hooks/useFullscreen";
-import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
-import useFilters from "@/common/hooks/useFilters";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/components/Page";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { LocationSelect } from "@/components/Common/LocationSelect";
-import Pagination from "@/components/Common/Pagination";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import Page from "@/components/Common/Page";
+import Pagination from "@/components/Common/Pagination";
 import { SortOption } from "@/components/Common/SortDropdown";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { getVitalsMonitorSocketUrl } from "../VitalsMonitor/utils";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import HL7PatientVitalsMonitor from "@/components/VitalsMonitor/HL7PatientVitalsMonitor";
+import useVitalsAspectRatioConfig from "@/components/VitalsMonitor/useVitalsAspectRatioConfig";
+import { getVitalsMonitorSocketUrl } from "@/components/VitalsMonitor/utils";
+
+import useFilters from "@/hooks/useFilters";
+import useFullscreen from "@/hooks/useFullscreen";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 const PER_PAGE_LIMIT = 6;
 

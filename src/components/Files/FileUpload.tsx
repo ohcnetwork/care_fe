@@ -1,20 +1,25 @@
-import { useState, ReactNode } from "react";
-import { FileUploadModel } from "../Patient/models";
-import Pagination from "@/components/Common/Pagination";
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import useFileUpload from "../../Utils/useFileUpload";
-import useFileManager from "../../Utils/useFileManager";
-import Tabs from "@/components/Common/components/Tabs";
-import FileBlock from "./FileBlock";
+
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Pagination from "@/components/Common/Pagination";
+import Tabs from "@/components/Common/Tabs";
+import FileBlock from "@/components/Files/FileBlock";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FileUploadModel } from "@/components/Patient/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useFileManager from "@/hooks/useFileManager";
+import useFileUpload from "@/hooks/useFileUpload";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export const LinearProgressWithLabel = (props: { value: number }) => {
   return (
