@@ -4,6 +4,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -40,19 +41,22 @@ interface Props {
 }
 
 export default function CentralNursingStation({ facilityId }: Props) {
-  let PER_PAGE_LIMIT;
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
+  const [PER_PAGE_LIMIT, setPerPageLimit] = useState(6);
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
   const getDimension = useWindowDimensions();
 
-  if (getDimension.width > 2080) {
-    PER_PAGE_LIMIT = 9;
-  } else {
-    PER_PAGE_LIMIT = 6;
-  }
+  useEffect(() => {
+    if (getDimension.width > 2080) {
+      setPerPageLimit(9);
+    } else {
+      setPerPageLimit(6);
+    }
+  }, [getDimension]);
+
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
