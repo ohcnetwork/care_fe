@@ -15,7 +15,7 @@ import CommentSection from "./CommentsSection";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "@/components/Common/components/Page";
-import { QRCodeSVG } from "qrcode.react";
+import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import {
   formatDateTime,
@@ -305,7 +305,7 @@ export default function ShiftDetails(props: { id: string }) {
       <PrintPreview title={t("Patient Referral Letter")}>
         <Card
           id="section-to-print"
-          className="print mx-auto w-full max-w-3xl bg-white sm:mx-2 sm:my-2"
+          className="print mx-auto w-full bg-white sm:mx-2 sm:my-2"
         >
           <CardHeader className="flex flex-col items-start justify-between space-y-2 pb-2 sm:flex-row sm:items-center sm:space-y-0">
             <CardTitle className="mx-auto my-auto text-lg font-bold sm:text-2xl">
@@ -318,7 +318,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {data.is_kasp && (
                   <img alt="logo" src={careConfig.headerLogo?.dark} />
                 )}
-                <QRCodeSVG
+                <QRCode
                   value={`${window.location.origin}/shifting/${data.id}`}
                   size={120}
                 />
