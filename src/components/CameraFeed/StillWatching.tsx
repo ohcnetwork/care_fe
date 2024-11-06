@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useTranslation } from "react-i18next";
-import { useTimer } from "../../Utils/useTimer";
 import careConfig from "@careConfig";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+
+import { useTimer } from "@/hooks/useTimer";
 
 type State = "watching" | "prompted" | "timed-out";
 

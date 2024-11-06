@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
-import request from "../../Utils/request/request";
-import * as Notification from "../../Utils/Notifications";
 import { navigate } from "raviger";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { validateRule } from "@/components/Users/UserAdd";
+
 import { LocalStorageKeys } from "@/common/constants";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { validateRule } from "../Users/UserAdd";
 import { validatePassword } from "@/common/validation";
-import routes from "../../Redux/api";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 export const ResetPassword = (props: any) => {
   const initForm: any = {

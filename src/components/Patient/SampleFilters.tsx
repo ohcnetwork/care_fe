@@ -1,18 +1,22 @@
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
+
+import CircularProgress from "@/components/Common/CircularProgress";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import { FacilityModel } from "@/components/Facility/models";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import useMergeState from "@/hooks/useMergeState";
+
 import {
-  SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
+  SAMPLE_TEST_STATUS,
   SAMPLE_TYPE_CHOICES,
 } from "@/common/constants";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { FacilityModel } from "../Facility/models";
-import useMergeState from "@/common/hooks/useMergeState";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;

@@ -1,6 +1,44 @@
-import { navigate } from "raviger";
+import { error } from "@pnotify/core";
 import dayjs from "dayjs";
+import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import BloodPressureFormField, {
+  BloodPressureValidator,
+} from "@/components/Common/BloodPressureFormField";
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import TemperatureFormField from "@/components/Common/TemperatureFormField";
+import InvestigationBuilder from "@/components/Common/prescription-builder/InvestigationBuilder";
+import { EditDiagnosesBuilder } from "@/components/Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
+import {
+  ConditionVerificationStatuses,
+  ConsultationDiagnosis,
+} from "@/components/Diagnosis/types";
+import { ICD11DiagnosisModel } from "@/components/Facility/models";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import { FieldErrorText } from "@/components/Form/FormFields/FormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import RangeAutocompleteFormField from "@/components/Form/FormFields/RangeAutocompleteFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import NursingCare from "@/components/LogUpdate/Sections/NursingCare";
+import PrescriptionBuilder from "@/components/Medicine/PrescriptionBuilder";
+import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
+import { DailyRoundTypes, DailyRoundsModel } from "@/components/Patient/models";
+import { Scribe } from "@/components/Scribe/Scribe";
+import { SCRIBE_FORMS } from "@/components/Scribe/formDetails";
+import { EncounterSymptomsBuilder } from "@/components/Symptoms/SymptomsBuilder";
+import SymptomsApi from "@/components/Symptoms/api";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
 import {
   APPETITE_CHOICES,
   BLADDER_DRAINAGE_CHOICES,
@@ -16,48 +54,14 @@ import {
   TELEMEDICINE_ACTIONS,
   URINATION_FREQUENCY_CHOICES,
 } from "@/common/constants";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import * as Notification from "../../Utils/Notifications";
-import { formatDateTime } from "../../Utils/utils";
-import BloodPressureFormField, {
-  BloodPressureValidator,
-} from "@/components/Common/BloodPressureFormField";
-import TemperatureFormField from "@/components/Common/TemperatureFormField";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import Page from "@/components/Common/components/Page";
-import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import PatientCategorySelect from "./PatientCategorySelect";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { Scribe } from "../Scribe/Scribe";
-import { SCRIBE_FORMS } from "../Scribe/formDetails";
-import { DailyRoundsModel, DailyRoundTypes } from "./models";
-import InvestigationBuilder from "@/components/Common/prescription-builder/InvestigationBuilder";
-import { FieldErrorText } from "../Form/FormFields/FormField";
-import { error } from "@pnotify/core";
-import { useTranslation } from "react-i18next";
-import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
-import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
-import {
-  ConditionVerificationStatuses,
-  ConsultationDiagnosis,
-} from "../Diagnosis/types";
-import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import SymptomsApi from "../Symptoms/api";
-import { scrollTo } from "../../Utils/utils";
-import { ICD11DiagnosisModel } from "../Facility/models";
-import DateFormField from "../Form/FormFields/DateFormField";
-import NursingCare from "../LogUpdate/Sections/NursingCare";
 
-import Loading from "@/components/Common/Loading";
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
+import { scrollTo } from "@/Utils/utils";
+
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();

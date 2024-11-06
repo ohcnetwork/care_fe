@@ -1,11 +1,14 @@
-import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
-import { ButtonSize, ButtonVariant } from "./ButtonV2";
-import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames } from "../../../Utils/utils";
-import { useIsAuthorized } from "@/common/hooks/useIsAuthorized";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { ButtonSize, ButtonVariant } from "@/components/Common/ButtonV2";
+
+import { useIsAuthorized } from "@/hooks/useIsAuthorized";
+
+import { Anyone, AuthorizedElementProps } from "@/Utils/AuthorizeFor";
+import { classNames } from "@/Utils/utils";
 
 interface DropdownMenuProps {
   id?: string;

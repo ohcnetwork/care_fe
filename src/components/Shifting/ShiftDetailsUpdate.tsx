@@ -1,4 +1,31 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import { navigate, useQueryParams } from "raviger";
+import { useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { LinkedFacilityUsers } from "@/components/Common/UserAutocompleteFormField";
+import DischargeModal from "@/components/Facility/DischargeModal";
+import { ConsultationModel, ShiftingModel } from "@/components/Facility/models";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
+import { PatientModel } from "@/components/Patient/models";
+import { UserBareMinimum } from "@/components/Users/models";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import {
   BREATHLESSNESS_LEVEL,
@@ -10,36 +37,13 @@ import {
   SHIFTING_VEHICLE_CHOICES,
   USER_TYPES,
 } from "@/common/constants";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { navigate, useQueryParams } from "raviger";
-import { useReducer, useState } from "react";
-import { ConsultationModel, ShiftingModel } from "../Facility/models";
-import DischargeModal from "../Facility/DischargeModal";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { parsePhoneNumber } from "../../Utils/utils";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import { useTranslation } from "react-i18next";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import Card from "../../CAREUI/display/Card";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import Page from "@/components/Common/components/Page";
-import { LinkedFacilityUsers } from "@/components/Common/UserAutocompleteFormField";
-import { UserBareMinimum } from "../Users/models";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import { PatientModel } from "../Patient/models";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import careConfig from "@careConfig";
 
-import Loading from "@/components/Common/Loading";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
+
 interface patientShiftProps {
   id: string;
 }

@@ -1,20 +1,23 @@
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import FacilityBlock from "@/components/Facility/FacilityBlock";
 import {
   FacilityModel,
   FacilitySpokeErrors,
   FacilitySpokeModel,
   FacilitySpokeRequest,
   SpokeRelationship,
-} from "./models";
-import ModelCrudEditor from "../Form/ModelCrudEditor";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { useEffect, useState } from "react";
+} from "@/components/Facility/models";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import ModelCrudEditor from "@/components/Form/ModelCrudEditor";
+
 import { SPOKE_RELATION_TYPES } from "@/common/constants";
-import FacilityBlock from "./FacilityBlock";
-import { useTranslation } from "react-i18next";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 export interface SpokeFacilityEditorProps {
   facility: Omit<FacilityModel, "id"> & { id: string };

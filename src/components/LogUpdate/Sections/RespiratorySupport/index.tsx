@@ -1,19 +1,26 @@
 import { useEffect } from "react";
-import { useSlugs } from "@/common/hooks/useSlug";
-import routes from "../../../../Redux/api";
-import useQuery from "../../../../Utils/request/useQuery";
-import { rangeValueDescription } from "../../../../Utils/utils";
-import { AssetClass } from "../../../Assets/AssetTypes";
-import DialogModal from "@/components/Common/Dialog";
-import Beds from "../../../Facility/Consultations/Beds";
-import RadioFormField from "../../../Form/FormFields/RadioFormField";
-import RangeFormField from "../../../Form/FormFields/RangeFormField";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../../utils";
-import OxygenRespiratorySupport from "./OxygenSupport";
-import VentilatorRespiratorySupport from "./Ventilator";
-import { Warn } from "../../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
+
+import { AssetClass } from "@/components/Assets/AssetTypes";
+import DialogModal from "@/components/Common/Dialog";
+import Beds from "@/components/Facility/Consultations/Beds";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import RangeFormField from "@/components/Form/FormFields/RangeFormField";
+import OxygenRespiratorySupport from "@/components/LogUpdate/Sections/RespiratorySupport/OxygenSupport";
+import VentilatorRespiratorySupport from "@/components/LogUpdate/Sections/RespiratorySupport/Ventilator";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
+
+import { useSlugs } from "@/hooks/useSlug";
+
 import { RESPIRATORY_SUPPORT } from "@/common/constants";
+
+import { Warn } from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { rangeValueDescription } from "@/Utils/utils";
 
 const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();

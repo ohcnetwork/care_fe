@@ -1,8 +1,8 @@
 // why is this file in js? can we convert to ts?
-
 import { useEffect, useState } from "react";
-import { Error } from "./Notifications";
 import { useTranslation } from "react-i18next";
+
+import { Error } from "@/Utils/Notifications";
 
 const useRecorder = (handleMicPermission) => {
   const [audioURL, setAudioURL] = useState("");

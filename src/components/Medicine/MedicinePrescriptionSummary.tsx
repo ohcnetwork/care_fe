@@ -1,13 +1,16 @@
-import MedicineRoutes from "./routes";
-import useQuery from "../../Utils/request/useQuery";
-import DialogModal from "@/components/Common/Dialog";
 import { useState } from "react";
-import Timeline, { TimelineNode } from "../../CAREUI/display/Timeline";
-import { MedibaseMedicine, Prescription } from "./models";
 import { useTranslation } from "react-i18next";
-import { humanizeStrings } from "../../Utils/utils";
 
+import Timeline, { TimelineNode } from "@/CAREUI/display/Timeline";
+
+import DialogModal from "@/components/Common/Dialog";
 import Loading from "@/components/Common/Loading";
+import { MedibaseMedicine, Prescription } from "@/components/Medicine/models";
+import MedicineRoutes from "@/components/Medicine/routes";
+
+import useQuery from "@/Utils/request/useQuery";
+import { humanizeStrings } from "@/Utils/utils";
+
 interface MedicinePrescriptionSummaryProps {
   consultation: string;
 }
