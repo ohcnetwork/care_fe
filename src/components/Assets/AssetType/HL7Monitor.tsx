@@ -1,21 +1,30 @@
 import { SyntheticEvent, useEffect, useState } from "react";
-import { AssetClass, AssetData, ResolvedMiddleware } from "../AssetTypes";
-import * as Notification from "../../../Utils/Notifications";
-import Loading from "@/components/Common/Loading";
-import { checkIfValidIP } from "@/common/validation";
-import Card from "../../../CAREUI/display/Card";
-import { Submit } from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
-import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
-import { BedModel } from "../../Facility/models";
-import useQuery from "../../../Utils/request/useQuery";
-import { FieldLabel } from "../../Form/FormFields/FormField";
+
+import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import {
+  AssetClass,
+  AssetData,
+  ResolvedMiddleware,
+} from "@/components/Assets/AssetTypes";
 import { BedSelect } from "@/components/Common/BedSelect";
+import { Submit } from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import { BedModel } from "@/components/Facility/models";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import HL7PatientVitalsMonitor from "@/components/VitalsMonitor/HL7PatientVitalsMonitor";
+import VentilatorPatientVitalsMonitor from "@/components/VitalsMonitor/VentilatorPatientVitalsMonitor";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { checkIfValidIP } from "@/common/validation";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface HL7MonitorProps {
   assetId: string;

@@ -1,5 +1,5 @@
-import { PatientAssetBed } from "../Assets/AssetTypes";
-import { getVitalsCanvasSizeAndDuration } from "./utils";
+import { PatientAssetBed } from "@/components/Assets/AssetTypes";
+import { getVitalsCanvasSizeAndDuration } from "@/components/VitalsMonitor/utils";
 
 export interface VitalsDataBase {
   device_id: string;

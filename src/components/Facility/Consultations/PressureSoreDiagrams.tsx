@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
+
 import Pagination from "@/components/Common/Pagination";
+import {
+  PressureSoreDiagramsFields,
+  PressureSoreDiagramsRes,
+} from "@/components/Facility/models";
+import PressureSore from "@/components/LogUpdate/Sections/PressureSore/PressureSore";
+
 import { PAGINATION_LIMIT } from "@/common/constants";
 
-import { formatDateTime } from "../../../Utils/utils";
-import { PressureSoreDiagramsFields, PressureSoreDiagramsRes } from "../models";
-import PressureSore from "../../LogUpdate/Sections/PressureSore/PressureSore";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;

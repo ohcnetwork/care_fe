@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import { LinePlot } from "./components/LinePlot";
+
 import Pagination from "@/components/Common/Pagination";
+import BinaryChronologicalChart from "@/components/Facility/Consultations/components/BinaryChronologicalChart";
+import { LinePlot } from "@/components/Facility/Consultations/components/LinePlot";
+import { VentilatorPlotFields } from "@/components/Facility/models";
+
 import { PAGINATION_LIMIT } from "@/common/constants";
-import { formatDateTime } from "../../../Utils/utils";
-import BinaryChronologicalChart from "./components/BinaryChronologicalChart";
-import { VentilatorPlotFields } from "../models";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 /*
 interface ModalityType {

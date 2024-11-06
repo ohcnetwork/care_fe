@@ -1,7 +1,6 @@
-import { ConsultationTabProps } from "./index";
-import { NutritionPlots } from "../Consultations/NutritionPlots";
-
 import PageTitle from "@/components/Common/PageTitle";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import { NutritionPlots } from "@/components/Facility/Consultations/NutritionPlots";
 
 export const ConsultationNutritionTab = (props: ConsultationTabProps) => {
   return (

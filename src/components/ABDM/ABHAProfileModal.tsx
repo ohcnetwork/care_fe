@@ -1,14 +1,16 @@
-import * as Notify from "../../Utils/Notifications";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "@/components/Common/Dialog";
 import QRCode from "qrcode.react";
-import { formatDateTime } from "../../Utils/utils";
 import { useRef } from "react";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { AbhaNumberModel } from "./types/abha";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import DialogModal from "@/components/Common/Dialog";
+
+import * as Notify from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 interface IProps {
   patientId?: string;

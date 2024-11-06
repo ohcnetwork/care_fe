@@ -1,3 +1,5 @@
+import imageCompression from "browser-image-compression";
+import { t } from "i18next";
 import {
   ChangeEvent,
   DetailedHTMLProps,
@@ -5,20 +7,21 @@ import {
   useEffect,
   useState,
 } from "react";
+
+import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
+import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
 import {
   CreateFileResponse,
   FileCategory,
   FileUploadModel,
 } from "@/components/Patient/models";
-import request from "./request/request";
-import routes from "../Redux/api";
-import uploadFile from "./request/uploadFile";
-import * as Notification from "./Notifications";
-import imageCompression from "browser-image-compression";
+
 import { DEFAULT_ALLOWED_EXTENSIONS } from "@/common/constants";
-import CameraCaptureDialog from "@/components/Files/CameraCaptureDialog";
-import AudioCaptureDialog from "@/components/Files/AudioCaptureDialog";
-import { t } from "i18next";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import uploadFile from "@/Utils/request/uploadFile";
 
 export type FileUploadOptions = {
   multiple?: boolean;

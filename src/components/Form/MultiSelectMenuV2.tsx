@@ -7,8 +7,9 @@ import {
 } from "@headlessui/react";
 import { ReactNode, useRef } from "react";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { classNames } from "@/Utils/utils";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
