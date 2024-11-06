@@ -68,7 +68,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
     patientAssetBed: obj,
     socketUrl: getVitalsMonitorSocketUrl(obj.asset),
   }));
-
   const { config, hash } = useVitalsAspectRatioConfig({
     default: 6 / 11,
     sm: 17 / 11,
