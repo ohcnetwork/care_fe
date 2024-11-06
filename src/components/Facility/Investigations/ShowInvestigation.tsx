@@ -1,4 +1,5 @@
-import { chain, set } from "lodash-es";
+import _ from "lodash";
+import { set } from "lodash-es";
 import { useCallback, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -150,7 +151,7 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
   };
 
   const handleUpdateCancel = useCallback(() => {
-    const changedValues = chain(state.initialValues)
+    const changedValues = _.chain(state.initialValues)
       .map((val: any, _key: string) => ({
         id: val?.id,
         initialValue: val?.notes || val?.value || null,

@@ -1,4 +1,4 @@
-import { chain } from "lodash-es";
+import _ from "lodash";
 import { useCallback, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -179,7 +179,7 @@ const InvestigationReports = ({ id }: any) => {
       ),
     );
 
-    const investigationList = chain(data)
+    const investigationList = _.chain(data)
       .flatMap((i) => i?.data?.results)
       .compact()
       .flatten()
