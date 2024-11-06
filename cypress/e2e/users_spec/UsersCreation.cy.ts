@@ -55,7 +55,7 @@ describe("User Creation", () => {
   ];
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

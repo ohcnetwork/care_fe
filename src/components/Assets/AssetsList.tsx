@@ -244,12 +244,19 @@ const AssetsList = () => {
                       className="text-2xl"
                     />
                   </span>
-                  <p
-                    className="w-48 truncate"
-                    data-testid="created-asset-list-name"
-                  >
-                    {asset.name}
-                  </p>
+                  <div className="tooltip w-48">
+                    <p
+                      className="truncate"
+                      data-testid="created-asset-list-name"
+                    >
+                      {asset.name}
+                    </p>
+                    {asset.name.length > 20 && (
+                      <span className="tooltip-text tooltip-top -translate-x-1/2">
+                        {asset.name}
+                      </span>
+                    )}
+                  </div>
                 </p>
               </div>
               <p className="text-sm font-normal">

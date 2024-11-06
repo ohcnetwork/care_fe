@@ -2,6 +2,7 @@
 import React, { Suspense } from "react";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
 
 import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
 
@@ -13,7 +14,7 @@ export default function PluginEngine({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<div>Loading plugins...</div>}>
+    <Suspense fallback={<Loading />}>
       <ErrorBoundary
         fallback={
           <div className="flex h-screen w-screen items-center justify-center">

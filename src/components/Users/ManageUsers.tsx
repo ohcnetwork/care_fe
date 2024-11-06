@@ -252,7 +252,9 @@ export default function ManageUsers() {
                   id="name"
                   className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
                 >
-                  {formatName(user)}
+                  <div className="max-w-full break-words">
+                    {formatName(user)}
+                  </div>
 
                   {user.last_login && cur_online ? (
                     <div
