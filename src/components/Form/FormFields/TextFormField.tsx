@@ -45,13 +45,13 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
   const minError =
     typeof props.min !== "undefined" &&
     typeof field.value !== "undefined" &&
-    parseFloat(`${props.min}`) > parseFloat(field.value)
+    parseFloat(`${props.min}`) > parseFloat(`${field.value}`)
       ? `Value can not be smaller than ${props.min}`
       : undefined;
   const maxError =
     typeof props.max !== "undefined" &&
     typeof field.value !== "undefined" &&
-    parseFloat(`${props.max}`) < parseFloat(field.value)
+    parseFloat(`${props.max}`) < parseFloat(`${field.value}`)
       ? `Value can not be greater than ${props.max}`
       : undefined;
 
@@ -65,7 +65,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
     return threshold;
   };
 
-  const threshold = getThreshold(field.value as unknown as number);
+  const threshold = getThreshold(Number(field.value));
 
   const labelSuffixWithThreshold = (
     <div className="flex items-center gap-2">

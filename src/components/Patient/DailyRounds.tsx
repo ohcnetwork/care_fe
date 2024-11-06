@@ -605,7 +605,7 @@ export const DailyRounds = (props: any) => {
 
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
           <div className="pb-6 md:col-span-2">
-            <FieldLabel>Symptoms</FieldLabel>
+            <FieldLabel>{t("symptoms")}</FieldLabel>
             <EncounterSymptomsBuilder
               onChange={() => {
                 handleFormFieldChange({
