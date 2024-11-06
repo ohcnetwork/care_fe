@@ -1,11 +1,10 @@
 /* eslint-disable no-undef */
-
 import {
   existsSync,
   mkdirSync,
+  readFileSync,
   readdirSync,
   writeFileSync,
-  readFileSync,
 } from "fs";
 
 const DEFAULT_LOCALE = "en";

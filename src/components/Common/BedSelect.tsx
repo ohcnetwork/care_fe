@@ -1,10 +1,12 @@
 import { useCallback } from "react";
-import { BedModel } from "../Facility/models";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { useTranslation } from "react-i18next";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { AssetClass } from "../Assets/AssetTypes";
+
+import { AssetClass } from "@/components/Assets/AssetTypes";
+import { BedModel } from "@/components/Facility/models";
+import AutoCompleteAsync from "@/components/Form/AutoCompleteAsync";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface BedSelectProps {
   name: string;

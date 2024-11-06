@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import { LinePlot } from "./components/LinePlot";
-import { StackedLinePlot } from "./components/StackedLinePlot";
-import Pagination from "@/components/Common/Pagination";
-import { PAGINATION_LIMIT } from "@/common/constants";
-import { formatDateTime } from "../../../Utils/utils";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { PainDiagrams } from "./PainDiagrams";
-import PageTitle from "@/components/Common/PageTitle";
-import dayjs from "../../../Utils/dayjs";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
-import { PrimaryParametersPlotFields } from "../models";
+import PageTitle from "@/components/Common/PageTitle";
+import Pagination from "@/components/Common/Pagination";
+import { PainDiagrams } from "@/components/Facility/Consultations/PainDiagrams";
+import { LinePlot } from "@/components/Facility/Consultations/components/LinePlot";
+import { StackedLinePlot } from "@/components/Facility/Consultations/components/StackedLinePlot";
+import { PrimaryParametersPlotFields } from "@/components/Facility/models";
+
+import { PAGINATION_LIMIT } from "@/common/constants";
+
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 interface PrimaryParametersPlotProps {
   facilityId: string;

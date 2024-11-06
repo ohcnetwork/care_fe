@@ -1,46 +1,48 @@
-import { GENDER_TYPES } from "@/common/constants";
-import { ConsultationModel } from "../models";
+import { Link, navigate, useQueryParams } from "raviger";
 import { useCallback, useEffect, useState } from "react";
-import DoctorVideoSlideover from "../DoctorVideoSlideover";
-import { PatientModel } from "../../Patient/models";
+import { useTranslation } from "react-i18next";
+
+import ABDMRecordsTab from "@/components/ABDM/ABDMRecordsTab";
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import Loading from "@/components/Common/Loading";
+import PageTitle from "@/components/Common/PageTitle";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
+import DiagnosesListAccordion from "@/components/Diagnosis/DiagnosesListAccordion";
+import Error404 from "@/components/ErrorPages/404";
+import { ConsultationABGTab } from "@/components/Facility/ConsultationDetails/ConsultationABGTab";
+import { ConsultationDialysisTab } from "@/components/Facility/ConsultationDetails/ConsultationDialysisTab";
+import { ConsultationFeedTab } from "@/components/Facility/ConsultationDetails/ConsultationFeedTab";
+import { ConsultationFilesTab } from "@/components/Facility/ConsultationDetails/ConsultationFilesTab";
+import { ConsultationInvestigationsTab } from "@/components/Facility/ConsultationDetails/ConsultationInvestigationsTab";
+import { ConsultationMedicinesTab } from "@/components/Facility/ConsultationDetails/ConsultationMedicinesTab";
+import { ConsultationNeurologicalMonitoringTab } from "@/components/Facility/ConsultationDetails/ConsultationNeurologicalMonitoringTab";
+import ConsultationNursingTab from "@/components/Facility/ConsultationDetails/ConsultationNursingTab";
+import { ConsultationNutritionTab } from "@/components/Facility/ConsultationDetails/ConsultationNutritionTab";
+import { ConsultationPressureSoreTab } from "@/components/Facility/ConsultationDetails/ConsultationPressureSoreTab";
+import { ConsultationSummaryTab } from "@/components/Facility/ConsultationDetails/ConsultationSummaryTab";
+import { ConsultationUpdatesTab } from "@/components/Facility/ConsultationDetails/ConsultationUpdatesTab";
+import { ConsultationVentilatorTab } from "@/components/Facility/ConsultationDetails/ConsultationVentilatorTab";
+import DoctorVideoSlideover from "@/components/Facility/DoctorVideoSlideover";
+import PatientNotesSlideover from "@/components/Facility/PatientNotesSlideover";
+import { ConsultationModel } from "@/components/Facility/models";
+import PatientInfoCard from "@/components/Patient/PatientInfoCard";
+import { PatientModel } from "@/components/Patient/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { GENDER_TYPES } from "@/common/constants";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import { CameraFeedPermittedUserTypes } from "@/Utils/permissions";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   humanizeStrings,
   keysOf,
   relativeTime,
-} from "../../../Utils/utils";
-
-import { Link, navigate, useQueryParams } from "raviger";
-import { triggerGoal } from "../../../Integrations/Plausible";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
-import { ConsultationABGTab } from "./ConsultationABGTab";
-import ConsultationNursingTab from "./ConsultationNursingTab";
-import { ConsultationFeedTab } from "./ConsultationFeedTab";
-import { ConsultationSummaryTab } from "./ConsultationSummaryTab";
-import { ConsultationFilesTab } from "./ConsultationFilesTab";
-import { ConsultationMedicinesTab } from "./ConsultationMedicinesTab";
-import { ConsultationInvestigationsTab } from "./ConsultationInvestigationsTab";
-import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
-import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
-import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
-import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
-import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
-import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
-import PatientNotesSlideover from "../PatientNotesSlideover";
-import PatientInfoCard from "../../Patient/PatientInfoCard";
-import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
-import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
-import { AbhaNumberModel } from "../../ABDM/types/abha";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
-import Error404 from "../../ErrorPages/404";
-import { useTranslation } from "react-i18next";
-import useQuery from "../../../Utils/request/useQuery";
-
-import Loading from "@/components/Common/Loading";
-import PageTitle from "@/components/Common/PageTitle";
+} from "@/Utils/utils";
 
 export interface ConsultationTabProps {
   consultationId: string;

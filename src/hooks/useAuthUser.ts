@@ -1,7 +1,9 @@
 import { createContext, useContext } from "react";
+
 import { UserModel } from "@/components/Users/models";
-import { RequestResult } from "../../Utils/request/types";
-import { JwtTokenObtainPair, LoginCredentials } from "../../Redux/api";
+
+import { JwtTokenObtainPair, LoginCredentials } from "@/Utils/request/api";
+import { RequestResult } from "@/Utils/request/types";
 
 type SignInReturnType = RequestResult<JwtTokenObtainPair>;
 

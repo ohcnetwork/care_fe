@@ -1,31 +1,33 @@
+import careConfig from "@careConfig";
+import { navigate } from "raviger";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import { ExportButton } from "@/components/Common/Export";
+import PageTitle from "@/components/Common/PageTitle";
+import Tabs from "@/components/Common/Tabs";
+import { ShiftingModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+import KanbanBoard from "@/components/Kanban/Board";
+import BadgesList from "@/components/Shifting/ShiftingBadges";
+import ShiftingBlock from "@/components/Shifting/ShiftingBlock";
+import { formatFilter } from "@/components/Shifting/ShiftingCommons";
+import ListFilter from "@/components/Shifting/ShiftingFilters";
+
+import useFilters from "@/hooks/useFilters";
+
 import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "@/common/constants";
 
-import BadgesList from "./ShiftingBadges";
-import { ExportButton } from "@/components/Common/Export";
-import ListFilter from "./ShiftingFilters";
-import SearchInput from "../Form/SearchInput";
-import { formatFilter } from "./ShiftingCommons";
-
-import { navigate } from "raviger";
-import useFilters from "@/common/hooks/useFilters";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Tabs from "@/components/Common/components/Tabs";
-import careConfig from "@careConfig";
-import KanbanBoard from "../Kanban/Board";
-
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { ShiftingModel } from "../Facility/models";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import PageTitle from "@/components/Common/PageTitle";
-import ShiftingBlock from "./ShiftingBlock";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({

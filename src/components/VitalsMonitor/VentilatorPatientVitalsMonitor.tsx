@@ -1,12 +1,18 @@
 import { useEffect } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useVentilatorVitalsMonitor from "./useVentilatorVitalsMonitor";
-import { IVitalsComponentProps, VitalsValueBase } from "./types";
-import { classNames } from "../../Utils/utils";
-import WaveformLabels from "./WaveformLabels";
-import { VitalsNonWaveformContent } from "./HL7PatientVitalsMonitor";
-import VitalsMonitorHeader from "./VitalsMonitorHeader";
-import VitalsMonitorFooter from "./VitalsMonitorFooter";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { VitalsNonWaveformContent } from "@/components/VitalsMonitor/HL7PatientVitalsMonitor";
+import VitalsMonitorFooter from "@/components/VitalsMonitor/VitalsMonitorFooter";
+import VitalsMonitorHeader from "@/components/VitalsMonitor/VitalsMonitorHeader";
+import WaveformLabels from "@/components/VitalsMonitor/WaveformLabels";
+import {
+  IVitalsComponentProps,
+  VitalsValueBase,
+} from "@/components/VitalsMonitor/types";
+import useVentilatorVitalsMonitor from "@/components/VitalsMonitor/useVentilatorVitalsMonitor";
+
+import { classNames } from "@/Utils/utils";
 
 export default function VentilatorPatientVitalsMonitor(
   props: IVitalsComponentProps,

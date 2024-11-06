@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
 
-import { LinePlot } from "./components/LinePlot";
-import { StackedLinePlot } from "./components/StackedLinePlot";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import Pagination from "@/components/Common/Pagination";
+import { LinePlot } from "@/components/Facility/Consultations/components/LinePlot";
+import { StackedLinePlot } from "@/components/Facility/Consultations/components/StackedLinePlot";
+import { NutritionPlotsFields } from "@/components/Facility/models";
+
 import { PAGINATION_LIMIT } from "@/common/constants";
-import { formatDateTime } from "../../../Utils/utils";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { NutritionPlotsFields } from "../models";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 export const NutritionPlots = (props: any) => {
   const { consultationId } = props;

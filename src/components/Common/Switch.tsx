@@ -1,4 +1,7 @@
-import { FieldErrorText, FieldLabel } from "../../Form/FormFields/FormField";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/components/Form/FormFields/FormField";
 
 type SwitchProps<T> = {
   name?: string;
