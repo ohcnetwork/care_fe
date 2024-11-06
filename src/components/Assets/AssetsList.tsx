@@ -41,7 +41,7 @@ const AssetsList = () => {
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [facility, setFacility] = useState<FacilityModel>();
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
@@ -71,7 +71,7 @@ const AssetsList = () => {
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
         setAssets(data.results);
-        setTotalCount(data.count);
+        setTotalCount(data?.count);
       }
     },
   });
@@ -443,7 +443,7 @@ const AssetsList = () => {
           <div className="grow">
             <div className="py-8 md:px-5">
               {manageAssets}
-              <Pagination totalCount={totalCount} />
+              {totalCount !== null && <Pagination totalCount={totalCount} />}
             </div>
           </div>
         </>
