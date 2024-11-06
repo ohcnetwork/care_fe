@@ -10,6 +10,13 @@ export default function Plausible() {
   });
 
   useEffect(() => {
+    if (!careConfig.plausible.domain || !careConfig.plausible.server) {
+      console.error(
+        "Plausible is not configured correctly. Please check your environment variables.",
+      );
+      return;
+    }
+
     plausible("pageview");
   }, []);
 
