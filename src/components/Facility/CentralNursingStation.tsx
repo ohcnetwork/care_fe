@@ -23,11 +23,10 @@ import { getVitalsMonitorSocketUrl } from "@/components/VitalsMonitor/utils";
 
 import useFilters from "@/hooks/useFilters";
 import useFullscreen from "@/hooks/useFullscreen";
+import useWindowDimensions from "@/hooks/useWindowDimensions";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
-
-const PER_PAGE_LIMIT = 6;
 
 const SORT_OPTIONS: SortOption[] = [
   { isAscending: true, value: "bed__name" },
@@ -41,11 +40,19 @@ interface Props {
 }
 
 export default function CentralNursingStation({ facilityId }: Props) {
+  let PER_PAGE_LIMIT;
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
+  const getDimension = useWindowDimensions();
+
+  if (getDimension.width > 2080) {
+    PER_PAGE_LIMIT = 9;
+  } else {
+    PER_PAGE_LIMIT = 6;
+  }
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
@@ -216,7 +223,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           {t("no_vitals_present")}
         </div>
       ) : (
-        <div className="3xl:grid-cols-3 mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2">
+        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 min-[2080px]:grid-cols-3">
           {data.map((props, i) => (
             <div className="overflow-hidden text-clip" key={i}>
               <HL7PatientVitalsMonitor
