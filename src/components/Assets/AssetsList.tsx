@@ -1,30 +1,34 @@
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
-import * as Notification from "../../Utils/Notifications";
-import { assetClassProps, AssetData } from "./AssetTypes";
-import { useState, useEffect } from "react";
 import { Link, navigate } from "raviger";
-import AssetFilter from "./AssetFilter";
-import { parseQueryParams } from "../../Utils/primitives";
-import Chip from "../../CAREUI/display/Chip";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "@/common/hooks/useFilters";
-import { FacilityModel } from "../Facility/models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useIsAuthorized } from "@/common/hooks/useIsAuthorized";
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import ExportMenu from "@/components/Common/Export";
-import CountBlock from "../../CAREUI/display/Count";
-import AssetImportModal from "./AssetImportModal";
-import Page from "@/components/Common/components/Page";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
 
+import Chip from "@/CAREUI/display/Chip";
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import AssetFilter from "@/components/Assets/AssetFilter";
+import AssetImportModal from "@/components/Assets/AssetImportModal";
+import { AssetData, assetClassProps } from "@/components/Assets/AssetTypes";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
+import { FacilityModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+
+import useFilters from "@/hooks/useFilters";
+import { useIsAuthorized } from "@/hooks/useIsAuthorized";
+
+import AuthorizeFor, { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import { parseQueryParams } from "@/Utils/primitives";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 const AssetsList = () => {
   const { t } = useTranslation();
   const {
@@ -240,12 +244,19 @@ const AssetsList = () => {
                       className="text-2xl"
                     />
                   </span>
-                  <p
-                    className="w-48 truncate"
-                    data-testid="created-asset-list-name"
-                  >
-                    {asset.name}
-                  </p>
+                  <div className="tooltip w-48">
+                    <p
+                      className="truncate"
+                      data-testid="created-asset-list-name"
+                    >
+                      {asset.name}
+                    </p>
+                    {asset.name.length > 20 && (
+                      <span className="tooltip-text tooltip-top -translate-x-1/2">
+                        {asset.name}
+                      </span>
+                    )}
+                  </div>
                 </p>
               </div>
               <p className="text-sm font-normal">

@@ -1,5 +1,6 @@
-import { IconName } from "../../CAREUI/icons/CareIcon";
-import { DailyRoundsModel } from "../Patient/models";
+import { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { DailyRoundsModel } from "@/components/Patient/models";
 
 export type LogUpdateSectionProps = {
   log: DailyRoundsModel;

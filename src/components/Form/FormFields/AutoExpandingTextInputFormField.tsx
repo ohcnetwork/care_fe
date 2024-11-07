@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
-import TextAreaFormField, { TextAreaFormFieldProps } from "./TextAreaFormField";
+
+import TextAreaFormField, {
+  TextAreaFormFieldProps,
+} from "@/components/Form/FormFields/TextAreaFormField";
 
 type AutoExpandingTextInputFormFieldProps = TextAreaFormFieldProps & {
   maxHeight?: number;

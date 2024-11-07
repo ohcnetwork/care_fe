@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import FormField from "./FormField";
+
+import FormField from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
 import {
-  classNames,
-  properRoundOf,
-  ValueDescription,
-} from "../../../Utils/utils";
-import TextFormField from "./TextFormField";
-import { SelectFormField } from "./SelectFormField";
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import { ValueDescription, classNames, properRoundOf } from "@/Utils/utils";
 
 type BaseProps = FormFieldBaseProps<number> & {
   min: number;

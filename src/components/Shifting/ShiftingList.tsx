@@ -1,23 +1,27 @@
+import { navigate } from "raviger";
 import { useState } from "react";
-import BadgesList from "./ShiftingBadges";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { ExportButton } from "@/components/Common/Export";
-import ListFilter from "./ShiftingFilters";
-import Page from "@/components/Common/components/Page";
-import SearchInput from "../Form/SearchInput";
-import { formatFilter } from "./ShiftingCommons";
-import { navigate } from "raviger";
-import useFilters from "@/common/hooks/useFilters";
-import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
 import Loading from "@/components/Common/Loading";
-import { ShiftingModel } from "../Facility/models";
-import ShiftingBlock from "./ShiftingBlock";
+import Page from "@/components/Common/Page";
+import { ShiftingModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+import BadgesList from "@/components/Shifting/ShiftingBadges";
+import ShiftingBlock from "@/components/Shifting/ShiftingBlock";
+import { formatFilter } from "@/components/Shifting/ShiftingCommons";
+import ListFilter from "@/components/Shifting/ShiftingFilters";
+
+import useFilters from "@/hooks/useFilters";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 export default function ListView() {
   const {

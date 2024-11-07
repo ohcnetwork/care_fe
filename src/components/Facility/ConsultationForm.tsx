@@ -1,74 +1,79 @@
-import * as Notification from "../../Utils/Notifications";
-
-import { BedModel, FacilityModel } from "./models";
-import {
-  CONSULTATION_SUGGESTION,
-  DISCHARGE_REASONS,
-  ConsultationSuggestionValue,
-  PATIENT_CATEGORIES,
-  REVIEW_AT_CHOICES,
-  TELEMEDICINE_ACTIONS,
-} from "@/common/constants";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import InvestigationBuilder, {
-  InvestigationType,
-} from "@/components/Common/prescription-builder/InvestigationBuilder";
-import { LegacyRef, createRef, useEffect, useRef, useState } from "react";
-import ProcedureBuilder, {
-  ProcedureType,
-} from "@/components/Common/prescription-builder/ProcedureBuilder";
-import { BedSelect } from "@/components/Common/BedSelect";
-import Beds from "./Consultations/Beds";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import {
-  FieldChangeEvent,
-  FieldChangeEventHandler,
-} from "../Form/FormFields/Utils";
-import { FormAction } from "../Form/Utils";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
-import { UserBareMinimum } from "../Users/models";
-
+import careConfig from "@careConfig";
+import { t } from "i18next";
 import { navigate } from "raviger";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import useVisibility from "../../Utils/useVisibility";
-import dayjs from "../../Utils/dayjs";
+import { LegacyRef, createRef, useEffect, useRef, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { BedSelect } from "@/components/Common/BedSelect";
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Loading from "@/components/Common/Loading";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import PageTitle from "@/components/Common/PageTitle";
 import RouteToFacilitySelect, {
   RouteToFacility,
 } from "@/components/Common/RouteToFacilitySelect";
-import { LocationSelect } from "@/components/Common/LocationSelect";
-import { classNames } from "../../Utils/utils";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import InvestigationBuilder, {
+  InvestigationType,
+} from "@/components/Common/prescription-builder/InvestigationBuilder";
+import ProcedureBuilder, {
+  ProcedureType,
+} from "@/components/Common/prescription-builder/ProcedureBuilder";
+import {
+  CreateDiagnosesBuilder,
+  EditDiagnosesBuilder,
+} from "@/components/Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
 import {
   ConditionVerificationStatuses,
   ConsultationDiagnosis,
   CreateDiagnosis,
-} from "../Diagnosis/types";
+} from "@/components/Diagnosis/types";
+import Beds from "@/components/Facility/Consultations/Beds";
+import { BedModel, FacilityModel } from "@/components/Facility/models";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField.js";
 import {
-  CreateDiagnosesBuilder,
-  EditDiagnosesBuilder,
-} from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { t } from "i18next";
-import { Writable } from "../../Utils/types";
-import { EncounterSymptom } from "../Symptoms/types";
+  FieldErrorText,
+  FieldLabel,
+} from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
 import {
-  EncounterSymptomsBuilder,
+  FieldChangeEvent,
+  FieldChangeEventHandler,
+} from "@/components/Form/FormFields/Utils";
+import { FormAction } from "@/components/Form/Utils";
+import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
+import {
   CreateSymptomsBuilder,
-} from "../Symptoms/SymptomsBuilder";
-import careConfig from "@careConfig";
-import DateFormField from "../Form/FormFields/DateFormField.js";
+  EncounterSymptomsBuilder,
+} from "@/components/Symptoms/SymptomsBuilder";
+import { EncounterSymptom } from "@/components/Symptoms/types";
+import { UserBareMinimum } from "@/components/Users/models";
 
-import Loading from "@/components/Common/Loading";
-import PageTitle from "@/components/Common/PageTitle";
+import useAppHistory from "@/hooks/useAppHistory";
+import useVisibility from "@/hooks/useVisibility";
+
+import {
+  CONSULTATION_SUGGESTION,
+  ConsultationSuggestionValue,
+  DISCHARGE_REASONS,
+  PATIENT_CATEGORIES,
+  REVIEW_AT_CHOICES,
+  TELEMEDICINE_ACTIONS,
+} from "@/common/constants";
+
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { Writable } from "@/Utils/types";
+import { classNames } from "@/Utils/utils";
 
 type BooleanStrings = "true" | "false";
 
