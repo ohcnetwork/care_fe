@@ -43,7 +43,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const breakpointValues = {
     default: 6,
     largedisplay: 9,
-    fourK: 10,
+    fourK: 12,
   };
   const PER_PAGE_LIMIT = useBreakpoints(breakpointValues);
   const { t } = useTranslation();
