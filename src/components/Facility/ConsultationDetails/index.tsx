@@ -53,7 +53,7 @@ export interface ConsultationTabProps {
   patientData: PatientModel;
 }
 
-const TABS = {
+const defaultTabs = {
   UPDATES: ConsultationUpdatesTab,
   FEED: ConsultationFeedTab,
   SUMMARY: ConsultationSummaryTab,
@@ -72,19 +72,19 @@ const TABS = {
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const { t } = useTranslation();
+  const [tabs, setTabs] =
+    useState<Record<string, React.FC<ConsultationTabProps>>>(defaultTabs);
   const pluginTabs = useCareAppConsultationTabs();
 
   useEffect(() => {
     if (pluginTabs) {
-      for (const [key, value] of Object.entries(pluginTabs)) {
-        TABS[key] = value as React.FC<ConsultationTabProps>;
-      }
+      setTabs((prev) => ({ ...prev, ...pluginTabs }));
     }
   }, [pluginTabs]);
 
   let tab = undefined;
-  if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
-    tab = props.tab.toUpperCase() as keyof typeof TABS;
+  if (Object.keys(tabs).includes(props.tab.toUpperCase())) {
+    tab = props.tab.toUpperCase();
   }
   const [showDoctors, setShowDoctors] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>();
@@ -192,7 +192,7 @@ export const ConsultationDetails = (props: any) => {
     return <Error404 />;
   }
 
-  const SelectedTab = TABS[tab];
+  const SelectedTab = tabs[tab];
 
   const tabButtonClasses = (selected: boolean) =>
     `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${
@@ -373,7 +373,7 @@ export const ConsultationDetails = (props: any) => {
                   className="flex space-x-6 overflow-x-auto pb-2 pl-2"
                   id="consultation_tab_nav"
                 >
-                  {keysOf(TABS).map((p) => {
+                  {keysOf(tabs).map((p) => {
                     if (p === "FEED") {
                       if (
                         isCameraAttached === false || // No camera attached

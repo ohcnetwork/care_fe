@@ -28,18 +28,22 @@ export const PubSubProvider = ({ children }: { children: React.ReactNode }) => {
   const unsubscribe = (topic: string, handler: Handler) => {
     setSubscribers((prev) => {
       const handlers = prev[topic];
-
       if (!handlers) {
         return prev;
       }
 
-      handlers.delete(handler);
+      const newHandlers = new Set(handlers);
+      newHandlers.delete(handler);
 
-      if (handlers.size === 0) {
-        delete prev[topic];
+      if (newHandlers.size === 0) {
+        const { [topic]: _, ...rest } = prev;
+        return rest;
       }
 
-      return { ...prev };
+      return {
+        ...prev,
+        [topic]: newHandlers,
+      };
     });
   };
 
@@ -48,7 +52,13 @@ export const PubSubProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    subscribers[topic].forEach(async (handler) => await handler(message));
+    subscribers[topic].forEach(async (handler) => {
+      try {
+        await handler(message);
+      } catch (error) {
+        console.error(`Handler failed for topic ${topic}:`, error);
+      }
+    });
   };
 
   return (
