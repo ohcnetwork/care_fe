@@ -26,7 +26,7 @@ describe("Facility Manage Functions", () => {
   const currentUpdatedOccupied = "100";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

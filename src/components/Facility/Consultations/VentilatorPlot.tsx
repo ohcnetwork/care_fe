@@ -83,7 +83,7 @@ export const VentilatorPlot = (props: any) => {
   return (
     <div>
       <div className="grid-row-1 grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="PIP"
             name="PIP"
@@ -93,7 +93,7 @@ export const VentilatorPlot = (props: any) => {
             high={30}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="MAP"
             name="MAP"
@@ -103,7 +103,7 @@ export const VentilatorPlot = (props: any) => {
             high={25}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Resp Rate"
             name="resp"
@@ -113,7 +113,7 @@ export const VentilatorPlot = (props: any) => {
             high={20}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Pressure Support"
             name="Pressure Support"
@@ -123,7 +123,7 @@ export const VentilatorPlot = (props: any) => {
             high={15}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Tidal Volume"
             name="Tidal Volume"
@@ -131,7 +131,7 @@ export const VentilatorPlot = (props: any) => {
             yData={yAxisData("ventilator_tidal_volume")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="PEEP"
             name="PEEP"
@@ -141,7 +141,7 @@ export const VentilatorPlot = (props: any) => {
             high={10}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="FiO2"
             name="FiO2"
@@ -151,7 +151,7 @@ export const VentilatorPlot = (props: any) => {
             high={60}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="SpO2"
             name="SpO2"
@@ -161,7 +161,7 @@ export const VentilatorPlot = (props: any) => {
             high={100}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="EtCo2"
             name="EtCo2"
@@ -171,7 +171,7 @@ export const VentilatorPlot = (props: any) => {
             high={45}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <BinaryChronologicalChart
             title="Bilateral Air Entry"
             data={bilateral}
@@ -179,7 +179,7 @@ export const VentilatorPlot = (props: any) => {
             falseName="No"
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Oxygen Flow Rate"
             name="Oxygen Flow Rate"
@@ -187,7 +187,7 @@ export const VentilatorPlot = (props: any) => {
             yData={yAxisData("ventilator_oxygen_modality_oxygen_rate")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Flow Rate"
             name="Flow Rate"

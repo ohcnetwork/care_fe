@@ -684,18 +684,22 @@ function ChooseAbhaAddress({
         {validateRule(
           healthId.length >= 4,
           t("abha_address_validation_length_error"),
+          false,
         )}
         {validateRule(
-          isNaN(Number(healthId[0])) && healthId[0] !== ".",
+          Number.isNaN(Number(healthId[0])) && healthId[0] !== ".",
           t("abha_address_validation_start_error"),
+          false,
         )}
         {validateRule(
           healthId[healthId.length - 1] !== ".",
           t("abha_address_validation_end_error"),
+          false,
         )}
         {validateRule(
           /^[0-9a-zA-Z._]+$/.test(healthId),
           t("abha_address_validation_character_error"),
+          false,
         )}
       </div>
 

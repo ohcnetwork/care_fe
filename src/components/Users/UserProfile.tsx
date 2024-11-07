@@ -202,6 +202,30 @@ export default function UserProfile() {
     },
   );
 
+  const validatePassword = (password: string) => {
+    const rules = [
+      {
+        test: (p: string) => p.length >= 8,
+        message: "Password should be at least 8 characters long",
+      },
+      {
+        test: (p: string) => p !== p.toUpperCase(),
+        message: "Password should contain at least 1 lowercase letter",
+      },
+      {
+        test: (p: string) => p !== p.toLowerCase(),
+        message: "Password should contain at least 1 uppercase letter",
+      },
+      {
+        test: (p: string) => /\d/.test(p),
+        message: "Password should contain at least 1 number",
+      },
+    ];
+    return rules.map((rule) =>
+      validateRule(rule.test(password), rule.message, !password),
+    );
+  };
+
   const validateNewPassword = (password: string) => {
     if (
       password.length < 8 ||
@@ -913,24 +937,7 @@ export default function UserProfile() {
                           required
                         />
                         <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
-                          {validateRule(
-                            changePasswordForm.new_password_1?.length >= 8,
-                            "Password should be atleast 8 characters long",
-                          )}
-                          {validateRule(
-                            changePasswordForm.new_password_1 !==
-                              changePasswordForm.new_password_1.toUpperCase(),
-                            "Password should contain at least 1 lowercase letter",
-                          )}
-                          {validateRule(
-                            changePasswordForm.new_password_1 !==
-                              changePasswordForm.new_password_1.toLowerCase(),
-                            "Password should contain at least 1 uppercase letter",
-                          )}
-                          {validateRule(
-                            /\d/.test(changePasswordForm.new_password_1),
-                            "Password should contain at least 1 number",
-                          )}
+                          {validatePassword(changePasswordForm.new_password_1)}
                         </div>
                       </div>
                       <div className="col-span-6 sm:col-span-3">
@@ -953,6 +960,7 @@ export default function UserProfile() {
                               changePasswordForm.new_password_1 ===
                                 changePasswordForm.new_password_2,
                               "Confirm password should match the new password",
+                              !changePasswordForm.new_password_2,
                             )}
                           </div>
                         )}
