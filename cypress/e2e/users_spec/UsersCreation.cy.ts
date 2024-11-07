@@ -1,11 +1,11 @@
+import LoginPage from "../../pageobject/Login/LoginPage";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import LoginPage from "../../pageobject/Login/LoginPage";
-import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import { UserPage } from "../../pageobject/Users/UserSearch";
+import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import {
-  generateEmergencyPhoneNumber,
   generatePhoneNumber,
+  generateEmergencyPhoneNumber,
 } from "../../pageobject/utils/constants";
 
 describe("User Creation", () => {

@@ -1,10 +1,11 @@
 // FacilityCreation
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import FacilityHome from "../../pageobject/Facility/FacilityHome";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
+import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { UserPage } from "../../pageobject/Users/UserSearch";
+import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 
 describe("Facility Homepage Function", () => {
   const loginPage = new LoginPage();

@@ -1,8 +1,8 @@
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
+import LoginPage from "../../pageobject/Login/LoginPage";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import LoginPage from "../../pageobject/Login/LoginPage";
+import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
 
 function addDaysToDate(numberOfDays: number) {
   const inputDate = new Date();
