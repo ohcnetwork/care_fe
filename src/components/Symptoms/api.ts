@@ -1,7 +1,8 @@
-import { Type } from "../../Redux/api";
-import { PaginatedResponse } from "../../Utils/request/types";
-import { WritableOnly } from "../../Utils/types";
-import { EncounterSymptom } from "./types";
+import { EncounterSymptom } from "@/components/Symptoms/types";
+
+import { Type } from "@/Utils/request/api";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { WritableOnly } from "@/Utils/types";
 
 const SymptomsApi = {
   list: {

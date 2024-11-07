@@ -1,23 +1,27 @@
 import { navigate } from "raviger";
-
 import { useReducer, useState } from "react";
-import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import { SampleTestModel } from "./models";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import Page from "@/components/Common/components/Page";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import { SampleTestModel } from "@/components/Patient/models";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { ICMR_CATEGORY, SAMPLE_TYPE_CHOICES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 const initForm: SampleTestModel = {
   isFastTrack: false,
   fast_track: "",

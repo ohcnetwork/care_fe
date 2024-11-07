@@ -1,11 +1,12 @@
-import { useTranslation } from "react-i18next";
-import { AbhaNumberModel, ABHAQRContent } from "../types/abha";
-import * as Notification from "../../../Utils/Notifications";
-
-import { Scanner, IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
+import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { ABHAQRContent, AbhaNumberModel } from "@/components/ABDM/types/abha";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 type ILoginWithQrProps = {
   onSuccess: (abhaNumber: AbhaNumberModel) => void;

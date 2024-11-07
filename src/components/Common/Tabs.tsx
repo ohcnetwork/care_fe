@@ -1,6 +1,8 @@
-import { useEffect, useRef, type ReactNode } from "react";
-import { classNames } from "../../../Utils/utils";
-import useWindowDimensions from "@/common/hooks/useWindowDimensions";
+import { type ReactNode, useEffect, useRef } from "react";
+
+import useWindowDimensions from "@/hooks/useWindowDimensions";
+
+import { classNames } from "@/Utils/utils";
 
 export default function Tabs(props: {
   className?: string;

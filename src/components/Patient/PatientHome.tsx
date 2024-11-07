@@ -1,6 +1,28 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
+import { useTranslation } from "react-i18next";
+
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import { ConsultationCard } from "@/components/Facility/ConsultationCard";
+import { ConsultationModel, ShiftingModel } from "@/components/Facility/models";
+import { InsuranceDetialsCard } from "@/components/Patient/InsuranceDetailsCard";
+import { SampleTestCard } from "@/components/Patient/SampleTestCard";
+import { PatientModel, SampleTestModel } from "@/components/Patient/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
 
 import {
   DISCHARGE_REASONS,
@@ -8,7 +30,14 @@ import {
   OCCUPATION_TYPES,
   SAMPLE_TEST_STATUS,
 } from "@/common/constants";
-import { PatientModel, SampleTestModel } from "./models";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   formatDate,
@@ -17,32 +46,7 @@ import {
   formatPatientAge,
   isAntenatal,
   isPostPartum,
-} from "../../Utils/utils";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Chip from "../../CAREUI/display/Chip";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { ConsultationCard } from "../Facility/ConsultationCard";
-import { ConsultationModel } from "../Facility/models";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import Page from "@/components/Common/components/Page";
-import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
-import { SampleTestCard } from "./SampleTestCard";
-import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
-import dayjs from "../../Utils/dayjs";
-import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
-import request from "../../Utils/request/request";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import Loading from "@/components/Common/Loading";
+} from "@/Utils/utils";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
@@ -62,10 +66,7 @@ export const PatientHome = (props: any) => {
     sample: any;
   }>({ status: 0, sample: null });
   const [showAlertMessage, setShowAlertMessage] = useState(false);
-  const [modalFor, setModalFor] = useState({
-    externalId: undefined,
-    loading: false,
-  });
+  const [modalFor, setModalFor] = useState<ShiftingModel>();
   const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
     useState(false);
 
@@ -76,12 +77,10 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
 
-  const handleTransferComplete = async (shift: any) => {
-    setModalFor({ ...modalFor, loading: true });
+  const handleTransferComplete = async (shift: ShiftingModel) => {
+    if (!shift) return;
     await request(routes.completeTransfer, {
-      pathParams: {
-        id: modalFor.externalId ?? "",
-      },
+      pathParams: { externalId: shift.external_id },
     });
     navigate(
       `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
@@ -417,7 +416,7 @@ export const PatientHome = (props: any) => {
               <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-4">
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Phone
+                    {t("phone")}
                   </div>
                   <div className="mt-1 text-sm leading-5">
                     <div>
@@ -442,7 +441,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Emergency Contact
+                    {t("patient_registration__contact")}
                   </div>
                   <div className="mt-1 text-sm leading-5 text-secondary-900">
                     <div>
@@ -719,7 +718,10 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon icon="l-lock" className="text-lg" />
+                    <CareIcon
+                      icon={patientData.allow_transfer ? "l-lock" : "l-unlock"}
+                      className="text-lg"
+                    />
                     {patientData.allow_transfer
                       ? "Disable Transfer"
                       : "Allow Transfer"}
@@ -737,7 +739,7 @@ export const PatientHome = (props: any) => {
               setIsShiftClicked(true);
             }}
           >
-            <div>Shifting</div>
+            <div>{t("shifting")}</div>
             {showShifts ? (
               <CareIcon icon="l-angle-up" className="text-2xl" />
             ) : (
@@ -754,7 +756,7 @@ export const PatientHome = (props: any) => {
             }
           >
             {activeShiftingData?.count ? (
-              activeShiftingData.results.map((shift: any) => (
+              activeShiftingData.results.map((shift: ShiftingModel) => (
                 <div key={`shift_${shift.id}`} className="mx-2">
                   <div className="h-full overflow-hidden rounded-lg bg-white shadow">
                     <div className="flex h-full flex-col justify-between p-4">
@@ -884,21 +886,16 @@ export const PatientHome = (props: any) => {
                                     shift.assigned_facility
                                 )
                               }
-                              onClick={() => setModalFor(shift.external_id)}
+                              onClick={() => setModalFor(shift)}
                             >
                               {t("transfer_to_receiving_facility")}
                             </ButtonV2>
                             <ConfirmDialog
                               title="Confirm Transfer Complete"
                               description="Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient"
-                              show={modalFor === shift.external_id}
+                              show={!!modalFor}
                               action="Confirm"
-                              onClose={() =>
-                                setModalFor({
-                                  externalId: undefined,
-                                  loading: false,
-                                })
-                              }
+                              onClose={() => setModalFor(undefined)}
                               onConfirm={() => handleTransferComplete(shift)}
                             />
                           </div>
@@ -922,12 +919,12 @@ export const PatientHome = (props: any) => {
           <div className="w-full">
             <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
               <div className="border-b border-dashed pb-2 text-xl font-bold text-secondary-900">
-                Location
+                {t("location")}
               </div>
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Address
+                    {t("address")}
                   </div>
                   <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {patientData.address || "-"}
@@ -935,7 +932,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    District
+                    {t("district")}
                   </div>
                   <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {patientData.district_object?.name || "-"}
@@ -951,7 +948,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Ward
+                    {t("ward")}
                   </div>
                   <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {(patientData.ward_object &&
@@ -972,7 +969,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Local Body
+                    {t("local_body")}
                   </div>
                   <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {patientData.local_body_object?.name || "-"}

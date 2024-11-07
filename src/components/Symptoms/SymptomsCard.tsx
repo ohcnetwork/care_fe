@@ -1,11 +1,14 @@
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import useSlug from "@/common/hooks/useSlug";
-import useQuery from "../../Utils/request/useQuery";
-import { SymptomText } from "./SymptomsBuilder";
-import SymptomsApi from "./api";
-import { type EncounterSymptom } from "./types";
-import { groupAndSortSymptoms } from "./utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { SymptomText } from "@/components/Symptoms/SymptomsBuilder";
+import SymptomsApi from "@/components/Symptoms/api";
+import { type EncounterSymptom } from "@/components/Symptoms/types";
+import { groupAndSortSymptoms } from "@/components/Symptoms/utils";
+
+import useSlug from "@/hooks/useSlug";
+
+import useQuery from "@/Utils/request/useQuery";
 
 // TODO: switch to list from events as timeline view instead once filter event by event type name is done
 const EncounterSymptomsCard = () => {

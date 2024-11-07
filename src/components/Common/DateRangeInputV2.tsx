@@ -1,5 +1,6 @@
 import { useState } from "react";
-import DateInputV2 from "./DateInputV2";
+
+import DateInputV2 from "@/components/Common/DateInputV2";
 
 export type DateRange = {
   start: Date | undefined;

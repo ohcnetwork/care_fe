@@ -1,12 +1,13 @@
+import CentralLiveMonitoring from "@/components/CameraFeed/CentralLiveMonitoring";
 import { AddBedForm } from "@/components/Facility/AddBedForm";
 import { AddInventoryForm } from "@/components/Facility/AddInventoryForm";
 import { AddLocationForm } from "@/components/Facility/AddLocationForm";
 import { BedManagement } from "@/components/Facility/BedManagement";
 import LocationManagement from "@/components/Facility/LocationManagement";
-import CentralLiveMonitoring from "@/components/CameraFeed/CentralLiveMonitoring";
-import { AuthorizeUserRoute } from "../../Utils/AuthorizeFor";
-import { CameraFeedPermittedUserTypes } from "../../Utils/permissions";
-import { AppRoutes } from "../AppRouter";
+
+import { AppRoutes } from "@/Routers/AppRouter";
+import { AuthorizeUserRoute } from "@/Utils/AuthorizeFor";
+import { CameraFeedPermittedUserTypes } from "@/Utils/permissions";
 
 const FacilityLocationRoutes: AppRoutes = {
   "/facility/:facilityId/location": ({ facilityId }) => (

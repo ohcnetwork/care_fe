@@ -1,14 +1,16 @@
 import { navigate } from "raviger";
-import ReportTable from "./Reports/ReportTable";
-
 import { useTranslation } from "react-i18next";
-import { formatDateTime } from "../../../Utils/utils";
-import { InvestigationResponse } from "./Reports/types";
-import { InvestigationSessionType } from "./investigationsTab";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import ReportTable from "@/components/Facility/Investigations/Reports/ReportTable";
+import { InvestigationResponse } from "@/components/Facility/Investigations/Reports/types";
+import { InvestigationSessionType } from "@/components/Facility/Investigations/investigationsTab";
+
+import { formatDateTime } from "@/Utils/utils";
+
 export default function ViewInvestigations(props: {
   isLoading: boolean;
   investigations: InvestigationResponse;

@@ -5,7 +5,8 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
+
+import { classNames } from "@/Utils/utils";
 
 type DialogProps = {
   title: React.ReactNode;
