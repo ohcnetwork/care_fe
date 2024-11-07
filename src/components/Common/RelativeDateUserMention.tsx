@@ -1,7 +1,8 @@
-import { formatDateTime, formatName, relativeDate } from "../../Utils/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { UserBareMinimum } from "@/components/Users/models";
+
+import { formatDateTime, formatName, relativeDate } from "@/Utils/utils";
 
 function RelativeDateUserMention(props: {
   actionDate?: string;

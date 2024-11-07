@@ -1,6 +1,8 @@
-import { createContext, ReactNode, useContext, useState } from "react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../icons/CareIcon";
+import { ReactNode, createContext, useContext, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 
 type ProviderValue = {
   scale: number;

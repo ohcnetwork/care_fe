@@ -1,9 +1,10 @@
+import HL7Monitor from "@/components/Assets/AssetType/HL7Monitor";
+import ConfigureCamera from "@/components/CameraFeed/ConfigureCamera";
 import Loading from "@/components/Common/Loading";
-import HL7Monitor from "./AssetType/HL7Monitor";
-import ConfigureCamera from "../CameraFeed/ConfigureCamera";
-import Page from "@/components/Common/components/Page";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import Page from "@/components/Common/Page";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 interface AssetConfigureProps {
   assetId: string;

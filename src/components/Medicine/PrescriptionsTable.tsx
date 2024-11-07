@@ -1,16 +1,20 @@
 import { useState } from "react";
-import ResponsiveMedicineTable from "./ResponsiveMedicineTables";
-import { formatDateTime } from "../../Utils/utils";
-import { Prescription } from "./models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Cancel } from "@/components/Common/components/ButtonV2";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import DialogModal from "@/components/Common/Dialog";
-import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { useTranslation } from "react-i18next";
-import useSlug from "@/common/hooks/useSlug";
-import useQuery from "../../Utils/request/useQuery";
-import MedicineRoutes from "./routes";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Cancel } from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
+import ResponsiveMedicineTable from "@/components/Medicine/ResponsiveMedicineTables";
+import { Prescription } from "@/components/Medicine/models";
+import MedicineRoutes from "@/components/Medicine/routes";
+
+import useSlug from "@/hooks/useSlug";
+
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime } from "@/Utils/utils";
 
 interface Props {
   is_prn?: boolean;

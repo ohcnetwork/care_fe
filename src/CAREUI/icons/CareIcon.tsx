@@ -1,5 +1,5 @@
-import iconData from "./UniconPaths.json";
-import "./icon.css";
+import iconData from "@/CAREUI/icons/UniconPaths.json";
+import "@/CAREUI/icons/icon.css";
 
 export type IconName = keyof typeof iconData;
 

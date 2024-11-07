@@ -1,3 +1,7 @@
+import { loadInvestigations } from "@/components/Common/prescription-builder/InvestigationBuilder";
+import { Field, ScribeForm } from "@/components/Scribe/Scribe";
+import { SYMPTOM_CHOICES } from "@/components/Symptoms/types";
+
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -5,9 +9,6 @@ import {
   RHYTHM_CHOICES,
   TELEMEDICINE_ACTIONS,
 } from "@/common/constants";
-import { loadInvestigations } from "@/components/Common/prescription-builder/InvestigationBuilder";
-import { SYMPTOM_CHOICES } from "../Symptoms/types";
-import { Field, ScribeForm } from "./Scribe";
 
 const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
   {

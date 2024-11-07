@@ -1,4 +1,4 @@
-import { classNames } from "../../Utils/utils";
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   labels: Record<string, string>;

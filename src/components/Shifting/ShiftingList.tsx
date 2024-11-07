@@ -1,25 +1,28 @@
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useFilters from "@/common/hooks/useFilters";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Page from "@/components/Common/components/Page";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { ExportButton } from "@/components/Common/Export";
-import Loading from "@/components/Common/Loading";
-import careConfig from "@careConfig";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
-import { formatDateTime } from "../../Utils/utils";
-import { ShiftingModel } from "../Facility/models";
-import SearchInput from "../Form/SearchInput";
-import BadgesList from "./ShiftingBadges";
-import { formatFilter } from "./ShiftingCommons";
-import ListFilter from "./ShiftingFilters";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import { ExportButton } from "@/components/Common/Export";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { ShiftingModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+import BadgesList from "@/components/Shifting/ShiftingBadges";
+import ShiftingBlock from "@/components/Shifting/ShiftingBlock";
+import { formatFilter } from "@/components/Shifting/ShiftingCommons";
+import ListFilter from "@/components/Shifting/ShiftingFilters";
+
+import useFilters from "@/hooks/useFilters";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 export default function ListView() {
   const {
     qParams,

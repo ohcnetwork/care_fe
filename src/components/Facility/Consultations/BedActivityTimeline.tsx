@@ -1,20 +1,23 @@
-import { useTranslation } from "react-i18next";
-import Chip from "../../../CAREUI/display/Chip";
-import Timeline, {
-  TimelineEvent,
-  TimelineNode,
-  TimelineNodeTitle,
-} from "../../../CAREUI/display/Timeline";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames, formatDateTime, relativeTime } from "../../../Utils/utils";
-import { AssetData } from "../../Assets/AssetTypes";
-import { CurrentBed } from "../models";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
+import { useTranslation } from "react-i18next";
+
+import Chip from "@/CAREUI/display/Chip";
+import Timeline, {
+  TimelineEvent,
+  TimelineNode,
+  TimelineNodeTitle,
+} from "@/CAREUI/display/Timeline";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { AssetData } from "@/components/Assets/AssetTypes";
+import { CurrentBed } from "@/components/Facility/models";
+
+import { classNames, formatDateTime, relativeTime } from "@/Utils/utils";
 
 interface AssetDiff {
   newlyLinkedAssets: AssetData[];

@@ -1,17 +1,19 @@
-import { useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
 import { navigate } from "raviger";
-import { Submit } from "@/components/Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { classNames } from "../../Utils/utils";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { IHealthFacility } from "./types/health-facility";
+import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { IHealthFacility } from "@/components/ABDM/types/health-facility";
+import { Submit } from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames } from "@/Utils/utils";
+
 const initForm = {
   health_facility: null as IHealthFacility | null,
   hf_id: "",

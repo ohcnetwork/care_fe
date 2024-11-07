@@ -1,13 +1,16 @@
 import { useState } from "react";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import * as Notification from "../../Utils/Notifications";
-import { formatDateTime, formatName } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import routes from "../../Redux/api";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import request from "../../Utils/request/request";
-import { CommentModel } from "../Facility/models";
+
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import { CommentModel } from "@/components/Facility/models";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 interface CommentSectionProps {
   id: string;
