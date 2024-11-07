@@ -8,7 +8,6 @@ describe("Sample Test", () => {
   const patientPage = new PatientPage();
   const loginPage = new LoginPage();
   const patientConsultationPage = new PatientConsultationPage();
-
   const patientName = "Dummy Patient 11";
   const sampleTestType = "BA/ETA";
   const icmrCategory = "Cat 0";
