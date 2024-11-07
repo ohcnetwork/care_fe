@@ -2,6 +2,7 @@ import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Card from "@/CAREUI/display/Card";
 import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
@@ -13,8 +14,6 @@ import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
-import UserDetails from "@/components/Common/UserDetails";
-import UserDetailComponent from "@/components/Common/UserDetailsComponet";
 import { FacilityModel } from "@/components/Facility/models";
 import SearchInput from "@/components/Form/SearchInput";
 import UnlinkFacilityDialog from "@/components/Users/UnlinkFacilityDialog";
@@ -22,7 +21,6 @@ import UserFilter from "@/components/Users/UserFilter";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
-import useWindowDimensions from "@/hooks/useWindowDimensions";
 
 import { USER_TYPES } from "@/common/constants";
 
@@ -32,15 +30,15 @@ import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
-  formatDisplayName,
   formatName,
   isUserOnline,
   relativeTime,
 } from "@/Utils/utils";
 
+import { UserModel } from "./models";
+
 export default function ManageUsers() {
   const { t } = useTranslation();
-  const { width } = useWindowDimensions();
   const {
     qParams,
     updateQuery,
@@ -58,9 +56,6 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-
-  const extremeSmallScreenBreakpoint = 320;
-  const isExtremeSmallScreen = width <= extremeSmallScreenBreakpoint;
 
   const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.home_facility },
@@ -116,163 +111,112 @@ export default function ManageUsers() {
     </ButtonV2>
   );
 
-  let userList: any[] = [];
-  userListData?.results &&
-    userListData.results.length &&
-    (userList = userListData.results.map((user: any, idx) => {
-      const cur_online = isUserOnline(user);
-      return (
-        <div key={`usr_${user.id}`} id={`usr_${idx}`}>
-          <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
-            <div className="flex h-full flex-col justify-between @container">
-              <div className="px-6 py-4">
-                <div className="mb-2 flex-none text-lg">
-                  <Avatar
-                    name={formatDisplayName(user)}
-                    imageUrl={user.read_profile_picture_url}
-                    className="mb-2 h-12 w-12 rounded-full text-black lg:mb-0"
-                  />
-                </div>
-                <div className="flex flex-col flex-wrap justify-between gap-3 @sm:flex-row">
-                  {user.username && (
-                    <div
-                      id="username"
-                      className="inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium leading-5 text-blue-800"
-                    >
-                      {user.username}
-                    </div>
+  const getCard = (user: UserModel, idx: number) => {
+    const cur_online = isUserOnline(user);
+    return (
+      <Card key={`usr_${user.id}`} id={`usr_${idx}`} className="relative">
+        <div className="flex items-start justify-between">
+          <div className="flex gap-4">
+            <Avatar
+              imageUrl={user.read_profile_picture_url}
+              name={user.username ?? ""}
+              className="h-16 w-16 text-2xl"
+            />
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3">
+                <h1 className="text-base font-bold" id="user-name">
+                  {formatName(user)}
+                </h1>
+                <div
+                  className={classNames(
+                    "flex items-center gap-2 rounded-full px-3 py-1",
+                    cur_online ? "bg-green-100" : "bg-gray-100",
                   )}
-                  <div className="min-width-50 shrink-0 text-sm text-secondary-600">
-                    {user.last_login && cur_online ? (
-                      <span>
-                        {" "}
-                        <CareIcon icon="l-clock" className="text-lg" />{" "}
-                        Currently Online
-                      </span>
-                    ) : (
-                      <>
-                        <span>
-                          <CareIcon icon="l-clock" className="text-lg" /> Last
-                          Online:{" "}
-                        </span>
-                        <span
-                          aria-label="Online"
-                          className={classNames(
-                            "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-secondary-300",
-                          )}
-                        ></span>
-                        <span className="pl-2">
-                          {user.last_login
+                >
+                  {user && (
+                    <>
+                      <span
+                        aria-label="Online"
+                        className={classNames(
+                          "inline-block h-2 w-2 shrink-0 rounded-full",
+                          cur_online ? "bg-green-500" : "bg-gray-400",
+                        )}
+                      ></span>
+                      <span
+                        className={classNames(
+                          "text-xs",
+                          cur_online ? "text-green-700" : "text-gray-500",
+                        )}
+                      >
+                        {cur_online
+                          ? "Online"
+                          : user.last_login
                             ? relativeTime(user.last_login)
                             : "Never"}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div
-                  id="name"
-                  className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
-                >
-                  <div className="max-w-full break-words">
-                    {formatName(user)}
-                  </div>
-
-                  {user.last_login && cur_online ? (
-                    <div
-                      className="h-4 w-4 rounded-full bg-primary-500"
-                      aria-label="Online"
-                    />
-                  ) : null}
-                </div>
-
-                <div
-                  className={`flex ${
-                    isExtremeSmallScreen
-                      ? "flex-wrap"
-                      : "flex-col justify-between md:flex-row"
-                  } gap-2 md:grid md:grid-cols-2`}
-                >
-                  {user.user_type && (
-                    <UserDetailComponent
-                      id="role"
-                      title="Role"
-                      value={user.user_type}
-                    />
-                  )}
-                  {user.district_object && (
-                    <UserDetailComponent
-                      id="district"
-                      title="District"
-                      value={user.district_object.name}
-                    />
-                  )}
-                </div>
-                {user.local_body_object && (
-                  <UserDetails id="local_body" title="Location">
-                    <div className="font-semibold">
-                      {user.local_body_object.name}
-                    </div>
-                  </UserDetails>
-                )}
-
-                <div
-                  className={`${
-                    isExtremeSmallScreen ? "flex flex-wrap" : "grid grid-cols-2"
-                  }`}
-                >
-                  {user.created_by && (
-                    <div className="col-span-1">
-                      <UserDetails id="created_by" title="Created by">
-                        <div className="overflow-hidden">
-                          <div
-                            className="truncate font-semibold"
-                            title={user.created_by}
-                          >
-                            {user.created_by}
-                          </div>
-                        </div>
-                      </UserDetails>
-                    </div>
-                  )}
-                  {user.username && (
-                    <div className="col-span-1">
-                      <UserDetails id="home_facility" title="Home Facility">
-                        <span className="block font-semibold">
-                          {user.home_facility_object?.name ||
-                            "No Home Facility"}
-                        </span>
-                      </UserDetails>
-                    </div>
+                      </span>
+                    </>
                   )}
                 </div>
               </div>
-              <div className="flex h-12 flex-row justify-end bg-secondary-200">
-                <ButtonV2
-                  id="link-user"
-                  className="mr-2 mt-1 h-[35px] w-[80px] self-center text-sm"
-                  ghost
-                  border
-                  onClick={() => navigate(`/users/${user.username}`)}
-                >
-                  {t("view_user")}
-                </ButtonV2>
+              <span className="text-sm text-gray-500">{user.username}</span>
+
+              <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2">
+                <div className="text-sm">
+                  <div className="text-gray-500">Role</div>
+                  <div className="font-medium">{user.user_type}</div>
+                </div>
+                <div className="text-sm">
+                  <div className="text-gray-500">Home facility</div>
+                  <div className="font-medium">
+                    {user.home_facility_object?.name || "No Home Facility"}
+                  </div>
+                </div>
+                {user.district_object && (
+                  <div className="text-sm">
+                    <div className="text-gray-500">District</div>
+                    <div className="font-medium">
+                      {user.district_object.name}
+                    </div>
+                  </div>
+                )}
+                {user.weekly_working_hours && (
+                  <div className="text-sm">
+                    <div className="text-gray-500">Average Weekly Hours</div>
+                    <div className="font-medium">
+                      {user.weekly_working_hours}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
+
+          <button
+            onClick={() => navigate(`/users/${user.username}`)}
+            className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-xs"
+          >
+            <CareIcon icon="l-arrow-up-right" className="text-lg" />
+            <span>More details</span>
+          </button>
         </div>
-      );
-    }));
+      </Card>
+    );
+  };
 
   if (userListLoading || districtDataLoading || !userListData?.results) {
-    manageUsers = <Loading />;
-  } else if (userListData?.results.length) {
+    return <Loading />;
+  }
+
+  let userList: any[] = [];
+
+  userList = userListData.results.map((user: UserModel, idx) => {
+    return getCard(user, idx);
+  });
+
+  if (userListData?.results.length) {
     manageUsers = (
       <div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          {userList}
-        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">{userList}</div>
         <Pagination totalCount={userListData.count} />
       </div>
     );

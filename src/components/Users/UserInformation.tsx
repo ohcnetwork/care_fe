@@ -86,7 +86,7 @@ export default function UserInformation({ username }: { username: string }) {
         handleDelete={handleAvatarDelete}
         onClose={() => setEditAvatar(false)}
       />
-      <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+      <div className="overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
         <div className="my-4 flex justify-between">
           <div className="flex items-center">
             <Avatar
