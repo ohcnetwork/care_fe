@@ -1,9 +1,13 @@
-import { Type } from "../../Redux/api";
-import { PaginatedResponse } from "../../Utils/request/types";
-import { WritableOnly } from "../../Utils/types";
-import { AssetBedModel } from "../Assets/AssetTypes";
-import { PerformedByModel } from "../HCX/misc";
-import { OperationAction, PTZPayload } from "./useOperateCamera";
+import { AssetBedModel } from "@/components/Assets/AssetTypes";
+import {
+  OperationAction,
+  PTZPayload,
+} from "@/components/CameraFeed/useOperateCamera";
+import { UserBareMinimum } from "@/components/Users/models";
+
+import { Type } from "@/Utils/request/api";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { WritableOnly } from "@/Utils/types";
 
 export type GetStatusResponse = {
   result: {
@@ -32,8 +36,8 @@ export type CameraPreset = {
   name: string;
   readonly asset_bed: AssetBedModel;
   position: PTZPayload;
-  readonly created_by: PerformedByModel;
-  readonly updated_by: PerformedByModel;
+  readonly created_by: UserBareMinimum;
+  readonly updated_by: UserBareMinimum;
   readonly created_date: string;
   readonly modified_date: string;
   readonly is_migrated: boolean;

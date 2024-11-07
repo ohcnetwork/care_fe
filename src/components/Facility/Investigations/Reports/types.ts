@@ -1,5 +1,5 @@
-import { InvestigationValueType } from "..";
-import { ConsultationModel } from "../../models";
+import { InvestigationValueType } from "@/components/Facility/Investigations";
+import { ConsultationModel } from "@/components/Facility/models";
 
 export interface Investigation {
   id: string;

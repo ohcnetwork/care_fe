@@ -1,6 +1,7 @@
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { FacilityModel } from "../Facility/models";
 import { useTranslation } from "react-i18next";
+
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import { FacilityModel } from "@/components/Facility/models";
 
 const ConfirmFacilityModal = ({
   username,

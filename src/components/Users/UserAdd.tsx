@@ -1,8 +1,8 @@
 import { Link } from "raviger";
-import Page from "@/components/Common/components/Page";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Page from "../Common/Page";
 import UserAddEditForm from "./UserAddEditForm";
 
 const UserAdd = () => {

@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
-import LinkededFacilities from "./LinkedFacilities";
-import { UserModel } from "./models";
-import userColumns from "../Common/UserColumns";
+
+import userColumns from "@/components/Common/UserColumns";
+import LinkededFacilities from "@/components/Users/LinkedFacilities";
+import { UserModel } from "@/components/Users/models";
 
 type Props = {
   userData: UserModel;

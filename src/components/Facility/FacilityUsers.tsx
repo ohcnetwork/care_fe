@@ -1,23 +1,27 @@
 import { useState } from "react";
-import CountBlock from "../../CAREUI/display/Count";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import { formatName, isUserOnline, relativeTime } from "../../Utils/utils";
-import SlideOver from "../../CAREUI/interactive/SlideOver";
-import Pagination from "@/components/Common/Pagination";
-import UserDetails from "@/components/Common/UserDetails";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Page from "@/components/Common/components/Page";
-import LinkFacilityDialog from "../Users/LinkFacilityDialog";
-import UserDeleteDialog from "../Users/UserDeleteDialog";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { UserFacilities } from "../Users/ManageUsers";
 import { useTranslation } from "react-i18next";
 
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import Pagination from "@/components/Common/Pagination";
+import UserDetails from "@/components/Common/UserDetails";
+import LinkFacilityDialog from "@/components/Users/LinkFacilityDialog";
+import { UserFacilities } from "@/components/Users/ManageUsers";
+import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { formatName, isUserOnline, relativeTime } from "@/Utils/utils";
+
 export default function FacilityUsers(props: any) {
   const { t } = useTranslation();
   const { facilityId } = props;

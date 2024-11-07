@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
-import { ICD11DiagnosisModel } from "../Diagnosis/types";
-import { getDiagnosesByIds } from "../Diagnosis/utils";
-import { useTranslation } from "react-i18next";
-import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { mergeQueryOptions } from "../../Utils/utils";
 import { debounce } from "lodash-es";
-import { Error } from "../../Utils/Notifications";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
+import { getDiagnosesByIds } from "@/components/Diagnosis/utils";
+import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+
+import { Error } from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { mergeQueryOptions } from "@/Utils/utils";
 
 export const FILTER_BY_DIAGNOSES_KEYS = [
   "diagnoses",

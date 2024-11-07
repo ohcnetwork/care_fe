@@ -4,8 +4,10 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
-import CareIcon from "../icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { classNames } from "@/Utils/utils";
 
 export type SlideFromEdges = "left" | "top" | "right" | "bottom";
 
@@ -124,7 +126,12 @@ export default function SlideOver({
                     <h1 className="w-full text-xl font-black">{title}</h1>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto p-4">{children}</div>
+                <div
+                  className="flex-1 overflow-auto p-4"
+                  data-test-id="slide-over-container"
+                >
+                  {children}
+                </div>
               </div>
             )}
           </DialogPanel>

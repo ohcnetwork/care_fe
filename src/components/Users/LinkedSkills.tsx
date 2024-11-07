@@ -1,16 +1,21 @@
 import { useState } from "react";
-import ButtonV2 from "../Common/components/ButtonV2";
-import routes from "@/Redux/api";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { SkillSelect } from "@/components/Common/SkillSelect";
+import ConfirmSkillsModal from "@/components/Users/ConfirmSkillsModal";
+
+import { useIsAuthorized } from "@/hooks/useIsAuthorized";
+
+import AuthorizeFor from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
+
 import { SkillModel } from "./models";
-import * as Notification from "../../Utils/Notifications";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import { useTranslation } from "react-i18next";
-import ConfirmSkillsModal from "./ConfirmSkillsModal";
-import { SkillSelect } from "../Common/SkillSelect";
-import { useIsAuthorized } from "@/common/hooks/useIsAuthorized";
-import AuthorizeFor from "@/Utils/AuthorizeFor";
 
 const initModalProps: {
   selectedSkill: SkillModel | null;

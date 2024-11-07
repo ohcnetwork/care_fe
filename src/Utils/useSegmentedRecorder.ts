@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
-import * as Notify from "./Notifications";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import * as Notify from "@/Utils/Notifications";
 
 const useSegmentedRecording = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
   const [audioBlobs, setAudioBlobs] = useState<Blob[]>([]);
   const [restart, setRestart] = useState(false);
+  const { t } = useTranslation();
 
   const bufferInterval = 1 * 1000;
   const splitSizeLimit = 20 * 1000000; // 20MB
@@ -28,7 +31,7 @@ const useSegmentedRecording = () => {
           },
           () => {
             Notify.Error({
-              msg: "Please grant microphone permission to record audio.",
+              msg: t("audio__permission_message"),
             });
             setIsRecording(false);
           },

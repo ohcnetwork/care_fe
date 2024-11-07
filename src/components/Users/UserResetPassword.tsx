@@ -1,13 +1,17 @@
 import { useState } from "react";
-import * as Notification from "../../Utils/Notifications";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { Submit } from "@/components/Common/components/ButtonV2";
-import { UpdatePasswordForm } from "./models";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import { validateRule } from "./UserAddEditForm";
 import { useTranslation } from "react-i18next";
+
+import { Submit } from "@/components/Common/ButtonV2";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+
+import { validateRule } from "./UserAddEditForm";
+import { UpdatePasswordForm } from "./models";
 
 export default function UserResetPassword() {
   const { t } = useTranslation();
@@ -129,20 +133,24 @@ export default function UserResetPassword() {
                   {validateRule(
                     changePasswordForm.new_password_1?.length >= 8,
                     "Password should be atleast 8 characters long",
+                    !changePasswordForm.new_password_1,
                   )}
                   {validateRule(
                     changePasswordForm.new_password_1 !==
                       changePasswordForm.new_password_1.toUpperCase(),
                     "Password should contain at least 1 lowercase letter",
+                    !changePasswordForm.new_password_1,
                   )}
                   {validateRule(
                     changePasswordForm.new_password_1 !==
                       changePasswordForm.new_password_1.toLowerCase(),
                     "Password should contain at least 1 uppercase letter",
+                    !changePasswordForm.new_password_1,
                   )}
                   {validateRule(
                     /\d/.test(changePasswordForm.new_password_1),
                     "Password should contain at least 1 number",
+                    !changePasswordForm.new_password_1,
                   )}
                 </div>
               </div>
@@ -166,6 +174,7 @@ export default function UserResetPassword() {
                       changePasswordForm.new_password_1 ===
                         changePasswordForm.new_password_2,
                       "Confirm password should match the new password",
+                      !changePasswordForm.new_password_2,
                     )}
                   </div>
                 )}

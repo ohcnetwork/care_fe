@@ -1,36 +1,43 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import CountBlock from "../../CAREUI/display/Count";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import { USER_TYPES } from "@/common/constants";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useFilters from "@/common/hooks/useFilters";
-import useWindowDimensions from "@/common/hooks/useWindowDimensions";
-import routes from "../../Redux/api";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
-import {
-  classNames,
-  formatName,
-  isUserOnline,
-  relativeTime,
-} from "../../Utils/utils";
+
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import { Avatar } from "@/components/Common/Avatar";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
 import UserDetails from "@/components/Common/UserDetails";
 import UserDetailComponent from "@/components/Common/UserDetailsComponet";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import Page from "@/components/Common/components/Page";
-import { FacilityModel } from "../Facility/models";
-import SearchInput from "../Form/SearchInput";
-import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
-import UserFilter from "./UserFilter";
+import { FacilityModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+import UnlinkFacilityDialog from "@/components/Users/UnlinkFacilityDialog";
+import UserFilter from "@/components/Users/UserFilter";
 
-import Loading from "@/components/Common/Loading";
+import useAuthUser from "@/hooks/useAuthUser";
+import useFilters from "@/hooks/useFilters";
+import useWindowDimensions from "@/hooks/useWindowDimensions";
+
+import { USER_TYPES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import {
+  classNames,
+  formatDisplayName,
+  formatName,
+  isUserOnline,
+  relativeTime,
+} from "@/Utils/utils";
+
 export default function ManageUsers() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -119,6 +126,13 @@ export default function ManageUsers() {
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
+                <div className="mb-2 flex-none text-lg">
+                  <Avatar
+                    name={formatDisplayName(user)}
+                    imageUrl={user.read_profile_picture_url}
+                    className="mb-2 h-12 w-12 rounded-full text-black lg:mb-0"
+                  />
+                </div>
                 <div className="flex flex-col flex-wrap justify-between gap-3 @sm:flex-row">
                   {user.username && (
                     <div
@@ -161,7 +175,9 @@ export default function ManageUsers() {
                   id="name"
                   className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
                 >
-                  {formatName(user)}
+                  <div className="max-w-full break-words">
+                    {formatName(user)}
+                  </div>
 
                   {user.last_login && cur_online ? (
                     <div

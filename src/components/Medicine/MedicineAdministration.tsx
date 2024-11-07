@@ -1,20 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import PrescriptionDetailCard from "./PrescriptionDetailCard";
-import { MedicineAdministrationRecord, Prescription } from "./models";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Error, Success } from "../../Utils/Notifications";
-import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import dayjs from "../../Utils/dayjs";
-import TextFormField from "../Form/FormFields/TextFormField";
-import request from "../../Utils/request/request";
-import MedicineRoutes from "./routes";
-import useSlug from "@/common/hooks/useSlug";
-import DosageFormField from "../Form/FormFields/DosageFormField";
-import { AdministrationDosageValidator } from "./validators";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import DosageFormField from "@/components/Form/FormFields/DosageFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "@/components/Medicine/models";
+import MedicineRoutes from "@/components/Medicine/routes";
+import { AdministrationDosageValidator } from "@/components/Medicine/validators";
+
+import useSlug from "@/hooks/useSlug";
+
+import { Error, Success } from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 interface Props {
   prescriptions: Prescription[];
@@ -179,7 +186,7 @@ export default function MedicineAdministration(props: Props) {
                 }
                 errorClassName="hidden"
               />
-              <div className="flex flex-col gap-2 lg:max-w-min">
+              <div className="flex w-full flex-col gap-2 lg:max-w-min">
                 <CheckBoxFormField
                   label="Administer for a time in the past"
                   labelClassName="whitespace-nowrap"
@@ -202,20 +209,24 @@ export default function MedicineAdministration(props: Props) {
                   }}
                   errorClassName="hidden"
                 />
-                <TextFormField
+                <DateFormField
                   name="administered_date"
-                  type="datetime-local"
-                  value={customTime[index]}
+                  value={
+                    customTime[index] ? new Date(customTime[index]) : new Date()
+                  }
                   onChange={({ value }) => {
                     setCustomTime((arr) => {
                       const newArr = [...arr];
-                      newArr[index] = value;
+                      newArr[index] = dayjs(value).format("YYYY-MM-DDTHH:mm");
                       return newArr;
                     });
                   }}
                   disabled={!shouldAdminister[index] || !isCustomTime[index]}
-                  min={dayjs(obj.created_date).format("YYYY-MM-DDTHH:mm")}
-                  max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                  min={new Date(obj.created_date)}
+                  max={new Date()}
+                  className="w-full"
+                  errorClassName="hidden"
+                  allowTime
                 />
               </div>
             </div>

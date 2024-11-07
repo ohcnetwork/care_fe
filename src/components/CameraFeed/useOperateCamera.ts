@@ -1,6 +1,8 @@
 import { useState } from "react";
-import request from "../../Utils/request/request";
-import { FeedRoutes } from "./routes";
+
+import { FeedRoutes } from "@/components/CameraFeed/routes";
+
+import request from "@/Utils/request/request";
 
 export interface PTZPayload {
   x: number;

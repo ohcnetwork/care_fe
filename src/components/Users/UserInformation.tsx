@@ -1,18 +1,21 @@
-import { useState } from "react";
-import { LocalStorageKeys } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { formatDisplayName, sleep } from "@/Utils/utils";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import { useTranslation } from "react-i18next";
-import Loading from "@/components/Common/Loading";
-import AvatarEditModal from "@/components/Common/AvatarEditModal";
-import uploadFile from "@/Utils/request/uploadFile";
 import careConfig from "@careConfig";
-import { Avatar } from "../Common/Avatar";
-import UserAddEditForm from "./UserAddEditForm";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { Avatar } from "@/components/Common/Avatar";
+import AvatarEditModal from "@/components/Common/AvatarEditModal";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import UserAddEditForm from "@/components/Users/UserAddEditForm";
+
+import { LocalStorageKeys } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import uploadFile from "@/Utils/request/uploadFile";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDisplayName, sleep } from "@/Utils/utils";
 
 export default function UserInformation({ username }: { username: string }) {
   const { t } = useTranslation();

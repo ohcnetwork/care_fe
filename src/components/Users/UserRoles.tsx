@@ -1,14 +1,16 @@
 import { useReducer, useRef } from "react";
-import * as Notification from "../../Utils/Notifications";
-import TextFormField from "../Form/FormFields/TextFormField";
-import dayjs from "../../Utils/dayjs";
-import { FieldError } from "../Form/FieldValidators";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
+
 import Loading from "@/components/Common/Loading";
-import Form from "../Form/Form";
+import { FieldError } from "@/components/Form/FieldValidators";
+import Form from "@/components/Form/Form";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 type EditForm = {
   user_type: string | undefined;

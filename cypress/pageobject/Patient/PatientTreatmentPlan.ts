@@ -33,7 +33,7 @@ class PatientTreatmentPlan {
   }
 
   typeProcedureTime(time: string) {
-    cy.get("#procedure-time").type(time);
+    cy.clickAndTypeDate("#procedure-time", time);
   }
 
   typeTreatmentPlan(treatment: string) {

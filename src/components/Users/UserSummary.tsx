@@ -1,18 +1,22 @@
-import { useTranslation } from "react-i18next";
-import UserResetPassword from "./UserResetPassword";
-import UserInformation from "./UserInformation";
 import { useState } from "react";
-import routes from "@/Redux/api";
+import { useTranslation } from "react-i18next";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import useAuthUser from "@/common/hooks/useAuthUser";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import userColumns from "@/components/Common/UserColumns";
+import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
+import UserInformation from "@/components/Users/UserInformation";
+import UserResetPassword from "@/components/Users/UserResetPassword";
+import { UserModel } from "@/components/Users/models";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
+import * as Notification from "@/Utils/Notifications";
 import { showUserDelete } from "@/Utils/permissions";
+import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import UserDeleteDialog from "./UserDeleteDialog";
-import * as Notification from "../../Utils/Notifications";
-import { UserModel } from "./models";
-import ButtonV2 from "../Common/components/ButtonV2";
-import userColumns from "../Common/UserColumns";
 
 export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
   const { t } = useTranslation();

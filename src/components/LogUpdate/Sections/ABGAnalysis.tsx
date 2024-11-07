@@ -1,8 +1,13 @@
 import { ReactNode } from "react";
-import { rangeValueDescription, ValueDescription } from "../../../Utils/utils";
-import RangeFormField from "../../Form/FormFields/RangeFormField";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
-import { DailyRoundsModel } from "../../Patient/models";
+
+import RangeFormField from "@/components/Form/FormFields/RangeFormField";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import { ValueDescription, rangeValueDescription } from "@/Utils/utils";
 
 export const ABGAnalysisFields = [
   {

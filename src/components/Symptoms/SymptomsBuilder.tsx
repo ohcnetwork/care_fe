@@ -1,23 +1,27 @@
 import { useState } from "react";
-import { Writable } from "../../Utils/types";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import SymptomsApi from "@/components/Symptoms/api";
 import {
   EncounterSymptom,
   OTHER_SYMPTOM_CHOICE,
   SYMPTOM_CHOICES,
-} from "./types";
-import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
-import DateFormField from "../Form/FormFields/DateFormField";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { classNames, dateQueryString } from "../../Utils/utils";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useSlug from "@/common/hooks/useSlug";
-import useQuery from "../../Utils/request/useQuery";
-import SymptomsApi from "./api";
-import request from "../../Utils/request/request";
-import { Success } from "../../Utils/Notifications";
-import { sortByOnsetDate } from "./utils";
+} from "@/components/Symptoms/types";
+import { sortByOnsetDate } from "@/components/Symptoms/utils";
+
+import useSlug from "@/hooks/useSlug";
+
+import { Success } from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { Writable } from "@/Utils/types";
+import { classNames, dateQueryString } from "@/Utils/utils";
 
 export const CreateSymptomsBuilder = (props: {
   value: Writable<EncounterSymptom>[];
@@ -191,7 +195,6 @@ const SymptomEntry = (props: {
         name="cure_date"
         value={symptom.cure_date ? new Date(symptom.cure_date) : undefined}
         disableFuture
-        position="CENTER"
         placeholder="Date of cure"
         min={new Date(symptom.onset_date)}
         disabled={disabled}
@@ -293,7 +296,6 @@ const AddSymptom = (props: {
   return (
     <div className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap">
       <DateFormField
-        className="w-full md:w-36"
         name="onset_date"
         id="symptoms_onset_date"
         placeholder="Date of onset"

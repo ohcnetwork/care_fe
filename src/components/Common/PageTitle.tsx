@@ -1,7 +1,9 @@
 import { ReactNode, useEffect, useRef } from "react";
-import Breadcrumbs from "./Breadcrumbs";
-import PageHeadTitle from "./PageHeadTitle";
-import { classNames } from "../../Utils/utils";
+
+import Breadcrumbs from "@/components/Common/Breadcrumbs";
+import PageHeadTitle from "@/components/Common/PageHeadTitle";
+
+import { classNames } from "@/Utils/utils";
 
 export interface PageTitleProps {
   title: string;

@@ -1,7 +1,9 @@
-import * as Notification from "../../Utils/Notifications";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuthContext } from "@/common/hooks/useAuthUser";
+
+import { useAuthContext } from "@/hooks/useAuthUser";
+
+import * as Notification from "@/Utils/Notifications";
 
 export default function SessionExpired() {
   const { signOut } = useAuthContext();
@@ -17,7 +19,7 @@ export default function SessionExpired() {
         <img
           src="/images/session_expired.svg"
           alt={t("session_expired")}
-          className="w-full"
+          className="mx-auto w-1/2"
         />
         <h1>{t("session_expired")}</h1>
         <p>
@@ -26,7 +28,7 @@ export default function SessionExpired() {
           <br />
           <div
             onClick={signOut}
-            className="hover:bg-primary- inline-block cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-white hover:text-white"
+            className="mt-5 inline-block cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-white hover:bg-primary-400"
           >
             {t("return_to_login")}
           </div>

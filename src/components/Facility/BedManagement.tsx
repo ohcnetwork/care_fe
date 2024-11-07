@@ -1,20 +1,26 @@
 import { useState } from "react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { BedModel } from "./models";
-import * as Notification from "../../Utils/Notifications";
-import { LOCATION_BED_TYPES } from "@/common/constants";
-import BedDeleteDialog from "./BedDeleteDialog";
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Page from "@/components/Common/components/Page";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import useFilters from "@/common/hooks/useFilters";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import Loading from "@/components/Common/Loading";
-import PaginatedList from "@/CAREUI/misc/PaginatedList";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import BedDeleteDialog from "@/components/Facility/BedDeleteDialog";
+import { BedModel } from "@/components/Facility/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useFilters from "@/hooks/useFilters";
+
+import { LOCATION_BED_TYPES } from "@/common/constants";
+
+import AuthorizeFor, { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 interface BedManagementProps {
   facilityId: string;
   locationId: string;
@@ -164,7 +170,7 @@ const BedCard = ({
 
 export const BedManagement = (props: BedManagementProps) => {
   const { facilityId, locationId } = props;
-  const { qParams, resultsPerPage } = useFilters({});
+  const { qParams, resultsPerPage } = useFilters({ limit: 16 });
   const { t } = useTranslation();
 
   const { data: location } = useQuery(routes.getFacilityAssetLocation, {
@@ -178,10 +184,10 @@ export const BedManagement = (props: BedManagementProps) => {
     <PaginatedList
       route={routes.listFacilityBeds}
       pathParams={{ facility_external_id: facilityId }}
+      perPage={resultsPerPage}
       query={{
         facility: facilityId,
         location: locationId,
-        limit: resultsPerPage,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
       }}
     >

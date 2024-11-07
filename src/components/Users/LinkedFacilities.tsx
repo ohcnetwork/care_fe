@@ -1,21 +1,26 @@
 import { useState } from "react";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import routes from "@/Redux/api";
-import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
-import { FacilityModel } from "../Facility/models";
-import { UserModel } from "./models";
-import * as Notification from "../../Utils/Notifications";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import ConfirmFacilityModal from "./ConfirmFacilityModal";
-import { useTranslation } from "react-i18next";
+
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import { FacilityModel } from "@/components/Facility/models";
+import ConfirmFacilityModal from "@/components/Users/ConfirmFacilityModal";
+import { UserModel } from "@/components/Users/models";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
+import ButtonV2 from "../Common/ButtonV2";
 
 const initModalProps: {
   selectedFacility?: FacilityModel;

@@ -1,18 +1,21 @@
+import { Link } from "raviger";
 import { useState } from "react";
-import Page from "../Common/components/Page";
+import { useTranslation } from "react-i18next";
+
+import Loading from "@/components/Common/Loading";
+import { userChildProps } from "@/components/Common/UserColumns";
+import Error404 from "@/components/ErrorPages/404";
+import LinkedFacilitiesTab from "@/components/Users/LinkedFacilitiesTab";
+import RoleAndSkillsTab from "@/components/Users/RoleAndSkillsTab";
+import { UserModel } from "@/components/Users/models";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatName, keysOf } from "@/Utils/utils";
+
+import Page from "../Common/Page";
 import UserBanner from "./UserBanner";
 import UserSummaryTab from "./UserSummary";
-import routes from "@/Redux/api";
-import useQuery from "@/Utils/request/useQuery";
-import { UserModel } from "./models";
-import Loading from "../Common/Loading";
-import Error404 from "../ErrorPages/404";
-import { classNames, formatName, keysOf } from "@/Utils/utils";
-import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
-import LinkedFacilitiesTab from "./LinkedFacilitiesTab";
-import RoleAndSkillsTab from "./RoleAndSkillsTab";
-import { userChildProps } from "../Common/UserColumns";
 
 export interface UserHomeProps {
   username: string;

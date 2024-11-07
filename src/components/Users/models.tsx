@@ -1,6 +1,12 @@
+import {
+  DistrictModel,
+  LocalBodyModel,
+  StateModel,
+} from "@/components/Facility/models";
+
 import { GENDER_TYPES, UserRole } from "@/common/constants";
-import { FeatureFlag } from "../../Utils/featureFlags";
-import { DistrictModel, LocalBodyModel, StateModel } from "../Facility/models";
+
+import { FeatureFlag } from "@/Utils/featureFlags";
 
 interface HomeFacilityObjectModel {
   id?: string;
@@ -21,6 +27,7 @@ export type UserBareMinimum = {
   email: string;
   user_type: UserRole;
   last_login: string | undefined;
+  read_profile_picture_url?: string;
 };
 
 export type GenderType = "Male" | "Female" | "Transgender";

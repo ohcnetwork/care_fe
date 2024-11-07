@@ -23,7 +23,7 @@ export class UserPage {
   }
 
   checkUsernameText(username: string) {
-    cy.get(this.usernameText).should("have.text", username);
+    cy.get(this.usernameText).should("contain.text", username);
   }
 
   checkUsernameBadgeVisibility(shouldBeVisible: boolean) {

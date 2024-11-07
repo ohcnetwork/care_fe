@@ -1,11 +1,11 @@
-import LoginPage from "../../pageobject/Login/LoginPage";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import { UserPage } from "../../pageobject/Users/UserSearch";
+import LoginPage from "../../pageobject/Login/LoginPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
+import { UserPage } from "../../pageobject/Users/UserSearch";
 import {
-  generatePhoneNumber,
   generateEmergencyPhoneNumber,
+  generatePhoneNumber,
 } from "../../pageobject/utils/constants";
 
 describe("User Creation", () => {
@@ -55,7 +55,7 @@ describe("User Creation", () => {
   ];
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -145,7 +145,7 @@ describe("User Creation", () => {
     userCreationPage.typeIntoElementById("password", "Test@123");
     userCreationPage.selectHomeFacility("Dummy Shifting Center");
     userCreationPage.typeIntoElementById("phone_number", phone_number);
-    userCreationPage.setInputDate("date_of_birth", "date-input", "25081999");
+    userCreationPage.setInputDate("date_of_birth", "25081999");
     userCreationPage.selectDropdownOption("user_type", "Doctor");
     userCreationPage.typeIntoElementById("c_password", "Test@123");
     userCreationPage.typeIntoElementById("qualification", "MBBS");
