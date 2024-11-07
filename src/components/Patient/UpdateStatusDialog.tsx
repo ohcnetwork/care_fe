@@ -1,24 +1,31 @@
-import { useEffect, useState, useReducer } from "react";
-import {
-  SAMPLE_TEST_STATUS,
-  SAMPLE_TEST_RESULT,
-  SAMPLE_FLOW_RULES,
-  HEADER_CONTENT_TYPES,
-} from "@/common/constants";
-import { CreateFileResponse, SampleTestModel } from "./models";
-import * as Notification from "../../Utils/Notifications";
-import { LinearProgressWithLabel } from "../Files/FileUpload";
-import { Submit } from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import TextFormField from "../Form/FormFields/TextFormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import uploadFile from "../../Utils/request/uploadFile";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Submit } from "@/components/Common/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import { LinearProgressWithLabel } from "@/components/Files/FileUpload";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import {
+  CreateFileResponse,
+  SampleTestModel,
+} from "@/components/Patient/models";
+
+import {
+  HEADER_CONTENT_TYPES,
+  SAMPLE_FLOW_RULES,
+  SAMPLE_TEST_RESULT,
+  SAMPLE_TEST_STATUS,
+} from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import uploadFile from "@/Utils/request/uploadFile";
 
 interface Props {
   sample: SampleTestModel;

@@ -1,15 +1,18 @@
 import { useState } from "react";
-import Switch from "../../CAREUI/interactive/Switch";
-import { Autocomplete } from "../Form/FormFields/Autocomplete";
-import FormField from "../Form/FormFields/FormField";
+
+import Switch from "@/CAREUI/interactive/Switch";
+
+import { Autocomplete } from "@/components/Form/FormFields/Autocomplete";
+import FormField from "@/components/Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
-import { MedibaseMedicine } from "./models";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { mergeQueryOptions } from "../../Utils/utils";
+} from "@/components/Form/FormFields/Utils";
+import { MedibaseMedicine } from "@/components/Medicine/models";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { mergeQueryOptions } from "@/Utils/utils";
 
 export default function MedibaseAutocompleteFormField(
   props: FormFieldBaseProps<MedibaseMedicine>,

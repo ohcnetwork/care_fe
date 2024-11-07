@@ -15,7 +15,7 @@ describe("Patient swtich bed functionality", () => {
   const switchPatientTwo = "Dummy Patient 7";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

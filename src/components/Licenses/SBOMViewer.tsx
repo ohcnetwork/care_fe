@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import Card from "../../CAREUI/display/Card";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "dayjs";
+import React, { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import licenseUrls from "./licenseUrls.json";
-import feBomData from "./fe-sbom.json";
-import beBomData from "./be-sbom.json";
+
+import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import beBomData from "@/components/Licenses/be-sbom.json";
+import feBomData from "@/components/Licenses/fe-sbom.json";
+import licenseUrls from "@/components/Licenses/licenseUrls.json";
 
 const getLicenseUrl = (licenseId: string | undefined): string | null => {
   if (!licenseId) return null;

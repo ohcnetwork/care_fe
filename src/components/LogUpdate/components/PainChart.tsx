@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { IPainScale } from "../../Patient/models";
-import RangeFormField from "../../Form/FormFields/RangeFormField";
-import HumanBodyChart from "../../../CAREUI/interactive/HumanChart";
-import PopupModal from "../../../CAREUI/display/PopupModal";
-import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import { classNames, getValueDescription } from "../../../Utils/utils";
+
+import PopupModal from "@/CAREUI/display/PopupModal";
+import HumanBodyChart from "@/CAREUI/interactive/HumanChart";
+
+import RangeFormField from "@/components/Form/FormFields/RangeFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import { IPainScale } from "@/components/Patient/models";
+
 import { HumanBodyRegion } from "@/common/constants";
-import { Error } from "../../../Utils/Notifications";
+
+import { Error } from "@/Utils/Notifications";
+import { classNames, getValueDescription } from "@/Utils/utils";
 
 type Props = {
   pain: IPainScale[];

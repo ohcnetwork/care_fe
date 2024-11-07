@@ -1,6 +1,6 @@
 import { defineConfig } from "cypress";
-import fs from "fs";
 import cypressSplit from "cypress-split";
+import fs from "fs";
 
 export default defineConfig({
   projectId: "wf7d2m",
