@@ -376,15 +376,9 @@ export default function NotificationsList({
     } catch (error) {
       const permission = Notification.permission;
 
-      if (permission === "denied") {
+      if (permission === "denied" || permission === "default") {
         Warn({
           msg: t("notification_permission_denied"),
-        });
-        setIsSubscribing(false);
-        return;
-      } else if (permission === "default") {
-        Warn({
-          msg: t("notification_cancelled"),
         });
         setIsSubscribing(false);
         return;
