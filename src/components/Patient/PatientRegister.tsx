@@ -32,6 +32,7 @@ import TransferPatientDialog from "@/components/Facility/TransferPatientDialog";
 import {
   DistrictModel,
   DupPatientModel,
+  FacilityModel,
   WardModel,
 } from "@/components/Facility/models";
 import {
@@ -93,6 +94,8 @@ import {
   parsePhoneNumber,
   scrollTo,
 } from "@/Utils/utils";
+
+import { UserModel } from "../Users/models";
 
 type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
