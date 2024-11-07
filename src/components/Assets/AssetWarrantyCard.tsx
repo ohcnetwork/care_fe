@@ -1,9 +1,12 @@
-import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import { AssetData } from "./AssetTypes";
-import { formatDate } from "../../Utils/utils";
-import CopyToClipboard from "react-copy-to-clipboard";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
+import CopyToClipboard from "react-copy-to-clipboard";
+
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { AssetData } from "@/components/Assets/AssetTypes";
+
+import { formatDate } from "@/Utils/utils";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
   const { asset } = props;

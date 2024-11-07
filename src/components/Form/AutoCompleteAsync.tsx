@@ -5,17 +5,19 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
+import { debounce } from "lodash-es";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { DropdownTransition } from "@/components/Common/HelperComponents";
 import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
-} from "./MultiSelectMenuV2";
-import { useEffect, useMemo, useState } from "react";
+} from "@/components/Form/MultiSelectMenuV2";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "@/components/Common/components/HelperComponents";
-import { classNames } from "../../Utils/utils";
-import { debounce } from "lodash-es";
-import { useTranslation } from "react-i18next";
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   id?: string;

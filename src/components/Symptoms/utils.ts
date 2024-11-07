@@ -1,6 +1,7 @@
-import { Writable } from "../../Utils/types";
-import { compareByDateString } from "../../Utils/utils";
-import { EncounterSymptom } from "./types";
+import { EncounterSymptom } from "@/components/Symptoms/types";
+
+import { Writable } from "@/Utils/types";
+import { compareByDateString } from "@/Utils/utils";
 
 // TODO: switch to using Object.groupBy(...) instead once upgraded to node v22
 export const groupAndSortSymptoms = <

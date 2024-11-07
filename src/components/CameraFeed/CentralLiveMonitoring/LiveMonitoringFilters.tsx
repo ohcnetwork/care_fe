@@ -4,14 +4,17 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { FieldLabel } from "../../Form/FormFields/FormField";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import { LocationSelect } from "@/components/Common/LocationSelect";
 import Pagination from "@/components/Common/Pagination";
-import useFilters from "@/common/hooks/useFilters";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import useSlug from "@/common/hooks/useSlug";
-import { useTranslation } from "react-i18next";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+
+import useFilters from "@/hooks/useFilters";
+import useSlug from "@/hooks/useSlug";
 
 interface Props {
   perPageLimit: number;

@@ -1,11 +1,11 @@
-import { classNames, formatDateTime, humanizeStrings } from "../../Utils/utils";
-
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Page from "@/components/Common/components/Page";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime, humanizeStrings } from "@/Utils/utils";
+
 interface ISamplePreviewProps {
   id: string;
   sampleId: string;

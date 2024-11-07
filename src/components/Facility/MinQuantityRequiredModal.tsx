@@ -1,11 +1,13 @@
 import { useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
-import TextFormField from "../Form/FormFields/TextFormField";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 const initForm = {
   id: "",

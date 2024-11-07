@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
-import { ConsultationTabProps } from "./index";
-import { NursingPlot } from "../Consultations/NursingPlot";
 import { useTranslation } from "react-i18next";
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
-import { RoutineAnalysisRes, RoutineFields } from "../models";
+
 import Loading from "@/components/Common/Loading";
-import { classNames, formatDate, formatTime } from "../../../Utils/utils";
+import PageTitle from "@/components/Common/PageTitle";
 import Pagination from "@/components/Common/Pagination";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import { NursingPlot } from "@/components/Facility/Consultations/NursingPlot";
+import {
+  RoutineAnalysisRes,
+  RoutineFields,
+} from "@/components/Facility/models";
+
 import { PAGINATION_LIMIT } from "@/common/constants";
 
-import PageTitle from "@/components/Common/PageTitle";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { classNames, formatDate, formatTime } from "@/Utils/utils";
 
 export default function ConsultationNursingTab(props: ConsultationTabProps) {
   const { t } = useTranslation();

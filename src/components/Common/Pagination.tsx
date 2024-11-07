@@ -1,7 +1,10 @@
 import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useAbortableEffect, statusType } from "@/common/utils";
-import ButtonV2 from "./components/ButtonV2";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+
+import { statusType, useAbortableEffect } from "@/common/utils";
 
 interface PaginationProps {
   data: { totalCount: number };

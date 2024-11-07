@@ -1,39 +1,53 @@
-import * as Notification from "../../Utils/Notifications";
-
-import ButtonV2, {
-  Cancel,
-  Submit,
-} from "@/components/Common/components/ButtonV2";
-import {
-  CapacityModal,
-  DistrictModel,
-  DoctorModal,
-  FacilityRequest,
-} from "./models";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import {
-  BED_TYPES,
-  FACILITY_FEATURE_TYPES,
-  FACILITY_TYPES,
-} from "@/common/constants";
-import {
-  MultiSelectFormField,
-  SelectFormField,
-} from "../Form/FormFields/SelectFormField";
+import careConfig from "@careConfig";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import GLocationPicker from "@/components/Common/GLocationPicker";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import Steps, { Step } from "@/components/Common/Steps";
+import { BedCapacity } from "@/components/Facility/BedCapacity";
+import BedTypeCard from "@/components/Facility/BedTypeCard";
+import SpokeFacilityEditor from "@/components/Facility/SpokeFacilityEditor";
+import { StaffCapacity } from "@/components/Facility/StaffCapacity";
+import StaffCountCard from "@/components/Facility/StaffCountCard";
 import {
-  getPincodeDetails,
-  includesIgnoreCase,
-  parsePhoneNumber,
-  compareBy,
-} from "../../Utils/utils";
+  CapacityModal,
+  DistrictModel,
+  DoctorModal,
+  FacilityRequest,
+} from "@/components/Facility/models";
+import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import {
+  MultiSelectFormField,
+  SelectFormField,
+} from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import { FormAction } from "@/components/Form/Utils";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
+import {
+  BED_TYPES,
+  FACILITY_FEATURE_TYPES,
+  FACILITY_TYPES,
+} from "@/common/constants";
 import {
   phonePreg,
   validateLatitude,
@@ -41,34 +55,19 @@ import {
   validatePincode,
 } from "@/common/validation";
 
-import { BedCapacity } from "./BedCapacity";
-import BedTypeCard from "./BedTypeCard";
-import Card from "../../CAREUI/display/Card";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { StaffCapacity } from "./StaffCapacity";
-import StaffCountCard from "./StaffCountCard";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FormAction } from "../Form/Utils";
-import GLocationPicker from "@/components/Common/GLocationPicker";
-import Page from "@/components/Common/components/Page";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { RequestResult } from "@/Utils/request/types";
+import useQuery from "@/Utils/request/useQuery";
+import {
+  compareBy,
+  getPincodeDetails,
+  includesIgnoreCase,
+  parsePhoneNumber,
+} from "@/Utils/utils";
 
-import { navigate } from "raviger";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import { useTranslation } from "react-i18next";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { RequestResult } from "../../Utils/request/types";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import SpokeFacilityEditor from "./SpokeFacilityEditor";
-import careConfig from "@careConfig";
-
-import Loading from "@/components/Common/Loading";
 interface FacilityProps {
   facilityId?: string;
 }

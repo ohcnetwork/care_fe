@@ -1,14 +1,16 @@
-import { AppRoutes } from "./Routers/AppRouter";
-import { ConsultationModel, FacilityModel } from "@/components/Facility/models";
-import { INavItem } from "@/components/Common/Sidebar/Sidebar";
 import { LazyExoticComponent } from "react";
+
+import { INavItem } from "@/components/Common/Sidebar/Sidebar";
+import { ConsultationModel, FacilityModel } from "@/components/Facility/models";
 import { UserAssignedModel } from "@/components/Users/models";
-import { pluginMap } from "./pluginMap";
-import { PatientInfoCardProps } from "./components/Patient/PatientInfoCard";
-import { PatientModel } from "./components/Patient/models";
+
+import { AppRoutes } from "./Routers/AppRouter";
 import { ConsultationTabProps } from "./components/Facility/ConsultationDetails";
-import { PatientForm } from "./components/Patient/PatientRegister";
 import { FormContextValue } from "./components/Form/FormContext";
+import { PatientInfoCardProps } from "./components/Patient/PatientInfoCard";
+import { PatientForm } from "./components/Patient/PatientRegister";
+import { PatientModel } from "./components/Patient/models";
+import { pluginMap } from "./pluginMap";
 
 // Define the available plugins
 export type AvailablePlugin = "@apps/care_livekit_fe" | "@apps/care_hcx_fe";

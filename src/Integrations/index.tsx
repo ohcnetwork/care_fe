@@ -1,5 +1,5 @@
-import Sentry from "./Sentry";
-import Plausible from "./Plausible";
+import Plausible from "@/Integrations/Plausible";
+import Sentry from "@/Integrations/Sentry";
 
 const Integrations = { Sentry, Plausible };
 
