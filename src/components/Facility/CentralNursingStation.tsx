@@ -42,7 +42,8 @@ interface Props {
 export default function CentralNursingStation({ facilityId }: Props) {
   const breakpointValues = {
     default: 6,
-    fourK: 9,
+    largedisplay: 9,
+    fourK: 10,
   };
   const PER_PAGE_LIMIT = useBreakpoints(breakpointValues);
   const { t } = useTranslation();
@@ -218,7 +219,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           {t("no_vitals_present")}
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 fourK:grid-cols-3">
+        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 largedisplay:grid-cols-3 fourk:grid-cols-4">
           {data.map((props, i) => (
             <div className="overflow-hidden text-clip" key={i}>
               <HL7PatientVitalsMonitor
