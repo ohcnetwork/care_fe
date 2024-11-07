@@ -18,8 +18,8 @@ const BREAKPOINT_WIDTH: Record<Breakpoints, number> = {
   xl: 1280,
   "2xl": 1536,
   "3xl": 1920,
-  fourK: 2080,
-  largedisplay: 2800,
+  largedisplay: 2080,
+  fourK: 3000,
 };
 
 /**
