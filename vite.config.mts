@@ -113,6 +113,12 @@ export default defineConfig(({ mode }) => {
 
           REACT_PLAUSIBLE_SITE_DOMAIN: z.string().url().optional(),
           REACT_PLAUSIBLE_SERVER_URL: z.string().url().optional(),
+          REACT_CDN_URLS: z
+            .string()
+            .optional()
+            .transform((val) => val?.split(" "))
+            .pipe(z.array(z.string().url()).optional())
+            .describe("Optional: Space-separated list of CDN URLs"),
         },
       }),
       viteStaticCopy({

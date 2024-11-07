@@ -10,9 +10,12 @@ export default function Plausible() {
   });
 
   useEffect(() => {
-    if (!careConfig.plausible.domain || !careConfig.plausible.server) {
+    const missingConfig = [];
+    if (!careConfig.plausible.domain) missingConfig.push("domain");
+    if (!careConfig.plausible.server) missingConfig.push("server");
+    if (missingConfig.length > 0) {
       console.error(
-        "Plausible is not configured correctly. Please check your environment variables.",
+        `Plausible analytics disabled. Missing configuration: ${missingConfig.join(", ")}`,
       );
       return;
     }
