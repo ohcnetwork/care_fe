@@ -1,7 +1,7 @@
 // LoginPage.ts
 
 class LoginPage {
-  loginAsDisctrictAdmin(): void {
+  loginAsDistrictAdmin(): void {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
   }
 
