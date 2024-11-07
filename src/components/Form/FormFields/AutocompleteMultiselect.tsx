@@ -145,7 +145,7 @@ export const AutocompleteMutliSelect = <T, V>(
             {!props.disabled && (
               <ComboboxButton
                 ref={comboButtonRef}
-                className="absolute inset-y-0 right-0 flex items-center pr-2"
+                className="absolute inset-y-0 right-0 flex h-12 items-center pr-2"
               >
                 <div className="text-lg text-secondary-900">
                   {props.isLoading ? (
