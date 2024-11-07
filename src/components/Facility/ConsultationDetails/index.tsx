@@ -25,7 +25,6 @@ import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
 import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
-import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
@@ -41,6 +40,7 @@ import useQuery from "../../../Utils/request/useQuery";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import { ConsultationProvider } from "./ConsultationContext";
+import { useCareAppConsultationTabs } from "@/common/hooks/useCareApps";
 
 export interface ConsultationTabProps {
   consultationId: string;
@@ -64,12 +64,21 @@ const TABS = {
   NUTRITION: ConsultationNutritionTab,
   PRESSURE_SORE: ConsultationPressureSoreTab,
   DIALYSIS: ConsultationDialysisTab,
-  ABDM: ABDMRecordsTab,
-};
+} as Record<string, React.FC<ConsultationTabProps>>;
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const { t } = useTranslation();
+  const pluginTabs = useCareAppConsultationTabs();
+
+  useEffect(() => {
+    if (pluginTabs) {
+      for (const [key, value] of Object.entries(pluginTabs)) {
+        TABS[key] = value as React.FC<ConsultationTabProps>;
+      }
+    }
+  }, [pluginTabs]);
+
   let tab = undefined;
   if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
     tab = props.tab.toUpperCase() as keyof typeof TABS;
@@ -373,10 +382,6 @@ export const ConsultationDetails = (props: any) => {
                       )
                         return null; // Hide feed tab
                     }
-
-                    // if (p === "ABDM" && !abhaNumberData?.abha_number) {
-                    //   return null;
-                    // }
 
                     return (
                       <Link

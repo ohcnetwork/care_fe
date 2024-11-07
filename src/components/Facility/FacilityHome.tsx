@@ -47,6 +47,7 @@ import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import careConfig from "@careConfig";
 import uploadFile from "@/Utils/request/uploadFile";
 import { sleep } from "@/Utils/utils";
+import { PLUGIN_Component } from "@/PluginEngine";
 
 type Props = {
   facilityId: string;
@@ -424,13 +425,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 >
                   {t("view_users")}
                 </DropdownItem>
-                <DropdownItem
-                  id="view-abdm-records"
-                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
-                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
-                >
-                  {t("view_abdm_records")}
-                </DropdownItem>
+                <PLUGIN_Component
+                  __name="ManageFacilityOptions"
+                  facility={facilityData}
+                />
                 {hasPermissionToDeleteFacility ? (
                   <DropdownItem
                     id="delete-facility"

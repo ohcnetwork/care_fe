@@ -7,13 +7,11 @@ import {
 import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
 import { useEffect, useState } from "react";
 
-import ABDMFacilityRecords from "@/components/ABDM/ABDMFacilityRecords";
 import AssetRoutes from "./routes/AssetRoutes";
 import { BLACKLISTED_PATHS } from "@/common/constants";
 import ConsultationRoutes from "./routes/ConsultationRoutes";
 import Error404 from "@/components/ErrorPages/404";
 import FacilityRoutes from "./routes/FacilityRoutes";
-import HealthInformation from "@/components/ABDM/HealthInformation";
 import IconIndex from "../CAREUI/icons/Index";
 import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
 import PatientRoutes from "./routes/PatientRoutes";
@@ -55,13 +53,6 @@ const Routes: AppRoutes = {
 
   "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
   "/notice_board": () => <NoticeBoard />,
-
-  "/abdm/health-information/:id": ({ id }) => (
-    <HealthInformation artefactId={id} />
-  ),
-  "/facility/:facilityId/abdm": ({ facilityId }) => (
-    <ABDMFacilityRecords facilityId={facilityId} />
-  ),
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,

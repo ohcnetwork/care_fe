@@ -4,13 +4,13 @@ import { navigate } from "raviger";
 import { Submit } from "@/components/Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "@/components/Common/components/Page";
-import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { t } from "i18next";
 import Loading from "@/components/Common/Loading";
+import { PLUGIN_Component } from "@/PluginEngine";
 const initForm = {
   name: "",
   state: 0,
@@ -160,7 +160,10 @@ export const FacilityConfigure = (props: IProps) => {
           </form>
         </div>
 
-        <ConfigureHealthFacility facilityId={facilityId} />
+        <PLUGIN_Component
+          __name="ExtendFacilityConfigure"
+          facilityId={facilityId}
+        />
       </div>
     </Page>
   );

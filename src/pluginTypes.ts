@@ -1,11 +1,14 @@
 import { AppRoutes } from "./Routers/AppRouter";
-import { ConsultationModel } from "@/components/Facility/models";
+import { ConsultationModel, FacilityModel } from "@/components/Facility/models";
 import { INavItem } from "@/components/Common/Sidebar/Sidebar";
 import { LazyExoticComponent } from "react";
 import { UserAssignedModel } from "@/components/Users/models";
 import { pluginMap } from "./pluginMap";
 import { PatientInfoCardProps } from "./components/Patient/PatientInfoCard";
 import { PatientModel } from "./components/Patient/models";
+import { ConsultationTabProps } from "./components/Facility/ConsultationDetails";
+import { PatientForm } from "./components/Patient/PatientRegister";
+import { FormContextValue } from "./components/Form/FormContext";
 
 // Define the available plugins
 export type AvailablePlugin = "@apps/care_livekit_fe" | "@apps/care_hcx_fe";
@@ -29,13 +32,39 @@ export type AdditionalDischargeProceduresComponentType = React.FC<{
   consultation: ConsultationModel;
 }>;
 
+export type ManageFacilityOptionsComponentType = React.FC<{
+  facility?: FacilityModel;
+}>;
+
+export type ExtendFacilityConfigureComponentType = React.FC<{
+  facilityId: string;
+}>;
+
+export type ExtendPatientRegisterFormComponentType = React.FC<{
+  facilityId: string;
+  patientId?: string;
+  state: {
+    form: {
+      [key: string]: any;
+    };
+    errors: {
+      [key: string]: string;
+    };
+  };
+  dispatch: React.Dispatch<any>;
+  field: FormContextValue<PatientForm>;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   ExtendPatientInfoCard: ExtendPatientInfoCardComponentType;
   ManagePatientOptions: ManagePatientOptionsComponentType;
   AdditionalDischargeProcedures: AdditionalDischargeProceduresComponentType;
+  ManageFacilityOptions: ManageFacilityOptionsComponentType;
   ConsultationContextEnabler: React.FC;
+  ExtendFacilityConfigure: ExtendFacilityConfigureComponentType;
+  ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType;
 };
 
 // Create a type for lazy-loaded components
@@ -59,6 +88,10 @@ export type PluginManifest = {
   extends: SupportedPluginExtensions[];
   components: PluginComponentMap;
   navItems: INavItem[];
+  consultationTabs?: Record<
+    string,
+    LazyComponent<React.FC<ConsultationTabProps>>
+  >;
 };
 
 // Create a type that ensures only available plugins can be used
