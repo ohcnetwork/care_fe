@@ -5,7 +5,6 @@ import {
   USER_TYPES,
   USER_TYPE_OPTIONS,
 } from "@/common/constants";
-import { useAbortableEffect } from "@/common/utils";
 import {
   validateEmailAddress,
   validateName,
@@ -42,8 +41,9 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
-import { GenderType } from "./models";
+import { GenderType, UserModel } from "./models";
 import Form from "../Form/Form";
+import { FormContextValue } from "../Form/FormContext";
 interface UserProps {
   username?: string;
 }
@@ -128,12 +128,6 @@ const user_create_reducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_errors": {
-      return {
-        ...state,
-        errors: action.errors,
-      };
-    }
     case "set_state": {
       if (action.state) return action.state;
       return state;
@@ -143,8 +137,8 @@ const user_create_reducer = (state = initialState, action: any) => {
   }
 };
 
-const getDate = (value: any) =>
-  value && dayjs(value).isValid() && dayjs(value).toDate();
+const getDate = (value: string | Date | null) =>
+  value && dayjs(value).isValid() ? dayjs(value).toDate() : undefined;
 
 export const validateRule = (
   condition: boolean,
@@ -172,6 +166,7 @@ const UserAddEditForm = (props: UserProps) => {
   const { username } = props;
   const editUser = username ? true : false;
   const formVals = useRef(initForm);
+  const [facilityErrors, setFacilityErrors] = useState("");
 
   const {
     loading: userDataLoading,
@@ -308,23 +303,33 @@ const UserAddEditForm = (props: UserProps) => {
   const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
 
   const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
-  const userTypes = authUser.is_superuser
-    ? [...USER_TYPE_OPTIONS]
-    : authUser.user_type === "StaffReadOnly"
-      ? readOnlyUsers.slice(0, 1)
-      : authUser.user_type === "DistrictReadOnlyAdmin"
-        ? readOnlyUsers.slice(0, 2)
-        : authUser.user_type === "StateReadOnlyAdmin"
-          ? readOnlyUsers.slice(0, 3)
-          : authUser.user_type === "Pharmacist"
-            ? USER_TYPE_OPTIONS.slice(0, 1)
-            : // Exception to allow Staff to Create Doctors
-              defaultAllowedUserTypes;
 
-  // TODO: refactor lines 227 through 248 to be more readable. This is messy.
-  if (authUser.user_type === "Nurse" || authUser.user_type === "Staff") {
-    userTypes.push(USER_TYPE_OPTIONS[6]); // Temperorily allows creation of users with elevated permissions due to introduction of new roles.
-  }
+  const getUserTypes = (authUser: UserModel) => {
+    // Superuser gets all options
+    if (authUser.is_superuser) {
+      return [...USER_TYPE_OPTIONS];
+    }
+
+    switch (authUser.user_type) {
+      case "StaffReadOnly":
+        return readOnlyUsers.slice(0, 1);
+      case "DistrictReadOnlyAdmin":
+        return readOnlyUsers.slice(0, 2);
+      case "StateReadOnlyAdmin":
+        return readOnlyUsers.slice(0, 3);
+      case "Pharmacist":
+        return USER_TYPE_OPTIONS.slice(0, 1);
+      case "Nurse":
+      case "Staff":
+        // Allow creation of users with elevated permissions
+        return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
+      default:
+        // Exception to allow Staff to Create Doctors
+        return defaultAllowedUserTypes;
+    }
+  };
+
+  const userTypes = getUserTypes(authUser);
 
   const showLocalbody = ![
     "Pharmacist",
@@ -373,23 +378,26 @@ const UserAddEditForm = (props: UserProps) => {
     },
   });
 
-  const handleDateChange = (e: FieldChangeEvent<Date>, field?: any) => {
-    if (dayjs(e.value).isValid()) {
-      const errors = { ...state.errors, [e.name]: "" };
+  const handleDateChange = (
+    event: FieldChangeEvent<Date>,
+    field?: FormContextValue<UserForm>,
+  ) => {
+    if (dayjs(event.value).isValid()) {
       dispatch({
         type: "set_form",
         form: {
           ...state.form,
-          [e.name]: dayjs(e.value).format("YYYY-MM-DD"),
+          [event.name]: dayjs(event.value).format("YYYY-MM-DD"),
         },
       });
-      if (field) field(e.name).onChange(e);
-      dispatch({ type: "set_errors", errors });
+      if (field) field(event.name as keyof UserForm).onChange(event);
     }
   };
 
-  const handleFieldChange = (event: FieldChangeEvent<unknown>, field?: any) => {
-    const errors = { ...state.errors, [event.name]: "" };
+  const handleFieldChange = (
+    event: FieldChangeEvent<unknown>,
+    field?: FormContextValue<UserForm>,
+  ) => {
     dispatch({
       type: "set_form",
       form: {
@@ -397,18 +405,63 @@ const UserAddEditForm = (props: UserProps) => {
         [event.name]: event.value,
       },
     });
-    dispatch({ type: "set_errors", errors });
-    if (field) field(event.name).onChange(event);
+    if (field) field(event.name as keyof UserForm).onChange(event);
   };
 
-  useAbortableEffect(() => {
-    if (state.form.phone_number_is_whatsapp) {
-      handleFieldChange({
-        name: "alt_phone_number",
-        value: state.form.phone_number,
-      });
+  const handlePhoneChange = (
+    event: FieldChangeEvent<unknown>,
+    field: FormContextValue<UserForm>,
+  ) => {
+    let formData = { ...state.form };
+    let phoneNumberVal = "";
+    switch (event.name) {
+      case "phone_number":
+        phoneNumberVal = event.value as string;
+        field("phone_number").onChange({
+          name: field("phone_number").name,
+          value: phoneNumberVal,
+        });
+        formData = { ...formData, phone_number: phoneNumberVal };
+        if (state.form.phone_number_is_whatsapp) {
+          field("alt_phone_number").onChange({
+            name: field("alt_phone_number").name,
+            value: phoneNumberVal,
+          });
+          formData = { ...formData, alt_phone_number: phoneNumberVal };
+        }
+        break;
+      case "alt_phone_number":
+        phoneNumberVal = event.value as string;
+        if (!state.form.phone_number_is_whatsapp) {
+          field("alt_phone_number").onChange({
+            name: field("alt_phone_number").name,
+            value: phoneNumberVal,
+          });
+          formData = { ...formData, alt_phone_number: phoneNumberVal };
+        }
+        break;
+      case "phone_number_is_whatsapp":
+        phoneNumberVal = state.form.phone_number;
+        formData = {
+          ...formData,
+          alt_phone_number: phoneNumberVal,
+          phone_number_is_whatsapp: event.value as boolean,
+        };
+        field("alt_phone_number").onChange({
+          name: field("alt_phone_number").name,
+          value: phoneNumberVal,
+        });
+        field("phone_number_is_whatsapp").onChange({
+          name: field("phone_number_is_whatsapp").name,
+          value: event.value,
+        });
+        break;
     }
-  }, [state.form.phone_number_is_whatsapp, state.form.phone_number]);
+    dispatch({
+      type: "set_form",
+      form: formData,
+    });
+  };
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     const newSelectedFacilities = selected
@@ -424,37 +477,40 @@ const UserAddEditForm = (props: UserProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const validateFacility = (
+    formData: UserForm,
+    selectedFacility: FacilityModel[],
+  ) => {
+    if (
+      selectedFacility &&
+      formData.user_type &&
+      selectedFacility.length === 0 &&
+      STAFF_OR_NURSE_USER.includes(authUser.user_type) &&
+      STAFF_OR_NURSE_USER.includes(formData.user_type)
+    ) {
+      return "Please select atleast one of the facilities you are linked to";
+    }
+  };
+
+  const validatePhoneNumber = (phoneNumber: string) => {
+    const parsedPhoneNumber = parsePhoneNumber(phoneNumber);
+    if (!parsedPhoneNumber) return false;
+    return PhoneNumberValidator()(parsedPhoneNumber) === undefined;
+  };
+
   const validateForm = (formData: UserForm) => {
     const errors: Partial<Record<keyof UserForm, FieldError>> = {};
+    const facilityError = validateFacility(formData, selectedFacility);
+    if (facilityError) {
+      errors.facilities = facilityError;
+    }
     Object.keys(formData).forEach((field) => {
       switch (field) {
-        case "facilities":
-          if (
-            formData.facilities &&
-            formData.user_type &&
-            formData["facilities"].length === 0 &&
-            STAFF_OR_NURSE_USER.includes(authUser.user_type) &&
-            STAFF_OR_NURSE_USER.includes(formData.user_type)
-          ) {
-            errors[field] =
-              "Please select atleast one of the facilities you are linked to";
-          }
-          return;
         case "user_type":
           if (!formData[field]) {
-            errors[field] = "Please select the User Type";
+            errors[field] = t("please_select_user_type");
           }
-          return;
-        case "doctor_experience_commenced_on":
-          if (formData.user_type === "Doctor" && !formData[field]) {
-            errors[field] = t("field_required");
-          } else if (
-            formData.user_type === "Doctor" &&
-            Number(formData.doctor_experience_commenced_on) > 100
-          ) {
-            errors[field] = "Doctor experience should be less than 100 years";
-          }
-          return;
+          break;
         case "qualification":
           if (
             (formData.user_type === "Doctor" ||
@@ -463,143 +519,138 @@ const UserAddEditForm = (props: UserProps) => {
           ) {
             errors[field] = t("field_required");
           }
-          return;
+          break;
+        case "doctor_experience_commenced_on":
+          if (formData.user_type === "Doctor" && !formData[field]) {
+            errors[field] = t("field_required");
+          } else if (
+            formData.user_type === "Doctor" &&
+            Number(formData.doctor_experience_commenced_on) > 100
+          ) {
+            errors[field] = t("doctor_experience_less_than_100_years");
+          }
+          break;
         case "doctor_medical_council_registration":
           if (formData.user_type === "Doctor" && !formData[field]) {
             errors[field] = t("field_required");
           }
-          return;
+          break;
+        case "phone_number":
+          if (!formData[field] || !validatePhoneNumber(formData[field])) {
+            errors[field] = t("invalid_phone");
+          }
+          break;
+        case "alt_phone_number":
+          if (
+            formData[field] &&
+            formData[field] !== "+91" &&
+            !validatePhoneNumber(formData[field])
+          ) {
+            errors[field] = t("mobile_number_validation_error");
+          }
+          break;
+        case "username":
+          if (!formData[field]) {
+            errors[field] = t("please_enter_username");
+          } else if (!validateUsername(formData[field])) {
+            errors[field] = t("invalid_username");
+          } else if (usernameExists !== userExistsEnums.available) {
+            errors[field] = t("username_already_exists");
+          }
+          break;
+        case "password":
+          if (!formData[field]) {
+            errors[field] = t("please_enter_password");
+          } else if (!validatePassword(formData[field])) {
+            errors.password = t("password_validation");
+          }
+          break;
+        case "c_password":
+          if (!formData.password) {
+            errors.c_password = t("confirm_password_required");
+          } else if (formData.password !== formData.c_password) {
+            errors.c_password = t("passwords_not_matching");
+          }
+          break;
         case "first_name":
         case "last_name":
           formData[field] = formData[field].trim();
           if (!formData[field]) {
-            errors[field] = `${field
-              .split("_")
-              .map((word) => word[0].toUpperCase() + word.slice(1))
-              .join(" ")} is required`;
+            errors[field] = t(`${field}_required`);
           } else if (!validateName(formData[field])) {
-            errors[field] = "Please enter a valid name";
+            errors[field] = t("enter_valid_name");
           }
-          return;
-        case "gender":
-          if (!formData[field]) {
-            errors[field] = "Please select the Gender";
-          }
-          return;
-        case "username":
-          if (!formData[field]) {
-            errors[field] = "Please enter the username";
-          } else if (!validateUsername(formData[field])) {
-            errors[field] =
-              "Please enter a 4-16 characters long username with lowercase letters, digits and . _ - only and it should not start or end with . _ -";
-          } else if (usernameExists !== userExistsEnums.available) {
-            errors[field] = "This username already exists";
-          }
-          return;
-        case "password":
-          if (!formData[field]) {
-            errors[field] = "Please enter the password";
-          } else if (!validatePassword(formData[field])) {
-            errors.password =
-              "Password should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long";
-          }
-          return;
-        case "c_password":
-          if (!formData.password) {
-            errors.c_password = "Confirm password is required";
-          } else if (formData.password !== formData.c_password) {
-            errors.c_password = "Passwords not matching";
-          }
-          return;
-        case "phone_number":
-          // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumber(formData[field]);
-          // eslint-disable-next-line no-case-declarations
-          let is_valid = false;
-          if (phoneNumber) {
-            is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
-          }
-          if (!formData[field] || !is_valid) {
-            errors[field] = "Please enter valid phone number";
-          }
-          return;
-
-        case "alt_phone_number":
-          // eslint-disable-next-line no-case-declarations
-          let alt_is_valid = false;
-          if (formData[field] && formData[field] !== "+91") {
-            const altPhoneNumber = parsePhoneNumber(formData[field]);
-            if (altPhoneNumber) {
-              alt_is_valid =
-                PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
-            }
-          }
-          if (formData[field] && formData[field] !== "+91" && !alt_is_valid) {
-            errors[field] = "Please enter valid mobile number";
-          }
-          return;
+          break;
         case "email":
           formData[field] = formData[field].trim();
           if (
             formData[field].length === 0 ||
             !validateEmailAddress(formData[field])
           ) {
-            errors[field] = "Please enter a valid email address";
+            errors[field] = t("invalid_email");
           }
-          return;
+          break;
         case "date_of_birth":
           if (!formData[field]) {
-            errors[field] = "Please enter date in DD/MM/YYYY format";
+            errors[field] = t("dob_format");
           } else if (
             dayjs(formData[field]).isAfter(dayjs().subtract(1, "year"))
           ) {
-            errors[field] = "Enter a valid date of birth";
+            errors[field] = t("enter_valid_dob");
+          } else if (
+            dayjs(formData[field]).isAfter(dayjs().subtract(16, "year"))
+          ) {
+            errors[field] = t("enter_valid_dob_age");
           }
-          return;
+          break;
+        case "gender":
+          if (!formData[field]) {
+            errors[field] = t("please_select_gender");
+          }
+          break;
         case "state":
           if (!Number(formData[field])) {
-            errors[field] = "Please select the state";
+            errors[field] = t("please_select_state");
           }
-          return;
+          break;
         case "district":
           if (!Number(formData[field])) {
-            errors[field] = "Please select the district";
+            errors[field] = t("please_select_district");
           }
-          return;
+          break;
         case "local_body":
           if (showLocalbody && !Number(formData[field])) {
-            errors[field] = "Please select the local body";
+            errors[field] = t("please_select_localbody");
           }
-          return;
+          break;
         case "weekly_working_hours":
-          if (
-            formData[field] &&
-            (Number(formData[field]) < 0 ||
-              Number(formData[field]) > 168 ||
-              !/^\d+$/.test(formData[field] ?? ""))
-          ) {
-            errors[field] =
-              "Average weekly working hours must be a number between 0 and 168";
+          if (formData[field] !== null && formData[field] !== undefined) {
+            const hours = Number(formData[field]);
+            if (
+              isNaN(hours) ||
+              hours < 0 ||
+              hours > 168 ||
+              !/^\d+$/.test(formData[field] ?? "")
+            ) {
+              errors[field] = t("weekly_working_hours_error");
+            }
           }
-          return;
+          break;
         case "video_connect_link":
           if (formData[field]) {
             if (isValidUrl(formData[field]) === false) {
-              errors[field] = "Please enter a valid url";
+              errors[field] = t("invalid_url");
             }
           }
-          return;
-
+          break;
         default:
-          return;
+          break;
       }
     });
-
-    const firstError = Object.values(errors).find((e) => e);
+    const firstError = Object.keys(errors).find((e) => e);
     if (firstError) {
       scrollTo(firstError);
     }
-    dispatch({ type: "set_errors", errors });
     return errors;
   };
 
@@ -609,7 +660,7 @@ const UserAddEditForm = (props: UserProps) => {
       user_type: formData.user_type,
       gender: formData.gender,
       password: formData.password,
-      facilities: formData.facilities ? formData.facilities : undefined,
+      facilities: selectedFacility ? selectedFacility : undefined,
       home_facility: formData.home_facility ?? undefined,
       username: formData.username,
       first_name: formData.first_name ? formData.first_name : undefined,
@@ -671,6 +722,11 @@ const UserAddEditForm = (props: UserProps) => {
     setIsLoading(false);
   };
 
+  useEffect(() => {
+    const facilityError = validateFacility(state.form, selectedFacility);
+    setFacilityErrors(facilityError || "");
+  }, [state.form, selectedFacility]);
+
   if (isLoading || (editUser && userDataLoading)) {
     return <Loading />;
   }
@@ -707,7 +763,7 @@ const UserAddEditForm = (props: UserProps) => {
                   name="facilities"
                   selected={selectedFacility}
                   setSelected={setFacility}
-                  errors={state.errors.facilities}
+                  errors={facilityErrors}
                   showAll={false}
                 />
               </div>
@@ -791,20 +847,18 @@ const UserAddEditForm = (props: UserProps) => {
                   required
                   types={["mobile", "landline"]}
                   onChange={(e) => {
-                    handleFieldChange(e, field);
+                    handlePhoneChange(e, field);
                   }}
                   className=""
                 />
-                {!editUser && (
-                  <CheckBoxFormField
-                    name="phone_number_is_whatsapp"
-                    value={state.form.phone_number_is_whatsapp}
-                    onChange={(e) => {
-                      handleFieldChange(e, field);
-                    }}
-                    label="Is the phone number a WhatsApp number?"
-                  />
-                )}
+                <CheckBoxFormField
+                  name="phone_number_is_whatsapp"
+                  value={state.form.phone_number_is_whatsapp}
+                  onChange={(e) => {
+                    handlePhoneChange(e, field);
+                  }}
+                  label="Is the phone number a WhatsApp number?"
+                />
               </div>
               <PhoneNumberFormField
                 {...field("alt_phone_number")}
@@ -813,7 +867,7 @@ const UserAddEditForm = (props: UserProps) => {
                 disabled={state.form.phone_number_is_whatsapp}
                 types={["mobile"]}
                 onChange={(e) => {
-                  handleFieldChange(e, field);
+                  handlePhoneChange(e, field);
                 }}
                 className="flex-1"
               />
