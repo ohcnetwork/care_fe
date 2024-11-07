@@ -1,115 +1,121 @@
 export class SampleTestPage {
-  visitSampleRequestPage() {
+  visitSampleRequestPage(): void {
     cy.verifyAndClickElement("#sample-request-btn", "Request Sample Test");
   }
 
-  selectSampleType(option: string) {
+  selectSampleType(option: string): void {
     cy.clickAndSelectOption("#sample-type", option);
   }
 
-  selectIcmrCategory(option: string) {
+  selectIcmrCategory(option: string): void {
     cy.clickAndSelectOption("#icmr-category", option);
   }
 
-  fillIcmrLabel(label: string) {
+  fillIcmrLabel(label: string): void {
     cy.get("#icmr-label").should("be.visible").type(label);
   }
 
-  fillFastTrackReason(value: string) {
+  fillFastTrackReason(value: string): void {
     cy.get("#is_fast_track").should("be.visible").check();
     cy.get("#fast_track").should("be.visible").type(value);
   }
 
-  fillDoctorName(value: string) {
+  fillDoctorName(value: string): void {
     cy.get("#doctor_name").should("be.visible").type(value);
   }
 
-  fillAtypicalPresentation(value: string) {
+  fillAtypicalPresentation(value: string): void {
     cy.get("#is_atypical_presentation").should("be.visible").check();
     cy.get("#atypical_presentation").should("be.visible").type(value);
   }
 
-  fillDiagnosis(value: string) {
+  fillDiagnosis(value: string): void {
     cy.get("#diagnosis").should("be.visible").type(value);
   }
 
-  fillEtiology(value: string) {
+  fillEtiology(value: string): void {
     cy.get("#etiology_identified").should("be.visible").type(value);
   }
 
-  fillDiffDiagnosis(value: string) {
+  fillDiffDiagnosis(value: string): void {
     cy.get("#diff_diagnosis").should("be.visible").type(value);
   }
 
-  checkHasSari() {
+  checkHasSari(): void {
     cy.get("#has_sari").should("be.visible").check();
   }
 
-  checkHasAri() {
+  checkHasAri(): void {
     cy.get("#has_ari").should("be.visible").check();
   }
 
-  checkIsUnusualCourse() {
+  checkIsUnusualCourse(): void {
     cy.get("#is_unusual_course").should("be.visible").check();
   }
 
-  checkRequestHistory(fastTrack: string) {
-    cy.verifyContentPresence("#sample-test-status", ["Request Submitted"]);
-    cy.verifyContentPresence("#sample-test-type", ["ba/eta"]);
+  checkRequestHistory(
+    sampleTestStatus: string,
+    sampleTestType: string,
+    fastTrack: string,
+    sampleTestResult: string,
+  ): void {
+    cy.verifyContentPresence("#sample-test-status", [sampleTestStatus]);
+    cy.verifyContentPresence("#sample-test-type", [sampleTestType]);
     cy.verifyContentPresence("#sample-test-fast-track", [fastTrack]);
-    cy.verifyContentPresence("#sample-test-result", ["Awaiting"]);
+    cy.verifyContentPresence("#sample-test-result", [sampleTestResult]);
   }
 
-  searchPatientSample(patientName: string) {
+  searchPatientSample(patientName: string): void {
     cy.get("#search_patient_name").should("be.visible").type(patientName);
   }
 
-  verifyPatientName(patientName: string) {
+  verifyPatientName(patientName: string): void {
     cy.verifyContentPresence("#sample-test-patient-name", [patientName]);
   }
 
-  clickOnSampleDetailsBtn() {
+  clickOnSampleDetailsBtn(): void {
     cy.get("#sample-details-btn").should("be.visible").first().click();
   }
 
   verifyPatientTestDetails(
     patientName: string,
     fastTrackReason: string,
+    doctorName: string,
     diagnosis: string,
     differentialDiagnosis: string,
     etiologyIdentified: string,
-  ) {
+  ): void {
     cy.verifyContentPresence("#patient_name", [patientName]);
     cy.verifyContentPresence("#fast_track_reason", [fastTrackReason]);
-    cy.verifyContentPresence("#doctor_name", ["Dr John Doe"]);
+    cy.verifyContentPresence("#doctor_name", [doctorName]);
     cy.verifyContentPresence("#diagnosis", [diagnosis]);
     cy.verifyContentPresence("#diff_diagnosis", [differentialDiagnosis]);
     cy.verifyContentPresence("#etiology_identified", [etiologyIdentified]);
   }
 
-  interceptPatientDetailsAPI() {
+  interceptPatientDetailsAPI(): void {
     cy.intercept("GET", "**/api/v1/patient/**").as("patientDetails");
   }
 
-  verifyPatientDetailsResponse() {
+  verifyPatientDetailsResponse(): void {
     cy.wait("@patientDetails").its("response.statusCode").should("eq", 200);
   }
 
-  interceptSampleTestReq() {
+  interceptSampleTestReq(): void {
     cy.intercept("GET", "**/api/v1/patient/*/test_sample/**").as(
       "sampleDetails",
     );
   }
 
-  verifySampleTestReq() {
+  verifySampleTestReq(): void {
     cy.wait("@sampleDetails").its("response.statusCode").should("eq", 200);
   }
 
-  interceptGetSampleTestReq() {
+  interceptGetSampleTestReq(): void {
     cy.intercept("GET", "**/api/v1/test_sample/**").as("getSampleTestReq");
   }
 
-  verifyGetSampleTestReq() {
+  verifyGetSampleTestReq(): void {
     cy.wait("@getSampleTestReq").its("response.statusCode").should("eq", 200);
   }
 }
