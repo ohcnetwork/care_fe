@@ -14,6 +14,7 @@ import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
+import Tabs from "@/components/Common/Tabs";
 import { FacilityModel } from "@/components/Facility/models";
 import SearchInput from "@/components/Form/SearchInput";
 import UnlinkFacilityDialog from "@/components/Users/UnlinkFacilityDialog";
@@ -21,6 +22,7 @@ import UserFilter from "@/components/Users/UserFilter";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
+import useWindowDimensions from "@/hooks/useWindowDimensions";
 
 import { USER_TYPES } from "@/common/constants";
 
@@ -56,6 +58,10 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
+  const { width } = useWindowDimensions();
+  const mediumScreenBreakpoint = 640;
+  const isMediumScreen = width <= mediumScreenBreakpoint;
+  const [activeTab, setActiveTab] = useState(0);
 
   const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.home_facility },
@@ -111,55 +117,65 @@ export default function ManageUsers() {
     </ButtonV2>
   );
 
-  const getCard = (user: UserModel, idx: number) => {
-    const cur_online = isUserOnline(user);
+  const getNameAndStatusCard = (user: UserModel, cur_online: boolean) => {
     return (
-      <Card key={`usr_${user.id}`} id={`usr_${idx}`} className="relative">
-        <div className="flex items-start justify-between">
-          <div className="flex gap-4">
-            <Avatar
-              imageUrl={user.read_profile_picture_url}
-              name={user.username ?? ""}
-              className="h-16 w-16 text-2xl"
-            />
-            <div className="flex flex-col">
-              <div className="flex items-center gap-3">
-                <h1 className="text-base font-bold" id="user-name">
-                  {formatName(user)}
-                </h1>
-                <div
+      <div>
+        <div className="flex items-center gap-3">
+          <h1 className="text-base font-bold" id="user-name">
+            {formatName(user)}
+          </h1>
+          <div
+            className={classNames(
+              "flex items-center gap-2 rounded-full px-3 py-1",
+              cur_online ? "bg-green-100" : "bg-gray-100",
+            )}
+          >
+            {user && (
+              <>
+                <span
+                  aria-label="Online"
                   className={classNames(
-                    "flex items-center gap-2 rounded-full px-3 py-1",
-                    cur_online ? "bg-green-100" : "bg-gray-100",
+                    "inline-block h-2 w-2 shrink-0 rounded-full",
+                    cur_online ? "bg-green-500" : "bg-gray-400",
+                  )}
+                ></span>
+                <span
+                  className={classNames(
+                    "text-xs",
+                    cur_online ? "text-green-700" : "text-gray-500",
                   )}
                 >
-                  {user && (
-                    <>
-                      <span
-                        aria-label="Online"
-                        className={classNames(
-                          "inline-block h-2 w-2 shrink-0 rounded-full",
-                          cur_online ? "bg-green-500" : "bg-gray-400",
-                        )}
-                      ></span>
-                      <span
-                        className={classNames(
-                          "text-xs",
-                          cur_online ? "text-green-700" : "text-gray-500",
-                        )}
-                      >
-                        {cur_online
-                          ? "Online"
-                          : user.last_login
-                            ? relativeTime(user.last_login)
-                            : "Never"}
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <span className="text-sm text-gray-500">{user.username}</span>
+                  {cur_online
+                    ? "Online"
+                    : user.last_login
+                      ? relativeTime(user.last_login)
+                      : "Never"}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+        <span className="text-sm text-gray-500">{user.username}</span>
+      </div>
+    );
+  };
+  const getCard = (user: UserModel, idx: number) => {
+    const cur_online = isUserOnline(user);
 
+    return (
+      <Card key={`usr_${user.id}`} id={`usr_${idx}`} className="relative">
+        <div className="flex flex-col items-start justify-between sm:flex-row">
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <div className="flex flex-col items-center gap-4 min-[320px]:flex-row sm:items-start">
+              <Avatar
+                imageUrl={user.read_profile_picture_url}
+                name={user.username ?? ""}
+                className="h-16 w-16 self-center text-2xl sm:self-auto"
+              />
+              {isMediumScreen && getNameAndStatusCard(user, cur_online)}
+            </div>
+            <div className="flex flex-col">
+              {!isMediumScreen && getNameAndStatusCard(user, cur_online)}
               <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2">
                 <div className="text-sm">
                   <div className="text-gray-500">Role</div>
@@ -202,21 +218,162 @@ export default function ManageUsers() {
       </Card>
     );
   };
+  const getListHeader = () => (
+    <thead>
+      <tr className="bg-gray-50 text-sm font-medium text-gray-500">
+        <th className="px-4 py-3 text-left">Name</th>
+        <th className="px-4 py-3 text-left">Status</th>
+        <th className="px-4 py-3 text-left">Role</th>
+        <th className="px-4 py-3 text-left">Home facility</th>
+        <th className="px-4 py-3 text-left">District</th>
+        <th className="px-4 py-3"></th>
+      </tr>
+    </thead>
+  );
+  const getList = (user: UserModel, idx: number) => {
+    const cur_online = isUserOnline(user);
+    return (
+      <tr key={`usr_${user.id}`} id={`usr_${idx}`} className="hover:bg-gray-50">
+        <td className="px-4 py-4">
+          <div className="flex items-center gap-3">
+            <Avatar
+              imageUrl={user.read_profile_picture_url}
+              name={user.username ?? ""}
+              className="h-10 w-10 text-lg"
+            />
+            <div className="flex flex-col">
+              <h1 className="text-sm font-medium" id="user-name">
+                {formatName(user)}
+              </h1>
+              <span className="text-xs text-gray-500">@{user.username}</span>
+            </div>
+          </div>
+        </td>
+        <td className="flex-0 py-4">
+          <div
+            className={classNames(
+              "flex items-center gap-2 rounded-full px-3 py-1",
+              cur_online ? "bg-green-100" : "bg-gray-100",
+            )}
+          >
+            <span
+              className={classNames(
+                "inline-block h-2 w-2 shrink-0 rounded-full",
+                cur_online ? "bg-green-500" : "bg-gray-400",
+              )}
+            ></span>
+            <span
+              className={classNames(
+                "text-xs",
+                cur_online ? "text-green-700" : "text-gray-500",
+              )}
+            >
+              {cur_online
+                ? "Online"
+                : user.last_login
+                  ? relativeTime(user.last_login)
+                  : "Never"}
+            </span>
+          </div>
+        </td>
+        <td className="px-4 py-4 text-sm">{user.user_type}</td>
+        <td className="px-4 py-4 text-sm">
+          {user.home_facility_object?.name || "No Home Facility"}
+        </td>
+        <td className="px-4 py-4 text-sm">
+          {user.district_object?.name || ""}
+        </td>
+        <td className="px-4 py-4">
+          <button
+            onClick={() => navigate(`/users/${user.username}`)}
+            className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-xs"
+          >
+            <CareIcon icon="l-arrow-up-right" className="text-lg" />
+            <span>More details</span>
+          </button>
+        </td>
+      </tr>
+    );
+  };
+  const renderCard = () => (
+    <>
+      {userListData?.results.map((user: UserModel, idx: number) =>
+        getCard(user, idx),
+      )}
+    </>
+  );
+  const renderList = () => (
+    <table className="min-w-full divide-y divide-gray-200">
+      {getListHeader()}
+      <tbody className="divide-y divide-gray-200 bg-white">
+        {userListData?.results.map((user: UserModel, idx: number) =>
+          getList(user, idx),
+        )}
+      </tbody>
+    </table>
+  );
+
+  const tabs = [
+    {
+      id: 0,
+      content: (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {renderCard()}
+        </div>
+      ),
+    },
+    {
+      id: 1,
+      content: <div className="rounded-lg bg-white shadow">{renderList()}</div>,
+    },
+  ];
 
   if (userListLoading || districtDataLoading || !userListData?.results) {
     return <Loading />;
   }
 
-  let userList: any[] = [];
-
-  userList = userListData.results.map((user: UserModel, idx) => {
-    return getCard(user, idx);
-  });
-
   if (userListData?.results.length) {
     manageUsers = (
       <div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">{userList}</div>
+        <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <div className="sm:w-1/2">
+            <SearchInput
+              id="search-by-username"
+              name="username"
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              value={qParams.username}
+              placeholder={t("search_by_username")}
+            />
+          </div>
+          <Tabs
+            tabs={[
+              {
+                text: (
+                  <div className="flex items-center gap-2">
+                    <CareIcon icon="l-credit-card" className="text-lg" />
+                    <span>Card</span>
+                  </div>
+                ),
+                value: 0,
+              },
+              {
+                text: (
+                  <div className="flex items-center gap-2">
+                    <CareIcon icon="l-list-ul" className="text-lg" />
+                    <span>List</span>
+                  </div>
+                ),
+                value: 1,
+              },
+            ]}
+            currentTab={activeTab}
+            onTabChange={(tab) => setActiveTab(tab as number)}
+            className="float-right"
+          />
+        </div>
+        <div className="clear-both">
+          {tabs.find((tab) => tab.id === activeTab)?.content}
+        </div>
         <Pagination totalCount={userListData.count} />
       </div>
     );
@@ -243,15 +400,6 @@ export default function ManageUsers() {
           className="flex-1"
         />
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
-          <div className="w-full">
-            <SearchInput
-              id="search-by-username"
-              name="username"
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              value={qParams.username}
-              placeholder={t("search_by_username")}
-            />
-          </div>
           <div className="flex flex-col gap-2">
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
