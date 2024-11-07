@@ -1,13 +1,19 @@
 import { ReactNode } from "react";
 
 import RangeFormField from "@/components/Form/FormFields/RangeFormField";
+import { PropsWithUnits } from "@/components/Form/FormFields/RangeFormField";
 import {
   LogUpdateSectionMeta,
   LogUpdateSectionProps,
 } from "@/components/LogUpdate/utils";
 import { DailyRoundsModel } from "@/components/Patient/models";
 
-import { ValueDescription, rangeValueDescription } from "@/Utils/utils";
+import {
+  ValueDescription,
+  kPaToMmHg,
+  mmHgToKPa,
+  rangeValueDescription,
+} from "@/Utils/utils";
 
 export const ABGAnalysisFields = [
   {
@@ -17,10 +23,18 @@ export const ABGAnalysisFields = [
         PO<sub>2</sub>
       </span>
     ),
-    unit: "mmHg",
-    min: 10,
-    max: 400,
-    valueDescription: rangeValueDescription({ low: 49, high: 200 }),
+    min: 0,
+    max: 20,
+    step: 0.01,
+    valueDescription: rangeValueDescription({ low: 10.5, high: 13.5 }),
+    units: [
+      { label: "kPa" },
+      {
+        label: "mmHg",
+        conversionFn: kPaToMmHg,
+        inversionFn: mmHgToKPa,
+      },
+    ],
   },
   {
     key: "pco2",
@@ -29,10 +43,18 @@ export const ABGAnalysisFields = [
         PCO<sub>2</sub>
       </span>
     ),
-    unit: "mmHg",
-    min: 10,
-    max: 200,
-    valueDescription: rangeValueDescription({ low: 34, high: 45 }),
+    min: 0,
+    max: 20,
+    step: 0.01,
+    valueDescription: rangeValueDescription({ low: 5.1, high: 5.6 }),
+    units: [
+      { label: "kPa" },
+      {
+        label: "mmHg",
+        conversionFn: kPaToMmHg,
+        inversionFn: mmHgToKPa,
+      },
+    ],
   },
   {
     key: "ph",
@@ -40,7 +62,7 @@ export const ABGAnalysisFields = [
     unit: "",
     min: 0,
     max: 10,
-    step: 0.1,
+    step: 0.01,
     valueDescription: rangeValueDescription({ low: 7.35, high: 7.45 }),
   },
   {
@@ -94,11 +116,16 @@ export const ABGAnalysisFields = [
 ] satisfies {
   key: keyof DailyRoundsModel;
   label: ReactNode;
-  unit: string;
+  unit?: string;
   min: number;
   max: number;
   step?: number;
   valueDescription: ValueDescription[];
+  units?: {
+    label: string;
+    conversionFn?: (val: number) => number;
+    inversionFn?: (val: number) => number;
+  }[];
 }[];
 
 const ABGAnalysis = ({ log, onChange }: LogUpdateSectionProps) => {
@@ -108,7 +135,9 @@ const ABGAnalysis = ({ log, onChange }: LogUpdateSectionProps) => {
         <RangeFormField
           key={index}
           label={field.label}
-          unit={field.unit}
+          {...(field.unit
+            ? { unit: field.unit }
+            : ({ units: field.units } as PropsWithUnits))}
           name={field.key}
           onChange={(c) => onChange({ [field.key]: c.value })}
           value={log[field.key] as number}
