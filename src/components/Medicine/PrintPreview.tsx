@@ -1,19 +1,23 @@
+import careConfig from "@careConfig";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import PrintPreview from "../../CAREUI/misc/PrintPreview";
-import { useSlugs } from "@/common/hooks/useSlug";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
+
+import PrintPreview from "@/CAREUI/misc/PrintPreview";
+
+import { Prescription } from "@/components/Medicine/models";
+import MedicineRoutes from "@/components/Medicine/routes";
+
+import { useSlugs } from "@/hooks/useSlug";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   formatDate,
   formatDateTime,
   formatName,
   patientAgeInYears,
-} from "../../Utils/utils";
-import MedicineRoutes from "./routes";
-import { Prescription } from "./models";
-import { ReactNode } from "react";
-import careConfig from "@careConfig";
+} from "@/Utils/utils";
 
 export default function PrescriptionsPrintPreview() {
   const { t } = useTranslation();

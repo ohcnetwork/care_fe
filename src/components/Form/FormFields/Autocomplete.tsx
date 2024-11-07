@@ -5,15 +5,21 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import { useEffect, useState } from "react";
-
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "@/components/Common/components/HelperComponents";
-import FormField from "./FormField";
-import { classNames } from "../../../Utils/utils";
-import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { DropdownTransition } from "@/components/Common/HelperComponents";
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+import { dropdownOptionClassNames } from "@/components/Form/MultiSelectMenuV2";
+
+import { classNames } from "@/Utils/utils";
+
 type OptionCallback<T, R> = (option: T) => R;
 
 type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {

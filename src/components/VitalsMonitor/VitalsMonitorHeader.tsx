@@ -1,8 +1,12 @@
-import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Link } from "raviger";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { PatientAssetBed } from "@/components/Assets/AssetTypes";
+
 import { GENDER_TYPES } from "@/common/constants";
-import { formatPatientAge } from "../../Utils/utils";
+
+import { formatPatientAge } from "@/Utils/utils";
 
 interface VitalsMonitorHeaderProps {
   patientAssetBed?: PatientAssetBed;

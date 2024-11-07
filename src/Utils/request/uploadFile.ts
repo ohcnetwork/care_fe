@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
-import { handleUploadPercentage } from "./utils";
-import * as Notification from "../../Utils/Notifications";
+
+import * as Notification from "@/Utils/Notifications";
+import { handleUploadPercentage } from "@/Utils/request/utils";
 
 const uploadFile = (
   url: string,

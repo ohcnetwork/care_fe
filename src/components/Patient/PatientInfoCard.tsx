@@ -1,4 +1,40 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import { Field, Label, MenuItem, Switch } from "@headlessui/react";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils.js";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/AuthorizedChild";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import ABHAProfileModal from "@/components/ABDM/ABHAProfileModal";
+import FetchRecordsModal from "@/components/ABDM/FetchRecordsModal";
+import LinkAbhaNumber from "@/components/ABDM/LinkAbhaNumber/index";
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import DropdownMenu from "@/components/Common/Menu";
+import Beds from "@/components/Facility/Consultations/Beds";
+import { Mews } from "@/components/Facility/Consultations/Mews";
+import DischargeModal from "@/components/Facility/DischargeModal";
+import DischargeSummaryModal from "@/components/Facility/DischargeSummaryModal";
+import {
+  ConsultationModel,
+  PatientCategory,
+} from "@/components/Facility/models";
+import { PatientModel } from "@/components/Patient/models";
+import { SkillModel } from "@/components/Users/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
 
 import {
   CONSULTATION_SUGGESTION,
@@ -7,15 +43,14 @@ import {
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
 } from "@/common/constants";
-import { ConsultationModel, PatientCategory } from "../Facility/models";
-import { Field, Label, MenuItem, Switch } from "@headlessui/react";
-import { Link, navigate } from "raviger";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import { PLUGIN_Component } from "@/PluginEngine";
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   formatDate,
@@ -23,34 +58,7 @@ import {
   formatName,
   formatPatientAge,
   humanizeStrings,
-} from "../../Utils/utils";
-
-import ABHAProfileModal from "../ABDM/ABHAProfileModal";
-import { AbhaNumberModel } from "../ABDM/types/abha";
-import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
-import Beds from "../Facility/Consultations/Beds";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "@/components/Common/Dialog";
-import DischargeModal from "../Facility/DischargeModal";
-import DischargeSummaryModal from "../Facility/DischargeSummaryModal";
-import DropdownMenu from "@/components/Common/components/Menu";
-import FetchRecordsModal from "../ABDM/FetchRecordsModal";
-import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index";
-import { Mews } from "../Facility/Consultations/Mews";
-import { PLUGIN_Component } from "@/PluginEngine";
-import { PatientModel } from "./models";
-import { SkillModel } from "../Users/models";
-import careConfig from "@careConfig";
-import { cn } from "@/lib/utils.js";
-import dayjs from "../../Utils/dayjs";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
+} from "@/Utils/utils";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);

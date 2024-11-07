@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
+import { useTranslation } from "react-i18next";
 
 import Pagination from "@/components/Common/Pagination";
+import { NeurologicalTablesFields } from "@/components/Facility/models";
+
 import {
   CONSCIOUSNESS_LEVEL,
   EYE_OPEN_SCALE,
@@ -13,9 +13,10 @@ import {
   PUPIL_REACTION_OPTIONS,
   VERBAL_RESPONSE_SCALE,
 } from "@/common/constants";
-import { formatDateTime } from "../../../Utils/utils";
-import { useTranslation } from "react-i18next";
-import { NeurologicalTablesFields } from "../models";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 const DataTable = (props: any) => {
   const { title, data } = props;

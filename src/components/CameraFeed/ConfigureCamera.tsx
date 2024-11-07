@@ -1,37 +1,43 @@
-import { useEffect, useState } from "react";
-import { AssetData } from "../Assets/AssetTypes";
-import { getCameraConfig, makeAccessKey } from "../../Utils/transformUtils";
-import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2, {
-  Cancel,
-  Submit,
-} from "@/components/Common/components/ButtonV2";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useOperateCamera from "./useOperateCamera";
-import CameraFeed from "./CameraFeed";
-import { useTranslation } from "react-i18next";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { Error, Success } from "../../Utils/Notifications";
-import { useQueryParams } from "raviger";
-import useQuery from "../../Utils/request/useQuery";
-import { classNames, compareBy } from "../../Utils/utils";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { CameraPreset, FeedRoutes, GetStatusResponse } from "./routes";
-import DialogModal from "@/components/Common/Dialog";
 import {
   Listbox,
   ListboxButton,
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
-import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
-import Loading from "@/components/Common/Loading";
+import { useQueryParams } from "raviger";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { AssetData } from "@/components/Assets/AssetTypes";
+import CameraFeed from "@/components/CameraFeed/CameraFeed";
+import {
+  CameraPreset,
+  FeedRoutes,
+  GetStatusResponse,
+} from "@/components/CameraFeed/routes";
+import useOperateCamera from "@/components/CameraFeed/useOperateCamera";
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import DialogModal from "@/components/Common/Dialog";
+import Loading from "@/components/Common/Loading";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { dropdownOptionClassNames } from "@/components/Form/MultiSelectMenuV2";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
 import { checkIfValidIP } from "@/common/validation";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+
+import { Error, Success } from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { getCameraConfig, makeAccessKey } from "@/Utils/transformUtils";
+import { classNames, compareBy } from "@/Utils/utils";
 
 interface Props {
   asset: AssetData;

@@ -1,17 +1,21 @@
+import { useEffect, useState } from "react";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { PatientConsentModel } from "@/components/Facility/models";
+import FileBlock from "@/components/Files/FileBlock";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import { FileUploadModel } from "@/components/Patient/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import { FileManagerResult } from "@/hooks/useFileManager";
+
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
 } from "@/common/constants";
-import { FileUploadModel } from "./models";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import { PatientConsentModel } from "../Facility/models";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { useEffect, useState } from "react";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import FileBlock from "../Files/FileBlock";
-import { FileManagerResult } from "../../Utils/useFileManager";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 export default function PatientConsentRecordBlockGroup(props: {
   consentRecord: PatientConsentModel;

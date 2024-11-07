@@ -1,6 +1,7 @@
-import routes from "../../../../Redux/api";
-import request from "../../../../Utils/request/request";
-import { UserBareMinimum } from "../../../Users/models";
+import { UserBareMinimum } from "@/components/Users/models";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 export type Type = {
   id: number;

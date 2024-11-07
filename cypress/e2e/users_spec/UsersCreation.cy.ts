@@ -76,7 +76,7 @@ describe("User Creation", () => {
   const save_btn = "Save User";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

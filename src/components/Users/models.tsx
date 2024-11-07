@@ -1,6 +1,12 @@
+import {
+  DistrictModel,
+  LocalBodyModel,
+  StateModel,
+} from "@/components/Facility/models";
+
 import { GENDER_TYPES, UserRole } from "@/common/constants";
-import { FeatureFlag } from "../../Utils/featureFlags";
-import { DistrictModel, LocalBodyModel, StateModel } from "../Facility/models";
+
+import { FeatureFlag } from "@/Utils/featureFlags";
 
 interface HomeFacilityObjectModel {
   id?: string;
