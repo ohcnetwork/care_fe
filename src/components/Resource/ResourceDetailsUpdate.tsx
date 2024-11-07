@@ -1,26 +1,31 @@
-import * as Notification from "../../Utils/Notifications";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { useReducer, useState } from "react";
 import { navigate, useQueryParams } from "raviger";
-import Card from "../../CAREUI/display/Card";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import Page from "@/components/Common/components/Page";
-import { RESOURCE_CHOICES } from "@/common/constants";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { UserModel } from "../Users/models";
-import request from "../../Utils/request/request";
+import { useReducer, useState } from "react";
 
+import Card from "@/CAREUI/display/Card";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import { UserModel } from "@/components/Users/models";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { RESOURCE_CHOICES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 interface resourceProps {
   id: string;
 }

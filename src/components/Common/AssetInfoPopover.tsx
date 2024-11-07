@@ -1,14 +1,16 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AssetData, assetClassProps } from "../Assets/AssetTypes";
-import ButtonV2 from "./components/ButtonV2";
-import { navigate } from "raviger";
-import { useTranslation } from "react-i18next";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
+import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { AssetData, assetClassProps } from "@/components/Assets/AssetTypes";
+import ButtonV2 from "@/components/Common/ButtonV2";
 
 interface AssetInfoPopoverProps {
   asset?: AssetData;

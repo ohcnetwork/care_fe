@@ -1,8 +1,8 @@
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
+} from "@/components/Form/FormFields/Utils";
 
 export const ROUTE_TO_FACILITY_OPTIONS = {
   10: "Outpatient/Emergency Room",

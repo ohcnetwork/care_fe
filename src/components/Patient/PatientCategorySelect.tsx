@@ -1,7 +1,9 @@
-import { PatientCategoryID, PATIENT_CATEGORIES } from "@/common/constants";
-import { classNames } from "../../Utils/utils";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FormFieldBaseProps } from "../Form/FormFields/Utils";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
+
+import { PATIENT_CATEGORIES, PatientCategoryID } from "@/common/constants";
+
+import { classNames } from "@/Utils/utils";
 
 /**
  * A `FormField` component to select patient category and is by default a mandatory

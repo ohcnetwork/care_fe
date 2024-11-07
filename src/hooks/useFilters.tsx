@@ -1,12 +1,15 @@
+import careConfig from "@careConfig";
 import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
+
+import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
+
 import PaginationComponent from "@/components/Common/Pagination";
-import { classNames, humanizeStrings } from "../../Utils/utils";
-import FiltersCache from "../../Utils/FiltersCache";
-import careConfig from "@careConfig";
-import { triggerGoal } from "../../Integrations/Plausible";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import FiltersCache from "@/Utils/FiltersCache";
+import { classNames, humanizeStrings } from "@/Utils/utils";
 
 export type FilterState = Record<string, unknown>;
 

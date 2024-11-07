@@ -1,20 +1,24 @@
 import { useState } from "react";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { DosageValue, Prescription } from "./models";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { Success } from "../../Utils/Notifications";
-import PrescriptionDetailCard from "./PrescriptionDetailCard";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import dayjs from "../../Utils/dayjs";
-import useSlug from "@/common/hooks/useSlug";
-import request from "../../Utils/request/request";
-import MedicineRoutes from "./routes";
-import DosageFormField from "../Form/FormFields/DosageFormField";
-import { AdministrationDosageValidator } from "./validators";
-import DateFormField from "../Form/FormFields/DateFormField";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import DosageFormField from "@/components/Form/FormFields/DosageFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
+import { DosageValue, Prescription } from "@/components/Medicine/models";
+import MedicineRoutes from "@/components/Medicine/routes";
+import { AdministrationDosageValidator } from "@/components/Medicine/validators";
+
+import useSlug from "@/hooks/useSlug";
+
+import { Success } from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 interface Props {
   prescription: Prescription;

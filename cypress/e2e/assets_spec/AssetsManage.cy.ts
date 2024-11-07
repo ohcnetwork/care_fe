@@ -22,7 +22,7 @@ describe("Asset", () => {
   const initiallocationName = "Camera Location";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

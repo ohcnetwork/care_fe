@@ -12,7 +12,7 @@ describe("Patient Doctor Connect in consultation page", () => {
   const teleIcuUser = "Dev Doctor Two";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

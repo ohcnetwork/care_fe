@@ -1,28 +1,33 @@
-import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
 import { useState } from "react";
+
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import { ExportButton } from "@/components/Common/Export";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import SearchInput from "@/components/Form/SearchInput";
+import SampleFilter from "@/components/Patient/SampleFilters";
+import UpdateStatusDialog from "@/components/Patient/UpdateStatusDialog";
+import { SampleTestModel } from "@/components/Patient/models";
+
+import useFilters from "@/hooks/useFilters";
+
 import {
-  SAMPLE_TEST_STATUS,
-  SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
+  SAMPLE_TEST_RESULT,
+  SAMPLE_TEST_STATUS,
   SAMPLE_TYPE_CHOICES,
 } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import { SampleTestModel } from "./models";
-import UpdateStatusDialog from "./UpdateStatusDialog";
-import { formatDateTime } from "../../Utils/utils";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "@/common/hooks/useFilters";
-import { ExportButton } from "@/components/Common/Export";
-import CountBlock from "../../CAREUI/display/Count";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import Page from "@/components/Common/components/Page";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 
-import Loading from "@/components/Common/Loading";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime } from "@/Utils/utils";
+
 export default function SampleViewAdmin() {
   const {
     qParams,

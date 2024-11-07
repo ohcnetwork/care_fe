@@ -1,9 +1,13 @@
-import { classNames } from "../../../Utils/utils";
 import DateRangeInputV2, {
   DateRange,
 } from "@/components/Common/DateRangeInputV2";
-import FormField from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import { classNames } from "@/Utils/utils";
 
 type Props = FormFieldBaseProps<DateRange> & {
   max?: Date;

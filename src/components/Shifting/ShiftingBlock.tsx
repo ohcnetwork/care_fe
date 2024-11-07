@@ -1,11 +1,15 @@
-import { useTranslation } from "react-i18next";
-import { ShiftingModel } from "../Facility/models";
 import careConfig from "@careConfig";
-import { classNames, formatDateTime, formatName } from "@/Utils/utils";
 import dayjs from "dayjs";
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Link } from "raviger";
-import useAuthUser from "@/common/hooks/useAuthUser";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { ShiftingModel } from "@/components/Facility/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { classNames, formatDateTime, formatName } from "@/Utils/utils";
 
 export default function ShiftingBlock(props: {
   shift: ShiftingModel;
