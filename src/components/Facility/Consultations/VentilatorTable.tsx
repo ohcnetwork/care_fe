@@ -1,6 +1,8 @@
-import { compareByDateString, formatDateTime } from "@/Utils/utils";
-import { DailyRoundsModel } from "../../Patient/models";
 import { useTranslation } from "react-i18next";
+
+import { compareByDateString, formatDateTime } from "@/Utils/utils";
+
+import { DailyRoundsModel } from "../../Patient/models";
 
 type VentilatorTableProps = {
   dailyRoundsList?: DailyRoundsModel[];
