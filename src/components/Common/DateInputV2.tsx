@@ -586,25 +586,27 @@ const DateInputV2: React.FC<Props> = ({
                               {Array(12)
                                 .fill(null)
                                 .map((_, i) => {
-                                  const isDisabled = !isDateWithinConstraints(
-                                    1,
-                                    i,
-                                    datePickerHeaderDate.getFullYear(),
-                                  );
+                                  const withinConstraints =
+                                    isDateWithinConstraints(
+                                      datePickerHeaderDate.getDate(),
+                                      i,
+                                      datePickerHeaderDate.getFullYear(),
+                                    );
+
                                   return (
                                     <div
                                       key={i}
                                       id={`month-${i}`}
                                       className={classNames(
-                                        "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
-                                        value && isSelectedMonth(i)
-                                          ? "bg-primary-500 text-white"
-                                          : "text-secondary-700 hover:bg-secondary-300",
-                                        isDisabled &&
-                                          "cursor-not-allowed opacity-50",
+                                        "w-1/4 rounded-lg px-2 py-4 text-center text-sm font-semibold",
+                                        withinConstraints
+                                          ? value && isSelectedMonth(i)
+                                            ? "cursor-pointer bg-primary-500 text-white"
+                                            : "cursor-pointer text-secondary-700 hover:bg-secondary-300"
+                                          : "!cursor-not-allowed !text-secondary-400",
                                       )}
                                       onClick={() => {
-                                        if (isDisabled) {
+                                        if (!withinConstraints) {
                                           Notification.Error({
                                             msg:
                                               outOfLimitsErrorMessage ??
@@ -633,18 +635,36 @@ const DateInputV2: React.FC<Props> = ({
                               {Array(12)
                                 .fill(null)
                                 .map((_, i) => {
-                                  const y = year.getFullYear() - 11 + i;
+                                  const y = year.getFullYear() - 11 + i; // Calculate year range based on current year minus 11
+
+                                  const withinRange =
+                                    !min ||
+                                    (y >= min.getFullYear() &&
+                                      y <= new Date().getFullYear()); // Enable only if within min year and current year
+
                                   return (
                                     <div
                                       key={i}
                                       id={`year-${i}`}
                                       className={classNames(
-                                        "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
-                                        value && isSelectedYear(y)
-                                          ? "bg-primary-500 text-white"
-                                          : "text-secondary-700 hover:bg-secondary-300",
+                                        "w-1/4 rounded-lg px-2 py-4 text-center text-sm font-semibold",
+                                        withinRange
+                                          ? value && isSelectedYear(y)
+                                            ? "cursor-pointer bg-primary-500 text-white"
+                                            : "cursor-pointer text-secondary-700 hover:bg-secondary-300"
+                                          : "!cursor-not-allowed !text-secondary-400", // Disabled styling for out-of-range years
                                       )}
-                                      onClick={setYearValue(y)}
+                                      onClick={() => {
+                                        if (withinRange) {
+                                          setYearValue(y)();
+                                        } else {
+                                          Notification.Error({
+                                            msg:
+                                              outOfLimitsErrorMessage ??
+                                              "Cannot select year out of range",
+                                          });
+                                        }
+                                      }}
                                     >
                                       {y}
                                     </div>
