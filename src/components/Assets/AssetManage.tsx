@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 import { navigate } from "raviger";
 import { ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -132,7 +132,7 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       <h2 className="text-center">Print Preview</h2>
       <div id="section-to-print" className="print flex justify-center">
-        <QRCode size={200} value={asset?.id ?? ""} />
+        <QRCodeSVG size={200} value={asset?.id ?? ""} />
       </div>
     </div>
   );

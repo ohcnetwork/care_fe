@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -453,7 +453,7 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="flex">
               <div>
                 <div className="">
-                  <QRCode
+                  <QRCodeSVG
                     value={`${window.location.origin}/shifting/ data.id`}
                   />
                 </div>
