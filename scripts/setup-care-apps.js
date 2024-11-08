@@ -53,6 +53,36 @@ const installApp = (app) => {
   );
 };
 
+const backupDir = path.join(__dirname, "..", "apps_backup");
+
+// Create backup directory if needed
+if (!fs.existsSync(backupDir)) {
+  fs.mkdirSync(backupDir);
+}
+
+try {
+  fs.readdirSync(appsDir, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name)
+    .filter(
+      (dir) =>
+        !appsConfig.map((app) => app.package.split("/")[1]).includes(dir),
+    )
+    .forEach((unusedApp) => {
+      const appPath = path.join(appsDir, unusedApp);
+      const backupPath = path.join(backupDir, `${unusedApp}_${Date.now()}`);
+      console.log(`Backing up '${unusedApp}' to ${backupPath}`);
+      fs.cpSync(appPath, backupPath, { recursive: true });
+      console.log(
+        `Removing existing app '${unusedApp}' as it is not configured.`,
+      );
+      fs.rmSync(appPath, { recursive: true, force: true });
+    });
+} catch (error) {
+  console.error("Error during cleanup:", error);
+  process.exit(1);
+}
+
 // Clone or pull care apps
 appsConfig.forEach((app) => {
   const appDir = path.join(appsDir, app.package.split("/")[1]);
