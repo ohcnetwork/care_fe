@@ -1,4 +1,5 @@
 import { navigate } from "raviger";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
@@ -7,7 +8,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Avatar } from "@/components/Common/Avatar";
 import { UserModel } from "@/components/Users/models";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import useWindowDimensions from "@/hooks/useWindowDimensions";
+
+import { USER_TYPES, USER_TYPE_OPTIONS } from "@/common/constants";
 
 import {
   classNames,
@@ -15,6 +19,42 @@ import {
   isUserOnline,
   relativeTime,
 } from "@/Utils/utils";
+
+export const GetUserTypes = () => {
+  const authUser = useAuthUser();
+
+  return useMemo(() => {
+    const userIndex = USER_TYPES.indexOf(authUser.user_type);
+    const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
+    const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
+
+    // Superuser gets all options
+    if (authUser.is_superuser) {
+      return [...USER_TYPE_OPTIONS];
+    }
+
+    switch (authUser.user_type) {
+      case "StaffReadOnly":
+        return readOnlyUsers.slice(0, 1);
+      case "DistrictReadOnlyAdmin":
+        return readOnlyUsers.slice(0, 2);
+      case "StateReadOnlyAdmin":
+        return readOnlyUsers.slice(0, 3);
+      case "Pharmacist":
+        return USER_TYPE_OPTIONS.slice(0, 1);
+      case "Nurse":
+      case "Staff":
+        return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
+      default:
+        return defaultAllowedUserTypes;
+    }
+  }, [authUser.user_type, authUser.is_superuser]);
+};
+
+export const CanUserAccess = (user: UserModel) => {
+  const allowedTypes = useMemo(() => GetUserTypes().map((type) => type.id), []);
+  return allowedTypes.includes(user.user_type);
+};
 
 const getNameAndStatusCard = (user: UserModel, cur_online: boolean) => {
   return (
@@ -85,14 +125,15 @@ const UserCard = ({ user }: { user: UserModel }) => {
             </div>
           </div>
         </div>
-
-        <button
-          onClick={() => navigate(`/users/${user.username}`)}
-          className="flex flex-grow-0 items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs"
-        >
-          <CareIcon icon="l-arrow-up-right" className="text-lg" />
-          <span>{t("more_details")}</span>
-        </button>
+        {CanUserAccess(user) && (
+          <button
+            onClick={() => navigate(`/users/${user.username}`)}
+            className="flex flex-grow-0 items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs"
+          >
+            <CareIcon icon="l-arrow-up-right" className="text-lg" />
+            <span>{t("more_details")}</span>
+          </button>
+        )}
       </div>
     </Card>
   );
@@ -151,13 +192,15 @@ const UserListRow = ({ user }: { user: UserModel }) => {
       </td>
       <td className="px-4 py-4 text-sm">{user.district_object?.name || ""}</td>
       <td className="px-4 py-4">
-        <button
-          onClick={() => navigate(`/users/${user.username}`)}
-          className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-xs"
-        >
-          <CareIcon icon="l-arrow-up-right" className="text-lg" />
-          <span>{t("more_details")}</span>
-        </button>
+        {CanUserAccess(user) && (
+          <button
+            onClick={() => navigate(`/users/${user.username}`)}
+            className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-xs"
+          >
+            <CareIcon icon="l-arrow-up-right" className="text-lg" />
+            <span>{t("more_details")}</span>
+          </button>
+        )}
       </td>
     </tr>
   );

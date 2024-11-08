@@ -76,8 +76,8 @@ export default function UserRoles({ username }: { username: string }) {
     loading: isLoading,
     refetch: refetchUserData,
   } = useQuery(routes.getUserDetails, {
-    pathParams: {
-      username,
+    query: {
+      username: username,
     },
     onResponse: (result) => {
       if (!result || !result.res || !result.data) return;

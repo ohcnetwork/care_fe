@@ -25,11 +25,7 @@ import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import {
-  GENDER_TYPES,
-  USER_TYPES,
-  USER_TYPE_OPTIONS,
-} from "@/common/constants";
+import { GENDER_TYPES, USER_TYPES } from "@/common/constants";
 import {
   validateEmailAddress,
   validateName,
@@ -51,7 +47,8 @@ import {
   scrollTo,
 } from "@/Utils/utils";
 
-import { GenderType, UserModel } from "./models";
+import { GetUserTypes } from "./UserListAndCard";
+import { GenderType } from "./models";
 
 interface UserProps {
   username?: string;
@@ -191,8 +188,8 @@ const UserAddEditForm = (props: UserProps) => {
     data: userData,
     refetch: refetchUserData,
   } = useQuery(routes.getUserDetails, {
-    pathParams: {
-      username: username ?? "",
+    query: {
+      username: username,
     },
     prefetch: editUser,
     onResponse: (result) => {
@@ -315,39 +312,9 @@ const UserAddEditForm = (props: UserProps) => {
     }
   }, [usernameInput]);
 
+  const userTypes = GetUserTypes();
   const authUser = useAuthUser();
-
   const userIndex = USER_TYPES.indexOf(authUser.user_type);
-  const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
-
-  const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
-
-  const getUserTypes = (authUser: UserModel) => {
-    // Superuser gets all options
-    if (authUser.is_superuser) {
-      return [...USER_TYPE_OPTIONS];
-    }
-
-    switch (authUser.user_type) {
-      case "StaffReadOnly":
-        return readOnlyUsers.slice(0, 1);
-      case "DistrictReadOnlyAdmin":
-        return readOnlyUsers.slice(0, 2);
-      case "StateReadOnlyAdmin":
-        return readOnlyUsers.slice(0, 3);
-      case "Pharmacist":
-        return USER_TYPE_OPTIONS.slice(0, 1);
-      case "Nurse":
-      case "Staff":
-        // Allow creation of users with elevated permissions
-        return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
-      default:
-        // Exception to allow Staff to Create Doctors
-        return defaultAllowedUserTypes;
-    }
-  };
-
-  const userTypes = getUserTypes(authUser);
 
   const showLocalbody = ![
     "Pharmacist",

@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -32,12 +32,14 @@ export default function UserHome(props: UserHomeProps) {
   const { t } = useTranslation();
 
   const { loading } = useQuery(routes.getUserDetails, {
-    pathParams: {
-      username,
+    query: {
+      username: username,
     },
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
         setUserData(data);
+      } else if (res?.status === 400) {
+        navigate("/users");
       }
     },
   });

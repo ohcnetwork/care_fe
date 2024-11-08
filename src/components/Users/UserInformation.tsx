@@ -26,8 +26,8 @@ export default function UserInformation({ username }: { username: string }) {
     loading: isLoading,
     refetch: refetchUserData,
   } = useQuery(routes.getUserDetails, {
-    pathParams: {
-      username,
+    query: {
+      username: username,
     },
   });
 
