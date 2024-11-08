@@ -32,6 +32,8 @@ export type TextFormFieldProps = FormFieldBaseProps<string> &
     trailingPadding?: string | undefined;
     leadingPadding?: string | undefined;
     suggestions?: string[];
+    min?: number | string;
+    max?: number | string;
     clearable?: boolean | undefined;
   };
 
@@ -100,6 +102,8 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         type={props.type === "password" ? getPasswordFieldType() : props.type}
         name={field.name}
         value={field.value}
+        min={Number(props?.min)}
+        max={Number(props?.max)}
         required={field.required}
         onChange={(e) => field.handleChange(e.target.value)}
       />
