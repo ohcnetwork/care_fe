@@ -888,7 +888,7 @@
   "no_duplicate_facility": "You should not create duplicate facilities",
   "no_facilities": "No Facilities found",
   "no_files_found": "No {{type}} files found",
-  "no_home_facility": "No home facility assigned",
+  "no_home_facility": "No home facility",
   "no_image_found": "No image found",
   "no_investigation": "No investigation Reports found",
   "no_investigation_suggestions": "No Investigation Suggestions",
@@ -1324,5 +1324,7 @@
   "yet_to_be_decided": "Yet to be decided",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out"
+  "zoom_out": "Zoom Out",
+  "role": "Role",
+  "more_details": "More details"
 }

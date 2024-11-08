@@ -2,12 +2,10 @@ import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Card from "@/CAREUI/display/Card";
 import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
-import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
@@ -22,7 +20,6 @@ import UserFilter from "@/components/Users/UserFilter";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
-import useWindowDimensions from "@/hooks/useWindowDimensions";
 
 import { USER_TYPES } from "@/common/constants";
 
@@ -30,14 +27,9 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import {
-  classNames,
-  formatName,
-  isUserOnline,
-  relativeTime,
-} from "@/Utils/utils";
+import { classNames } from "@/Utils/utils";
 
-import { UserModel } from "./models";
+import { UserGrid, UserList } from "./UserListAndCard";
 
 export default function ManageUsers() {
   const { t } = useTranslation();
@@ -52,15 +44,12 @@ export default function ManageUsers() {
     limit: 18,
     cacheBlacklist: ["username"],
   });
-  let manageUsers: any = null;
+  let manageUsers: JSX.Element = <></>;
   const authUser = useAuthUser();
   const userIndex = USER_TYPES.indexOf(authUser.user_type);
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const { width } = useWindowDimensions();
-  const mediumScreenBreakpoint = 640;
-  const isMediumScreen = width <= mediumScreenBreakpoint;
   const [activeTab, setActiveTab] = useState(0);
 
   const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
@@ -117,216 +106,8 @@ export default function ManageUsers() {
     </ButtonV2>
   );
 
-  const getNameAndStatusCard = (user: UserModel, cur_online: boolean) => {
-    return (
-      <div>
-        <div className="flex items-center gap-3">
-          <h1 className="text-base font-bold" id="user-name">
-            {formatName(user)}
-          </h1>
-          <div
-            className={classNames(
-              "flex items-center gap-2 rounded-full px-3 py-1",
-              cur_online ? "bg-green-100" : "bg-gray-100",
-            )}
-          >
-            {user && (
-              <>
-                <span
-                  aria-label="Online"
-                  className={classNames(
-                    "inline-block h-2 w-2 shrink-0 rounded-full",
-                    cur_online ? "bg-green-500" : "bg-gray-400",
-                  )}
-                ></span>
-                <span
-                  className={classNames(
-                    "text-xs",
-                    cur_online ? "text-green-700" : "text-gray-500",
-                  )}
-                >
-                  {cur_online
-                    ? "Online"
-                    : user.last_login
-                      ? relativeTime(user.last_login)
-                      : "Never"}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-        <span className="text-sm text-gray-500">{user.username}</span>
-      </div>
-    );
-  };
-  const getCard = (user: UserModel, idx: number) => {
-    const cur_online = isUserOnline(user);
-
-    return (
-      <Card key={`usr_${user.id}`} id={`usr_${idx}`} className="relative">
-        <div className="flex flex-col items-start justify-between sm:flex-row">
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <div className="flex flex-col items-center gap-4 min-[320px]:flex-row sm:items-start">
-              <Avatar
-                imageUrl={user.read_profile_picture_url}
-                name={user.username ?? ""}
-                className="h-16 w-16 self-center text-2xl sm:self-auto"
-              />
-              {isMediumScreen && getNameAndStatusCard(user, cur_online)}
-            </div>
-            <div className="flex flex-col">
-              {!isMediumScreen && getNameAndStatusCard(user, cur_online)}
-              <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2">
-                <div className="text-sm">
-                  <div className="text-gray-500">Role</div>
-                  <div className="font-medium">{user.user_type}</div>
-                </div>
-                <div className="text-sm">
-                  <div className="text-gray-500">Home facility</div>
-                  <div className="font-medium">
-                    {user.home_facility_object?.name || "No Home Facility"}
-                  </div>
-                </div>
-                {user.district_object && (
-                  <div className="text-sm">
-                    <div className="text-gray-500">District</div>
-                    <div className="font-medium">
-                      {user.district_object.name}
-                    </div>
-                  </div>
-                )}
-                {user.weekly_working_hours && (
-                  <div className="text-sm">
-                    <div className="text-gray-500">Average Weekly Hours</div>
-                    <div className="font-medium">
-                      {user.weekly_working_hours}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => navigate(`/users/${user.username}`)}
-            className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-xs"
-          >
-            <CareIcon icon="l-arrow-up-right" className="text-lg" />
-            <span>More details</span>
-          </button>
-        </div>
-      </Card>
-    );
-  };
-  const getListHeader = () => (
-    <thead>
-      <tr className="bg-gray-50 text-sm font-medium text-gray-500">
-        <th className="px-4 py-3 text-left">Name</th>
-        <th className="px-4 py-3 text-left">Status</th>
-        <th className="px-4 py-3 text-left">Role</th>
-        <th className="px-4 py-3 text-left">Home facility</th>
-        <th className="px-4 py-3 text-left">District</th>
-        <th className="px-4 py-3"></th>
-      </tr>
-    </thead>
-  );
-  const getList = (user: UserModel, idx: number) => {
-    const cur_online = isUserOnline(user);
-    return (
-      <tr key={`usr_${user.id}`} id={`usr_${idx}`} className="hover:bg-gray-50">
-        <td className="px-4 py-4">
-          <div className="flex items-center gap-3">
-            <Avatar
-              imageUrl={user.read_profile_picture_url}
-              name={user.username ?? ""}
-              className="h-10 w-10 text-lg"
-            />
-            <div className="flex flex-col">
-              <h1 className="text-sm font-medium" id="user-name">
-                {formatName(user)}
-              </h1>
-              <span className="text-xs text-gray-500">@{user.username}</span>
-            </div>
-          </div>
-        </td>
-        <td className="flex-0 py-4">
-          <div
-            className={classNames(
-              "flex items-center gap-2 rounded-full px-3 py-1",
-              cur_online ? "bg-green-100" : "bg-gray-100",
-            )}
-          >
-            <span
-              className={classNames(
-                "inline-block h-2 w-2 shrink-0 rounded-full",
-                cur_online ? "bg-green-500" : "bg-gray-400",
-              )}
-            ></span>
-            <span
-              className={classNames(
-                "text-xs",
-                cur_online ? "text-green-700" : "text-gray-500",
-              )}
-            >
-              {cur_online
-                ? "Online"
-                : user.last_login
-                  ? relativeTime(user.last_login)
-                  : "Never"}
-            </span>
-          </div>
-        </td>
-        <td className="px-4 py-4 text-sm">{user.user_type}</td>
-        <td className="px-4 py-4 text-sm">
-          {user.home_facility_object?.name || "No Home Facility"}
-        </td>
-        <td className="px-4 py-4 text-sm">
-          {user.district_object?.name || ""}
-        </td>
-        <td className="px-4 py-4">
-          <button
-            onClick={() => navigate(`/users/${user.username}`)}
-            className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-xs"
-          >
-            <CareIcon icon="l-arrow-up-right" className="text-lg" />
-            <span>More details</span>
-          </button>
-        </td>
-      </tr>
-    );
-  };
-  const renderCard = () => (
-    <>
-      {userListData?.results.map((user: UserModel, idx: number) =>
-        getCard(user, idx),
-      )}
-    </>
-  );
-  const renderList = () => (
-    <table className="min-w-full divide-y divide-gray-200">
-      {getListHeader()}
-      <tbody className="divide-y divide-gray-200 bg-white">
-        {userListData?.results.map((user: UserModel, idx: number) =>
-          getList(user, idx),
-        )}
-      </tbody>
-    </table>
-  );
-
-  const tabs = [
-    {
-      id: 0,
-      content: (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {renderCard()}
-        </div>
-      ),
-    },
-    {
-      id: 1,
-      content: <div className="rounded-lg bg-white shadow">{renderList()}</div>,
-    },
-  ];
+  const renderCard = () => <UserGrid users={userListData?.results} />;
+  const renderList = () => <UserList users={userListData?.results} />;
 
   if (userListLoading || districtDataLoading || !userListData?.results) {
     return <Loading />;
@@ -372,7 +153,7 @@ export default function ManageUsers() {
           />
         </div>
         <div className="clear-both">
-          {tabs.find((tab) => tab.id === activeTab)?.content}
+          {activeTab === 0 ? renderCard() : renderList()}
         </div>
         <Pagination totalCount={userListData.count} />
       </div>
@@ -391,7 +172,7 @@ export default function ManageUsers() {
 
   return (
     <Page title={t("user_management")} hideBack={true} breadcrumbs={false}>
-      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5">
+      <div className="mt-5 flex flex-col items-center justify-between gap-3 sm:flex-row">
         <CountBlock
           text="Total Users"
           count={userListData?.count || 0}
