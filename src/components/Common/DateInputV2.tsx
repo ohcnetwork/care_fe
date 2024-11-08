@@ -93,9 +93,9 @@ const DateInputV2: React.FC<Props> = ({
         break;
       case "year":
         setYear((prev) => {
-          const newYear = dayjs(prev).subtract(1, "year").year();
+          const newYear = dayjs(prev).subtract(10, "year").year();
           if (newYear >= new Date().getFullYear() - 10) {
-            return dayjs(prev).subtract(1, "year").toDate();
+            return dayjs(prev).subtract(10, "year").toDate();
           }
           return prev;
         });
@@ -218,12 +218,30 @@ const DateInputV2: React.FC<Props> = ({
     year === datePickerHeaderDate.getFullYear();
 
   const setMonthValue = (month: number) => () => {
-    if (min && new Date(datePickerHeaderDate.getFullYear(), month, 1) < min) {
+    const selectedMonthDate = new Date(
+      datePickerHeaderDate.getFullYear(),
+      month,
+      1,
+    );
+
+    if (min && selectedMonthDate < min) {
+      Notification.Error({
+        msg:
+          outOfLimitsErrorMessage ??
+          "Cannot select month before the allowed date",
+      });
       return;
     }
-    if (max && new Date(datePickerHeaderDate.getFullYear(), month, 1) > max) {
+
+    if (max && selectedMonthDate > max) {
+      Notification.Error({
+        msg:
+          outOfLimitsErrorMessage ??
+          "Cannot select month after the allowed date",
+      });
       return;
     }
+
     setDatePickerHeaderDate(
       new Date(
         datePickerHeaderDate.getFullYear(),
@@ -231,6 +249,7 @@ const DateInputV2: React.FC<Props> = ({
         datePickerHeaderDate.getDate(),
       ),
     );
+
     if (
       isDateWithinConstraints(
         datePickerHeaderDate.getDate(),
@@ -388,23 +407,67 @@ const DateInputV2: React.FC<Props> = ({
                       <div className="flex flex-col items-center gap-4 px-4 md:flex-row md:px-0">
                         <div className="flex flex-1 flex-col items-center justify-between">
                           <div className="flex">
-                            <button
-                              type="button"
-                              disabled={
-                                !isDateWithinConstraints(
-                                  getLastDay(),
-                                  datePickerHeaderDate.getMonth() - 1,
-                                )
-                              }
-                              className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
-                              onClick={decrement}
-                              data-test-id="decrement-date-range"
-                            >
-                              <CareIcon
-                                icon="l-angle-left-b"
-                                className="text-lg"
-                              />
-                            </button>
+                            {type === "date" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  !isDateWithinConstraints(
+                                    getLastDay(),
+                                    datePickerHeaderDate.getMonth() - 1,
+                                    datePickerHeaderDate.getFullYear(),
+                                  )
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={decrement}
+                                data-test-id="decrement-date-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-left-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
+                            {type === "month" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  !isDateWithinConstraints(
+                                    getLastDay(),
+                                    datePickerHeaderDate.getMonth() - 1,
+                                    datePickerHeaderDate.getFullYear() - 1,
+                                  )
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={decrement}
+                                data-test-id="decrement-month-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-left-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
+
+                            {type === "year" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  !isDateWithinConstraints(
+                                    getLastDay(),
+                                    datePickerHeaderDate.getMonth(),
+                                    datePickerHeaderDate.getFullYear() - 1,
+                                  )
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={decrement}
+                                data-test-id="decrement-year-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-left-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
 
                             <div className="flex items-center justify-center text-sm">
                               {type === "date" && (
@@ -522,27 +585,46 @@ const DateInputV2: React.FC<Props> = ({
                             <div className="flex flex-wrap">
                               {Array(12)
                                 .fill(null)
-                                .map((_, i) => (
-                                  <div
-                                    key={i}
-                                    id={`month-${i}`}
-                                    className={classNames(
-                                      "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
-                                      value && isSelectedMonth(i)
-                                        ? "bg-primary-500 text-white"
-                                        : "text-secondary-700 hover:bg-secondary-300",
-                                    )}
-                                    onClick={setMonthValue(i)} // Set the selected month
-                                  >
-                                    {dayjs(
-                                      new Date(
-                                        datePickerHeaderDate.getFullYear(),
-                                        i,
-                                        1,
-                                      ),
-                                    ).format("MMM")}
-                                  </div>
-                                ))}
+                                .map((_, i) => {
+                                  const isDisabled = !isDateWithinConstraints(
+                                    1,
+                                    i,
+                                    datePickerHeaderDate.getFullYear(),
+                                  );
+                                  return (
+                                    <div
+                                      key={i}
+                                      id={`month-${i}`}
+                                      className={classNames(
+                                        "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
+                                        value && isSelectedMonth(i)
+                                          ? "bg-primary-500 text-white"
+                                          : "text-secondary-700 hover:bg-secondary-300",
+                                        isDisabled &&
+                                          "cursor-not-allowed opacity-50",
+                                      )}
+                                      onClick={() => {
+                                        if (isDisabled) {
+                                          Notification.Error({
+                                            msg:
+                                              outOfLimitsErrorMessage ??
+                                              "Cannot select month out of range",
+                                          });
+                                        } else {
+                                          setMonthValue(i)();
+                                        }
+                                      }}
+                                    >
+                                      {dayjs(
+                                        new Date(
+                                          datePickerHeaderDate.getFullYear(),
+                                          i,
+                                          1,
+                                        ),
+                                      ).format("MMM")}
+                                    </div>
+                                  );
+                                })}
                             </div>
                           )}
 
@@ -551,7 +633,7 @@ const DateInputV2: React.FC<Props> = ({
                               {Array(12)
                                 .fill(null)
                                 .map((_, i) => {
-                                  const y = year.getFullYear() - 11 + i; // Adjust the range of years
+                                  const y = year.getFullYear() - 11 + i;
                                   return (
                                     <div
                                       key={i}
@@ -562,7 +644,7 @@ const DateInputV2: React.FC<Props> = ({
                                           ? "bg-primary-500 text-white"
                                           : "text-secondary-700 hover:bg-secondary-300",
                                       )}
-                                      onClick={setYearValue(y)} // Set the selected year
+                                      onClick={setYearValue(y)}
                                     >
                                       {y}
                                     </div>
