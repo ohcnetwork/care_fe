@@ -92,10 +92,14 @@ const DateInputV2: React.FC<Props> = ({
         );
         break;
       case "year":
-        setDatePickerHeaderDate((prev) =>
-          dayjs(prev).subtract(1, "year").toDate(),
-        );
-        setYear((prev) => dayjs(prev).subtract(10, "year").toDate());
+        setYear((prev) => {
+          const newYear = dayjs(prev).subtract(1, "year").year();
+          if (newYear >= new Date().getFullYear() - 10) {
+            return dayjs(prev).subtract(1, "year").toDate();
+          }
+          return prev;
+        });
+
         break;
     }
   };
@@ -214,6 +218,12 @@ const DateInputV2: React.FC<Props> = ({
     year === datePickerHeaderDate.getFullYear();
 
   const setMonthValue = (month: number) => () => {
+    if (min && new Date(datePickerHeaderDate.getFullYear(), month, 1) < min) {
+      return;
+    }
+    if (max && new Date(datePickerHeaderDate.getFullYear(), month, 1) > max) {
+      return;
+    }
     setDatePickerHeaderDate(
       new Date(
         datePickerHeaderDate.getFullYear(),
@@ -221,10 +231,35 @@ const DateInputV2: React.FC<Props> = ({
         datePickerHeaderDate.getDate(),
       ),
     );
-    setType("date");
+    if (
+      isDateWithinConstraints(
+        datePickerHeaderDate.getDate(),
+        month,
+        datePickerHeaderDate.getFullYear(),
+      )
+    ) {
+      setDatePickerHeaderDate(
+        new Date(
+          datePickerHeaderDate.getFullYear(),
+          month,
+          datePickerHeaderDate.getDate(),
+        ),
+      );
+      setType("date");
+    } else {
+      Notification.Error({
+        msg: outOfLimitsErrorMessage ?? "Cannot select month out of range",
+      });
+    }
   };
 
   const setYearValue = (year: number) => () => {
+    if (min && new Date(year, datePickerHeaderDate.getMonth(), 1) < min) {
+      return;
+    }
+    if (max && new Date(year, datePickerHeaderDate.getMonth(), 1) > max) {
+      return;
+    }
     setDatePickerHeaderDate(
       new Date(
         year,
@@ -497,7 +532,7 @@ const DateInputV2: React.FC<Props> = ({
                                         ? "bg-primary-500 text-white"
                                         : "text-secondary-700 hover:bg-secondary-300",
                                     )}
-                                    onClick={setMonthValue(i)}
+                                    onClick={setMonthValue(i)} // Set the selected month
                                   >
                                     {dayjs(
                                       new Date(
@@ -510,12 +545,13 @@ const DateInputV2: React.FC<Props> = ({
                                 ))}
                             </div>
                           )}
+
                           {type === "year" && (
                             <div className="flex flex-wrap">
                               {Array(12)
                                 .fill(null)
                                 .map((_, i) => {
-                                  const y = year.getFullYear() - 11 + i;
+                                  const y = year.getFullYear() - 11 + i; // Adjust the range of years
                                   return (
                                     <div
                                       key={i}
@@ -526,7 +562,7 @@ const DateInputV2: React.FC<Props> = ({
                                           ? "bg-primary-500 text-white"
                                           : "text-secondary-700 hover:bg-secondary-300",
                                       )}
-                                      onClick={setYearValue(y)}
+                                      onClick={setYearValue(y)} // Set the selected year
                                     >
                                       {y}
                                     </div>
