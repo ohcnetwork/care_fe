@@ -93,7 +93,7 @@ const DateInputV2: React.FC<Props> = ({
         break;
       case "year":
         setYear((prev) => {
-          const newYear = dayjs(prev).subtract(10, "year").year();
+          const newYear = dayjs(prev).subtract(1, "year").year();
           if (newYear >= new Date().getFullYear() - 10) {
             return dayjs(prev).subtract(10, "year").toDate();
           }
