@@ -1,27 +1,24 @@
-import { useState } from "react";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import ButtonV2 from "@/components/Common/ButtonV2";
-import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
-import DateFormField from "@/components/Form/FormFields/DateFormField";
-import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
-import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
-import SymptomsApi from "@/components/Symptoms/api";
+import { useState, useEffect } from "react";
+import { Writable } from "../../Utils/types";
 import {
   EncounterSymptom,
   OTHER_SYMPTOM_CHOICE,
   SYMPTOM_CHOICES,
-} from "@/components/Symptoms/types";
-import { sortByOnsetDate } from "@/components/Symptoms/utils";
-
-import useSlug from "@/hooks/useSlug";
-
-import { Success } from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
-import { Writable } from "@/Utils/types";
-import { classNames, dateQueryString } from "@/Utils/utils";
+} from "./types";
+import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
+import DateFormField from "../Form/FormFields/DateFormField";
+import ButtonV2 from "@/components/Common/components/ButtonV2";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { classNames, dateQueryString } from "../../Utils/utils";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import useSlug from "@/common/hooks/useSlug";
+import useQuery from "../../Utils/request/useQuery";
+import SymptomsApi from "./api";
+import request from "../../Utils/request/request";
+import { Success } from "../../Utils/Notifications";
+import { sortByOnsetDate } from "./utils";
+import ModelCrudEditor from "../Form/ModelCrudEditor";
 
 export const CreateSymptomsBuilder = (props: {
   value: Writable<EncounterSymptom>[];
@@ -72,101 +69,242 @@ export const CreateSymptomsBuilder = (props: {
   );
 };
 
+// export const EncounterSymptomsBuilder = (props: {
+//   showAll?: boolean;
+//   onChange?: () => void;
+// }) => {
+//   const consultationId = useSlug("consultation");
+
+//   const [isProcessing, setIsProcessing] = useState(false);
+// const { data, loading, refetch } = useQuery(SymptomsApi.list, {
+//   pathParams: { consultationId },
+//   query: { limit: 100 },
+// });
+
+//   if (!data) {
+//     return (
+//       <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-secondary-200 py-8 text-center font-medium text-secondary-700">
+//         <CareIcon icon="l-spinner-alt" className="animate-spin text-lg" />
+//         <span>Fetching symptom records...</span>
+//       </div>
+//     );
+//   }
+
+//   let items = sortByOnsetDate(data.results);
+//   if (!props.showAll) {
+//     items = items.filter(
+//       (i) => i.clinical_impression_status !== "entered-in-error",
+//     );
+//   }
+
+//   return (
+//     <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
+//       <ul
+//         className={classNames(
+//           "flex w-full flex-col p-4",
+//           (loading || isProcessing) && "pointer-events-none animate-pulse",
+//         )}
+//       >
+//         {items.map((symptom) => {
+//           const handleUpdate = async (event: FieldChangeEvent<unknown>) => {
+//             setIsProcessing(true);
+//             const { res } = await request(SymptomsApi.partialUpdate, {
+//               pathParams: { consultationId, external_id: symptom.id },
+//               body: { [event.name]: event.value },
+//             });
+//             if (res?.ok) {
+//               props.onChange?.();
+//               await refetch();
+//             }
+//             setIsProcessing(false);
+//           };
+
+//           const handleMarkAsEnteredInError = async () => {
+//             setIsProcessing(true);
+//             const { res } = await request(SymptomsApi.markAsEnteredInError, {
+//               pathParams: { consultationId, external_id: symptom.id },
+//             });
+//             if (res?.ok) {
+//               props.onChange?.();
+//               await refetch();
+//             }
+//             setIsProcessing(false);
+//           };
+
+//           return (
+//             <li
+//               key={symptom.id}
+//               className="border-b-2 border-dashed border-secondary-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
+//             >
+//               <SymptomEntry
+//                 value={symptom}
+//                 disabled={isProcessing}
+//                 onChange={handleUpdate}
+//                 onRemove={handleMarkAsEnteredInError}
+//               />
+//             </li>
+//           );
+//         })}
+//       </ul>
+
+//       {items.length === 0 && (
+//         <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-secondary-700">
+//           Patient is Asymptomatic
+//         </div>
+//       )}
+
+//       <div className="w-full rounded-b-lg border-t-2 border-dashed border-secondary-400 bg-secondary-100 p-4">
+//         <AddSymptom
+//           existing={data.results}
+//           consultationId={consultationId}
+//           onAdd={() => {
+//             props.onChange?.();
+//             refetch();
+//           }}
+//         />
+//       </div>
+//     </div>
+//   );
+// };
+
 export const EncounterSymptomsBuilder = (props: {
   showAll?: boolean;
   onChange?: () => void;
 }) => {
   const consultationId = useSlug("consultation");
-
-  const [isProcessing, setIsProcessing] = useState(false);
   const { data, loading, refetch } = useQuery(SymptomsApi.list, {
     pathParams: { consultationId },
     query: { limit: 100 },
   });
 
-  if (!data) {
+  const symptoms = sortByOnsetDate(data?.results || []).filter(
+    (item) =>
+      props.showAll || item.clinical_impression_status !== "entered-in-error",
+  );
+
+  const createSymptom = async (body: Writable<EncounterSymptom>) => {
+    const { res } = await request(SymptomsApi.add, {
+      pathParams: { consultationId },
+      body,
+    });
+    if (res?.ok) {
+      Success({ msg: "Symptom added successfully" });
+      refetch();
+    }
+  };
+
+  const updateSymptom = async (
+    symptomId: string,
+    body: Writable<EncounterSymptom>,
+  ) => {
+    const { res } = await request(SymptomsApi.partialUpdate, {
+      pathParams: { consultationId, external_id: symptomId },
+      body,
+    });
+    if (res?.ok) {
+      props.onChange?.();
+      refetch();
+    }
+  };
+
+  const deleteSymptom = async (symptomId: string) => {
+    const { res } = await request(SymptomsApi.markAsEnteredInError, {
+      pathParams: { consultationId, externa_id: symptomId },
+    });
+    if (res?.ok) {
+      props.onChange?.();
+      refetch();
+    }
+  };
+
+  const FormRender = (
+    item: EncounterSymptom | Writable<EncounterSymptom>,
+    setItem: (item: EncounterSymptom | Writable<EncounterSymptom>) => void,
+    processing: boolean,
+  ) => {
+    const [selectedSymptom, setSelectedSymptom] = useState<
+      (typeof SYMPTOM_CHOICES)[number]["id"] | null
+    >(item.symptom || null);
+    const [otherSymptom, setOtherSymptom] = useState<string>(
+      item.other_symptom || "",
+    );
+    const [onsetDate, setOnsetDate] = useState<Date | undefined>(
+      new Date(item.onset_date),
+    );
+
+    useEffect(() => {
+      setItem({
+        ...item,
+        symptom: selectedSymptom || 9,
+        other_symptom:
+          selectedSymptom === OTHER_SYMPTOM_CHOICE.id ? otherSymptom : null,
+        onset_date: onsetDate ? onsetDate.toISOString().split("T")[0] : "",
+      });
+    }, [selectedSymptom, otherSymptom, onsetDate]);
+
+    const symptomOptions = SYMPTOM_CHOICES.filter(
+      ({ id }) => id !== item.symptom,
+    );
+
     return (
-      <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-secondary-200 py-8 text-center font-medium text-secondary-700">
-        <CareIcon icon="l-spinner-alt" className="animate-spin text-lg" />
-        <span>Fetching symptom records...</span>
+      <div className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap">
+        <DateFormField
+          name="onset_date"
+          value={onsetDate}
+          onChange={({ value }) => setOnsetDate(value)}
+          disableFuture
+          disabled={processing}
+        />
+        <AutocompleteMultiSelectFormField
+          name="symptom"
+          placeholder="Search for symptoms"
+          options={symptomOptions}
+          optionLabel={(option) => option.text}
+          optionValue={(option) => option.id}
+          value={selectedSymptom ? [selectedSymptom] : []}
+          onChange={(e) =>
+            setSelectedSymptom(
+              e.value[0] as (typeof SYMPTOM_CHOICES)[number]["id"],
+            )
+          }
+          disabled={processing}
+        />
+        {selectedSymptom === OTHER_SYMPTOM_CHOICE.id && (
+          <TextAreaFormField
+            name="other_symptom"
+            placeholder="Describe the other symptom"
+            value={otherSymptom}
+            onChange={({ value }) => setOtherSymptom(value)}
+            disabled={processing}
+          />
+        )}
       </div>
     );
-  }
-
-  let items = sortByOnsetDate(data.results);
-  if (!props.showAll) {
-    items = items.filter(
-      (i) => i.clinical_impression_status !== "entered-in-error",
-    );
-  }
+  };
 
   return (
-    <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
-      <ul
-        className={classNames(
-          "flex w-full flex-col p-4",
-          (loading || isProcessing) && "pointer-events-none animate-pulse",
-        )}
+    <>
+      <ModelCrudEditor<
+        EncounterSymptom,
+        Writable<EncounterSymptom>,
+        Record<string, never>
       >
-        {items.map((symptom) => {
-          const handleUpdate = async (event: FieldChangeEvent<unknown>) => {
-            setIsProcessing(true);
-            const { res } = await request(SymptomsApi.partialUpdate, {
-              pathParams: { consultationId, external_id: symptom.id },
-              body: { [event.name]: event.value },
-            });
-            if (res?.ok) {
-              props.onChange?.();
-              await refetch();
-            }
-            setIsProcessing(false);
-          };
-
-          const handleMarkAsEnteredInError = async () => {
-            setIsProcessing(true);
-            const { res } = await request(SymptomsApi.markAsEnteredInError, {
-              pathParams: { consultationId, external_id: symptom.id },
-            });
-            if (res?.ok) {
-              props.onChange?.();
-              await refetch();
-            }
-            setIsProcessing(false);
-          };
-
-          return (
-            <li
-              key={symptom.id}
-              className="border-b-2 border-dashed border-secondary-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
-            >
-              <SymptomEntry
-                value={symptom}
-                disabled={isProcessing}
-                onChange={handleUpdate}
-                onRemove={handleMarkAsEnteredInError}
-              />
-            </li>
-          );
-        })}
-      </ul>
-
-      {items.length === 0 && (
-        <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-secondary-700">
-          Patient is Asymptomatic
-        </div>
-      )}
-
-      <div className="w-full rounded-b-lg border-t-2 border-dashed border-secondary-400 bg-secondary-100 p-4">
-        <AddSymptom
-          existing={data.results}
-          consultationId={consultationId}
-          onAdd={() => {
-            props.onChange?.();
-            refetch();
-          }}
-        />
-      </div>
-    </div>
+        items={symptoms}
+        onCreate={createSymptom}
+        onUpdate={updateSymptom}
+        onDelete={deleteSymptom}
+        loading={loading}
+        errors={{}}
+        emptyText="No Symptoms Added"
+        empty={{
+          symptom: OTHER_SYMPTOM_CHOICE.id,
+          onset_date: new Date().toISOString().split("T")[0],
+        }}
+        createText="Add Symptom"
+      >
+        {FormRender}
+      </ModelCrudEditor>
+    </>
   );
 };
 
