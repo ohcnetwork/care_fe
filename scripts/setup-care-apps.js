@@ -57,10 +57,7 @@ fs.readdirSync(appsDir, { withFileTypes: true })
   .filter((dirent) => dirent.isDirectory())
   .map((dirent) => dirent.name)
   .filter(
-    (dir) =>
-      !appsConfig
-        .map((app) => path.join(appsDir, app.package.split("/")[1]))
-        .includes(dir),
+    (dir) => !appsConfig.map((app) => app.package.split("/")[1]).includes(dir),
   )
   .forEach((unusedApp) => {
     console.log(`Removing existing app '${unusedApp}' as not configured.`);
