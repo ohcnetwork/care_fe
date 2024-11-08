@@ -65,18 +65,21 @@ try {
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
     .filter(
-      (dir) => !appsConfig.map((app) => app.package.split("/")[1]).includes(dir),
+      (dir) =>
+        !appsConfig.map((app) => app.package.split("/")[1]).includes(dir),
     )
     .forEach((unusedApp) => {
       const appPath = path.join(appsDir, unusedApp);
       const backupPath = path.join(backupDir, `${unusedApp}_${Date.now()}`);
       console.log(`Backing up '${unusedApp}' to ${backupPath}`);
       fs.cpSync(appPath, backupPath, { recursive: true });
-      console.log(`Removing existing app '${unusedApp}' as it is not configured.`);
+      console.log(
+        `Removing existing app '${unusedApp}' as it is not configured.`,
+      );
       fs.rmSync(appPath, { recursive: true, force: true });
     });
 } catch (error) {
-  console.error('Error during cleanup:', error);
+  console.error("Error during cleanup:", error);
   process.exit(1);
 }
 
