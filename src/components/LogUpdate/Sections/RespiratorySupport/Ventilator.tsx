@@ -1,11 +1,9 @@
-import {
-  rangeValueDescription,
-  ValueDescription,
-} from "../../../../Utils/utils";
-import RangeFormField from "../../../Form/FormFields/RangeFormField";
-import { DailyRoundsModel } from "../../../Patient/models";
-import { LogUpdateSectionProps } from "../../utils";
-import VentilatorModeSelector from "./VentilatorModeSelector";
+import RangeFormField from "@/components/Form/FormFields/RangeFormField";
+import VentilatorModeSelector from "@/components/LogUpdate/Sections/RespiratorySupport/VentilatorModeSelector";
+import { LogUpdateSectionProps } from "@/components/LogUpdate/utils";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import { ValueDescription, rangeValueDescription } from "@/Utils/utils";
 
 export const VentilatorFields = [
   {

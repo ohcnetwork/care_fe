@@ -9,7 +9,7 @@ describe("Inventory Management Section", () => {
   const inventoryName = "PPE";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

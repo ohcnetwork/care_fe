@@ -1,5 +1,6 @@
-import { classNames } from "../../Utils/utils";
-import CareIcon, { IconName } from "../icons/CareIcon";
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   count: number;

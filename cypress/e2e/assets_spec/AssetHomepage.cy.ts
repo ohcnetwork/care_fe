@@ -18,7 +18,7 @@ describe("Asset Tab", () => {
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

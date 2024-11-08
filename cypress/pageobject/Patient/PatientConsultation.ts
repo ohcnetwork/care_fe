@@ -60,7 +60,7 @@ export class PatientConsultationPage {
   }
 
   typePatientConsultationDate(selector: string, date: string) {
-    cy.get(selector).clear().click().type(date);
+    cy.clickAndTypeDate(selector, date);
   }
 
   clickPatientDetails() {

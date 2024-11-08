@@ -1,6 +1,7 @@
 import { useRef } from "react";
-import FormField from "./FormField";
-import { FormFieldBaseProps } from "./Utils";
+
+import FormField from "@/components/Form/FormFields/FormField";
+import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
 
 type TextAreaFormFieldProps = {
   length?: number;

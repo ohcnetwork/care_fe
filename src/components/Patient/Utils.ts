@@ -1,4 +1,4 @@
-import { PatientModel } from "./models";
+import { PatientModel } from "@/components/Patient/models";
 
 export function isPatientMandatoryDataFilled(patient: PatientModel) {
   return (

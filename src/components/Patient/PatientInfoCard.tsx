@@ -1,10 +1,41 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import { Field, Label, MenuItem, Switch } from "@headlessui/react";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils.js";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/AuthorizedChild";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+import ABHAProfileModal from "@/components/ABDM/ABHAProfileModal";
+import FetchRecordsModal from "@/components/ABDM/FetchRecordsModal";
+import LinkAbhaNumber from "@/components/ABDM/LinkAbhaNumber/index";
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import DropdownMenu from "@/components/Common/Menu";
+import Beds from "@/components/Facility/Consultations/Beds";
+import { Mews } from "@/components/Facility/Consultations/Mews";
+import DischargeModal from "@/components/Facility/DischargeModal";
+import DischargeSummaryModal from "@/components/Facility/DischargeSummaryModal";
+import {
+  ConsultationModel,
+  PatientCategory,
+} from "@/components/Facility/models";
+import { PatientModel } from "@/components/Patient/models";
+import { SkillModel } from "@/components/Users/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
 import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
@@ -12,12 +43,14 @@ import {
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
 } from "@/common/constants";
-import { ConsultationModel, PatientCategory } from "../Facility/models";
-import { Switch, MenuItem, Field, Label } from "@headlessui/react";
-import { Link, navigate } from "raviger";
-import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import dayjs from "../../Utils/dayjs";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import { PLUGIN_Component } from "@/PluginEngine";
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   formatDate,
@@ -25,30 +58,7 @@ import {
   formatName,
   formatPatientAge,
   humanizeStrings,
-} from "../../Utils/utils";
-import ABHAProfileModal from "../ABDM/ABHAProfileModal";
-import DialogModal from "@/components/Common/Dialog";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Beds from "../Facility/Consultations/Beds";
-import { PatientModel } from "./models";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import DropdownMenu from "@/components/Common/components/Menu";
-import { triggerGoal } from "../../Integrations/Plausible";
-
-import useAuthUser from "@/common/hooks/useAuthUser";
-import { Mews } from "../Facility/Consultations/Mews";
-import DischargeSummaryModal from "../Facility/DischargeSummaryModal";
-import DischargeModal from "../Facility/DischargeModal";
-import { useTranslation } from "react-i18next";
-import useQuery from "../../Utils/request/useQuery";
-import FetchRecordsModal from "../ABDM/FetchRecordsModal";
-import { AbhaNumberModel } from "../ABDM/types/abha";
-import { SkillModel } from "../Users/models";
-import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
-import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index";
-import careConfig from "@careConfig";
-import { cn } from "@/lib/utils.js";
+} from "@/Utils/utils";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -673,27 +683,25 @@ export default function PatientInfoCard(props: {
                     "l-file-medical",
                     consultation?.id,
                   ],
-                ]
-                  .concat(
-                    careConfig.hcx.enabled
-                      ? [
-                          [
-                            `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
-                            "Claims",
-                            "l-copy-landscape",
-                            consultation?.id,
-                          ],
-                        ]
-                      : [],
-                  )
-                  .map(
-                    (action: any, i) =>
-                      action[3] && (
-                        <div key={i}>
-                          <Link
-                            key={i}
-                            className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                            href={
+                ].map(
+                  (action: any, i) =>
+                    action[3] && (
+                      <div key={i}>
+                        <Link
+                          key={i}
+                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                          href={
+                            !["Treatment Summary", "Consent Records"].includes(
+                              action[1],
+                            ) &&
+                            consultation?.admitted &&
+                            !consultation?.current_bed &&
+                            i === 1
+                              ? ""
+                              : `${action[0]}`
+                          }
+                          onClick={() => {
+                            if (
                               ![
                                 "Treatment Summary",
                                 "Consent Records",
@@ -701,47 +709,35 @@ export default function PatientInfoCard(props: {
                               consultation?.admitted &&
                               !consultation?.current_bed &&
                               i === 1
-                                ? ""
-                                : `${action[0]}`
-                            }
-                            onClick={() => {
-                              if (
-                                ![
-                                  "Treatment Summary",
-                                  "Consent Records",
-                                ].includes(action[1]) &&
-                                consultation?.admitted &&
-                                !consultation?.current_bed &&
-                                i === 1
-                              ) {
-                                Notification.Error({
-                                  msg: "Please assign a bed to the patient",
-                                });
-                                setOpen(true);
-                              }
-                              triggerGoal("Patient Card Button Clicked", {
-                                buttonName: action[1],
-                                consultationId: consultation?.id,
-                                userId: authUser?.id,
+                            ) {
+                              Notification.Error({
+                                msg: "Please assign a bed to the patient",
                               });
-                            }}
-                          >
-                            <CareIcon
-                              icon={action[2]}
-                              className="text-lg text-primary-500"
-                            />
-                            <span>{action[1]}</span>
-                          </Link>
-                          {action?.[4]?.[0] && (
-                            <>
-                              <p className="mt-1 text-xs text-red-500">
-                                {action[4][1]}
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      ),
-                  )}
+                              setOpen(true);
+                            }
+                            triggerGoal("Patient Card Button Clicked", {
+                              buttonName: action[1],
+                              consultationId: consultation?.id,
+                              userId: authUser?.id,
+                            });
+                          }}
+                        >
+                          <CareIcon
+                            icon={action[2]}
+                            className="text-lg text-primary-500"
+                          />
+                          <span>{action[1]}</span>
+                        </Link>
+                        {action?.[4]?.[0] && (
+                          <>
+                            <p className="mt-1 text-xs text-red-500">
+                              {action[4][1]}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ),
+                )}
               </div>
 
               <div>
@@ -926,6 +922,13 @@ export default function PatientInfoCard(props: {
                   )}
                 </MenuItem>
               </div>
+
+              <PLUGIN_Component
+                __name="ManagePatientOptions"
+                patient={patient}
+                consultation={consultation}
+              />
+
               <div className="px-4 py-2">
                 <Field as="div" className="flex items-center">
                   <Switch

@@ -1,7 +1,10 @@
 import React from "react";
-import { PaitentNotesReplyModel } from "./models";
+
+import { PaitentNotesReplyModel } from "@/components/Facility/models";
+
 import { USER_TYPES_MAP } from "@/common/constants";
-import { formatDateTime, relativeDate } from "../../Utils/utils";
+
+import { formatDateTime, relativeDate } from "@/Utils/utils";
 
 interface Props {
   parentNote: PaitentNotesReplyModel | undefined;

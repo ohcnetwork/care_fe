@@ -1,7 +1,6 @@
-import { ConsultationTabProps } from "./index";
-import { DialysisPlots } from "../Consultations/DialysisPlots";
-
 import PageTitle from "@/components/Common/PageTitle";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import { DialysisPlots } from "@/components/Facility/Consultations/DialysisPlots";
 
 export const ConsultationDialysisTab = (props: ConsultationTabProps) => {
   return (

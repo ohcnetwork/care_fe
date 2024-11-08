@@ -1,4 +1,4 @@
-import { FieldError } from "./FieldValidators";
+import { FieldError } from "@/components/Form/FieldValidators";
 
 export type FormDetails = { [key: string]: any };
 export type FormErrors<T = FormDetails> = Partial<

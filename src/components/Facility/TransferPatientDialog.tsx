@@ -1,15 +1,18 @@
-import * as Notification from "../../Utils/Notifications";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { useReducer, useState } from "react";
-import { DupPatientModel } from "./models";
-import { OptionsType } from "@/common/constants";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { navigate } from "raviger";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { DupPatientModel } from "@/components/Facility/models";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import { OptionsType } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface Props {
   patientList: Array<DupPatientModel>;

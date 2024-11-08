@@ -1,15 +1,20 @@
-import { classNames } from "../../../Utils/utils";
 import DateRangeInputV2, {
   DateRange,
 } from "@/components/Common/DateRangeInputV2";
-import FormField from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import { classNames } from "@/Utils/utils";
 
 type Props = FormFieldBaseProps<DateRange> & {
   max?: Date;
   min?: Date;
   disableFuture?: boolean;
   disablePast?: boolean;
+  allowTime?: boolean;
 };
 
 /**
@@ -23,6 +28,7 @@ type Props = FormFieldBaseProps<DateRange> & {
  *   label="Predicted date of birth"
  *   required
  *   disablePast // equivalent to min={new Date()}
+ *   time={true} // allows picking time as well
  * />
  * ```
  */
@@ -38,6 +44,7 @@ const DateRangeFormField = (props: Props) => {
         disabled={field.disabled}
         min={props.min || (props.disableFuture ? new Date() : undefined)}
         max={props.max || (props.disablePast ? new Date() : undefined)}
+        allowTime={props.allowTime}
       />
     </FormField>
   );

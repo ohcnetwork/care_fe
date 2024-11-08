@@ -1,4 +1,4 @@
-import { Prescription } from "../models";
+import { Prescription } from "@/components/Medicine/models";
 
 export function computeActivityBounds(prescriptions: Prescription[]) {
   // get start by finding earliest of all presciption's created_date

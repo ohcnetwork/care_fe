@@ -1,22 +1,25 @@
 import { useState } from "react";
-import ButtonV2, { Cancel } from "@/components/Common/components/ButtonV2";
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Page from "@/components/Common/components/Page";
-import routes from "../../Redux/api";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import { LocationModel } from "./models";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import request from "../../Utils/request/request";
-import * as Notification from "../../Utils/Notifications";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import ButtonV2, { Cancel } from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import DialogModal from "@/components/Common/Dialog";
-import Uptime from "@/components/Common/Uptime";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-
 import Loading from "@/components/Common/Loading";
-import { cn } from "@/lib/utils";
+import Page from "@/components/Common/Page";
+import Uptime from "@/components/Common/Uptime";
+import { LocationModel } from "@/components/Facility/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import AuthorizeFor, { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 interface Props {
   facilityId: string;
 }
@@ -287,11 +290,9 @@ const Location = ({
         id="manage-bed-button"
         variant="secondary"
         border
-        className={cn(
-          "mt-3 flex w-full items-center justify-between",
-          totalBeds != null && "opacity-50",
-        )}
+        className="mt-3 flex w-full items-center justify-between"
         href={`location/${id}/beds`}
+        disabled={totalBeds == null}
       >
         Manage Beds
         <span className="flex items-center justify-center gap-2">

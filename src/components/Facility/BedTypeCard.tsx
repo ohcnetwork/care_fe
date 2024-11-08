@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
-import { BedCapacity } from "./BedCapacity";
-import DialogModal from "@/components/Common/Dialog";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+import DialogModal from "@/components/Common/Dialog";
+import { BedCapacity } from "@/components/Facility/BedCapacity";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface BedTypeCardProps {
   facilityId?: string;

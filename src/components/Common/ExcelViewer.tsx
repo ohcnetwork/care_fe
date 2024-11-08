@@ -1,8 +1,11 @@
 import { ReactNode, useEffect, useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2, { Cancel, Submit } from "./components/ButtonV2";
-import DialogModal from "./Dialog";
-import Pagination from "./Pagination";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import Pagination from "@/components/Common/Pagination";
+
 import { ParsedData } from "@/common/schemaParser";
 
 type FilePreviewProps = {

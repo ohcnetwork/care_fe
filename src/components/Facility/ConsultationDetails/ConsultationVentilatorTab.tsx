@@ -1,7 +1,6 @@
-import { ConsultationTabProps } from "./index";
-import { VentilatorPlot } from "../Consultations/VentilatorPlot";
-
 import PageTitle from "@/components/Common/PageTitle";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import { VentilatorPlot } from "@/components/Facility/Consultations/VentilatorPlot";
 
 export const ConsultationVentilatorTab = (props: ConsultationTabProps) => {
   return (
