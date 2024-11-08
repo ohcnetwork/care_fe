@@ -1,5 +1,5 @@
 #build-stage
-FROM --platform=$BUILDPLATFORM node:20-buster-slim as build-stage
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim as build-stage
 
 WORKDIR /app
 
