@@ -1,11 +1,10 @@
 // FacilityCreation
-
-import LoginPage from "../../pageobject/Login/LoginPage";
-import FacilityHome from "../../pageobject/Facility/FacilityHome";
-import ManageUserPage from "../../pageobject/Users/ManageUserPage";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import { UserPage } from "../../pageobject/Users/UserSearch";
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import LoginPage from "../../pageobject/Login/LoginPage";
+import ManageUserPage from "../../pageobject/Users/ManageUserPage";
+import { UserPage } from "../../pageobject/Users/UserSearch";
 
 describe("Facility Homepage Function", () => {
   const loginPage = new LoginPage();
@@ -17,6 +16,7 @@ describe("Facility Homepage Function", () => {
   const facilitiesAlias = "downloadFacilitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
+  const capacitiesAlias = "downloadCapacitiesCSV";
   const facilityName = "Dummy Facility 40";
   const facilityLocaion = "Dummy Location";
   const stateName = "Kerala";
@@ -107,11 +107,12 @@ describe("Facility Homepage Function", () => {
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Triages");
     facilityHome.verifyDownload(triagesAlias);
-  });
 
-  it("Verify Capacity Export Functionality", () => {
+    // Verify Capacity Export
+    facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
+    facilityHome.verifyDownload(capacitiesAlias);
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
@@ -135,7 +136,23 @@ describe("Facility Homepage Function", () => {
     facilityHome.verifyLiveMonitorUrl();
   });
 
-  afterEach(() => {
-    cy.saveLocalStorage();
+  it("Verify sidebar collapse and expand functionality", () => {
+    facilityHome.toggleSidebar();
+    facilityHome.verifyIconsVisible();
+    facilityHome.verifyTextVisible();
+
+    // Click toggle button to collapse sidebar, verify icons visible and text hidden
+    facilityHome.toggleSidebar();
+    facilityHome.verifyIconsVisible();
+    facilityHome.verifyTextHidden();
+
+    // Click toggle button again to expand sidebar, verify icons and text are visible again
+    facilityHome.toggleSidebar();
+    facilityHome.verifyIconsVisible();
+    facilityHome.verifyTextVisible();
   });
+});
+
+afterEach(() => {
+  cy.saveLocalStorage();
 });

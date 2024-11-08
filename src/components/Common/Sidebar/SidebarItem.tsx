@@ -60,8 +60,11 @@ const SidebarItemBase = forwardRef<HTMLAnchorElement, SidebarItemBaseProps>(
             shrinked ? "justify-center" : "justify-start pl-5 pr-4"
           } transition-all duration-200 ease-in-out`}
         >
-          <div className="flex-none text-lg">{props.icon}</div>
+          <div data-testid="sidebar-icon" className="flex-none text-lg">
+            {props.icon}
+          </div>
           <span
+            data-testid="sidebar-text"
             className={`${
               shrinked ? "hidden" : "grow"
             } flex w-full items-center text-nowrap pl-4 text-sm tracking-wide`}

@@ -4,6 +4,10 @@ class FacilityHome {
   searchButton = "#search";
   menuItem = "[role='menuitem']";
 
+  sidebarToggle = () => cy.get('[data-testid="sidebar-toggle"]');
+  sidebarIcon = () => cy.get('[data-testid="sidebar-icon"]');
+  sidebarText = () => cy.get('[data-testid="sidebar-text"]');
+
   // Operations
   clickExportButton() {
     cy.get(this.exportButton).scrollIntoView();
@@ -102,6 +106,26 @@ class FacilityHome {
   verifyURLContains(searchText: string) {
     const encodedText = encodeURIComponent(searchText).replace(/%20/g, "+");
     this.getURL().should("include", `search=${encodedText}`);
+  }
+
+  toggleSidebar() {
+    this.sidebarToggle().click();
+  }
+
+  verifyIconsVisible() {
+    this.sidebarIcon().each(($el) => {
+      cy.wrap($el).should("be.visible");
+    });
+  }
+
+  verifyTextVisible() {
+    this.sidebarText().each(($el) => {
+      cy.wrap($el).should("be.visible");
+    });
+  }
+
+  verifyTextHidden() {
+    this.sidebarText().should("not.be.visible");
   }
 }
 
