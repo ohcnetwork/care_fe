@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { AssetData } from "../Assets/AssetTypes";
-import CameraFeed from "./CameraFeed";
-import useQuery from "../../Utils/request/useQuery";
-import { CameraPresetDropdown } from "./CameraPresetSelect";
-import useOperateCamera from "./useOperateCamera";
-import { classNames } from "../../Utils/utils";
-import { CameraPreset, FeedRoutes } from "./routes";
+
+import { AssetData } from "@/components/Assets/AssetTypes";
+import CameraFeed from "@/components/CameraFeed/CameraFeed";
+import { CameraPresetDropdown } from "@/components/CameraFeed/CameraPresetSelect";
+import { CameraPreset, FeedRoutes } from "@/components/CameraFeed/routes";
+import useOperateCamera from "@/components/CameraFeed/useOperateCamera";
+
+import useQuery from "@/Utils/request/useQuery";
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   asset: AssetData;

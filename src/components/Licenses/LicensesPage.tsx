@@ -1,5 +1,6 @@
 import React from "react";
-import BOMDisplay from "./SBOMViewer";
+
+import BOMDisplay from "@/components/Licenses/SBOMViewer";
 
 const LicensesPage: React.FC = () => {
   return (

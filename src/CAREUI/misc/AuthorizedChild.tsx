@@ -1,8 +1,10 @@
 import { ReactNode } from "react";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import { useIsAuthorized } from "@/common/hooks/useIsAuthorized";
-import useSlug from "@/common/hooks/useSlug";
-import { AuthorizedForCB } from "../../Utils/AuthorizeFor";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import { useIsAuthorized } from "@/hooks/useIsAuthorized";
+import useSlug from "@/hooks/useSlug";
+
+import { AuthorizedForCB } from "@/Utils/AuthorizeFor";
 
 interface Props {
   children: (value: { isAuthorized: boolean }) => JSX.Element;

@@ -1,23 +1,27 @@
 import { useState } from "react";
-import { Writable } from "../../Utils/types";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import SymptomsApi from "@/components/Symptoms/api";
 import {
   EncounterSymptom,
   OTHER_SYMPTOM_CHOICE,
   SYMPTOM_CHOICES,
-} from "./types";
-import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
-import DateFormField from "../Form/FormFields/DateFormField";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { classNames, dateQueryString } from "../../Utils/utils";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useSlug from "@/common/hooks/useSlug";
-import useQuery from "../../Utils/request/useQuery";
-import SymptomsApi from "./api";
-import request from "../../Utils/request/request";
-import { Success } from "../../Utils/Notifications";
-import { sortByOnsetDate } from "./utils";
+} from "@/components/Symptoms/types";
+import { sortByOnsetDate } from "@/components/Symptoms/utils";
+
+import useSlug from "@/hooks/useSlug";
+
+import { Success } from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { Writable } from "@/Utils/types";
+import { classNames, dateQueryString } from "@/Utils/utils";
 
 export const CreateSymptomsBuilder = (props: {
   value: Writable<EncounterSymptom>[];

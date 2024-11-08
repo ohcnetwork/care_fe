@@ -1,14 +1,16 @@
-import ConditionVerificationStatusMenu from "../ConditionVerificationStatusMenu";
+import { useState } from "react";
+
+import ConditionVerificationStatusMenu from "@/components/Diagnosis/ConditionVerificationStatusMenu";
+import DiagnosesRoutes from "@/components/Diagnosis/routes";
 import {
   ActiveConditionVerificationStatuses,
   ConditionVerificationStatuses,
   ConsultationDiagnosis,
   CreateDiagnosis,
-} from "../types";
-import DiagnosesRoutes from "../routes";
-import { useState } from "react";
-import request from "../../../Utils/request/request";
-import { classNames } from "../../../Utils/utils";
+} from "@/components/Diagnosis/types";
+
+import request from "@/Utils/request/request";
+import { classNames } from "@/Utils/utils";
 
 interface RemoveAction {
   type: "remove";

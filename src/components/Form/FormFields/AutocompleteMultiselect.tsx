@@ -5,17 +5,22 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import { ReactNode, useEffect, useRef, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { DropdownTransition } from "@/components/Common/HelperComponents";
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
 import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
-} from "../MultiSelectMenuV2";
-import { ReactNode, useEffect, useRef, useState } from "react";
+} from "@/components/Form/MultiSelectMenuV2";
 
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "@/components/Common/components/HelperComponents";
-import FormField from "./FormField";
-import { classNames } from "../../../Utils/utils";
+import { classNames } from "@/Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 

@@ -1,28 +1,32 @@
 import { useEffect, useRef, useState } from "react";
-import { ConsultationTabProps } from "./index";
-import useQuery from "../../../Utils/request/useQuery";
-import CameraFeed from "../../CameraFeed/CameraFeed";
-import Loading from "@/components/Common/Loading";
-import CameraPresetSelect from "../../CameraFeed/CameraPresetSelect";
-import { triggerGoal } from "../../../Integrations/Plausible";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import useOperateCamera, {
-  PTZPayload,
-} from "../../CameraFeed/useOperateCamera";
-import request from "../../../Utils/request/request";
-import { classNames, isIOS } from "../../../Utils/utils";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import useBreakpoints from "@/common/hooks/useBreakpoints";
-import { Warn } from "../../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import CameraFeed from "@/components/CameraFeed/CameraFeed";
+import CameraPresetSelect from "@/components/CameraFeed/CameraPresetSelect";
+import StillWatching from "@/components/CameraFeed/StillWatching";
 import {
   CameraPreset,
   FeedRoutes,
   GetStatusResponse,
-} from "../../CameraFeed/routes";
-import StillWatching from "../../CameraFeed/StillWatching";
+} from "@/components/CameraFeed/routes";
+import useOperateCamera, {
+  PTZPayload,
+} from "@/components/CameraFeed/useOperateCamera";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useBreakpoints from "@/hooks/useBreakpoints";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import { Warn } from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, isIOS } from "@/Utils/utils";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const { t } = useTranslation();
