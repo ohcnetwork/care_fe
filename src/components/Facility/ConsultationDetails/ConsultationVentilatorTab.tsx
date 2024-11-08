@@ -1,12 +1,13 @@
-import { ConsultationTabProps } from "./index";
-import { VentilatorPlot } from "../Consultations/VentilatorPlot";
-import VentilatorTable from "../Consultations/VentilatorTable";
-import routes from "../../../Redux/api";
-import useQuery from "../../../Utils/request/useQuery";
-
-import PageTitle from "@/components/Common/PageTitle";
 import Loading from "@/components/Common/Loading";
-import useFilters from "@/common/hooks/useFilters";
+import PageTitle from "@/components/Common/PageTitle";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import { VentilatorPlot } from "@/components/Facility/Consultations/VentilatorPlot";
+import VentilatorTable from "@/components/Facility/Consultations/VentilatorTable";
+
+import useFilters from "@/hooks/useFilters";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export const ConsultationVentilatorTab = (props: ConsultationTabProps) => {
   const { consultationId } = props;

@@ -1,7 +1,7 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
-import { UserPage } from "../../pageobject/Users/UserSearch";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
+import { UserPage } from "../../pageobject/Users/UserSearch";
 
 describe("Manage User", () => {
   const loginPage = new LoginPage();
@@ -20,7 +20,7 @@ describe("Manage User", () => {
   const linkedskill = "General Medicine";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

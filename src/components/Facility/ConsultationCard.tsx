@@ -1,15 +1,18 @@
-import { navigate } from "raviger";
-import { ConsultationModel } from "./models";
-import { formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
-import Chip from "../../CAREUI/display/Chip";
-import * as Notification from "../../Utils/Notifications";
-import { useState } from "react";
-import DialogModal from "@/components/Common/Dialog";
-import Beds from "./Consultations/Beds";
 import careConfig from "@careConfig";
+import { navigate } from "raviger";
+import { useState } from "react";
+
+import Chip from "@/CAREUI/display/Chip";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
+import Beds from "@/components/Facility/Consultations/Beds";
+import { ConsultationModel } from "@/components/Facility/models";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import { formatDateTime } from "@/Utils/utils";
 
 interface ConsultationProps {
   itemData: ConsultationModel;

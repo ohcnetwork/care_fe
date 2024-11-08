@@ -1,14 +1,18 @@
-import { useState } from "react";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/components/Page";
-import useQuery from "../../../Utils/request/useQuery";
-import routes from "../../../Redux/api";
-import LocationFeedTile from "../CameraFeedWithBedPresets";
-import Fullscreen from "../../../CAREUI/misc/Fullscreen";
-import useBreakpoints from "@/common/hooks/useBreakpoints";
 import { useQueryParams } from "raviger";
-import LiveMonitoringFilters from "./LiveMonitoringFilters";
-import StillWatching from "../StillWatching";
+import { useState } from "react";
+
+import Fullscreen from "@/CAREUI/misc/Fullscreen";
+
+import LocationFeedTile from "@/components/CameraFeed/CameraFeedWithBedPresets";
+import LiveMonitoringFilters from "@/components/CameraFeed/CentralLiveMonitoring/LiveMonitoringFilters";
+import StillWatching from "@/components/CameraFeed/StillWatching";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export default function CentralLiveMonitoring(props: { facilityId: string }) {
   const [isFullscreen, setFullscreen] = useState(false);

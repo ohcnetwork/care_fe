@@ -1,10 +1,10 @@
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import { generatePhoneNumber } from "../../pageobject/utils/constants";
-import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
+import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
+import { generatePhoneNumber } from "../../pageobject/utils/constants";
 
 const yearOfBirth = "2001";
 const isHCXEnabled = Cypress.env("ENABLE_HCX");
@@ -71,7 +71,7 @@ describe("Patient Creation with consultation", () => {
   const patientOccupation = "Student";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

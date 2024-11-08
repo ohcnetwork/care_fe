@@ -1,23 +1,24 @@
-import { useTranslation } from "react-i18next";
-import { Prescription } from "../models";
 import { useState } from "react";
-import useQuery from "../../../Utils/request/useQuery";
-import MedicineRoutes from "../routes";
-import { classNames, formatDateTime } from "../../../Utils/utils";
-import useSlug from "@/common/hooks/useSlug";
-import DiscontinuePrescription from "../DiscontinuePrescription";
-import AdministerMedicine from "../AdministerMedicine";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/AuthorizedChild";
+
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
-import PrescriptionDetailCard from "../PrescriptionDetailCard";
-import ButtonV2, {
-  Cancel,
-  Submit,
-} from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import EditPrescriptionForm from "../EditPrescriptionForm";
-import AdministrationEventSeperator from "./AdministrationEventSeperator";
-import AdministrationEventCell from "./AdministrationEventCell";
-import { AuthorizedForConsultationRelatedActions } from "../../../CAREUI/misc/AuthorizedChild";
+import AdministerMedicine from "@/components/Medicine/AdministerMedicine";
+import DiscontinuePrescription from "@/components/Medicine/DiscontinuePrescription";
+import EditPrescriptionForm from "@/components/Medicine/EditPrescriptionForm";
+import AdministrationEventCell from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventCell";
+import AdministrationEventSeperator from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventSeperator";
+import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
+import { Prescription } from "@/components/Medicine/models";
+import MedicineRoutes from "@/components/Medicine/routes";
+
+import useSlug from "@/hooks/useSlug";
+
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface Props {
   prescription: Prescription;

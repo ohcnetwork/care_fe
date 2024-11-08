@@ -1,19 +1,23 @@
-import { useEffect, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
-import ButtonV2, {
-  Cancel,
-  Submit,
-} from "@/components/Common/components/ButtonV2";
-import DialogModal from "@/components/Common/Dialog";
-import { AssetData, AssetService, AssetServiceEdit } from "./AssetTypes";
 import dayjs from "dayjs";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { formatDate, formatDateTime } from "../../Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import DateFormField from "../Form/FormFields/DateFormField";
 import { t } from "i18next";
+import { useEffect, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import {
+  AssetData,
+  AssetService,
+  AssetServiceEdit,
+} from "@/components/Assets/AssetTypes";
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDate, formatDateTime } from "@/Utils/utils";
 
 export const AssetServiceEditModal = (props: {
   asset?: AssetData;

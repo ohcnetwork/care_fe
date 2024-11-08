@@ -1,13 +1,17 @@
 import { useTranslation } from "react-i18next";
-import { TimelineNode } from "../../../../CAREUI/display/Timeline";
-import PaginatedList from "../../../../CAREUI/misc/PaginatedList";
-import { useSlugs } from "@/common/hooks/useSlug";
-import routes from "../../../../Redux/api";
-import LoadingLogUpdateCard from "../../Consultations/DailyRounds/LoadingCard";
-import GenericEvent from "./GenericEvent";
-import { getEventIcon } from "./iconMap";
-import { EventGeneric } from "./types";
-import { QueryParams } from "../../../../Utils/request/types";
+
+import { TimelineNode } from "@/CAREUI/display/Timeline";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import GenericEvent from "@/components/Facility/ConsultationDetails/Events/GenericEvent";
+import { getEventIcon } from "@/components/Facility/ConsultationDetails/Events/iconMap";
+import { EventGeneric } from "@/components/Facility/ConsultationDetails/Events/types";
+import LoadingLogUpdateCard from "@/components/Facility/Consultations/DailyRounds/LoadingCard";
+
+import { useSlugs } from "@/hooks/useSlug";
+
+import routes from "@/Utils/request/api";
+import { QueryParams } from "@/Utils/request/types";
 
 export default function EventsList({ query }: { query: QueryParams }) {
   const [consultationId] = useSlugs("consultation");

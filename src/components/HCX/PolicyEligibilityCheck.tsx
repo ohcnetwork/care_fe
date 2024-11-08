@@ -1,16 +1,18 @@
-import * as Notification from "../../Utils/Notifications";
-
 import { useEffect, useState } from "react";
-
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXPolicyModel } from "./models";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { useMessageListener } from "@/common/hooks/useMessageListener";
-import useQuery from "../../Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import { HCXPolicyModel } from "@/components/HCX/models";
+
+import { useMessageListener } from "@/hooks/useMessageListener";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   className?: string;

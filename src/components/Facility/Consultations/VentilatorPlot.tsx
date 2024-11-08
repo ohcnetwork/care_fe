@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { LinePlot } from "./components/LinePlot";
-import { formatDateTime } from "../../../Utils/utils";
-import BinaryChronologicalChart from "./components/BinaryChronologicalChart";
-import { DailyRoundsModel } from "../../Patient/models";
 import { useTranslation } from "react-i18next";
-import Loading from "../../Common/Loading";
+
+import Loading from "@/components/Common/Loading";
+import BinaryChronologicalChart from "@/components/Facility/Consultations/components/BinaryChronologicalChart";
+import { LinePlot } from "@/components/Facility/Consultations/components/LinePlot";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import { formatDateTime } from "@/Utils/utils";
 
 /*
 interface ModalityType {
@@ -252,7 +254,7 @@ export const VentilatorPlot = ({
   return (
     <div>
       <div className="grid-row-1 grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="PIP"
             name="PIP"
@@ -263,7 +265,7 @@ export const VentilatorPlot = ({
             verticalMarkerData={getMarkLineData("ventilator_pip")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="MAP"
             name="MAP"
@@ -276,7 +278,7 @@ export const VentilatorPlot = ({
             )}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Resp Rate"
             name="resp"
@@ -287,7 +289,7 @@ export const VentilatorPlot = ({
             verticalMarkerData={getMarkLineData("ventilator_resp_rate")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Pressure Support"
             name="Pressure Support"
@@ -298,7 +300,7 @@ export const VentilatorPlot = ({
             verticalMarkerData={getMarkLineData("ventilator_pressure_support")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Tidal Volume"
             name="Tidal Volume"
@@ -307,7 +309,7 @@ export const VentilatorPlot = ({
             verticalMarkerData={getMarkLineData("ventilator_tidal_volume")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="PEEP"
             name="PEEP"
@@ -318,7 +320,7 @@ export const VentilatorPlot = ({
             verticalMarkerData={getMarkLineData("ventilator_peep")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="FiO2"
             name="FiO2"
@@ -329,7 +331,7 @@ export const VentilatorPlot = ({
             verticalMarkerData={getMarkLineData("ventilator_fio2")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="SpO2"
             name="SpO2"
@@ -340,7 +342,7 @@ export const VentilatorPlot = ({
             verticalMarkerData={getMarkLineData("ventilator_spo2")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="EtCo2"
             name="EtCo2"
@@ -351,7 +353,7 @@ export const VentilatorPlot = ({
             verticalMarkerData={getMarkLineData("etco2")}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <BinaryChronologicalChart
             title="Bilateral Air Entry"
             data={bilateral}
@@ -359,7 +361,7 @@ export const VentilatorPlot = ({
             falseName="No"
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Oxygen Flow Rate"
             name="Oxygen Flow Rate"
@@ -370,7 +372,7 @@ export const VentilatorPlot = ({
             )}
           />
         </div>
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Flow Rate"
             name="Flow Rate"

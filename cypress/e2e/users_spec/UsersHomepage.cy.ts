@@ -17,7 +17,7 @@ describe("User Homepage", () => {
   const doctorUserName = "devdoctor1";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

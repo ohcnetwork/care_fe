@@ -1,6 +1,7 @@
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { HCXPolicyModel } from "../HCX/models";
 import { navigate } from "raviger";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { HCXPolicyModel } from "@/components/HCX/models";
 
 interface InsuranceDetails {
   data?: HCXPolicyModel;
