@@ -300,6 +300,8 @@ export default function ResourceCreate(props: resourceProps) {
         <TextFormField
           label={t("required_quantity")}
           name="requested_quantity"
+          type="number"
+          min={1}
           value={state.form.required_quantity}
           onChange={handleChange}
         />
