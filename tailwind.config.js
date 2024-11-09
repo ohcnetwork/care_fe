@@ -20,10 +20,6 @@ module.exports = {
   darkMode: ["class"],
   theme: {
     extend: {
-      screens: {
-        "4xl": "2560px",
-        "4k": "3840px",
-      },
       fontFamily: {
         sans: ["Figtree", "sans-serif"],
       },
