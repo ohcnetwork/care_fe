@@ -1,6 +1,6 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
-import UserProfilePage from "../../pageobject/Users/UserProfilePage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
+import UserProfilePage from "../../pageobject/Users/UserProfilePage";
 
 describe("Manage User Profile", () => {
   const loginPage = new LoginPage();
