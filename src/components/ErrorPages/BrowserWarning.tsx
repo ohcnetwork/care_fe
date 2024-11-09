@@ -1,7 +1,8 @@
-import React from "react";
-import supportedBrowsers from "../../supportedBrowsers";
 import bowser from "bowser";
+import React from "react";
 import { useTranslation } from "react-i18next";
+
+import supportedBrowsers from "@/supportedBrowsers";
 
 const BrowserWarning = () => {
   const { t } = useTranslation();

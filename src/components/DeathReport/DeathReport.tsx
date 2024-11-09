@@ -1,22 +1,26 @@
+import dayjs from "dayjs";
+import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import Page from "@/components/Common/Page";
+import Form from "@/components/Form/Form";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
 import { GENDER_TYPES } from "@/common/constants";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import DateFormField from "../Form/FormFields/DateFormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   formatPatientAge,
   humanizeStrings,
-} from "../../Utils/utils";
-import Page from "@/components/Common/components/Page";
-import Form from "../Form/Form";
-import { useTranslation } from "react-i18next";
-import { navigate } from "raviger";
-import dayjs from "dayjs";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+} from "@/Utils/utils";
 
 type DeathReport = {
   name?: string;

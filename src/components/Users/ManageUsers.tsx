@@ -2,43 +2,49 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import CountBlock from "../../CAREUI/display/Count";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
+
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import SlideOverCustom from "@/CAREUI/interactive/SlideOver";
+
+import { Avatar } from "@/components/Common/Avatar";
+import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import Pagination from "@/components/Common/Pagination";
+import UserDetails from "@/components/Common/UserDetails";
+import UserDetailComponent from "@/components/Common/UserDetailsComponet";
+import { FacilityModel } from "@/components/Facility/models";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import SearchInput from "@/components/Form/SearchInput";
+import ConfirmHomeFacilityUpdateDialog from "@/components/Users/ConfirmHomeFacilityUpdateDialog";
+import SkillsSlideOver from "@/components/Users/SkillsSlideOver";
+import UnlinkFacilityDialog from "@/components/Users/UnlinkFacilityDialog";
+import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
+import UserFilter from "@/components/Users/UserFilter";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useFilters from "@/hooks/useFilters";
+import useWindowDimensions from "@/hooks/useWindowDimensions";
+
 import { USER_TYPES } from "@/common/constants";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useFilters from "@/common/hooks/useFilters";
-import useWindowDimensions from "@/common/hooks/useWindowDimensions";
-import routes from "../../Redux/api";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
+
+import * as Notification from "@/Utils/Notifications";
+import { showUserDelete } from "@/Utils/permissions";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   formatDisplayName,
   formatName,
   isUserOnline,
   relativeTime,
-} from "../../Utils/utils";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import Pagination from "@/components/Common/Pagination";
-import UserDetails from "@/components/Common/UserDetails";
-import UserDetailComponent from "@/components/Common/UserDetailsComponet";
-import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import Page from "@/components/Common/components/Page";
-import { FacilityModel } from "../Facility/models";
-import TextFormField from "../Form/FormFields/TextFormField";
-import SearchInput from "../Form/SearchInput";
-import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
-import SkillsSlideOver from "./SkillsSlideOver";
-import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
-import UserDeleteDialog from "./UserDeleteDialog";
-import UserFilter from "./UserFilter";
-import { showUserDelete } from "../../Utils/permissions";
-import { Avatar } from "../Common/Avatar";
-import Loading from "@/components/Common/Loading";
+} from "@/Utils/utils";
+
 export default function ManageUsers() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -246,7 +252,9 @@ export default function ManageUsers() {
                   id="name"
                   className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
                 >
-                  {formatName(user)}
+                  <div className="max-w-full break-words">
+                    {formatName(user)}
+                  </div>
 
                   {user.last_login && cur_online ? (
                     <div

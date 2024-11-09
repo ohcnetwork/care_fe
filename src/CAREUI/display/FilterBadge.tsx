@@ -1,4 +1,4 @@
-import CareIcon from "../icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 export interface FilterBadgeProps {
   name: string;

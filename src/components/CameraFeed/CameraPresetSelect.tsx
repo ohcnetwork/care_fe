@@ -4,11 +4,14 @@ import {
   ListboxOption,
   ListboxOptions,
 } from "@headlessui/react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
-import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
-import { CameraPreset } from "./routes";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { CameraPreset } from "@/components/CameraFeed/routes";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { dropdownOptionClassNames } from "@/components/Form/MultiSelectMenuV2";
+
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   disabled?: boolean;

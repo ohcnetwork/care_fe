@@ -1,17 +1,22 @@
 import { forIn } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
 import { useTranslation } from "react-i18next";
-import { Cancel, Submit } from "./components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useDragAndDrop from "../../Utils/useDragAndDrop";
-import ExcelViewer from "./ExcelViewer";
 import * as XLSX from "xlsx";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import ExcelViewer from "@/components/Common/ExcelViewer";
+
+import useDragAndDrop from "@/hooks/useDragAndDrop";
+
 import schemaParser, {
-  SchemaType,
   ErrorData,
   ParsedData,
+  SchemaType,
 } from "@/common/schemaParser";
+
+import * as Notification from "@/Utils/Notifications";
 
 interface Props {
   handleSubmit: (data: any) => void;

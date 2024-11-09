@@ -1,5 +1,8 @@
-import { AssetClass, AssetData } from "../Assets/AssetTypes";
-import { ChannelOptions, VitalsWaveformBase } from "./types";
+import { AssetClass, AssetData } from "@/components/Assets/AssetTypes";
+import {
+  ChannelOptions,
+  VitalsWaveformBase,
+} from "@/components/VitalsMonitor/types";
 
 /**
  * Maps a value from one range to another.

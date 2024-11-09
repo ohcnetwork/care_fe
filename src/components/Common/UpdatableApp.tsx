@@ -1,8 +1,11 @@
 import { Popover, Transition } from "@headlessui/react";
 import { ReactNode, useEffect, useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
-import ButtonV2 from "./components/ButtonV2";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+
+import { classNames } from "@/Utils/utils";
 
 const META_URL = "/build-meta.json";
 const APP_VERSION_KEY = "app-version";

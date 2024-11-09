@@ -1,12 +1,15 @@
 import { Link } from "raviger";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { classNames, formatDateTime } from "../../Utils/utils";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/components/Page";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface IProps {
   facilityId: string;
@@ -184,6 +187,13 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                 </table>
               </div>
             </div>
+            {consentsResult?.results.length === 0 && (
+              <div className="flex min-h-[12rem] items-center justify-center p-4">
+                <p className="text-2xl font-bold text-secondary-600">
+                  {t("no_records_found")}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
