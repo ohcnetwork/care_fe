@@ -22,8 +22,8 @@ module.exports = {
   theme: {
     extend: {
       screens: {
-        largedisplay: "130rem",
-        fourk: "187rem", // rem is used insted of pixel
+        "4xl": "160rem",
+        "4k": "240rem", // rem is used insted of pixel
       },
       fontFamily: {
         sans: ["Figtree", "sans-serif"],

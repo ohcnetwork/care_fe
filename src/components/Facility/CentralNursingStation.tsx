@@ -40,24 +40,23 @@ interface Props {
 }
 
 export default function CentralNursingStation({ facilityId }: Props) {
-  const breakpointValues = {
+  const perPageLimit = useBreakpoints({
     default: 6,
-    largedisplay: 9,
-    fourK: 24,
-  };
-  const PER_PAGE_LIMIT = useBreakpoints(breakpointValues);
+    "4xl": 9,
+    "4k": 24,
+  });
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
-    limit: PER_PAGE_LIMIT,
+    limit: perPageLimit,
   });
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
       ...qParams,
       page: qParams.page || 1,
-      limit: PER_PAGE_LIMIT,
-      offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
+      limit: perPageLimit,
+      offset: (qParams.page ? qParams.page - 1 : 0) * perPageLimit,
       asset_class: "HL7MONITOR",
       ordering: qParams.ordering || "bed__name",
       bed_is_occupied:
@@ -91,7 +90,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           <Pagination
             className=""
             cPage={qParams.page}
-            defaultPerPage={PER_PAGE_LIMIT}
+            defaultPerPage={perPageLimit}
             data={{ totalCount }}
             onChange={(page) => updatePage(page)}
           />
@@ -219,7 +218,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           {t("no_vitals_present")}
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 largedisplay:grid-cols-3 fourk:grid-cols-6">
+        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 4xl:grid-cols-3 4k:grid-cols-6">
           {data.map((props, i) => (
             <div className="overflow-hidden text-clip" key={i}>
               <HL7PatientVitalsMonitor
