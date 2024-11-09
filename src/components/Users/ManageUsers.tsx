@@ -12,11 +12,10 @@ import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import Pagination from "@/components/Common/Pagination";
-import Tabs from "@/components/Common/Tabs";
 import { FacilityModel } from "@/components/Facility/models";
-import SearchInput from "@/components/Form/SearchInput";
 import UnlinkFacilityDialog from "@/components/Users/UnlinkFacilityDialog";
 import UserFilter from "@/components/Users/UserFilter";
+import UserListView from "@/components/Users/UserListAndCard";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
@@ -28,8 +27,6 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
-
-import { UserGrid, UserList } from "./UserListAndCard";
 
 export default function ManageUsers() {
   const { t } = useTranslation();
@@ -50,7 +47,6 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [activeTab, setActiveTab] = useState(0);
 
   const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.home_facility },
@@ -106,9 +102,6 @@ export default function ManageUsers() {
     </ButtonV2>
   );
 
-  const renderCard = () => <UserGrid users={userListData?.results} />;
-  const renderList = () => <UserList users={userListData?.results} />;
-
   if (userListLoading || districtDataLoading || !userListData?.results) {
     return <Loading />;
   }
@@ -116,45 +109,11 @@ export default function ManageUsers() {
   if (userListData?.results.length) {
     manageUsers = (
       <div>
-        <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <div className="sm:w-1/2">
-            <SearchInput
-              id="search-by-username"
-              name="username"
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              value={qParams.username}
-              placeholder={t("search_by_username")}
-            />
-          </div>
-          <Tabs
-            tabs={[
-              {
-                text: (
-                  <div className="flex items-center gap-2">
-                    <CareIcon icon="l-credit-card" className="text-lg" />
-                    <span>Card</span>
-                  </div>
-                ),
-                value: 0,
-              },
-              {
-                text: (
-                  <div className="flex items-center gap-2">
-                    <CareIcon icon="l-list-ul" className="text-lg" />
-                    <span>List</span>
-                  </div>
-                ),
-                value: 1,
-              },
-            ]}
-            currentTab={activeTab}
-            onTabChange={(tab) => setActiveTab(tab as number)}
-            className="float-right"
-          />
-        </div>
-        <div className="clear-both">
-          {activeTab === 0 ? renderCard() : renderList()}
-        </div>
+        <UserListView
+          users={userListData?.results ?? []}
+          onSearch={(username) => updateQuery({ username })}
+          searchValue={qParams.username}
+        />
         <Pagination totalCount={userListData.count} />
       </div>
     );

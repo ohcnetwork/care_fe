@@ -1,12 +1,12 @@
 import { navigate } from "raviger";
-import { useMemo } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Avatar } from "@/components/Common/Avatar";
-import { UserModel } from "@/components/Users/models";
+import { UserAssignedModel, UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useWindowDimensions from "@/hooks/useWindowDimensions";
@@ -20,43 +20,108 @@ import {
   relativeTime,
 } from "@/Utils/utils";
 
+import Tabs from "../Common/Tabs";
+import SearchInput from "../Form/SearchInput";
+
+interface UserListViewProps {
+  users: UserModel[] | UserAssignedModel[];
+  onSearch: (username: string) => void;
+  searchValue: string;
+}
+
+export default function UserListView({
+  users,
+  onSearch,
+  searchValue,
+}: UserListViewProps) {
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState(0);
+
+  return (
+    <>
+      <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+        <div className="sm:w-1/2">
+          <SearchInput
+            id="search-by-username"
+            name="username"
+            onChange={(e) => onSearch(e.value)}
+            value={searchValue}
+            placeholder={t("search_by_username")}
+          />
+        </div>
+        <Tabs
+          tabs={[
+            {
+              text: (
+                <div className="flex items-center gap-2">
+                  <CareIcon icon="l-credit-card" className="text-lg" />
+                  <span>Card</span>
+                </div>
+              ),
+              value: 0,
+            },
+            {
+              text: (
+                <div className="flex items-center gap-2">
+                  <CareIcon icon="l-list-ul" className="text-lg" />
+                  <span>List</span>
+                </div>
+              ),
+              value: 1,
+            },
+          ]}
+          currentTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as number)}
+          className="float-right"
+        />
+      </div>
+      {activeTab === 0 ? (
+        <UserGrid users={users} />
+      ) : (
+        <UserList users={users} />
+      )}
+    </>
+  );
+}
+
 export const GetUserTypes = () => {
   const authUser = useAuthUser();
 
-  return useMemo(() => {
-    const userIndex = USER_TYPES.indexOf(authUser.user_type);
-    const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
-    const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
+  const userIndex = USER_TYPES.indexOf(authUser.user_type);
+  const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
+  const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
 
-    // Superuser gets all options
-    if (authUser.is_superuser) {
-      return [...USER_TYPE_OPTIONS];
-    }
+  // Superuser gets all options
+  if (authUser.is_superuser) {
+    return [...USER_TYPE_OPTIONS];
+  }
 
-    switch (authUser.user_type) {
-      case "StaffReadOnly":
-        return readOnlyUsers.slice(0, 1);
-      case "DistrictReadOnlyAdmin":
-        return readOnlyUsers.slice(0, 2);
-      case "StateReadOnlyAdmin":
-        return readOnlyUsers.slice(0, 3);
-      case "Pharmacist":
-        return USER_TYPE_OPTIONS.slice(0, 1);
-      case "Nurse":
-      case "Staff":
-        return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
-      default:
-        return defaultAllowedUserTypes;
-    }
-  }, [authUser.user_type, authUser.is_superuser]);
+  switch (authUser.user_type) {
+    case "StaffReadOnly":
+      return readOnlyUsers.slice(0, 1);
+    case "DistrictReadOnlyAdmin":
+      return readOnlyUsers.slice(0, 2);
+    case "StateReadOnlyAdmin":
+      return readOnlyUsers.slice(0, 3);
+    case "Pharmacist":
+      return USER_TYPE_OPTIONS.slice(0, 1);
+    case "Nurse":
+    case "Staff":
+      return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
+    default:
+      return defaultAllowedUserTypes;
+  }
 };
 
-export const CanUserAccess = (user: UserModel) => {
-  const allowedTypes = useMemo(() => GetUserTypes().map((type) => type.id), []);
+export const CanUserAccess = (user: UserModel | UserAssignedModel) => {
+  const allowedTypes = GetUserTypes().map((type) => type.id);
   return allowedTypes.includes(user.user_type);
 };
 
-const getNameAndStatusCard = (user: UserModel, cur_online: boolean) => {
+const getNameAndStatusCard = (
+  user: UserModel | UserAssignedModel,
+  cur_online: boolean,
+) => {
   return (
     <div>
       <div className="flex items-center gap-3">
@@ -76,7 +141,7 @@ const getNameAndStatusCard = (user: UserModel, cur_online: boolean) => {
     </div>
   );
 };
-const UserCard = ({ user }: { user: UserModel }) => {
+const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
   const cur_online = isUserOnline(user);
   const { width } = useWindowDimensions();
   const mediumScreenBreakpoint = 640;
@@ -108,10 +173,16 @@ const UserCard = ({ user }: { user: UserModel }) => {
                   {user.home_facility_object?.name || t("no_home_facility")}
                 </div>
               </div>
-              {user.district_object && (
+              {"district_object" in user && user.district_object && (
                 <div className="text-sm">
                   <div className="text-gray-500">{t("district")}</div>
                   <div className="font-medium">{user.district_object.name}</div>
+                </div>
+              )}
+              {"district" in user && user.district && (
+                <div className="text-sm">
+                  <div className="text-gray-500">{t("district")}</div>
+                  <div className="font-medium">{user.district}</div>
                 </div>
               )}
               {user.weekly_working_hours && (
@@ -138,7 +209,11 @@ const UserCard = ({ user }: { user: UserModel }) => {
     </Card>
   );
 };
-export const UserGrid = ({ users }: { users?: UserModel[] }) => (
+export const UserGrid = ({
+  users,
+}: {
+  users?: UserModel[] | UserAssignedModel[];
+}) => (
   <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 sm:grid-cols-2">
     {users?.map((user) => <UserCard key={user.id} user={user} />)}
   </div>
@@ -160,7 +235,7 @@ const UserListHeader = () => {
   );
 };
 
-const UserListRow = ({ user }: { user: UserModel }) => {
+const UserListRow = ({ user }: { user: UserModel | UserAssignedModel }) => {
   const { t } = useTranslation();
   return (
     <tr
@@ -190,7 +265,13 @@ const UserListRow = ({ user }: { user: UserModel }) => {
       <td className="px-4 py-4 text-sm">
         {user.home_facility_object?.name || t("no_home_facility")}
       </td>
-      <td className="px-4 py-4 text-sm">{user.district_object?.name || ""}</td>
+      <td className="px-4 py-4 text-sm">
+        {"district_object" in user && user.district
+          ? user.district_object?.name
+          : "district" in user && user.district
+            ? user.district
+            : ""}
+      </td>
       <td className="px-4 py-4">
         {CanUserAccess(user) && (
           <button
@@ -205,7 +286,11 @@ const UserListRow = ({ user }: { user: UserModel }) => {
     </tr>
   );
 };
-export const UserList = ({ users }: { users?: UserModel[] }) => (
+export const UserList = ({
+  users,
+}: {
+  users?: UserModel[] | UserAssignedModel[];
+}) => (
   <div className="overflow-x-auto rounded-lg border border-gray-200">
     <table className="min-w-full divide-y divide-gray-200">
       <UserListHeader />
@@ -221,7 +306,7 @@ export const UserStatusIndicator = ({
   className,
   addPadding = false,
 }: {
-  user: UserModel;
+  user: UserModel | UserAssignedModel;
   className?: string;
   addPadding?: boolean;
 }) => {
