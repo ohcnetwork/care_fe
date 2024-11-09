@@ -37,9 +37,9 @@ describe("Sample Test", () => {
     // Ensure patient list API is loaded before proceeding
     cy.awaitUrl("/patients");
     patientPage.visitPatient(patientName);
-    sampleTestPage.interceptPatientDetailsAPI();
+    patientConsultationPage.interceptPatientDetailsAPI();
     patientConsultationPage.clickPatientDetails();
-    sampleTestPage.verifyPatientDetailsResponse();
+    patientConsultationPage.verifyPatientDetailsResponse();
     // Visit SampleRequest Page
     sampleTestPage.visitSampleRequestPage();
     // Fill Sample Test Request Form

@@ -93,14 +93,6 @@ export class SampleTestPage {
     cy.verifyContentPresence("#etiology_identified", [etiologyIdentified]);
   }
 
-  interceptPatientDetailsAPI(): void {
-    cy.intercept("GET", "**/api/v1/patient/**").as("patientDetails");
-  }
-
-  verifyPatientDetailsResponse(): void {
-    cy.wait("@patientDetails").its("response.statusCode").should("eq", 200);
-  }
-
   interceptSampleTestReq(): void {
     cy.intercept("GET", "**/api/v1/patient/*/test_sample/**").as(
       "sampleDetails",
