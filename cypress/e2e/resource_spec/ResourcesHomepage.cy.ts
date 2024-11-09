@@ -1,6 +1,6 @@
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ResourcePage from "../../pageobject/Resource/ResourcePage";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 
 describe("Resource Page", () => {
   let createdResource: string;
@@ -68,6 +68,10 @@ describe("Resource Page", () => {
     cy.visit(createdResource);
     resourcePage.clickUpdateStatus();
     resourcePage.updateStatus("APPROVED");
+    cy.clickAndSelectOption(
+      "input[name='assigned_facility_object']",
+      "Dummy Request Fulfilment Center, Ernakulam",
+    );
     resourcePage.clickSubmitButton();
     resourcePage.verifySuccessNotification(
       "Resource request updated successfully",
