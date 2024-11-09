@@ -19,6 +19,8 @@ import {
   mergeQueryOptions,
 } from "@/Utils/utils";
 
+import { Avatar } from "./Avatar";
+
 type BaseProps = FormFieldBaseProps<UserBareMinimum> & {
   placeholder?: string;
   userType?: UserRole;
@@ -67,6 +69,16 @@ export default function UserAutocomplete(props: UserSearchProps) {
     }
   }, [loading, field.required, data?.results, props.noResultsError]);
 
+  const getAvatar = (option: UserBareMinimum) => {
+    return (
+      <Avatar
+        className="h-11 w-11 rounded-full"
+        name={formatName(option)}
+        imageUrl={option.read_profile_picture_url}
+      />
+    );
+  };
+
   return (
     <FormField field={field}>
       <Autocomplete
@@ -83,6 +95,7 @@ export default function UserAutocomplete(props: UserSearchProps) {
         )}
         optionLabel={formatName}
         optionIcon={userOnlineDot}
+        optionImage={getAvatar}
         optionDescription={(option) =>
           `${option.user_type} - ${option.username}`
         }
