@@ -166,7 +166,7 @@
       "eslint --fix",
       "git update-index --again"
     ],
-    "src/Locale/*.json": [
+    "public/locale/*.json": [
       "npm run sort-locales"
     ]
   },
