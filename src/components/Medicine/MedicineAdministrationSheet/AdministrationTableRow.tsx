@@ -58,6 +58,25 @@ export default function MedicineAdministrationTableRow({
       key: `${prescription.last_administration?.administered_date}`,
     },
   );
+  const TableContent = () => (
+    <div className="flex justify-center">
+      <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
+        {prescription.dosage_type !== "TITRATED" ? (
+          <p>{prescription.base_dosage}</p>
+        ) : (
+          <p>
+            {prescription.base_dosage} - {prescription.target_dosage}
+          </p>
+        )}
+
+        <p className="max-w-[6rem] truncate">
+          {prescription.dosage_type !== "PRN"
+            ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
+            : prescription.indicator}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -215,26 +234,13 @@ export default function MedicineAdministrationTableRow({
                 {prescription.medicine_object?.generic}
               </span>
             </div>
-          </div>
-        </td>
-        <td>
-          <div className="flex justify-center">
-            <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
-              {prescription.dosage_type !== "TITRATED" ? (
-                <p>{prescription.base_dosage}</p>
-              ) : (
-                <p>
-                  {prescription.base_dosage} - {prescription.target_dosage}
-                </p>
-              )}
-
-              <p className="max-w-[6rem] truncate">
-                {prescription.dosage_type !== "PRN"
-                  ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
-                  : prescription.indicator}
-              </p>
+            <div className="block lg:hidden">
+              <TableContent />
             </div>
           </div>
+        </td>
+        <td className="hidden lg:table-cell">
+          <TableContent />
         </td>
 
         <td />
