@@ -5,7 +5,7 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -29,6 +29,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
+  optionImage?: OptionCallback<T, ReactNode | undefined>;
   optionDisabled?: OptionCallback<T, boolean>;
   minQueryLength?: number;
   onQuery?: (query: string) => void;
@@ -55,6 +56,7 @@ const AutocompleteFormField = <T, V>(
         placeholder={props.placeholder}
         optionLabel={props.optionLabel}
         optionIcon={props.optionIcon}
+        optionImage={props.optionImage}
         optionValue={props.optionValue}
         optionDescription={props.optionDescription}
         optionDisabled={props.optionDisabled}
@@ -79,6 +81,7 @@ type AutocompleteProps<T, V = T> = {
   placeholder?: string;
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
+  optionImage?: OptionCallback<T, ReactNode | undefined>;
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionDisabled?: OptionCallback<T, boolean>;
@@ -89,7 +92,6 @@ type AutocompleteProps<T, V = T> = {
   isLoading?: boolean;
   allowRawInput?: boolean;
   error?: string;
-  avatar?: boolean;
 } & (
   | {
       required?: false;
@@ -124,6 +126,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       description,
       search: label.toLowerCase(),
       icon: props.optionIcon?.(option),
+      image: props.optionImage?.(option),
       value: props.optionValue ? props.optionValue(option) : option,
       disabled: props.optionDisabled?.(option),
     };
@@ -143,6 +146,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
         description: undefined,
         search: query.toLowerCase(),
         icon: <CareIcon icon="l-plus" />,
+        image: undefined,
         value: query,
         disabled: undefined,
       },
@@ -241,25 +245,28 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                     disabled={option.disabled}
                   >
                     {({ focus }) => (
-                      <div className="flex flex-col">
-                        <div className="flex justify-between">
-                          <span>{option.label}</span>
-                          <span>{option.icon}</span>
-                        </div>
-                        {option.description && (
-                          <div
-                            className={classNames(
-                              "text-sm font-normal",
-                              option.disabled
-                                ? "text-secondary-700"
-                                : focus
-                                  ? "text-primary-200"
-                                  : "text-secondary-700",
-                            )}
-                          >
-                            {option.description}
+                      <div className="flex flex-row gap-2">
+                        {option?.image}
+                        <div className="flex flex-grow flex-col">
+                          <div className="flex justify-between">
+                            <span>{option.label}</span>
+                            <span>{option.icon}</span>
                           </div>
-                        )}
+                          {option.description && (
+                            <div
+                              className={classNames(
+                                "text-sm font-normal",
+                                option.disabled
+                                  ? "text-secondary-700"
+                                  : focus
+                                    ? "text-primary-200"
+                                    : "text-secondary-700",
+                              )}
+                            >
+                              {option.description}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </ComboboxOption>
