@@ -23,10 +23,6 @@ export default class FacilityNotify {
     cy.get("a[href='/notice_board']").should("be.visible").click();
   }
 
-  visitNotificationSideBar(): void {
-    cy.get("#notification-slide-btn").should("be.visible").click();
-  }
-
   updateUrl(): void {
     cy.awaitUrl(
       "http://localhost:4000/facility?page=1&limit=14&search=Dummy+Facility+40",
