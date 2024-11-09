@@ -1,6 +1,7 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientFileUpload } from "../../pageobject/Patient/PatientFileupload";
+
 const loginPage = new LoginPage();
 const patientPage = new PatientPage();
 const patientFileUpload = new PatientFileUpload();
