@@ -15,7 +15,6 @@ const secondary = {
 };
 
 /** @type {import('tailwindcss').Config} */
-
 module.exports = {
   important: true,
   darkMode: ["class"],
@@ -23,7 +22,7 @@ module.exports = {
     extend: {
       screens: {
         "4xl": "160rem",
-        "4k": "240rem", // rem is used insted of pixel
+        "4k": "240rem",
       },
       fontFamily: {
         sans: ["Figtree", "sans-serif"],
