@@ -454,7 +454,7 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <div className="">
                   <QRCodeSVG
-                    value={`${window.location.origin}/shifting/ data.id`}
+                    value={`${window.location.origin}/shifting/${data.id}`}
                   />
                 </div>
               </div>
