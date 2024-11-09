@@ -47,7 +47,7 @@
     "prepare": "husky",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write",
+    "format": "prettier ./src ./cypress --write",
     "sort-locales": "node ./scripts/sort-locales.js"
   },
   "dependencies": {
