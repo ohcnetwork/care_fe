@@ -1139,6 +1139,30 @@ input[type="number"] {
     background-color: #fbfafc;
 }
 
+/* styles for file src/components/Assets/AssetManage.tsx */
+
+@media (min-width: 1280px) and (max-width: 1286px){
+    .responsive-flex-col {
+      flex-direction: column!important;
+    }
+}
+  
+@media (max-width: 768px){
+    .responsive-flex-col {
+      flex-direction: column!important;
+    }
+}
+@media (min-width: 920px) and (max-width: 1012px) {
+    .responsive-flex-col {
+        flex-direction: column!important;
+    }
+}
+
+@media (min-width: 769px) and (max-width:940px) {
+    .responsive-width {
+        width:320px;
+    }
+}
 
 /* Copied CSS */
 

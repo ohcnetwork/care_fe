@@ -544,3 +544,14 @@ export const fahrenheitToCelsius = (fahrenheit: number) => {
 export const keysOf = <T extends object>(obj: T) => {
   return Object.keys(obj) as (keyof T)[];
 };
+
+/**
+ * Converts a given string to snake_case format for translation.
+ * @param text - The input text to be converted
+ * @returns The text in snake_case format
+ */
+export const toSnakeCase = (text: string): string =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, " ");

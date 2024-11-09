@@ -425,7 +425,7 @@ const AssetManage = (props: AssetManageProps) => {
                 },
               ].map(detailBlock)}
             </div>
-            <div className="flex flex-col gap-1 md:flex-row">
+            <div className="flex flex-row gap-1 responsive-flex-col">
               <ButtonV2
                 className="flex gap-2"
                 onClick={() =>

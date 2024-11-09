@@ -6,7 +6,7 @@ import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { AssetData } from "@/components/Assets/AssetTypes";
 
-import { formatDate } from "@/Utils/utils";
+import { formatDate, toSnakeCase } from "@/Utils/utils";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
   const { asset } = props;
@@ -31,7 +31,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
   }, [isCopied]);
 
   return (
-    <div className="warranty-card relative z-10 flex h-full w-screen flex-col overflow-hidden p-6 text-white transition-all hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 md:w-full md:rounded-xl xl:w-96">
+    <div className="warranty-card relative z-10 flex h-full w-full flex-col overflow-hidden p-6 text-white transition-all hover:scale-[1.01] rounded-lg hover:from-primary-600 hover:to-primary-700 xl:w-96">
       <div className="mb-3 text-right text-lg font-bold italic">
         {asset.manufacturer}
       </div>
@@ -39,8 +39,8 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
         <div className="flex h-full w-full flex-col gap-4 md:border-r xl:w-auto xl:border-r-0">
           {Object.keys(details).map((key) => (
             <div className="">
-              <div className="mb-1 text-xs uppercase italic tracking-widest text-secondary-200">
-                {key}
+              <div className="mb-1 text-sm uppercase italic tracking-widest text-secondary-200">
+                {t(toSnakeCase(key.toString()))}
               </div>
               <div className="flex items-center gap-2 font-semibold">
                 {details[key as keyof typeof details] || "--"}
@@ -68,8 +68,8 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
         <div className="mb-2 hidden h-px w-full bg-white/40 xl:block" />
         <div className="shrink-0">
           <div>
-            <div className="mb-1 text-xs uppercase italic tracking-widest text-secondary-200">
-              Customer Support Details
+            <div className="mb-1 text-sm uppercase italic tracking-widest text-secondary-200">
+              {t("customer_support_details")}
             </div>
             <div className="font-semibold">{asset.support_name || "--"}</div>
           </div>
@@ -78,20 +78,22 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
               ["Phone", asset.support_phone, "l-phone"],
               ["Email", asset.support_email, "l-envelope"],
             ].map((item) => (
-              <div className="flex items-center">
+              <div className="flex items-center flex-wrap responsive-width leading-5 mt-2">
                 {item[1] && (
                   <>
-                    <div className="w-16 italic text-secondary-200">
-                      {item[0]} :
-                    </div>
+                    <span className="mr-3 italic">
+                      {t(toSnakeCase(item[0]))}&nbsp;:
+                    </span>
                     <a
                       href={
                         (item[0] === "Email" ? "mailto:" : "tel:") + item[1]
                       }
                       className="border-b border-primary-300 text-primary-300 hover:text-primary-400"
                     >
-                      <CareIcon icon={item[2] as IconName} className="mr-1" />
-                      {item[1]}
+                      <span className="break-all">
+                        <CareIcon icon={item[2] as IconName} className="mr-1" />
+                        <span>{item[1]}</span>
+                      </span>
                     </a>
                   </>
                 )}
