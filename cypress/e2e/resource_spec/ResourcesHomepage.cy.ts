@@ -68,6 +68,10 @@ describe("Resource Page", () => {
     cy.visit(createdResource);
     resourcePage.clickUpdateStatus();
     resourcePage.updateStatus("APPROVED");
+    cy.clickAndSelectOption(
+      "input[name='assigned_facility_object']",
+      "Dummy Request Fulfilment Center, Ernakulam",
+    );
     resourcePage.clickSubmitButton();
     resourcePage.verifySuccessNotification(
       "Resource request updated successfully",
