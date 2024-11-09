@@ -1,7 +1,8 @@
-import LoginPage from "../../pageobject/Login/LoginPage";
-import FacilityManage from "../../pageobject/Facility/FacilityManage";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { v4 as uuidv4 } from "uuid";
+
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import FacilityManage from "../../pageobject/Facility/FacilityManage";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Facility Manage Functions", () => {
   const loginPage = new LoginPage();
