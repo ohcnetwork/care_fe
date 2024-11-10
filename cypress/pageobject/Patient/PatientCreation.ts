@@ -221,7 +221,7 @@ export class PatientPage {
   }
 
   clickPatientUpdateDetails() {
-    cy.verifyAndClickElement("#update-patient-details", "Patient Details");
+    cy.verifyAndClickElement("#update-patient-details", "Update Details");
   }
 
   interceptFacilities() {

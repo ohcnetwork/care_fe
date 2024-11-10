@@ -125,6 +125,9 @@ export class PatientConsultationPage {
   }
 
   clickClaimsButton() {
-    cy.verifyAndClickElement("#consultation-buttons", "Claims");
+    cy.get("#log-update").scrollIntoView();
+    cy.intercept(/\/api\/hcx\/policy\/\?.*/).as("policyStatus");
+    cy.get("#consultation-buttons").contains("Claims").click();
+    cy.wait("@policyStatus").its("response.statusCode").should("eq", 200);
   }
 }

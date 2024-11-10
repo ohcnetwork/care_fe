@@ -1,8 +1,9 @@
+import { HcxClaims } from "pageobject/Hcx/HcxClaims";
 import { PatientConsultationPage } from "pageobject/Patient/PatientConsultation";
+import PatientInsurance from "pageobject/Patient/PatientInsurance";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
-import PatientInsurance from "pageobject/Patient/PatientInsurance";
-import { HcxClaims } from "pageobject/Hcx/HcxClaims";
 
 describe("HCX Claims configuration and approval workflow", () => {
   const loginPage = new LoginPage();
@@ -17,7 +18,7 @@ describe("HCX Claims configuration and approval workflow", () => {
   const patientInsurerName = "Demo Payor";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -27,7 +28,7 @@ describe("HCX Claims configuration and approval workflow", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Verify the HCX Workflow for a patient", () => {
+  it("Verify the HCX Workflow for a patient with mocked eligibility", () => {
     // Modify the insurance for a facility
     patientPage.visitPatient(hcxPatientName);
     patientConsultationPage.clickPatientDetails();
@@ -46,7 +47,33 @@ describe("HCX Claims configuration and approval workflow", () => {
     patientInsurance.selectHcxInsurer(patientInsurerName);
     cy.submitButton("Save Details");
     cy.verifyNotification("Patient updated successfully");
+    cy.closeNotification();
+    // Navigate to Consultation View and capture dynamic consultation ID
+    let consultationId: string;
     patientConsultationPage.clickViewConsultationButton();
+    cy.url().then((url) => {
+      const urlRegex =
+        /facility\/([^/]+)\/patient\/([^/]+)\/consultation\/([^/]+)/;
+      const match = url.match(urlRegex);
+      if (match) {
+        consultationId = match[3];
+      }
+    });
+    // Intercept and mock the eligibility check response using captured consultationId
+    cy.intercept("POST", "/api/hcx/check_eligibility", (req) => {
+      req.reply({
+        statusCode: 200,
+        body: {
+          api_call_id: "bfa228f0-cdfa-4426-bebe-26e996079dbb",
+          correlation_id: "86ae030c-1b33-4e52-a6f1-7a74a48111eb",
+          timestamp: Date.now(),
+          consultation: consultationId,
+          policy: patientPolicyId,
+          outcome: "Complete",
+          limit: 1,
+        },
+      });
+    }).as("checkEligibility");
     // Raise a HCX Pre-auth
     patientConsultationPage.clickManagePatientButton();
     patientConsultationPage.clickClaimsButton();
@@ -54,8 +81,11 @@ describe("HCX Claims configuration and approval workflow", () => {
     hcxClaims.verifyPolicyEligibity();
     cy.verifyNotification("Checking Policy Eligibility");
     cy.closeNotification();
-    // Raise a HCX Claim
-    // Approve the HCX from there website
+    // Confirm that the eligibility check displays as successful
+    cy.wait("@checkEligibility").then((interception) => {
+      const response = interception.response.body;
+      expect(response.outcome).to.equal("Complete");
+    });
   });
 
   afterEach(() => {
