@@ -178,11 +178,7 @@ export const FacilityList = () => {
       <div className="mt-4 gap-2 lg:flex">
         <CountBlock
           text="Total Facilities"
-          count={
-            isLoading || permittedData?.count === undefined
-              ? null
-              : permittedData.count
-          }
+          count={permittedData ? permittedData.count : null}
           loading={isLoading}
           icon="l-hospital"
           className="flex-1"

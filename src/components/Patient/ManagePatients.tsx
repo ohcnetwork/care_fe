@@ -974,9 +974,7 @@ export const PatientManager = () => {
           <div className="flex-1" id="total-patientcount">
             <CountBlock
               text="Total Patients"
-              count={
-                isLoading || data?.count === undefined ? null : data?.count
-              }
+              count={data ? data.count : null}
               loading={isLoading}
               icon="l-user-injured"
               className="pb-12"
