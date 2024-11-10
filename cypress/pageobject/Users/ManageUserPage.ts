@@ -172,14 +172,6 @@ export class ManageUserPage {
         });
       });
   }
-
-  interceptFacilitySearchReq() {
-    cy.intercept("GET", "**/api/v1/facility/**").as("searchFacility");
-  }
-
-  verifyFacilitySearchReq() {
-    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
-  }
 }
 
 export default ManageUserPage;
