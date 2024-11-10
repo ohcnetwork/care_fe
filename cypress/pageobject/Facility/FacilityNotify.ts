@@ -11,44 +11,39 @@ export default class FacilityNotify {
     cy.get("#NotifyModalMessageInput").should("be.visible").type(message);
   }
 
-  openNotificationSlide(): void {
+  openNotificationSlide() {
     cy.get("#notification-slide-btn").should("be.visible").click();
   }
 
-  closeNotificationSlide(): void {
+  closeNotificationSlide() {
     cy.get("#close-slide-over").should("be.visible").click();
   }
 
-  visitNoticeBoard(): void {
+  visitNoticeBoard() {
     cy.get("a[href='/notice_board']").should("be.visible").click();
   }
 
-  updateUrl(): void {
-    cy.awaitUrl(
-      "http://localhost:4000/facility?page=1&limit=14&search=Dummy+Facility+40",
-    );
+  visitNotificationSideBar() {
+    cy.get("#notification-slide-btn").should("be.visible").click();
   }
 
-  interceptFacilitySearchReq(): void {
-    cy.intercept("GET", "**/api/v1/facility/**").as("searchFacility");
-  }
-  verifyFacilitySearchReq(): void {
-    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
+  verifyUrlContains(substring: string) {
+    cy.url().should("include", substring);
   }
 
-  interceptPostNotificationReq(): void {
+  interceptPostNotificationReq() {
     cy.intercept("POST", "**/api/v1/notification/notify").as("notifyFacility");
   }
 
-  verifyPostNotificationReq(): void {
+  verifyPostNotificationReq() {
     cy.wait("@notifyFacility").its("response.statusCode").should("eq", 204);
   }
 
-  interceptGetNotificationReq(): void {
+  interceptGetNotificationReq() {
     cy.intercept("GET", "**/api/v1/notification/**").as("getNotifications");
   }
 
-  verifyGetNotificationReq(): void {
+  verifyGetNotificationReq() {
     cy.wait("@getNotifications").its("response.statusCode").should("eq", 200);
   }
 }
