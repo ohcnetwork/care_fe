@@ -44,7 +44,10 @@ describe("HCX Claims configuration and approval workflow", () => {
       "policy_id",
       patientPolicyId,
     );
-    patientInsurance.selectHcxInsurer(patientInsurerName);
+    patientInsurance.selectPatientInsurerName(
+      firstInsuranceIdentifier,
+      patientInsurerName,
+    );
     cy.submitButton("Save Details");
     cy.verifyNotification("Patient updated successfully");
     cy.closeNotification();
