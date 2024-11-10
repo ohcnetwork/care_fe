@@ -6,6 +6,8 @@ import Card from "@/CAREUI/display/Card";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Avatar } from "@/components/Common/Avatar";
+import Tabs from "@/components/Common/Tabs";
+import SearchInput from "@/components/Form/SearchInput";
 import { UserAssignedModel, UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -19,9 +21,6 @@ import {
   isUserOnline,
   relativeTime,
 } from "@/Utils/utils";
-
-import Tabs from "../Common/Tabs";
-import SearchInput from "../Form/SearchInput";
 
 interface UserListViewProps {
   users: UserModel[] | UserAssignedModel[];
@@ -84,7 +83,7 @@ export default function UserListView({
   );
 }
 
-export const GetUserTypes = () => {
+export const GetUserTypes = (editForm = false) => {
   const authUser = useAuthUser();
 
   const userIndex = USER_TYPES.indexOf(authUser.user_type);
@@ -107,6 +106,8 @@ export const GetUserTypes = () => {
       return USER_TYPE_OPTIONS.slice(0, 1);
     case "Nurse":
     case "Staff":
+      if (editForm) return [...defaultAllowedUserTypes];
+      // Temporarily allows creation of users with elevated permissions due to introduction of new roles.
       return [...defaultAllowedUserTypes, USER_TYPE_OPTIONS[6]];
     default:
       return defaultAllowedUserTypes;
@@ -114,7 +115,7 @@ export const GetUserTypes = () => {
 };
 
 export const CanUserAccess = (user: UserModel | UserAssignedModel) => {
-  const allowedTypes = GetUserTypes().map((type) => type.id);
+  const allowedTypes = GetUserTypes(true).map((type) => type.id);
   return allowedTypes.includes(user.user_type);
 };
 

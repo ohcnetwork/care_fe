@@ -1,7 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { UserModel } from "./models";
-import userColumns from "../Common/UserColumns";
-import LinkedSkills from "./LinkedSkills";
+
+import userColumns from "@/components/Common/UserColumns";
+import LinkedSkills from "@/components/Users/LinkedSkills";
+import { UserModel } from "@/components/Users/models";
+
 import UserRoles from "./UserRoles";
 
 type Props = {

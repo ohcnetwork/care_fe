@@ -1,17 +1,20 @@
-import { UserModel } from "./models";
-import { useEffect, useState } from "react";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import {
-  isUserOnline,
-  formatName,
-  classNames,
-  relativeTime,
-} from "@/Utils/utils";
 import dayjs from "dayjs";
 import { t } from "i18next";
-import UserDetails from "../Common/UserDetails";
-import UserDetailComponent from "../Common/UserDetailsComponet";
-import { Avatar } from "../Common/Avatar";
+import { useEffect, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Avatar } from "@/components/Common/Avatar";
+import UserDetails from "@/components/Common/UserDetails";
+import UserDetailComponent from "@/components/Common/UserDetailsComponet";
+import { UserModel } from "@/components/Users/models";
+
+import {
+  classNames,
+  formatName,
+  isUserOnline,
+  relativeTime,
+} from "@/Utils/utils";
 
 export default function UserBanner({ userData }: { userData: UserModel }) {
   const [userOnline, setUserOnline] = useState(false);

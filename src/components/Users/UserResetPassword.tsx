@@ -3,19 +3,19 @@ import { useTranslation } from "react-i18next";
 
 import { Submit } from "@/components/Common/ButtonV2";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-
-import useAuthUser from "@/hooks/useAuthUser";
+import { validateRule } from "@/components/Users/UserAddEditForm";
+import { UpdatePasswordForm, UserModel } from "@/components/Users/models";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
-import { validateRule } from "./UserAddEditForm";
-import { UpdatePasswordForm } from "./models";
-
-export default function UserResetPassword() {
+export default function UserResetPassword({
+  userData,
+}: {
+  userData: UserModel;
+}) {
   const { t } = useTranslation();
-  const authUser = useAuthUser();
 
   const [changePasswordForm, setChangePasswordForm] = useState<{
     username: string;
@@ -23,7 +23,7 @@ export default function UserResetPassword() {
     new_password_1: string;
     new_password_2: string;
   }>({
-    username: authUser.username,
+    username: userData.username,
     old_password: "",
     new_password_1: "",
     new_password_2: "",
@@ -71,7 +71,7 @@ export default function UserResetPassword() {
     } else {
       const form: UpdatePasswordForm = {
         old_password: changePasswordForm.old_password,
-        username: authUser.username,
+        username: userData.username,
         new_password: changePasswordForm.new_password_1,
       };
       const { res, data, error } = await request(routes.updatePassword, {

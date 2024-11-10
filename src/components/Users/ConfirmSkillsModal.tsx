@@ -1,5 +1,6 @@
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { useTranslation } from "react-i18next";
+
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
 
 const ConfirmSkillsModal = ({
   username,

@@ -61,7 +61,7 @@ interface StateObj {
 
 type UserForm = {
   user_type?: string;
-  gender: string;
+  gender: GenderType;
   password?: string;
   c_password?: string;
   facilities?: Array<string>;
@@ -86,7 +86,7 @@ type UserForm = {
 
 const initForm: UserForm = {
   user_type: "",
-  gender: "",
+  gender: "Female",
   password: "",
   c_password: "",
   facilities: [],
@@ -105,8 +105,8 @@ const initForm: UserForm = {
   qualification: undefined,
   doctor_experience_commenced_on: undefined,
   doctor_medical_council_registration: undefined,
-  weekly_working_hours: "",
-  video_connect_link: "",
+  weekly_working_hours: undefined,
+  video_connect_link: undefined,
 };
 
 const STAFF_OR_NURSE_USER = [
@@ -645,7 +645,7 @@ const UserAddEditForm = (props: UserProps) => {
       user_type: formData.user_type,
       gender: formData.gender,
       password: formData.password,
-      facilities: selectedFacility ? selectedFacility : undefined,
+      facilities: formData.facilities ? formData.facilities : undefined,
       home_facility: formData.home_facility ?? undefined,
       username: formData.username,
       first_name: formData.first_name ? formData.first_name : undefined,

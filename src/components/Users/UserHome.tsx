@@ -3,19 +3,18 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import { userChildProps } from "@/components/Common/UserColumns";
 import Error404 from "@/components/ErrorPages/404";
 import LinkedFacilitiesTab from "@/components/Users/LinkedFacilitiesTab";
 import RoleAndSkillsTab from "@/components/Users/RoleAndSkillsTab";
+import UserBanner from "@/components/Users/UserBanner";
+import UserSummaryTab from "@/components/Users/UserSummary";
 import { UserModel } from "@/components/Users/models";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
-
-import Page from "../Common/Page";
-import UserBanner from "./UserBanner";
-import UserSummaryTab from "./UserSummary";
 
 export interface UserHomeProps {
   username: string;
