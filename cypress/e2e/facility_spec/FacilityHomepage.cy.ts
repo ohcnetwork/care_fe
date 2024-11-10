@@ -154,6 +154,7 @@ describe("Facility Homepage Function", () => {
     facilityNotify.verifyPostNotificationReq();
     cy.verifyNotification("Facility Notified");
     cy.closeNotification();
+    cy.wait(2000);
     // Verify the frontend error on empty message
     facilityHome.clickFacilityNotifyButton();
     facilityNotify.verifyFacilityName(facilityName);
