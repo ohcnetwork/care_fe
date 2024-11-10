@@ -12,6 +12,11 @@ export default class FacilityNotify {
     cy.get("#NotifyModalMessageInput").click().type(message);
   }
 
+  verifyFacilityNoticeBoardMessage(message: string) {
+    cy.get("#notification-message", { timeout: 10000 }).should("be.visible");
+    cy.verifyContentPresence("#notification-message", [message]);
+  }
+
   openNotificationSlide() {
     cy.get("#notification-slide-btn").should("be.visible").click();
   }
@@ -40,8 +45,11 @@ export default class FacilityNotify {
     cy.wait("@notifyFacility").its("response.statusCode").should("eq", 204);
   }
 
-  interceptGetNotificationReq() {
-    cy.intercept("GET", "**/api/v1/notification/**").as("getNotifications");
+  interceptGetNotificationReq(event: string = "") {
+    cy.intercept(
+      "GET",
+      `**/api/v1/notification/?offset=0&event=${event}&*=SYSTEM`,
+    ).as("getNotifications");
   }
 
   verifyGetNotificationReq() {

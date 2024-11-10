@@ -166,11 +166,10 @@ describe("Facility Homepage Function", () => {
     loginPage.clickSignOutBtn();
     loginPage.loginManuallyAsNurse();
     // Verify Notice Board Reflection
-    facilityNotify.interceptGetNotificationReq();
+    facilityNotify.interceptGetNotificationReq("MESSAGE");
     facilityNotify.visitNoticeBoard();
-    cy.reload();
     facilityNotify.verifyGetNotificationReq();
-    cy.verifyContentPresence("#notification-message", [notificationMessage]);
+    facilityNotify.verifyFacilityNoticeBoardMessage(notificationMessage);
     facilityNotify.interceptGetNotificationReq();
     // Verify Sidebar Notification Reflection
     facilityNotify.openNotificationSlide();
