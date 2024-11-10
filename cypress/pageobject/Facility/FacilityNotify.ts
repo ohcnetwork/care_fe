@@ -1,14 +1,15 @@
 export default class FacilityNotify {
-  verifyFacilityName(facilityName: string): void {
+  verifyFacilityName(facilityName: string) {
     cy.verifyContentPresence("#notify-facility-name", [facilityName]);
   }
 
-  verifyErrorMessage(errorMessage: string): void {
+  verifyErrorMessage(errorMessage: string) {
     cy.verifyContentPresence(".error-text", [errorMessage]);
   }
 
-  fillNotifyText(message: string): void {
-    cy.get("#NotifyModalMessageInput").should("be.visible").type(message);
+  fillNotifyText(message: string) {
+    cy.get("#NotifyModalMessageInput").scrollIntoView();
+    cy.get("#NotifyModalMessageInput").click().type(message);
   }
 
   openNotificationSlide() {

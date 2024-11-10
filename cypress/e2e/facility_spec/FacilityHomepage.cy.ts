@@ -25,7 +25,8 @@ describe("Facility Homepage Function", () => {
   const localBody = "Aikaranad";
   const facilityType = "Private Hospital";
   const notificationErrorMsg = "Message cannot be empty";
-  const notificationMessage = "";
+  const notificationMessage = "Test Notification";
+
   before(() => {
     loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
