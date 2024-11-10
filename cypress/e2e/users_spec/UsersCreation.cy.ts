@@ -68,12 +68,12 @@ describe("User Creation", () => {
   const district = "Ernakulam";
   const role = "Doctor";
   const home_facility = "Dummy Shifting Center";
-  const weekly_working_hrs = "12";
-  const dob_id = "date_of_birth";
+  const weekly_working_hrs = "14";
   const dob = "01011998";
   const formatted_dob = "01/01/1998";
   const update_btn = "Update";
   const save_btn = "Save User";
+  const new_user_dob = "25081999";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -104,7 +104,7 @@ describe("User Creation", () => {
     userCreationPage.typeEmail(email);
     userCreationPage.clearWeeklyWorkingHours();
     userCreationPage.typeWeeklyWorkingHours(weekly_working_hrs);
-    userCreationPage.typeIntoElementByIdPostClearDob(dob_id, dob);
+    userCreationPage.typeDateOfBirth(dob);
     cy.submitButton(update_btn);
     cy.verifyContentPresence("#contactno-profile-details", [
       "+91" + phone_number,
@@ -141,19 +141,20 @@ describe("User Creation", () => {
     userCreationPage.typeUserName(username);
     userCreationPage.typePassword(password);
     userCreationPage.selectHomeFacility(home_facility);
-    userCreationPage.typePhoneNumber(phone_number);
+    userCreationPage.typeNewUserPhoneNumber(phone_number);
+    userCreationPage.typeDateOfBirth(new_user_dob);
     userCreationPage.selectUserType(role);
     userCreationPage.typeConfirmPassword(password);
     userCreationPage.typeQualification(qualification);
     userCreationPage.typeDoctorExperience(experince);
     userCreationPage.typeDoctorMedicalCouncilRegNo(reg_no);
-    userCreationPage.typeFirstName(firstName_);
-    userCreationPage.typeLastName(lastName_);
+    userCreationPage.typeNewUserFirstName(firstName_);
+    userCreationPage.typeNewUserLastName(lastName_);
     userCreationPage.typeEmail(email);
     userCreationPage.selectGender(gender);
     userCreationPage.selectState(state);
     userCreationPage.selectDistrict(district);
-    cy.clickSubmit();
+    userCreationPage.clickSubmitButton();
     cy.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
