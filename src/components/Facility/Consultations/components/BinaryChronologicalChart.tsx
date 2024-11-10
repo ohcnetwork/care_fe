@@ -4,7 +4,7 @@ import { formatDateTime } from "@/Utils/utils";
 
 export default function BinaryChronologicalChart(props: {
   data: {
-    value: boolean;
+    value: boolean | undefined;
     timestamp: string;
     notes?: string;
   }[];

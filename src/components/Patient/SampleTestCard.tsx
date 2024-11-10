@@ -118,10 +118,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               id="sample-test-type"
               className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium capitalize leading-5"
             >
-              {(itemData.sample_type !== "OTHER TYPE"
-                ? itemData.sample_type
-                : itemData.sample_type_other
-              )?.toLowerCase()}
+              {itemData.sample_type?.toLowerCase()}
             </div>
           </div>
         </div>

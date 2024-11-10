@@ -219,7 +219,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           id="sample-type"
         />
 
-        {state.form.sample_type === "OTHER TYPE" && (
+        {state.form.sample_type === "9" && (
           <TextAreaFormField
             {...field("sample_type_other", "Sample Test Type Details")}
             required
