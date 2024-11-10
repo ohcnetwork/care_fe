@@ -168,6 +168,7 @@ describe("Facility Homepage Function", () => {
     // Verify Notice Board Reflection
     facilityNotify.interceptGetNotificationReq();
     facilityNotify.visitNoticeBoard();
+    cy.reload();
     facilityNotify.verifyGetNotificationReq();
     cy.verifyContentPresence("#notification-message", [notificationMessage]);
     facilityNotify.interceptGetNotificationReq();
