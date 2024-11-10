@@ -1,5 +1,5 @@
-import DialogModal from "./Dialog";
-import { ButtonVariant, Cancel, Submit } from "./components/ButtonV2";
+import { ButtonVariant, Cancel, Submit } from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
 
 type ConfirmDialogProps = {
   className?: string;

@@ -1,9 +1,15 @@
-import { useState, useEffect } from "react";
-import { FieldChangeEvent, FormFieldBaseProps } from "../Form/FormFields/Utils";
-import { fahrenheitToCelsius, celsiusToFahrenheit } from "@/Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "./components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
+import { useEffect, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import {
+  FieldChangeEvent,
+  FormFieldBaseProps,
+} from "@/components/Form/FormFields/Utils";
+
+import { celsiusToFahrenheit, fahrenheitToCelsius } from "@/Utils/utils";
 
 type TemperatureUnit = "celsius" | "fahrenheit";
 

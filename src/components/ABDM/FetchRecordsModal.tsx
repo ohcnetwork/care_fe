@@ -1,24 +1,27 @@
-import * as Notification from "../../Utils/Notifications";
-
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import DialogModal from "@/components/Common/Dialog";
-import TextFormField from "../Form/FormFields/TextFormField";
+import dayjs from "dayjs";
+import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import { ConsentHIType, ConsentPurpose } from "@/components/ABDM/types/consent";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import DateRangeFormField from "@/components/Form/FormFields/DateRangeFormField";
 import {
   MultiSelectFormField,
   SelectFormField,
-} from "../Form/FormFields/SelectFormField";
+} from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import { useMessageListener } from "@/hooks/useMessageListener";
+
 import { ABDM_CONSENT_PURPOSE, ABDM_HI_TYPE } from "@/common/constants";
-import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
-import dayjs from "dayjs";
-import { navigate } from "raviger";
-import DateFormField from "../Form/FormFields/DateFormField";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { useMessageListener } from "@/common/hooks/useMessageListener";
-import { AbhaNumberModel } from "./types/abha";
-import { ConsentHIType, ConsentPurpose } from "./types/consent";
-import { useTranslation } from "react-i18next";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 const getDate = (value: string | Date) =>
   (value && dayjs(value).isValid() && dayjs(value).toDate()) || undefined;

@@ -1,6 +1,10 @@
-import { Type } from "../../Redux/api";
-import { PaginatedResponse } from "../../Utils/request/types";
-import { ConsultationDiagnosis, CreateDiagnosis } from "./types";
+import {
+  ConsultationDiagnosis,
+  CreateDiagnosis,
+} from "@/components/Diagnosis/types";
+
+import { Type } from "@/Utils/request/api";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 const DiagnosesRoutes = {
   // ICD-11

@@ -1,8 +1,9 @@
-import routes from "../../../Redux/api";
-import useQuery from "../../../Utils/request/useQuery";
-import { PatientModel } from "../../Patient/models";
-import ViewInvestigationSuggestions from "./InvestigationSuggestions";
-import ViewInvestigations from "./ViewInvestigations";
+import ViewInvestigationSuggestions from "@/components/Facility/Investigations/InvestigationSuggestions";
+import ViewInvestigations from "@/components/Facility/Investigations/ViewInvestigations";
+import { PatientModel } from "@/components/Patient/models";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export interface InvestigationSessionType {
   session_external_id: string;

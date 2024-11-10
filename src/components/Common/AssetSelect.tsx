@@ -1,7 +1,9 @@
 import { useCallback } from "react";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+
+import AutoCompleteAsync from "@/components/Form/AutoCompleteAsync";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface AssetSelectProps {
   name: string;

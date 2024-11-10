@@ -1,24 +1,29 @@
+import { t } from "i18next";
 import { useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Page from "@/components/Common/Page";
+import Tabs from "@/components/Common/Tabs";
+import { PatientConsentModel } from "@/components/Facility/models";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import PatientConsentRecordBlockGroup from "@/components/Patient/PatientConsentRecordBlock";
+
+import useFileManager from "@/hooks/useFileManager";
+import useFileUpload from "@/hooks/useFileUpload";
+
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
 } from "@/common/constants";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import Page from "@/components/Common/components/Page";
-import request from "../../Utils/request/request";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatDateTime } from "../../Utils/utils";
-import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import useFileUpload from "../../Utils/useFileUpload";
-import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
-import useFileManager from "../../Utils/useFileManager";
-import { PatientConsentModel } from "../Facility/models";
-import Tabs from "@/components/Common/components/Tabs";
-import { t } from "i18next";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime } from "@/Utils/utils";
 
 export default function PatientConsentRecords(props: {
   facilityId: string;

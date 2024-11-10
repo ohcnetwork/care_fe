@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import AutocompleteFormField from "../../Form/FormFields/Autocomplete";
+
+import ConditionVerificationStatusMenu from "@/components/Diagnosis/ConditionVerificationStatusMenu";
 import {
   ActiveConditionVerificationStatuses,
   CreateDiagnosis,
   ICD11DiagnosisModel,
-} from "../types";
-import ConditionVerificationStatusMenu from "../ConditionVerificationStatusMenu";
-import { classNames, mergeQueryOptions } from "../../../Utils/utils";
-import useQuery from "../../../Utils/request/useQuery";
-import routes from "../../../Redux/api";
-import { Error } from "../../../Utils/Notifications";
+} from "@/components/Diagnosis/types";
+import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
+
+import { Error } from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, mergeQueryOptions } from "@/Utils/utils";
 
 interface AddICD11DiagnosisProps {
   className?: string;

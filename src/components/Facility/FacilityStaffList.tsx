@@ -1,18 +1,23 @@
 import { useState } from "react";
-import { DOCTOR_SPECIALIZATION } from "@/common/constants";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import DialogModal from "@/components/Common/Dialog";
-import { StaffCapacity } from "./StaffCapacity";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { DoctorModal } from "./models";
-import DoctorsCountCard from "./StaffCountCard";
-import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
-import useFilters from "@/common/hooks/useFilters";
-import Pagination from "../Common/Pagination";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import Pagination from "@/components/Common/Pagination";
+import { StaffCapacity } from "@/components/Facility/StaffCapacity";
+import DoctorsCountCard from "@/components/Facility/StaffCountCard";
+import { DoctorModal } from "@/components/Facility/models";
+import { DoctorIcon } from "@/components/TeleIcu/Icons/DoctorIcon";
+
+import useFilters from "@/hooks/useFilters";
+
+import { DOCTOR_SPECIALIZATION } from "@/common/constants";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export const FacilityStaffList = (props: any) => {
   const { t } = useTranslation();
