@@ -99,7 +99,7 @@ describe("User Creation", () => {
     userCreationPage.clearPhoneNumber();
     userCreationPage.typePhoneNumber(phone_number);
     userCreationPage.clearAltPhoneNumber();
-    userCreationPage.typeAltPhoneumber(emergency_phone_number);
+    userCreationPage.typeAltPhoneNumber(emergency_phone_number);
     userCreationPage.clearEmail();
     userCreationPage.typeEmail(email);
     userCreationPage.clearWeeklyWorkingHours();

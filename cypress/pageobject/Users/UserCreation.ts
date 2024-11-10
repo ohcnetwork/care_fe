@@ -1,5 +1,9 @@
 // UserCreation.ts
 export class UserCreationPage {
+  private selectOptionContainingText(text: string) {
+    cy.get("[role='option']").contains(text).click();
+  }
+
   clickProfileName() {
     cy.get("#user-profile-name").click();
   }
@@ -53,7 +57,7 @@ export class UserCreationPage {
     cy.get("#weekly_working_hours").click().type(workingHrs);
   }
 
-  typeAltPhoneumber(emergencyPhoneNumber: string) {
+  typeAltPhoneNumber(emergencyPhoneNumber: string) {
     cy.get("#altPhoneNumber").click().type(emergencyPhoneNumber);
   }
 
@@ -97,11 +101,10 @@ export class UserCreationPage {
   selectUserType(role: string) {
     cy.clickAndSelectOption("#user_type", role);
   }
-
   selectHomeFacility(name: string) {
-    cy.get("#home_facility").click();
-    this.selectOptionContainingText(name);
+    cy.clickAndSelectOption("#home_facility", name);
   }
+
   selectGender(gender: string) {
     cy.clickAndSelectOption("#gender", gender);
   }
@@ -117,10 +120,6 @@ export class UserCreationPage {
     cy.get("input[name='facilities'] + button")
       .find("#dropdown-toggle")
       .click();
-  }
-
-  selectOptionContainingText(text: string) {
-    cy.get("[role='option']").contains(text).click();
   }
 
   verifyElementContainsText(elementId: string, expectedText: string) {
