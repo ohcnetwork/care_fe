@@ -1,10 +1,11 @@
-import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import { UserCreationPage } from "../../pageobject/Users/UserCreation";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
-import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import { v4 as uuidv4 } from "uuid";
+
+import { AssetPage } from "../../pageobject/Asset/AssetCreation";
+import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
+import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 
 describe("Location Management Section", () => {
   const assetPage = new AssetPage();

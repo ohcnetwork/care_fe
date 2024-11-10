@@ -47,7 +47,7 @@
     "prepare": "husky",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write",
+    "format": "prettier ./src ./cypress --write",
     "sort-locales": "node ./scripts/sort-locales.js"
   },
   "dependencies": {
@@ -166,7 +166,7 @@
       "eslint --fix",
       "git update-index --again"
     ],
-    "src/Locale/*.json": [
+    "public/locale/*.json": [
       "npm run sort-locales"
     ]
   },
