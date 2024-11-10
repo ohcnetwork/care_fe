@@ -35,7 +35,7 @@ export default function MedicineAdministrationTable({
             </th>
             <th>
               <span className="hidden px-2 text-center text-xs leading-none lg:block">
-                <p>Dosage &</p>
+                <p>{t("dosage")} &</p>
                 <p>
                   {prescriptions[0]?.dosage_type !== "PRN"
                     ? t("frequency")
