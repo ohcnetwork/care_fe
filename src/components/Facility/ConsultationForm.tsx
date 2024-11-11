@@ -967,7 +967,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         ref={fieldRef["referred_from_facility"]}
                       >
                         <FieldLabel required>
-                          Name of the referring Facility"
+                          Name of the referring Facility
                         </FieldLabel>
                         <FacilitySelect
                           name="referred_from_facility"
