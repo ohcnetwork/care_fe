@@ -1,4 +1,70 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import { startCase, toLower } from "lodash-es";
+import { debounce } from "lodash-es";
+import { navigate } from "raviger";
+import { useCallback, useReducer, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import LinkAbhaNumber from "@/components/ABDM/LinkAbhaNumber/index";
+import { AbhaNumberModel } from "@/components/ABDM/types/abha";
+import AccordionV2 from "@/components/Common/AccordionV2";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CollapseV2 from "@/components/Common/CollapseV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import DialogModal from "@/components/Common/Dialog";
+import Loading from "@/components/Common/Loading";
+import PageTitle from "@/components/Common/PageTitle";
+import Spinner from "@/components/Common/Spinner";
+import Error404 from "@/components/ErrorPages/404";
+import { ILocalBodies } from "@/components/ExternalResult/models";
+import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import TransferPatientDialog from "@/components/Facility/TransferPatientDialog";
+import {
+  DistrictModel,
+  DupPatientModel,
+  WardModel,
+} from "@/components/Facility/models";
+import {
+  FieldError,
+  PhoneNumberValidator,
+  RequiredFieldValidator,
+} from "@/components/Form/FieldValidators";
+import Form from "@/components/Form/Form";
+import { FormContextValue } from "@/components/Form/FormContext";
+import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import SelectMenuV2 from "@/components/Form/SelectMenuV2";
+import InsuranceDetailsBuilder from "@/components/HCX/InsuranceDetailsBuilder";
+import { HCXPolicyModel } from "@/components/HCX/models";
+import HCXPolicyValidator from "@/components/HCX/validators";
+import {
+  Occupation,
+  PatientMeta,
+  PatientModel,
+} from "@/components/Patient/models";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import {
   BLOOD_GROUPS,
@@ -10,13 +76,15 @@ import {
   SOCIOECONOMIC_STATUS_CHOICES,
   VACCINES,
 } from "@/common/constants";
-import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
-import {
-  FieldError,
-  PhoneNumberValidator,
-  RequiredFieldValidator,
-} from "../Form/FieldValidators";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import countryList from "@/common/static/countries.json";
+import { statusType, useAbortableEffect } from "@/common/utils";
+import { validatePincode } from "@/common/validation";
+
+import { RestoreDraftButton } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   compareBy,
   dateQueryString,
@@ -24,60 +92,7 @@ import {
   includesIgnoreCase,
   parsePhoneNumber,
   scrollTo,
-} from "../../Utils/utils";
-import { useCallback, useReducer, useRef, useState } from "react";
-import { navigate } from "raviger";
-import { statusType, useAbortableEffect } from "@/common/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import AccordionV2 from "@/components/Common/components/AccordionV2";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import CollapseV2 from "@/components/Common/components/CollapseV2";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import DateFormField from "../Form/FormFields/DateFormField";
-import DialogModal from "@/components/Common/Dialog";
-import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import Error404 from "../ErrorPages/404";
-import Form from "../Form/Form";
-import { HCXPolicyModel } from "../HCX/models";
-import HCXPolicyValidator from "../HCX/validators";
-import { ILocalBodies } from "../ExternalResult/models";
-import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
-import { PatientModel, Occupation, PatientMeta } from "./models";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import Spinner from "@/components/Common/Spinner";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import _ from "lodash";
-import countryList from "@/common/static/countries.json";
-import { debounce } from "lodash-es";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import { useTranslation } from "react-i18next";
-import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index";
-import { AbhaNumberModel } from "../ABDM/types/abha";
-import { validatePincode } from "@/common/validation";
-import careConfig from "@careConfig";
-import { Button } from "@/components/ui/button";
-
-import Loading from "@/components/Common/Loading";
-import PageTitle from "@/components/Common/PageTitle";
-import { RestoreDraftButton } from "@/Utils/AutoSave";
-import { FormContextValue } from "../Form/FormContext";
+} from "@/Utils/utils";
 
 type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
@@ -635,7 +650,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ? formData.last_vaccinated_date
             : null
           : null,
-      name: _.startCase(_.toLower(formData.name)),
+      name: startCase(toLower(formData.name)),
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
       nationality: formData.nationality,

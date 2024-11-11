@@ -5,17 +5,19 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
+import { debounce } from "lodash-es";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { DropdownTransition } from "@/components/Common/HelperComponents";
 import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
-} from "./MultiSelectMenuV2";
-import { useEffect, useMemo, useState } from "react";
+} from "@/components/Form/MultiSelectMenuV2";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "@/components/Common/components/HelperComponents";
-import { classNames } from "../../Utils/utils";
-import { debounce } from "lodash-es";
-import { useTranslation } from "react-i18next";
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   id?: string;
@@ -100,7 +102,7 @@ const AutoCompleteAsync = (props: Props) => {
         immediate
       >
         <div className="relative mt-1">
-          <div className="flex">
+          <div className="relative flex">
             <ComboboxInput
               id={id}
               name={name}
@@ -125,12 +127,12 @@ const AutoCompleteAsync = (props: Props) => {
             />
             {!disabled && (
               <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
-                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
+                <div className="absolute right-0 mr-2 flex items-center text-lg text-secondary-900">
                   {hasSelection && !loading && !required && (
                     <div className="tooltip" id="clear-button">
                       <CareIcon
                         icon="l-times-circle"
-                        className="mb-[-5px] h-4 w-4 text-secondary-800 transition-colors duration-200 ease-in-out hover:text-secondary-500"
+                        className="h-4 w-4 text-secondary-800 transition-colors duration-200 ease-in-out hover:text-secondary-500"
                         onClick={(e) => {
                           e.preventDefault();
                           onChange(null);
@@ -142,16 +144,9 @@ const AutoCompleteAsync = (props: Props) => {
                     </div>
                   )}
                   {loading ? (
-                    <CareIcon
-                      icon="l-spinner"
-                      className="-mb-1.5 animate-spin"
-                    />
+                    <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
-                    <CareIcon
-                      id="dropdown-toggle"
-                      icon="l-angle-down"
-                      className="-mb-1.5"
-                    />
+                    <CareIcon id="dropdown-toggle" icon="l-angle-down" />
                   )}
                 </div>
               </ComboboxButton>

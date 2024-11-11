@@ -1,16 +1,19 @@
+import { camelCase, startCase } from "lodash-es";
 import { navigate } from "raviger";
 import { useState } from "react";
-import { SampleTestModel } from "./models";
-import { SAMPLE_TEST_STATUS } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import UpdateStatusDialog from "./UpdateStatusDialog";
-import * as _ from "lodash-es";
-import { formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
+import UpdateStatusDialog from "@/components/Patient/UpdateStatusDialog";
+import { SampleTestModel } from "@/components/Patient/models";
+
+import { SAMPLE_TEST_STATUS } from "@/common/constants";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -98,7 +101,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               Status{" "}
             </div>
             <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {_.startCase(_.camelCase(itemData.status))}
+              {startCase(camelCase(itemData.status))}
             </div>
           </div>
         </div>
@@ -108,10 +111,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               Sample Type{" "}
             </div>
             <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium capitalize leading-5">
-              {(itemData.sample_type !== "OTHER TYPE"
-                ? itemData.sample_type
-                : itemData.sample_type_other
-              )?.toLowerCase()}
+              {itemData.sample_type?.toLowerCase()}
             </div>
           </div>
         </div>
@@ -133,7 +133,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               Result{" "}
             </div>
             <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {_.startCase(_.camelCase(itemData.result))}
+              {startCase(camelCase(itemData.result))}
             </div>
           </div>
         </div>

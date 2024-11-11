@@ -1,35 +1,24 @@
-import ReactEchartsCore from "echarts-for-react/lib/core";
-import { BarChart, LineChart } from "echarts/charts";
-import {
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  ToolboxComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  VisualMapPiecewiseComponent,
-} from "echarts/components";
+import { Suspense, lazy } from "react";
 
-import * as echarts from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
-echarts.use([
-  BarChart,
-  LineChart,
-  CanvasRenderer,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  LegendComponent,
-  TitleComponent,
-  ToolboxComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  VisualMapPiecewiseComponent,
-]);
+import CircularProgress from "@/components/Common/CircularProgress";
+
+const ReactEcharts = lazy(
+  () => import("@/components/Facility/Consultations/components/ReactEcharts"),
+);
+
+interface DataPoint {
+  name: string;
+  data: number[];
+}
+
+interface StackedLinePlotProps {
+  title: string;
+  xData: string[];
+  yData: DataPoint[];
+}
 const COLORS = ["#B13F3C", "#2F8B35", "#44327A", "#B19D3C"];
 
-export const StackedLinePlot = (props: any) => {
+export const StackedLinePlot = (props: StackedLinePlotProps) => {
   const { title, xData, yData } = props;
 
   const series = yData.map((x: any) => ({
@@ -108,5 +97,15 @@ export const StackedLinePlot = (props: any) => {
     },
     series: series,
   };
-  return <ReactEchartsCore echarts={echarts} option={generalOptions} />;
+  return (
+    <Suspense
+      fallback={
+        <div className="grid h-16 place-items-center">
+          <CircularProgress />
+        </div>
+      }
+    >
+      <ReactEcharts option={generalOptions} />
+    </Suspense>
+  );
 };

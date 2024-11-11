@@ -1,29 +1,30 @@
-import * as Notification from "../../../Utils/Notifications";
-
-import { BedModel, CurrentBed } from "../models";
-import { Dispatch, SetStateAction, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import useQuery from "../../../Utils/request/useQuery";
-
-import { BedSelect } from "@/components/Common/BedSelect";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import { FieldLabel } from "../../Form/FormFields/FormField";
-import Loading from "@/components/Common/Loading";
-import dayjs from "../../../Utils/dayjs";
-import { AssetSelect } from "@/components/Common/AssetSelect";
-import DialogModal from "@/components/Common/Dialog";
 import { Link } from "raviger";
+import { Dispatch, SetStateAction, useState } from "react";
+
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import {
   AssetClass,
-  assetClassProps,
   AssetData,
-} from "../../Assets/AssetTypes";
-import Chip from "../../../CAREUI/display/Chip";
-import BedActivityTimeline from "./BedActivityTimeline";
-import DateFormField from "../../Form/FormFields/DateFormField.js";
+  assetClassProps,
+} from "@/components/Assets/AssetTypes";
+import { AssetSelect } from "@/components/Common/AssetSelect";
+import { BedSelect } from "@/components/Common/BedSelect";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import DialogModal from "@/components/Common/Dialog";
+import Loading from "@/components/Common/Loading";
+import BedActivityTimeline from "@/components/Facility/Consultations/BedActivityTimeline";
+import { BedModel, CurrentBed } from "@/components/Facility/models";
+import DateFormField from "@/components/Form/FormFields/DateFormField.js";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface BedsProps {
   facilityId: string;

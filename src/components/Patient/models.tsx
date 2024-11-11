@@ -1,5 +1,9 @@
-import { ConsultationModel, PatientCategory } from "../Facility/models";
-import { PerformedByModel } from "../HCX/misc";
+import {
+  ConsultationModel,
+  PatientCategory,
+} from "@/components/Facility/models";
+import { UserBareMinimum } from "@/components/Users/models";
+
 import {
   APPETITE_CHOICES,
   BLADDER_DRAINAGE_CHOICES,
@@ -130,8 +134,8 @@ export interface PatientModel {
   fit_for_blood_donation?: boolean;
   date_declared_positive?: string;
   is_declared_positive?: boolean;
-  last_edited?: PerformedByModel;
-  created_by?: PerformedByModel;
+  last_edited?: UserBareMinimum;
+  created_by?: UserBareMinimum;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
   occupation?: Occupation;
@@ -325,8 +329,8 @@ export interface DailyRoundsModel {
   rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
-  created_by?: PerformedByModel;
-  last_edited_by?: PerformedByModel;
+  created_by?: UserBareMinimum;
+  last_edited_by?: UserBareMinimum;
   bed?: string;
   pain_scale_enhanced?: IPainScale[];
   in_prone_position?: boolean;
@@ -429,13 +433,13 @@ export interface FileUploadModel {
   associating_id?: string;
   created_date?: string;
   upload_completed?: boolean;
-  uploaded_by?: PerformedByModel;
+  uploaded_by?: UserBareMinimum;
   file_category?: FileCategory;
   read_signed_url?: string;
   is_archived?: boolean;
   archive_reason?: string;
   extension?: string;
-  archived_by?: PerformedByModel;
+  archived_by?: UserBareMinimum;
   archived_datetime?: string;
 }
 

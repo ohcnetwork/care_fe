@@ -1,6 +1,6 @@
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 
@@ -59,7 +59,7 @@ describe("Facility Creation", () => {
   const triageErrorMessage = ["This field is required"];
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

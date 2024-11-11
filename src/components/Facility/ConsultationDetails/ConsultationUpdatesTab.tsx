@@ -1,44 +1,50 @@
-import { useState } from "react";
-import { ConsultationTabProps } from "./index";
-import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
-import { BedModel } from "../models";
-import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
-import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
-import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
-import { DISCHARGE_REASONS } from "@/common/constants";
-import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
-import Chip from "../../../CAREUI/display/Chip";
-import {
-  formatDate,
-  formatDateTime,
-  formatPatientAge,
-  isAntenatal,
-  isPostPartum,
-} from "../../../Utils/utils";
-import ReadMore from "@/components/Common/components/Readmore";
-import DailyRoundsList from "../Consultations/DailyRoundsList";
-import EventsList from "./Events/EventsList";
-import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
-import useQuery from "../../../Utils/request/useQuery";
-import routes from "../../../Redux/api";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import EncounterSymptomsCard from "../../Symptoms/SymptomsCard";
-import { QueryParams } from "../../../Utils/request/types";
-import { EVENTS_SORT_OPTIONS } from "@/common/constants";
-import DailyRoundsFilter from "../Consultations/DailyRoundsFilter";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import { classNames } from "../../../Utils/utils";
-
-import { useTranslation } from "react-i18next";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import Tabs from "@/components/Common/components/Tabs";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import {
+  AssetBedModel,
+  AssetClass,
+  AssetData,
+} from "@/components/Assets/AssetTypes";
+import ButtonV2 from "@/components/Common/ButtonV2";
 import PageTitle from "@/components/Common/PageTitle";
+import ReadMore from "@/components/Common/Readmore";
+import Tabs from "@/components/Common/Tabs";
+import EventsList from "@/components/Facility/ConsultationDetails/Events/EventsList";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import DailyRoundsFilter from "@/components/Facility/Consultations/DailyRoundsFilter";
+import DailyRoundsList from "@/components/Facility/Consultations/DailyRoundsList";
+import { BedModel } from "@/components/Facility/models";
+import PrescriptionsTable from "@/components/Medicine/PrescriptionsTable";
+import EncounterSymptomsCard from "@/components/Symptoms/SymptomsCard";
+import HL7PatientVitalsMonitor from "@/components/VitalsMonitor/HL7PatientVitalsMonitor";
+import VentilatorPatientVitalsMonitor from "@/components/VitalsMonitor/VentilatorPatientVitalsMonitor";
+import useVitalsAspectRatioConfig from "@/components/VitalsMonitor/useVitalsAspectRatioConfig";
+import { getVitalsMonitorSocketUrl } from "@/components/VitalsMonitor/utils";
+
+import { DISCHARGE_REASONS } from "@/common/constants";
+import { EVENTS_SORT_OPTIONS } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import { QueryParams } from "@/Utils/request/types";
+import useQuery from "@/Utils/request/useQuery";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+  isAntenatal,
+  isPostPartum,
+} from "@/Utils/utils";
+import { classNames } from "@/Utils/utils";
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();

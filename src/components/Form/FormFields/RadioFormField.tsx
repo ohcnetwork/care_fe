@@ -1,7 +1,12 @@
 import { ChangeEventHandler, ReactNode } from "react";
-import { classNames } from "../../../Utils/utils";
-import FormField from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import { classNames } from "@/Utils/utils";
 
 type Props<T, V = string> = FormFieldBaseProps<V | null> & {
   options: readonly T[];

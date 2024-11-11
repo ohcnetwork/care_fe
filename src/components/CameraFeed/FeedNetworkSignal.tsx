@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { calculateVideoDelay } from "./utils";
-import NetworkSignal from "../../CAREUI/display/NetworkSignal";
-import { StreamStatus } from "./FeedAlert";
+
+import NetworkSignal from "@/CAREUI/display/NetworkSignal";
+
+import { StreamStatus } from "@/components/CameraFeed/FeedAlert";
+import { calculateVideoDelay } from "@/components/CameraFeed/utils";
 
 interface Props {
   playerRef: React.RefObject<HTMLVideoElement>;

@@ -1,10 +1,12 @@
+import { Redirect } from "raviger";
+
 import { ShiftCreate } from "@/components/Patient/ShiftCreate";
 import ShiftDetails from "@/components/Shifting/ShiftDetails";
 import { ShiftDetailsUpdate } from "@/components/Shifting/ShiftDetailsUpdate";
-import ListView from "@/components/Shifting/ListView";
-import BoardView from "@/components/Shifting/BoardView";
-import { Redirect } from "raviger";
-import { AppRoutes } from "../AppRouter";
+import BoardView from "@/components/Shifting/ShiftingBoard";
+import ListView from "@/components/Shifting/ShiftingList";
+
+import { AppRoutes } from "@/Routers/AppRouter";
 
 const getDefaultView = () =>
   localStorage.getItem("defaultShiftView") === "list" ? "list" : "board";

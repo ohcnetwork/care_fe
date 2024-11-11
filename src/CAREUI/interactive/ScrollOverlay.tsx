@@ -1,5 +1,6 @@
-import useVisibility from "../../Utils/useVisibility";
-import { classNames } from "../../Utils/utils";
+import useVisibility from "@/hooks/useVisibility";
+
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   className?: string;
