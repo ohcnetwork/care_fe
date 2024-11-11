@@ -115,7 +115,9 @@ const NotificationTile = ({
           />
         </div>
       </div>
-      <div className="py-1 text-sm">{result.message}</div>
+      <div className="py-1 text-sm" id="notification-slide-msg">
+        {result.message}
+      </div>
       <div className="flex flex-col justify-end gap-2">
         <div className="py-1 text-right text-xs text-secondary-700">
           {formatDateTime(result.created_date)}
@@ -474,6 +476,7 @@ export default function NotificationsList({
     <>
       <Item
         text={t("Notifications")}
+        id="notification-slide-btn"
         do={() => setOpen(!open)}
         icon={<CareIcon icon="l-bell" className="h-5" />}
         badgeCount={unreadCount}
