@@ -1,7 +1,10 @@
 // UserCreation.ts
 export class UserCreationPage {
   private selectOptionContainingText(text: string) {
-    cy.get("[role='option']").contains(text).click();
+    cy.get("[role='option']")
+      .contains(text)
+      .should("be.visible")
+      .click({ timeout: 10000 });
   }
 
   clickProfileName() {
@@ -45,8 +48,8 @@ export class UserCreationPage {
   typeQualification(qualification: string) {
     cy.get("#qualification").click().type(qualification);
   }
-  typeDoctorExperience(experince: string) {
-    cy.get("#doctor_experience_commenced_on").click().type(experince);
+  typeDoctorExperience(experience: string) {
+    cy.get("#doctor_experience_commenced_on").click().type(experience);
   }
 
   typeDoctorMedicalCouncilRegNo(regNo: string) {
