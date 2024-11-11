@@ -290,7 +290,9 @@ const DischargeModal = ({
               setPreDischargeForm((form) => ({ ...form, ...updates }));
             }}
             required
-            min={new Date(consultationData?.encounter_date)}
+            min={dayjs(consultationData?.encounter_date)
+              .subtract(1, "day")
+              .toDate()}
             max={new Date()}
             error={
               discharge_reason ===
