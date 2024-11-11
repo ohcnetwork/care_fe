@@ -9,7 +9,6 @@ import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { ConsultationModel } from "@/components/Facility/models";
@@ -22,16 +21,13 @@ import {
   SHIFTING_CHOICES_WARTIME,
 } from "@/common/constants";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
 export default function ShiftDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = careConfig.wartimeShifting
@@ -41,26 +37,6 @@ export default function ShiftDetails(props: { id: string }) {
   const { data, loading } = useQuery(routes.getShiftDetails, {
     pathParams: { id: props.id },
   });
-
-  const handleShiftDelete = async () => {
-    setOpenDeleteShiftDialog(true);
-
-    const { res, data } = await request(routes.deleteShiftRecord, {
-      pathParams: { id: props.id },
-    });
-    if (res?.status == 204) {
-      Notification.Success({
-        msg: t("shifting_deleted"),
-      });
-    } else {
-      Notification.Error({
-        msg: t("error_deleting_shifting") + (data?.detail || ""),
-      });
-    }
-
-    navigate("/shifting");
-  };
-
   const showCopyToclipBoard = (data: any) => {
     return (
       <a href="#">
@@ -731,25 +707,6 @@ export default function ShiftDetails(props: { id: string }) {
                 }
                 time={data?.modified_date}
               />
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <div>
-                <ButtonV2
-                  variant="danger"
-                  onClick={() => setOpenDeleteShiftDialog(true)}
-                >
-                  {t("delete_record")}
-                </ButtonV2>
-                <ConfirmDialog
-                  title={t("authorize_shift_delete")}
-                  description={t("record_delete_confirm")}
-                  action="Confirm"
-                  show={openDeleteShiftDialog}
-                  onClose={() => setOpenDeleteShiftDialog(false)}
-                  onConfirm={handleShiftDelete}
-                />
-              </div>
             </div>
           </div>
 
