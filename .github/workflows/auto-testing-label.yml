@@ -38,7 +38,7 @@ jobs:
               }
 
               if (isChangesRequired) {
-                await github.issues.createComment({
+                await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,

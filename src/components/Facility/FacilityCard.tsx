@@ -185,7 +185,10 @@ export const FacilityCard = (props: {
                     <DialogModal
                       show={notifyModalFor === facility.id}
                       title={
-                        <span className="flex justify-center text-2xl">
+                        <span
+                          className="flex justify-center text-2xl"
+                          id="notify-facility-name"
+                        >
                           Notify: {facility.name}
                         </span>
                       }
