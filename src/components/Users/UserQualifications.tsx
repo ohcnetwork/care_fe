@@ -66,7 +66,7 @@ const editFormReducer = (state: State, action: Action) => {
   }
 };
 
-export default function UserRoles({ username }: { username: string }) {
+export default function UserQualifications({ username }: { username: string }) {
   const { t } = useTranslation();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const formVals = useRef(initForm);

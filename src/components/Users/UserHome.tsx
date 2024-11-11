@@ -50,13 +50,13 @@ export default function UserHome(props: UserHomeProps) {
 
   const TABS: {
     PROFILE: tabChildProp;
-    ROLE_SKILLS: tabChildProp;
+    SKILLS: tabChildProp;
     FACILITIES: tabChildProp;
   } = {
     PROFILE: { body: UserSummaryTab },
-    ROLE_SKILLS: {
+    SKILLS: {
       body: RoleAndSkillsTab,
-      name: roleInfoBeVisible() ? "ROLE_SKILLS" : "SKILLS",
+      name: roleInfoBeVisible() ? "QUALIFICATIONS_SKILLS" : "SKILLS",
     },
     FACILITIES: { body: LinkedFacilitiesTab },
   };
