@@ -380,7 +380,10 @@ const Login = (props: { forgot?: boolean }) => {
                     <span>{t("back_to_login")}</span>
                   </div>
                 </button>
-                <div className="mb-8 w-[300px] text-4xl font-black text-primary-600" id="forgot-password-heading">
+                <div
+                  className="mb-8 w-[300px] text-4xl font-black text-primary-600"
+                  id="forgot-password-heading"
+                >
                   {t("forget_password")}
                 </div>
                 <form onSubmit={handleForgetSubmit}>
