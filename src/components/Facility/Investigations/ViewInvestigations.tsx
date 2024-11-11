@@ -62,6 +62,7 @@ export default function ViewInvestigations(props: {
                 </div>
                 <div className="flex items-center space-x-2">
                   <ButtonV2
+                    id="view-investigation"
                     onClick={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}`,
@@ -73,6 +74,7 @@ export default function ViewInvestigations(props: {
                     {t("view")}
                   </ButtonV2>
                   <ButtonV2
+                    id="print-investigation"
                     onClick={() =>
                       navigate(
                         `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}/print`,
