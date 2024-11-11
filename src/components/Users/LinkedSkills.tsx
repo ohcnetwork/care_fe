@@ -5,7 +5,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import { SkillSelect } from "@/components/Common/SkillSelect";
-import ConfirmSkillsModal from "@/components/Users/ConfirmSkillsModal";
 
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
@@ -15,6 +14,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 
+import UnlinkSkillDialog from "./UnlinkSkillDialog";
 import { SkillModel } from "./models";
 
 const initModalProps: {
@@ -99,15 +99,17 @@ export default function LinkedSkills({ username }: { username: string }) {
       <div id={`skill_${skill.id}`} key={`skill${skill.id}`}>
         <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
           <div className="rounded p-1 text-sm">{skill.skill_object.name}</div>
-          <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
-            <button
-              onClick={() => handleOnClick(skill)}
-              title={t("clear_skill")}
-              aria-label={t("clear_skill")}
-            >
-              <CareIcon icon="l-multiply" className="text-sm" />
-            </button>
-          </div>
+          {authorizeForAddSkill && (
+            <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
+              <button
+                onClick={() => handleOnClick(skill)}
+                title={t("clear_skill")}
+                aria-label={t("clear_skill")}
+              >
+                <CareIcon icon="l-multiply" className="text-sm" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -116,11 +118,11 @@ export default function LinkedSkills({ username }: { username: string }) {
   return (
     <>
       {modalProps.toggle && (
-        <ConfirmSkillsModal
-          username={username}
-          currentSkillName={modalProps.selectedSkill?.skill_object.name}
-          handleCancel={handleModalCancel}
-          handleOk={handleModalOk}
+        <UnlinkSkillDialog
+          userName={username}
+          skillName={modalProps.selectedSkill?.skill_object.name}
+          onCancel={handleModalCancel}
+          onSubmit={handleModalOk}
         />
       )}
       <div className="flex flex-col gap-y-6 rounded bg-white p-4 shadow">
