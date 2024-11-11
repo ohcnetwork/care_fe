@@ -84,7 +84,7 @@ class FacilityLocation {
   }
 
   clickNotification() {
-    cy.get(".pnotify").click();
+    cy.get(".pnotify-container").click();
   }
 
   enterBedName(name: string) {

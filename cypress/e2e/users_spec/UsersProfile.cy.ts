@@ -1,6 +1,6 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
-import UserProfilePage from "../../pageobject/Users/UserProfilePage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
+import UserProfilePage from "../../pageobject/Users/UserProfilePage";
 
 describe("Manage User Profile", () => {
   const loginPage = new LoginPage();
@@ -10,7 +10,7 @@ describe("Manage User Profile", () => {
   const date_of_birth = "01011999";
   const gender = "Male";
   const email = "test@example.com";
-  const phone = "+918899887788";
+  const phone = "8899887788";
   const workinghours = "8";
   const qualification = "MBBS";
   const doctorYoE = "10";
@@ -25,9 +25,7 @@ describe("Manage User Profile", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    console.log(localStorage);
     cy.clearLocalStorage(/filters--.+/);
-    console.log(localStorage);
     cy.awaitUrl("/user/profile");
   });
 

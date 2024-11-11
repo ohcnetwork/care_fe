@@ -1,12 +1,12 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
-import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
-import PatientPredefined from "../../pageobject/Patient/PatientPredefined";
-import ShiftCreation from "../../pageobject/Shift/ShiftCreation";
-import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
-import PatientTreatmentPlan from "../../pageobject/Patient/PatientTreatmentPlan";
+import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import PatientDeathReport from "../../pageobject/Patient/PatientDeathReport";
+import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
+import PatientPredefined from "../../pageobject/Patient/PatientPredefined";
 import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
+import PatientTreatmentPlan from "../../pageobject/Patient/PatientTreatmentPlan";
+import ShiftCreation from "../../pageobject/Shift/ShiftCreation";
 
 describe("Patient Consultation in multiple combination", () => {
   const patientConsultationPage = new PatientConsultationPage();
@@ -38,7 +38,7 @@ describe("Patient Consultation in multiple combination", () => {
   const patientIpNumber = `${Math.floor(Math.random() * 90 + 10)}/${Math.floor(Math.random() * 9000 + 1000)}`;
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -86,7 +86,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectPatientPrincipalDiagnosis(diagnosis4);
     patientTreatmentPlan.clickAddProcedure();
     patientTreatmentPlan.typeProcedureName(procedureName);
-    patientTreatmentPlan.typeProcedureTime("2024-02-22T12:30");
+    patientTreatmentPlan.typeProcedureTime("220220241230");
     patientTreatmentPlan.typeTreatmentPlan(patientTreatment);
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     patientTreatmentPlan.typeSpecialInstruction(specialInstruction);
@@ -182,12 +182,12 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.typeCauseOfDeath("Cause of Death");
     patientConsultationPage.typePatientConsultationDate(
       "#death_datetime",
-      "2024-02-22T12:45",
+      "220220241230",
     );
     patientConsultationPage.typeDeathConfirmedBy(doctorName);
     patientConsultationPage.typePatientConsultationDate(
       "#encounter_date",
-      "2024-02-22T12:30",
+      "220220241230",
     );
     cy.submitButton("Create Consultation");
     cy.verifyNotification(
@@ -245,7 +245,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.typePatientConsultationDate(
       "#icu_admission_date",
-      "2024-02-23T12:30",
+      "230220241230",
     );
     // add investigation
     patientInvestigation.clickAddInvestigation();

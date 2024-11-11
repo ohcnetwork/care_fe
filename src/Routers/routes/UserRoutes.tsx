@@ -1,7 +1,8 @@
-import ManageUsers from "../../Components/Users/ManageUsers";
-import { UserAdd } from "../../Components/Users/UserAdd";
-import UserProfile from "../../Components/Users/UserProfile";
-import { AppRoutes } from "../AppRouter";
+import ManageUsers from "@/components/Users/ManageUsers";
+import { UserAdd } from "@/components/Users/UserAdd";
+import UserProfile from "@/components/Users/UserProfile";
+
+import { AppRoutes } from "@/Routers/AppRouter";
 
 const UserRoutes: AppRoutes = {
   "/users": () => <ManageUsers />,

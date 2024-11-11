@@ -1,7 +1,8 @@
 import careConfig from "@careConfig";
-import handleResponse from "./handleResponse";
-import { RequestOptions, RequestResult, Route } from "./types";
-import { makeHeaders, makeUrl } from "./utils";
+
+import handleResponse from "@/Utils/request/handleResponse";
+import { RequestOptions, RequestResult, Route } from "@/Utils/request/types";
+import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 
 type ControllerXORControllerRef =
   | {
@@ -85,6 +86,11 @@ async function getResponseBody<TData>(res: Response): Promise<TData> {
   }
 
   const isJson = res.headers.get("content-type")?.includes("application/json");
+  const isImage = res.headers.get("content-type")?.includes("image");
+
+  if (isImage) {
+    return (await res.blob()) as TData;
+  }
 
   if (!isJson) {
     return (await res.text()) as TData;

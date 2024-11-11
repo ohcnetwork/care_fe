@@ -1,6 +1,6 @@
 class FacilityManage {
   clickCoverImage() {
-    cy.get("#facility-coverimage").click({ force: true });
+    cy.get("#facility-coverimage").click();
   }
 
   verifyUploadButtonVisible() {
@@ -11,6 +11,11 @@ class FacilityManage {
     cy.get("#upload-cover-image")
       .selectFile(`cypress/fixtures/${fileName}`, { force: true })
       .wait(100); // Adjust the wait time as needed
+  }
+
+  clickSaveCoverImage() {
+    cy.get("#save-cover-image").scrollIntoView();
+    cy.get("#save-cover-image").click();
   }
 
   verifyTotalDoctorCapacity(expectedCapacity: string) {
@@ -35,11 +40,6 @@ class FacilityManage {
 
   clickDeleteFacilityBedCapacity() {
     cy.get("#delete-facility-bedcapacity").click();
-  }
-
-  clickSaveCoverImage() {
-    cy.get("#save-cover-image").scrollIntoView();
-    cy.get("#save-cover-image").click();
   }
 
   clickFacilityConfigureButton() {

@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
-import useQuery, { QueryOptions } from "../../Utils/request/useQuery";
-import ButtonV2, {
-  CommonButtonProps,
-} from "../../Components/Common/components/ButtonV2";
-import CareIcon from "../icons/CareIcon";
-import { classNames } from "../../Utils/utils";
-import Pagination from "../../Components/Common/Pagination";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { CommonButtonProps } from "@/components/Common/ButtonV2";
+import Pagination from "@/components/Common/Pagination";
+
+import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
+import useQuery, { QueryOptions } from "@/Utils/request/useQuery";
+import { classNames } from "@/Utils/utils";
 
 const DEFAULT_PER_PAGE_LIMIT = 14;
 

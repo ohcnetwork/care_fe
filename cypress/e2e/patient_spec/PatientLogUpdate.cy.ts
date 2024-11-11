@@ -1,8 +1,8 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
-import PatientLogupdate from "../../pageobject/Patient/PatientLogupdate";
 import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
+import PatientLogupdate from "../../pageobject/Patient/PatientLogupdate";
 import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
 
 describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
@@ -41,7 +41,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const domicilaryPatient = "Dummy Patient 11";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -113,6 +113,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.closeNotification();
     // Submit the doctors log update
     cy.submitButton("Save and Continue");
+    cy.wait(2000);
     cy.verifyNotification("Progress Note created successfully");
     cy.closeNotification();
     // modify the relevant critical care log update

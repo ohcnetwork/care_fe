@@ -1,19 +1,17 @@
 #build-stage
-FROM --platform=$BUILDPLATFORM node:20-buster-slim as build-stage
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim as build-stage
 
 WORKDIR /app
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-RUN if [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "arm64" ]; then apt-get update && apt-get install -y python3-dev make g++; fi
+RUN apt-get update && apt-get install -y git
 
 COPY package.json package-lock.json ./
 
 RUN npm install
 
 COPY . .
-
-RUN npm run setup
 
 RUN npm run build
 

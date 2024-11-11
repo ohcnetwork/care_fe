@@ -1,11 +1,13 @@
-import CareIcon from "../icons/CareIcon";
+import { ReactNode } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import {
   formatDateTime,
   formatName,
   isUserOnline,
   relativeTime,
-} from "../../Utils/utils";
-import { ReactNode } from "react";
+} from "@/Utils/utils";
 
 interface Props {
   time?: string;

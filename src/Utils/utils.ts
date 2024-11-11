@@ -1,7 +1,9 @@
-import { AREACODES, IN_LANDLINE_AREA_CODES } from "../Common/constants";
-import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
-import dayjs from "./dayjs";
-import { PatientModel } from "../Components/Patient/models";
+import { PatientModel } from "@/components/Patient/models";
+
+import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
+import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
+
+import dayjs from "@/Utils/dayjs";
 
 interface ApacheParams {
   age: number;

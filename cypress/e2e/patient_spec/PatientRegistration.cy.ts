@@ -1,10 +1,10 @@
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import { generatePhoneNumber } from "../../pageobject/utils/constants";
-import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
+import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
+import { generatePhoneNumber } from "../../pageobject/utils/constants";
 
 const yearOfBirth = "2001";
 const isHCXEnabled = Cypress.env("ENABLE_HCX");
@@ -25,7 +25,7 @@ const getRelativeDateString = (deltaDays = 0) => {
       month: "2-digit",
       year: "numeric",
     })
-    .replace("/", "");
+    .replace(/\//g, "");
 };
 
 describe("Patient Creation with consultation", () => {
@@ -71,7 +71,7 @@ describe("Patient Creation with consultation", () => {
   const patientOccupation = "Student";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -239,17 +239,9 @@ describe("Patient Creation with consultation", () => {
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
     cy.get("[data-testid=patient-details]")
-      .contains(patientOneFirstSubscriberId)
+      .contains("member id")
       .scrollIntoView();
     cy.wait(2000);
-    patientInsurance.verifyPatientPolicyDetails(
-      patientOneFirstSubscriberId,
-      patientOneFirstPolicyId,
-      patientOneFirstInsurerId,
-      patientOneFirstInsurerName,
-      isHCXEnabled,
-    );
-
     patientInsurance.clickPatientInsuranceViewDetail();
     cy.wait(3000);
     patientInsurance.verifyPatientPolicyDetails(

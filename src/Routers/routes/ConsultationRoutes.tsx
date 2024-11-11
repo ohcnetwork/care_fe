@@ -1,19 +1,20 @@
-import { ConsultationForm } from "../../Components/Facility/ConsultationForm";
-import Investigation from "../../Components/Facility/Investigations";
-import ShowInvestigation from "../../Components/Facility/Investigations/ShowInvestigation";
-import ManagePrescriptions from "../../Components/Medicine/ManagePrescriptions";
-import { DailyRoundListDetails } from "../../Components/Patient/DailyRoundListDetails";
-import { DailyRounds } from "../../Components/Patient/DailyRounds";
-import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
-import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
-import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
-import PatientConsentRecords from "../../Components/Patient/PatientConsentRecords";
-import CriticalCareEditor from "../../Components/LogUpdate/CriticalCareEditor";
-import PrescriptionsPrintPreview from "../../Components/Medicine/PrintPreview";
-import CriticalCarePreview from "../../Components/LogUpdate/CriticalCarePreview";
-import FileUploadPage from "../../Components/Patient/FileUploadPage";
-import InvestigationPrintPreview from "../../Components/Facility/Investigations/InvestigationsPrintPreview";
-import { AppRoutes } from "../AppRouter";
+import { ConsultationDetails } from "@/components/Facility/ConsultationDetails";
+import ConsultationDoctorNotes from "@/components/Facility/ConsultationDoctorNotes";
+import { ConsultationForm } from "@/components/Facility/ConsultationForm";
+import Investigation from "@/components/Facility/Investigations";
+import InvestigationPrintPreview from "@/components/Facility/Investigations/InvestigationsPrintPreview";
+import ShowInvestigation from "@/components/Facility/Investigations/ShowInvestigation";
+import TreatmentSummary from "@/components/Facility/TreatmentSummary";
+import CriticalCareEditor from "@/components/LogUpdate/CriticalCareEditor";
+import CriticalCarePreview from "@/components/LogUpdate/CriticalCarePreview";
+import ManagePrescriptions from "@/components/Medicine/ManagePrescriptions";
+import PrescriptionsPrintPreview from "@/components/Medicine/PrintPreview";
+import { DailyRoundListDetails } from "@/components/Patient/DailyRoundListDetails";
+import { DailyRounds } from "@/components/Patient/DailyRounds";
+import FileUploadPage from "@/components/Patient/FileUploadPage";
+import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
+
+import { AppRoutes } from "@/Routers/AppRouter";
 
 const consultationRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/consultation": ({

@@ -1,5 +1,5 @@
 import { useLocationChange } from "raviger";
-import { createContext, ReactNode, useState } from "react";
+import { ReactNode, createContext, useState } from "react";
 
 export const HistoryContext = createContext<string[]>([]);
 // eslint-disable-next-line @typescript-eslint/no-empty-function

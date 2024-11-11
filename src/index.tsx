@@ -1,19 +1,15 @@
-import { createRoot } from "react-dom/client";
-import reducer from "../src/Redux/Reducer";
-import App from "./App";
-import "./i18n";
-import { applyMiddleware, createStore } from "redux";
-import thunk from "redux-thunk";
-import { Provider } from "react-redux";
 import * as Sentry from "@sentry/browser";
-import "./style/index.css";
+import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
+
+import App from "@/App";
+import "@/i18n";
+import "@/style/index.css";
 
 if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 
-const store = createStore(reducer, applyMiddleware(thunk));
 if (import.meta.env.PROD) {
   Sentry.init({
     environment: import.meta.env.MODE,
@@ -22,8 +18,4 @@ if (import.meta.env.PROD) {
 }
 
 const root = createRoot(document.getElementById("root") as HTMLElement);
-root.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-);
+root.render(<App />);

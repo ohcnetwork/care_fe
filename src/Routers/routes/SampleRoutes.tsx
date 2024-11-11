@@ -1,8 +1,9 @@
-import { SampleDetails } from "../../Components/Patient/SampleDetails";
-import SampleReport from "../../Components/Patient/SamplePreview";
-import { SampleTest } from "../../Components/Patient/SampleTest";
-import SampleViewAdmin from "../../Components/Patient/SampleViewAdmin";
-import { AppRoutes } from "../AppRouter";
+import { SampleDetails } from "@/components/Patient/SampleDetails";
+import SampleReport from "@/components/Patient/SamplePreview";
+import { SampleTest } from "@/components/Patient/SampleTest";
+import SampleViewAdmin from "@/components/Patient/SampleViewAdmin";
+
+import { AppRoutes } from "@/Routers/AppRouter";
 
 const SampleRoutes: AppRoutes = {
   "/sample": () => <SampleViewAdmin />,
