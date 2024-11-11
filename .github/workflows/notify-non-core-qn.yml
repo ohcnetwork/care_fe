@@ -22,59 +22,64 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             console.log('Script started');
+
+            const isOrgMember = (commenter, allowedUsers) => {
+              return allowedUsers.split(',').includes(commenter);
+            };
+
+            const containsQuestionKeywords = (text, keywords) => {
+              return keywords.split(',').some(keyword =>
+                text.toLowerCase().includes(keyword.toLowerCase())
+              );
+            };
+
+            const addLabelsToIssue = async (github, context, labels) => {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                labels: labels.split(',')
+              });
+            };
+
+            const sendSlackNotification = async (webhook, message) => {
+              const response = await fetch(webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(message)
+              });
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+            };
+
             const commenter = context.payload.comment.user.login;
             console.log('Commenter:', commenter);
-            const coreUsernames = process.env.ALLOWED_USERNAMES.split(',');
-            const isOrgMember = coreUsernames.includes(commenter);
-            console.log('Is commenter an org member?', isOrgMember);
 
-            if (!isOrgMember) {
-              const commentBody = context.payload.comment.body.toLowerCase();
-              console.log('Comment body:', commentBody);
-              const questionKeywords = process.env.QUESTION_KEYWORDS.split(',');
-              console.log('Question Keywords:', questionKeywords);
-              const isQuestion = questionKeywords.some(keyword => commentBody.includes(keyword));
-              console.log('Is comment a question?', isQuestion);
+            if (!isOrgMember(commenter, process.env.ALLOWED_USERNAMES)) {
+              const sanitizedComment = context.payload.comment.body
+                ?.replace(/[^\w\s?]/gi, '')
+                .toLowerCase();
+              console.log('Comment body:', sanitizedComment);
 
-              if (isQuestion) {
+              if (containsQuestionKeywords(sanitizedComment, process.env.QUESTION_KEYWORDS)) {
                 try {
                   console.log('Adding labels to the issue');
-                  await github.rest.issues.addLabels({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: context.payload.issue.number,
-                    labels: process.env.QUESTION_LABELS.split(',')
-                  });
+                  await addLabelsToIssue(github, context, process.env.QUESTION_LABELS);
                   console.log('Labels added successfully');
-                } catch (error) {
-                  console.error('Error adding labels:', error.message);
-                  if (error.status === 403) {
-                    console.error('Permission denied. Please check GitHub token permissions.');
-                  }
-                }
 
-                const slackWebhook = process.env.SLACK_WEBHOOK;
-                console.log('Slack Webhook URL:', slackWebhook);
-                const issueUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${context.payload.issue.number}`;
-                console.log('Issue URL:', issueUrl);
+                  const issueUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${context.payload.issue.number}`;
+                  console.log('Issue URL:', issueUrl);
 
-                const message = {
-                  text: `:question: *An Open Source contributor posted a question:*\n<${issueUrl}| View the issue>`
-                };
-                console.log('Slack message:', message);
-
-                try {
-                  await fetch(slackWebhook, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(message)
+                  await sendSlackNotification(process.env.SLACK_WEBHOOK, {
+                    text: `:question: *An Open Source contributor posted a question:*\n<${issueUrl}| View the issue>`
                   });
                   console.log('Slack notification sent successfully');
                 } catch (error) {
-                  console.error('Error sending Slack notification:', error.message);
+                  console.error('Workflow failed:', error.message);
+                  core.setFailed(`Workflow failed: ${error.message}`);
                 }
               }
             }
+
             console.log('Script ended');
