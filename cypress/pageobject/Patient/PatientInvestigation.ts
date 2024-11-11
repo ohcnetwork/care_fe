@@ -17,6 +17,10 @@ class PatientInvestigation {
     cy.get("#investigation-checkbox").click();
   }
 
+  selectInvestigationOption(options: string[]) {
+    cy.clickAndMultiSelectOption("#investigations", options);
+  }
+
   clickLogLabResults() {
     cy.verifyAndClickElement("#log-lab-results", "Log Lab Results");
   }
