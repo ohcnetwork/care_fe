@@ -35,8 +35,6 @@ export default function ListView() {
     resultsPerPage,
   } = useFilters({ cacheBlacklist: ["patient_name"] });
 
-  // Adjust the modalFor type definition
-
   const [modalFor, setModalFor] = useState<{
     externalId: string | undefined;
     loading: boolean;
@@ -50,12 +48,16 @@ export default function ListView() {
 
   const handleTransferComplete = async (shift: ShiftingModel) => {
     setModalFor({ ...modalFor, loading: true });
-    await request(routes.completeTransfer, {
-      pathParams: { externalId: shift.external_id },
-    });
-    navigate(
-      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
-    );
+    try {
+      await request(routes.completeTransfer, {
+        pathParams: { externalId: shift.external_id },
+      });
+      navigate(
+        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
+      );
+    } catch (error) {
+      setModalFor({ externalId: undefined, loading: false });
+    }
   };
 
   const {
