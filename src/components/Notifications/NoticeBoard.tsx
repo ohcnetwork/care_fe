@@ -26,7 +26,9 @@ export const NoticeBoard = () => {
             className="overflow-hidden rounded shadow-md"
           >
             <div className="px-6 py-4">
-              <div className="text-justify text-lg">{item.message}</div>
+              <div className="text-justify text-lg" id="notification-message">
+                {item.message}
+              </div>
               <div className="text-md my-2 text-secondary-700">
                 {formatName(item.caused_by)} -{" "}
                 <span className="font-bold text-primary-700">
