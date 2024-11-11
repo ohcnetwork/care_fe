@@ -17,6 +17,7 @@ export const ConsultationInvestigationsTab = (props: ConsultationTabProps) => {
         <PageTitle title="Investigations" hideBack={true} breadcrumbs={false} />
         <div className="pt-6">
           <ButtonV2
+            id="log-lab-results"
             authorizeFor={NonReadOnlyUsers}
             disabled={!props.patientData.is_active}
             onClick={() =>
