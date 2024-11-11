@@ -59,7 +59,7 @@ export default function MedicineAdministrationTableRow({
       key: `${prescription.last_administration?.administered_date}`,
     },
   );
-  const TableContent = () => (
+  const DosageFrequencyInfo = () => (
     <div className="flex justify-center">
       <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
         {prescription.dosage_type !== "TITRATED" ? (
@@ -236,12 +236,12 @@ export default function MedicineAdministrationTableRow({
               </span>
             </div>
             <div className="block lg:hidden">
-              <TableContent />
+              <DosageFrequencyInfo />
             </div>
           </div>
         </td>
         <td className="hidden lg:table-cell">
-          <TableContent />
+          <DosageFrequencyInfo />
         </td>
 
         <td />
