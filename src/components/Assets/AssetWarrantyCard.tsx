@@ -38,7 +38,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
       <div className="flex h-full flex-col justify-between gap-2 md:flex-row xl:flex-col">
         <div className="flex h-full w-full flex-col gap-4 md:border-r xl:w-auto xl:border-r-0">
           {Object.keys(details).map((key) => (
-            <div className="">
+            <div key={key} className="rtl:text-right">
               <div className="mb-1 text-sm uppercase italic tracking-widest text-secondary-200">
                 {t(toSnakeCase(key.toString()))}
               </div>
@@ -78,7 +78,10 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
               ["Phone", asset.support_phone, "l-phone"],
               ["Email", asset.support_email, "l-envelope"],
             ].map((item) => (
-              <div className="flex items-center flex-wrap responsive-width leading-5 mt-2">
+              <div
+                key={item[0]}
+                className="flex items-center flex-wrap responsive-width leading-5 mt-2 rtl:flex-row-reverse"
+              >
                 {item[1] && (
                   <>
                     <span className="mr-3 italic">
@@ -90,8 +93,11 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
                       }
                       className="border-b border-primary-300 text-primary-300 hover:text-primary-400"
                     >
-                      <span className="break-all">
-                        <CareIcon icon={item[2] as IconName} className="mr-1" />
+                      <span className="break-words">
+                        <CareIcon
+                          icon={item[2] as IconName}
+                          className="mx-1 rtl:rotate-180"
+                        />
                         <span>{item[1]}</span>
                       </span>
                     </a>

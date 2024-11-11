@@ -546,12 +546,23 @@ export const keysOf = <T extends object>(obj: T) => {
 };
 
 /**
- * Converts a given string to snake_case format for translation.
+ * Converts a string to snake_case format.
+ *
+ * @example
+ * toSnakeCase("Hello World!") // returns "hello_world"
+ * toSnakeCase("User-Name:") // returns "user_name"
+ *
  * @param text - The input text to be converted
  * @returns The text in snake_case format
+ * @throws {Error} If the input is null or undefined
  */
-export const toSnakeCase = (text: string): string =>
-  text
+export const toSnakeCase = (text: string): string => {
+  if (text == null) {
+    throw new Error("Input text cannot be null or undefined");
+  }
+  return text
     .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, " ");
+    .replace(/^_+|_+$/g, "");
+};
