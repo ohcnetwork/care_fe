@@ -1,11 +1,15 @@
-import { lazy } from "react";
-import routes from "../../../Redux/api";
-import useQuery from "../../../Utils/request/useQuery";
-import PrintPreview from "../../../CAREUI/misc/PrintPreview";
-import { useTranslation } from "react-i18next";
-const Loading = lazy(() => import("@/components/Common/Loading"));
-import { Investigation } from "./Reports/types";
 import careConfig from "@careConfig";
+import { lazy } from "react";
+import { useTranslation } from "react-i18next";
+
+import PrintPreview from "@/CAREUI/misc/PrintPreview";
+
+import { Investigation } from "@/components/Facility/Investigations/Reports/types";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+
+const Loading = lazy(() => import("@/components/Common/Loading"));
 
 const InvestigationEntry = ({
   investigation,

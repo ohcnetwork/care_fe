@@ -1,20 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import PopupModal from "../../../../CAREUI/display/PopupModal";
-import HumanBodyChart from "../../../../CAREUI/interactive/HumanChart";
-import { SelectFormField } from "../../../Form/FormFields/SelectFormField";
-import TextFormField from "../../../Form/FormFields/TextFormField";
-import TextAreaFormField from "../../../Form/FormFields/TextAreaFormField";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../../utils";
+import { useTranslation } from "react-i18next";
+
+import PopupModal from "@/CAREUI/display/PopupModal";
+import HumanBodyChart from "@/CAREUI/interactive/HumanChart";
+
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { calculatePushScore } from "@/components/LogUpdate/Sections/PressureSore/utils";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
+import { IPressureSore } from "@/components/Patient/models";
+
 import {
   HumanBodyRegion,
   PressureSoreExudateAmountOptions,
   PressureSoreTissueTypeOptions,
 } from "@/common/constants";
-import { IPressureSore } from "../../../Patient/models";
-import { Error } from "../../../../Utils/Notifications";
-import { classNames, getValueDescription } from "../../../../Utils/utils";
-import { calculatePushScore } from "./utils";
-import { useTranslation } from "react-i18next";
+
+import { Error } from "@/Utils/Notifications";
+import { classNames, getValueDescription } from "@/Utils/utils";
 
 const PressureSore = ({ log, onChange, readonly }: LogUpdateSectionProps) => {
   const value = log.pressure_sore ?? [];

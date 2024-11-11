@@ -1,8 +1,11 @@
 import { useState } from "react";
-import FeedButton from "./FeedButton";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { PTZPayload } from "./useOperateCamera";
-import { isAppleDevice } from "../../Utils/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import FeedButton from "@/components/CameraFeed/FeedButton";
+import { PTZPayload } from "@/components/CameraFeed/useOperateCamera";
+
+import { isAppleDevice } from "@/Utils/utils";
 
 const Actions = {
   UP: 1 << 0,

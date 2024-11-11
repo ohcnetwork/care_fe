@@ -1,8 +1,9 @@
+import { IPressureSore } from "@/components/Patient/models";
+
 import {
   PressureSoreExudateAmountOptions,
   PressureSoreTissueTypeOptions,
 } from "@/common/constants";
-import { IPressureSore } from "../../../Patient/models";
 
 const areaIntervalPoints = [0.0, 0.3, 0.6, 1.0, 2.2, 3.0, 4.0, 8.0, 12.0, 24.0];
 

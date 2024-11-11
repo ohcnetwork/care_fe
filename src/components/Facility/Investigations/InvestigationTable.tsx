@@ -1,11 +1,14 @@
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import { classNames } from "../../../Utils/utils";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { navigate } from "raviger";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
+import { classNames } from "@/Utils/utils";
 
 const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
   const { t } = useTranslation();

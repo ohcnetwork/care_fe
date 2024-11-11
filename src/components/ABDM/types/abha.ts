@@ -1,4 +1,4 @@
-import { PatientModel } from "../../Patient/models";
+import { PatientModel } from "@/components/Patient/models";
 
 export type AbhaNumberModel = {
   id: number;

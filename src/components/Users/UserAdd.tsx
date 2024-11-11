@@ -1,5 +1,28 @@
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import CircularProgress from "@/components/Common/CircularProgress";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { FacilityModel } from "@/components/Facility/models";
+import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
 import {
   GENDER_TYPES,
   USER_TYPES,
@@ -12,38 +35,20 @@ import {
   validatePassword,
   validateUsername,
 } from "@/common/validation";
-import * as Notification from "../../Utils/Notifications";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { FacilityModel } from "../Facility/models";
+
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   classNames,
   dateQueryString,
   parsePhoneNumber,
   scrollTo,
-} from "../../Utils/utils";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import Page from "@/components/Common/components/Page";
-import Card from "../../CAREUI/display/Card";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import dayjs from "../../Utils/dayjs";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { useTranslation } from "react-i18next";
+} from "@/Utils/utils";
 
-import Loading from "@/components/Common/Loading";
 interface UserProps {
   userId?: number;
 }
@@ -145,16 +150,25 @@ const getDate = (value: any) =>
 export const validateRule = (
   condition: boolean,
   content: JSX.Element | string,
+  isInitialState: boolean,
 ) => {
   return (
     <div>
-      {condition ? (
+      {isInitialState ? (
+        <CareIcon icon="l-circle" className="text-xl text-gray-500" />
+      ) : condition ? (
         <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
       ) : (
         <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
       )}{" "}
       <span
-        className={classNames(condition ? "text-primary-500" : "text-red-500")}
+        className={classNames(
+          isInitialState
+            ? "text-black"
+            : condition
+              ? "text-primary-500"
+              : "text-red-500",
+        )}
       >
         {content}
       </span>
@@ -786,24 +800,28 @@ export const UserAdd = (props: UserProps) => {
                     {validateRule(
                       usernameInput.length >= 4 && usernameInput.length <= 16,
                       "Username should be 4-16 characters long",
+                      !state.form.username,
                     )}
                   </div>
                   <div>
                     {validateRule(
                       /^[a-z0-9._-]*$/.test(usernameInput),
                       "Username can only contain lowercase letters, numbers, and . _ -",
+                      !state.form.username,
                     )}
                   </div>
                   <div>
                     {validateRule(
                       /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
                       "Username must start and end with a letter or number",
+                      !state.form.username,
                     )}
                   </div>
                   <div>
                     {validateRule(
                       !/(?:[._-]{2,})/.test(usernameInput),
                       "Username can't contain consecutive special characters . _ -",
+                      !state.form.username,
                     )}
                   </div>
                 </div>
@@ -835,18 +853,22 @@ export const UserAdd = (props: UserProps) => {
                   {validateRule(
                     state.form.password?.length >= 8,
                     "Password should be atleast 8 characters long",
+                    !state.form.password,
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toUpperCase(),
                     "Password should contain at least 1 lowercase letter",
+                    !state.form.password,
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toLowerCase(),
                     "Password should contain at least 1 uppercase letter",
+                    !state.form.password,
                   )}
                   {validateRule(
                     /\d/.test(state.form.password),
                     "Password should contain at least 1 number",
+                    !state.form.password,
                   )}
                 </div>
               )}
@@ -867,6 +889,7 @@ export const UserAdd = (props: UserProps) => {
                 validateRule(
                   state.form.c_password === state.form.password,
                   "Confirm password should match the entered password",
+                  !state.form.password,
                 )}
             </div>
             <TextFormField

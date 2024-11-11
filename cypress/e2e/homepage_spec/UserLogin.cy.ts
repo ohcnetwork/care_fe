@@ -1,4 +1,5 @@
 import LoginPage from "pageobject/Login/LoginPage";
+
 const loginPage = new LoginPage();
 
 describe("Authorisation/Authentication", () => {
@@ -27,18 +28,15 @@ describe("Forgot Password", () => {
   const userName = "dummy_user_1";
   beforeEach(() => {
     cy.awaitUrl("/", true);
-    cy.verifyAndClickElement("#forgot-pass-btn", "Forgot password?");
   });
 
-  it("Send Password Reset Link", () => {
+  it("should send a password reset link and navigate back to the login page", () => {
+    cy.verifyAndClickElement("#forgot-pass-btn", "Forgot password?");
     loginPage.fillUserNameInForgotPasswordForm(userName);
     loginPage.interceptResetLinkReq();
     loginPage.clickSendResetLinkBtn();
     loginPage.verifyResetLinkReq();
     cy.verifyNotification("Password Reset Email Sent");
-  });
-
-  it("Go to Login page", () => {
     loginPage.clickBackButton();
     loginPage.verifyLoginPageUrl();
   });

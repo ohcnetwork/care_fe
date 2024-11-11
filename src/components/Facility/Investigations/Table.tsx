@@ -1,8 +1,9 @@
-import { FieldChangeEvent } from "../../Form/FormFields/Utils";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField";
-import TextFormField from "../../Form/FormFields/TextFormField";
 import { set } from "lodash-es";
 import { useState } from "react";
+
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 
 const TestRow = ({ data, value, onChange, i }: any) => {
   return (
