@@ -22,67 +22,6 @@ import {
   relativeTime,
 } from "@/Utils/utils";
 
-interface UserListViewProps {
-  users: UserModel[] | UserAssignedModel[];
-  onSearch: (username: string) => void;
-  searchValue: string;
-}
-
-export default function UserListView({
-  users,
-  onSearch,
-  searchValue,
-}: UserListViewProps) {
-  const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState(0);
-
-  return (
-    <>
-      <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-        <div className="sm:w-1/2">
-          <SearchInput
-            id="search-by-username"
-            name="username"
-            onChange={(e) => onSearch(e.value)}
-            value={searchValue}
-            placeholder={t("search_by_username")}
-          />
-        </div>
-        <Tabs
-          tabs={[
-            {
-              text: (
-                <div className="flex items-center gap-2">
-                  <CareIcon icon="l-credit-card" className="text-lg" />
-                  <span>Card</span>
-                </div>
-              ),
-              value: 0,
-            },
-            {
-              text: (
-                <div className="flex items-center gap-2">
-                  <CareIcon icon="l-list-ul" className="text-lg" />
-                  <span>List</span>
-                </div>
-              ),
-              value: 1,
-            },
-          ]}
-          currentTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as number)}
-          className="float-right"
-        />
-      </div>
-      {activeTab === 0 ? (
-        <UserGrid users={users} />
-      ) : (
-        <UserList users={users} />
-      )}
-    </>
-  );
-}
-
 export const GetUserTypes = (editForm = false) => {
   const authUser = useAuthUser();
 
@@ -113,37 +52,100 @@ export const GetUserTypes = (editForm = false) => {
       return defaultAllowedUserTypes;
   }
 };
-
 export const CanUserAccess = (user: UserModel | UserAssignedModel) => {
   const allowedTypes = GetUserTypes(true).map((type) => type.id);
   return allowedTypes.includes(user.user_type);
 };
-
+const GetDetailsButton = (username: string) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex-grow-0">
+      <button
+        onClick={() => navigate(`/users/${username}`)}
+        className="flex flex-grow-0 items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs hover:bg-gray-200"
+      >
+        <CareIcon icon="l-arrow-up-right" className="text-lg" />
+        <span>{t("more_details")}</span>
+      </button>
+    </div>
+  );
+};
 const getNameAndStatusCard = (
   user: UserModel | UserAssignedModel,
   cur_online: boolean,
+  showDetailsButton = false,
 ) => {
   return (
     <div>
-      <div className="flex items-center gap-3">
-        <h1 className="text-base font-bold" id="user-name">
-          {formatName(user)}
-        </h1>
-        <div
-          className={classNames(
-            "flex items-center gap-2 rounded-full px-3 py-1",
-            cur_online ? "bg-green-100" : "bg-gray-100",
-          )}
-        >
-          <UserStatusIndicator user={user} />
+      <div className="flex flex-row justify-between gap-x-3">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-x-3">
+            <h1 className="text-base font-bold" id="user-name">
+              {formatName(user)}
+            </h1>
+            <div
+              className={classNames(
+                "flex items-center gap-2 rounded-full px-3 py-1",
+                cur_online ? "bg-green-100" : "bg-gray-100",
+              )}
+            >
+              <UserStatusIndicator user={user} />
+            </div>
+          </div>
+          <span className="text-sm text-gray-500">{user.username}</span>
+        </div>
+        <div>
+          {showDetailsButton &&
+            CanUserAccess(user) &&
+            GetDetailsButton(user.username)}
         </div>
       </div>
-      <span className="text-sm text-gray-500">{user.username}</span>
+    </div>
+  );
+};
+export const UserStatusIndicator = ({
+  user,
+  className,
+  addPadding = false,
+}: {
+  user: UserModel | UserAssignedModel;
+  className?: string;
+  addPadding?: boolean;
+}) => {
+  const cur_online = isUserOnline(user);
+  const { t } = useTranslation();
+  return (
+    <div
+      className={classNames(
+        "inline-flex items-center gap-2 rounded-full",
+        addPadding ? "px-3 py-1" : "pypx",
+        cur_online ? "bg-green-100" : "bg-gray-100",
+        className,
+      )}
+    >
+      <span
+        className={classNames(
+          "inline-block h-2 w-2 shrink-0 rounded-full",
+          cur_online ? "bg-green-500" : "bg-gray-400",
+        )}
+      ></span>
+      <span
+        className={classNames(
+          "whitespace-nowrap text-xs",
+          cur_online ? "text-green-700" : "text-gray-500",
+        )}
+      >
+        {cur_online
+          ? t("online")
+          : user.last_login
+            ? relativeTime(user.last_login)
+            : t("never")}
+      </span>
     </div>
   );
 };
 const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
-  const cur_online = isUserOnline(user);
+  const userOnline = isUserOnline(user);
   const { width } = useWindowDimensions();
   const mediumScreenBreakpoint = 640;
   const isMediumScreen = width <= mediumScreenBreakpoint;
@@ -151,61 +153,57 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
 
   return (
     <Card key={`usr_${user.id}`} id={`usr_${user.id}`} className="relative">
-      <div className="flex flex-col items-start justify-between sm:flex-row">
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <div className="flex flex-col items-center gap-4 min-[320px]:flex-row sm:items-start">
-            <Avatar
-              imageUrl={user.read_profile_picture_url}
-              name={user.username ?? ""}
-              className="h-16 w-16 self-center text-2xl sm:self-auto"
-            />
-            {isMediumScreen && getNameAndStatusCard(user, cur_online)}
-          </div>
-          <div className="flex flex-col">
-            {!isMediumScreen && getNameAndStatusCard(user, cur_online)}
-            <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-2">
-              <div className="text-sm">
-                <div className="text-gray-500">{t("role")}</div>
-                <div className="font-medium">{user.user_type}</div>
-              </div>
-              <div className="text-sm">
-                <div className="text-gray-500">{t("home_facility")}</div>
-                <div className="font-medium">
-                  {user.home_facility_object?.name || t("no_home_facility")}
-                </div>
-              </div>
-              {"district_object" in user && user.district_object && (
+      <div className="flex flex-col justify-between sm:flex-row">
+        <div className="flex flex-col gap-4 sm:flex-row w-full justify-between">
+          <div className="flex grow flex-col gap-4 sm:flex-row w-full">
+            <div className="flex flex-col items-center gap-4 min-[320px]:flex-row sm:items-start">
+              <Avatar
+                imageUrl={user.read_profile_picture_url}
+                name={user.username ?? ""}
+                className="h-16 w-16 self-center text-2xl sm:self-auto"
+              />
+              {isMediumScreen && getNameAndStatusCard(user, userOnline)}
+            </div>
+            <div className="flex flex-col w-full">
+              {!isMediumScreen && getNameAndStatusCard(user, userOnline, true)}
+              <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4">
                 <div className="text-sm">
-                  <div className="text-gray-500">{t("district")}</div>
-                  <div className="font-medium">{user.district_object.name}</div>
+                  <div className="text-gray-500">{t("role")}</div>
+                  <div className="font-medium">{user.user_type}</div>
                 </div>
-              )}
-              {"district" in user && user.district && (
                 <div className="text-sm">
-                  <div className="text-gray-500">{t("district")}</div>
-                  <div className="font-medium">{user.district}</div>
+                  <div className="text-gray-500">{t("home_facility")}</div>
+                  <div className="font-medium">
+                    {user.home_facility_object?.name || t("no_home_facility")}
+                  </div>
                 </div>
-              )}
-              {user.weekly_working_hours && (
+                {"district_object" in user && user.district_object && (
+                  <div className="text-sm">
+                    <div className="text-gray-500">{t("district")}</div>
+                    <div className="font-medium">
+                      {user.district_object.name}
+                    </div>
+                  </div>
+                )}
+                {"district" in user && user.district && (
+                  <div className="text-sm">
+                    <div className="text-gray-500">{t("district")}</div>
+                    <div className="font-medium">{user.district}</div>
+                  </div>
+                )}
                 <div className="text-sm">
                   <div className="text-gray-500">
                     {t("average_weekly_working_hours")}
                   </div>
-                  <div className="font-medium">{user.weekly_working_hours}</div>
+                  <div className="font-medium">
+                    {user.weekly_working_hours ?? "-"}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
+          {isMediumScreen && GetDetailsButton(user.username)}
         </div>
-        {CanUserAccess(user) && (
-          <button
-            onClick={() => navigate(`/users/${user.username}`)}
-            className="flex flex-grow-0 items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs"
-          >
-            <CareIcon icon="l-arrow-up-right" className="text-lg" />
-            <span>{t("more_details")}</span>
-          </button>
-        )}
       </div>
     </Card>
   );
@@ -267,22 +265,14 @@ const UserListRow = ({ user }: { user: UserModel | UserAssignedModel }) => {
         {user.home_facility_object?.name || t("no_home_facility")}
       </td>
       <td className="px-4 py-4 text-sm">
-        {"district_object" in user && user.district
+        {"district_object" in user && user.district_object
           ? user.district_object?.name
           : "district" in user && user.district
             ? user.district
             : ""}
       </td>
       <td className="px-4 py-4">
-        {CanUserAccess(user) && (
-          <button
-            onClick={() => navigate(`/users/${user.username}`)}
-            className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-xs"
-          >
-            <CareIcon icon="l-arrow-up-right" className="text-lg" />
-            <span>{t("more_details")}</span>
-          </button>
-        )}
+        {CanUserAccess(user) && GetDetailsButton(user.username)}
       </td>
     </tr>
   );
@@ -301,45 +291,63 @@ export const UserList = ({
     </table>
   </div>
 );
+interface UserListViewProps {
+  users: UserModel[] | UserAssignedModel[];
+  onSearch: (username: string) => void;
+  searchValue: string;
+}
 
-export const UserStatusIndicator = ({
-  user,
-  className,
-  addPadding = false,
-}: {
-  user: UserModel | UserAssignedModel;
-  className?: string;
-  addPadding?: boolean;
-}) => {
-  const cur_online = isUserOnline(user);
+export default function UserListView({
+  users,
+  onSearch,
+  searchValue,
+}: UserListViewProps) {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState(0);
+
   return (
-    <div
-      className={classNames(
-        "inline-flex items-center gap-2 rounded-full",
-        addPadding ? "px-3 py-1" : "pypx",
-        cur_online ? "bg-green-100" : "bg-gray-100",
-        className,
+    <>
+      <div className="mb-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+        <div className="sm:w-1/2">
+          <SearchInput
+            id="search-by-username"
+            name="username"
+            onChange={(e) => onSearch(e.value)}
+            value={searchValue}
+            placeholder={t("search_by_username")}
+          />
+        </div>
+        <Tabs
+          tabs={[
+            {
+              text: (
+                <div className="flex items-center gap-2">
+                  <CareIcon icon="l-credit-card" className="text-lg" />
+                  <span>Card</span>
+                </div>
+              ),
+              value: 0,
+            },
+            {
+              text: (
+                <div className="flex items-center gap-2">
+                  <CareIcon icon="l-list-ul" className="text-lg" />
+                  <span>List</span>
+                </div>
+              ),
+              value: 1,
+            },
+          ]}
+          currentTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as number)}
+          className="float-right"
+        />
+      </div>
+      {activeTab === 0 ? (
+        <UserGrid users={users} />
+      ) : (
+        <UserList users={users} />
       )}
-    >
-      <span
-        className={classNames(
-          "inline-block h-2 w-2 shrink-0 rounded-full",
-          cur_online ? "bg-green-500" : "bg-gray-400",
-        )}
-      ></span>
-      <span
-        className={classNames(
-          "whitespace-nowrap text-xs",
-          cur_online ? "text-green-700" : "text-gray-500",
-        )}
-      >
-        {cur_online
-          ? t("online")
-          : user.last_login
-            ? relativeTime(user.last_login)
-            : t("never")}
-      </span>
-    </div>
+    </>
   );
-};
+}
