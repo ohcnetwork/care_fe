@@ -1,13 +1,15 @@
 import LoginPage from "pageobject/Login/LoginPage";
 
 const loginPage = new LoginPage();
+const userName = "dummy_user_1";
+const forgotPasswordHeading = "Forgot password?";
 
-describe("Authorisation/Authentication", () => {
+describe("User login workflow with correct and incorrect passwords", () => {
   beforeEach(() => {
     cy.awaitUrl("/", true);
   });
 
-  it("Try login as admin with correct password", () => {
+  it("Log in as admin with correct password", () => {
     loginPage.loginManuallyAsDistrictAdmin();
     loginPage.interceptFacilityReq();
     loginPage.verifyFacilityReq();
@@ -16,28 +18,31 @@ describe("Authorisation/Authentication", () => {
     loginPage.verifyLoginPageUrl();
   });
 
-  it("Try login as admin with incorrect password", () => {
+  it("Display an error when logging in as admin with incorrect password", () => {
     loginPage.interceptLoginReq();
     loginPage.loginManuallyAsDistrictAdmin(false);
     loginPage.verifyLoginReq();
     cy.verifyNotification("No active account found with the given credentials");
+    cy.closeNotification();
   });
 });
 
-describe("Forgot Password", () => {
-  const userName = "dummy_user_1";
+describe("Reset user's password using email", () => {
   beforeEach(() => {
     cy.awaitUrl("/", true);
   });
 
-  it("should send a password reset link and navigate back to the login page", () => {
-    cy.verifyAndClickElement("#forgot-pass-btn", "Forgot password?");
+  it("Send a password reset link and navigate back to the login page", () => {
+    loginPage.clickForgotPasswordButton(forgotPasswordHeading);
+    loginPage.verifyForgotPasswordHeading([forgotPasswordHeading]);
     loginPage.fillUserNameInForgotPasswordForm(userName);
     loginPage.interceptResetLinkReq();
     loginPage.clickSendResetLinkBtn();
     loginPage.verifyResetLinkReq();
     cy.verifyNotification("Password Reset Email Sent");
+    cy.closeNotification();
     loginPage.clickBackButton();
     loginPage.verifyLoginPageUrl();
+    loginPage.verifyLoginButtonPresence();
   });
 });

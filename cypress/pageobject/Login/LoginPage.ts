@@ -59,6 +59,10 @@ class LoginPage {
     cy.verifyAndClickElement("#back-to-login-btn", "Back to login");
   }
 
+  clickForgotPasswordButton(text: string): void {
+    cy.verifyAndClickElement("#forgot-pass-btn", text);
+  }
+
   interceptFacilityReq(): void {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
   }
@@ -81,6 +85,14 @@ class LoginPage {
 
   verifyResetLinkReq(): void {
     cy.wait("@resetLink").its("response.statusCode").should("eq", 200);
+  }
+
+  verifyLoginButtonPresence(): void {
+    cy.verifyContentPresence("#login-button", ["Login"]);
+  }
+
+  verifyForgotPasswordHeading(text: string[]): void {
+    cy.verifyContentPresence("#forgot-password-heading", text);
   }
 }
 

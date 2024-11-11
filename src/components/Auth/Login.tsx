@@ -348,6 +348,7 @@ const Login = (props: { forgot?: boolean }) => {
                         </div>
                       ) : (
                         <button
+                          id="login-button"
                           type="submit"
                           className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
                         >
@@ -379,11 +380,11 @@ const Login = (props: { forgot?: boolean }) => {
                     <span>{t("back_to_login")}</span>
                   </div>
                 </button>
-                <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
+                <div className="mb-8 w-[300px] text-4xl font-black text-primary-600" id="forgot-password-heading">
                   {t("forget_password")}
                 </div>
                 <form onSubmit={handleForgetSubmit}>
-                  <div>
+                  <div id="forgot-password-instruction">
                     {t("forget_password_instruction")}
                     <LegendInput
                       id="forgot_username"
