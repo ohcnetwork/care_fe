@@ -6,6 +6,7 @@ import PageTitle from "@/components/Common/PageTitle";
 import Pagination from "@/components/Common/Pagination";
 import { ProcedureType } from "@/components/Common/prescription-builder/ProcedureBuilder";
 import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import LogUpdateAnalayseTable from "@/components/Facility/Consultations/LogUpdateAnalayseTable";
 import {
   DailyRoundsRes,
   NursingPlotFields,
@@ -17,8 +18,6 @@ import { NURSING_CARE_PROCEDURES, PAGINATION_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-
-import LogUpdateAnalayseTable from "../Consultations/LogUpdateAnalayseTable";
 
 const REVERSE_CHOICES = {
   appetite: {
