@@ -1,11 +1,9 @@
 class PatientInvestigation {
   clickAddInvestigation() {
-    cy.get("#investigation").scrollIntoView();
     cy.verifyAndClickElement("#investigation", "Add Investigation");
   }
 
   clickInvestigationTab() {
-    cy.get("#consultation_tab_nav").scrollIntoView();
     cy.verifyAndClickElement("#consultation_tab_nav", "Investigations");
   }
 
@@ -17,6 +15,14 @@ class PatientInvestigation {
 
   clickInvestigationCheckbox() {
     cy.get("#investigation-checkbox").click();
+  }
+
+  selectInvestigationOption(options: string[]) {
+    cy.clickAndMultiSelectOption("#investigations", options);
+  }
+
+  clickLogLabResults() {
+    cy.verifyAndClickElement("#log-lab-results", "Log Lab Results");
   }
 
   selectInvestigationFrequency(frequency: string) {
