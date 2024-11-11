@@ -31,17 +31,17 @@ export default function MedicineAdministrationTable({
         <thead className="sticky top-0 z-10 bg-secondary-50 text-xs font-medium text-black">
           <tr>
             <th className="sticky left-0 z-20 bg-secondary-50 py-3 pl-4 text-left">
-              <div className="flex justify-between gap-2">
-                <span className="text-sm">{t("medicine")}</span>
-                <span className="hidden px-2 text-center text-xs leading-none lg:block">
-                  <p>Dosage &</p>
-                  <p>
-                    {prescriptions[0]?.dosage_type !== "PRN"
-                      ? "Frequency"
-                      : "Indicator"}
-                  </p>
-                </span>
-              </div>
+              <span className="text-sm">{t("medicine")}</span>
+            </th>
+            <th>
+              <span className="hidden px-2 text-center text-xs leading-none lg:block">
+                <p>{t("dosage")} &</p>
+                <p>
+                  {prescriptions[0]?.dosage_type !== "PRN"
+                    ? t("frequency")
+                    : t("indicator")}
+                </p>
+              </span>
             </th>
 
             <th>
