@@ -79,9 +79,11 @@ export default function UserResetPassword({
       });
       if (res?.ok) {
         Notification.Success({ msg: data?.message });
-      } else if (!error) {
+      } else {
         Notification.Error({
-          msg: "There was some error. Please try again in some time.",
+          msg:
+            error?.message ??
+            "There was some error. Please try again in some time.",
         });
       }
       setChangePasswordForm({

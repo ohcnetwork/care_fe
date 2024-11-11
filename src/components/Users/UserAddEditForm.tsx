@@ -248,15 +248,19 @@ const UserAddEditForm = (props: UserProps) => {
           ? formData.weekly_working_hours
           : null,
     };
-    const { res } = await request(routes.partialUpdateUser, {
+    const { res, error } = await request(routes.partialUpdateUser, {
       pathParams: { username },
       body: data,
     });
     if (res?.ok) {
       Notification.Success({
-        msg: "Details updated successfully",
+        msg: "Updated user details successfully",
       });
       await refetchUserData();
+    } else {
+      Notification.Error({
+        msg: error?.message ?? "Error while updating user details",
+      });
     }
   };
 
@@ -688,21 +692,19 @@ const UserAddEditForm = (props: UserProps) => {
           : undefined,
     };
 
-    const { res } = await request(routes.addUser, {
+    const { res, error } = await request(routes.addUser, {
       body: data,
     });
     if (res?.ok) {
       dispatch({ type: "set_form", form: initForm });
-      if (!username) {
-        Notification.Success({
-          msg: "User added successfully",
-        });
-      } else {
-        Notification.Success({
-          msg: "User updated successfully",
-        });
-      }
+      Notification.Success({
+        msg: "User added successfully",
+      });
       navigate("/users");
+    } else {
+      Notification.Error({
+        msg: error?.message ?? "Error while adding user",
+      });
     }
     setIsLoading(false);
   };
