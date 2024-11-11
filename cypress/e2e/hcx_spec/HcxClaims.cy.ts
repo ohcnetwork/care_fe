@@ -81,7 +81,7 @@ describe("HCX Claims configuration and approval workflow", () => {
     patientConsultationPage.clickManagePatientButton();
     patientConsultationPage.clickClaimsButton();
     hcxClaims.selectEligiblePolicy(patientInsurerName);
-    hcxClaims.verifyPolicyEligibity();
+    hcxClaims.verifyPolicyEligibility();
     cy.verifyNotification("Checking Policy Eligibility");
     cy.closeNotification();
     // Confirm that the eligibility check displays as successful

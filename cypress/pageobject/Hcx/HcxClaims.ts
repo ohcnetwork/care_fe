@@ -3,7 +3,7 @@ export class HcxClaims {
     cy.clickAndSelectOption("#select-insurance-policy", policy);
   }
 
-  verifyPolicyEligibity() {
-    cy.verifyAndClickElement("#check-eligibity", "Check Eligibility");
+  verifyPolicyEligibility() {
+    cy.verifyAndClickElement("#check-eligibility", "Check Eligibility");
   }
 }

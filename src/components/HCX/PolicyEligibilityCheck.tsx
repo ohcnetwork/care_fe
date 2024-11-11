@@ -140,7 +140,7 @@ export default function HCXPolicyEligibilityCheck({
           )}
         />
         <ButtonV2
-          id="check-eligibity"
+          id="check-eligibility"
           className="whitespace-nowrap py-3 max-sm:w-full"
           onClick={checkEligibility}
           disabled={
