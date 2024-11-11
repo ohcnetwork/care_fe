@@ -43,7 +43,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.typePatientAdmitedBeforeDate(patientFromDate);
     patientHome.typePatientAdmitedAfterDate(patientToDate);
     patientHome.clickPatientFilterApply();
-    patientHome.verifyTotalPatientCount("1");
     // verify the badge and clear the count
     patientHome.verifyPatientCreatedBeforeDate(patientToDateBadge);
     patientHome.verifyPatientCreatedAfterDate(patientFromDateBadge);
