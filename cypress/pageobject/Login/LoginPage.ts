@@ -34,6 +34,10 @@ class LoginPage {
     cy.get("#sign-out-button").scrollIntoView();
     cy.get("#sign-out-button").contains("Sign Out").should("exist");
   }
+
+  clickSignOutBtn(): void {
+    cy.verifyAndClickElement("#sign-out-button", "Sign Out");
+  }
 }
 
 export default LoginPage;

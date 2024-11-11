@@ -2,6 +2,7 @@
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import FacilityNotify from "../../pageobject/Facility/FacilityNotify";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import { UserPage } from "../../pageobject/Users/UserSearch";
@@ -9,6 +10,7 @@ import { UserPage } from "../../pageobject/Users/UserSearch";
 describe("Facility Homepage Function", () => {
   const loginPage = new LoginPage();
   const facilityHome = new FacilityHome();
+  const facilityNotify = new FacilityNotify();
   const facilityPage = new FacilityPage();
   const manageUserPage = new ManageUserPage();
   const userPage = new UserPage();
@@ -22,6 +24,8 @@ describe("Facility Homepage Function", () => {
   const district = "Ernakulam";
   const localBody = "Aikaranad";
   const facilityType = "Private Hospital";
+  const notificationErrorMsg = "Message cannot be empty";
+  const notificationMessage = "Test Notification";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -30,6 +34,7 @@ describe("Facility Homepage Function", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/facility");
   });
 
@@ -41,9 +46,6 @@ describe("Facility Homepage Function", () => {
     facilityHome.clickViewCnsButton();
     facilityHome.verifyCnsUrl();
     facilityHome.navigateBack();
-    // view notify button
-    facilityHome.clickFacilityNotifyButton();
-    facilityHome.verifyAndCloseNotifyModal();
     // view facility button
     facilityHome.clickViewFacilityDetails();
     facilityPage.getFacilityName().should("be.visible");
@@ -132,6 +134,51 @@ describe("Facility Homepage Function", () => {
     facilityHome.selectLocation(facilityLocaion);
     facilityHome.clickLiveMonitorButton();
     facilityHome.verifyLiveMonitorUrl();
+  });
+
+  it("Verify Notice Board Functionality", () => {
+    // search facility and verify it's loaded or not
+    manageUserPage.interceptFacilitySearchReq();
+    manageUserPage.typeFacilitySearch(facilityName);
+    manageUserPage.verifyFacilitySearchReq();
+    // verify facility name and card reflection
+    facilityNotify.verifyUrlContains("Dummy+Facility+40");
+    facilityPage.verifyFacilityBadgeContent(facilityName);
+    manageUserPage.assertFacilityInCard(facilityName);
+    // send notification to a facility
+    facilityHome.clickFacilityNotifyButton();
+    facilityNotify.verifyFacilityName(facilityName);
+    facilityNotify.fillNotifyText(notificationMessage);
+    facilityNotify.interceptPostNotificationReq();
+    cy.submitButton("Notify");
+    facilityNotify.verifyPostNotificationReq();
+    cy.verifyNotification("Facility Notified");
+    cy.closeNotification();
+    cy.wait(2000);
+    // Verify the frontend error on empty message
+    facilityHome.clickFacilityNotifyButton();
+    facilityNotify.verifyFacilityName(facilityName);
+    cy.submitButton("Notify");
+    facilityNotify.verifyErrorMessage(notificationErrorMsg);
+    // close pop-up and verify
+    facilityHome.verifyAndCloseNotifyModal();
+    // signout as district admin and login as a Nurse
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsNurse();
+    // Verify Notice Board Reflection
+    facilityNotify.interceptGetNotificationReq("MESSAGE");
+    facilityNotify.visitNoticeBoard();
+    facilityNotify.verifyGetNotificationReq();
+    facilityNotify.verifyFacilityNoticeBoardMessage(notificationMessage);
+    facilityNotify.interceptGetNotificationReq();
+    // Verify Sidebar Notification Reflection
+    facilityNotify.openNotificationSlide();
+    facilityNotify.verifyGetNotificationReq();
+    cy.verifyContentPresence("#notification-slide-msg", [notificationMessage]);
+    facilityNotify.closeNotificationSlide();
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
   });
 
   afterEach(() => {
