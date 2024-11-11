@@ -36,6 +36,7 @@ export default function ListView() {
   } = useFilters({ cacheBlacklist: ["patient_name"] });
 
   // Adjust the modalFor type definition
+
   const [modalFor, setModalFor] = useState<{
     externalId: string | undefined;
     loading: boolean;
@@ -163,7 +164,7 @@ export default function ListView() {
             >
               <CareIcon icon="l-plane-departure" className="mr-2" />
               <dd className="text-sm font-bold leading-5 text-secondary-900">
-                {(shift.origin_facility_object || {}).name}
+                {shift.origin_facility_object?.name}
               </dd>
             </dt>
 
@@ -174,7 +175,7 @@ export default function ListView() {
               >
                 <CareIcon icon="l-user-check" className="mr-2" />
                 <dd className="text-sm font-bold leading-5 text-secondary-900">
-                  {(shift.shifting_approving_facility_object || {}).name}
+                  {shift.shifting_approving_facility_object?.name}
                 </dd>
               </dt>
             )}
@@ -231,10 +232,6 @@ export default function ListView() {
                   onClose={() =>
                     setModalFor({ externalId: undefined, loading: false })
                   }
-                  // show={modalFor === shift.external_id}
-                  // onClose={() =>
-                  //   setModalFor({ externalId: undefined, loading: false })
-                  // }
                   onConfirm={() => handleTransferComplete(shift)}
                 />
               </div>
