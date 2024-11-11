@@ -1,12 +1,12 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
-import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
-import PatientPredefined from "../../pageobject/Patient/PatientPredefined";
-import ShiftCreation from "../../pageobject/Shift/ShiftCreation";
-import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
-import PatientTreatmentPlan from "../../pageobject/Patient/PatientTreatmentPlan";
+import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import PatientDeathReport from "../../pageobject/Patient/PatientDeathReport";
+import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
+import PatientPredefined from "../../pageobject/Patient/PatientPredefined";
 import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
+import PatientTreatmentPlan from "../../pageobject/Patient/PatientTreatmentPlan";
+import ShiftCreation from "../../pageobject/Shift/ShiftCreation";
 
 describe("Patient Consultation in multiple combination", () => {
   const patientConsultationPage = new PatientConsultationPage();
