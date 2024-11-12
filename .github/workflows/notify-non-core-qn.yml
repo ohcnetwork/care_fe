@@ -2,18 +2,16 @@ name: Notify Core Team on Non-Core Questions
 on:
   issue_comment:
     types: [created]
-
 permissions:
   issues: write
   pull-requests: write
-
 jobs:
   notify_core_team:
     runs-on: ubuntu-latest
     env:
-      ALLOWED_USERNAMES: ${{ secrets.ALLOWED_USERNAMES }}
-      QUESTION_KEYWORDS: ${{ secrets.QUESTION_KEYWORDS }}
-      QUESTION_LABELS: ${{ secrets.QUESTION_LABELS }}
+      ALLOWED_USERNAMES: ${{ vars.ALLOWED_USERNAMES }}
+      QUESTION_KEYWORDS: ${{ vars.QUESTION_KEYWORDS }}
+      QUESTION_LABELS: ${{ vars.QUESTION_LABELS }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     steps:
       - name: Check and Notify
@@ -22,26 +20,26 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             console.log('Script started');
-
             const isOrgMember = (commenter, allowedUsers) => {
-              return allowedUsers.split(',').includes(commenter);
+              return allowedUsers.split(',').map(u => u.trim()).includes(commenter);
             };
-
             const containsQuestionKeywords = (text, keywords) => {
-              return keywords.split(',').some(keyword =>
+              return keywords.split(',').map(k => k.trim()).some(keyword =>
                 text.toLowerCase().includes(keyword.toLowerCase())
               );
             };
-
-            const addLabelsToIssue = async (github, context, labels) => {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.issue.number,
-                labels: labels.split(',')
-              });
+            const addLabelsToIssue = async (github, context, labelsString) => {
+              const labels = labelsString.split(',').map(label => label.trim()).filter(label => label);
+              if (labels.length > 0) {
+                console.log('Adding labels:', labels);
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.issue.number,
+                  labels: labels
+                });
+              }
             };
-
             const sendSlackNotification = async (webhook, message) => {
               const response = await fetch(webhook, {
                 method: 'POST',
@@ -52,32 +50,27 @@ jobs:
                 throw new Error(`HTTP error! status: ${response.status}`);
               }
             };
-
             const commenter = context.payload.comment.user.login;
             console.log('Commenter:', commenter);
-
             if (!isOrgMember(commenter, process.env.ALLOWED_USERNAMES)) {
               const commentBody = context.payload.comment.body;
               const sanitizedComment = commentBody
                 ?.replace(/[^\w\s?]/gi, '')
                 .toLowerCase();
               console.log('Comment body:', sanitizedComment);
-
               if (containsQuestionKeywords(sanitizedComment, process.env.QUESTION_KEYWORDS)) {
                 try {
                   console.log('Adding labels to the issue');
                   await addLabelsToIssue(github, context, process.env.QUESTION_LABELS);
                   console.log('Labels added successfully');
-
                   const issueUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${context.payload.issue.number}`;
                   const issueTitle = context.payload.issue.title;
                   const issueNumber = context.payload.issue.number;
                   console.log('Issue URL:', issueUrl);
                   console.log('Issue Title:', issueTitle);
                   console.log('Issue Number:', issueNumber);
-
                   await sendSlackNotification(process.env.SLACK_WEBHOOK, {
-                    text: `:care: *An Open Source contributor posted a question:*\n*Title:* ${issueTitle}\n*Issue Number:* <${issueUrl}|#${issueNumber}>\n*Commenter:* ${commenter}\n\n*Question:*\n${commentBody}`
+                    text: `:care: An Open Source contributor posted a question:\n*Title:* ${issueTitle}\n*Issue Number:* <${issueUrl}|#${issueNumber}>\n*Commenter:* ${commenter}\n\n*Question:*\n${commentBody}`
                   });
                   console.log('Slack notification sent successfully');
                 } catch (error) {
@@ -86,5 +79,5 @@ jobs:
                 }
               }
             }
-
             console.log('Script ended');
+
