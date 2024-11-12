@@ -19,15 +19,13 @@ export default function LinkedFacilitiesTab(props: Props) {
   }
 
   return (
-    <>
-      <div className="mt-10 flex flex-col gap-y-12">
-        {userColumns(
-          t("linked_facilities"),
-          t("linked_facilities_note"),
-          LinkedFacilities,
-          props,
-        )}
-      </div>
-    </>
+    <div className="mt-10 flex flex-col gap-y-12">
+      {userColumns(
+        t("linked_facilities"),
+        t("linked_facilities_note"),
+        LinkedFacilities,
+        props,
+      )}
+    </div>
   );
 }

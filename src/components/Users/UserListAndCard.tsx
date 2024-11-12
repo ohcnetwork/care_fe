@@ -238,7 +238,13 @@ const UserListHeader = ({
   );
 };
 
-const UserListRow = ({ user }: { user: UserModel | UserAssignedModel }) => {
+const UserListRow = ({
+  user,
+  showDistrictColumn,
+}: {
+  user: UserModel | UserAssignedModel;
+  showDistrictColumn: boolean;
+}) => {
   const { t } = useTranslation();
   return (
     <tr
@@ -266,13 +272,15 @@ const UserListRow = ({ user }: { user: UserModel | UserAssignedModel }) => {
       <td className="px-4 py-4 text-sm">
         {user.home_facility_object?.name || t("no_home_facility")}
       </td>
-      <td className="px-4 py-4 text-sm">
-        {"district_object" in user && user.district_object
-          ? user.district_object?.name
-          : "district" in user && user.district
-            ? user.district
-            : ""}
-      </td>
+      {showDistrictColumn && (
+        <td className="px-4 py-4 text-sm">
+          {"district_object" in user && user.district_object
+            ? user.district_object?.name
+            : "district" in user && user.district
+              ? user.district
+              : ""}
+        </td>
+      )}
       <td className="px-4 py-4">
         {CanUserAccess(user) && GetDetailsButton(user.username)}
       </td>
@@ -292,7 +300,13 @@ export const UserList = ({
       <table className="min-w-full divide-y divide-gray-200">
         <UserListHeader showDistrictColumn={showDistrictColumn ?? false} />
         <tbody className="divide-y divide-gray-200 bg-white">
-          {users?.map((user) => <UserListRow key={user.id} user={user} />)}
+          {users?.map((user) => (
+            <UserListRow
+              key={user.id}
+              user={user}
+              showDistrictColumn={showDistrictColumn ?? false}
+            />
+          ))}
         </tbody>
       </table>
     </div>

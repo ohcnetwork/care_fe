@@ -5,8 +5,12 @@ import Loading from "@/components/Common/Loading";
 import { FieldError } from "@/components/Form/FieldValidators";
 import Form from "@/components/Form/Form";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-
-import { validateNumber } from "@/common/validation";
+import {
+  EditForm,
+  ValidateDoctorExperienceCommencedOn,
+  ValidateDoctorMedicalCouncilRegistration,
+  ValidateQualification,
+} from "@/components/Users/UserFormValidations";
 
 import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
@@ -17,12 +21,6 @@ import useQuery from "@/Utils/request/useQuery";
 import { FormContextValue } from "../Form/FormContext";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
-type EditForm = {
-  user_type: string;
-  qualification?: string | null;
-  doctor_experience_commenced_on?: string | null;
-  doctor_medical_council_registration?: string | null;
-};
 type ErrorForm = {
   user_type?: string;
   qualification?: string | null;
@@ -104,38 +102,27 @@ export default function UserQualifications({ username }: { username: string }) {
     },
   });
 
-  const validateForm = () => {
+  const validateForm = (formData: EditForm) => {
     const errors: Partial<Record<keyof EditForm, FieldError>> = {};
-    Object.keys(states.form).forEach((field) => {
+    Object.keys(formData).forEach((field) => {
+      let currentError = null;
       switch (field) {
         case "doctor_experience_commenced_on":
-          if (states.form.user_type === "Doctor") {
-            if (states.form.doctor_experience_commenced_on === undefined) {
-              errors[field] = t("field_required");
-            } else if (
-              !validateNumber(states.form.doctor_experience_commenced_on ?? "")
-            ) {
-              errors[field] = t("doctor_experience_number_error");
-            } else {
-              const years = Number(states.form.doctor_experience_commenced_on);
-              if (isNaN(years) || years < 0 || years > 100) {
-                errors[field] = t("doctor_experience_error");
-              }
-            }
+          currentError = ValidateDoctorExperienceCommencedOn(formData, t);
+          if (currentError) {
+            errors[field] = currentError;
           }
           break;
         case "qualification":
-          if (
-            (states.form.user_type === "Doctor" ||
-              states.form.user_type === "Nurse") &&
-            !states.form[field]
-          ) {
-            errors[field] = t("field_required");
+          currentError = ValidateQualification(formData, t);
+          if (currentError) {
+            errors[field] = currentError;
           }
           break;
         case "doctor_medical_council_registration":
-          if (states.form.user_type === "Doctor" && !states.form[field]) {
-            errors[field] = t("field_required");
+          currentError = ValidateDoctorMedicalCouncilRegistration(formData, t);
+          if (currentError) {
+            errors[field] = currentError;
           }
           break;
       }
@@ -192,15 +179,19 @@ export default function UserQualifications({ username }: { username: string }) {
           ? (formData.doctor_medical_council_registration ?? undefined)
           : undefined,
     };
-    const { res } = await request(routes.partialUpdateUser, {
+    const { res, error } = await request(routes.partialUpdateUser, {
       pathParams: { username: userData.username },
       body: data,
     });
     if (res?.ok) {
       Notification.Success({
-        msg: "Details updated successfully",
+        msg: t("user_details_update_success"),
       });
       await refetchUserData();
+    } else {
+      Notification.Error({
+        msg: error?.message ?? t("user_details_update_error"),
+      });
     }
   };
 
@@ -242,9 +233,6 @@ export default function UserQualifications({ username }: { username: string }) {
                         {...field("doctor_experience_commenced_on")}
                         required
                         className="flex-1"
-                        type="number"
-                        min={0}
-                        max={100}
                         label={t("years_of_experience")}
                         placeholder={t("years_of_experience_of_the_doctor")}
                         onChange={(e) => {

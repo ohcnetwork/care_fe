@@ -21,6 +21,14 @@ import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormFi
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import {
+  UserForm,
+  ValidateDoctorExperienceCommencedOn,
+  ValidateDoctorMedicalCouncilRegistration,
+  ValidateQualification,
+} from "@/components/Users/UserFormValidations";
+import { GetUserTypes } from "@/components/Users/UserListAndCard";
+import { GenderType } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -48,9 +56,6 @@ import {
   scrollTo,
 } from "@/Utils/utils";
 
-import { GetUserTypes } from "./UserListAndCard";
-import { GenderType } from "./models";
-
 interface UserProps {
   username?: string;
 }
@@ -59,31 +64,6 @@ interface StateObj {
   id: number;
   name: string;
 }
-
-type UserForm = {
-  user_type?: string;
-  gender: GenderType;
-  password?: string;
-  c_password?: string;
-  facilities?: Array<string>;
-  home_facility?: FacilityModel | null;
-  username?: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  alt_phone_number: string;
-  phone_number_is_whatsapp?: boolean;
-  date_of_birth: Date | null | string;
-  state?: number;
-  district?: number;
-  local_body?: number;
-  qualification?: string | undefined;
-  doctor_experience_commenced_on?: string;
-  doctor_medical_council_registration?: string;
-  video_connect_link?: string;
-  weekly_working_hours?: string | null;
-};
 
 const initForm: UserForm = {
   user_type: "",
@@ -195,16 +175,20 @@ const UserAddEditForm = (props: UserProps) => {
     prefetch: editUser,
     onResponse: (result) => {
       if (!editUser || !result || !result.res || !result.data) return;
+      const userData = result.data;
       const formData: UserForm = {
-        first_name: result.data.first_name,
-        last_name: result.data.last_name,
-        date_of_birth: result.data.date_of_birth || null,
-        gender: result.data.gender || "Male",
-        email: result.data.email,
-        video_connect_link: result.data.video_connect_link,
-        phone_number: result.data.phone_number?.toString() || "",
-        alt_phone_number: result.data.alt_phone_number?.toString() || "",
-        weekly_working_hours: result.data.weekly_working_hours,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        date_of_birth: userData.date_of_birth || null,
+        gender: userData.gender || "Male",
+        email: userData.email,
+        video_connect_link: userData.video_connect_link,
+        phone_number: userData.phone_number?.toString() || "",
+        alt_phone_number: userData.alt_phone_number?.toString() || "",
+        weekly_working_hours: userData.weekly_working_hours,
+        phone_number_is_whatsapp:
+          userData.phone_number?.toString() ===
+          userData.alt_phone_number?.toString(),
       };
       dispatch({
         type: "set_form",
@@ -255,12 +239,12 @@ const UserAddEditForm = (props: UserProps) => {
     });
     if (res?.ok) {
       Notification.Success({
-        msg: "Updated user details successfully",
+        msg: t("user_details_update_success"),
       });
       await refetchUserData();
     } else {
       Notification.Error({
-        msg: error?.message ?? "Error while updating user details",
+        msg: error?.message ?? t("user_details_update_error"),
       });
     }
   };
@@ -401,12 +385,32 @@ const UserAddEditForm = (props: UserProps) => {
   const changePhoneNumber = (
     field: FormContextValue<UserForm>,
     fieldName: keyof UserForm,
-    phoneNumber: string,
+    value: string | boolean,
   ) => {
     field(fieldName).onChange({
       name: field(fieldName).name,
-      value: phoneNumber,
+      value: value,
     });
+  };
+
+  const updatePhoneNumber = (
+    field: FormContextValue<UserForm>,
+    phoneNumber: string,
+  ) => {
+    changePhoneNumber(field, "phone_number", phoneNumber);
+    return { phone_number: phoneNumber };
+  };
+
+  const updateAltPhoneNumber = (
+    field: FormContextValue<UserForm>,
+    allowUpdate: boolean,
+    phoneNumber: string,
+  ) => {
+    if (allowUpdate) {
+      changePhoneNumber(field, "alt_phone_number", phoneNumber);
+      return { alt_phone_number: phoneNumber };
+    }
+    return {};
   };
 
   const handlePhoneChange = (
@@ -417,33 +421,42 @@ const UserAddEditForm = (props: UserProps) => {
     let phoneNumberVal = "";
     switch (event.name) {
       case "phone_number":
-        phoneNumberVal = event.value as string;
-        changePhoneNumber(field, "phone_number", phoneNumberVal);
-        formData = { ...formData, phone_number: phoneNumberVal };
-        if (state.form.phone_number_is_whatsapp) {
-          changePhoneNumber(field, "alt_phone_number", phoneNumberVal);
-          formData = { ...formData, alt_phone_number: phoneNumberVal };
-        }
+        formData = {
+          ...formData,
+          ...updatePhoneNumber(field, event.value as string),
+          ...updateAltPhoneNumber(
+            field,
+            state.form.phone_number_is_whatsapp ?? true,
+            event.value as string,
+          ),
+        };
         break;
       case "alt_phone_number":
         phoneNumberVal = event.value as string;
-        if (!state.form.phone_number_is_whatsapp) {
-          changePhoneNumber(field, "alt_phone_number", phoneNumberVal);
-          formData = { ...formData, alt_phone_number: phoneNumberVal };
-        }
-        break;
-      case "phone_number_is_whatsapp":
-        phoneNumberVal = state.form.phone_number;
         formData = {
           ...formData,
-          alt_phone_number: phoneNumberVal,
+          ...updateAltPhoneNumber(
+            field,
+            !(state.form.phone_number_is_whatsapp ?? true),
+            phoneNumberVal,
+          ),
+        };
+        break;
+      case "phone_number_is_whatsapp":
+        formData = {
+          ...formData,
+          ...updateAltPhoneNumber(
+            field,
+            event.value as boolean,
+            state.form.phone_number,
+          ),
           phone_number_is_whatsapp: event.value as boolean,
         };
-        changePhoneNumber(field, "alt_phone_number", phoneNumberVal);
-        field("phone_number_is_whatsapp").onChange({
-          name: field("phone_number_is_whatsapp").name,
-          value: event.value,
-        });
+        changePhoneNumber(
+          field,
+          "phone_number_is_whatsapp",
+          event.value as boolean,
+        );
         break;
     }
     dispatch({
@@ -493,6 +506,7 @@ const UserAddEditForm = (props: UserProps) => {
     if (facilityError) {
       errors.facilities = facilityError;
     }
+    let currentError = null;
     Object.keys(formData).forEach((field) => {
       switch (field) {
         case "user_type":
@@ -501,28 +515,21 @@ const UserAddEditForm = (props: UserProps) => {
           }
           break;
         case "qualification":
-          if (
-            (formData.user_type === "Doctor" ||
-              formData.user_type === "Nurse") &&
-            !formData[field]
-          ) {
-            errors[field] = t("field_required");
+          currentError = ValidateQualification(formData, t);
+          if (currentError) {
+            errors[field] = currentError;
           }
           break;
         case "doctor_experience_commenced_on":
-          if (formData.user_type === "Doctor") {
-            if (!formData[field]) {
-              errors[field] = t("field_required");
-            } else if (!validateNumber(formData[field] ?? "")) {
-              errors[field] = t("doctor_experience_number_error");
-            } else if (Number(formData.doctor_experience_commenced_on) > 100) {
-              errors[field] = t("doctor_experience_less_than_100_years");
-            }
+          currentError = ValidateDoctorExperienceCommencedOn(formData, t);
+          if (currentError) {
+            errors[field] = currentError;
           }
           break;
         case "doctor_medical_council_registration":
-          if (formData.user_type === "Doctor" && !formData[field]) {
-            errors[field] = t("field_required");
+          currentError = ValidateDoctorMedicalCouncilRegistration(formData, t);
+          if (currentError) {
+            errors[field] = currentError;
           }
           break;
         case "phone_number":
@@ -748,11 +755,12 @@ const UserAddEditForm = (props: UserProps) => {
                 <FieldLabel>{t("facilities")}</FieldLabel>
                 <FacilitySelect
                   multiple={true}
-                  name="facilities"
+                  name={t("facilities")}
                   selected={selectedFacility}
                   setSelected={setFacility}
                   errors={facilityErrors}
                   showAll={false}
+                  aria-label={t("facilities")}
                 />
               </div>
             )}
@@ -771,6 +779,7 @@ const UserAddEditForm = (props: UserProps) => {
                   }}
                   optionValue={(o) => o.id}
                   className="flex-1"
+                  aria-label={t("user_type")}
                 />
                 <SelectFormField
                   {...field("home_facility")}
@@ -782,6 +791,7 @@ const UserAddEditForm = (props: UserProps) => {
                     handleFieldChange(e, field);
                   }}
                   className="flex-1"
+                  aria-label={t("home_facility")}
                 />
               </div>
             )}
@@ -796,6 +806,7 @@ const UserAddEditForm = (props: UserProps) => {
                   handleFieldChange(e, field);
                 }}
                 className="flex-1"
+                aria-label={t("qualification")}
               />
             )}
             {state.form.user_type === "Doctor" && (
@@ -803,14 +814,13 @@ const UserAddEditForm = (props: UserProps) => {
                 <TextFormField
                   {...field("doctor_experience_commenced_on")}
                   required
-                  min={0}
-                  type="number"
                   label={t("years_of_experience")}
                   placeholder={t("years_of_experience_of_the_doctor")}
                   onChange={(e) => {
                     handleFieldChange(e, field);
                   }}
                   className="flex-1"
+                  aria-label={t("years_of_experience")}
                 />
 
                 <TextFormField
@@ -822,6 +832,7 @@ const UserAddEditForm = (props: UserProps) => {
                     handleFieldChange(e, field);
                   }}
                   className="flex-1"
+                  aria-label={t("medical_council_registration")}
                 />
               </div>
             )}
@@ -838,6 +849,7 @@ const UserAddEditForm = (props: UserProps) => {
                     handlePhoneChange(e, field);
                   }}
                   className=""
+                  aria-label={t("phone_number")}
                 />
                 <CheckBoxFormField
                   name="phone_number_is_whatsapp"
@@ -858,6 +870,7 @@ const UserAddEditForm = (props: UserProps) => {
                   handlePhoneChange(e, field);
                 }}
                 className="flex-1"
+                aria-label={t("whatsapp_number")}
               />
             </div>
 
@@ -878,6 +891,7 @@ const UserAddEditForm = (props: UserProps) => {
                   onBlur={() => {
                     setUsernameInputInFocus(false);
                   }}
+                  aria-label={t("username")}
                 />
               )}
               {!editUser && usernameInputInFocus && (
@@ -921,28 +935,22 @@ const UserAddEditForm = (props: UserProps) => {
                       </>
                     )}
                   </div>
-                  <div>
+                  <div aria-live="polite">
                     {validateRule(
                       usernameInput.length >= 4 && usernameInput.length <= 16,
                       "Username should be 4-16 characters long",
                       !state.form.username,
                     )}
-                  </div>
-                  <div>
                     {validateRule(
                       /^[a-z0-9._-]*$/.test(usernameInput),
                       "Username can only contain lowercase letters, numbers, and . _ -",
                       !state.form.username,
                     )}
-                  </div>
-                  <div>
                     {validateRule(
                       /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
                       "Username must start and end with a letter or number",
                       !state.form.username,
                     )}
-                  </div>
-                  <div>
                     {validateRule(
                       !/(?:[._-]{2,})/.test(usernameInput),
                       "Username can't contain consecutive special characters . _ -",
@@ -969,9 +977,13 @@ const UserAddEditForm = (props: UserProps) => {
                       onChange={(e) => {
                         handleFieldChange(e, field);
                       }}
+                      aria-label={t("password")}
                     />
                     {passwordInputInFocus && state.form.password && (
-                      <div className="text-small pl-2 text-secondary-500">
+                      <div
+                        className="text-small pl-2 text-secondary-500"
+                        aria-live="polite"
+                      >
                         {validateRule(
                           state.form.password.length >= 8,
                           "Password should be atleast 8 characters long",
@@ -1010,14 +1022,18 @@ const UserAddEditForm = (props: UserProps) => {
                       onChange={(e) => {
                         handleFieldChange(e, field);
                       }}
+                      aria-label={t("confirm_password")}
                     />
                     {confirmPasswordInputInFocus &&
                       state.form.c_password &&
-                      state.form.c_password.length > 0 &&
-                      validateRule(
-                        state.form.c_password === state.form.password,
-                        "Confirm password should match the entered password",
-                        !state.form.c_password,
+                      state.form.c_password.length > 0 && (
+                        <div aria-live="polite">
+                          {validateRule(
+                            state.form.c_password === state.form.password,
+                            "Confirm password should match the entered password",
+                            !state.form.c_password,
+                          )}
+                        </div>
                       )}
                   </div>
                 </div>
@@ -1032,6 +1048,7 @@ const UserAddEditForm = (props: UserProps) => {
                 onChange={(e) => {
                   handleFieldChange(e, field);
                 }}
+                aria-label={t("first_name")}
               />
               <TextFormField
                 {...field("last_name")}
@@ -1041,6 +1058,7 @@ const UserAddEditForm = (props: UserProps) => {
                 onChange={(e) => {
                   handleFieldChange(e, field);
                 }}
+                aria-label={t("last_name")}
               />
             </div>
             <TextFormField
@@ -1051,6 +1069,7 @@ const UserAddEditForm = (props: UserProps) => {
               onChange={(e) => {
                 handleFieldChange(e, field);
               }}
+              aria-label={t("email")}
             />
             <div className="flex flex-col justify-between gap-x-3 sm:flex-row sm:items-center">
               <DateFormField
@@ -1063,6 +1082,7 @@ const UserAddEditForm = (props: UserProps) => {
                 }}
                 disableFuture
                 className="flex-1"
+                aria-label={t("date_of_birth")}
               />
               <SelectFormField
                 {...field("gender")}
@@ -1076,6 +1096,7 @@ const UserAddEditForm = (props: UserProps) => {
                   handleFieldChange(e, field);
                 }}
                 className="flex-1"
+                aria-label={t("gender")}
               />
             </div>
 
@@ -1092,6 +1113,7 @@ const UserAddEditForm = (props: UserProps) => {
                     onChange={(e) => {
                       handleFieldChange(e, field);
                     }}
+                    aria-label={t("average_weekly_working_hours")}
                   />
                   <TextFormField
                     {...field("video_connect_link")}
@@ -1101,6 +1123,7 @@ const UserAddEditForm = (props: UserProps) => {
                     onChange={(e) => {
                       handleFieldChange(e, field);
                     }}
+                    aria-label={t("video_conference_link")}
                   />
                 </div>
               </>
@@ -1123,6 +1146,7 @@ const UserAddEditForm = (props: UserProps) => {
                       handleFieldChange(e, field);
                       if (e) setSelectedStateId(e.value);
                     }}
+                    aria-label={t("state")}
                   />
                 )}
 
@@ -1141,6 +1165,7 @@ const UserAddEditForm = (props: UserProps) => {
                       handleFieldChange(e, field);
                       if (e) setSelectedDistrictId(e.value);
                     }}
+                    aria-label={t("district")}
                   />
                 )}
 
@@ -1160,6 +1185,7 @@ const UserAddEditForm = (props: UserProps) => {
                       onChange={(e) => {
                         handleFieldChange(e, field);
                       }}
+                      aria-label={t("local_body")}
                     />
                   ))}
               </>

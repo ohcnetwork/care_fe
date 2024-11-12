@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Form from "@/components/Form/Form";
@@ -22,6 +23,7 @@ export default function UserResetPassword({
   userData: UserModel;
 }) {
   const { t } = useTranslation();
+  const [isSubmitting, setisSubmitting] = useState(false);
 
   const initForm: PasswordForm = {
     username: userData.username,
@@ -69,6 +71,7 @@ export default function UserResetPassword({
   };
 
   const handleSubmit = async (formData: PasswordForm) => {
+    setisSubmitting(true);
     const form: UpdatePasswordForm = {
       old_password: formData.old_password,
       username: userData.username,
@@ -86,6 +89,7 @@ export default function UserResetPassword({
         msg: error?.message ?? t("password_update_error"),
       });
     }
+    setisSubmitting(false);
   };
 
   return (
@@ -97,6 +101,7 @@ export default function UserResetPassword({
         resetFormVals
         hideRestoreDraft
         noPadding
+        disabled={isSubmitting}
       >
         {(field) => (
           <div className="grid grid-cols-6 gap-4">
@@ -107,6 +112,7 @@ export default function UserResetPassword({
               className="col-span-6 sm:col-span-3"
               type="password"
               required
+              aria-label={t("current_password")}
             />
             <div className="col-span-6 sm:col-span-3">
               <TextFormField
@@ -116,8 +122,12 @@ export default function UserResetPassword({
                 type="password"
                 className="peer col-span-6 sm:col-span-3"
                 required
+                aria-label={t("new_password")}
               />
-              <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
+              <div
+                className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block"
+                aria-live="polite"
+              >
                 {validateRule(
                   field("new_password_1").value?.length >= 8,
                   t("password_length_validation"),
@@ -150,9 +160,13 @@ export default function UserResetPassword({
                 className="peer col-span-6 sm:col-span-3"
                 type="password"
                 required
+                aria-label={t("new_password_confirmation")}
               />
               {field("new_password_2").value?.length > 0 && (
-                <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
+                <div
+                  className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block"
+                  aria-live="polite"
+                >
                   {validateRule(
                     field("new_password_1").value ===
                       field("new_password_2").value,
