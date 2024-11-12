@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 
 interface Props {
-  skillName?: string;
+  skillName: string;
   userName: string;
   onCancel: () => void;
   onSubmit: () => void;

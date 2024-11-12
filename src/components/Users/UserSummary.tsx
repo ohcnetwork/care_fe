@@ -21,6 +21,7 @@ import request from "@/Utils/request/request";
 export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
   const { t } = useTranslation();
   const [showDeleteDialog, setshowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const authUser = useAuthUser();
 
   if (!userData) {
@@ -28,20 +29,23 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
   }
 
   const handleSubmit = async () => {
+    setIsDeleting(true);
     const { res, error } = await request(routes.deleteUser, {
       pathParams: { username: userData.username },
     });
+    setIsDeleting(false);
     if (res?.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
       });
+      setshowDeleteDialog(!showDeleteDialog);
+      navigate("/users");
     } else {
       Notification.Error({
         msg: "Error while deleting User: " + (error || ""),
       });
+      setshowDeleteDialog(!showDeleteDialog);
     }
-    setshowDeleteDialog(!showDeleteDialog);
-    navigate("/users");
   };
 
   const userColumnsData = { userData, username: userData.username };
@@ -75,10 +79,10 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
         {deletePermitted && (
           <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
             <div className="sm:w-1/4">
-              <p className="my-1 text-sm leading-5">
+              <div className="my-1 text-sm leading-5">
                 <p className="mb-2 font-semibold">{t("delete_account")}</p>
                 <p className="text-secondary-600">{t("delete_account_note")}</p>
-              </p>
+              </div>
             </div>
             <div className="w-3/4">
               <ButtonV2
@@ -87,6 +91,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
                 variant="danger"
                 data-testid="user-delete-button"
                 className="my-1 inline-flex"
+                disabled={isDeleting}
               >
                 <CareIcon icon="l-trash" className="h-4" />
                 <span className="">{t("delete_account_btn")}</span>

@@ -63,14 +63,13 @@ export default function LinkedSkills({ username }: { username: string }) {
       pathParams: { username },
       body: { skill: skill.id },
     });
-
-    if (!res?.ok) {
-      Notification.Error({
-        msg: "Error while adding skill",
+    if (res?.ok) {
+      Notification.Success({
+        msg: t("skill_added_successfully"),
       });
     } else {
-      Notification.Success({
-        msg: "Skill added successfully",
+      Notification.Error({
+        msg: t("skill_add_error"),
       });
     }
     setSelectedSkill(null);
@@ -84,11 +83,11 @@ export default function LinkedSkills({ username }: { username: string }) {
     });
     if (res?.status !== 204) {
       Notification.Error({
-        msg: "Error while unlinking skill",
+        msg: t("unlink_skill_error"),
       });
     } else {
       Notification.Success({
-        msg: "Skill unlinked successfully",
+        msg: t("unlink_skill_success"),
       });
     }
     await refetchUserSkills();
@@ -100,7 +99,7 @@ export default function LinkedSkills({ username }: { username: string }) {
         <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
           <div className="rounded p-1 text-sm">{skill.skill_object.name}</div>
           {authorizeForAddSkill && (
-            <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
+            <div className="rounded-r bg-secondary-300 px-2 py-1">
               <button
                 onClick={() => handleOnClick(skill)}
                 title={t("clear_skill")}
@@ -120,7 +119,7 @@ export default function LinkedSkills({ username }: { username: string }) {
       {modalProps.toggle && (
         <UnlinkSkillDialog
           userName={username}
-          skillName={modalProps.selectedSkill?.skill_object.name}
+          skillName={modalProps.selectedSkill?.skill_object.name ?? ""}
           onCancel={handleModalCancel}
           onSubmit={handleModalOk}
         />
@@ -144,14 +143,14 @@ export default function LinkedSkills({ username }: { username: string }) {
             disabled={!authorizeForAddSkill}
             onClick={() => addSkill(username, selectedSkill)}
             className="mt-1 rounded-lg px-6 py-[11px] text-base"
+            tooltip={
+              !authorizeForAddSkill
+                ? t("contact_your_admin_to_add_skills")
+                : t("add_skill")
+            }
           >
             {t("add_skill")}
           </ButtonV2>
-          {!authorizeForAddSkill && (
-            <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
-              {t("contact_your_admin_to_add_skills")}
-            </span>
-          )}
         </div>
         {skills && skills?.count > 0 && (
           <div className="flex flex-col gap-2">

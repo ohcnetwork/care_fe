@@ -29,6 +29,7 @@ import { GENDER_TYPES, USER_TYPES } from "@/common/constants";
 import {
   validateEmailAddress,
   validateName,
+  validateNumber,
   validatePassword,
   validateUsername,
 } from "@/common/validation";
@@ -78,8 +79,8 @@ type UserForm = {
   district?: number;
   local_body?: number;
   qualification?: string | undefined;
-  doctor_experience_commenced_on?: string | undefined;
-  doctor_medical_council_registration?: string | undefined;
+  doctor_experience_commenced_on?: string;
+  doctor_medical_council_registration?: string;
   video_connect_link?: string;
   weekly_working_hours?: string | null;
 };
@@ -397,6 +398,17 @@ const UserAddEditForm = (props: UserProps) => {
     if (field) field(event.name as keyof UserForm).onChange(event);
   };
 
+  const changePhoneNumber = (
+    field: FormContextValue<UserForm>,
+    fieldName: keyof UserForm,
+    phoneNumber: string,
+  ) => {
+    field(fieldName).onChange({
+      name: field(fieldName).name,
+      value: phoneNumber,
+    });
+  };
+
   const handlePhoneChange = (
     event: FieldChangeEvent<unknown>,
     field: FormContextValue<UserForm>,
@@ -406,26 +418,17 @@ const UserAddEditForm = (props: UserProps) => {
     switch (event.name) {
       case "phone_number":
         phoneNumberVal = event.value as string;
-        field("phone_number").onChange({
-          name: field("phone_number").name,
-          value: phoneNumberVal,
-        });
+        changePhoneNumber(field, "phone_number", phoneNumberVal);
         formData = { ...formData, phone_number: phoneNumberVal };
         if (state.form.phone_number_is_whatsapp) {
-          field("alt_phone_number").onChange({
-            name: field("alt_phone_number").name,
-            value: phoneNumberVal,
-          });
+          changePhoneNumber(field, "alt_phone_number", phoneNumberVal);
           formData = { ...formData, alt_phone_number: phoneNumberVal };
         }
         break;
       case "alt_phone_number":
         phoneNumberVal = event.value as string;
         if (!state.form.phone_number_is_whatsapp) {
-          field("alt_phone_number").onChange({
-            name: field("alt_phone_number").name,
-            value: phoneNumberVal,
-          });
+          changePhoneNumber(field, "alt_phone_number", phoneNumberVal);
           formData = { ...formData, alt_phone_number: phoneNumberVal };
         }
         break;
@@ -436,10 +439,7 @@ const UserAddEditForm = (props: UserProps) => {
           alt_phone_number: phoneNumberVal,
           phone_number_is_whatsapp: event.value as boolean,
         };
-        field("alt_phone_number").onChange({
-          name: field("alt_phone_number").name,
-          value: phoneNumberVal,
-        });
+        changePhoneNumber(field, "alt_phone_number", phoneNumberVal);
         field("phone_number_is_whatsapp").onChange({
           name: field("phone_number_is_whatsapp").name,
           value: event.value,
@@ -510,13 +510,14 @@ const UserAddEditForm = (props: UserProps) => {
           }
           break;
         case "doctor_experience_commenced_on":
-          if (formData.user_type === "Doctor" && !formData[field]) {
-            errors[field] = t("field_required");
-          } else if (
-            formData.user_type === "Doctor" &&
-            Number(formData.doctor_experience_commenced_on) > 100
-          ) {
-            errors[field] = t("doctor_experience_less_than_100_years");
+          if (formData.user_type === "Doctor") {
+            if (!formData[field]) {
+              errors[field] = t("field_required");
+            } else if (!validateNumber(formData[field] ?? "")) {
+              errors[field] = t("doctor_experience_number_error");
+            } else if (Number(formData.doctor_experience_commenced_on) > 100) {
+              errors[field] = t("doctor_experience_less_than_100_years");
+            }
           }
           break;
         case "doctor_medical_council_registration":
@@ -616,10 +617,10 @@ const UserAddEditForm = (props: UserProps) => {
           if (formData[field] !== null && formData[field] !== undefined) {
             const hours = Number(formData[field]);
             if (
-              isNaN(hours) ||
+              Number.isNaN(hours) ||
               hours < 0 ||
               hours > 168 ||
-              !/^\d+$/.test(formData[field] ?? "")
+              !validateNumber(formData[field] ?? "")
             ) {
               errors[field] = t("weekly_working_hours_error");
             }
@@ -744,7 +745,7 @@ const UserAddEditForm = (props: UserProps) => {
           <div className="my-4 flex flex-col gap-y-2">
             {!editUser && (
               <div className="w-full">
-                <FieldLabel>Facilities</FieldLabel>
+                <FieldLabel>{t("facilities")}</FieldLabel>
                 <FacilitySelect
                   multiple={true}
                   name="facilities"
@@ -760,7 +761,7 @@ const UserAddEditForm = (props: UserProps) => {
                 <SelectFormField
                   {...field("user_type")}
                   required
-                  label="User Type"
+                  label={t("user_type")}
                   options={userTypes}
                   optionLabel={(o) =>
                     o.role + (o.readOnly ? " (Read Only)" : "")
@@ -773,7 +774,7 @@ const UserAddEditForm = (props: UserProps) => {
                 />
                 <SelectFormField
                   {...field("home_facility")}
-                  label="Home facility"
+                  label={t("home_facility")}
                   options={selectedFacility ?? []}
                   optionLabel={(option) => option.name}
                   optionValue={(option) => option.id}
@@ -804,8 +805,8 @@ const UserAddEditForm = (props: UserProps) => {
                   required
                   min={0}
                   type="number"
-                  label="Years of experience"
-                  placeholder="Years of experience of the Doctor"
+                  label={t("years_of_experience")}
+                  placeholder={t("years_of_experience_of_the_doctor")}
                   onChange={(e) => {
                     handleFieldChange(e, field);
                   }}
@@ -815,8 +816,8 @@ const UserAddEditForm = (props: UserProps) => {
                 <TextFormField
                   {...field("doctor_medical_council_registration")}
                   required
-                  label="Medical Council Registration"
-                  placeholder="Doctor's medical council registration number"
+                  label={t("medical_council_registration")}
+                  placeholder={t("doctor_s_medical_council_registration")}
                   onChange={(e) => {
                     handleFieldChange(e, field);
                   }}
@@ -829,8 +830,8 @@ const UserAddEditForm = (props: UserProps) => {
               <div className="flex flex-1 flex-col">
                 <PhoneNumberFormField
                   {...field("phone_number")}
-                  placeholder="Phone Number"
-                  label="Phone Number"
+                  placeholder={t("phone_number")}
+                  label={t("phone_number")}
                   required
                   types={["mobile", "landline"]}
                   onChange={(e) => {
@@ -844,13 +845,13 @@ const UserAddEditForm = (props: UserProps) => {
                   onChange={(e) => {
                     handlePhoneChange(e, field);
                   }}
-                  label="Is the phone number a WhatsApp number?"
+                  label={t("is_phone_a_whatsapp_number")}
                 />
               </div>
               <PhoneNumberFormField
                 {...field("alt_phone_number")}
-                placeholder="WhatsApp Phone Number"
-                label="Whatsapp Number"
+                placeholder={t("whatsapp_phone_number")}
+                label={t("whatsapp_number")}
                 disabled={state.form.phone_number_is_whatsapp}
                 types={["mobile"]}
                 onChange={(e) => {
@@ -864,8 +865,8 @@ const UserAddEditForm = (props: UserProps) => {
               {!editUser && (
                 <TextFormField
                   {...field("username")}
-                  label="Username"
-                  placeholder="Username"
+                  label={t("username")}
+                  placeholder={t("username")}
                   required
                   autoComplete="new-username"
                   value={usernameInput}
@@ -901,7 +902,7 @@ const UserAddEditForm = (props: UserProps) => {
                                   className="text-xl text-red-500"
                                 />{" "}
                                 <span className="text-red-500">
-                                  Username is not available
+                                  {t("username_not_available")}
                                 </span>
                               </div>
                             ) : (
@@ -911,7 +912,7 @@ const UserAddEditForm = (props: UserProps) => {
                                   className="text-xl text-green-500"
                                 />{" "}
                                 <span className="text-primary-500">
-                                  Username is available
+                                  {t("username_available")}
                                 </span>
                               </div>
                             )}
@@ -1045,7 +1046,7 @@ const UserAddEditForm = (props: UserProps) => {
             <TextFormField
               {...field("email")}
               label={t("email")}
-              placeholder="Email"
+              placeholder={t("email")}
               required
               onChange={(e) => {
                 handleFieldChange(e, field);
@@ -1054,7 +1055,7 @@ const UserAddEditForm = (props: UserProps) => {
             <div className="flex flex-col justify-between gap-x-3 sm:flex-row sm:items-center">
               <DateFormField
                 {...field("date_of_birth")}
-                label="Date of Birth"
+                label={t("date_of_birth")}
                 required
                 value={getDate(state.form.date_of_birth)}
                 onChange={(e) => {
@@ -1112,9 +1113,9 @@ const UserAddEditForm = (props: UserProps) => {
                 ) : (
                   <SelectFormField
                     {...field("state")}
-                    label="State"
+                    label={t("state")}
                     required
-                    placeholder="Choose State"
+                    placeholder={t("choose_state")}
                     options={states}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
@@ -1130,9 +1131,9 @@ const UserAddEditForm = (props: UserProps) => {
                 ) : (
                   <SelectFormField
                     {...field("district")}
-                    label="District"
+                    label={t("district")}
                     required
-                    placeholder="Choose District"
+                    placeholder={t("choose_district")}
                     options={districts}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
@@ -1149,10 +1150,10 @@ const UserAddEditForm = (props: UserProps) => {
                   ) : (
                     <SelectFormField
                       {...field("local_body")}
-                      label="Local Body"
+                      label={t("local_body")}
                       required
                       position="above"
-                      placeholder="Choose Local Body"
+                      placeholder={t("choose_localbody")}
                       options={localBodies}
                       optionLabel={(o) => o.name}
                       optionValue={(o) => o.id}

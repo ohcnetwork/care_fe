@@ -12,6 +12,7 @@ import UserBanner from "@/components/Users/UserBanner";
 import UserSummaryTab from "@/components/Users/UserSummary";
 import { UserModel } from "@/components/Users/models";
 
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
@@ -30,18 +31,25 @@ export default function UserHome(props: UserHomeProps) {
   const [userData, setUserData] = useState<UserModel>();
   const { t } = useTranslation();
 
-  const { loading } = useQuery(routes.getUserDetails, {
-    query: {
-      username: username,
+  const { loading, refetch: refetchUserDetails } = useQuery(
+    routes.getUserDetails,
+    {
+      query: {
+        username: username,
+      },
+      onResponse: ({ res, data, error }) => {
+        if (res?.status === 200 && data) {
+          setUserData(data);
+        } else if (res?.status === 400) {
+          navigate("/users");
+        } else if (error) {
+          Notification.Error({
+            msg: "Error while fetching user details: " + (error?.message || ""),
+          });
+        }
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setUserData(data);
-      } else if (res?.status === 400) {
-        navigate("/users");
-      }
-    },
-  });
+  );
 
   const roleInfoBeVisible = () => {
     if (["Doctor", "Nurse"].includes(userData?.user_type ?? "")) return true;
@@ -61,10 +69,10 @@ export default function UserHome(props: UserHomeProps) {
     FACILITIES: { body: LinkedFacilitiesTab },
   };
 
-  let currentTab = undefined;
-  if (Object.keys(TABS).includes(tab.toUpperCase())) {
-    currentTab = tab.toUpperCase() as keyof typeof TABS;
-  }
+  const normalizedTab = tab.toUpperCase();
+  const isValidTab = (tab: string): tab is keyof typeof TABS =>
+    Object.keys(TABS).includes(tab as keyof typeof TABS);
+  const currentTab = isValidTab(normalizedTab) ? normalizedTab : undefined;
 
   if (!currentTab) {
     return <Error404 />;
@@ -118,7 +126,11 @@ export default function UserHome(props: UserHomeProps) {
                 </div>
               </div>
             </div>
-            <SelectedTab userData={userData} {...props} />
+            <SelectedTab
+              userData={userData}
+              {...props}
+              refetchUserData={refetchUserDetails}
+            />
           </>
         }
       </Page>

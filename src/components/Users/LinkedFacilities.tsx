@@ -34,8 +34,10 @@ const initModalProps: {
 
 export default function LinkedFacilities({
   userData,
+  refetchUserData,
 }: {
   userData: UserModel;
+  refetchUserData?: () => void;
 }) {
   const [facility, setFacility] = useState<any>(null);
   const [userFacilities, setUserFacilities] = useState<
@@ -109,16 +111,16 @@ export default function LinkedFacilities({
     });
     if (!res?.ok) {
       Notification.Error({
-        msg: "Error while updating Home facility",
+        msg: t("update_home_facility_error"),
       });
     } else {
-      userData.home_facility_object = selectedFacility;
       setHomeFacility(selectedFacility);
       Notification.Success({
-        msg: "Home Facility updated successfully",
+        msg: t("home_facility_updated_success"),
       });
     }
     await refetchUserFacilities();
+    refetchUserData?.();
   };
 
   const clearHomeFacility = async () => {
@@ -128,13 +130,13 @@ export default function LinkedFacilities({
 
     if (!res?.ok) {
       Notification.Error({
-        msg: "Error while clearing home facility",
+        msg: t("clear_home_facility_error"),
       });
     } else {
       userData.home_facility_object = undefined;
       setHomeFacility(undefined);
       Notification.Success({
-        msg: "Home Facility cleared successfully",
+        msg: t("home_facility_cleared_success"),
       });
     }
     await refetchUserFacilities();
@@ -147,11 +149,11 @@ export default function LinkedFacilities({
     });
     if (!res?.ok) {
       Notification.Error({
-        msg: "Error while unlinking home facility",
+        msg: t("unlink_home_facility_error"),
       });
     } else {
       Notification.Success({
-        msg: "Facility unlinked successfully",
+        msg: t("unlink_home_facility_success"),
       });
     }
     await refetchUserFacilities();
@@ -161,23 +163,22 @@ export default function LinkedFacilities({
     username: string,
     facility: FacilityModel | null,
   ) => {
-    //setIsLoading(true);
+    if (!facility) return;
     const { res } = await request(routes.addUserFacility, {
       pathParams: { username },
-      body: { facility: facility?.id?.toString() },
+      body: { facility: facility.id?.toString() },
     });
 
     if (!res?.ok) {
       Notification.Error({
-        msg: "Error while linking facility",
+        msg: t("link_facility_error"),
       });
     } else {
       Notification.Success({
-        msg: "Facility linked successfully",
+        msg: t("facility_linked_success"),
       });
     }
     await refetchUserFacilities();
-    //setIsLoading(false);
     setFacility(null);
   };
 
@@ -189,7 +190,7 @@ export default function LinkedFacilities({
           <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
             <div className="rounded p-1 text-sm">{facility.name}</div>
             <DropdownMenuTrigger>
-              <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
+              <div className="rounded-r bg-secondary-300 px-2 py-1">
                 <CareIcon icon="l-setting" className="text-sm" />
               </div>
             </DropdownMenuTrigger>

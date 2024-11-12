@@ -80,9 +80,7 @@ const getNameAndStatusCard = (
       <div className="flex flex-row justify-between gap-x-3">
         <div className="flex flex-col">
           <div className="flex items-center gap-x-3">
-            <h1 className="text-base font-bold" id="user-name">
-              {formatName(user)}
-            </h1>
+            <h1 className="text-base font-bold">{formatName(user)}</h1>
             <div
               className={classNames(
                 "flex items-center gap-2 rounded-full px-3 py-1",
@@ -118,7 +116,7 @@ export const UserStatusIndicator = ({
     <div
       className={classNames(
         "inline-flex items-center gap-2 rounded-full",
-        addPadding ? "px-3 py-1" : "pypx",
+        addPadding ? "px-3 py-1" : "py-px",
         cur_online ? "bg-green-100" : "bg-gray-100",
         className,
       )}
@@ -250,9 +248,7 @@ const UserListRow = ({ user }: { user: UserModel | UserAssignedModel }) => {
             className="h-10 w-10 text-lg"
           />
           <div className="flex flex-col">
-            <h1 className="text-sm font-medium" id="user-name">
-              {formatName(user)}
-            </h1>
+            <h1 className="text-sm font-medium">{formatName(user)}</h1>
             <span className="text-xs text-gray-500">@{user.username}</span>
           </div>
         </div>

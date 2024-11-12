@@ -15,8 +15,8 @@ interface SkillSelectProps {
   multiple?: boolean;
   showNOptions?: number;
   disabled?: boolean;
-  selected: SkillModel | SkillModel[] | null;
-  setSelected: (selected: SkillModel) => void;
+  selected: SkillModel | null;
+  setSelected: (selected: SkillModel | null) => void;
   userSkills?: SkillModel[];
 }
 

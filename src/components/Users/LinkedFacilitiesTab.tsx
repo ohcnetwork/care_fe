@@ -1,12 +1,13 @@
 import { useTranslation } from "react-i18next";
 
 import userColumns from "@/components/Common/UserColumns";
-import LinkededFacilities from "@/components/Users/LinkedFacilities";
+import LinkedFacilities from "@/components/Users/LinkedFacilities";
 import { UserModel } from "@/components/Users/models";
 
 type Props = {
   userData: UserModel;
   username: string;
+  refetchUserData?: () => void;
 };
 
 export default function LinkedFacilitiesTab(props: Props) {
@@ -14,7 +15,7 @@ export default function LinkedFacilitiesTab(props: Props) {
   const { t } = useTranslation();
 
   if (!userData) {
-    return;
+    return <></>;
   }
 
   return (
@@ -23,7 +24,7 @@ export default function LinkedFacilitiesTab(props: Props) {
         {userColumns(
           t("linked_facilities"),
           t("linked_facilities_note"),
-          LinkededFacilities,
+          LinkedFacilities,
           props,
         )}
       </div>

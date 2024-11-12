@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Submit } from "@/components/Common/ButtonV2";
+import Form from "@/components/Form/Form";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserAddEditForm";
 import { UpdatePasswordForm, UserModel } from "@/components/Users/models";
@@ -10,6 +9,13 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
+interface PasswordForm {
+  username: string;
+  old_password: string;
+  new_password_1: string;
+  new_password_2: string;
+}
+
 export default function UserResetPassword({
   userData,
 }: {
@@ -17,25 +23,12 @@ export default function UserResetPassword({
 }) {
   const { t } = useTranslation();
 
-  const [changePasswordForm, setChangePasswordForm] = useState<{
-    username: string;
-    old_password: string;
-    new_password_1: string;
-    new_password_2: string;
-  }>({
+  const initForm: PasswordForm = {
     username: userData.username,
     old_password: "",
     new_password_1: "",
     new_password_2: "",
-  });
-
-  const [changePasswordErrors] = useState<{
-    old_password: string;
-    password_confirmation: string;
-  }>({
-    old_password: "",
-    password_confirmation: "",
-  });
+  };
 
   const validateNewPassword = (password: string) => {
     if (
@@ -49,145 +42,129 @@ export default function UserResetPassword({
     return true;
   };
 
-  const changePassword = async (e: any) => {
-    e.preventDefault();
-    //validating form
-    if (
-      changePasswordForm.new_password_1 !== changePasswordForm.new_password_2
-    ) {
-      Notification.Error({
-        msg: "Passwords are different in new password and confirmation password column.",
-      });
-    } else if (!validateNewPassword(changePasswordForm.new_password_1)) {
-      Notification.Error({
-        msg: "Entered New Password is not valid, please check!",
-      });
-    } else if (
-      changePasswordForm.new_password_1 === changePasswordForm.old_password
-    ) {
-      Notification.Error({
-        msg: "New password is same as old password, Please enter a different new password.",
-      });
+  const validateForm = (formData: PasswordForm) => {
+    const errors: Partial<Record<keyof PasswordForm, string>> = {};
+
+    if (!formData.old_password) {
+      errors.old_password = t("please_enter_current_password");
+    }
+
+    if (!formData.new_password_1) {
+      errors.new_password_1 = t("please_enter_new_password");
+    } else if (!validateNewPassword(formData.new_password_1)) {
+      errors.new_password_1 = t("new_password_validation");
+    }
+
+    if (!formData.new_password_2) {
+      errors.new_password_2 = t("please_confirm_password");
+    } else if (formData.new_password_1 !== formData.new_password_2) {
+      errors.new_password_2 = t("passwords_not_matching");
+    }
+
+    if (formData.new_password_1 === formData.old_password) {
+      errors.new_password_1 = t("new_password_same_as_old");
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async (formData: PasswordForm) => {
+    const form: UpdatePasswordForm = {
+      old_password: formData.old_password,
+      username: userData.username,
+      new_password: formData.new_password_1,
+    };
+
+    const { res, data, error } = await request(routes.updatePassword, {
+      body: form,
+    });
+
+    if (res?.ok) {
+      Notification.Success({ msg: data?.message });
     } else {
-      const form: UpdatePasswordForm = {
-        old_password: changePasswordForm.old_password,
-        username: userData.username,
-        new_password: changePasswordForm.new_password_1,
-      };
-      const { res, data, error } = await request(routes.updatePassword, {
-        body: form,
-      });
-      if (res?.ok) {
-        Notification.Success({ msg: data?.message });
-      } else {
-        Notification.Error({
-          msg:
-            error?.message ??
-            "There was some error. Please try again in some time.",
-        });
-      }
-      setChangePasswordForm({
-        ...changePasswordForm,
-        new_password_1: "",
-        new_password_2: "",
-        old_password: "",
+      Notification.Error({
+        msg: error?.message ?? t("password_update_error"),
       });
     }
   };
 
   return (
-    <>
-      <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
-        <div className="space-y-4">
-          <form action="#" method="POST">
-            <div className="grid grid-cols-6 gap-4">
+    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+      <Form<PasswordForm>
+        defaults={initForm}
+        validate={validateForm}
+        onSubmit={handleSubmit}
+        resetFormVals
+        hideRestoreDraft
+        noPadding
+      >
+        {(field) => (
+          <div className="grid grid-cols-6 gap-4">
+            <TextFormField
+              {...field("old_password")}
+              name="old_password"
+              label={t("current_password")}
+              className="col-span-6 sm:col-span-3"
+              type="password"
+              required
+            />
+            <div className="col-span-6 sm:col-span-3">
               <TextFormField
-                name="old_password"
-                label={t("current_password")}
-                className="col-span-6 sm:col-span-3"
+                {...field("new_password_1")}
+                name="new_password_1"
+                label={t("new_password")}
                 type="password"
-                value={changePasswordForm.old_password}
-                onChange={(e) =>
-                  setChangePasswordForm({
-                    ...changePasswordForm,
-                    old_password: e.value,
-                  })
-                }
-                error={changePasswordErrors.old_password}
+                className="peer col-span-6 sm:col-span-3"
                 required
               />
-              <div className="col-span-6 sm:col-span-3">
-                <TextFormField
-                  name="new_password_1"
-                  label={t("new_password")}
-                  type="password"
-                  value={changePasswordForm.new_password_1}
-                  className="peer col-span-6 sm:col-span-3"
-                  onChange={(e) => {
-                    setChangePasswordForm({
-                      ...changePasswordForm,
-                      new_password_1: e.value,
-                    });
-                  }}
-                  required
-                />
-                <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
-                  {validateRule(
-                    changePasswordForm.new_password_1?.length >= 8,
-                    "Password should be atleast 8 characters long",
-                    !changePasswordForm.new_password_1,
-                  )}
-                  {validateRule(
-                    changePasswordForm.new_password_1 !==
-                      changePasswordForm.new_password_1.toUpperCase(),
-                    "Password should contain at least 1 lowercase letter",
-                    !changePasswordForm.new_password_1,
-                  )}
-                  {validateRule(
-                    changePasswordForm.new_password_1 !==
-                      changePasswordForm.new_password_1.toLowerCase(),
-                    "Password should contain at least 1 uppercase letter",
-                    !changePasswordForm.new_password_1,
-                  )}
-                  {validateRule(
-                    /\d/.test(changePasswordForm.new_password_1),
-                    "Password should contain at least 1 number",
-                    !changePasswordForm.new_password_1,
-                  )}
-                </div>
-              </div>
-              <div className="col-span-6 sm:col-span-3">
-                <TextFormField
-                  name="new_password_2"
-                  label={t("new_password_confirmation")}
-                  className="peer col-span-6 sm:col-span-3"
-                  type="password"
-                  value={changePasswordForm.new_password_2}
-                  onChange={(e) => {
-                    setChangePasswordForm({
-                      ...changePasswordForm,
-                      new_password_2: e.value,
-                    });
-                  }}
-                />
-                {changePasswordForm.new_password_2.length > 0 && (
-                  <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
-                    {validateRule(
-                      changePasswordForm.new_password_1 ===
-                        changePasswordForm.new_password_2,
-                      "Confirm password should match the new password",
-                      !changePasswordForm.new_password_2,
-                    )}
-                  </div>
+              <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
+                {validateRule(
+                  field("new_password_1").value?.length >= 8,
+                  t("password_length_validation"),
+                  !field("new_password_1").value,
+                )}
+                {validateRule(
+                  field("new_password_1").value !==
+                    field("new_password_1").value?.toUpperCase(),
+                  t("password_lowercase_validation"),
+                  !field("new_password_1").value,
+                )}
+                {validateRule(
+                  field("new_password_1").value !==
+                    field("new_password_1").value?.toLowerCase(),
+                  t("password_uppercase_validation"),
+                  !field("new_password_1").value,
+                )}
+                {validateRule(
+                  /\d/.test(field("new_password_1").value ?? ""),
+                  t("password_number_validation"),
+                  !field("new_password_1").value,
                 )}
               </div>
             </div>
-            <div className="px-4 py-3 text-right sm:px-6">
-              <Submit onClick={changePassword} label={t("change_password")} />
+            <div className="col-span-6 sm:col-span-3">
+              <TextFormField
+                {...field("new_password_2")}
+                name="new_password_2"
+                label={t("new_password_confirmation")}
+                className="peer col-span-6 sm:col-span-3"
+                type="password"
+                required
+              />
+              {field("new_password_2").value?.length > 0 && (
+                <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
+                  {validateRule(
+                    field("new_password_1").value ===
+                      field("new_password_2").value,
+                    t("passwords_not_matching"),
+                    !field("new_password_2").value,
+                  )}
+                </div>
+              )}
             </div>
-          </form>
-        </div>
-      </div>
-    </>
+          </div>
+        )}
+      </Form>
+    </div>
   );
 }

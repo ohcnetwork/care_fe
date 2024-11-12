@@ -6,23 +6,28 @@ import { FieldError } from "@/components/Form/FieldValidators";
 import Form from "@/components/Form/Form";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 
+import { validateNumber } from "@/common/validation";
+
 import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 
+import { FormContextValue } from "../Form/FormContext";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+
 type EditForm = {
-  user_type: string | undefined;
-  qualification: string | undefined;
-  doctor_experience_commenced_on: number | string | undefined;
-  doctor_medical_council_registration: string | undefined;
+  user_type: string;
+  qualification?: string | null;
+  doctor_experience_commenced_on?: string | null;
+  doctor_medical_council_registration?: string | null;
 };
 type ErrorForm = {
-  user_type: string | undefined;
-  qualification: string | undefined;
-  doctor_experience_commenced_on: number | string | undefined;
-  doctor_medical_council_registration: string | undefined;
+  user_type?: string;
+  qualification?: string | null;
+  doctor_experience_commenced_on?: string | null;
+  doctor_medical_council_registration?: string | null;
 };
 type State = {
   form: EditForm;
@@ -34,9 +39,9 @@ type Action =
 
 const initForm: EditForm = {
   user_type: "",
-  qualification: undefined,
-  doctor_experience_commenced_on: undefined,
-  doctor_medical_council_registration: undefined,
+  qualification: null,
+  doctor_experience_commenced_on: null,
+  doctor_medical_council_registration: null,
 };
 
 const initError: ErrorForm = Object.assign(
@@ -85,10 +90,9 @@ export default function UserQualifications({ username }: { username: string }) {
       const formData: EditForm = {
         user_type: result.data.user_type,
         qualification: result.data.qualification,
-        doctor_experience_commenced_on: dayjs().diff(
-          dayjs(result.data.doctor_experience_commenced_on),
-          "years",
-        ),
+        doctor_experience_commenced_on: dayjs()
+          .diff(dayjs(result.data.doctor_experience_commenced_on), "years")
+          .toString(),
         doctor_medical_council_registration:
           result.data.doctor_medical_council_registration,
       };
@@ -105,17 +109,21 @@ export default function UserQualifications({ username }: { username: string }) {
     Object.keys(states.form).forEach((field) => {
       switch (field) {
         case "doctor_experience_commenced_on":
-          if (states.form.user_type === "Doctor" && !states.form[field]) {
-            errors[field] = t("field_required");
-          } else if (
-            (states.form.user_type === "Doctor" &&
-              Number(states.form.doctor_experience_commenced_on) >= 100) ||
-            Number(states.form.doctor_experience_commenced_on) < 0
-          ) {
-            errors[field] =
-              "Doctor experience should be at least 0 years and less than 100 years.";
+          if (states.form.user_type === "Doctor") {
+            if (states.form.doctor_experience_commenced_on === undefined) {
+              errors[field] = t("field_required");
+            } else if (
+              !validateNumber(states.form.doctor_experience_commenced_on ?? "")
+            ) {
+              errors[field] = t("doctor_experience_number_error");
+            } else {
+              const years = Number(states.form.doctor_experience_commenced_on);
+              if (isNaN(years) || years < 0 || years > 100) {
+                errors[field] = t("doctor_experience_error");
+              }
+            }
           }
-          return;
+          break;
         case "qualification":
           if (
             (states.form.user_type === "Doctor" ||
@@ -124,12 +132,12 @@ export default function UserQualifications({ username }: { username: string }) {
           ) {
             errors[field] = t("field_required");
           }
-          return;
+          break;
         case "doctor_medical_council_registration":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
             errors[field] = t("field_required");
           }
-          return;
+          break;
       }
     });
     return errors;
@@ -142,6 +150,20 @@ export default function UserQualifications({ username }: { username: string }) {
     });
   };
 
+  const handleFieldChange = (
+    event: FieldChangeEvent<unknown>,
+    field?: FormContextValue<EditForm>,
+  ) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...states.form,
+        [event.name]: event.value,
+      },
+    });
+    if (field) field(event.name as keyof EditForm).onChange(event);
+  };
+
   if (isLoading || !userData) {
     return <Loading />;
   }
@@ -152,7 +174,7 @@ export default function UserQualifications({ username }: { username: string }) {
     const data = {
       qualification:
         formData.user_type === "Doctor" || formData.user_type === "Nurse"
-          ? formData.qualification
+          ? (formData.qualification ?? undefined)
           : undefined,
       doctor_experience_commenced_on:
         formData.user_type === "Doctor"
@@ -167,7 +189,7 @@ export default function UserQualifications({ username }: { username: string }) {
           : undefined,
       doctor_medical_council_registration:
         formData.user_type === "Doctor"
-          ? formData.doctor_medical_council_registration
+          ? (formData.doctor_medical_council_registration ?? undefined)
           : undefined,
     };
     const { res } = await request(routes.partialUpdateUser, {
@@ -208,6 +230,9 @@ export default function UserQualifications({ username }: { username: string }) {
                         className="flex-1"
                         label={t("qualification")}
                         placeholder={t("qualification")}
+                        onChange={(e) => {
+                          handleFieldChange(e, field);
+                        }}
                       />
                     )}
                   </div>
@@ -219,8 +244,12 @@ export default function UserQualifications({ username }: { username: string }) {
                         className="flex-1"
                         type="number"
                         min={0}
+                        max={100}
                         label={t("years_of_experience")}
                         placeholder={t("years_of_experience_of_the_doctor")}
+                        onChange={(e) => {
+                          handleFieldChange(e, field);
+                        }}
                       />
                       <TextFormField
                         {...field("doctor_medical_council_registration")}
@@ -228,6 +257,9 @@ export default function UserQualifications({ username }: { username: string }) {
                         className="flex-1"
                         label={t("medical_council_registration")}
                         placeholder={t("doctor_s_medical_council_registration")}
+                        onChange={(e) => {
+                          handleFieldChange(e, field);
+                        }}
                       />
                     </div>
                   )}
