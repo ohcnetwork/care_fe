@@ -109,23 +109,30 @@ class FacilityHome {
   }
 
   toggleSidebar() {
-    this.sidebarToggle().click();
+    this.sidebarToggle().should("be.visible").click();
+  }
+
+  private verifySidebarElements(
+    textVisibility: "be.visible" | "not.be.visible",
+  ) {
+    this.sidebarItems()
+      .should("have.length.at.least", 1)
+      .each(($item) => {
+        cy.wrap($item, { timeout: 10000 })
+          .find('[data-testid="sidebar-icon"]')
+          .should("be.visible");
+        cy.wrap($item, { timeout: 10000 })
+          .find('[data-testid="sidebar-text"]')
+          .should(textVisibility);
+      });
   }
 
   verifyIconsAndTextVisible() {
-    this.sidebarItems().each(($item) => {
-      cy.wrap($item).find('[data-testid="sidebar-icon"]').should("be.visible");
-      cy.wrap($item).find('[data-testid="sidebar-text"]').should("be.visible");
-    });
+    this.verifySidebarElements("be.visible");
   }
 
   verifyIconsVisibleAndTextHidden() {
-    this.sidebarItems().each(($item) => {
-      cy.wrap($item).find('[data-testid="sidebar-icon"]').should("be.visible");
-      cy.wrap($item)
-        .find('[data-testid="sidebar-text"]')
-        .should("not.be.visible");
-    });
+    this.verifySidebarElements("not.be.visible");
   }
 }
 
