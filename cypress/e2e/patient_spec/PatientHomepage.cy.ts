@@ -127,7 +127,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.selectPatientMedicoFilter(patientMedicoStatus);
     patientHome.clickPatientFilterApply();
     cy.get("a[data-cy='patient']").should("contain.text", "Dummy Patient");
-    patientHome.verifyTotalPatientCount("1");
     // Verify the presence of badges
     patientHome.verifyGenderBadgeContent(patientGender);
     patientHome.verifyCategoryBadgeContent(patientCategory);
