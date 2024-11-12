@@ -57,7 +57,8 @@ jobs:
             console.log('Commenter:', commenter);
 
             if (!isOrgMember(commenter, process.env.ALLOWED_USERNAMES)) {
-              const sanitizedComment = context.payload.comment.body
+              const commentBody = context.payload.comment.body;
+              const sanitizedComment = commentBody
                 ?.replace(/[^\w\s?]/gi, '')
                 .toLowerCase();
               console.log('Comment body:', sanitizedComment);
@@ -69,10 +70,14 @@ jobs:
                   console.log('Labels added successfully');
 
                   const issueUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${context.payload.issue.number}`;
+                  const issueTitle = context.payload.issue.title;
+                  const issueNumber = context.payload.issue.number;
                   console.log('Issue URL:', issueUrl);
+                  console.log('Issue Title:', issueTitle);
+                  console.log('Issue Number:', issueNumber);
 
                   await sendSlackNotification(process.env.SLACK_WEBHOOK, {
-                    text: `:question: *An Open Source contributor posted a question:*\n<${issueUrl}| View the issue>`
+                    text: `:care: *An Open Source contributor posted a question:*\n*Title:* ${issueTitle}\n*Issue Number:* <${issueUrl}|#${issueNumber}>\n*Commenter:* ${commenter}\n\n*Question:*\n${commentBody}`
                   });
                   console.log('Slack notification sent successfully');
                 } catch (error) {
