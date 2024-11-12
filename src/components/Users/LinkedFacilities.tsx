@@ -15,6 +15,9 @@ import { FacilityModel } from "@/components/Facility/models";
 import ConfirmFacilityModal from "@/components/Users/ConfirmFacilityModal";
 import { UserModel } from "@/components/Users/models";
 
+import { useIsAuthorized } from "@/hooks/useIsAuthorized";
+
+import AuthorizeFor from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
@@ -46,6 +49,10 @@ export default function LinkedFacilities({
   const [homeFacility, setHomeFacility] = useState<FacilityModel | undefined>();
   const [modalProps, setModalProps] = useState(initModalProps);
   const { t } = useTranslation();
+
+  const authorizeForHomeFacility = useIsAuthorized(
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
+  );
 
   const { refetch: refetchUserFacilities } = useQuery(routes.userListFacility, {
     pathParams: { username: userData.username },
@@ -111,7 +118,7 @@ export default function LinkedFacilities({
     });
     if (!res?.ok) {
       Notification.Error({
-        msg: t("update_home_facility_error"),
+        msg: t("home_facility_updated_error"),
       });
     } else {
       setHomeFacility(selectedFacility);
@@ -149,11 +156,11 @@ export default function LinkedFacilities({
     });
     if (!res?.ok) {
       Notification.Error({
-        msg: t("unlink_home_facility_error"),
+        msg: t("unlink_facility_error"),
       });
     } else {
       Notification.Success({
-        msg: t("unlink_home_facility_success"),
+        msg: t("unlink_facility_success"),
       });
     }
     await refetchUserFacilities();
@@ -197,16 +204,20 @@ export default function LinkedFacilities({
           </div>
 
           <DropdownMenuContent>
-            <DropdownMenuItem
-              onClick={() =>
-                handleOnClick(
-                  homeFacility ? "replace_home_facility" : "set_home_facility",
-                  facility,
-                )
-              }
-            >
-              {t("set_home_facility")}
-            </DropdownMenuItem>
+            {authorizeForHomeFacility && (
+              <DropdownMenuItem
+                onClick={() =>
+                  handleOnClick(
+                    homeFacility
+                      ? "replace_home_facility"
+                      : "set_home_facility",
+                    facility,
+                  )
+                }
+              >
+                {t("set_home_facility")}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={() => handleOnClick("unlink_facility", facility)}
             >
@@ -226,15 +237,19 @@ export default function LinkedFacilities({
       >
         <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
           <div className="rounded p-1 text-sm">{homeFacility.name}</div>
-          <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
-            <button
-              onClick={() => handleOnClick("clear_home_facility", homeFacility)}
-              title={t("clear_home_facility")}
-              aria-label={t("clear_home_facility")}
-            >
-              <CareIcon icon="l-multiply" className="text-sm" />
-            </button>
-          </div>
+          {authorizeForHomeFacility && (
+            <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
+              <button
+                onClick={() =>
+                  handleOnClick("clear_home_facility", homeFacility)
+                }
+                title={t("clear_home_facility")}
+                aria-label={t("clear_home_facility")}
+              >
+                <CareIcon icon="l-multiply" className="text-sm" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

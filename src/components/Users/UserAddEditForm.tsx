@@ -372,14 +372,15 @@ const UserAddEditForm = (props: UserProps) => {
     event: FieldChangeEvent<unknown>,
     field?: FormContextValue<UserForm>,
   ) => {
+    const fieldName = event.name as keyof UserForm;
     dispatch({
       type: "set_form",
       form: {
         ...state.form,
-        [event.name]: event.value,
+        [fieldName]: event.value,
       },
     });
-    if (field) field(event.name as keyof UserForm).onChange(event);
+    field?.(fieldName).onChange(event);
   };
 
   const changePhoneNumber = (

@@ -1,4 +1,4 @@
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
@@ -23,9 +23,9 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
 type ErrorForm = {
   user_type?: string;
-  qualification?: string | null;
-  doctor_experience_commenced_on?: string | null;
-  doctor_medical_council_registration?: string | null;
+  qualification?: string;
+  doctor_experience_commenced_on?: string;
+  doctor_medical_council_registration?: string;
 };
 type State = {
   form: EditForm;
@@ -72,6 +72,7 @@ const editFormReducer = (state: State, action: Action) => {
 export default function UserQualifications({ username }: { username: string }) {
   const { t } = useTranslation();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const formVals = useRef(initForm);
 
   const {
@@ -84,15 +85,18 @@ export default function UserQualifications({ username }: { username: string }) {
     },
     onResponse: (result) => {
       if (!result || !result.res || !result.data) return;
+      const userData = result.data;
 
       const formData: EditForm = {
-        user_type: result.data.user_type,
-        qualification: result.data.qualification,
-        doctor_experience_commenced_on: dayjs()
-          .diff(dayjs(result.data.doctor_experience_commenced_on), "years")
-          .toString(),
+        user_type: userData.user_type,
+        qualification: userData.qualification,
+        doctor_experience_commenced_on: userData.doctor_experience_commenced_on
+          ? dayjs()
+              .diff(dayjs(userData.doctor_experience_commenced_on), "years")
+              .toString()
+          : null,
         doctor_medical_council_registration:
-          result.data.doctor_medical_council_registration,
+          userData.doctor_medical_council_registration,
       };
       dispatch({
         type: "set_form",
@@ -141,14 +145,15 @@ export default function UserQualifications({ username }: { username: string }) {
     event: FieldChangeEvent<unknown>,
     field?: FormContextValue<EditForm>,
   ) => {
+    const fieldName = event.name as keyof EditForm;
     dispatch({
       type: "set_form",
       form: {
         ...states.form,
-        [event.name]: event.value,
+        [fieldName]: event.value,
       },
     });
-    if (field) field(event.name as keyof EditForm).onChange(event);
+    field?.(fieldName).onChange(event);
   };
 
   if (isLoading || !userData) {
@@ -158,6 +163,7 @@ export default function UserQualifications({ username }: { username: string }) {
   if (!["Doctor", "Nurse"].includes(states.form.user_type ?? "")) return;
 
   const handleSubmit = async (formData: EditForm) => {
+    setIsSubmitting(true);
     const data = {
       qualification:
         formData.user_type === "Doctor" || formData.user_type === "Nurse"
@@ -193,6 +199,7 @@ export default function UserQualifications({ username }: { username: string }) {
         msg: error?.message ?? t("user_details_update_error"),
       });
     }
+    setIsSubmitting(false);
   };
 
   return (
@@ -201,7 +208,7 @@ export default function UserQualifications({ username }: { username: string }) {
         {!isLoading && (
           <div className="space-y-4">
             <Form<EditForm>
-              disabled={isLoading}
+              disabled={isSubmitting || isLoading}
               defaults={userData ? states.form : initForm}
               validate={validateForm}
               onCancel={handleCancel}

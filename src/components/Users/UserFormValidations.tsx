@@ -58,11 +58,11 @@ export const ValidateDoctorExperienceCommencedOn = (
     if (!formData["doctor_experience_commenced_on"]) {
       return translator("field_required");
     } else if (
-      !validateNumber(formData["doctor_experience_commenced_on"] ?? "")
+      !validateNumber(formData["doctor_experience_commenced_on"] ?? "") ||
+      Number(formData["doctor_experience_commenced_on"]) < 0 ||
+      Number(formData["doctor_experience_commenced_on"]) > 100
     ) {
       return translator("doctor_experience_error");
-    } else if (Number(formData.doctor_experience_commenced_on) > 100) {
-      return translator("doctor_experience_less_than_100_years");
     }
   }
   return null;

@@ -146,7 +146,7 @@ export default function LinkedSkills({ username }: { username: string }) {
             tooltip={
               !authorizeForAddSkill
                 ? t("contact_your_admin_to_add_skills")
-                : t("add_skill")
+                : undefined
             }
           >
             {t("add_skill")}
