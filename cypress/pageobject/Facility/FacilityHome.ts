@@ -5,8 +5,7 @@ class FacilityHome {
   menuItem = "[role='menuitem']";
 
   sidebarToggle = () => cy.get('[data-testid="sidebar-toggle"]');
-  sidebarIcon = () => cy.get('[data-testid="sidebar-icon"]');
-  sidebarText = () => cy.get('[data-testid="sidebar-text"]');
+  sidebarItems = () => cy.get('[data-testid="sidebar-item"]');
 
   // Operations
   clickExportButton() {
@@ -113,20 +112,20 @@ class FacilityHome {
     this.sidebarToggle().click();
   }
 
-  verifyIconsVisible() {
-    this.sidebarIcon().each(($el) => {
-      cy.wrap($el).should("be.visible");
+  verifyIconsAndTextVisible() {
+    this.sidebarItems().each(($item) => {
+      cy.wrap($item).find('[data-testid="sidebar-icon"]').should("be.visible");
+      cy.wrap($item).find('[data-testid="sidebar-text"]').should("be.visible");
     });
   }
 
-  verifyTextVisible() {
-    this.sidebarText().each(($el) => {
-      cy.wrap($el).should("be.visible");
+  verifyIconsVisibleAndTextHidden() {
+    this.sidebarItems().each(($item) => {
+      cy.wrap($item).find('[data-testid="sidebar-icon"]').should("be.visible");
+      cy.wrap($item)
+        .find('[data-testid="sidebar-text"]')
+        .should("not.be.visible");
     });
-  }
-
-  verifyTextHidden() {
-    this.sidebarText().should("not.be.visible");
   }
 }
 

@@ -140,20 +140,17 @@ describe("Facility Homepage Function", () => {
 
   it("Verify sidebar collapse and expand functionality", () => {
     facilityHome.toggleSidebar();
-    facilityHome.verifyIconsVisible();
-    facilityHome.verifyTextVisible();
+    facilityHome.verifyIconsAndTextVisible();
 
     // Click toggle button to collapse sidebar, verify icons visible and text hidden
     facilityHome.toggleSidebar();
-    facilityHome.verifyIconsVisible();
-    facilityHome.verifyTextHidden();
+    facilityHome.verifyIconsVisibleAndTextHidden();
 
     // Click toggle button again to expand sidebar, verify icons and text are visible again
     facilityHome.toggleSidebar();
-    facilityHome.verifyIconsVisible();
-    facilityHome.verifyTextVisible();
+    facilityHome.verifyIconsAndTextVisible();
+  });
 
-    
   it("Verify Notice Board Functionality", () => {
     // search facility and verify it's loaded or not
     manageUserPage.interceptFacilitySearchReq();
@@ -202,8 +199,4 @@ describe("Facility Homepage Function", () => {
   afterEach(() => {
     cy.saveLocalStorage();
   });
-});
-
-afterEach(() => {
-  cy.saveLocalStorage();
 });
