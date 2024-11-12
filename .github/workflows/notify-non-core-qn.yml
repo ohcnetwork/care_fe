@@ -40,11 +40,11 @@ jobs:
                 });
               }
             };
-            const sendSlackNotification = async (webhook, message) => {
+            const sendSlackNotification = async (webhook, payload) => {
               const response = await fetch(webhook, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(message)
+                body: JSON.stringify(payload)
               });
               if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -69,9 +69,14 @@ jobs:
                   console.log('Issue URL:', issueUrl);
                   console.log('Issue Title:', issueTitle);
                   console.log('Issue Number:', issueNumber);
-                  await sendSlackNotification(process.env.SLACK_WEBHOOK, {
-                    text: `:care: An Open Source contributor posted a question:\n*Title:* ${issueTitle}\n*Issue Number:* <${issueUrl}|#${issueNumber}>\n*Commenter:* ${commenter}\n\n*Question:*\n${commentBody}`
-                  });
+                  const payload = {
+                    link: issueUrl,
+                    Question: commentBody,
+                    "issue-number": issueNumber,
+                    title: issueTitle,
+                    user: commenter
+                  };
+                  await sendSlackNotification(process.env.SLACK_WEBHOOK, payload);
                   console.log('Slack notification sent successfully');
                 } catch (error) {
                   console.error('Workflow failed:', error.message);
@@ -80,4 +85,3 @@ jobs:
               }
             }
             console.log('Script ended');
-
