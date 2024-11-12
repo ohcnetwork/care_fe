@@ -222,30 +222,6 @@ export default function NotificationsList({
       }
     };
   }, [data, totalCount]);
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setTimeout>;
-    if (isSubscribing) {
-      const checkNotificationPermission = () => {
-        if (Notification.permission === "denied") {
-          Warn({
-            msg: t("notification_permission_denied"),
-          });
-          setIsSubscribing(false);
-          clearInterval(intervalId);
-        } else if (Notification.permission === "granted") {
-          Success({
-            msg: t("notification_permission_granted"),
-          });
-          setIsSubscribing(false);
-          clearInterval(intervalId);
-        }
-      };
-
-      checkNotificationPermission();
-      intervalId = setInterval(checkNotificationPermission, 1000);
-    }
-    return () => clearInterval(intervalId);
-  }, [isSubscribing]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -269,7 +245,14 @@ export default function NotificationsList({
   const handleSubscribeClick = () => {
     const status = isSubscribed;
     if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
-      subscribe();
+      if (Notification.permission === "denied") {
+        Warn({
+          msg: t("notification_permission_denied"),
+        });
+        setIsSubscribing(false);
+      } else {
+        subscribe();
+      }
     } else {
       unsubscribe();
     }
@@ -324,6 +307,10 @@ export default function NotificationsList({
                   body: data,
                 });
 
+                Warn({
+                  msg: t("unsubscribed_successfully"),
+                });
+
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
               })
@@ -344,43 +331,67 @@ export default function NotificationsList({
 
   async function subscribe() {
     setIsSubscribing(true);
-    const response = await request(routes.getPublicKey);
-    const public_key = response.data?.public_key;
-    const sw = await navigator.serviceWorker.ready;
-    const push = await sw.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: public_key,
-    });
-    const p256dh = btoa(
-      String.fromCharCode.apply(
-        null,
-        new Uint8Array(push.getKey("p256dh") as any) as any,
-      ),
-    );
-    const auth = btoa(
-      String.fromCharCode.apply(
-        null,
-        new Uint8Array(push.getKey("auth") as any) as any,
-      ),
-    );
+    try {
+      const response = await request(routes.getPublicKey);
+      const public_key = response.data?.public_key;
+      const sw = await navigator.serviceWorker.ready;
+      const push = await sw.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: public_key,
+      });
+      const p256dh = btoa(
+        String.fromCharCode.apply(
+          null,
+          new Uint8Array(push.getKey("p256dh") as any) as any,
+        ),
+      );
+      const auth = btoa(
+        String.fromCharCode.apply(
+          null,
+          new Uint8Array(push.getKey("auth") as any) as any,
+        ),
+      );
 
-    const data = {
-      pf_endpoint: push.endpoint,
-      pf_p256dh: p256dh,
-      pf_auth: auth,
-    };
+      const data = {
+        pf_endpoint: push.endpoint,
+        pf_p256dh: p256dh,
+        pf_auth: auth,
+      };
 
-    const { res } = await request(routes.updateUserPnconfig, {
-      pathParams: { username: username },
-      body: data,
-    });
+      const { res } = await request(routes.updateUserPnconfig, {
+        pathParams: { username: username },
+        body: data,
+      });
 
-    if (res?.ok) {
-      setIsSubscribed("SubscribedOnThisDevice");
+      if (res?.ok) {
+        setIsSubscribed("SubscribedOnThisDevice");
+        Success({
+          msg: t("subscribed_successfully"),
+        });
+        setIsSubscribing(false);
+      } else {
+        Error({
+          msg: t("subscription_failed"),
+        });
+        setIsSubscribing(false);
+      }
+    } catch (error) {
+      const permission = Notification.permission;
+
+      if (permission === "denied" || permission === "default") {
+        Warn({
+          msg: t("notification_permission_denied"),
+        });
+        setIsSubscribing(false);
+        return;
+      }
+      Error({
+        msg: t("subscription_failed"),
+      });
+    } finally {
+      setIsSubscribing(false);
     }
-    setIsSubscribing(false);
   }
-
   const handleMarkAllAsRead = async () => {
     setIsMarkingAllAsRead(true);
     await Promise.all(
