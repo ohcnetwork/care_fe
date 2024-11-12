@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
-import { UserBareMinimum } from "../Users/models";
+import { UserBareMinimum } from "@/components/Users/models";
 
-interface CustomLinkProps {
-  className?: string;
+interface CustomLinkProps
+  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   "data-username"?: string;
 }
 
@@ -46,7 +46,7 @@ const MarkdownPreview = ({
     })
     .replace(/~~(.*?)~~/g, (_, text) => `<del>${text}</del>`);
 
-  const CustomLink: React.FC<CustomLinkProps> = (props) => {
+  const CustomLink = (props: CustomLinkProps) => {
     const [isHovered, setIsHovered] = useState(false);
 
     if (props["data-username"]) {

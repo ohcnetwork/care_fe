@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
+import RichTextEditor from "@/components/Common/RichTextEditor";
 import Tabs from "@/components/Common/Tabs";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
 import PatientConsultationNotesList from "@/components/Facility/PatientConsultationNotesList";

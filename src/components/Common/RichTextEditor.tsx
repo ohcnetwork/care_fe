@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
-import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
 
-import useFileUpload from "@/Utils/useFileUpload";
+import useFileUpload from "@/hooks/useFileUpload";
+
 import { classNames } from "@/Utils/utils";
 
 import MarkdownPreview from "./MarkdownPreview";

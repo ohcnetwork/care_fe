@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-import useAuthUser from "@/common/hooks/useAuthUser";
+import Pagination from "@/components/Common/Pagination";
+import Tabs from "@/components/Common/Tabs";
+import FileBlock from "@/components/Files/FileBlock";
+import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import useFileManager from "../../Utils/useFileManager";
-import Pagination from "../Common/Pagination";
-import Tabs from "../Common/components/Tabs";
-import FileBlock from "../Files/FileBlock";
-import { FileUploadModel } from "./models";
+import useAuthUser from "@/hooks/useAuthUser";
+import useFileManager from "@/hooks/useFileManager";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 interface DiscussionNotesProps {
   patientId: string;

@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
 import RichTextEditor from "@/components/Common/RichTextEditor";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
@@ -19,6 +20,7 @@ import useNotificationSubscriptionState from "@/hooks/useNotificationSubscriptio
 import { PATIENT_NOTES_THREADS } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { classNames, keysOf } from "@/Utils/utils";
