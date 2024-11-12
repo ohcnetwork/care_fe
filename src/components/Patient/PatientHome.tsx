@@ -678,6 +678,7 @@ export const PatientHome = (props: any) => {
                 )}
                 <div>
                   <ButtonV2
+                    id="update-patient-details"
                     className="mt-4 w-full"
                     disabled={!patientData.is_active}
                     authorizeFor={NonReadOnlyUsers}

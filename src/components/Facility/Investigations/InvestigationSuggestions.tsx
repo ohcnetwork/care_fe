@@ -197,7 +197,7 @@ export default function ViewInvestigationSuggestions(props: {
         </tbody>
       </table>
       <div className="flex flex-col gap-4 md:hidden">
-        {Array.isArray(investigations) ? (
+        {Array.isArray(investigations?.investigation) ? (
           investigations.investigation?.map((investigation, index) => {
             let nextFurthestInvestigation: any = undefined;
 

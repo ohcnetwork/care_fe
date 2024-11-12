@@ -13,6 +13,7 @@ export class PatientConsultationPage {
   selectSymptomsDate(date: string) {
     cy.clickAndTypeDate("#symptoms_onset_date", date);
   }
+
   clickAddSymptom() {
     cy.get("#add-symptom").click();
   }
@@ -110,5 +111,23 @@ export class PatientConsultationPage {
       "Edit Consultation Details",
     );
     cy.wait(3000);
+  }
+
+  clickViewConsultationButton() {
+    cy.verifyAndClickElement(
+      "#view_consultation_updates",
+      "View Consultation / Consultation Updates",
+    );
+  }
+
+  clickManagePatientButton() {
+    cy.verifyAndClickElement("#show-more", "Manage Patient");
+  }
+
+  clickClaimsButton() {
+    cy.get("#log-update").scrollIntoView();
+    cy.intercept(/\/api\/hcx\/policy\/\?.*/).as("policyStatus");
+    cy.get("#consultation-buttons").contains("Claims").click();
+    cy.wait("@policyStatus").its("response.statusCode").should("eq", 200);
   }
 }
