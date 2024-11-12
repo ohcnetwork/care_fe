@@ -216,7 +216,11 @@ export const UserGrid = ({
   </div>
 );
 
-const UserListHeader = () => {
+const UserListHeader = ({
+  showDistrictColumn,
+}: {
+  showDistrictColumn: boolean;
+}) => {
   const { t } = useTranslation();
   return (
     <thead>
@@ -225,7 +229,9 @@ const UserListHeader = () => {
         <th className="w-32 px-4 py-3 text-left">{t("status")}</th>
         <th className="px-4 py-3 text-left">{t("role")}</th>
         <th className="px-4 py-3 text-left">{t("home_facility")}</th>
-        <th className="px-4 py-3 text-left">{t("district")}</th>
+        {showDistrictColumn && (
+          <th className="px-4 py-3 text-left">{t("district")}</th>
+        )}
         <th className="px-4 py-3"></th>
       </tr>
     </thead>
@@ -277,16 +283,21 @@ export const UserList = ({
   users,
 }: {
   users?: UserModel[] | UserAssignedModel[];
-}) => (
-  <div className="overflow-x-auto rounded-lg border border-gray-200">
-    <table className="min-w-full divide-y divide-gray-200">
-      <UserListHeader />
-      <tbody className="divide-y divide-gray-200 bg-white">
-        {users?.map((user) => <UserListRow key={user.id} user={user} />)}
-      </tbody>
-    </table>
-  </div>
-);
+}) => {
+  const showDistrictColumn = users?.some(
+    (user) => "district_object" in user || "district" in user,
+  );
+  return (
+    <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <table className="min-w-full divide-y divide-gray-200">
+        <UserListHeader showDistrictColumn={showDistrictColumn ?? false} />
+        <tbody className="divide-y divide-gray-200 bg-white">
+          {users?.map((user) => <UserListRow key={user.id} user={user} />)}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 interface UserListViewProps {
   users: UserModel[] | UserAssignedModel[];
   onSearch: (username: string) => void;
