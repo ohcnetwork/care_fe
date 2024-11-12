@@ -4,21 +4,16 @@ import { useState } from "react";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CommentSection from "@/components/Resource/ResourceCommentSection";
 
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import { classNames, formatDateTime, formatName } from "@/Utils/utils";
 
 export default function ResourceDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
-  const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =
-    useState(false);
   const { data, loading } = useQuery(routes.getResourceDetails, {
     pathParams: { id: props.id },
     onResponse: ({ res, data }) => {
@@ -27,25 +22,6 @@ export default function ResourceDetails(props: { id: string }) {
       }
     },
   });
-
-  const handleResourceDelete = async () => {
-    setOpenDeleteResourceDialog(true);
-    const { res, data } = await request(routes.deleteResourceRecord, {
-      pathParams: { id: props.id },
-    });
-    if (res?.status === 204) {
-      Notification.Success({
-        msg: "Resource record has been deleted successfully.",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while deleting Resource: " + (data?.detail || ""),
-      });
-    }
-
-    navigate("/resource");
-  };
-
   const showFacilityCard = (facilityData: any) => {
     return (
       <div className="mt-2 h-full rounded-lg border bg-white p-4 text-black shadow">
@@ -327,28 +303,6 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="md:col-span-2 md:row-span-2">
                 <div className="font-semibold leading-relaxed">Reason: </div>
                 <div className="break-words">{data.reason || "--"}</div>
-              </div>
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <div>
-                <ButtonV2
-                  className="w-full"
-                  variant="danger"
-                  onClick={() => setOpenDeleteResourceDialog(true)}
-                >
-                  Delete Record
-                </ButtonV2>
-
-                <ConfirmDialog
-                  title="Authorize resource delete"
-                  description="Are you sure you want to delete this record?"
-                  action="Delete"
-                  variant="danger"
-                  show={openDeleteResourceDialog}
-                  onClose={() => setOpenDeleteResourceDialog(false)}
-                  onConfirm={handleResourceDelete}
-                />
               </div>
             </div>
           </div>
