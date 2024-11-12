@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
-import ABDMFacilityRecords from "@/components/ABDM/ABDMFacilityRecords";
-import HealthInformation from "@/components/ABDM/HealthInformation";
 import {
   DesktopSidebar,
   MobileSidebar,
@@ -59,13 +57,6 @@ const Routes: AppRoutes = {
 
   "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
   "/notice_board": () => <NoticeBoard />,
-
-  "/abdm/health-information/:id": ({ id }) => (
-    <HealthInformation artefactId={id} />
-  ),
-  "/facility/:facilityId/abdm": ({ facilityId }) => (
-    <ABDMFacilityRecords facilityId={facilityId} />
-  ),
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
