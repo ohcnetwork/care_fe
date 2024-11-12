@@ -24,6 +24,14 @@ export const useCareAppNavItems = () => {
   return navItems;
 };
 
+export const useCareAppConsultationTabs = () => {
+  const careApps = useCareApps();
+
+  return careApps.reduce((acc, app) => {
+    return { ...acc, ...(app.consultationTabs ?? {}) };
+  }, {});
+};
+
 // If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => JSX.Element>
 export function usePluginRoutes() {
   const careApps = useCareApps();

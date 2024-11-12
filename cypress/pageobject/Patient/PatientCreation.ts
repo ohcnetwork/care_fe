@@ -220,6 +220,10 @@ export class PatientPage {
     cy.visit(patient_url + "/update");
   }
 
+  clickPatientUpdateDetails() {
+    cy.verifyAndClickElement("#update-patient-details", "Update Details");
+  }
+
   interceptFacilities() {
     cy.intercept("GET", "**/facility/*/patient/**").as("getFacilities");
   }
