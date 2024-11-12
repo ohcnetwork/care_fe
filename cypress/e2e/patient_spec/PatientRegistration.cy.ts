@@ -1,13 +1,12 @@
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import { generatePhoneNumber } from "../../pageobject/utils/constants";
-import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
+import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
+import { generatePhoneNumber } from "../../pageobject/utils/constants";
 
 const yearOfBirth = "2001";
-const isHCXEnabled = Cypress.env("ENABLE_HCX");
 
 const calculateAge = () => {
   const currentYear = new Date().getFullYear();
@@ -58,13 +57,11 @@ describe("Patient Creation with consultation", () => {
   const patientOneFirstInsuranceId = "insurance-details-0";
   const patientOneFirstSubscriberId = "member id 01";
   const patientOneFirstPolicyId = "policy name 01";
-  const patientOneFirstInsurerId = "insurer id 01";
-  const patientOneFirstInsurerName = "insurer name 01";
+  const patientOneFirstInsurerName = "Demo Payor";
   const patientOneSecondInsuranceId = "insurance-details-1";
   const patientOneSecondSubscriberId = "member id 02";
   const patientOneSecondPolicyId = "policy name 02";
-  const patientOneSecondInsurerId = "insurer id 02";
-  const patientOneSecondInsurerName = "insurer name 02";
+  const patientOneSecondInsurerName = "Care Payor";
   const patientTransferPhoneNumber = "9849511866";
   const patientTransferFacility = "Dummy Shifting Center";
   const patientTransferName = "Dummy Patient 10";
@@ -178,21 +175,10 @@ describe("Patient Creation with consultation", () => {
       "policy_id",
       patientOneFirstPolicyId,
     );
-    if (isHCXEnabled) {
-      patientInsurance.selectInsurer("test");
-    } else {
-      patientInsurance.typePatientInsuranceDetail(
-        patientOneFirstInsuranceId,
-        "insurer_id",
-        patientOneFirstInsurerId,
-      );
-      patientInsurance.typePatientInsuranceDetail(
-        patientOneFirstInsuranceId,
-        "insurer_name",
-        patientOneFirstInsurerName,
-      );
-    }
-
+    patientInsurance.selectPatientInsurerName(
+      patientOneFirstInsuranceId,
+      patientOneFirstInsurerName,
+    );
     patientInsurance.clickAddInsruanceDetails();
     patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
@@ -204,21 +190,10 @@ describe("Patient Creation with consultation", () => {
       "policy_id",
       patientOneSecondPolicyId,
     );
-    if (isHCXEnabled) {
-      patientInsurance.selectInsurer("Care");
-    } else {
-      patientInsurance.typePatientInsuranceDetail(
-        patientOneSecondInsuranceId,
-        "insurer_id",
-        patientOneSecondInsurerId,
-      );
-      patientInsurance.typePatientInsuranceDetail(
-        patientOneSecondInsuranceId,
-        "insurer_name",
-        patientOneSecondInsurerName,
-      );
-    }
-
+    patientInsurance.selectPatientInsurerName(
+      patientOneSecondInsuranceId,
+      patientOneSecondInsurerName,
+    );
     patientPage.clickUpdatePatient();
     cy.wait(3000);
     patientPage.verifyPatientUpdated();
@@ -247,16 +222,12 @@ describe("Patient Creation with consultation", () => {
     patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
-      patientOneFirstInsurerId,
       patientOneFirstInsurerName,
-      isHCXEnabled,
     );
     patientInsurance.verifyPatientPolicyDetails(
       patientOneSecondSubscriberId,
       patientOneSecondPolicyId,
-      patientOneSecondInsurerId,
       patientOneSecondInsurerName,
-      isHCXEnabled,
     );
   });
 

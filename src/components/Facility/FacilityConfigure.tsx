@@ -2,13 +2,13 @@ import { t } from "i18next";
 import { navigate } from "raviger";
 import { useReducer, useState } from "react";
 
-import { ConfigureHealthFacility } from "@/components/ABDM/ConfigureHealthFacility";
 import { Submit } from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
@@ -163,7 +163,10 @@ export const FacilityConfigure = (props: IProps) => {
           </form>
         </div>
 
-        <ConfigureHealthFacility facilityId={facilityId} />
+        <PLUGIN_Component
+          __name="ExtendFacilityConfigure"
+          facilityId={facilityId}
+        />
       </div>
     </Page>
   );
