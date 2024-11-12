@@ -57,6 +57,15 @@ export default function CriticalCarePreview(props: Props) {
         >
           {t("back_to_consultation")}
         </ButtonV2>
+        <div>
+          <div className="mt-2">
+            <ButtonV2
+              href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/daily-rounds/${props.id}/update`}
+            >
+              Update Details
+            </ButtonV2>
+          </div>
+        </div>
       </div>
 
       <Card className="md:rounded-xl lg:p-8">
