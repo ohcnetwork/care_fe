@@ -1091,6 +1091,7 @@
   "resource_approving_facility": "Resource approving facility",
   "resource_origin_facility": "Origin Facility",
   "resource_request": "Resource Request",
+  "resource_status": "Resource Status",
   "result": "Result",
   "result_date": "Result Date",
   "result_details": "Result details",
