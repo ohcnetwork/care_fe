@@ -150,7 +150,7 @@ const getDate = (value: any) =>
 export const validateRule = (
   condition: boolean,
   content: JSX.Element | string,
-  isInitialState: boolean,
+  isInitialState: boolean = false,
 ) => {
   return (
     <div>

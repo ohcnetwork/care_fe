@@ -38,6 +38,7 @@ import {
   USER_TYPES,
 } from "@/common/constants";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import { CameraFeedPermittedUserTypes } from "@/Utils/permissions";
@@ -423,13 +424,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 >
                   {t("view_users")}
                 </DropdownItem>
-                <DropdownItem
-                  id="view-abdm-records"
-                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
-                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
-                >
-                  {t("view_abdm_records")}
-                </DropdownItem>
+                <PLUGIN_Component
+                  __name="ManageFacilityOptions"
+                  facility={facilityData}
+                />
                 {hasPermissionToDeleteFacility ? (
                   <DropdownItem
                     id="delete-facility"
