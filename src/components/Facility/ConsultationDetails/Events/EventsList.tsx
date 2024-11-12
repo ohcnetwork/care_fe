@@ -68,12 +68,6 @@ export default function EventsList({ query }: { query: QueryParams }) {
                       }
 
                       const values = Object.fromEntries(entries);
-                      if (
-                        values.ventilator_interface === "INVASIVE" ||
-                        values.ventilator_interface === "NON_INVASIVE"
-                      ) {
-                        values.ventilator_interface += " VENTILATOR";
-                      }
 
                       switch (item.event_type.name) {
                         case "INTERNAL_TRANSFER":
