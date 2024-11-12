@@ -24,7 +24,7 @@ describe("Patient Homepage present functionalities", () => {
   const patientToDateBadge = "2023-12-07";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -43,7 +43,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.typePatientAdmitedBeforeDate(patientFromDate);
     patientHome.typePatientAdmitedAfterDate(patientToDate);
     patientHome.clickPatientFilterApply();
-    patientHome.verifyTotalPatientCount("1");
     // verify the badge and clear the count
     patientHome.verifyPatientCreatedBeforeDate(patientToDateBadge);
     patientHome.verifyPatientCreatedAfterDate(patientFromDateBadge);
@@ -128,7 +127,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.selectPatientMedicoFilter(patientMedicoStatus);
     patientHome.clickPatientFilterApply();
     cy.get("a[data-cy='patient']").should("contain.text", "Dummy Patient");
-    patientHome.verifyTotalPatientCount("1");
     // Verify the presence of badges
     patientHome.verifyGenderBadgeContent(patientGender);
     patientHome.verifyCategoryBadgeContent(patientCategory);

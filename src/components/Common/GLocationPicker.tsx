@@ -1,11 +1,14 @@
-import React from "react";
-import { Wrapper, Status } from "@googlemaps/react-wrapper";
-import { deepEqual } from "@/common/utils";
-import { isLatLngLiteral } from "@googlemaps/typescript-guards";
-import Spinner from "./Spinner";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { PopoverButton } from "@headlessui/react";
 import careConfig from "@careConfig";
+import { Status, Wrapper } from "@googlemaps/react-wrapper";
+import { isLatLngLiteral } from "@googlemaps/typescript-guards";
+import { PopoverButton } from "@headlessui/react";
+import React from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import Spinner from "@/components/Common/Spinner";
+
+import { deepEqual } from "@/common/utils";
 
 interface GLocationPickerProps {
   lat: number;

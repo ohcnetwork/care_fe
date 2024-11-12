@@ -1,9 +1,12 @@
-import { useTranslation } from "react-i18next";
-import useFilters from "@/common/hooks/useFilters";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../icons/CareIcon";
-import SlideOver from "./SlideOver";
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+
+import useFilters from "@/hooks/useFilters";
 
 type AdvancedFilter = ReturnType<typeof useFilters>["advancedFilter"];
 

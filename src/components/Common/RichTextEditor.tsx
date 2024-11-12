@@ -1,11 +1,15 @@
-import React, { useRef, useState, useCallback, useEffect } from "react";
-import MentionsDropdown from "./MentionDropdown";
-import DialogModal from "@/components/Common/Dialog";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import DialogModal from "@/components/Common/Dialog";
 import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
-import MarkdownPreview from "./MarkdownPreview";
-import { classNames } from "@/Utils/utils";
+
 import useFileUpload from "@/Utils/useFileUpload";
+import { classNames } from "@/Utils/utils";
+
+import MarkdownPreview from "./MarkdownPreview";
+import MentionsDropdown from "./MentionDropdown";
 
 interface RichTextEditorProps {
   initialMarkdown?: string;

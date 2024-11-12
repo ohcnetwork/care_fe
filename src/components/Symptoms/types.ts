@@ -1,4 +1,4 @@
-import { BaseModel } from "../../Utils/types";
+import { BaseModel } from "@/Utils/types";
 
 export const OTHER_SYMPTOM_CHOICE = { id: 9, text: "Other Symptom" } as const;
 

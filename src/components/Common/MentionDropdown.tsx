@@ -1,7 +1,9 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+
+import useSlug from "@/common/hooks/useSlug";
+
 import routes from "@/Redux/api";
 import useQuery from "@/Utils/request/useQuery";
-import useSlug from "@/common/hooks/useSlug";
 
 interface MentionsDropdownProps {
   onSelect: (user: { id: string; username: string }) => void;

@@ -1,10 +1,13 @@
-import Page from "@/components/Common/components/Page";
-import Loading from "@/components/Common/Loading";
-import { formatDateTime, formatName } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
@@ -23,7 +26,9 @@ export const NoticeBoard = () => {
             className="overflow-hidden rounded shadow-md"
           >
             <div className="px-6 py-4">
-              <div className="text-justify text-lg">{item.message}</div>
+              <div className="text-justify text-lg" id="notification-message">
+                {item.message}
+              </div>
               <div className="text-md my-2 text-secondary-700">
                 {formatName(item.caused_by)} -{" "}
                 <span className="font-bold text-primary-700">

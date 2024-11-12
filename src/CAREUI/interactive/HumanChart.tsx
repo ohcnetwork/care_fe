@@ -1,4 +1,5 @@
 import { Fragment } from "react/jsx-runtime";
+
 import { HumanBodyPaths, HumanBodyRegion } from "@/common/constants";
 
 type Props = {

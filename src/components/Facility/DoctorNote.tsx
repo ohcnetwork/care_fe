@@ -1,8 +1,12 @@
 import InfiniteScroll from "react-infinite-scroll-component";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import PatientNoteCard from "./PatientNoteCard";
-import { PatientNoteStateType, PatientNotesModel } from "./models";
-import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";
+
+import CircularProgress from "@/components/Common/CircularProgress";
+import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
+import PatientNoteCard from "@/components/Facility/PatientNoteCard";
+import {
+  PatientNoteStateType,
+  PatientNotesModel,
+} from "@/components/Facility/models";
 
 interface DoctorNoteProps {
   state: PatientNoteStateType;

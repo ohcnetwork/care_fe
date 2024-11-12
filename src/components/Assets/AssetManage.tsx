@@ -1,36 +1,41 @@
-import { useState, useEffect, ReactElement } from "react";
+import dayjs from "dayjs";
+import { QRCodeSVG } from "qrcode.react";
+import { navigate } from "raviger";
+import { ReactElement, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import Chip from "@/CAREUI/display/Chip";
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { AssetServiceEditModal } from "@/components/Assets/AssetServiceEditModal";
 import {
   AssetClass,
-  assetClassProps,
   AssetData,
   AssetService,
   AssetTransaction,
-} from "./AssetTypes";
-import Pagination from "@/components/Common/Pagination";
-import { navigate } from "raviger";
-import QRCode from "qrcode.react";
-import AssetWarrantyCard from "./AssetWarrantyCard";
-import { formatDate, formatDateTime, formatName } from "../../Utils/utils";
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { UserRole, USER_TYPES } from "@/common/constants";
+  assetClassProps,
+} from "@/components/Assets/AssetTypes";
+import AssetWarrantyCard from "@/components/Assets/AssetWarrantyCard";
+import { warrantyAmcValidityChip } from "@/components/Assets/AssetsList";
+import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { useTranslation } from "react-i18next";
 import Loading from "@/components/Common/Loading";
-import * as Notification from "../../Utils/Notifications";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import Uptime from "@/components/Common/Uptime";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import dayjs from "dayjs";
+import Page from "@/components/Common/Page";
+import Pagination from "@/components/Common/Pagination";
 import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
-import { AssetServiceEditModal } from "./AssetServiceEditModal";
-import { warrantyAmcValidityChip } from "./AssetsList";
-import Page from "@/components/Common/components/Page";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
+import Uptime from "@/components/Common/Uptime";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { USER_TYPES, UserRole } from "@/common/constants";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDate, formatDateTime, formatName } from "@/Utils/utils";
 
 interface AssetManageProps {
   assetId: string;
@@ -127,7 +132,7 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       <h2 className="text-center">Print Preview</h2>
       <div id="section-to-print" className="print flex justify-center">
-        <QRCode size={200} value={asset?.id ?? ""} />
+        <QRCodeSVG size={200} value={asset?.id ?? ""} />
       </div>
     </div>
   );
@@ -432,7 +437,7 @@ const AssetManage = (props: AssetManageProps) => {
                 data-testid="asset-update-button"
                 authorizeFor={NonReadOnlyUsers}
               >
-                <CareIcon icon="l-pen" className="mr-1 h-4" />
+                <CareIcon icon="l-pen" className="text-lg" />
                 {t("update")}
               </ButtonV2>
               {asset?.asset_class &&
@@ -449,7 +454,7 @@ const AssetManage = (props: AssetManageProps) => {
                     id="configure-asset"
                     data-testid="asset-configure-button"
                   >
-                    <CareIcon icon="l-setting" className="h-4" />
+                    <CareIcon icon="l-setting" className="text-lg" />
                     {t("configure")}
                   </ButtonV2>
                 )}
@@ -459,10 +464,9 @@ const AssetManage = (props: AssetManageProps) => {
                   onClick={() => setShowDeleteDialog(true)}
                   variant="danger"
                   data-testid="asset-delete-button"
-                  className="inline-flex"
                 >
-                  <CareIcon icon="l-trash" className="h-4" />
-                  <span className="md:hidden">{t("delete")}</span>
+                  <CareIcon icon="l-trash" className="text-lg" />
+                  <span>{t("delete")}</span>
                 </ButtonV2>
               )}
             </div>

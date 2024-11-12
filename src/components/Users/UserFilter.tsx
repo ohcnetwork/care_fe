@@ -1,22 +1,27 @@
-import { parsePhoneNumber } from "../../Utils/utils";
-import TextFormField from "../Form/FormFields/TextFormField";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { useTranslation } from "react-i18next";
+
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
+
+import DistrictAutocompleteFormField from "@/components/Common/DistrictAutocompleteFormField";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import StateAutocompleteFormField from "@/components/Common/StateAutocompleteFormField";
+import { FacilityModel } from "@/components/Facility/models";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import SelectMenuV2 from "@/components/Form/SelectMenuV2";
+
+import useMergeState from "@/hooks/useMergeState";
+
 import {
   USER_LAST_ACTIVE_OPTIONS,
   USER_TYPE_OPTIONS,
 } from "@/common/constants";
-import useMergeState from "@/common/hooks/useMergeState";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import DistrictAutocompleteFormField from "@/components/Common/DistrictAutocompleteFormField";
-import StateAutocompleteFormField from "@/components/Common/StateAutocompleteFormField";
-import { useTranslation } from "react-i18next";
-import * as Notify from "../../Utils/Notifications";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { FacilityModel } from "../Facility/models";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+
+import * as Notify from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";

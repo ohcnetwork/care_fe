@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import CircularProgress from "../Common/components/CircularProgress";
-import routes from "../../Redux/api";
-import { PaitentNotesReplyModel, PatientNotesModel } from "./models";
-import request from "../../Utils/request/request";
-import PatientNoteCard from "./PatientNoteCard";
-import RichTextEditor from "../Common/RichTextEditor";
+
 import * as Notification from "../../../src/Utils/Notifications";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+import RichTextEditor from "../Common/RichTextEditor";
+import CircularProgress from "../Common/components/CircularProgress";
 import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";
+import PatientNoteCard from "./PatientNoteCard";
+import { PaitentNotesReplyModel, PatientNotesModel } from "./models";
 
 interface Props {
   patientId: string;

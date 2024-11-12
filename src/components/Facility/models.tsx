@@ -1,4 +1,22 @@
-import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
+import { AssetData, AssetLocationType } from "@/components/Assets/AssetTypes";
+import { RouteToFacility } from "@/components/Common/RouteToFacilitySelect";
+import { InvestigationType } from "@/components/Common/prescription-builder/InvestigationBuilder";
+import { ProcedureType } from "@/components/Common/prescription-builder/ProcedureBuilder";
+import {
+  ConsultationDiagnosis,
+  CreateDiagnosis,
+} from "@/components/Diagnosis/types";
+import {
+  AssignedToObjectModel,
+  BloodPressure,
+  DailyRoundsModel,
+  FacilityNameModel,
+  FileUploadModel,
+  PatientModel,
+} from "@/components/Patient/models";
+import { EncounterSymptom } from "@/components/Symptoms/types";
+import { UserBareMinimum } from "@/components/Users/models";
+
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
@@ -8,21 +26,8 @@ import {
   SHIFTING_CHOICES_PEACETIME,
   UserRole,
 } from "@/common/constants";
-import { FeatureFlag } from "../../Utils/featureFlags";
-import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import {
-  AssignedToObjectModel,
-  BloodPressure,
-  DailyRoundsModel,
-  FacilityNameModel,
-  FileUploadModel,
-  PatientModel,
-} from "../Patient/models";
-import { EncounterSymptom } from "../Symptoms/types";
-import { UserBareMinimum } from "../Users/models";
-import { InvestigationType } from "@/components/Common/prescription-builder/InvestigationBuilder";
-import { ProcedureType } from "@/components/Common/prescription-builder/ProcedureBuilder";
-import { RouteToFacility } from "@/components/Common/RouteToFacilitySelect";
+
+import { FeatureFlag } from "@/Utils/featureFlags";
 
 export interface LocalBodyModel {
   id: number;

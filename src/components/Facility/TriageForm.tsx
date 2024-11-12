@@ -1,23 +1,26 @@
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import Card from "../../CAREUI/display/Card";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { PatientStatsModel } from "./models";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/components/Page";
 import dayjs from "dayjs";
-import { dateQueryString, scrollTo } from "../../Utils/utils";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { PatientStatsModel } from "@/components/Facility/models";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { dateQueryString, scrollTo } from "@/Utils/utils";
 
 interface Props extends PatientStatsModel {
   facilityId: string;

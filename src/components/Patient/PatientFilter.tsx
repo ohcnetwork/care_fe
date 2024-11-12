@@ -1,6 +1,33 @@
+import careConfig from "@careConfig";
 import dayjs from "dayjs";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
+
+import AccordionV2 from "@/components/Common/AccordionV2";
+import { DateRange } from "@/components/Common/DateRangeInputV2";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import { LocationSelect } from "@/components/Common/LocationSelect";
+import DistrictSelect from "@/components/Facility/FacilityFilter/DistrictSelect";
+import AutoCompleteAsync from "@/components/Form/AutoCompleteAsync";
+import DateRangeFormField from "@/components/Form/FormFields/DateRangeFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import {
+  FieldChangeEvent,
+  FieldChangeEventHandler,
+} from "@/components/Form/FormFields/Utils";
+import MultiSelectMenuV2 from "@/components/Form/MultiSelectMenuV2";
+import SelectMenuV2 from "@/components/Form/SelectMenuV2";
+import DiagnosesFilter, {
+  FILTER_BY_DIAGNOSES_KEYS,
+} from "@/components/Patient/DiagnosesFilter";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useMergeState from "@/hooks/useMergeState";
+
 import {
   ADMITTED_TO,
   CONSENT_TYPE_CHOICES,
@@ -10,31 +37,11 @@ import {
   PATIENT_FILTER_CATEGORIES,
   RATION_CARD_CATEGORY,
 } from "@/common/constants";
-import useMergeState from "@/common/hooks/useMergeState";
-import { dateQueryString } from "../../Utils/utils";
-import { DateRange } from "@/components/Common/DateRangeInputV2";
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { LocationSelect } from "@/components/Common/LocationSelect";
-import AccordionV2 from "@/components/Common/components/AccordionV2";
-import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import {
-  FieldChangeEvent,
-  FieldChangeEventHandler,
-} from "../Form/FormFields/Utils";
-import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { useTranslation } from "react-i18next";
-import careConfig from "@careConfig";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { dateQueryString } from "@/Utils/utils";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();

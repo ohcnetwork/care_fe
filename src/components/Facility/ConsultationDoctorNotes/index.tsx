@@ -1,21 +1,26 @@
 import { useState } from "react";
-import * as Notification from "../../../Utils/Notifications.js";
-import Page from "../../Common/components/Page";
-import { useMessageListener } from "@/common/hooks/useMessageListener";
-import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
-import { PatientNoteStateType, PaitentNotesReplyModel } from "../models.js";
-import routes from "../../../Redux/api.js";
-import request from "../../../Utils/request/request.js";
-import useQuery from "../../../Utils/request/useQuery.js";
-import { classNames } from "../../../Utils/utils.js";
-import { keysOf } from "../../../Utils/utils.js";
-import { PATIENT_NOTES_THREADS } from "@/common/constants.js";
-import useAuthUser from "@/common/hooks/useAuthUser.js";
-import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
-import RichTextEditor from "@/components/Common/RichTextEditor";
-import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
-import Tabs from "@/components/Common/components/Tabs";
 import { useTranslation } from "react-i18next";
+
+import Page from "@/components/Common/Page";
+import Tabs from "@/components/Common/Tabs";
+import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
+import PatientConsultationNotesList from "@/components/Facility/PatientConsultationNotesList";
+import PatientNotesDetailedView from "@/components/Facility/PatientNotesDetailedView";
+import {
+  PaitentNotesReplyModel,
+  PatientNoteStateType,
+} from "@/components/Facility/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import { useMessageListener } from "@/hooks/useMessageListener";
+
+import { PATIENT_NOTES_THREADS } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, keysOf } from "@/Utils/utils";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;

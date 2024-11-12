@@ -1,14 +1,17 @@
 import { useEffect, useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
-import { CapacityModal, OptionsType } from "./models";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { BED_TYPES } from "@/common/constants";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { CapacityModal, OptionsType } from "@/components/Facility/models";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import { BED_TYPES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;

@@ -1,28 +1,36 @@
-import {
-  relativeDate,
-  formatDateTime,
-  classNames,
-  formatName,
-} from "../../Utils/utils";
-import { USER_TYPES_MAP } from "@/common/constants";
-import { PatientNotesEditModel, PatientNotesModel } from "./models";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useState } from "react";
-import { Error, Success } from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import DialogModal from "@/components/Common/Dialog";
-import { t } from "i18next";
 import dayjs from "dayjs";
-import Spinner from "../Common/Spinner";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useSlug from "@/common/hooks/useSlug";
-import MarkdownPreview from "../Common/MarkdownPreview";
-import { ExtImage } from "../../Utils/useFileUpload";
-import { StateInterface } from "../Files/FileUpload";
-import FilePreviewDialog from "../Common/FilePreviewDialog";
-import { FileUploadModel } from "../Patient/models";
+import { t } from "i18next";
+import { useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
+import MarkdownPreview from "@/components/Common/MarkdownPreview";
+import Spinner from "@/components/Common/Spinner";
+import {
+  PatientNotesEditModel,
+  PatientNotesModel,
+} from "@/components/Facility/models";
+import { StateInterface } from "@/components/Files/FileUpload";
+import { FileUploadModel } from "@/components/Patient/models";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import { ExtImage } from "@/hooks/useFileUpload";
+import useSlug from "@/hooks/useSlug";
+
+import { USER_TYPES_MAP } from "@/common/constants";
+
+import { Error, Success } from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import {
+  classNames,
+  formatDateTime,
+  formatName,
+  relativeDate,
+} from "@/Utils/utils";
 
 const PatientNoteCard = ({
   note,

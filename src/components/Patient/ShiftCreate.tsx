@@ -1,4 +1,25 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import { navigate } from "raviger";
+import { useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { FacilitySelect } from "@/components/Common/FacilitySelect";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import {
   BREATHLESSNESS_LEVEL,
@@ -6,32 +27,14 @@ import {
   PATIENT_CATEGORIES,
   SHIFTING_VEHICLE_CHOICES,
 } from "@/common/constants";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { useReducer, useState } from "react";
-
-import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import PatientCategorySelect from "./PatientCategorySelect";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { navigate } from "raviger";
-import { parsePhoneNumber } from "../../Utils/utils";
 import { phonePreg } from "@/common/validation";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import { useTranslation } from "react-i18next";
-import Page from "@/components/Common/components/Page";
-import Card from "../../CAREUI/display/Card";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import careConfig from "@careConfig";
 
-import Loading from "@/components/Common/Loading";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
+
 interface patientShiftProps {
   facilityId: string;
   patientId: string;

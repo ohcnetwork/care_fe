@@ -1,10 +1,13 @@
-import { OperationAction, PTZPayload } from "./useOperateCamera";
-
-import { AssetBedModel } from "../Assets/AssetTypes";
-import { PaginatedResponse } from "../../Utils/request/types";
-import { Type } from "../../Redux/api";
+import { AssetBedModel } from "@/components/Assets/AssetTypes";
+import {
+  OperationAction,
+  PTZPayload,
+} from "@/components/CameraFeed/useOperateCamera";
 import { UserBareMinimum } from "@/components/Users/models";
-import { WritableOnly } from "../../Utils/types";
+
+import { Type } from "@/Utils/request/api";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { WritableOnly } from "@/Utils/types";
 
 export type GetStatusResponse = {
   result: {

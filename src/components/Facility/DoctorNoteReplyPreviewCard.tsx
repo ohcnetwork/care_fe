@@ -1,9 +1,13 @@
 import React from "react";
-import { PaitentNotesReplyModel } from "./models";
+
+import { PaitentNotesReplyModel } from "@/components/Facility/models";
+
 import { USER_TYPES_MAP } from "@/common/constants";
-import { formatDateTime, relativeDate } from "../../Utils/utils";
-import MarkdownPreview from "../Common/MarkdownPreview";
+
+import { formatDateTime, relativeDate } from "@/Utils/utils";
+
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import MarkdownPreview from "../Common/MarkdownPreview";
 
 interface Props {
   parentNote: PaitentNotesReplyModel | undefined;
