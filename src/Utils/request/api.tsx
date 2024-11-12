@@ -1065,11 +1065,6 @@ const routes = {
     TBody: Type<ShiftingModel>(),
     TRes: Type<ShiftingModel>(),
   },
-  deleteShiftRecord: {
-    path: "/api/v1/shift/{id}/",
-    method: "DELETE",
-    TRes: Type<{ detail: string }>(),
-  },
   listShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
@@ -1240,13 +1235,6 @@ const routes = {
     method: "PUT",
     TRes: Type<ResourceModel>(),
     TBody: Type<Partial<ResourceModel>>(),
-  },
-  deleteResourceRecord: {
-    path: "/api/v1/resource/{id}/",
-    method: "DELETE",
-    TRes: Type<{
-      detail?: string;
-    }>(),
   },
   listResourceRequests: {
     path: "/api/v1/resource/",
