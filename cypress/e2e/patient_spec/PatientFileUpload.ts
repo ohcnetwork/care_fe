@@ -1,6 +1,7 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientFileUpload } from "../../pageobject/Patient/PatientFileupload";
+
 const loginPage = new LoginPage();
 const patientPage = new PatientPage();
 const patientFileUpload = new PatientFileUpload();
@@ -17,7 +18,7 @@ function runTests(
     const patientNameTwo = "Dummy Patient 4";
     const patientNameThree = "Dummy Patient 5";
     before(() => {
-      loginPage.loginAsDisctrictAdmin();
+      loginPage.loginAsDistrictAdmin();
       cy.saveLocalStorage();
     });
 
@@ -90,7 +91,7 @@ function runTests(
       patientFileUpload.verifyUploadFilePresence(newFileName);
       patientFileUpload.verifyFileRenameOption(false);
       // Login as District Admin
-      loginPage.loginAsDisctrictAdmin();
+      loginPage.loginAsDistrictAdmin();
       cy.reload();
       // Verify the file edit option is available
       patientFileUpload.verifyUploadFilePresence(newFileName);

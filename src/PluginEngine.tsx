@@ -1,9 +1,12 @@
-import { CareAppsContext, useCareApps } from "@/common/hooks/useCareApps";
 /* eslint-disable i18next/no-literal-string */
 import React, { Suspense } from "react";
-import { SupportedPluginComponents, pluginMap } from "./pluginTypes";
 
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
+
+import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
+
+import { SupportedPluginComponents, pluginMap } from "@/pluginTypes";
 
 export default function PluginEngine({
   children,
@@ -11,7 +14,7 @@ export default function PluginEngine({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<div>Loading plugins...</div>}>
+    <Suspense fallback={<Loading />}>
       <ErrorBoundary
         fallback={
           <div className="flex h-screen w-screen items-center justify-center">

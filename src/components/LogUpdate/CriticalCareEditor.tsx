@@ -1,18 +1,24 @@
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import LogUpdateSections, { RoundTypeSections } from "./Sections";
-import React, { useState } from "react";
-import Loading from "@/components/Common/Loading";
-import { DailyRoundsModel } from "../Patient/models";
-import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Card from "../../CAREUI/display/Card";
 import { navigate } from "raviger";
-import { classNames } from "../../Utils/utils";
-import request from "../../Utils/request/request";
-import { useSlugs } from "@/common/hooks/useSlug";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Success } from "../../Utils/Notifications";
+
+import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import LogUpdateSections, {
+  RoundTypeSections,
+} from "@/components/LogUpdate/Sections";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import { useSlugs } from "@/hooks/useSlug";
+
+import { Success } from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames } from "@/Utils/utils";
 
 type Props = {
   facilityId: string;

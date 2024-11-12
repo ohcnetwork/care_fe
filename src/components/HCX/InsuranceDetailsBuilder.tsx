@@ -1,20 +1,22 @@
+import careConfig from "@careConfig";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import FormField, { FieldLabel } from "@/components/Form/FormFields/FormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
 import {
   FieldChangeEvent,
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
-import FormField, { FieldLabel } from "../Form/FormFields/FormField";
+} from "@/components/Form/FormFields/Utils";
+import InsurerAutocomplete from "@/components/HCX/InsurerAutocomplete";
+import { HCXPolicyModel } from "@/components/HCX/models";
 
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXPolicyModel } from "./models";
-import InsurerAutocomplete from "./InsurerAutocomplete";
-import TextFormField from "../Form/FormFields/TextFormField";
-import careConfig from "@careConfig";
-import { classNames } from "../../Utils/utils";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { useTranslation } from "react-i18next";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { classNames } from "@/Utils/utils";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 

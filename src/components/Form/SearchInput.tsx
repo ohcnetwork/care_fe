@@ -1,8 +1,13 @@
 import { createRef, useEffect, useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { isAppleDevice } from "../../Utils/utils";
-import TextFormField, { TextFormFieldProps } from "./FormFields/TextFormField";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import TextFormField, {
+  TextFormFieldProps,
+} from "@/components/Form/FormFields/TextFormField";
+
+import { isAppleDevice } from "@/Utils/utils";
 
 type SearchInputProps = TextFormFieldProps & {
   debouncePeriod?: number;
@@ -82,7 +87,7 @@ const SearchInput = ({
       className={className}
       leading={
         props.leading || (
-          <CareIcon icon="l-search-alt" className="text-secondary-600" />
+          <CareIcon icon="l-search-alt" className="text-secondary-600 z-10" />
         )
       }
       trailing={

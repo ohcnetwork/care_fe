@@ -1,5 +1,8 @@
-import RangeFormField from "../../Form/FormFields/RangeFormField";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
+import RangeFormField from "@/components/Form/FormFields/RangeFormField";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
 
 const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
   return (

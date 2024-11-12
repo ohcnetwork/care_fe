@@ -1,23 +1,24 @@
-import { useTranslation } from "react-i18next";
-import { Prescription } from "../models";
 import { useState } from "react";
-import useQuery from "../../../Utils/request/useQuery";
-import MedicineRoutes from "../routes";
-import { classNames, formatDateTime } from "../../../Utils/utils";
-import useSlug from "@/common/hooks/useSlug";
-import DiscontinuePrescription from "../DiscontinuePrescription";
-import AdministerMedicine from "../AdministerMedicine";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AuthorizedForConsultationRelatedActions } from "@/CAREUI/misc/AuthorizedChild";
+
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
-import PrescriptionDetailCard from "../PrescriptionDetailCard";
-import ButtonV2, {
-  Cancel,
-  Submit,
-} from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import EditPrescriptionForm from "../EditPrescriptionForm";
-import AdministrationEventSeperator from "./AdministrationEventSeperator";
-import AdministrationEventCell from "./AdministrationEventCell";
-import { AuthorizedForConsultationRelatedActions } from "../../../CAREUI/misc/AuthorizedChild";
+import AdministerMedicine from "@/components/Medicine/AdministerMedicine";
+import DiscontinuePrescription from "@/components/Medicine/DiscontinuePrescription";
+import EditPrescriptionForm from "@/components/Medicine/EditPrescriptionForm";
+import AdministrationEventCell from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventCell";
+import AdministrationEventSeperator from "@/components/Medicine/MedicineAdministrationSheet/AdministrationEventSeperator";
+import PrescriptionDetailCard from "@/components/Medicine/PrescriptionDetailCard";
+import { Prescription } from "@/components/Medicine/models";
+import MedicineRoutes from "@/components/Medicine/routes";
+
+import useSlug from "@/hooks/useSlug";
+
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface Props {
   prescription: Prescription;
@@ -57,6 +58,25 @@ export default function MedicineAdministrationTableRow({
       },
       key: `${prescription.last_administration?.administered_date}`,
     },
+  );
+  const DosageFrequencyInfo = () => (
+    <div className="flex justify-center">
+      <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
+        {prescription.dosage_type !== "TITRATED" ? (
+          <p>{prescription.base_dosage}</p>
+        ) : (
+          <p>
+            {prescription.base_dosage} - {prescription.target_dosage}
+          </p>
+        )}
+
+        <p className="max-w-[6rem] truncate">
+          {prescription.dosage_type !== "PRN"
+            ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
+            : prescription.indicator}
+        </p>
+      </div>
+    </div>
   );
 
   return (
@@ -215,23 +235,13 @@ export default function MedicineAdministrationTableRow({
                 {prescription.medicine_object?.generic}
               </span>
             </div>
-
-            <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
-              {prescription.dosage_type !== "TITRATED" ? (
-                <p>{prescription.base_dosage}</p>
-              ) : (
-                <p>
-                  {prescription.base_dosage} - {prescription.target_dosage}
-                </p>
-              )}
-
-              <p>
-                {prescription.dosage_type !== "PRN"
-                  ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
-                  : prescription.indicator}
-              </p>
+            <div className="block lg:hidden">
+              <DosageFrequencyInfo />
             </div>
           </div>
+        </td>
+        <td className="hidden lg:table-cell">
+          <DosageFrequencyInfo />
         </td>
 
         <td />
