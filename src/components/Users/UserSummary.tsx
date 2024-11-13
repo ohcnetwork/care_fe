@@ -14,7 +14,7 @@ import { UserModel } from "@/components/Users/models";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import * as Notification from "@/Utils/Notifications";
-import { showUserDelete } from "@/Utils/permissions";
+import { showUserDelete, showUserPasswordReset } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
@@ -50,6 +50,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
 
   const userColumnsData = { userData, username: userData.username };
   const deletePermitted = showUserDelete(authUser, userData);
+  const passwordResetPermitted = showUserPasswordReset(authUser, userData);
 
   return (
     <>
@@ -69,7 +70,7 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
           UserInformation,
           userColumnsData,
         )}
-        {deletePermitted &&
+        {passwordResetPermitted &&
           userColumns(
             t("reset_password"),
             t("reset_password_note"),

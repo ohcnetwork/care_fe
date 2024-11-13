@@ -122,4 +122,12 @@ export class UserPage {
       });
     });
   }
+
+  switchToListView() {
+    cy.get("#user-list-view").click();
+  }
+
+  verifyListView() {
+    cy.get("#user-list-view").should("have.class", "text-white");
+  }
 }

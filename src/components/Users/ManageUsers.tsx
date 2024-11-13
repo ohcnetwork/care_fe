@@ -47,6 +47,7 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
+  const [activeTab, setActiveTab] = useState(0);
 
   const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.home_facility },
@@ -113,6 +114,8 @@ export default function ManageUsers() {
           users={userListData?.results ?? []}
           onSearch={(username) => updateQuery({ username })}
           searchValue={qParams.username}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
         <Pagination totalCount={userListData.count} />
       </div>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
@@ -16,6 +17,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
     limit: 18,
     cacheBlacklist: ["username"],
   });
+  const [activeTab, setActiveTab] = useState(0);
   const { facilityId } = props;
 
   const { data: facilityData } = useQuery(routes.getAnyFacility, {
@@ -58,6 +60,8 @@ export default function FacilityUsers(props: { facilityId: number }) {
         users={userListData?.results ?? []}
         onSearch={(username) => updateQuery({ username })}
         searchValue={qParams.username}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
 
       <Pagination totalCount={userListData?.count ?? 0} />

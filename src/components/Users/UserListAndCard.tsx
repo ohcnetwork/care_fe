@@ -1,5 +1,4 @@
 import { navigate } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
@@ -59,7 +58,7 @@ export const CanUserAccess = (user: UserModel | UserAssignedModel) => {
 const GetDetailsButton = (username: string) => {
   const { t } = useTranslation();
   return (
-    <div className="flex-grow-0">
+    <div className="grow">
       <button
         id="more-details"
         onClick={() => navigate(`/users/${username}`)}
@@ -152,14 +151,19 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
   const { width } = useWindowDimensions();
   const mediumScreenBreakpoint = 640;
   const isMediumScreen = width <= mediumScreenBreakpoint;
+  const isLessThanXLargeScreen = width <= 1280;
   const { t } = useTranslation();
 
   return (
-    <Card key={`usr_${user.id}`} id={`usr_${user.id}`} className="relative">
-      <div className="flex flex-col justify-between sm:flex-row">
-        <div className="flex flex-col gap-4 sm:flex-row w-full justify-between">
-          <div className="flex grow flex-col gap-4 sm:flex-row w-full">
-            <div className="flex flex-col items-center gap-4 min-[320px]:flex-row sm:items-start">
+    <Card
+      key={`usr_${user.id}`}
+      id={`usr_${user.id}`}
+      className="relative h-full"
+    >
+      <div className="flex h-full flex-col justify-between">
+        <div className="flex flex-col gap-4 xl:flex-row w-full">
+          <div className="flex flex-col gap-4 sm:flex-row w-full">
+            <div className="flex flex-col items-center gap-4 min-[400px]:flex-row sm:items-start">
               <Avatar
                 imageUrl={user.read_profile_picture_url}
                 name={user.username ?? ""}
@@ -168,7 +172,8 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
               {isMediumScreen && getNameAndStatusCard(user, userOnline)}
             </div>
             <div className="flex flex-col w-full">
-              {!isMediumScreen && getNameAndStatusCard(user, userOnline, true)}
+              {!isMediumScreen &&
+                getNameAndStatusCard(user, userOnline, !isLessThanXLargeScreen)}
               <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4">
                 <div className="text-sm">
                   <div className="text-gray-500">{t("role")}</div>
@@ -209,8 +214,10 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
               </div>
             </div>
           </div>
-          {isMediumScreen && GetDetailsButton(user.username)}
         </div>
+        {isLessThanXLargeScreen && (
+          <div className="mt-4">{GetDetailsButton(user.username)}</div>
+        )}
       </div>
     </Card>
   );
@@ -220,7 +227,7 @@ export const UserGrid = ({
 }: {
   users?: UserModel[] | UserAssignedModel[];
 }) => (
-  <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 sm:grid-cols-2">
+  <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 lg:grid-cols-2">
     {users?.map((user) => <UserCard key={user.id} user={user} />)}
   </div>
 );
@@ -331,15 +338,18 @@ interface UserListViewProps {
   users: UserModel[] | UserAssignedModel[];
   onSearch: (username: string) => void;
   searchValue: string;
+  activeTab: number;
+  onTabChange: (tab: number) => void;
 }
 
 export default function UserListView({
   users,
   onSearch,
   searchValue,
+  activeTab,
+  onTabChange,
 }: UserListViewProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState(0);
 
   return (
     <>
@@ -363,6 +373,7 @@ export default function UserListView({
                 </div>
               ),
               value: 0,
+              id: "user-card-view",
             },
             {
               text: (
@@ -372,10 +383,11 @@ export default function UserListView({
                 </div>
               ),
               value: 1,
+              id: "user-list-view",
             },
           ]}
           currentTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as number)}
+          onTabChange={(tab) => onTabChange(tab as number)}
           className="float-right"
         />
       </div>
