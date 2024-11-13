@@ -1,4 +1,4 @@
-// FacilityPage.ts
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 class FacilityPage {
   visitCreateFacilityPage() {
@@ -13,6 +13,12 @@ class FacilityPage {
     cy.get("#search").click().clear();
     cy.get("#search").click().type(facilityName);
   }
+
+  selectFacilityType(facility: string) {
+    advanceFilters.selectFacilityType(facility);
+  }
+
+  selectLocalBody;
 
   visitUpdateFacilityPage(url: string) {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");

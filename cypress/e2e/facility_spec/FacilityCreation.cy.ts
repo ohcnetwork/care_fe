@@ -57,6 +57,7 @@ describe("Facility Creation", () => {
     "This field is required",
   ];
   const triageErrorMessage = ["This field is required"];
+  const facilityType = "Primary Health Centres";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -117,7 +118,7 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
     userCreationPage.verifyErrorMessages(facilityErrorMessage);
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.clickfacilityfeatureoption();
     facilityFeature.forEach((featureText) => {
       cy.get("[role='option']").contains(featureText).click();
@@ -206,7 +207,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with single bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -246,7 +247,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with no bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -285,7 +286,7 @@ describe("Facility Creation", () => {
     facilityPage.visitUpdateFacilityPage(facilityUrl1);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillAddress(facilityUpdateAddress);
     facilityPage.fillOxygenCapacity(oxygenCapacity);
     facilityPage.fillExpectedOxygenRequirement(oxygenExpected);

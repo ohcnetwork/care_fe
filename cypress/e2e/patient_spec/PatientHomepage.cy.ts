@@ -1,3 +1,5 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import PatientHome from "../../pageobject/Patient/PatientHome";
 
@@ -35,7 +37,7 @@ describe("Patient Homepage present functionalities", () => {
   });
 
   it("Date based advance filters applied in the patient tab", () => {
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFilters();
     patientHome.typePatientCreatedBeforeDate(patientFromDate);
     patientHome.typePatientCreatedAfterDate(patientToDate);
     patientHome.typePatientModifiedBeforeDate(patientFromDate);
@@ -55,7 +57,7 @@ describe("Patient Homepage present functionalities", () => {
   });
 
   it("Facility Geography based advance filters applied in the patient tab", () => {
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFilters();
     patientHome.typeFacilityName(facilityName);
     patientHome.selectFacilityType(facilityType);
     patientHome.typeFacilityLsgBody(facilityLsgBody);
@@ -73,7 +75,7 @@ describe("Patient Homepage present functionalities", () => {
 
   it("Patient diagnosis based advance filters applied in the patient tab", () => {
     // Patient Filtering based on icd-11 data
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFilters();
     patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
     patientHome.selectConfirmedIcdDiagnosis(
       patientIcdDiagnosis,
@@ -103,7 +105,7 @@ describe("Patient Homepage present functionalities", () => {
     cy.clearAllFilters();
     patientHome.verifyTotalPatientCount("1");
     // Apply Any and confirmed diagonsis to verify patient count 17
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFilters();
     patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
     patientHome.selectConfirmedIcdDiagnosis(
       patientIcdDiagnosis,
@@ -115,7 +117,7 @@ describe("Patient Homepage present functionalities", () => {
 
   it("Patient Details based advance filters applied in the patient tab", () => {
     // Patient Filtering based on patient details
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFilters();
     patientHome.selectPatientGenderfilter(patientGender);
     patientHome.selectPatientCategoryfilter(patientCategory);
     patientHome.typePatientMinimumAgeFilter(patientMinimumAge);

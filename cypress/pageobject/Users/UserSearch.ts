@@ -35,10 +35,6 @@ export class UserPage {
     cy.get(this.removeIcon).click();
   }
 
-  clickAdvancedFilters() {
-    cy.get("#advanced-filter").contains("Advanced Filters").click();
-  }
-
   typeInFirstName(firstName: string) {
     cy.get("#first_name").click().type(firstName);
   }
