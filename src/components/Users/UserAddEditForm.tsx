@@ -734,6 +734,335 @@ const UserAddEditForm = (props: UserProps) => {
     });
   };
 
+  const renderDoctorOrNurseFields = (field: FormContextValue<UserForm>) => {
+    return (
+      <>
+        {(state.form.user_type === "Doctor" ||
+          state.form.user_type === "Nurse") && (
+          <TextFormField
+            {...field("qualification")}
+            required
+            label={t("qualification")}
+            placeholder={t("qualification")}
+            onChange={(e) => {
+              handleFieldChange(e, field);
+            }}
+            className="flex-1"
+            aria-label={t("qualification")}
+          />
+        )}
+        {state.form.user_type === "Doctor" && (
+          <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+            <TextFormField
+              {...field("doctor_experience_commenced_on")}
+              required
+              label={t("years_of_experience")}
+              placeholder={t("years_of_experience_of_the_doctor")}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              className="flex-1"
+              aria-label={t("years_of_experience")}
+            />
+
+            <TextFormField
+              {...field("doctor_medical_council_registration")}
+              required
+              label={t("medical_council_registration")}
+              placeholder={t("doctor_s_medical_council_registration")}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              className="flex-1"
+              aria-label={t("medical_council_registration")}
+            />
+          </div>
+        )}
+      </>
+    );
+  };
+
+  const renderPhoneNumberFields = (field: FormContextValue<UserForm>) => {
+    return (
+      <>
+        <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+          <div className="flex flex-1 flex-col">
+            <PhoneNumberFormField
+              {...field("phone_number")}
+              placeholder={t("phone_number")}
+              label={t("phone_number")}
+              required
+              types={["mobile", "landline"]}
+              onChange={(e) => {
+                handlePhoneChange(e, field);
+              }}
+              className=""
+              aria-label={t("phone_number")}
+            />
+            <CheckBoxFormField
+              name="phone_number_is_whatsapp"
+              value={state.form.phone_number_is_whatsapp}
+              onChange={(e) => {
+                handlePhoneChange(e, field);
+              }}
+              label={t("is_phone_a_whatsapp_number")}
+            />
+          </div>
+          <PhoneNumberFormField
+            {...field("alt_phone_number")}
+            placeholder={t("whatsapp_phone_number")}
+            label={t("whatsapp_number")}
+            disabled={state.form.phone_number_is_whatsapp}
+            types={["mobile"]}
+            onChange={(e) => {
+              handlePhoneChange(e, field);
+            }}
+            className="flex-1"
+            aria-label={t("whatsapp_number")}
+          />
+        </div>
+      </>
+    );
+  };
+
+  const renderUsernameField = (field: FormContextValue<UserForm>) => {
+    return (
+      <>
+        {!editUser && (
+          <>
+            <TextFormField
+              {...field("username")}
+              label={t("username")}
+              placeholder={t("username")}
+              required
+              autoComplete="new-username"
+              value={usernameInput}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+                setUsernameInput(e.value);
+              }}
+              onFocus={() => setUsernameInputInFocus(true)}
+              onBlur={() => {
+                setUsernameInputInFocus(false);
+              }}
+              aria-label={t("username")}
+            />
+            {usernameInputInFocus && (
+              <div className="text-small pl-2 text-secondary-500">
+                <div>
+                  {usernameExists !== userExistsEnums.idle && (
+                    <>
+                      {usernameExists === userExistsEnums.checking ? (
+                        <span>
+                          <CareIcon icon="l-record-audio" className="text-xl" />{" "}
+                          checking...
+                        </span>
+                      ) : (
+                        <>
+                          {usernameExists === userExistsEnums.exists ? (
+                            <div>
+                              <CareIcon
+                                icon="l-times-circle"
+                                className="text-xl text-red-500"
+                              />{" "}
+                              <span className="text-red-500">
+                                {t("username_not_available")}
+                              </span>
+                            </div>
+                          ) : (
+                            <div>
+                              <CareIcon
+                                icon="l-check-circle"
+                                className="text-xl text-green-500"
+                              />{" "}
+                              <span className="text-primary-500">
+                                {t("username_available")}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+                <div aria-live="polite">
+                  {validateRule(
+                    usernameInput.length >= 4 && usernameInput.length <= 16,
+                    "Username should be 4-16 characters long",
+                    !state.form.username,
+                  )}
+                  {validateRule(
+                    /^[a-z0-9._-]*$/.test(usernameInput),
+                    "Username can only contain lowercase letters, numbers, and . _ -",
+                    !state.form.username,
+                  )}
+                  {validateRule(
+                    /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
+                    "Username must start and end with a letter or number",
+                    !state.form.username,
+                  )}
+                  {validateRule(
+                    !/(?:[._-]{2,})/.test(usernameInput),
+                    "Username can't contain consecutive special characters . _ -",
+                    !state.form.username,
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </>
+    );
+  };
+
+  const renderPasswordFields = (field: FormContextValue<UserForm>) => {
+    return (
+      <>
+        {!editUser && (
+          <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+            <div className="flex flex-1 flex-col">
+              <TextFormField
+                {...field("password")}
+                label={t("password")}
+                placeholder={t("password")}
+                required
+                autoComplete="new-password"
+                type="password"
+                onFocus={() => setPasswordInputInFocus(true)}
+                onBlur={() => setPasswordInputInFocus(false)}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                }}
+                aria-label={t("password")}
+              />
+              {passwordInputInFocus && state.form.password && (
+                <div
+                  className="text-small pl-2 text-secondary-500"
+                  aria-live="polite"
+                >
+                  {validateRule(
+                    state.form.password.length >= 8,
+                    "Password should be atleast 8 characters long",
+                    !state.form.password,
+                  )}
+                  {validateRule(
+                    state.form.password !== state.form.password.toUpperCase(),
+                    "Password should contain at least 1 lowercase letter",
+                    !state.form.password,
+                  )}
+                  {validateRule(
+                    state.form.password !== state.form.password.toLowerCase(),
+                    "Password should contain at least 1 uppercase letter",
+                    !state.form.password,
+                  )}
+                  {validateRule(
+                    /\d/.test(state.form.password),
+                    "Password should contain at least 1 number",
+                    !state.form.password,
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-1 flex-col">
+              <TextFormField
+                {...field("c_password")}
+                label={t("confirm_password")}
+                placeholder={t("confirm_password")}
+                required
+                type="password"
+                autoComplete="off"
+                onFocus={() => setConfirmPasswordInputInFocus(true)}
+                onBlur={() => setConfirmPasswordInputInFocus(false)}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                }}
+                aria-label={t("confirm_password")}
+              />
+              {confirmPasswordInputInFocus &&
+                state.form.c_password &&
+                state.form.c_password.length > 0 && (
+                  <div aria-live="polite">
+                    {validateRule(
+                      state.form.c_password === state.form.password,
+                      "Confirm password should match the entered password",
+                      !state.form.c_password,
+                    )}
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  const renderPersonalInfoFields = (field: FormContextValue<UserForm>) => {
+    return (
+      <>
+        <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+          <TextFormField
+            {...field("first_name")}
+            required
+            label={t("first_name")}
+            className="flex-1"
+            onChange={(e) => {
+              handleFieldChange(e, field);
+            }}
+            aria-label={t("first_name")}
+          />
+          <TextFormField
+            {...field("last_name")}
+            required
+            label={t("last_name")}
+            className="flex-1"
+            onChange={(e) => {
+              handleFieldChange(e, field);
+            }}
+            aria-label={t("last_name")}
+          />
+        </div>
+        <TextFormField
+          {...field("email")}
+          label={t("email")}
+          placeholder={t("email")}
+          required
+          onChange={(e) => {
+            handleFieldChange(e, field);
+          }}
+          aria-label={t("email")}
+        />
+        <div className="flex flex-col justify-between gap-x-3 sm:flex-row sm:items-center">
+          <DateFormField
+            {...field("date_of_birth")}
+            label={t("date_of_birth")}
+            required
+            value={getDate(state.form.date_of_birth)}
+            onChange={(e) => {
+              handleDateChange(e, field);
+            }}
+            disableFuture
+            className="flex-1"
+            aria-label={t("date_of_birth")}
+          />
+          <SelectFormField
+            {...field("gender")}
+            label={t("gender")}
+            required
+            value={state.form.gender}
+            options={GENDER_TYPES}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.text}
+            onChange={(e) => {
+              handleFieldChange(e, field);
+            }}
+            className="flex-1"
+            aria-label={t("gender")}
+          />
+        </div>
+      </>
+    );
+  };
+
   return (
     <Form<UserForm>
       disabled={isLoading}
@@ -796,310 +1125,11 @@ const UserAddEditForm = (props: UserProps) => {
                 />
               </div>
             )}
-            {(state.form.user_type === "Doctor" ||
-              state.form.user_type === "Nurse") && (
-              <TextFormField
-                {...field("qualification")}
-                required
-                label={t("qualification")}
-                placeholder={t("qualification")}
-                onChange={(e) => {
-                  handleFieldChange(e, field);
-                }}
-                className="flex-1"
-                aria-label={t("qualification")}
-              />
-            )}
-            {state.form.user_type === "Doctor" && (
-              <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-                <TextFormField
-                  {...field("doctor_experience_commenced_on")}
-                  required
-                  label={t("years_of_experience")}
-                  placeholder={t("years_of_experience_of_the_doctor")}
-                  onChange={(e) => {
-                    handleFieldChange(e, field);
-                  }}
-                  className="flex-1"
-                  aria-label={t("years_of_experience")}
-                />
-
-                <TextFormField
-                  {...field("doctor_medical_council_registration")}
-                  required
-                  label={t("medical_council_registration")}
-                  placeholder={t("doctor_s_medical_council_registration")}
-                  onChange={(e) => {
-                    handleFieldChange(e, field);
-                  }}
-                  className="flex-1"
-                  aria-label={t("medical_council_registration")}
-                />
-              </div>
-            )}
-
-            <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-              <div className="flex flex-1 flex-col">
-                <PhoneNumberFormField
-                  {...field("phone_number")}
-                  placeholder={t("phone_number")}
-                  label={t("phone_number")}
-                  required
-                  types={["mobile", "landline"]}
-                  onChange={(e) => {
-                    handlePhoneChange(e, field);
-                  }}
-                  className=""
-                  aria-label={t("phone_number")}
-                />
-                <CheckBoxFormField
-                  name="phone_number_is_whatsapp"
-                  value={state.form.phone_number_is_whatsapp}
-                  onChange={(e) => {
-                    handlePhoneChange(e, field);
-                  }}
-                  label={t("is_phone_a_whatsapp_number")}
-                />
-              </div>
-              <PhoneNumberFormField
-                {...field("alt_phone_number")}
-                placeholder={t("whatsapp_phone_number")}
-                label={t("whatsapp_number")}
-                disabled={state.form.phone_number_is_whatsapp}
-                types={["mobile"]}
-                onChange={(e) => {
-                  handlePhoneChange(e, field);
-                }}
-                className="flex-1"
-                aria-label={t("whatsapp_number")}
-              />
-            </div>
-
-            <div>
-              {!editUser && (
-                <TextFormField
-                  {...field("username")}
-                  label={t("username")}
-                  placeholder={t("username")}
-                  required
-                  autoComplete="new-username"
-                  value={usernameInput}
-                  onChange={(e) => {
-                    handleFieldChange(e, field);
-                    setUsernameInput(e.value);
-                  }}
-                  onFocus={() => setUsernameInputInFocus(true)}
-                  onBlur={() => {
-                    setUsernameInputInFocus(false);
-                  }}
-                  aria-label={t("username")}
-                />
-              )}
-              {!editUser && usernameInputInFocus && (
-                <div className="text-small pl-2 text-secondary-500">
-                  <div>
-                    {usernameExists !== userExistsEnums.idle && (
-                      <>
-                        {usernameExists === userExistsEnums.checking ? (
-                          <span>
-                            <CareIcon
-                              icon="l-record-audio"
-                              className="text-xl"
-                            />{" "}
-                            checking...
-                          </span>
-                        ) : (
-                          <>
-                            {usernameExists === userExistsEnums.exists ? (
-                              <div>
-                                <CareIcon
-                                  icon="l-times-circle"
-                                  className="text-xl text-red-500"
-                                />{" "}
-                                <span className="text-red-500">
-                                  {t("username_not_available")}
-                                </span>
-                              </div>
-                            ) : (
-                              <div>
-                                <CareIcon
-                                  icon="l-check-circle"
-                                  className="text-xl text-green-500"
-                                />{" "}
-                                <span className="text-primary-500">
-                                  {t("username_available")}
-                                </span>
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <div aria-live="polite">
-                    {validateRule(
-                      usernameInput.length >= 4 && usernameInput.length <= 16,
-                      "Username should be 4-16 characters long",
-                      !state.form.username,
-                    )}
-                    {validateRule(
-                      /^[a-z0-9._-]*$/.test(usernameInput),
-                      "Username can only contain lowercase letters, numbers, and . _ -",
-                      !state.form.username,
-                    )}
-                    {validateRule(
-                      /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
-                      "Username must start and end with a letter or number",
-                      !state.form.username,
-                    )}
-                    {validateRule(
-                      !/(?:[._-]{2,})/.test(usernameInput),
-                      "Username can't contain consecutive special characters . _ -",
-                      !state.form.username,
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {!editUser && (
-              <>
-                <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-                  <div className="flex flex-1 flex-col">
-                    <TextFormField
-                      {...field("password")}
-                      label="Password"
-                      placeholder="Password"
-                      required
-                      autoComplete="new-password"
-                      type="password"
-                      onFocus={() => setPasswordInputInFocus(true)}
-                      onBlur={() => setPasswordInputInFocus(false)}
-                      onChange={(e) => {
-                        handleFieldChange(e, field);
-                      }}
-                      aria-label={t("password")}
-                    />
-                    {passwordInputInFocus && state.form.password && (
-                      <div
-                        className="text-small pl-2 text-secondary-500"
-                        aria-live="polite"
-                      >
-                        {validateRule(
-                          state.form.password.length >= 8,
-                          "Password should be atleast 8 characters long",
-                          !state.form.password,
-                        )}
-                        {validateRule(
-                          state.form.password !==
-                            state.form.password.toUpperCase(),
-                          "Password should contain at least 1 lowercase letter",
-                          !state.form.password,
-                        )}
-                        {validateRule(
-                          state.form.password !==
-                            state.form.password.toLowerCase(),
-                          "Password should contain at least 1 uppercase letter",
-                          !state.form.password,
-                        )}
-                        {validateRule(
-                          /\d/.test(state.form.password),
-                          "Password should contain at least 1 number",
-                          !state.form.password,
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col">
-                    <TextFormField
-                      {...field("c_password")}
-                      label="Confirm Password"
-                      placeholder="Confirm Password"
-                      required
-                      type="password"
-                      autoComplete="off"
-                      onFocus={() => setConfirmPasswordInputInFocus(true)}
-                      onBlur={() => setConfirmPasswordInputInFocus(false)}
-                      onChange={(e) => {
-                        handleFieldChange(e, field);
-                      }}
-                      aria-label={t("confirm_password")}
-                    />
-                    {confirmPasswordInputInFocus &&
-                      state.form.c_password &&
-                      state.form.c_password.length > 0 && (
-                        <div aria-live="polite">
-                          {validateRule(
-                            state.form.c_password === state.form.password,
-                            "Confirm password should match the entered password",
-                            !state.form.c_password,
-                          )}
-                        </div>
-                      )}
-                  </div>
-                </div>
-              </>
-            )}
-            <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-              <TextFormField
-                {...field("first_name")}
-                required
-                label={t("first_name")}
-                className="flex-1"
-                onChange={(e) => {
-                  handleFieldChange(e, field);
-                }}
-                aria-label={t("first_name")}
-              />
-              <TextFormField
-                {...field("last_name")}
-                required
-                label={t("last_name")}
-                className="flex-1"
-                onChange={(e) => {
-                  handleFieldChange(e, field);
-                }}
-                aria-label={t("last_name")}
-              />
-            </div>
-            <TextFormField
-              {...field("email")}
-              label={t("email")}
-              placeholder={t("email")}
-              required
-              onChange={(e) => {
-                handleFieldChange(e, field);
-              }}
-              aria-label={t("email")}
-            />
-            <div className="flex flex-col justify-between gap-x-3 sm:flex-row sm:items-center">
-              <DateFormField
-                {...field("date_of_birth")}
-                label={t("date_of_birth")}
-                required
-                value={getDate(state.form.date_of_birth)}
-                onChange={(e) => {
-                  handleDateChange(e, field);
-                }}
-                disableFuture
-                className="flex-1"
-                aria-label={t("date_of_birth")}
-              />
-              <SelectFormField
-                {...field("gender")}
-                label={t("gender")}
-                required
-                value={state.form.gender}
-                options={GENDER_TYPES}
-                optionLabel={(o) => o.text}
-                optionValue={(o) => o.text}
-                onChange={(e) => {
-                  handleFieldChange(e, field);
-                }}
-                className="flex-1"
-                aria-label={t("gender")}
-              />
-            </div>
+            {renderDoctorOrNurseFields(field)}
+            {renderPhoneNumberFields(field)}
+            {renderUsernameField(field)}
+            {renderPasswordFields(field)}
+            {renderPersonalInfoFields(field)}
 
             {editUser && (
               <>
