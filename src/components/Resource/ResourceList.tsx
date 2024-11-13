@@ -46,9 +46,6 @@ export default function ListView() {
   });
 
   const showResourceCardList = (data: ResourceModel[]) => {
-    if (loading) {
-      return <Loading />;
-    }
     if (data && !data.length) {
       return (
         <div className="w-full mt-64 flex flex-1 justify-center text-secondary-600">
@@ -85,7 +82,7 @@ export default function ListView() {
 
           <div className="col-span-1 flex flex-col px-3 text-left">
             <div className="3xl:flex-row mb-2 flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row ">
-              {resource.status == "TRANSPORTATION TO BE ARRANGED" ? (
+              {resource.status === "TRANSPORTATION TO BE ARRANGED" ? (
                 <dt
                   title={t("resource_status")}
                   className="w-3/4 mt-1 h-fit flex h-5 shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4  overflow-hidden whitespace-nowrap text-ellipsis truncate bg-gray-200"
