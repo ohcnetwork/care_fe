@@ -30,7 +30,7 @@ export default function TemperatureFormField({
     if (value) {
       const initialTemperature =
         unit === "celsius"
-          ? fahrenheitToCelsius(parseFloat(value)).toFixed(1)
+          ? Number(fahrenheitToCelsius(parseFloat(value)).toFixed(1)).toString()
           : value;
       setInputValue(initialTemperature);
     }
@@ -49,25 +49,14 @@ export default function TemperatureFormField({
 
   const handleInputChange = (e: FieldChangeEvent<string>) => {
     const newValue = e.value;
+    setInputValue(newValue);
 
-    const regex = /^-?\d*\.?\d{0,1}$/;
-    if (regex.test(newValue)) {
-      setInputValue(newValue);
-    }
-  };
+    if (Number.isNaN(newValue)) return;
 
-  const handleBlur = () => {
-    if (!inputValue) return;
-    const parsedValue = parseFloat(inputValue);
-    if (isNaN(parsedValue)) return;
+    const valueInFahrenheit =
+      unit === "celsius" ? celsiusToFahrenheit(Number(newValue)) : newValue;
 
-    const finalValue =
-      unit === "celsius"
-        ? celsiusToFahrenheit(parsedValue).toString()
-        : parsedValue.toString();
-
-    setInputValue(finalValue);
-    onChange({ name, value: finalValue });
+    onChange({ name, value: valueInFahrenheit.toString() });
   };
 
   return (
@@ -82,7 +71,6 @@ export default function TemperatureFormField({
         max={`${unit === "celsius" ? 41.1 : 106}`}
         step={0.1}
         onChange={handleInputChange}
-        onBlur={handleBlur}
         autoComplete="off"
         error={error}
       />
