@@ -1,28 +1,17 @@
 // UserCreation.ts
 export class UserCreationPage {
-  private selectOptionContainingText(text: string) {
-    cy.get("[role='option']")
-      .contains(text)
-      .should("be.visible")
-      .click({ timeout: 10000 });
-  }
-
   clickProfileName() {
     cy.get("#user-profile-name").click();
   }
   clickProfileButton() {
-    cy.get("#profile-button").click();
+    cy.verifyAndClickElement("#profile-button", "Profile");
   }
   clickEditProfileButton() {
-    cy.get("#edit-cancel-profile-button").click();
+    cy.verifyAndClickElement("#edit-cancel-profile-button", "Edit Profile");
   }
   clickAddUserButton() {
-    cy.get("#addUserButton").click();
+    cy.verifyAndClickElement("#addUserButton", "Add New User");
   }
-  clickSubmitButton() {
-    cy.get("#submit").click();
-  }
-
   typeUserName(username: string) {
     cy.get("#username").click().type(username);
   }
@@ -35,7 +24,6 @@ export class UserCreationPage {
   typeEmail(email: string) {
     cy.get("#email").click().type(email);
   }
-
   typePassword(password: string) {
     cy.get("#password").click().type(password);
   }
@@ -51,23 +39,14 @@ export class UserCreationPage {
   typeDoctorExperience(experience: string) {
     cy.get("#doctor_experience_commenced_on").click().type(experience);
   }
-
   typeDoctorMedicalCouncilRegNo(regNo: string) {
     cy.get("#doctor_medical_council_registration").click().type(regNo);
   }
-
   typeWeeklyWorkingHours(workingHrs: string) {
     cy.get("#weekly_working_hours").click().type(workingHrs);
   }
-
   typeAltPhoneNumber(emergencyPhoneNumber: string) {
     cy.get("#altPhoneNumber").click().type(emergencyPhoneNumber);
-  }
-
-  typeIntoInputByName(inputName: string, value: string) {
-    cy.get("input[name='" + inputName + "']")
-      .click()
-      .type(value);
   }
   typeDateOfBirth(dob: string) {
     cy.clickAndTypeDate("#date_of_birth", dob);
@@ -81,7 +60,6 @@ export class UserCreationPage {
   typeNewUserPhoneNumber(phoneNumber: string) {
     cy.get("#phone_number").click().type(phoneNumber);
   }
-
   clearFirstName() {
     cy.get("#firstName").click().clear();
   }
@@ -117,9 +95,9 @@ export class UserCreationPage {
   selectDistrict(district: string) {
     cy.clickAndSelectOption("#district", district);
   }
+
   selectFacility(name: string) {
-    this.typeIntoInputByName("facilities", name);
-    this.selectOptionContainingText(name);
+    cy.typeAndSelectOption("input[name='facilities']", name);
     cy.get("input[name='facilities'] + button")
       .find("#dropdown-toggle")
       .click();
