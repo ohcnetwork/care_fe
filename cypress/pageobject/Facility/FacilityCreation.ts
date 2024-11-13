@@ -21,35 +21,12 @@ class FacilityPage {
     cy.get("#manage-facility-dropdown button").should("be.visible");
   }
 
-  clickUpdateFacilityType(facilityType: string) {
-    cy.get("#facility_type")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(facilityType).click();
-      });
-  }
-
   fillFacilityName(name: string) {
     cy.get("#name").click().clear().click().type(name);
   }
 
   fillPincode(pincode: string) {
     cy.get("#pincode").click().type(pincode);
-  }
-
-  selectState(state: string) {
-    cy.get("div#state button").click();
-    cy.get("[role='option']").contains(state).click();
-  }
-
-  selectDistrict(district: string) {
-    cy.get("div#district button").click();
-    cy.get("[role='option']").contains(district).click();
-  }
-
-  selectLocalBody(localBody: string) {
-    cy.get("div#local_body button").click();
-    cy.get("[role='option']").contains(localBody).click();
   }
 
   selectWard(ward: string) {
