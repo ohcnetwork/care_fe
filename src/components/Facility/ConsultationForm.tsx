@@ -936,7 +936,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
-              className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-8"
+              className="relative z-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-8"
             >
               <DraftSection
                 handleDraftSelect={(newState: any) => {

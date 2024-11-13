@@ -5,6 +5,7 @@ import {
   DataZoomComponent,
   GridComponent,
   LegendComponent,
+  MarkLineComponent,
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,
@@ -27,6 +28,7 @@ echarts.use([
   TooltipComponent,
   VisualMapComponent,
   VisualMapPiecewiseComponent,
+  MarkLineComponent,
 ]);
 
 interface ReactEchartsProps extends EChartsReactProps {
