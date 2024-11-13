@@ -60,9 +60,12 @@ export default function CriticalCarePreview(props: Props) {
         <div>
           <div className="mt-2">
             <ButtonV2
+              id="update-log"
+              data-testid="update-log-button"
+              aria-label={t("update_log")}
               href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/daily-rounds/${props.id}/update`}
             >
-              Update Details
+              {t("update_log")}
             </ButtonV2>
           </div>
         </div>
