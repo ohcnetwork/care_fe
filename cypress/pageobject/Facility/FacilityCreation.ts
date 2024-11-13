@@ -18,7 +18,9 @@ class FacilityPage {
     advanceFilters.selectFacilityType(facility);
   }
 
-  selectLocalBody;
+  selectLocalBody(localBody: string) {
+    advanceFilters.selectLocalBody(localBody);
+  }
 
   visitUpdateFacilityPage(url: string) {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
