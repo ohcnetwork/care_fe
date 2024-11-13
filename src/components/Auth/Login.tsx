@@ -335,6 +335,7 @@ const Login = (props: { forgot?: boolean }) => {
                             setForgotPassword(true);
                           }}
                           type="button"
+                          id="forgot-pass-btn"
                           className="text-sm text-primary-400 hover:text-primary-500"
                         >
                           {t("forget_password")}
@@ -347,6 +348,7 @@ const Login = (props: { forgot?: boolean }) => {
                         </div>
                       ) : (
                         <button
+                          id="login-button"
                           type="submit"
                           className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
                         >
@@ -370,6 +372,7 @@ const Login = (props: { forgot?: boolean }) => {
                     setForgotPassword(false);
                   }}
                   type="button"
+                  id="back-to-login-btn"
                   className="mb-4 text-sm text-primary-400 hover:text-primary-500"
                 >
                   <div className="flex justify-center">
@@ -377,11 +380,14 @@ const Login = (props: { forgot?: boolean }) => {
                     <span>{t("back_to_login")}</span>
                   </div>
                 </button>
-                <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
+                <div
+                  className="mb-8 w-[300px] text-4xl font-black text-primary-600"
+                  id="forgot-password-heading"
+                >
                   {t("forget_password")}
                 </div>
                 <form onSubmit={handleForgetSubmit}>
-                  <div>
+                  <div id="forgot-password-instruction">
                     {t("forget_password_instruction")}
                     <LegendInput
                       id="forgot_username"
@@ -403,6 +409,7 @@ const Login = (props: { forgot?: boolean }) => {
                       ) : (
                         <button
                           type="submit"
+                          id="send-reset-link-btn"
                           className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
                         >
                           {t("send_reset_link")}

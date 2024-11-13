@@ -1,10 +1,11 @@
-import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
-import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
-import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
-import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import LoginPage from "../../pageobject/Login/LoginPage";
 import { v4 as uuidv4 } from "uuid";
+
+import { AssetPage } from "../../pageobject/Asset/AssetCreation";
+import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
+import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
+import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
+import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Asset Tab", () => {
   const assetSearchPage = new AssetSearchPage();
