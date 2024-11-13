@@ -8,10 +8,12 @@ export const advanceFilters = {
   },
 
   selectDistrict(district: string) {
+    cy.get("#state").should("have.value.not.eq", "");
     cy.clickAndSelectOption("#district", district);
   },
 
   selectLocalBody(localBody: string) {
+    cy.get("#district").should("have.value.not.eq", "");
     cy.clickAndSelectOption("#local_body", localBody);
   },
 

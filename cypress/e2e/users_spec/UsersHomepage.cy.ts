@@ -57,6 +57,7 @@ describe("User Homepage", () => {
       "Home Facility",
       `Home Facility: ${homeFacility}`,
     );
+    advanceFilters.clickAdvancedFiltersButton();
     advanceFilters.clickClearAdvanceFilters();
     userPage.verifyDataTestIdNotVisible("First Name");
     userPage.verifyDataTestIdNotVisible("Last Name");

@@ -73,7 +73,7 @@ describe("Facility Homepage Function", () => {
     facilityPage.verifyLocalBodyBadgeContent(localBody);
     facilityPage.verifyFacilityTypeBadgeContent(facilityType);
     manageUserPage.assertFacilityInCard(facilityName);
-    advanceFilters.applySelectedFilter();
+    advanceFilters.clickAdvancedFiltersButton();
     advanceFilters.clickClearAdvanceFilters();
     userPage.verifyDataTestIdNotVisible("State");
     userPage.verifyDataTestIdNotVisible("District");
