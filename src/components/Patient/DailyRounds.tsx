@@ -655,10 +655,12 @@ export const DailyRounds = (props: any) => {
                 <SelectFormField
                   {...selectField("nutrition_route", NUTRITION_ROUTE_CHOICES)}
                 />
-                <SelectFormField
-                  {...selectField("oral_issue", ORAL_ISSUE_CHOICES)}
-                  disabled={state.form.nutrition_route !== "ORAL"}
-                />
+                <div data-scribe-ignore={state.form.nutrition_route !== "ORAL"}>
+                  <SelectFormField
+                    {...selectField("oral_issue", ORAL_ISSUE_CHOICES)}
+                    disabled={state.form.nutrition_route !== "ORAL"}
+                  />
+                </div>
                 <SelectFormField
                   {...selectField("appetite", APPETITE_CHOICES)}
                 />
