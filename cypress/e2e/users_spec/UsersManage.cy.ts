@@ -36,7 +36,7 @@ describe("Manage User", () => {
     // select the district user and select one skill link and verify its profile reflection
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
-    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedSkillTab();
     cy.wait(500);
@@ -56,7 +56,7 @@ describe("Manage User", () => {
     manageUserPage.navigateToManageUser();
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
-    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedSkillTab();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
@@ -72,7 +72,7 @@ describe("Manage User", () => {
     userPage.typeInLastName(lastNameUserSkill);
     userPage.applyFilter();
     userPage.checkUsernameText(usernameToLinkSkill);
-    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.clickMoreDetailsButton(usernameToLinkSkill);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedSkillTab();
     manageUserPage.verifyDoctorQualification();
@@ -99,7 +99,7 @@ describe("Manage User", () => {
     // verify mandatory field error and select working hour for a user
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
-    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.verifyProfileTabPage();
     manageUserPage.clearweeklyhourfield();
@@ -120,7 +120,7 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernameToLinkFacilitydoc1);
     userPage.checkUsernameText(usernameToLinkFacilitydoc1);
     manageUserPage.assertHomeFacility("No home facility");
-    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.clickMoreDetailsButton(usernameToLinkFacilitydoc1);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedFacilitiesTab();
     manageUserPage.verifyLinkedFacilitiesTabPage();
@@ -135,7 +135,7 @@ describe("Manage User", () => {
     //  Link a new facility and ensure it is under home facility - doctor username (2)
     userPage.typeInSearchInput(usernameToLinkFacilitydoc2);
     userPage.checkUsernameText(usernameToLinkFacilitydoc2);
-    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.clickMoreDetailsButton(usernameToLinkFacilitydoc2);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedFacilitiesTab();
     manageUserPage.verifyLinkedFacilitiesTabPage();
@@ -154,7 +154,7 @@ describe("Manage User", () => {
     manageUserPage.navigateToManageUser();
     userPage.typeInSearchInput(usernameToLinkFacilitydoc3);
     userPage.checkUsernameText(usernameToLinkFacilitydoc3);
-    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.clickMoreDetailsButton(usernameToLinkFacilitydoc3);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedFacilitiesTab();
     manageUserPage.verifyLinkedFacilitiesTabPage();

@@ -128,8 +128,8 @@ export class ManageUserPage {
     cy.get("#facilities").click();
   }
 
-  clickMoreDetailsButton() {
-    cy.get("#more-details").click();
+  clickMoreDetailsButton(username: string) {
+    cy.get(`#more-details-${username}`).click();
   }
 
   verifyMoreDetailsPage() {
