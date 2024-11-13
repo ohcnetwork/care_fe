@@ -66,13 +66,13 @@ describe("Asset Tab", () => {
       "ONVIF Camera",
       "Camera Loc",
     );
-    advanceFilters.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
     assetFilters.assertFacilityText("Dummy Facility 40");
     assetFilters.assertAssetClassText("ONVIF");
     assetFilters.assertStatusText("ACTIVE");
     assetFilters.assertLocationText("Camera Loc");
-    advanceFilters.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     assetFilters.clearFilters();
   });
 

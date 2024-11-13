@@ -30,7 +30,7 @@ describe("User Homepage", () => {
   });
 
   it("User advance filter functionality", () => {
-    advanceFilters.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     userPage.typeInFirstName(firstName);
     userPage.typeInLastName(lastName);
     userPage.selectRole(role);

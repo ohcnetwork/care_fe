@@ -57,7 +57,7 @@ describe("Manage User", () => {
 
   it("linking skills for a doctor users and verify its reflection in doctor connect", () => {
     // select a doctor user and link and unlink same skill twice and verify the badge is only shown once in doctor connect
-    advanceFilters.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     userPage.typeInFirstName(firstNameUserSkill);
     userPage.typeInLastName(lastNameUserSkill);
     advanceFilters.applySelectedFilter();

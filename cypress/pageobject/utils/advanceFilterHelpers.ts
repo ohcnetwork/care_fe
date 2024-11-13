@@ -1,5 +1,5 @@
 export const advanceFilters = {
-  clickAdvancedFilters() {
+  clickAdvancedFiltersButton() {
     cy.verifyAndClickElement("#advanced-filter", "Advanced Filters");
   },
 

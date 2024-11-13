@@ -62,7 +62,7 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify the functionality of advance filter", () => {
-    advanceFilters.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     advanceFilters.selectState(stateName);
     advanceFilters.selectDistrict(district);
     advanceFilters.selectLocalBody(localBody);
@@ -118,7 +118,7 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
-    advanceFilters.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     advanceFilters.selectState(stateName);
     advanceFilters.selectDistrict(district);
     advanceFilters.selectLocalBody(localBody);

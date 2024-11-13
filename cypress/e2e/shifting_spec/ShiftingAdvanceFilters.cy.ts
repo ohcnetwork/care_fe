@@ -14,7 +14,7 @@ describe("Shifting section filter", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/shifting");
-    advanceFilters.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
   });
 
   it("filter by facility", () => {
