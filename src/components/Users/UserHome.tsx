@@ -116,7 +116,7 @@ export default function UserHome(props: UserHomeProps) {
                           )}
                           href={`/users/${username}/${p.toLocaleLowerCase()}`}
                         >
-                          <div className="px-3 py-1.5">
+                          <div className="px-3 py-1.5" id={p.toLowerCase()}>
                             {t(`USERMANAGEMENT_TAB__${tabName}`)}
                           </div>
                         </Link>

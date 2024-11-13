@@ -196,7 +196,7 @@ export default function LinkedFacilities({
         <DropdownMenu>
           <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
             <div className="rounded p-1 text-sm">{facility.name}</div>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger id="linked-facility-settings">
               <div className="rounded-r bg-secondary-300 px-2 py-1">
                 <CareIcon icon="l-setting" className="text-sm" />
               </div>
@@ -206,6 +206,7 @@ export default function LinkedFacilities({
           <DropdownMenuContent>
             {authorizeForHomeFacility && (
               <DropdownMenuItem
+                id="set-home-facility"
                 onClick={() =>
                   handleOnClick(
                     homeFacility
@@ -219,6 +220,7 @@ export default function LinkedFacilities({
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
+              id="unlink-facility"
               onClick={() => handleOnClick("unlink_facility", facility)}
             >
               {t("unlink_this_facility")}
@@ -236,10 +238,13 @@ export default function LinkedFacilities({
         key={`facility_${homeFacility.id}`}
       >
         <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-          <div className="rounded p-1 text-sm">{homeFacility.name}</div>
+          <div id="home-facility" className="rounded p-1 text-sm">
+            {homeFacility.name}
+          </div>
           {authorizeForHomeFacility && (
             <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
               <button
+                id="clear-home-facility"
                 onClick={() =>
                   handleOnClick("clear_home_facility", homeFacility)
                 }
@@ -270,6 +275,7 @@ export default function LinkedFacilities({
       <div className="flex flex-col gap-y-6 rounded bg-white p-4 shadow">
         <div className="flex flex-row gap-3">
           <FacilitySelect
+            id="select-facility"
             multiple={false}
             name="facility"
             exclude_user={userData.username}
@@ -302,7 +308,10 @@ export default function LinkedFacilities({
           <div className="flex flex-col gap-2">
             <p className="text-xs">{t("linked_facilities")}</p>
 
-            <div className="flex flex-row flex-wrap gap-3">
+            <div
+              id="linked-facility-list"
+              className="flex flex-row flex-wrap gap-3"
+            >
               {userFacilities.map((facility: FacilityModel) => {
                 if (homeFacility?.id === facility.id) {
                   return null;

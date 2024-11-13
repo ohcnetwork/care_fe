@@ -1,10 +1,6 @@
 export class ManageUserPage {
   assertHomeFacility(expectedText: string) {
-    cy.get("#home_facility").should("contain.text", expectedText);
-  }
-
-  clickFacilitiesTab() {
-    cy.get("#facilities").click();
+    cy.get("#home-facility").should("contain.text", expectedText);
   }
 
   selectFacilityFromDropdown(facilityName: string) {
@@ -13,10 +9,6 @@ export class ManageUserPage {
 
   selectSkillFromDropdown(skill: string) {
     cy.typeAndSelectOption("input[name='skill']", skill);
-  }
-
-  clickLinkFacility() {
-    cy.get("#link-facility").click();
   }
 
   assertLinkedFacility(facilityName: string) {
@@ -40,24 +32,28 @@ export class ManageUserPage {
     cy.get("[role='option']").should("not.exist");
   }
 
-  clickCloseSlideOver() {
-    cy.get("#close-slide-over").click({ force: true });
+  clickLinkedFacilitySettings() {
+    cy.get("#linked-facility-settings").click();
   }
 
-  clickHomeFacilityIcon() {
-    cy.get("#home-facility-icon").click();
+  clickSetHomeFacility() {
+    cy.get("#set-home-facility").click();
   }
 
   clickUnlinkFacilityButton() {
-    cy.get("#unlink-facility-button").click();
+    cy.get("#unlink-facility").click();
+  }
+
+  clickConfirmUnlinkSkill() {
+    cy.get("button[name='confirm-unlink-skill']").click();
+  }
+
+  clickLinkFacility() {
+    cy.get("#link-facility").click();
   }
 
   clickSubmit() {
     cy.get("#submit").click();
-  }
-
-  clicksetaveragehourbutton() {
-    cy.get("#avg-workinghour").click();
   }
 
   clearweeklyhourfield() {
@@ -80,7 +76,11 @@ export class ManageUserPage {
   }
 
   verifyWorkingHours(expectedHours: string) {
-    cy.get("#working-hours").should("contain", `${expectedHours} hours`);
+    cy.get("input[name='weekly_working_hours']").should("be.visible");
+    cy.get("input[name='weekly_working_hours']").should(
+      "have.value",
+      expectedHours,
+    );
   }
 
   verifyProfileWorkingHours(expectedHours: string) {
@@ -92,6 +92,10 @@ export class ManageUserPage {
 
   navigateToFacility() {
     cy.visit("/facility");
+  }
+
+  navigateToManageUser() {
+    cy.visit("/users");
   }
 
   typeFacilitySearch(facilityName: string) {
@@ -116,8 +120,43 @@ export class ManageUserPage {
     cy.get("#facility-patients").click();
   }
 
-  clicklinkedskillbutton() {
+  clickLinkedSkillTab() {
     cy.get("#skills").click();
+  }
+
+  clickLinkedFacilitiesTab() {
+    cy.get("#facilities").click();
+  }
+
+  clickMoreDetailsButton() {
+    cy.get("#more-details").click();
+  }
+
+  verifyMoreDetailsPage() {
+    cy.get("#users-name").should("be.visible");
+    cy.get("#username").should("be.visible");
+    cy.get("#role").should("be.visible");
+    cy.get("#usermanagement_tab_nav").should("be.visible");
+    cy.get("#profile").should("be.visible");
+    cy.get("#facilities").should("be.visible");
+    cy.get("#skills").should("be.visible");
+  }
+
+  verifyProfileTabPage() {
+    cy.get("#user-edit-form").should("be.visible");
+  }
+
+  verifyDoctorQualification() {
+    cy.get("input[name='qualification']").should("be.visible");
+  }
+
+  verifyLinkedSkillsTabPage() {
+    cy.get("#select-skill").scrollIntoView();
+    cy.get("#select-skill").should("be.visible");
+  }
+
+  verifyLinkedFacilitiesTabPage() {
+    cy.get("#select-facility").should("be.visible");
   }
 
   clickAddSkillButton() {
@@ -146,8 +185,17 @@ export class ManageUserPage {
     cy.get("#unlink-skill").click();
   }
 
+  verifyUnlinkSkillModal() {
+    cy.get("#unlink-skill-modal-description").should("be.visible");
+    cy.get("button[name='confirm-unlink-skill']").should("be.visible");
+  }
+
   assertSkillInAddedUserSkills(skillName: string) {
     cy.get("#added-user-skills").should("contain", skillName);
+  }
+
+  assertSkillNotInAddedUserSkills(skillName: string) {
+    cy.get("#added-user-skills").should("not.contain", skillName);
   }
 
   assertDoctorConnectVisibility(realName: string) {

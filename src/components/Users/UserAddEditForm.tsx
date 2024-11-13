@@ -1106,6 +1106,7 @@ const UserAddEditForm = (props: UserProps) => {
                 <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
                   <TextFormField
                     {...field("weekly_working_hours")}
+                    name="weekly_working_hours"
                     label={t("average_weekly_working_hours")}
                     className="flex-1"
                     type="number"

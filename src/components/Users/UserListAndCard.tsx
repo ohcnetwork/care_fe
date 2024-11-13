@@ -61,6 +61,7 @@ const GetDetailsButton = (username: string) => {
   return (
     <div className="flex-grow-0">
       <button
+        id="more-details"
         onClick={() => navigate(`/users/${username}`)}
         className="flex flex-grow-0 items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs hover:bg-gray-200"
       >
@@ -90,7 +91,9 @@ const getNameAndStatusCard = (
               <UserStatusIndicator user={user} />
             </div>
           </div>
-          <span className="text-sm text-gray-500">{user.username}</span>
+          <span className="text-sm text-gray-500" id="username">
+            {user.username}
+          </span>
         </div>
         <div>
           {showDetailsButton &&
@@ -171,7 +174,7 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
                 </div>
                 <div className="text-sm">
                   <div className="text-gray-500">{t("home_facility")}</div>
-                  <div className="font-medium">
+                  <div id="home-facility" className="font-medium">
                     {user.home_facility_object?.name || t("no_home_facility")}
                   </div>
                 </div>

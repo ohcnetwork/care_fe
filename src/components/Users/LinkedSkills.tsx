@@ -104,6 +104,7 @@ export default function LinkedSkills({ username }: { username: string }) {
                 onClick={() => handleOnClick(skill)}
                 title={t("clear_skill")}
                 aria-label={t("clear_skill")}
+                id="unlink-skill"
               >
                 <CareIcon icon="l-multiply" className="text-sm" />
               </button>
@@ -156,7 +157,10 @@ export default function LinkedSkills({ username }: { username: string }) {
           <div className="flex flex-col gap-2">
             <p className="text-xs">{t("linked_skills")}</p>
 
-            <div className="flex flex-row flex-wrap gap-3">
+            <div
+              id="added-user-skills"
+              className="flex flex-row flex-wrap gap-3"
+            >
               {skills?.results.map((skill: SkillModel) => {
                 return renderSkillButtons(skill);
               })}

@@ -447,6 +447,7 @@
   "clear_home_facility_confirm": "Are you sure you want to clear the home facility",
   "clear_home_facility_error": "Error while clearing home facility. Try again later.",
   "clear_selection": "Clear selection",
+  "clear_skill": "Clear Skill",
   "close": "Close",
   "close_scanner": "Close Scanner",
   "collapse_sidebar": "Collapse Sidebar",

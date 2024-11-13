@@ -22,6 +22,7 @@ export default function UnlinkSkillDialog(props: Props) {
   return (
     <ConfirmDialog
       action="Unlink"
+      name="confirm-unlink-skill"
       title={t("unlink_skill")}
       variant="warning"
       onClose={props.onCancel}
@@ -30,7 +31,7 @@ export default function UnlinkSkillDialog(props: Props) {
       show
       description={
         <div className="flex leading-relaxed text-secondary-800">
-          <span>
+          <span id="unlink-skill-modal-description">
             {t("unlink_skill_confirm")} <strong>{props.skillName}</strong>{" "}
             {t("from_user")} <strong>{props.userName}</strong>?{" "}
             {t("unlink_skill_access")}

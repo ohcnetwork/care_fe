@@ -110,7 +110,9 @@ export default function UserInformation({ username }: { username: string }) {
             </div>
           </div>
         </div>
-        <UserAddEditForm username={username} />
+        <div id="user-edit-form">
+          <UserAddEditForm username={username} />
+        </div>
       </div>
     </>
   );

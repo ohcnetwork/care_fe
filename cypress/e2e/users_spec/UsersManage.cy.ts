@@ -19,7 +19,7 @@ describe("Manage User", () => {
   const facilitytolinkusername = "Dummy Shifting Center";
   const facilitytolinkskill = "Dummy Facility 40";
   const workinghour = "23";
-  const linkedskill = "General Medicine";
+  const linkedskill = "Immunologist";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -36,21 +36,33 @@ describe("Manage User", () => {
     // select the district user and select one skill link and verify its profile reflection
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
-    manageUserPage.clicklinkedskillbutton();
+    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickLinkedSkillTab();
+    cy.wait(500);
+    manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
-    manageUserPage.clickCloseSlideOver();
-    cy.wait(5000);
-    manageUserPage.clicklinkedskillbutton();
+    cy.wait(500);
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
-    manageUserPage.clickCloseSlideOver();
-    cy.wait(5000);
+    cy.wait(500);
     manageUserPage.navigateToProfile();
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
       usernameforworkinghour,
     );
     manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
+    // unlink the skill
+    manageUserPage.navigateToManageUser();
+    userPage.typeInSearchInput(usernameforworkinghour);
+    userPage.checkUsernameText(usernameforworkinghour);
+    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickLinkedSkillTab();
+    manageUserPage.assertSkillInAddedUserSkills(linkedskill);
+    manageUserPage.clickUnlinkSkill();
+    manageUserPage.verifyUnlinkSkillModal();
+    manageUserPage.clickConfirmUnlinkSkill();
   });
 
   it("linking skills for a doctor users and verify its reflection in doctor connect", () => {
@@ -60,18 +72,20 @@ describe("Manage User", () => {
     userPage.typeInLastName(lastNameUserSkill);
     userPage.applyFilter();
     userPage.checkUsernameText(usernameToLinkSkill);
-    manageUserPage.clicklinkedskillbutton();
+    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickLinkedSkillTab();
+    manageUserPage.verifyDoctorQualification();
+    manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
-    manageUserPage.clickCloseSlideOver();
-    cy.wait(5000); // temporary hack to fix the failure
-    manageUserPage.clicklinkedskillbutton();
+    cy.wait(500); // temporary hack to fix the failure
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();
-    manageUserPage.clickSubmit();
+    manageUserPage.verifyUnlinkSkillModal();
+    manageUserPage.clickConfirmUnlinkSkill();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
-    manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
     manageUserPage.navigateToFacility();
     manageUserPage.typeFacilitySearch(facilitytolinkskill);
@@ -85,13 +99,17 @@ describe("Manage User", () => {
     // verify mandatory field error and select working hour for a user
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
-    manageUserPage.clicksetaveragehourbutton();
+    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.verifyProfileTabPage();
     manageUserPage.clearweeklyhourfield();
     manageUserPage.clickSubmit();
-    manageUserPage.verifyErrorText("Value should be between 0 and 168");
-    // verify the data is reflected in user card and profile page
+    manageUserPage.verifyErrorText(
+      "Average weekly working hours must be a number between 0 and 168",
+    );
     manageUserPage.typeInWeeklyWorkingHours(workinghour);
     manageUserPage.clickSubmit();
+    // verify the data is reflected in user card and profile page
     manageUserPage.verifyWorkingHours(workinghour);
     manageUserPage.navigateToProfile();
     manageUserPage.verifyProfileWorkingHours(workinghour);
@@ -101,42 +119,51 @@ describe("Manage User", () => {
     // verify the user doesn't have any home facility
     userPage.typeInSearchInput(usernameToLinkFacilitydoc1);
     userPage.checkUsernameText(usernameToLinkFacilitydoc1);
-    manageUserPage.assertHomeFacility("No Home Facility");
+    manageUserPage.assertHomeFacility("No home facility");
+    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickLinkedFacilitiesTab();
+    manageUserPage.verifyLinkedFacilitiesTabPage();
     //  Link a new facility and ensure it is under linked facility - doctor username (1)
-    manageUserPage.clickFacilitiesTab();
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
     manageUserPage.assertLinkedFacility(facilitytolinkusername);
     //  Verify in the already linked facility are not present in droplist
     manageUserPage.assertFacilityNotInDropdown(facilitytolinkusername);
-    manageUserPage.clickCloseSlideOver();
+    // Go back to manage user page
+    manageUserPage.navigateToManageUser();
     //  Link a new facility and ensure it is under home facility - doctor username (2)
-    userPage.clearSearchInput();
     userPage.typeInSearchInput(usernameToLinkFacilitydoc2);
     userPage.checkUsernameText(usernameToLinkFacilitydoc2);
-    manageUserPage.clickFacilitiesTab();
+    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickLinkedFacilitiesTab();
+    manageUserPage.verifyLinkedFacilitiesTabPage();
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
-    manageUserPage.clickHomeFacilityIcon();
+    manageUserPage.clickLinkedFacilitySettings();
+    manageUserPage.clickSetHomeFacility();
     manageUserPage.assertnotLinkedFacility(facilitytolinkusername);
     manageUserPage.assertHomeFacilitylink(facilitytolinkusername);
-    manageUserPage.clickCloseSlideOver();
     //  verify the home facility doctor id have reflection in user card
-    userPage.clearSearchInput();
+    manageUserPage.navigateToManageUser();
     userPage.typeInSearchInput(usernameToLinkFacilitydoc2);
     userPage.checkUsernameText(usernameToLinkFacilitydoc2);
     manageUserPage.assertHomeFacility(facilitytolinkusername);
     // Link a new facility and unlink the facility from the doctor username (3)
-    userPage.clearSearchInput();
+    manageUserPage.navigateToManageUser();
     userPage.typeInSearchInput(usernameToLinkFacilitydoc3);
     userPage.checkUsernameText(usernameToLinkFacilitydoc3);
-    manageUserPage.clickFacilitiesTab();
+    manageUserPage.clickMoreDetailsButton();
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickLinkedFacilitiesTab();
+    manageUserPage.verifyLinkedFacilitiesTabPage();
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
+    manageUserPage.clickLinkedFacilitySettings();
     manageUserPage.clickUnlinkFacilityButton();
     manageUserPage.clickSubmit();
     manageUserPage.linkedfacilitylistnotvisible();
-    manageUserPage.clickCloseSlideOver();
     //  Go to particular facility doctor connect and all user-id are reflected based on there access
     // Path will be facility page to patient page then doctor connect button
     manageUserPage.navigateToFacility();

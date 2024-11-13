@@ -26,7 +26,7 @@ export default function UserBanner({ userData }: { userData: UserModel }) {
           />
           <div className="flex flex-col self-center">
             <div className="flex flex-row items-center gap-3">
-              <h1 className="text-xl font-bold" id="user-name">
+              <h1 className="text-xl font-bold" id="users-name">
                 {formatName(userData)}
               </h1>
               <div className="min-width-50 shrink-0 text-sm text-secondary-600">
@@ -34,7 +34,10 @@ export default function UserBanner({ userData }: { userData: UserModel }) {
               </div>
             </div>
 
-            <span className="text-sm font-light leading-relaxed text-secondary-600">
+            <span
+              id="username"
+              className="text-sm font-light leading-relaxed text-secondary-600"
+            >
               {userData.username}
             </span>
           </div>
