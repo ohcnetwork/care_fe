@@ -81,7 +81,9 @@ const getNameAndStatusCard = (
       <div className="flex flex-row justify-between gap-x-3">
         <div className="flex flex-col">
           <div className="flex items-center gap-x-3">
-            <h1 className="text-base font-bold">{formatName(user)}</h1>
+            <h1 id="name" className="text-base font-bold">
+              {formatName(user)}
+            </h1>
             <div
               className={classNames(
                 "flex items-center gap-2 rounded-full px-3 py-1",
@@ -170,7 +172,9 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
               <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4">
                 <div className="text-sm">
                   <div className="text-gray-500">{t("role")}</div>
-                  <div className="font-medium">{user.user_type}</div>
+                  <div id="role" className="font-medium">
+                    {user.user_type}
+                  </div>
                 </div>
                 <div className="text-sm">
                   <div className="text-gray-500">{t("home_facility")}</div>
@@ -181,7 +185,7 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
                 {"district_object" in user && user.district_object && (
                   <div className="text-sm">
                     <div className="text-gray-500">{t("district")}</div>
-                    <div className="font-medium">
+                    <div id="district" className="font-medium">
                       {user.district_object.name}
                     </div>
                   </div>
@@ -189,7 +193,9 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
                 {"district" in user && user.district && (
                   <div className="text-sm">
                     <div className="text-gray-500">{t("district")}</div>
-                    <div className="font-medium">{user.district}</div>
+                    <div id="district" className="font-medium">
+                      {user.district}
+                    </div>
                   </div>
                 )}
                 <div className="text-sm">
@@ -263,20 +269,26 @@ const UserListRow = ({
             className="h-10 w-10 text-lg"
           />
           <div className="flex flex-col">
-            <h1 className="text-sm font-medium">{formatName(user)}</h1>
-            <span className="text-xs text-gray-500">@{user.username}</span>
+            <h1 id="name" className="text-sm font-medium">
+              {formatName(user)}
+            </h1>
+            <span id="username" className="text-xs text-gray-500">
+              @{user.username}
+            </span>
           </div>
         </div>
       </td>
       <td className="flex-0 py-4">
         <UserStatusIndicator user={user} addPadding />
       </td>
-      <td className="px-4 py-4 text-sm">{user.user_type}</td>
-      <td className="px-4 py-4 text-sm">
+      <td id="role" className="px-4 py-4 text-sm">
+        {user.user_type}
+      </td>
+      <td id="home-facility" className="px-4 py-4 text-sm">
         {user.home_facility_object?.name || t("no_home_facility")}
       </td>
       {showDistrictColumn && (
-        <td className="px-4 py-4 text-sm">
+        <td id="district" className="px-4 py-4 text-sm">
           {"district_object" in user && user.district_object
             ? user.district_object?.name
             : "district" in user && user.district

@@ -67,7 +67,7 @@ interface StateObj {
 
 const initForm: UserForm = {
   user_type: "",
-  gender: "Female",
+  gender: "",
   password: "",
   c_password: "",
   facilities: [],
@@ -756,7 +756,7 @@ const UserAddEditForm = (props: UserProps) => {
                 <FieldLabel>{t("facilities")}</FieldLabel>
                 <FacilitySelect
                   multiple={true}
-                  name={t("facilities")}
+                  name="facilities"
                   selected={selectedFacility}
                   setSelected={setFacility}
                   errors={facilityErrors}

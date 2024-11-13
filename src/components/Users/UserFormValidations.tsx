@@ -3,11 +3,10 @@ import { TFunction } from "i18next";
 import { validateNumber } from "@/common/validation";
 
 import { FacilityModel } from "../Facility/models";
-import { GenderType } from "./models";
 
 export type UserForm = {
   user_type?: string;
-  gender: GenderType;
+  gender: string;
   password?: string;
   c_password?: string;
   facilities?: Array<string>;

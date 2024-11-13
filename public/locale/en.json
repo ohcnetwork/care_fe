@@ -780,7 +780,7 @@
   "insurer_name_required": "Insurer Name is required",
   "international_mobile": "International Mobile",
   "invalid_asset_id_msg": "Oops! The asset ID you entered does not appear to be valid.",
-  "invalid_email": "Please Enter a Valid Email Address",
+  "invalid_email": "Please enter a valid email address",
   "invalid_ip_address": "Invalid IP Address",
   "invalid_link_msg": "It appears that the password reset link you have used is either invalid or expired. Please request a new password reset link.",
   "invalid_password": "Password doesn't meet the requirements",

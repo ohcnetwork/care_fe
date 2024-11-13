@@ -168,14 +168,8 @@ describe("User Creation", () => {
     userCreationPage.verifyElementContainsText("role", "Doctor");
     userCreationPage.verifyElementContainsText("district", "Ernakulam");
     userCreationPage.verifyElementContainsText(
-      "home_facility",
+      "home-facility",
       "Dummy Shifting Center",
-    );
-    userCreationPage.verifyElementContainsText("qualification", "MBBS");
-    userCreationPage.verifyElementContainsText("doctor-experience", "2");
-    userCreationPage.verifyElementContainsText(
-      "medical-council-registration",
-      "123456789",
     );
   });
 

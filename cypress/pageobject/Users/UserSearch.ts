@@ -102,7 +102,7 @@ export class UserPage {
   }
 
   verifyMultipleBadgesWithSameId(alreadylinkedusersviews: string[]) {
-    cy.get("#user-view-name").then(($elements) => {
+    cy.get("#name").then(($elements) => {
       const userViews = $elements
         .map((_, el) => Cypress.$(el).text().trim())
         .get();
