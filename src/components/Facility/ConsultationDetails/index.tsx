@@ -72,15 +72,12 @@ const defaultTabs = {
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const { t } = useTranslation();
-  const [tabs, setTabs] =
-    useState<Record<string, React.FC<ConsultationTabProps>>>(defaultTabs);
   const pluginTabs = useCareAppConsultationTabs();
 
-  useEffect(() => {
-    if (pluginTabs) {
-      setTabs((prev) => ({ ...prev, ...pluginTabs }));
-    }
-  }, [pluginTabs]);
+  const tabs: Record<string, React.FC<ConsultationTabProps>> = {
+    ...defaultTabs,
+    ...pluginTabs,
+  };
 
   let tab = undefined;
   if (Object.keys(tabs).includes(props.tab.toUpperCase())) {
