@@ -20,7 +20,7 @@ export const advanceFilters = {
   },
 
   selectFacilityType(facilityType: string) {
-    cy.clickAndSelectOption("#local_body", facilityType);
+    cy.clickAndSelectOption("#facility_type", facilityType);
   },
 
   clickClearAdvanceFilters() {
