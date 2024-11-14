@@ -154,13 +154,17 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
           className="my-auto p-0"
           noPadding
           hideRestoreDraft
-          additionalButtons={[
-            {
-              id: "save-and-add-more",
-              type: "submit",
-              label: additionalButtonLabel,
-            },
-          ]}
+          additionalButtons={
+            isLastOptionType
+              ? []
+              : [
+                  {
+                    id: "save-and-add-more",
+                    type: "submit",
+                    label: additionalButtonLabel,
+                  },
+                ]
+          }
         >
           {(field) => (
             <>

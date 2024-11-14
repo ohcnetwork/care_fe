@@ -241,13 +241,17 @@ export const BedCapacity = (props: BedCapacityProps) => {
             className="my-auto p-0"
             noPadding
             hideRestoreDraft
-            additionalButtons={[
-              {
-                id: "save-and-add-more",
-                type: "submit",
-                label: additionalButtonLabel,
-              },
-            ]}
+            additionalButtons={
+              isLastOptionType
+                ? []
+                : [
+                    {
+                      id: "save-and-add-more",
+                      type: "submit",
+                      label: additionalButtonLabel,
+                    },
+                  ]
+            }
           >
             {(field) => (
               <>
