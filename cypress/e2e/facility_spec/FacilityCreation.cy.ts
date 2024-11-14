@@ -59,6 +59,11 @@ describe("Facility Creation", () => {
   const triageErrorMessage = ["This field is required"];
   const facilityType = "Primary Health Centres";
 
+  const nonAdminUsers = [
+    { username: "dummynurse1", password: "Coronasafe@123" },
+    { username: "devdoctor", password: "Coronasafe@123" },
+  ];
+
   before(() => {
     loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
@@ -315,6 +320,34 @@ describe("Facility Creation", () => {
     facilityPage.verifySuccessNotification(
       "Facility middleware updated successfully",
     );
+  });
+
+  it("Should display error when district admin tries to create facility in a different district", () => {
+    facilityPage.visitCreateFacilityPage();
+    facilityPage.fillFacilityName(facilityName);
+    facilityPage.selectFacilityType(facilityType);
+    facilityPage.fillPincode("682001");
+    facilityPage.selectStateOnPincode("Kerala");
+    facilityPage.selectDistrictOnPincode("Kottayam");
+    facilityPage.selectLocalBody("Arpookara");
+    facilityPage.selectWard("5");
+    facilityPage.fillAddress(facilityAddress);
+    facilityPage.fillPhoneNumber(facilityNumber);
+    facilityPage.submitForm();
+    facilityPage.verifyErrorNotification(
+      "You do not have permission to perform this action.",
+    );
+  });
+
+  it("Access Restriction for Non-Admin Users to facility creation page", () => {
+    nonAdminUsers.forEach((user) => {
+      loginPage.login(user.username, user.password);
+      cy.visit("/facility/create");
+
+      facilityPage.verifyErrorNotification(
+        "You don't have permission to perform this action. Contact the admin",
+      );
+    });
   });
 
   afterEach(() => {
