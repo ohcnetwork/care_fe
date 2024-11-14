@@ -1,8 +1,8 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
-import PatientLogupdate from "../../pageobject/Patient/PatientLogupdate";
 import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
+import PatientLogupdate from "../../pageobject/Patient/PatientLogupdate";
 import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
 
 describe("Patient Log Update in Normal, Critical and TeleIcu", () => {

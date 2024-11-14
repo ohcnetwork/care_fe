@@ -1,3 +1,5 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 
@@ -28,7 +30,7 @@ describe("User Homepage", () => {
   });
 
   it("User advance filter functionality", () => {
-    userPage.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     userPage.typeInFirstName(firstName);
     userPage.typeInLastName(lastName);
     userPage.selectRole(role);
@@ -37,7 +39,7 @@ describe("User Homepage", () => {
     userPage.typeInPhoneNumber(phoneNumber);
     userPage.typeInAltPhoneNumber(altPhoneNumber);
     userPage.selectHomeFacility(homeFacility);
-    userPage.applyFilter();
+    advanceFilters.applySelectedFilter();
     userPage.checkUsernameText(nurseUserName);
     // Verify the badges related to the data
     userPage.verifyDataTestIdText("First Name", `First Name: ${firstName}`);
@@ -55,7 +57,8 @@ describe("User Homepage", () => {
       "Home Facility",
       `Home Facility: ${homeFacility}`,
     );
-    userPage.clearFilters();
+    advanceFilters.clickAdvancedFiltersButton();
+    advanceFilters.clickClearAdvanceFilters();
     userPage.verifyDataTestIdNotVisible("First Name");
     userPage.verifyDataTestIdNotVisible("Last Name");
     userPage.verifyDataTestIdNotVisible("Phone Number");

@@ -1,6 +1,6 @@
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ResourcePage from "../../pageobject/Resource/ResourcePage";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 
 describe("Resource Page", () => {
   let createdResource: string;

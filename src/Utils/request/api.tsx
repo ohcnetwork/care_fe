@@ -1,14 +1,3 @@
-import { AbhaNumberModel } from "@/components/ABDM/types/abha";
-import {
-  ConsentRequestModel,
-  CreateConsentTBody,
-} from "@/components/ABDM/types/consent";
-import {
-  IHealthFacility,
-  IcreateHealthFacilityTBody,
-  IpartialUpdateHealthFacilityTBody,
-} from "@/components/ABDM/types/health-facility";
-import { HealthInformationModel } from "@/components/ABDM/types/health-information";
 import {
   AssetBedBody,
   AssetBedModel,
@@ -92,7 +81,6 @@ import {
   CreateFileResponse,
   FileUploadModel,
 } from "@/components/Patient/models";
-import { ScribeModel } from "@/components/Scribe/Scribe";
 import {
   SkillModel,
   SkillObjectModel,
@@ -122,36 +110,6 @@ export interface LoginCredentials {
 }
 
 const routes = {
-  createScribe: {
-    path: "/api/care_scribe/scribe/",
-    method: "POST",
-    TReq: Type<ScribeModel>(),
-    TRes: Type<ScribeModel>(),
-  },
-  getScribe: {
-    path: "/api/care_scribe/scribe/{external_id}/",
-    method: "GET",
-    TRes: Type<ScribeModel>(),
-  },
-  updateScribe: {
-    path: "/api/care_scribe/scribe/{external_id}/",
-    method: "PUT",
-    TReq: Type<ScribeModel>(),
-    TRes: Type<ScribeModel>(),
-  },
-  createScribeFileUpload: {
-    path: "/api/care_scribe/scribe_file/",
-    method: "POST",
-    TBody: Type<CreateFileRequest>(),
-    TRes: Type<CreateFileResponse>(),
-  },
-  editScribeFileUpload: {
-    path: "/api/care_scribe/scribe_file/{id}/?file_type={fileType}&associating_id={associatingId}",
-    method: "PATCH",
-    TBody: Type<Partial<FileUploadModel>>(),
-    TRes: Type<FileUploadModel>(),
-  },
-
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",
@@ -1065,11 +1023,6 @@ const routes = {
     TBody: Type<ShiftingModel>(),
     TRes: Type<ShiftingModel>(),
   },
-  deleteShiftRecord: {
-    path: "/api/v1/shift/{id}/",
-    method: "DELETE",
-    TRes: Type<{ detail: string }>(),
-  },
   listShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
@@ -1241,13 +1194,6 @@ const routes = {
     TRes: Type<ResourceModel>(),
     TBody: Type<Partial<ResourceModel>>(),
   },
-  deleteResourceRecord: {
-    path: "/api/v1/resource/{id}/",
-    method: "DELETE",
-    TRes: Type<{
-      detail?: string;
-    }>(),
-  },
   listResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
@@ -1357,246 +1303,6 @@ const routes = {
     method: "PUT",
     TRes: Type<AssetService>(),
     TBody: Type<AssetServiceUpdate>(),
-  },
-
-  abdm: {
-    consent: {
-      list: {
-        path: "/api/abdm/consent/",
-        method: "GET",
-        TRes: Type<PaginatedResponse<ConsentRequestModel>>(),
-      },
-
-      create: {
-        path: "/api/abdm/consent/",
-        method: "POST",
-        TRes: Type<ConsentRequestModel>(),
-        TBody: Type<CreateConsentTBody>(),
-      },
-
-      get: {
-        path: "/api/abdm/consent/{id}/",
-        method: "GET",
-      },
-
-      checkStatus: {
-        path: "/api/abdm/v3/hiu/consent_request_status/",
-        method: "POST",
-        TBody: Type<{
-          consent_request: string;
-        }>(),
-        TRes: Type<{
-          detail: string;
-        }>(),
-      },
-    },
-
-    healthInformation: {
-      get: {
-        path: "/api/abdm/health_information/{artefactId}",
-        method: "GET",
-        TRes: Type<HealthInformationModel>(),
-      },
-    },
-
-    healthFacility: {
-      list: {
-        path: "/api/abdm/health_facility/",
-        method: "GET",
-      },
-
-      create: {
-        path: "/api/abdm/health_facility/",
-        method: "POST",
-        TRes: Type<IHealthFacility>(),
-        TBody: Type<IcreateHealthFacilityTBody>(),
-      },
-
-      get: {
-        path: "/api/abdm/health_facility/{facility_id}/",
-        method: "GET",
-        TRes: Type<IHealthFacility>(),
-      },
-
-      update: {
-        path: "/api/abdm/health_facility/{facility_id}/",
-        method: "PUT",
-        TRes: Type<IHealthFacility>(),
-        TBody: Type<IcreateHealthFacilityTBody>(),
-      },
-
-      partialUpdate: {
-        path: "/api/abdm/health_facility/{facility_id}/",
-        method: "PATCH",
-        TRes: Type<IHealthFacility>(),
-        TBody: Type<IpartialUpdateHealthFacilityTBody>(),
-      },
-
-      registerAsService: {
-        path: "/api/abdm/health_facility/{facility_id}/register_service/",
-        method: "POST",
-        TRes: Type<IHealthFacility>(),
-        TBody: Type<IcreateHealthFacilityTBody>(),
-      },
-    },
-
-    abhaNumber: {
-      get: {
-        path: "/api/abdm/abha_number/{abhaNumberId}/",
-        method: "GET",
-        TRes: Type<AbhaNumberModel>(),
-      },
-      create: {
-        path: "/api/abdm/abha_number/",
-        method: "POST",
-        TBody: Type<Partial<AbhaNumberModel>>(),
-        TRes: Type<AbhaNumberModel>(),
-      },
-    },
-
-    healthId: {
-      abhaCreateSendAadhaarOtp: {
-        path: "/api/abdm/v3/health_id/create/send_aadhaar_otp/",
-        method: "POST",
-        TBody: Type<{
-          aadhaar: string;
-          transaction_id?: string;
-        }>(),
-        TRes: Type<{
-          transaction_id: string;
-          detail: string;
-        }>(),
-      },
-
-      abhaCreateVerifyAadhaarOtp: {
-        path: "/api/abdm/v3/health_id/create/verify_aadhaar_otp/",
-        method: "POST",
-        TBody: Type<{
-          transaction_id: string;
-          otp: string;
-          mobile: string;
-        }>(),
-        TRes: Type<{
-          transaction_id: string;
-          detail: string;
-          is_new: boolean;
-          abha_number: AbhaNumberModel;
-        }>(),
-      },
-
-      abhaCreateLinkMobileNumber: {
-        path: "/api/abdm/v3/health_id/create/link_mobile_number/",
-        method: "POST",
-        TBody: Type<{
-          transaction_id: string;
-          mobile: string;
-        }>(),
-        TRes: Type<{
-          transaction_id: string;
-          detail: string;
-        }>(),
-      },
-
-      abhaCreateVerifyMobileNumber: {
-        path: "/api/abdm/v3/health_id/create/verify_mobile_otp/",
-        method: "POST",
-        TBody: Type<{
-          transaction_id: string;
-          otp: string;
-        }>(),
-        TRes: Type<{
-          transaction_id: string;
-          detail: string;
-        }>(),
-      },
-
-      abhaCreateAbhaAddressSuggestion: {
-        path: "/api/abdm/v3/health_id/create/abha_address_suggestion/",
-        method: "POST",
-        TBody: Type<{
-          transaction_id: string;
-        }>(),
-        TRes: Type<{
-          transaction_id: string;
-          abha_addresses: string[];
-        }>(),
-      },
-
-      abhaCreateEnrolAbhaAddress: {
-        path: "/api/abdm/v3/health_id/create/enrol_abha_address/",
-        method: "POST",
-        TBody: Type<{
-          transaction_id: string;
-          abha_address: string;
-        }>(),
-        TRes: Type<{
-          detail?: string;
-          transaction_id: string;
-          health_id: string;
-          preferred_abha_address: string;
-          abha_number: AbhaNumberModel;
-        }>(),
-      },
-
-      linkAbhaNumberAndPatient: {
-        path: "/api/abdm/v3/health_id/link_patient/",
-        method: "POST",
-        TBody: Type<{
-          abha_number: string;
-          patient: string;
-        }>(),
-        TRes: Type<{
-          detail: string;
-        }>(),
-      },
-
-      abhaLoginCheckAuthMethods: {
-        path: "/api/abdm/v3/health_id/login/check_auth_methods/",
-        method: "POST",
-        TBody: Type<{
-          abha_address: string;
-        }>(),
-        TRes: Type<{
-          abha_number: string;
-          auth_methods: string[];
-        }>(),
-      },
-
-      abhaLoginSendOtp: {
-        path: "/api/abdm/v3/health_id/login/send_otp/",
-        method: "POST",
-        TBody: Type<{
-          type: "abha-number" | "abha-address" | "mobile" | "aadhaar";
-          value: string;
-          otp_system: "abdm" | "aadhaar";
-        }>(),
-        TRes: Type<{
-          transaction_id: string;
-          detail: string;
-        }>(),
-      },
-
-      abhaLoginVerifyOtp: {
-        path: "/api/abdm/v3/health_id/login/verify_otp/",
-        method: "POST",
-        TBody: Type<{
-          type: "abha-number" | "abha-address" | "mobile" | "aadhaar";
-          otp: string;
-          transaction_id: string;
-          otp_system: "abdm" | "aadhaar";
-        }>(),
-        TRes: Type<{
-          abha_number: AbhaNumberModel;
-          created: boolean;
-        }>(),
-      },
-
-      getAbhaCard: {
-        path: "/api/abdm/v3/health_id/abha_card",
-        method: "GET",
-        TRes: Type<Blob>(),
-      },
-    },
   },
 
   // Prescription endpoints

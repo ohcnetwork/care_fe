@@ -1,6 +1,6 @@
-import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
+import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
 
 const patientPrescription = new PatientPrescription();
 const loginPage = new LoginPage();
