@@ -85,7 +85,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
       noImplicitPadding
       breadcrumbs={false}
       collapseSidebar
-      className="@container"
       options={
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
           <Pagination
@@ -219,21 +218,23 @@ export default function CentralNursingStation({ facilityId }: Props) {
           {t("no_vitals_present")}
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-1 @5xl:grid-cols-2 @7xl:grid-cols-3 @[140rem]:grid-cols-4 @[180rem]:grid-cols-5 @[240rem]:grid-cols-6">
-          {data.map((props, i) => (
-            <div className="overflow-hidden text-clip" key={i}>
-              <HL7PatientVitalsMonitor
-                patientCurrentBedAssignmentDate={
-                  props.patientAssetBed?.patient?.last_consultation?.current_bed
-                    ?.start_date
-                }
-                key={`${props.patientAssetBed?.bed.id}-${hash}`}
-                patientAssetBed={props.patientAssetBed}
-                socketUrl={props.socketUrl || ""}
-                config={config}
-              />
-            </div>
-          ))}
+        <div className="@container">
+          <div className="mt-1 grid grid-cols-1 gap-1 @5xl:grid-cols-2 @7xl:grid-cols-3 @[140rem]:grid-cols-4 @[180rem]:grid-cols-5 @[240rem]:grid-cols-6">
+            {data.map((props, i) => (
+              <div className="overflow-hidden text-clip" key={i}>
+                <HL7PatientVitalsMonitor
+                  patientCurrentBedAssignmentDate={
+                    props.patientAssetBed?.patient?.last_consultation
+                      ?.current_bed?.start_date
+                  }
+                  key={`${props.patientAssetBed?.bed.id}-${hash}`}
+                  patientAssetBed={props.patientAssetBed}
+                  socketUrl={props.socketUrl || ""}
+                  config={config}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </Page>
