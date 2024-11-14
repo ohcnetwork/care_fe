@@ -774,17 +774,22 @@ export const DailyRounds = (props: any) => {
                   {
                     value: 0,
                     className: "text-danger-500",
-                    label: "Low",
+                    label: "Severe Hypoxemia",
                   },
                   {
-                    value: 90,
+                    value: 86,
+                    className: "text-danger-500",
+                    label: "Moderate Hypoxemia",
+                  },
+                  {
+                    value: 91,
+                    className: "text-warning-400",
+                    label: "Mild Hypoxemia",
+                  },
+                  {
+                    value: 95,
                     className: "text-primary-500",
                     label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "High",
                   },
                 ]}
               />
