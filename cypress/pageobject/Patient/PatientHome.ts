@@ -60,10 +60,6 @@ class PatientHome {
     );
   }
 
-  clickPatientAdvanceFilters() {
-    cy.get("#advanced-filter").click();
-  }
-
   selectPatientGenderfilter(gender: string) {
     cy.clickAndSelectOption("#gender-advancefilter", gender);
   }
