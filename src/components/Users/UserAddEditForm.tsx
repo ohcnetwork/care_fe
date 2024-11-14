@@ -107,7 +107,11 @@ const initialState = {
   errors: { ...initError },
 };
 
-const user_create_reducer = (state = initialState, action: any) => {
+type UserFormAction =
+  | { type: "set_form"; form: UserForm }
+  | { type: "set_state"; state?: typeof initialState };
+
+const user_create_reducer = (state = initialState, action: UserFormAction) => {
   switch (action.type) {
     case "set_form": {
       return {

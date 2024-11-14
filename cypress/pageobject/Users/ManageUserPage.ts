@@ -165,7 +165,8 @@ export class ManageUserPage {
   }
 
   verifyMoreDetailsPage() {
-    cy.wait(2000);
+    cy.intercept("GET", "**/api/v1/users/get_user/**").as("getUserDetails");
+    cy.wait("@getUserDetails");
     cy.get("#username").should("be.visible");
     cy.get("#role").should("be.visible");
     cy.get("#usermanagement_tab_nav").should("be.visible");
@@ -180,6 +181,10 @@ export class ManageUserPage {
 
   verifyDoctorQualification() {
     cy.get("input[name='qualification']").should("be.visible");
+  }
+
+  verifyDoctorQualificationDoesNotExist() {
+    cy.get("input[name='qualification']").should("not.exist");
   }
 
   verifyLinkedSkillsTabPage() {

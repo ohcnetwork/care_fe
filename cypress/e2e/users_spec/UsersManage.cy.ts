@@ -62,6 +62,7 @@ describe("Manage User", () => {
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedSkillTab();
     cy.wait(500);
+    manageUserPage.verifyDoctorQualificationDoesNotExist();
     manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
