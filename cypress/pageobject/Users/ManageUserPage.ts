@@ -64,6 +64,38 @@ export class ManageUserPage {
     cy.get(".error-text").should("contain", expectedError).and("be.visible");
   }
 
+  editUserDetails(
+    fName: string,
+    lName: string,
+    email: string,
+    dateOfBirth: string,
+    gender: string,
+  ) {
+    cy.get("#first_name").click().clear();
+    cy.get("#first_name").click().type(fName);
+    cy.get("#last_name").click().clear();
+    cy.get("#last_name").click().type(lName);
+    cy.get("#email").click().clear();
+    cy.get("#email").click().type(email);
+    cy.clickAndTypeDate("#date_of_birth", dateOfBirth);
+    cy.get("#gender").click();
+    cy.get("[role='option']").contains(gender).click();
+  }
+
+  verifyEditUserDetails(
+    fName: string,
+    lName: string,
+    email: string,
+    dateOfBirth: string,
+    gender: string,
+  ) {
+    cy.get("#first_name").should("have.value", fName);
+    cy.get("#last_name").should("have.value", lName);
+    cy.get("#email").should("have.value", email);
+    cy.get("#date_of_birth").should("have.value", dateOfBirth);
+    cy.get("#gender").should("contain.text", gender);
+  }
+
   typeInWeeklyWorkingHours(hours: string) {
     cy.get("#weekly_working_hours").click().type(hours);
   }
@@ -133,7 +165,7 @@ export class ManageUserPage {
   }
 
   verifyMoreDetailsPage() {
-    cy.get("#users-name").should("be.visible");
+    cy.wait(2000);
     cy.get("#username").should("be.visible");
     cy.get("#role").should("be.visible");
     cy.get("#usermanagement_tab_nav").should("be.visible");

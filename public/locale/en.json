@@ -615,6 +615,7 @@
   "duplicate_patient_record_rejection": "I confirm that the suspect / patient I want to create is not on the list.",
   "edit": "Edit",
   "edit_avatar": "Edit Avatar",
+  "edit_avatar_permission_error": "You do not have permissions to edit the avatar of this user",
   "edit_caution_note": "A new prescription will be added to the consultation with the edited details and the current prescription will be discontinued.",
   "edit_cover_photo": "Edit Cover Photo",
   "edit_history": "Edit History",

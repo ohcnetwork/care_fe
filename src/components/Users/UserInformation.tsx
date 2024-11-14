@@ -8,9 +8,12 @@ import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import UserAddEditForm from "@/components/Users/UserAddEditForm";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import { LocalStorageKeys } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
+import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
@@ -20,6 +23,7 @@ import { formatDisplayName, sleep } from "@/Utils/utils";
 export default function UserInformation({ username }: { username: string }) {
   const { t } = useTranslation();
   const [editAvatar, setEditAvatar] = useState(false);
+  const authUser = useAuthUser();
 
   const {
     data: userData,
@@ -101,6 +105,12 @@ export default function UserInformation({ username }: { username: string }) {
                 id="edit-cancel-profile-button"
                 className="border border-gray-200 bg-gray-50 text-black hover:bg-gray-100"
                 shadow={false}
+                disabled={!showAvatarEdit(authUser, userData)}
+                tooltip={
+                  !showAvatarEdit(authUser, userData)
+                    ? t("edit_avatar_permission_error")
+                    : undefined
+                }
               >
                 {t("change_avatar")}
               </ButtonV2>

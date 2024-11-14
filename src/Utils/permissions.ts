@@ -2,15 +2,24 @@ import { UserModel } from "@/components/Users/models";
 
 import { USER_TYPES, UserRole } from "@/common/constants";
 
-const checkIfStateOrDistrictAdminInSameDistrict = (
+const checkIfStateOrDistrictAdminInSameLocation = (
   authUser: UserModel,
   targetUser: UserModel,
 ) => {
+  const hasLocation = Boolean(
+    targetUser.state_object || targetUser.district_object,
+  );
+
+  const isStateAdminOfSameState =
+    authUser.user_type === "StateAdmin" &&
+    targetUser.state_object?.id === authUser.state;
+
+  const isDistrictAdminOfSameDistrict =
+    authUser.user_type === "DistrictAdmin" &&
+    targetUser.district_object?.id === authUser.district;
+
   return (
-    (authUser.user_type === "StateAdmin" &&
-      targetUser.state_object?.id === authUser.state) ||
-    (authUser.user_type === "DistrictAdmin" &&
-      targetUser.district_object?.id === authUser.district)
+    hasLocation && (isStateAdminOfSameState || isDistrictAdminOfSameDistrict)
   );
 };
 
@@ -22,7 +31,7 @@ export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
   )
     return false;
 
-  return checkIfStateOrDistrictAdminInSameDistrict(authUser, targetUser);
+  return checkIfStateOrDistrictAdminInSameLocation(authUser, targetUser);
 };
 
 export const showUserPasswordReset = (
@@ -38,9 +47,14 @@ export const showUserPasswordReset = (
   )
     return false;
 
-  return checkIfStateOrDistrictAdminInSameDistrict(authUser, targetUser);
+  return checkIfStateOrDistrictAdminInSameLocation(authUser, targetUser);
 };
 
+export const showAvatarEdit = (authUser: UserModel, targetUser: UserModel) => {
+  if (authUser.username === targetUser.username || authUser.is_superuser)
+    return true;
+  return false;
+};
 export const CameraFeedPermittedUserTypes: UserRole[] = [
   "DistrictAdmin",
   "StateAdmin",

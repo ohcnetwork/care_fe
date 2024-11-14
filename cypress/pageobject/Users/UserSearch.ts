@@ -23,7 +23,7 @@ export class UserPage {
   }
 
   checkUsernameText(username: string) {
-    cy.get(this.usernameText).should("contain.text", username);
+    cy.get(`${this.usernameText}-${username}`).should("contain.text", username);
   }
 
   checkUsernameBadgeVisibility(shouldBeVisible: boolean) {
@@ -102,24 +102,8 @@ export class UserPage {
   }
 
   verifyMultipleBadgesWithSameId(alreadylinkedusersviews: string[]) {
-    cy.get("#name").then(($elements) => {
-      const userViews = $elements
-        .map((_, el) => Cypress.$(el).text().trim())
-        .get();
-      let foundMatches = 0;
-
-      alreadylinkedusersviews.forEach((expectedContent) => {
-        const index = userViews.findIndex((actualContent) =>
-          actualContent.includes(expectedContent),
-        );
-        if (index !== -1) {
-          userViews.splice(index, 1); // Remove the matched element
-          foundMatches++;
-        }
-        if (foundMatches === alreadylinkedusersviews.length) {
-          return false; // Break the loop if all matches are found
-        }
-      });
+    alreadylinkedusersviews.forEach((username) => {
+      cy.get(`#name-${username}`).scrollIntoView().should("be.visible");
     });
   }
 

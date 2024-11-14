@@ -1,3 +1,4 @@
+import { TFunction } from "i18next";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -80,7 +81,7 @@ const getNameAndStatusCard = (
       <div className="flex flex-row justify-between gap-x-3">
         <div className="flex flex-col">
           <div className="flex items-center gap-x-3">
-            <h1 id="name" className="text-base font-bold">
+            <h1 id={`name-${user.username}`} className="text-base font-bold">
               {formatName(user)}
             </h1>
             <div
@@ -92,7 +93,10 @@ const getNameAndStatusCard = (
               <UserStatusIndicator user={user} />
             </div>
           </div>
-          <span className="text-sm text-gray-500" id="username">
+          <span
+            className="text-sm text-gray-500"
+            id={`username-${user.username}`}
+          >
             {user.username}
           </span>
         </div>
@@ -105,6 +109,26 @@ const getNameAndStatusCard = (
     </div>
   );
 };
+
+const getDistrict = (user: UserModel | UserAssignedModel, t: TFunction) => {
+  const district =
+    "district_object" in user && user.district_object
+      ? user.district_object?.name
+      : "district" in user && user.district
+        ? user.district
+        : undefined;
+
+  if (!district) return <></>;
+  return (
+    <div className="text-sm">
+      <div className="text-gray-500">{t("district")}</div>
+      <div id="district" className="font-medium">
+        {district}
+      </div>
+    </div>
+  );
+};
+
 export const UserStatusIndicator = ({
   user,
   className,
@@ -187,22 +211,7 @@ const UserCard = ({ user }: { user: UserModel | UserAssignedModel }) => {
                     {user.home_facility_object?.name || t("no_home_facility")}
                   </div>
                 </div>
-                {"district_object" in user && user.district_object && (
-                  <div className="text-sm">
-                    <div className="text-gray-500">{t("district")}</div>
-                    <div id="district" className="font-medium">
-                      {user.district_object.name}
-                    </div>
-                  </div>
-                )}
-                {"district" in user && user.district && (
-                  <div className="text-sm">
-                    <div className="text-gray-500">{t("district")}</div>
-                    <div id="district" className="font-medium">
-                      {user.district}
-                    </div>
-                  </div>
-                )}
+                {getDistrict(user, t)}
                 <div className="text-sm">
                   <div className="text-gray-500">
                     {t("average_weekly_working_hours")}
@@ -276,10 +285,13 @@ const UserListRow = ({
             className="h-10 w-10 text-lg"
           />
           <div className="flex flex-col">
-            <h1 id="name" className="text-sm font-medium">
+            <h1 id={`name-${user.username}`} className="text-sm font-medium">
               {formatName(user)}
             </h1>
-            <span id="username" className="text-xs text-gray-500">
+            <span
+              id={`username-${user.username}`}
+              className="text-xs text-gray-500"
+            >
               @{user.username}
             </span>
           </div>

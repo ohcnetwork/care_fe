@@ -57,9 +57,9 @@ export default function UserBanner({ userData }: { userData: UserModel }) {
               value={userData.district_object.name}
             />
           )}
-          <UserDetails id="home_facility" title="Home Facility">
+          <UserDetails id="home-facility" title={t("home_facility")}>
             <span className="block font-semibold">
-              {userData.home_facility_object?.name || "No Home Facility"}
+              {userData.home_facility_object?.name || t("no_home_facility")}
             </span>
           </UserDetails>
           {["Doctor", "Nurse"].includes(userData.user_type) && (

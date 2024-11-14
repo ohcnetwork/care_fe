@@ -32,6 +32,28 @@ describe("Manage User", () => {
     cy.awaitUrl("/users");
   });
 
+  it("edit a user and verify its reflection in profile", () => {
+    userPage.typeInSearchInput(usernameforworkinghour);
+    userPage.checkUsernameText(usernameforworkinghour);
+    manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.editUserDetails(
+      "Devo",
+      "Districto",
+      "dev@test.com",
+      "01081999",
+      "Female",
+    );
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyEditUserDetails(
+      "Devo",
+      "Districto",
+      "dev@test.com",
+      "01/08/1999",
+      "Female",
+    );
+  });
+
   it("linking skills for users and verify its reflection in profile", () => {
     // select the district user and select one skill link and verify its profile reflection
     userPage.typeInSearchInput(usernameforworkinghour);

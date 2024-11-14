@@ -28,7 +28,7 @@ import {
   ValidateQualification,
 } from "@/components/Users/UserFormValidations";
 import { GetUserTypes } from "@/components/Users/UserListAndCard";
-import { GenderType } from "@/components/Users/models";
+import { GenderType, UserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -198,15 +198,18 @@ const UserAddEditForm = (props: UserProps) => {
     },
   });
 
-  const handleEditSubmit = async (formData: UserForm) => {
-    if (!username) return;
-    const data = {
+  const prepData = (formData: UserForm, isCreate: boolean = false) => {
+    const phoneNumber = parsePhoneNumber(formData.phone_number) ?? "";
+    const altPhoneNumber = formData.phone_number_is_whatsapp
+      ? phoneNumber
+      : (parsePhoneNumber(formData.alt_phone_number) ?? "");
+    let baseData: Partial<UserForm> = {
       first_name: formData.first_name,
       last_name: formData.last_name,
       email: formData.email,
       video_connect_link: formData.video_connect_link,
-      phone_number: parsePhoneNumber(formData.phone_number) ?? "",
-      alt_phone_number: parsePhoneNumber(formData.alt_phone_number) ?? "",
+      phone_number: phoneNumber,
+      alt_phone_number: altPhoneNumber,
       gender: formData.gender as GenderType,
       date_of_birth: dateQueryString(formData.date_of_birth),
       qualification:
@@ -231,11 +234,32 @@ const UserAddEditForm = (props: UserProps) => {
       weekly_working_hours:
         formData.weekly_working_hours && formData.weekly_working_hours !== ""
           ? formData.weekly_working_hours
-          : null,
+          : undefined,
     };
+
+    if (isCreate) {
+      baseData = {
+        ...baseData,
+        user_type: formData.user_type,
+        password: formData.password,
+        facilities: formData.facilities ? formData.facilities : undefined,
+        home_facility: formData.home_facility ?? undefined,
+        username: formData.username,
+        state: formData.state,
+        district: formData.district,
+        local_body: showLocalbody ? formData.local_body : undefined,
+      };
+    }
+
+    return baseData;
+  };
+
+  const handleEditSubmit = async (formData: UserForm) => {
+    if (!username) return;
+    const data = prepData(formData);
     const { res, error } = await request(routes.partialUpdateUser, {
       pathParams: { username },
-      body: data,
+      body: data as Partial<UserModel>,
     });
     if (res?.ok) {
       Notification.Success({
@@ -654,52 +678,7 @@ const UserAddEditForm = (props: UserProps) => {
 
   const handleSubmit = async (formData: UserForm) => {
     setIsLoading(true);
-    const data = {
-      user_type: formData.user_type,
-      gender: formData.gender,
-      password: formData.password,
-      facilities: formData.facilities ? formData.facilities : undefined,
-      home_facility: formData.home_facility ?? undefined,
-      username: formData.username,
-      first_name: formData.first_name ? formData.first_name : undefined,
-      last_name: formData.last_name ? formData.last_name : undefined,
-      email: formData.email,
-      state: formData.state,
-      district: formData.district,
-      local_body: showLocalbody ? formData.local_body : null,
-      phone_number:
-        formData.phone_number === "+91"
-          ? ""
-          : parsePhoneNumber(formData.phone_number),
-      alt_phone_number:
-        parsePhoneNumber(
-          formData.phone_number_is_whatsapp
-            ? formData.phone_number === "+91"
-              ? ""
-              : formData.phone_number
-            : formData.alt_phone_number === "+91"
-              ? ""
-              : formData.alt_phone_number,
-        ) ?? "",
-      date_of_birth: dateQueryString(formData.date_of_birth),
-      qualification:
-        formData.user_type === "Doctor" || formData.user_type == "Nurse"
-          ? formData.qualification
-          : undefined,
-      doctor_experience_commenced_on:
-        formData.user_type === "Doctor"
-          ? dayjs()
-              .subtract(
-                parseInt(formData.doctor_experience_commenced_on ?? "0"),
-                "years",
-              )
-              .format("YYYY-MM-DD")
-          : undefined,
-      doctor_medical_council_registration:
-        formData.user_type === "Doctor"
-          ? formData.doctor_medical_council_registration
-          : undefined,
-    };
+    const data = prepData(formData, true);
 
     const { res, error } = await request(routes.addUser, {
       body: data,

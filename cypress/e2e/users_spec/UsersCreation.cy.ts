@@ -164,7 +164,10 @@ describe("User Creation", () => {
     userCreationPage.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
-    userCreationPage.verifyElementContainsText("name", "cypress test");
+    userCreationPage.verifyElementContainsText(
+      `name-${username}`,
+      "cypress test",
+    );
     userCreationPage.verifyElementContainsText("role", "Doctor");
     userCreationPage.verifyElementContainsText("district", "Ernakulam");
     userCreationPage.verifyElementContainsText(
