@@ -1,3 +1,4 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 import { v4 as uuidv4 } from "uuid";
 
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
@@ -65,13 +66,13 @@ describe("Asset Tab", () => {
       "ONVIF Camera",
       "Camera Loc",
     );
-    assetFilters.clickadvancefilter();
+    advanceFilters.clickAdvancedFiltersButton();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
     assetFilters.assertFacilityText("Dummy Facility 40");
     assetFilters.assertAssetClassText("ONVIF");
     assetFilters.assertStatusText("ACTIVE");
     assetFilters.assertLocationText("Camera Loc");
-    assetFilters.clickadvancefilter();
+    advanceFilters.clickAdvancedFiltersButton();
     assetFilters.clearFilters();
   });
 
