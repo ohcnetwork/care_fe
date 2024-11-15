@@ -81,32 +81,22 @@ const TransferPatientDialog = (props: Props) => {
     });
   };
 
-  const handleOnBlur = (e: any) => {
-    if (state.form.year_of_birth > maxYear) {
-      dispatch({
-        type: "set_error",
-        errors: {
-          ...state.errors,
-          [e.target.name]: `Cannot be greater than ${maxYear}`,
-        },
-      });
-    } else if (state.form.year_of_birth < 1900) {
-      dispatch({
-        type: "set_error",
-        errors: {
-          ...state.errors,
-          [e.target.name]: `Cannot be smaller than 1900`,
-        },
-      });
-    } else {
-      dispatch({
-        type: "set_error",
-        errors: {
-          ...state.errors,
-          [e.target.name]: "",
-        },
-      });
+  const handleOnBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const yearValue = Number(state.form.year_of_birth);
+    if (!state.form.year_of_birth) return;
+    let errorMessage = "";
+    if (yearValue > maxYear) {
+      errorMessage = `Cannot be greater than ${maxYear}`;
+    } else if (yearValue < 1900) {
+      errorMessage = `Cannot be smaller than 1900`;
     }
+    dispatch({
+      type: "set_error",
+      errors: {
+        ...state.errors,
+        [e.target.name]: errorMessage,
+      },
+    });
   };
 
   const validateForm = () => {
