@@ -1,10 +1,20 @@
+/// <reference types="cypress" />
+
 class FacilityManage {
   clickCoverImage() {
     cy.get("#facility-coverimage").click();
   }
 
+  clickCancelButton() {
+    cy.get("#cancel").scrollIntoView().should("be.visible").click();
+  }
+
+  verifyCoverImageModalClosed() {
+    cy.get("#upload-cover-image").should("not.exist");
+  }
+
   verifyUploadButtonVisible() {
-    cy.get("#upload-cover-image").should("be.visible");
+    cy.get("#upload-cover-image").scrollIntoView().should("be.visible");
   }
 
   uploadCoverImage(fileName: string) {
@@ -14,8 +24,16 @@ class FacilityManage {
   }
 
   clickSaveCoverImage() {
-    cy.get("#save-cover-image").scrollIntoView();
-    cy.get("#save-cover-image").click();
+    cy.intercept("POST", "**/api/v1/facility/**").as("uploadCoverImage");
+    cy.get("#save-cover-image").scrollIntoView().click();
+    cy.wait("@uploadCoverImage").its("response.statusCode").should("eq", 200);
+  }
+
+  clickDeleteCoverImage() {
+    cy.intercept("DELETE", "**/api/v1/facility/**").as("deleteCoverImage");
+    cy.get("#delete-cover-image").scrollIntoView();
+    cy.get("#delete-cover-image").click();
+    cy.wait("@deleteCoverImage").its("response.statusCode").should("eq", 204);
   }
 
   verifyTotalDoctorCapacity(expectedCapacity: string) {
