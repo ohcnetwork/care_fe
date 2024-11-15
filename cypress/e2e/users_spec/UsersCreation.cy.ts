@@ -14,8 +14,8 @@ describe("User Creation", () => {
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
-  const phoneNumber = generatePhoneNumber();
-  const emergencyPhoneNumber = generateEmergencyPhoneNumber();
+  const phone_number = generatePhoneNumber();
+  const emergency_phone_number = generateEmergencyPhoneNumber();
   const fillFacilityName = "Dummy Facility 40";
   const makeId = (length: number) => {
     let result = "";
@@ -97,9 +97,9 @@ describe("User Creation", () => {
     userCreationPage.typeLastName(lastName);
     userCreationPage.selectGender(gender);
     userCreationPage.clearPhoneNumber();
-    userCreationPage.typePhoneNumber(phoneNumber);
+    userCreationPage.typePhoneNumber(phone_number);
     userCreationPage.clearAltPhoneNumber();
-    userCreationPage.typeAltPhoneNumber(emergencyPhoneNumber);
+    userCreationPage.typeAltPhoneNumber(emergency_phone_number);
     userCreationPage.clearEmail();
     userCreationPage.typeEmail(email);
     userCreationPage.clearWeeklyWorkingHours();
@@ -107,10 +107,10 @@ describe("User Creation", () => {
     userCreationPage.typeDateOfBirth(dob);
     cy.submitButton(updateBtn);
     cy.verifyContentPresence("#contactno-profile-details", [
-      "+91" + phoneNumber,
+      "+91" + phone_number,
     ]);
     cy.verifyContentPresence("#whatsapp-profile-details", [
-      "+91" + emergencyPhoneNumber,
+      "+91" + emergency_phone_number,
     ]);
     cy.verifyContentPresence("#firstname-profile-details", [firstName]);
     cy.verifyContentPresence("#lastname-profile-details", [lastName]);
@@ -141,7 +141,7 @@ describe("User Creation", () => {
     userCreationPage.typeUserName(username);
     userCreationPage.typePassword(password);
     userCreationPage.selectHomeFacility(homeFacility);
-    userCreationPage.typeNewUserPhoneNumber(phoneNumber);
+    userCreationPage.typeNewUserPhoneNumber(phone_number);
     userCreationPage.typeDateOfBirth(newUserDob);
     userCreationPage.selectUserType(role);
     userCreationPage.typeConfirmPassword(password);
@@ -170,7 +170,7 @@ describe("User Creation", () => {
   it("create new user form throwing mandatory field error", () => {
     userCreationPage.clickAddUserButton();
     cy.submitButton(saveBtn);
-    cy.wait(2000);
+    cy.get(".error-text", { timeout: 10000 }).should("be.visible");
     userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
   });
 
