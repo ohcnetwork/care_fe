@@ -749,6 +749,31 @@ export const DailyRounds = (props: any) => {
                   {
                     value: 0,
                     className: "text-danger-500",
+                    label: "Bradypnea",
+                  },
+                  {
+                    value: 12,
+                    className: "text-primary-500",
+                    label: "Normal",
+                  },
+                  {
+                    value: 16,
+                    className: "text-danger-500",
+                    label: "Tachypnea",
+                  },
+                ]}
+              />
+
+              <TextFormField
+                {...field("ventilator_spo2")}
+                labelSuffix="%"
+                type="number"
+                min={0}
+                max={100}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
                     label: t("SPO2_LEVEL_SEVERE_HYPOXEMIA"),
                   },
                   {
@@ -765,36 +790,6 @@ export const DailyRounds = (props: any) => {
                     value: 95,
                     className: "text-primary-500",
                     label: t("SPO2_LEVEL_NORMAL"),
-                  },
-                ]}
-              />
-
-              <TextFormField
-                {...field("ventilator_spo2")}
-                labelSuffix="%"
-                type="number"
-                min={0}
-                max={100}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Severe Hypoxemia",
-                  },
-                  {
-                    value: 86,
-                    className: "text-danger-500",
-                    label: "Moderate Hypoxemia",
-                  },
-                  {
-                    value: 91,
-                    className: "text-warning-400",
-                    label: "Mild Hypoxemia",
-                  },
-                  {
-                    value: 95,
-                    className: "text-primary-500",
-                    label: "Normal",
                   },
                 ]}
               />
