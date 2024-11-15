@@ -167,13 +167,17 @@ export default defineConfig(({ mode }) => {
       },
     },
     optimizeDeps: {
-      include: getPluginDependencies(),
+      include: [
+        ...getPluginDependencies(),
+        "@radix-ui/react-separator",
+      ],
     },
     build: {
       outDir: "build",
       assetsDir: "bundle",
       sourcemap: true,
       rollupOptions: {
+        external: ["@radix-ui/react-separator"],
         output: {
           manualChunks(id, { getModuleInfo }) {
             if (id.includes("node_modules")) {
