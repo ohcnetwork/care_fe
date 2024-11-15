@@ -3,6 +3,10 @@ import { navigate } from "raviger";
 
 import Card from "@/CAREUI/display/Card";
 
+import { Badge } from "@/components/ui/badge";
+import { CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -285,142 +289,188 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         )
       }
     >
-      <Card>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <span className="font-semibold capitalize leading-relaxed">
-              Status:{" "}
-            </span>
-            {sampleDetails?.status}
-          </div>
-          <div>
-            <span className="font-semibold capitalize leading-relaxed">
-              Result:{" "}
-            </span>
-            {sampleDetails?.result}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">Patient: </span>
-            {sampleDetails?.patient_name}
-          </div>
-          {sampleDetails?.facility_object && (
-            <div>
-              <span className="font-semibold leading-relaxed">Facility: </span>
-              {sampleDetails?.facility_object.name}
+      <Card className="my-2">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="space-y-1 flex gap-2 items-center">
+              <div className="text-sm text-muted-foreground">Status:</div>
+              <Badge variant="outline" className="font-semibold">
+                {sampleDetails?.status}
+              </Badge>
             </div>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">Tested on: </span>
-            {sampleDetails?.date_of_result
-              ? formatDateTime(sampleDetails.date_of_result)
-              : "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">Result on: </span>
-            {sampleDetails?.date_of_result
-              ? formatDateTime(sampleDetails.date_of_result)
-              : "-"}
-          </div>
-          {sampleDetails?.fast_track && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                Fast track testing reason:{" "}
-              </span>
-              {sampleDetails.fast_track}
+            <div className="space-y-1 sm:text-right flex gap-2 items-center ">
+              <div className="text-sm text-muted-foreground">Result:</div>
+              <Badge variant="secondary" className="font-semibold">
+                {sampleDetails?.result}
+              </Badge>
             </div>
-          )}
-          {sampleDetails?.doctor_name && (
-            <div className="capitalize md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                Doctor&apos;s Name:{" "}
-              </span>
-              {startCase(camelCase(sampleDetails.doctor_name))}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">Patient:</div>
+              <div className="font-medium">{sampleDetails?.patient_name}</div>
             </div>
-          )}
-          {sampleDetails?.diagnosis && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">Diagnosis: </span>
-              {sampleDetails.diagnosis}
-            </div>
-          )}
-          {sampleDetails?.diff_diagnosis && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                Differential diagnosis:{" "}
-              </span>
-              {sampleDetails?.diff_diagnosis}
-            </div>
-          )}
-          {sampleDetails?.etiology_identified && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                Etiology identified:{" "}
-              </span>
-              {sampleDetails.etiology_identified}
-            </div>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Is Atypical presentation{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.is_atypical_presentation)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Is unusual course{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.is_unusual_course)}
-          </div>
-          {sampleDetails?.atypical_presentation && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                Atypical presentation details:{" "}
-              </span>
-              {sampleDetails.atypical_presentation}
-            </div>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              SARI - Severe Acute Respiratory illness{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.has_sari)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              ARI - Acute Respiratory illness{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.has_ari)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Contact with confirmed carrier{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.patient_has_confirmed_contact)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Contact with suspected carrier{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.patient_has_suspected_contact)}
-          </div>
-          {sampleDetails?.patient_travel_history &&
-            sampleDetails.patient_travel_history.length !== 0 && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Countries travelled:{" "}
-                </span>
-                {sampleDetails.patient_travel_history}
+            {sampleDetails?.facility_object && (
+              <div className="space-y-1">
+                <div className="text-sm text-muted-foreground">Facility:</div>
+                <div className="font-medium">
+                  {sampleDetails?.facility_object.name}
+                </div>
               </div>
             )}
-          {sampleDetails?.sample_type && (
-            <div className="md:col-span-2">
-              <span className="font-semibold capitalize leading-relaxed">
-                Sample Type:{" "}
-              </span>
-              {startCase(camelCase(sampleDetails.sample_type))}
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">Tested on:</div>
+              <div className="font-medium">
+                {sampleDetails?.date_of_result
+                  ? formatDateTime(sampleDetails.date_of_result)
+                  : "-"}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">Result on:</div>
+              <div className="font-medium">
+                {sampleDetails?.date_of_result
+                  ? formatDateTime(sampleDetails.date_of_result)
+                  : "-"}
+              </div>
+            </div>
+          </div>
+
+          {sampleDetails?.doctor_name && (
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
+                Doctor&apos;s Name:
+              </div>
+              <div className="font-medium">
+                {startCase(camelCase(sampleDetails.doctor_name))}
+              </div>
             </div>
           )}
-        </div>
+          <Separator />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sampleDetails?.fast_track && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">
+                  Fast track testing reason:{" "}
+                </div>
+                <Badge variant={"secondary"}>{sampleDetails.fast_track}</Badge>
+              </div>
+            )}
+            {sampleDetails?.diagnosis && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">Diagnosis: </div>
+                <Badge variant={"secondary"}> {sampleDetails.diagnosis}</Badge>
+              </div>
+            )}
+            {sampleDetails?.diff_diagnosis && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">
+                  Differential diagnosis:{" "}
+                </div>
+                <Badge variant={"secondary"}>
+                  {" "}
+                  {sampleDetails?.diff_diagnosis}
+                </Badge>
+              </div>
+            )}
+            {sampleDetails?.etiology_identified && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">Etiology identified: </div>
+                <Badge variant={"secondary"}>
+                  {" "}
+                  {sampleDetails.etiology_identified}
+                </Badge>
+              </div>
+            )}
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                Is Atypical presentation{" "}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.is_atypical_presentation)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">Is unusual course </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.is_unusual_course)}
+              </Badge>
+            </div>
+            {sampleDetails?.atypical_presentation && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">
+                  Atypical presentation details:{" "}
+                </div>
+                <Badge variant={"secondary"}>
+                  {" "}
+                  {sampleDetails.atypical_presentation}
+                </Badge>
+              </div>
+            )}
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                SARI - Severe Acute Respiratory illness{" "}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.has_sari)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                ARI - Acute Respiratory illness{" "}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.has_ari)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                Contact with confirmed carrier{" "}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.patient_has_confirmed_contact)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                Contact with suspected carrier{" "}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.patient_has_suspected_contact)}
+              </Badge>
+            </div>
+            {sampleDetails?.patient_travel_history &&
+              sampleDetails.patient_travel_history.length !== 0 && (
+                <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                  <div className="font-medium text-sm">
+                    Countries travelled:{" "}
+                  </div>
+                  <Badge variant={"secondary"}>
+                    {" "}
+                    {sampleDetails.patient_travel_history}
+                  </Badge>
+                </div>
+              )}
+          </div>
+          <Separator />
+          {sampleDetails?.sample_type && (
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">Sample Type:</div>
+              <div className="font-medium">
+                {" "}
+                {startCase(camelCase(sampleDetails.sample_type))}
+              </div>
+            </div>
+          )}
+        </CardContent>
       </Card>
 
       <div>
