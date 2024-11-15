@@ -25,6 +25,6 @@
       "@careConfig": ["./care.config.ts"]
     }
   },
-  "include": ["src/**/*", "apps/**/*", "care.config.ts"],
+  "include": ["src/**/*", "apps/**/*", "care.config.ts", "src/@types" ],
   "exclude": ["src/**/*.gen.tsx"]
 }
