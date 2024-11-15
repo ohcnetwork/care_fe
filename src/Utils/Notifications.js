@@ -69,6 +69,11 @@ export const Success = ({ msg }) => {
   notify(msg, "success");
 };
 
+/*Info message Handler*/
+export const Info = ({ msg }) => {
+  notify(msg, "info");
+};
+
 /** Error message handler */
 export const Error = ({ msg }) => {
   notify(msg, "error");
