@@ -1,6 +1,7 @@
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
@@ -55,7 +56,7 @@ export default function ListView() {
     }
 
     return data.map((resource: ResourceModel, i) => (
-      <div key={i} className="w-full border-b-2 border-gray-100 col-span-6">
+      <div key={i} className="w-full border-b-2 border-gray-200 col-span-6">
         <div className="border-3  flex grid w-full gap-1 overflow-hidden bg-white p-4 shadow sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-5">
           <div className="col-span-1 px-3 text-left">
             <div className="text-sm font-bold capitalize">{resource.title}</div>
@@ -85,28 +86,40 @@ export default function ListView() {
               {resource.status === "TRANSPORTATION TO BE ARRANGED" ? (
                 <dt
                   title={t("resource_status")}
-                  className="w-3/4 mt-1 h-fit flex h-5 shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4  overflow-hidden whitespace-nowrap text-ellipsis truncate bg-gray-200"
+                  className="w-3/4 mt-1 h-fit flex h-5 shrink-0 items-center px-2 py-0.5 text-xs font-medium leading-4  overflow-hidden whitespace-nowrap text-ellipsis truncate"
                 >
-                  <CareIcon icon="l-truck" className="mr-2" />
-                  <dd className="text-sky-600 truncate">{resource.status}</dd>
+                  <Chip
+                    size="small"
+                    variant="secondary"
+                    startIcon="l-truck"
+                    text={t(`${resource.status}`)}
+                    className="text-lg font-bold text-sky-600 truncate bg-gray-300 rounded-full"
+                  />
                 </dt>
               ) : (
                 <dt
                   title={t("resource_status")}
-                  className={`w-fit mt-1 h-fit flex h-5 shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4  ${
-                    resource.status === "APPROVED"
-                      ? "bg-sky-200"
-                      : "bg-yellow-200 text-yellow-500"
-                  }`}
+                  className="w-fit mt-1 h-fit flex h-5 shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4"
                 >
-                  <CareIcon icon="l-truck" className="mr-2" />
-                  <dd className="text-sky-600">{resource.status}</dd>
+                  <Chip
+                    size="small"
+                    variant={
+                      resource.status === "APPROVED" ? "primary" : "secondary"
+                    }
+                    startIcon="l-truck"
+                    text={t(`${resource.status}`)}
+                    className={`text-lg font-bold rounded-full ${
+                      resource.status === "APPROVED"
+                        ? "bg-sky-200"
+                        : "bg-yellow-200 "
+                    }`}
+                  />
                 </dt>
               )}
 
               <div>
                 {resource.emergency && (
-                  <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
+                  <span className="mt-1.5 inline-block shrink-0 rounded-full bg-red-100 px-2 py-1 text-xs font-medium leading-4 text-red-800">
                     {t("emergency")}
                   </span>
                 )}
