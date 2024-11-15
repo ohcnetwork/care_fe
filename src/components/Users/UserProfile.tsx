@@ -36,7 +36,6 @@ import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
 import {
-  classNames,
   dateQueryString,
   formatDate,
   formatDisplayName,
@@ -371,16 +370,24 @@ export default function UserProfile() {
     setDirty(true);
   };
 
-  const getDate = (value: any) =>
+  const getDate = (value: string | Date | undefined) =>
     value && dayjs(value).isValid() && dayjs(value).toDate();
+
+  interface FormState {
+    [key: string]: string | number | boolean | undefined;
+  }
+
+  interface ErrorState {
+    [key: string]: string | undefined;
+  }
 
   const fieldProps = (name: string) => {
     return {
       name,
       id: name,
-      value: (states.form as any)[name],
+      value: (states.form as FormState)[name],
       onChange: handleFieldChange,
-      error: (states.errors as any)[name],
+      error: (states.errors as ErrorState)[name],
     };
   };
 
@@ -452,6 +459,9 @@ export default function UserProfile() {
       setUpdateStatus({
         isUpdateAvailable: true,
         isChecking: false,
+      });
+      Notification.Info({
+        msg: "A new update is available. Click 'Update' to proceed.",
       });
     } else {
       setUpdateStatus({
@@ -1006,9 +1016,9 @@ export default function UserProfile() {
             </p>
           </div>
         </div>
-        {updateStatus.isUpdateAvailable && (
+        {updateStatus.isUpdateAvailable && !updateStatus.isChecking && (
           <UpdatableApp silentlyAutoUpdate={false}>
-            <ButtonV2 disabled={true}>
+            <ButtonV2 onClick={checkUpdates} disabled={false}>
               <div className="flex items-center gap-4">
                 <CareIcon icon="l-exclamation" className="text-2xl" />
                 {t("update_available")}
@@ -1016,21 +1026,23 @@ export default function UserProfile() {
             </ButtonV2>
           </UpdatableApp>
         )}
+        {/* Show "Check for Update" Button if update is not available and check is not in progress */}
         <div className="mt-5 md:col-span-2 md:mt-0">
-          {!updateStatus.isUpdateAvailable && (
-            <ButtonV2 disabled={updateStatus.isChecking} onClick={checkUpdates}>
-              {" "}
+          {!updateStatus.isUpdateAvailable && !updateStatus.isChecking && (
+            <ButtonV2 onClick={checkUpdates}>
               <div className="flex items-center gap-4">
-                <CareIcon
-                  icon="l-sync"
-                  className={classNames(
-                    "text-2xl",
-                    updateStatus.isChecking && "animate-spin",
-                  )}
-                />
-                {updateStatus.isChecking
-                  ? t("checking_for_update")
-                  : t("check_for_update")}
+                <CareIcon icon="l-sync" className="text-2xl" />
+                {t("check_for_update")}
+              </div>
+            </ButtonV2>
+          )}
+
+          {/* Show "Checking for Update" Button when the update check is in progress */}
+          {updateStatus.isChecking && (
+            <ButtonV2 disabled={true}>
+              <div className="flex items-center gap-4">
+                <CareIcon icon="l-sync" className="text-2xl animate-spin" />
+                {t("checking_for_update")}
               </div>
             </ButtonV2>
           )}

@@ -87,3 +87,7 @@ export const BadRequest = ({ errs }) => {
     notifyError(errs);
   }
 };
+
+export function Info(_arg0) {
+  throw new Error("Function not implemented.");
+}
