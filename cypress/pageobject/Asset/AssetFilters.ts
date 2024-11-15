@@ -49,9 +49,6 @@ export class AssetFilters {
       expect(allEmpty).to.be.true;
     });
   }
-  clickadvancefilter() {
-    cy.get("#advanced-filter").click();
-  }
   clickslideoverbackbutton() {
     cy.get("#close-slide-over").click();
   }

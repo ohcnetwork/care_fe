@@ -1,3 +1,5 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
@@ -55,10 +57,10 @@ describe("Manage User", () => {
 
   it("linking skills for a doctor users and verify its reflection in doctor connect", () => {
     // select a doctor user and link and unlink same skill twice and verify the badge is only shown once in doctor connect
-    userPage.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     userPage.typeInFirstName(firstNameUserSkill);
     userPage.typeInLastName(lastNameUserSkill);
-    userPage.applyFilter();
+    advanceFilters.applySelectedFilter();
     userPage.checkUsernameText(usernameToLinkSkill);
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.selectSkillFromDropdown(linkedskill);
