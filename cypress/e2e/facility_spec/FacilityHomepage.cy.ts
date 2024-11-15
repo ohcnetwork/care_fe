@@ -1,4 +1,6 @@
 // FacilityCreation
+import { PatientData, PatientPage } from "pageobject/Patient/PatientCreation";
+
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
@@ -16,6 +18,7 @@ describe("Facility Homepage Function", () => {
   const manageUserPage = new ManageUserPage();
   const userPage = new UserPage();
   const assetPagination = new AssetPagination();
+  const patientPage = new PatientPage();
   const facilitiesAlias = "downloadFacilitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
@@ -27,6 +30,31 @@ describe("Facility Homepage Function", () => {
   const facilityType = "Private Hospital";
   const notificationErrorMsg = "Message cannot be empty";
   const notificationMessage = "Test Notification";
+  const facilityWithNoAvailableBeds = "Dummy Facility 12";
+  const newPatientData: PatientData = {
+    facility: facilityWithNoAvailableBeds,
+    phoneNumber: "9898464555",
+    isEmergencyNumber: true,
+    age: "20",
+    name: "Dummy Patient 42",
+    gender: "Male",
+    address: "42 is the answer to everything",
+    pincode: "682001",
+    state: "Kerala",
+    district: "Ernakulam",
+    localBody: "Aluva",
+    ward: "4",
+    occupation: "Student",
+    socioeconomicStatus: "MIDDLE_CLASS",
+    domesticHealthcareSupport: "FAMILY_MEMBER",
+    medicalHistory: {
+      presentHealth: "Good",
+      ongoingMedication: "None",
+      conditions: [{ index: 2, condition: "Diabetes" }],
+      allergies: "None",
+    },
+    bloodGroup: "O+",
+  };
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -181,6 +209,23 @@ describe("Facility Homepage Function", () => {
     facilityNotify.closeNotificationSlide();
     loginPage.ensureLoggedIn();
     loginPage.clickSignOutBtn();
+  });
+
+  it("Verify the bed capacity badge reflection", () => {
+    manageUserPage.typeFacilitySearch(facilityWithNoAvailableBeds);
+    facilityPage.verifyFacilityBadgeContent(facilityWithNoAvailableBeds);
+    manageUserPage.assertFacilityInCard(facilityWithNoAvailableBeds);
+    facilityHome.verifyOccupancyBadgeVisibility();
+    manageUserPage.assertFacilityBadgeContent("0", "0");
+    // create a new patient in the facility
+    cy.awaitUrl("/patients");
+    patientPage.createPatientWithData(newPatientData);
+    cy.awaitUrl("/facility");
+    manageUserPage.typeFacilitySearch(facilityWithNoAvailableBeds);
+    facilityPage.verifyFacilityBadgeContent(facilityWithNoAvailableBeds);
+    facilityHome.verifyOccupancyBadgeVisibility();
+    manageUserPage.assertFacilityBadgeContent("1", "0");
+    manageUserPage.assertFacilityBadgeBackgroundColor("rgb(239, 68, 68)");
   });
 
   afterEach(() => {
