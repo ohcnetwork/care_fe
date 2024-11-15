@@ -56,8 +56,11 @@ export default function ListView() {
     }
 
     return data.map((resource: ResourceModel, i) => (
-      <div key={i} className="w-full border-b-2 border-gray-200 col-span-6">
-        <div className="border-3  flex grid w-full gap-1 overflow-hidden bg-white p-4 shadow sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-5">
+      <div
+        key={i}
+        className="w-full border border-b-2 border-gray-200  col-span-6"
+      >
+        <div className=" flex grid w-full gap-1 overflow-hidden bg-white p-4    sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-5">
           <div className="col-span-1 px-3 text-left">
             <div className="text-sm font-bold capitalize">{resource.title}</div>
           </div>
