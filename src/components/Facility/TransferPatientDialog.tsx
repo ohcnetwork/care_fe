@@ -75,23 +75,38 @@ const TransferPatientDialog = (props: Props) => {
   const maxYear = new Date().getFullYear();
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
-    if (
-      e.name === "year_of_birth" &&
-      parseInt((e.value as string) || "0") > maxYear
-    ) {
-      dispatch({
-        type: "set_error",
-        errors: {
-          ...state.errors,
-          [e.name]: `Cannot be greater than ${maxYear}`,
-        },
-      });
-      return;
-    }
     dispatch({
       type: "set_form",
       form: { ...state.form, [e.name]: e.value },
     });
+  };
+
+  const handleOnBlur = (e: any) => {
+    if (state.form.year_of_birth > maxYear) {
+      dispatch({
+        type: "set_error",
+        errors: {
+          ...state.errors,
+          [e.target.name]: `Cannot be greater than ${maxYear}`,
+        },
+      });
+    } else if (state.form.year_of_birth < 1900) {
+      dispatch({
+        type: "set_error",
+        errors: {
+          ...state.errors,
+          [e.target.name]: `Cannot be smaller than 1900`,
+        },
+      });
+    } else {
+      dispatch({
+        type: "set_error",
+        errors: {
+          ...state.errors,
+          [e.target.name]: "",
+        },
+      });
+    }
   };
 
   const validateForm = () => {
@@ -113,6 +128,11 @@ const TransferPatientDialog = (props: Props) => {
 
           if (parseInt(state.form[field] || "0") > maxYear) {
             errors[field] = `Cannot be greater than ${maxYear}`;
+            invalidForm = true;
+          }
+
+          if (parseInt(state.form[field] || "0") < 1900) {
+            errors[field] = `Cannot be smaller than 1900`;
             invalidForm = true;
           }
           return;
@@ -193,9 +213,8 @@ const TransferPatientDialog = (props: Props) => {
               label="Year of birth"
               labelClassName="text-sm"
               value={state.form.year_of_birth}
-              min="1900"
-              max={maxYear}
               onChange={handleChange}
+              onBlur={handleOnBlur}
               placeholder="Enter year of birth"
               error={state.errors.year_of_birth}
             />
