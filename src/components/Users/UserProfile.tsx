@@ -370,24 +370,16 @@ export default function UserProfile() {
     setDirty(true);
   };
 
-  const getDate = (value: string | Date | undefined) =>
+  const getDate = (value: any) =>
     value && dayjs(value).isValid() && dayjs(value).toDate();
-
-  interface FormState {
-    [key: string]: string | number | boolean | undefined;
-  }
-
-  interface ErrorState {
-    [key: string]: string | undefined;
-  }
 
   const fieldProps = (name: string) => {
     return {
       name,
       id: name,
-      value: (states.form as FormState)[name],
+      value: (states.form as any)[name],
       onChange: handleFieldChange,
-      error: (states.errors as ErrorState)[name],
+      error: (states.errors as any)[name],
     };
   };
 
