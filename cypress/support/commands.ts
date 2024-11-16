@@ -114,7 +114,16 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add("verifyNotification", (text) => {
-  return cy.get(".pnotify-container").should("exist").contains(text);
+  cy.get("body").then(($body) => {
+    if ($body.find(".pnotify-container").length > 0) {
+      cy.get(".pnotify-container", { timeout: 10000 })
+        .should("be.visible")
+        .and("contain.text", text); // Check if the notification contains the expected text
+    } else {
+      cy.log("Notification not found in the DOM.");
+      throw new Error("Notification not found in the DOM.");
+    }
+  });
 });
 
 Cypress.Commands.add("clearAllFilters", () => {
