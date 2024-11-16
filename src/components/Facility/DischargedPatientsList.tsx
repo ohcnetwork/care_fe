@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,9 +39,18 @@ import {
 } from "@/common/constants";
 import { parseOptionId } from "@/common/utils";
 
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { formatPatientAge, humanizeStrings } from "@/Utils/utils";
+import {
+  formatPatientAge,
+  humanizeStrings,
+  parsePhoneNumber,
+} from "@/Utils/utils";
+
+import ButtonV2 from "../Common/ButtonV2";
+import ExportMenu from "../Common/Export";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -52,16 +62,96 @@ const DischargedPatientsList = ({
     pathParams: { id: facility_external_id },
   });
 
-  const { qParams, updateQuery, advancedFilter, FilterBadges, updatePage } =
-    useFilters({
-      limit: 12,
-      cacheBlacklist: [
-        "name",
-        "patient_no",
-        "phone_number",
-        "emergency_phone_number",
-      ],
-    });
+  const {
+    qParams,
+    updateQuery,
+    advancedFilter,
+    FilterBadges,
+    resultsPerPage,
+    updatePage,
+  } = useFilters({
+    limit: 12,
+    cacheBlacklist: [
+      "name",
+      "patient_no",
+      "phone_number",
+      "emergency_phone_number",
+    ],
+  });
+
+  const params = {
+    page: qParams.page || 1,
+    limit: resultsPerPage,
+    name: qParams.name || undefined,
+    patient_no: qParams.patient_no || undefined,
+    is_active:
+      !qParams.last_consultation__new_discharge_reason &&
+      (qParams.is_active || "False"),
+    phone_number: qParams.phone_number
+      ? parsePhoneNumber(qParams.phone_number)
+      : undefined,
+    emergency_phone_number: qParams.emergency_phone_number
+      ? parsePhoneNumber(qParams.emergency_phone_number)
+      : undefined,
+    local_body: qParams.lsgBody || undefined,
+    facility: qParams.facility,
+    facility_type: qParams.facility_type || undefined,
+    district: qParams.district || undefined,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    created_date_before: qParams.created_date_before || undefined,
+    created_date_after: qParams.created_date_after || undefined,
+    modified_date_before: qParams.modified_date_before || undefined,
+    modified_date_after: qParams.modified_date_after || undefined,
+    ordering: qParams.ordering || undefined,
+    category: qParams.category || undefined,
+    gender: qParams.gender || undefined,
+    age_min: qParams.age_min || undefined,
+    age_max: qParams.age_max || undefined,
+    date_declared_positive_before:
+      qParams.date_declared_positive_before || undefined,
+    date_declared_positive_after:
+      qParams.date_declared_positive_after || undefined,
+    ration_card_category: qParams.ration_card_category || undefined,
+    last_consultation_medico_legal_case:
+      qParams.last_consultation_medico_legal_case || undefined,
+    last_consultation_encounter_date_before:
+      qParams.last_consultation_encounter_date_before || undefined,
+    last_consultation_encounter_date_after:
+      qParams.last_consultation_encounter_date_after || undefined,
+    last_consultation_discharge_date_before:
+      qParams.last_consultation_discharge_date_before || undefined,
+    last_consultation_discharge_date_after:
+      qParams.last_consultation_discharge_date_after || undefined,
+    last_consultation_admitted_bed_type_list:
+      qParams.last_consultation_admitted_bed_type_list || undefined,
+    last_consultation__consent_types:
+      qParams.last_consultation__consent_types || undefined,
+    last_consultation__new_discharge_reason:
+      qParams.last_consultation__new_discharge_reason || undefined,
+    last_consultation_current_bed__location:
+      qParams.last_consultation_current_bed__location || undefined,
+    number_of_doses: qParams.number_of_doses || undefined,
+    covin_id: qParams.covin_id || undefined,
+    is_kasp: qParams.is_kasp || undefined,
+    is_declared_positive: qParams.is_declared_positive || undefined,
+    last_vaccinated_date_before:
+      qParams.last_vaccinated_date_before || undefined,
+    last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
+    last_consultation_is_telemedicine:
+      qParams.last_consultation_is_telemedicine || undefined,
+    is_antenatal: qParams.is_antenatal || undefined,
+    last_menstruation_start_date_after:
+      (qParams.is_antenatal === "true" &&
+        dayjs().subtract(9, "month").format("YYYY-MM-DD")) ||
+      undefined,
+    ventilator_interface: qParams.ventilator_interface || undefined,
+    diagnoses: qParams.diagnoses || undefined,
+    diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
+    diagnoses_provisional: qParams.diagnoses_provisional || undefined,
+    diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
+    diagnoses_differential: qParams.diagnoses_differential || undefined,
+    review_missed: qParams.review_missed || undefined,
+  };
 
   useEffect(() => {
     if (!qParams.phone_number && phone_number.length >= 13) {
@@ -74,6 +164,88 @@ const DischargedPatientsList = ({
       setEmergencyPhoneNumber("+91");
     }
   }, [qParams]);
+
+  const date_range_fields = [
+    [params.created_date_before, params.created_date_after],
+    [params.modified_date_before, params.modified_date_after],
+    [params.date_declared_positive_before, params.date_declared_positive_after],
+    [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
+    [
+      params.last_consultation_encounter_date_before,
+      params.last_consultation_encounter_date_after,
+    ],
+    [
+      params.last_consultation_discharge_date_before,
+      params.last_consultation_discharge_date_after,
+    ],
+  ];
+
+  const durations = date_range_fields.map((field: string[]) => {
+    // XOR (checks if only one of the dates is set)
+    if (!field[0] !== !field[1]) {
+      return -1;
+    }
+    if (field[0] && field[1]) {
+      return dayjs(field[0]).diff(dayjs(field[1]), "days");
+    }
+    return 0;
+  });
+
+  const isExportAllowed =
+    durations.every((x) => x >= 0 && x <= 7) &&
+    !durations.every((x) => x === 0);
+
+  const preventDuplicatePatientsDuetoPolicyId = (data: any) => {
+    // Generate a array which contains imforamation of duplicate patient IDs and there respective linenumbers
+    const lines = data.split("\n"); // Split the data into individual lines
+    const idsMap = new Map(); // To store indices of lines with the same patient ID
+
+    lines.map((line: any, i: number) => {
+      const patientId = line.split(",")[0]; // Extract the patient ID from each line
+      if (idsMap.has(patientId)) {
+        idsMap.get(patientId).push(i); // Add the index to the existing array
+      } else {
+        idsMap.set(patientId, [i]); // Create a new array with the current index
+      }
+    });
+
+    const linesWithSameId = Array.from(idsMap.entries())
+      .filter(([_, indices]) => indices.length > 1)
+      .map(([patientId, indices]) => ({
+        patientId,
+        indexSame: indices,
+      }));
+
+    // after getting the array of duplicate patient IDs and there respective linenumbers we will merge the policy IDs of the duplicate patients
+
+    linesWithSameId.map((lineInfo) => {
+      const indexes = lineInfo.indexSame;
+      //get policyid of all the duplicate patients and merge them by seperating them with a semicolon
+      const mergedPolicyId = `${indexes.map((currentIndex: number) => {
+        return `${lines[currentIndex].split(",")[5]};`;
+      })}`.replace(/,/g, "");
+      // replace the policy ID of the first patient with the merged policy ID
+      const arrayOfCurrentLine = lines[indexes[0]].split(",");
+      arrayOfCurrentLine[5] = mergedPolicyId;
+      const lineAfterMerge = arrayOfCurrentLine.join(",");
+      lines[indexes[0]] = `${lineAfterMerge}`;
+    });
+
+    // after merging the policy IDs of the duplicate patients we will remove the duplicate patients from the data
+    const uniqueLines = [];
+    const ids = new Set(); // To keep track of unique patient IDs
+
+    for (const line of lines) {
+      const patientId = line.split(",")[0]; // Extract the patient ID from each line
+      if (!ids.has(patientId)) {
+        uniqueLines.push(line);
+        ids.add(patientId);
+      }
+    }
+
+    const cleanedData = uniqueLines.join("\n"); // Join the unique lines back together
+    return cleanedData;
+  };
 
   const { data: districtData } = useQuery(routes.getDistrict, {
     pathParams: {
@@ -277,6 +449,60 @@ const DischargedPatientsList = ({
               selected={qParams.ordering}
               onSelect={(e) => updateQuery({ ordering: e.ordering })}
             />
+            <div className="tooltip w-full md:w-auto" id="patient-export">
+              {!isExportAllowed ? (
+                <ButtonV2
+                  onClick={() => {
+                    advancedFilter.setShow(true);
+                    setTimeout(() => {
+                      const element =
+                        document.getElementById("bed-type-select");
+                      if (element)
+                        element.scrollIntoView({ behavior: "smooth" });
+                      Notification.Warn({
+                        msg: "Please select a seven day period.",
+                      });
+                    }, 500);
+                  }}
+                  className="mr-5 w-full lg:w-fit"
+                >
+                  <CareIcon icon="l-export" />
+                  <span className="lg:my-[3px]">Export</span>
+                </ButtonV2>
+              ) : (
+                <ExportMenu
+                  disabled={!isExportAllowed}
+                  exportItems={[
+                    {
+                      label: "Export Live patients",
+                      action: async () => {
+                        const query = {
+                          ...qParams,
+                          csv: true,
+                        };
+                        const pathParams = { facility_external_id };
+                        const { data } = await request(
+                          routes.listFacilityDischargedPatients,
+                          {
+                            query,
+                            pathParams,
+                          },
+                        );
+                        return data ?? null;
+                      },
+
+                      parse: preventDuplicatePatientsDuetoPolicyId,
+                    },
+                  ]}
+                />
+              )}
+
+              {!isExportAllowed && (
+                <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                  Select a seven day period
+                </span>
+              )}
+            </div>
           </div>
         </>
       }
