@@ -182,7 +182,7 @@ const DischargedPatientsList = ({
 
   const durations = date_range_fields.map((field: string[]) => {
     // XOR (checks if only one of the dates is set)
-    if (!field[0] !== !field[1]) {
+    if ((field[0] && !field[1]) || (!field[0] && field[1])) {
       return -1;
     }
     if (field[0] && field[1]) {
@@ -221,9 +221,9 @@ const DischargedPatientsList = ({
     linesWithSameId.map((lineInfo) => {
       const indexes = lineInfo.indexSame;
       //get policyid of all the duplicate patients and merge them by seperating them with a semicolon
-      const mergedPolicyId = `${indexes.map((currentIndex: number) => {
-        return `${lines[currentIndex].split(",")[5]};`;
-      })}`.replace(/,/g, "");
+      const mergedPolicyId = indexes
+        .map((currentIndex: number) => lines[currentIndex].split(",")[5])
+        .join(";");
       // replace the policy ID of the first patient with the merged policy ID
       const arrayOfCurrentLine = lines[indexes[0]].split(",");
       arrayOfCurrentLine[5] = mergedPolicyId;
@@ -474,7 +474,7 @@ const DischargedPatientsList = ({
                   disabled={!isExportAllowed}
                   exportItems={[
                     {
-                      label: "Export Live patients",
+                      label: "Export Discharged patients",
                       action: async () => {
                         const query = {
                           ...qParams,
