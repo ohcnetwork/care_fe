@@ -1,6 +1,6 @@
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 
@@ -57,9 +57,10 @@ describe("Facility Creation", () => {
     "This field is required",
   ];
   const triageErrorMessage = ["This field is required"];
+  const facilityType = "Primary Health Centres";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -117,7 +118,7 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
     userCreationPage.verifyErrorMessages(facilityErrorMessage);
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.clickfacilityfeatureoption();
     facilityFeature.forEach((featureText) => {
       cy.get("[role='option']").contains(featureText).click();
@@ -206,7 +207,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with single bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -246,7 +247,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with no bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -285,7 +286,7 @@ describe("Facility Creation", () => {
     facilityPage.visitUpdateFacilityPage(facilityUrl1);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillAddress(facilityUpdateAddress);
     facilityPage.fillOxygenCapacity(oxygenCapacity);
     facilityPage.fillExpectedOxygenRequirement(oxygenExpected);

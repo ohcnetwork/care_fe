@@ -1,10 +1,9 @@
-import React from "react";
 import { Link } from "raviger";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { formatName, formatDisplayName } from "../../../Utils/utils";
-import useAuthUser, { useAuthContext } from "@/common/hooks/useAuthUser";
-import { Avatar } from "@/components/Common/Avatar";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import { Avatar } from "@/components/Common/Avatar";
+
+import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+
+import { formatDisplayName, formatName } from "@/Utils/utils";
 
 interface SidebarUserCardProps {
   shrinked: boolean;
@@ -31,7 +36,9 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
           <Button
             variant="outline"
             size="lg"
-            className={`tooltip relative w-full cursor-pointer items-center justify-between rounded-lg bg-gray-200 p-2 font-normal text-gray-900 transition hover:bg-gray-200 focus:outline-none focus:ring focus:ring-primary-300 ${shrinked ? "flex h-full flex-col-reverse" : "flex flex-row"}`}
+            className={`tooltip relative w-full cursor-pointer items-center justify-between rounded-lg bg-gray-200 p-2 font-normal text-gray-900 transition hover:bg-gray-200 focus:outline-none focus:ring focus:ring-primary-300 ${
+              shrinked ? "flex h-full flex-col-reverse" : "flex flex-row"
+            }`}
           >
             <div
               id="user-profile-name"
@@ -59,23 +66,21 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
                 aria-label="Up arrow icon"
               />
             </div>
-            <div>
-              <DropdownMenuContent align="end" className="w-full">
-                <Link
-                  className="block text-sm capitalize text-gray-900"
-                  href="/user/profile"
-                >
-                  <DropdownMenuItem className="cursor-pointer">
-                    <div id="profile-button">{t("profile")}</div>
-                  </DropdownMenuItem>
-                </Link>
-                <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
-                  <div id="sign-out-button">{t("sign_out")}</div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </div>
           </Button>
         </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-full">
+          <Link
+            href="/user/profile"
+            className="block text-sm capitalize text-gray-900"
+          >
+            <DropdownMenuItem className="cursor-pointer">
+              <div id="profile-button">{t("profile")}</div>
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+            <div id="sign-out-button">{t("sign_out")}</div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );

@@ -1,6 +1,7 @@
-import { classNames } from "../../../Utils/utils";
-import { FieldError } from "../FieldValidators";
-import { FormFieldBaseProps } from "./Utils";
+import { FieldError } from "@/components/Form/FieldValidators";
+import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
+
+import { classNames } from "@/Utils/utils";
 
 type LabelProps = {
   id?: string | undefined;

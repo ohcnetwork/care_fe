@@ -1,9 +1,12 @@
-import { useTranslation } from "react-i18next";
-import { ResourceModel } from "../Facility/models";
-import { classNames, formatDateTime, formatName } from "@/Utils/utils";
 import dayjs from "dayjs";
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { ResourceModel } from "@/components/Facility/models";
+
+import { classNames, formatDateTime, formatName } from "@/Utils/utils";
 
 export default function ResourceBlock(props: { resource: ResourceModel }) {
   const { resource } = props;

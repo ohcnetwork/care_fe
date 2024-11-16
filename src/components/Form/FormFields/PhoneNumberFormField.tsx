@@ -1,24 +1,31 @@
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import FormField from "./FormField";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  classNames,
-  parsePhoneNumber,
-  formatPhoneNumber as formatPhoneNumberUtil,
-  getCountryCode,
-  CountryData,
-  humanizeStrings,
-} from "../../../Utils/utils";
-import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
-import {
-  FieldError,
-  PhoneNumberValidator,
-  PhoneNumberType,
-} from "../FieldValidators";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import React from "react";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import {
+  FieldError,
+  PhoneNumberType,
+  PhoneNumberValidator,
+} from "@/components/Form/FieldValidators";
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
+
+import {
+  CountryData,
+  classNames,
+  formatPhoneNumber as formatPhoneNumberUtil,
+  getCountryCode,
+  humanizeStrings,
+  parsePhoneNumber,
+} from "@/Utils/utils";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 

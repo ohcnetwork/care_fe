@@ -1,13 +1,15 @@
+import { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { SortOption } from "@/components/Common/SortDropdown";
 import {
   PatientCategory,
   SpokeRelationship,
 } from "@/components/Facility/models";
-import { SortOption } from "@/components/Common/SortDropdown";
-import { dateQueryString } from "../Utils/utils";
-import { IconName } from "../CAREUI/icons/CareIcon";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+
+import { dateQueryString } from "@/Utils/utils";
+
 import { SchemaType } from "./schemaParser";
-import { ConsentHIType, ConsentPurpose } from "@/components/ABDM/types/consent";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -1138,26 +1140,6 @@ export const AssetImportSchema: SchemaType = {
     type: "string",
   },
 };
-
-// ABDM
-export const ABDM_CONSENT_PURPOSE = [
-  "CAREMGT",
-  "BTG",
-  "PUBHLTH",
-  "HPAYMT",
-  "DSRCH",
-  "PATRQT",
-] as ConsentPurpose[];
-
-export const ABDM_HI_TYPE = [
-  "Prescription",
-  "DiagnosticReport",
-  "OPConsultation",
-  "DischargeSummary",
-  "ImmunizationRecord",
-  "HealthDocumentRecord",
-  "WellnessRecord",
-] as ConsentHIType[];
 
 export const USER_TYPES_MAP = {
   Pharmacist: "Pharmacist",

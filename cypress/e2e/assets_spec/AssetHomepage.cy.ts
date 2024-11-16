@@ -1,10 +1,12 @@
-import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
-import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
-import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
-import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import LoginPage from "../../pageobject/Login/LoginPage";
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 import { v4 as uuidv4 } from "uuid";
+
+import { AssetPage } from "../../pageobject/Asset/AssetCreation";
+import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
+import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
+import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
+import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Asset Tab", () => {
   const assetSearchPage = new AssetSearchPage();
@@ -18,7 +20,7 @@ describe("Asset Tab", () => {
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -64,13 +66,13 @@ describe("Asset Tab", () => {
       "ONVIF Camera",
       "Camera Loc",
     );
-    assetFilters.clickadvancefilter();
+    advanceFilters.clickAdvancedFiltersButton();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
     assetFilters.assertFacilityText("Dummy Facility 40");
     assetFilters.assertAssetClassText("ONVIF");
     assetFilters.assertStatusText("ACTIVE");
     assetFilters.assertLocationText("Camera Loc");
-    assetFilters.clickadvancefilter();
+    advanceFilters.clickAdvancedFiltersButton();
     assetFilters.clearFilters();
   });
 

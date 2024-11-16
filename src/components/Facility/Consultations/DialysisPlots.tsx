@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import { LinePlot } from "./components/LinePlot";
+
 import Pagination from "@/components/Common/Pagination";
+import { LinePlot } from "@/components/Facility/Consultations/components/LinePlot";
+import { DialysisPlotsFields } from "@/components/Facility/models";
+
 import { PAGINATION_LIMIT } from "@/common/constants";
-import { formatDateTime } from "../../../Utils/utils";
-import { DialysisPlotsFields } from "../models";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 export const DialysisPlots = (props: any) => {
   const { consultationId } = props;
@@ -46,7 +49,7 @@ export const DialysisPlots = (props: any) => {
   return (
     <div>
       <div className="grid-row-1 grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Dialysis Fluid Balance"
             name="Fluid Balance"
@@ -55,7 +58,7 @@ export const DialysisPlots = (props: any) => {
           />
         </div>
 
-        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+        <div className="rounded-lg border bg-white p-4 shadow">
           <LinePlot
             title="Dialysis Net Balance"
             name="Net Balance"

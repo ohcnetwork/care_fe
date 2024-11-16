@@ -1,14 +1,15 @@
+import { useState } from "react";
+
+import { Autocomplete } from "@/components/Form/FormFields/Autocomplete";
+import FormField from "@/components/Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
+} from "@/components/Form/FormFields/Utils";
 
-import { Autocomplete } from "../Form/FormFields/Autocomplete";
-import FormField from "../Form/FormFields/FormField";
-import routes from "../../Redux/api";
-import { mergeQueryOptions } from "../../Utils/utils";
-import useQuery from "../../Utils/request/useQuery";
-import { useState } from "react";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { mergeQueryOptions } from "@/Utils/utils";
 
 export type InsurerOptionModel = {
   name: string;

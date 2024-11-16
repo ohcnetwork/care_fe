@@ -1,4 +1,5 @@
 import { DoctorConnect } from "pageobject/Patient/PatientDoctorConnect";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 
@@ -12,7 +13,7 @@ describe("Patient Doctor Connect in consultation page", () => {
   const teleIcuUser = "Dev Doctor Two";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

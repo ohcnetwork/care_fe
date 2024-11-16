@@ -1,39 +1,33 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import { QRCodeSVG } from "qrcode.react";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { useTranslation } from "react-i18next";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { ConsultationModel } from "@/components/Facility/models";
+import { PatientModel } from "@/components/Patient/models";
+import CommentSection from "@/components/Shifting/ShiftingCommentsSection";
 
 import {
   GENDER_TYPES,
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "@/common/constants";
-import { Link, navigate } from "raviger";
-import { useState } from "react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CommentSection from "./ShiftingCommentsSection";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import Page from "@/components/Common/components/Page";
-import QRCode from "qrcode.react";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-} from "../../Utils/utils";
 
-import { useTranslation } from "react-i18next";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import { ConsultationModel } from "../Facility/models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { PatientModel } from "../Patient/models";
-import careConfig from "@careConfig";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
-import Loading from "@/components/Common/Loading";
 export default function ShiftDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = careConfig.wartimeShifting
@@ -43,26 +37,6 @@ export default function ShiftDetails(props: { id: string }) {
   const { data, loading } = useQuery(routes.getShiftDetails, {
     pathParams: { id: props.id },
   });
-
-  const handleShiftDelete = async () => {
-    setOpenDeleteShiftDialog(true);
-
-    const { res, data } = await request(routes.deleteShiftRecord, {
-      pathParams: { id: props.id },
-    });
-    if (res?.status == 204) {
-      Notification.Success({
-        msg: t("shifting_deleted"),
-      });
-    } else {
-      Notification.Error({
-        msg: t("error_deleting_shifting") + (data?.detail || ""),
-      });
-    }
-
-    navigate("/shifting");
-  };
-
   const showCopyToclipBoard = (data: any) => {
     return (
       <a href="#">
@@ -455,8 +429,8 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="flex">
               <div>
                 <div className="">
-                  <QRCode
-                    value={`${window.location.origin}/shifting/ data.id`}
+                  <QRCodeSVG
+                    value={`${window.location.origin}/shifting/${data.id}`}
                   />
                 </div>
               </div>
@@ -733,25 +707,6 @@ export default function ShiftDetails(props: { id: string }) {
                 }
                 time={data?.modified_date}
               />
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <div>
-                <ButtonV2
-                  variant="danger"
-                  onClick={() => setOpenDeleteShiftDialog(true)}
-                >
-                  {t("delete_record")}
-                </ButtonV2>
-                <ConfirmDialog
-                  title={t("authorize_shift_delete")}
-                  description={t("record_delete_confirm")}
-                  action="Confirm"
-                  show={openDeleteShiftDialog}
-                  onClose={() => setOpenDeleteShiftDialog(false)}
-                  onConfirm={handleShiftDelete}
-                />
-              </div>
             </div>
           </div>
 

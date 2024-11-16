@@ -1,22 +1,30 @@
-import { useState, useEffect, Dispatch, SetStateAction } from "react";
-import * as Notification from "../../Utils/Notifications";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames, isAppleDevice, keysOf } from "../../Utils/utils";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { useMessageListener } from "@/common/hooks/useMessageListener";
-import PatientConsultationNotesList from "./PatientConsultationNotesList";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { PatientNoteStateType, PaitentNotesReplyModel } from "./models";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import { PATIENT_NOTES_THREADS } from "@/common/constants";
-import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";
-import useNotificationSubscriptionState from "@/common/hooks/useNotificationSubscriptionState";
-import { Link } from "raviger";
 import { t } from "i18next";
+import { Link } from "raviger";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import useKeyboardShortcut from "use-keyboard-shortcut";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
+import PatientConsultationNotesList from "@/components/Facility/PatientConsultationNotesList";
+import {
+  PaitentNotesReplyModel,
+  PatientNoteStateType,
+} from "@/components/Facility/models";
+import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import { useMessageListener } from "@/hooks/useMessageListener";
+import useNotificationSubscriptionState from "@/hooks/useNotificationSubscriptionState";
+
+import { PATIENT_NOTES_THREADS } from "@/common/constants";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { classNames, isAppleDevice, keysOf } from "@/Utils/utils";
 
 interface PatientNotesProps {
   patientId: string;
@@ -153,15 +161,19 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         id="expand_doctor_notes"
         className={classNames(
           "tooltip flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
-          show && "rotate-180",
         )}
         onClick={() => setShow(!show)}
       >
         <CareIcon
-          icon="l-angle-up"
+          icon={show ? "l-angle-down" : "l-angle-up"}
           className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
-        <span className="tooltip-text tooltip-top rotate-[-180deg] text-xs">
+        <span
+          className={classNames(
+            "tooltip-text text-xs",
+            show ? "tooltip-bottom -translate-x-16" : "tooltip-top",
+          )}
+        >
           {t("minimize")}
         </span>
       </div>
@@ -173,7 +185,12 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           icon="l-times"
           className="tooltip text-lg transition-all delay-150 duration-300 ease-out"
         />
-        <span className="tooltip-text tooltip-bottom -translate-x-11 text-xs">
+        <span
+          className={classNames(
+            "tooltip-text text-xs",
+            show ? "tooltip-bottom -translate-x-11" : "tooltip-top",
+          )}
+        >
           {t("close")}
         </span>
       </div>

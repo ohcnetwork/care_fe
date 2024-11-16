@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
-import useRecorder from "../../Utils/useRecorder";
 import { Link } from "raviger";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useTimer } from "../../Utils/useTimer";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import * as Notify from "../../Utils/Notifications";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { useTimer } from "@/hooks/useTimer";
+
+import * as Notify from "@/Utils/Notifications";
+
+import useVoiceRecorder from "../../Utils/useVoiceRecorder";
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -24,8 +28,8 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   const [status, setStatus] = useState<Status | null>(null);
   const { t } = useTranslation();
 
-  const [audioURL, , startRecording, stopRecording, , resetRecording] =
-    useRecorder((permission: boolean) => {
+  const { audioURL, resetRecording, startRecording, stopRecording } =
+    useVoiceRecorder((permission: boolean) => {
       if (!permission) {
         handleStopRecording();
         resetRecording();

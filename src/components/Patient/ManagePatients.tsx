@@ -1,4 +1,20 @@
-import * as Notification from "../../Utils/Notifications";
+import dayjs from "dayjs";
+import { Link, navigate } from "raviger";
+import { ReactNode, useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { Avatar } from "@/components/Common/Avatar";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { ExportMenu } from "@/components/Common/Export";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import SortDropdownMenu from "@/components/Common/SortDropdown";
+import Tabs from "@/components/Common/Tabs";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useFilters from "@/hooks/useFilters";
+
 import {
   ADMITTED_TO,
   CONSENT_TYPE_CHOICES,
@@ -9,49 +25,38 @@ import {
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
 } from "@/common/constants";
-import { FacilityModel, PatientCategory } from "../Facility/models";
-import { Link, navigate } from "raviger";
-import { ReactNode, useEffect, useState, useCallback } from "react";
 import { parseOptionId } from "@/common/utils";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+
+import routes from "@/Utils/request/api";
+
 import Chip from "../../CAREUI/display/Chip";
 import CountBlock from "../../CAREUI/display/Count";
-import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
-import { ExportMenu } from "@/components/Common/Export";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import FilterBadge from "../../CAREUI/display/FilterBadge";
-import PatientFilter from "./PatientFilter";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import SortDropdownMenu from "@/components/Common/SortDropdown";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import { triggerGoal } from "../../Integrations/Plausible";
+import * as Notification from "../../Utils/Notifications";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
 import {
   formatPatientAge,
   humanizeStrings,
   isAntenatal,
   parsePhoneNumber,
 } from "../../Utils/utils";
-import useFilters from "@/common/hooks/useFilters";
-import { useTranslation } from "react-i18next";
-import Page from "@/components/Common/components/Page";
-import dayjs from "dayjs";
-import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import { ICD11DiagnosisModel } from "../Diagnosis/types";
+import { getDiagnosesByIds } from "../Diagnosis/utils";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import { FacilityModel, PatientCategory } from "../Facility/models";
 import {
   DIAGNOSES_FILTER_LABELS,
   DiagnosesFilterKey,
   FILTER_BY_DIAGNOSES_KEYS,
 } from "./DiagnosesFilter";
-import { ICD11DiagnosisModel } from "../Diagnosis/types";
-import { getDiagnosesByIds } from "../Diagnosis/utils";
-import Tabs from "@/components/Common/components/Tabs";
+import PatientFilter from "./PatientFilter";
 import { isPatientMandatoryDataFilled } from "./Utils";
-import request from "../../Utils/request/request";
-import { Avatar } from "@/components/Common/Avatar";
-import Loading from "@/components/Common/Loading";
-import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 
 interface TabPanelProps {
   children?: ReactNode;

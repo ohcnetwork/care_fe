@@ -1,11 +1,14 @@
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import routes from "../../../Redux/api";
-import dayjs from "../../../Utils/dayjs";
-import useQuery from "../../../Utils/request/useQuery";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { InvestigationResponse } from "./Reports/types";
+import { InvestigationResponse } from "@/components/Facility/Investigations/Reports/types";
+
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export default function ViewInvestigationSuggestions(props: {
   consultationId: string;
@@ -194,7 +197,7 @@ export default function ViewInvestigationSuggestions(props: {
         </tbody>
       </table>
       <div className="flex flex-col gap-4 md:hidden">
-        {Array.isArray(investigations) ? (
+        {Array.isArray(investigations?.investigation) ? (
           investigations.investigation?.map((investigation, index) => {
             let nextFurthestInvestigation: any = undefined;
 
