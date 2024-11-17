@@ -90,6 +90,7 @@ export const PatientManager = () => {
     Pagination,
     FilterBadges,
     resultsPerPage,
+    clearSearch,
   } = useFilters({
     limit: 12,
     cacheBlacklist: [
@@ -1005,6 +1006,7 @@ export const PatientManager = () => {
             <SearchByMultipleFields
               options={searchOptions}
               onSearch={handleSearch}
+              clearSearch={clearSearch}
             />
           </div>
         </div>

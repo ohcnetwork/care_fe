@@ -1,28 +1,32 @@
 import React, {
-  useState,
   useCallback,
-  useRef,
   useEffect,
   useMemo,
+  useRef,
+  useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+
 import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
-import { FieldError } from "@/components/Form/FieldValidators";
+
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandGroup,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+import { FieldError } from "@/components/Form/FieldValidators";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 
 interface SearchOption {
   key: string;
@@ -41,6 +45,7 @@ interface SearchByMultipleFieldsProps {
   className?: string;
   inputClassName?: string;
   buttonClassName?: string;
+  clearSearch?: { value: boolean; params?: string[] };
 }
 
 type EventType = {
@@ -55,6 +60,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   className,
   inputClassName,
   buttonClassName,
+  clearSearch,
 }) => {
   const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState<SearchOption>(
@@ -65,6 +71,16 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [error, setError] = useState<string | undefined | boolean>();
+
+  useEffect(() => {
+    if (clearSearch?.value) {
+      const clearinput = options
+        .map((op) => op.key)
+        .some((element) => clearSearch.params?.includes(element));
+      clearinput ? setSearchValue("") : null;
+    }
+  }, [clearSearch]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement !== inputRef.current) {
