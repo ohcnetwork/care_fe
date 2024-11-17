@@ -1,5 +1,9 @@
 // FacilityCreation
+import { AssetPage } from "pageobject/Asset/AssetCreation";
+import FacilityLocation from "pageobject/Facility/FacilityLocation";
+import { PatientConsultationPage } from "pageobject/Patient/PatientConsultation";
 import { PatientData, PatientPage } from "pageobject/Patient/PatientCreation";
+import PatientTreatmentPlan from "pageobject/Patient/PatientTreatmentPlan";
 
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
@@ -19,6 +23,10 @@ describe("Facility Homepage Function", () => {
   const userPage = new UserPage();
   const assetPagination = new AssetPagination();
   const patientPage = new PatientPage();
+  const patientConsultationPage = new PatientConsultationPage();
+  const patientTreatmentPlan = new PatientTreatmentPlan();
+  const facilityLocation = new FacilityLocation();
+  const assetPage = new AssetPage();
   const facilitiesAlias = "downloadFacilitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
@@ -30,7 +38,9 @@ describe("Facility Homepage Function", () => {
   const facilityType = "Private Hospital";
   const notificationErrorMsg = "Message cannot be empty";
   const notificationMessage = "Test Notification";
+  const doctorName = "Dummy Doctor";
   const facilityWithNoAvailableBeds = "Dummy Facility 12";
+  const usernameToLinkFacilityWithNoBeds = "dummydoctor12";
   const newPatientData: PatientData = {
     facility: facilityWithNoAvailableBeds,
     phoneNumber: "9898464555",
@@ -55,6 +65,9 @@ describe("Facility Homepage Function", () => {
     },
     bloodGroup: "O+",
   };
+  const patientIpNumber = `${Math.floor(Math.random() * 90 + 10)}/${Math.floor(Math.random() * 9000 + 1000)}`;
+  const locationName = "Test-location";
+  const locationType = "WARD";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -209,6 +222,8 @@ describe("Facility Homepage Function", () => {
     facilityNotify.closeNotificationSlide();
     loginPage.ensureLoggedIn();
     loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsDistrictAdmin();
+    loginPage.ensureLoggedIn();
   });
 
   it("Verify the bed capacity badge reflection", () => {
@@ -217,15 +232,90 @@ describe("Facility Homepage Function", () => {
     manageUserPage.assertFacilityInCard(facilityWithNoAvailableBeds);
     facilityHome.verifyOccupancyBadgeVisibility();
     manageUserPage.assertFacilityBadgeContent("0", "0");
+
+    // link dummy doctor 12 to the facility
+    cy.awaitUrl("/users");
+    userPage.typeInSearchInput(usernameToLinkFacilityWithNoBeds);
+    userPage.checkUsernameText(usernameToLinkFacilityWithNoBeds);
+
+    cy.get("#home_facility").then(($homeFacility) => {
+      const homeFacilityText = $homeFacility.text().trim();
+      if (homeFacilityText.includes("No Home Facility")) {
+        // Link facility if no home facility exists
+        manageUserPage.clickFacilitiesTab();
+        manageUserPage.selectFacilityFromDropdown(facilityWithNoAvailableBeds);
+        manageUserPage.clickLinkFacility();
+        manageUserPage.clickHomeFacilityIcon();
+        manageUserPage.assertnotLinkedFacility(facilityWithNoAvailableBeds);
+        manageUserPage.assertHomeFacilitylink(facilityWithNoAvailableBeds);
+        manageUserPage.clickCloseSlideOver();
+      } else {
+        // Assert if facility is already linked
+        manageUserPage.assertHomeFacility(facilityWithNoAvailableBeds);
+      }
+    });
+
     // create a new patient in the facility
-    cy.awaitUrl("/patients");
+    cy.visit("/patients");
     patientPage.createPatientWithData(newPatientData);
-    cy.awaitUrl("/facility");
+    // navigate to facility page and verify the occupancy badge
+    cy.visit("/facility");
     manageUserPage.typeFacilitySearch(facilityWithNoAvailableBeds);
     facilityPage.verifyFacilityBadgeContent(facilityWithNoAvailableBeds);
     facilityHome.verifyOccupancyBadgeVisibility();
     manageUserPage.assertFacilityBadgeContent("1", "0");
     manageUserPage.assertFacilityBadgeBackgroundColor("rgb(239, 68, 68)");
+    // create a new location and add a bed to the facility
+    facilityPage.visitAlreadyCreatedFacility();
+    cy.get("[id='manage-facility-dropdown']").scrollIntoView().click();
+    cy.get("[id=location-management]").click();
+    // create new location and add a bed to the facility
+    cy.document().then(($doc) => {
+      const manageBedButton = $doc.querySelector("#manage-bed-button");
+      if (manageBedButton) {
+        facilityLocation.clickManageBedButton();
+      } else {
+        facilityLocation.clickAddNewLocationButton();
+        facilityPage.fillFacilityName(locationName);
+        facilityLocation.selectLocationType(locationType);
+        assetPage.clickassetupdatebutton();
+        facilityLocation.clickNotification();
+        facilityLocation.clickManageBedButton();
+      }
+    });
+    facilityLocation.clickAddBedButton();
+    facilityLocation.addBed("Bed 1", "Test Description", "Regular", 2);
+    // navigate to patient page, and click create consultation
+    cy.visit("/facility");
+    manageUserPage.typeFacilitySearch(facilityWithNoAvailableBeds);
+    facilityPage.verifyFacilityBadgeContent(facilityWithNoAvailableBeds);
+    // visit facility patients page
+    manageUserPage.clickFacilityPatients();
+    facilityHome.verifyPatientListVisibility();
+    facilityHome.verifyPatientListUrl();
+    // type patient name and click create consultation
+    patientPage.visitPatientWithNoConsultation(newPatientData.name);
+    // create patient consultation and add bed to the consultation
+    patientConsultationPage.selectConsultationStatus(
+      "Outpatient/Emergency Room",
+    );
+    cy.get("#is_asymptomatic").click();
+    patientConsultationPage.selectPatientCategory("Mild");
+    patientConsultationPage.typePatientNumber(patientIpNumber);
+    patientConsultationPage.selectPatientDiagnosis(
+      "1A00",
+      "add-icd11-diagnosis-as-unconfirmed",
+    );
+    patientTreatmentPlan.fillTreatingPhysican(doctorName);
+    patientConsultationPage.selectBed("Bed 1");
+    cy.submitButton("Create Consultation");
+    cy.verifyNotification("Consultation created successfully");
+    // verify the occupancy badge reflection
+    cy.visit("/facility");
+    manageUserPage.typeFacilitySearch(facilityWithNoAvailableBeds);
+    facilityPage.verifyFacilityBadgeContent(facilityWithNoAvailableBeds);
+    facilityHome.verifyOccupancyBadgeVisibility();
+    manageUserPage.assertFacilityBadgeContent("1", "2");
   });
 
   afterEach(() => {

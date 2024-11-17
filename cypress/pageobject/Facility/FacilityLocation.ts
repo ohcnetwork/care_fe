@@ -19,7 +19,7 @@ class FacilityLocation {
   }
 
   clickAddNewLocationButton() {
-    cy.get("#add-new-location").click();
+    cy.get("#add-new-location").click({ force: true });
   }
 
   clickFacilityLocationManagement() {
@@ -76,15 +76,40 @@ class FacilityLocation {
   }
 
   clickManageBedButton() {
-    cy.get("#manage-bed-button").first().click();
+    cy.intercept("/api/v1/bed/?facility=*").as("getBeds");
+    cy.get("#manage-bed-button").first().click({});
+    cy.wait("@getBeds").its("response.statusCode").should("eq", 200);
   }
 
   clickAddBedButton() {
-    cy.get("#add-new-bed").click();
+    cy.get("#add-new-bed").click({ force: true });
   }
 
   clickNotification() {
     cy.get(".pnotify-container").click();
+  }
+
+  addBed(
+    bedName: string,
+    bedDescrption: string,
+    bedType: string,
+    multipleBeds?: number,
+  ) {
+    this.enterBedName(bedName);
+    this.enterBedDescription(bedDescrption);
+    this.selectBedType(bedType);
+    if (multipleBeds) {
+      this.setMultipleBeds(multipleBeds);
+    }
+    cy.get("#submit").click();
+  }
+
+  editBed(bedName: string, bedDescrption: string, bedType: string) {
+    this.clickEditBedButton();
+    this.enterBedName(bedName);
+    this.enterBedDescription(bedDescrption);
+    this.selectBedType(bedType);
+    cy.get("#submit").click();
   }
 
   enterBedName(name: string) {

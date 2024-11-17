@@ -51,6 +51,17 @@ export class PatientPage {
       .contains(patientName);
   }
 
+  visitPatientWithNoConsultation(patientName: string) {
+    cy.get("#name").click().type(patientName);
+    cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
+    cy.get("#patient-name-list").contains(patientName).click();
+    cy.wait(2000);
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+    cy.get("#patient-name-age").should("be.visible").contains(patientName);
+    cy.get("#create-consultation").should("be.visible");
+    this.clickCreateConsultationOnPatientPageWithNoConsultation();
+  }
+
   selectFacility(facilityName: string) {
     cy.typeAndSelectOption("input[name='facilities']", facilityName);
     cy.submitButton("Select");
@@ -180,6 +191,10 @@ export class PatientPage {
     cy.intercept("PUT", "**/api/v1/patient/**").as("updatePatient");
     cy.get("button").get("[data-testid=submit-button]").click();
     cy.wait("@updatePatient").its("response.statusCode").should("eq", 200);
+  }
+
+  clickCreateConsultationOnPatientPageWithNoConsultation() {
+    cy.get("#create-consultation").should("be.visible").click();
   }
 
   verifyPatientUpdated() {

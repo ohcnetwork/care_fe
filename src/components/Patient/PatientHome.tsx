@@ -334,6 +334,7 @@ export const PatientHome = (props: any) => {
                   `/facility/${patientData?.facility}/patient/${id}/consultation`,
                 )
               }
+              id="create-consultation"
             >
               <CareIcon icon="l-plus" className="mr-2" />
               <span>{t("create_consultation")}</span>
@@ -346,7 +347,10 @@ export const PatientHome = (props: any) => {
             <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">
               <div>
                 <div className="flex flex-row gap-4">
-                  <h1 className="flex flex-row pb-3 text-2xl font-bold capitalize">
+                  <h1
+                    className="flex flex-row pb-3 text-2xl font-bold capitalize"
+                    id="patient-name-age"
+                  >
                     {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">

@@ -472,9 +472,8 @@ class FacilityPage {
   }
 
   selectDistrictOnPincode(districtName: string) {
-    this.getDistrictElement()
-      .scrollIntoView()
-      .wait(2000)
+    this.getDistrictElement().as("district").scrollIntoView().wait(2000);
+    cy.get("@district")
       .should("be.visible")
       .then(($element) => {
         const text = $element.text();

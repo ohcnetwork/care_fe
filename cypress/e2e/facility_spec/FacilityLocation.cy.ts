@@ -59,13 +59,13 @@ describe("Location Management Section", () => {
   });
 
   it("Add a Bed to facility location along with duplication and deleting a bed", () => {
+    cy.wait(2000);
     // mandatory field verification in bed creation
-    cy.get("body").then(($body) => {
-      if ($body.find("#manage-bed-button:visible").length) {
-        // If the '#manage-bed-button' is visible
+    cy.document().then(($doc) => {
+      const manageBedButton = $doc.querySelector("#manage-bed-button");
+      if (manageBedButton) {
         facilityLocation.clickManageBedButton();
       } else {
-        // If the '#manage-bed-button' is not visible
         facilityLocation.clickAddNewLocationButton();
         facilityPage.fillFacilityName(locationName);
         facilityLocation.selectLocationType(locationType);
@@ -78,29 +78,24 @@ describe("Location Management Section", () => {
     assetPage.clickassetupdatebutton();
     userCreationPage.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
     // create a new single bed and verify
-    facilityLocation.enterBedName(bedName);
-    facilityLocation.enterBedDescription(bedDescrption);
-    facilityLocation.selectBedType(bedType);
-    assetPage.clickassetupdatebutton();
+    facilityLocation.addBed(bedName, bedDescrption, bedType);
     // Verify the bed creation
     facilityLocation.verifyBedNameBadge(bedName);
     facilityLocation.verifyBedBadge(bedType);
     facilityLocation.verifyBedBadge(bedStatus);
     // Try to create duplication bed and verify the error
     facilityLocation.clickAddBedButton();
-    facilityLocation.enterBedName(bedName);
-    facilityLocation.selectBedType(bedType);
-    assetPage.clickassetupdatebutton();
+    facilityLocation.addBed(bedName, bedDescrption, bedType);
     facilityLocation.verifyNotification(
       "Name - Bed with same name already exists in location",
     );
     facilityHome.verifyAndCloseNotifyModal();
     // edit the created bed
-    facilityLocation.clickEditBedButton();
-    facilityLocation.enterBedName(bedModifiedName);
-    facilityLocation.enterBedDescription(bedModifiedDescrption);
-    facilityLocation.selectBedType(bedModifiedType);
-    assetPage.clickassetupdatebutton();
+    facilityLocation.editBed(
+      bedModifiedName,
+      bedModifiedDescrption,
+      bedModifiedType,
+    );
     // verify the modification
     facilityLocation.verifyBedNameBadge(bedModifiedName);
     facilityLocation.verifyBedBadge(bedModifiedType);
@@ -144,11 +139,7 @@ describe("Location Management Section", () => {
     // create multiple bed and verify
     facilityLocation.clickManageBedButton();
     facilityLocation.clickAddBedButton();
-    facilityLocation.enterBedName(bedName);
-    facilityLocation.enterBedDescription(bedDescrption);
-    facilityLocation.selectBedType(bedType);
-    facilityLocation.setMultipleBeds(numberOfBeds);
-    assetPage.clickassetupdatebutton();
+    facilityLocation.addBed(bedName, bedDescrption, bedType, numberOfBeds);
     facilityLocation.clickNotification();
     // verify the bed creation
     facilityLocation.verifyBedBadge(bedType);
@@ -166,11 +157,12 @@ describe("Location Management Section", () => {
     // bed creation
     facilityLocation.clickManageBedButton();
     facilityLocation.clickAddBedButton();
-    facilityLocation.enterBedName(bedModifiedName);
-    facilityLocation.enterBedDescription(bedModifiedDescrption);
-    facilityLocation.selectBedType(bedModifiedType);
-    facilityLocation.setMultipleBeds(numberOfModifiedBeds);
-    assetPage.clickassetupdatebutton();
+    facilityLocation.addBed(
+      bedModifiedName,
+      bedModifiedDescrption,
+      bedModifiedType,
+      numberOfModifiedBeds,
+    );
     // pagination
     assetPagination.navigateToNextPage();
     assetPagination.navigateToPreviousPage();
@@ -199,9 +191,7 @@ describe("Location Management Section", () => {
     cy.closeNotification();
     facilityLocation.clickManageBedButton();
     facilityLocation.clickAddBedButton();
-    facilityLocation.enterBedName("Bed 1");
-    facilityLocation.selectBedType("Regular");
-    cy.submitButton("Add Bed(s)");
+    facilityLocation.addBed("Bed 1", "Test Description", "Regular");
     cy.verifyNotification("1 Bed created successfully");
     cy.closeNotification();
     facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
