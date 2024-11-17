@@ -1,13 +1,8 @@
-import React, { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
+import { useEffect, useState } from "react";
 
 import { UserBareMinimum } from "@/components/Users/models";
-
-interface CustomLinkProps
-  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  "data-username"?: string;
-}
 
 const UserCard = ({ user }: { user: UserBareMinimum }) => (
   <div className="z-10 flex w-64 items-center space-x-3 rounded-lg bg-gray-200 px-3 pb-3 shadow-lg">
@@ -35,66 +30,69 @@ const MarkdownPreview = ({
     mentioned_users?.map((u) => [u.username, u]) ?? [],
   );
 
+  const [hoveredUser, setHoveredUser] = useState<string | null>(null);
+
+  const renderer = new marked.Renderer();
+  renderer.link = function ({
+    href,
+    title,
+    text,
+  }: {
+    href: string;
+    title?: string | null;
+    text: string;
+  }) {
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" title="${
+      title || ""
+    }">${text}</a>`;
+  };
+
   const processedMarkdown = markdown
     .replace(/@(\w+)/g, (_, username) => {
       const user = MentionedUsers[username];
       if (user) {
-        return `<a href="/user/profile/${username}" data-username="${username}">@${username}</a>`;
+        return `<span class="mention" data-username="${username}">@${username}</span>`;
       } else {
         return `@${username}`;
       }
     })
     .replace(/~~(.*?)~~/g, (_, text) => `<del>${text}</del>`);
 
-  const CustomLink = (props: CustomLinkProps) => {
-    const [isHovered, setIsHovered] = useState(false);
+  const html = marked
+    .parse(processedMarkdown, {
+      gfm: true,
+      breaks: true,
+      renderer: renderer,
+    })
+    .toString();
 
-    if (props["data-username"]) {
-      const username = props["data-username"];
-      return (
-        <span
-          className="relative inline-block"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="cursor-pointer rounded bg-blue-100 px-1 font-normal text-slate-800 no-underline"
-          >
-            @{username}
-          </span>
-          {MentionedUsers[username] && isHovered && (
-            <div className="tooltip-text absolute bottom-full z-10 mb-2 transition-opacity duration-300 ease-in-out">
-              <UserCard user={MentionedUsers[username]} />
-              <div className="absolute left-2 top-full border-8 border-solid border-transparent border-t-gray-200 shadow-md"></div>
-            </div>
-          )}
-        </span>
-      );
-    }
-    return (
-      <a
-        {...props}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        className="text-blue-500 underline"
-      />
-    );
-  };
+  const sanitizedHtml = DOMPurify.sanitize(html, {
+    ADD_ATTR: ["target", "rel"],
+  });
+
+  useEffect(() => {
+    const mentionElements = document.querySelectorAll(".mention");
+    mentionElements.forEach((ele) => {
+      ele.addEventListener("mouseenter", () => {
+        const username = ele.getAttribute("data-username");
+        if (username) setHoveredUser(username);
+      });
+      ele.addEventListener("mouseleave", () => {
+        setHoveredUser(null);
+      });
+    });
+  }, [sanitizedHtml]);
 
   return (
-    <ReactMarkdown
-      className="prose text-sm prose-p:m-0"
-      rehypePlugins={[rehypeRaw]}
-      components={{
-        a: CustomLink,
-      }}
-    >
-      {processedMarkdown}
-    </ReactMarkdown>
+    <div className="relative prose text-sm prose-p:m-0">
+      <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
+      {hoveredUser && MentionedUsers[hoveredUser] && (
+        <div className="tooltip-text absolute bottom-full z-10 mb-2 transition-opacity duration-300 ease-in-out">
+          <UserCard user={MentionedUsers[hoveredUser]} />
+          <div className="absolute left-2 top-full border-8 border-solid border-transparent border-t-gray-200 shadow-md"></div>
+        </div>
+      )}
+    </div>
   );
 };
 
