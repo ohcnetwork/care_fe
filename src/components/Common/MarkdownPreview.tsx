@@ -31,6 +31,10 @@ const MarkdownPreview = ({
   );
 
   const [hoveredUser, setHoveredUser] = useState<string | null>(null);
+  const [hoverPosition, setHoverPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const renderer = new marked.Renderer();
   renderer.link = function ({
@@ -51,7 +55,7 @@ const MarkdownPreview = ({
     .replace(/@(\w+)/g, (_, username) => {
       const user = MentionedUsers[username];
       if (user) {
-        return `<span class="mention" data-username="${username}">@${username}</span>`;
+        return `<span class="mention cursor-pointer font-medium text-primary hover:underline" data-username="${username}">@${username}</span>`;
       } else {
         return `@${username}`;
       }
@@ -72,24 +76,51 @@ const MarkdownPreview = ({
 
   useEffect(() => {
     const mentionElements = document.querySelectorAll(".mention");
+
+    const handleMouseEnter = (event: Event) => {
+      const element = event.target as HTMLElement;
+      const username = element.getAttribute("data-username");
+      if (username) {
+        setHoveredUser(username);
+        const rect = element.getBoundingClientRect();
+        setHoverPosition({
+          x: rect.left,
+          y: rect.top,
+        });
+      }
+    };
+
+    const handleMouseLeave = () => {
+      setHoveredUser(null);
+      setHoverPosition(null);
+    };
+
     mentionElements.forEach((ele) => {
-      ele.addEventListener("mouseenter", () => {
-        const username = ele.getAttribute("data-username");
-        if (username) setHoveredUser(username);
-      });
-      ele.addEventListener("mouseleave", () => {
-        setHoveredUser(null);
-      });
+      ele.addEventListener("mouseenter", handleMouseEnter);
+      ele.addEventListener("mouseleave", handleMouseLeave);
     });
+
+    return () => {
+      mentionElements.forEach((ele) => {
+        ele.removeEventListener("mouseenter", handleMouseEnter);
+        ele.removeEventListener("mouseleave", handleMouseLeave);
+      });
+    };
   }, [sanitizedHtml]);
 
   return (
     <div className="relative prose text-sm prose-p:m-0">
       <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
-      {hoveredUser && MentionedUsers[hoveredUser] && (
-        <div className="tooltip-text absolute bottom-full z-10 mb-2 transition-opacity duration-300 ease-in-out">
+      {hoveredUser && hoverPosition && MentionedUsers[hoveredUser] && (
+        <div
+          className="fixed z-50 transition-opacity duration-300 ease-in-out"
+          style={{
+            top: `${hoverPosition.y - 100}px`,
+            left: `${hoverPosition.x}px`,
+          }}
+        >
           <UserCard user={MentionedUsers[hoveredUser]} />
-          <div className="absolute left-2 top-full border-8 border-solid border-transparent border-t-gray-200 shadow-md"></div>
+          <div className="absolute left-2 -bottom-1 h-4 w-4 rotate-45 transform bg-gray-200"></div>
         </div>
       )}
     </div>
