@@ -297,7 +297,7 @@ const PatientNoteCard = ({
                   if (allowThreadView && setThreadViewNote)
                     setThreadViewNote(note.id);
                 }}
-                className={`pl-11 text-sm text-gray-700 ${allowThreadView && "cursor-pointer"}`}
+                className={`pl-11 text-sm text-gray-700 ${allowThreadView ? "cursor-pointer" : ""}`}
               >
                 <MarkdownPreview
                   markdown={noteField}

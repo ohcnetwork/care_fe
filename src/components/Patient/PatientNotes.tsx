@@ -61,22 +61,31 @@ const PatientNotes = (props: PatientNotesProps) => {
       return;
     }
 
-    const { res, data } = await request(routes.addPatientNote, {
-      pathParams: { patientId: patientId },
-      body: {
-        note: noteField,
-        thread,
-        reply_to: reply_to?.id,
-      },
-    });
-    if (res?.status === 201) {
-      Notification.Success({ msg: "Note added successfully" });
-      setNoteField("");
-      setReload(!reload);
-      setState({ ...state, cPage: 1 });
-      setReplyTo(undefined);
+    try {
+      const { res, data } = await request(routes.addPatientNote, {
+        pathParams: { patientId: patientId },
+        body: {
+          note: noteField,
+          thread,
+          reply_to: reply_to?.id,
+        },
+      });
+      if (res?.status === 201) {
+        Notification.Success({ msg: "Note added successfully" });
+        setNoteField("");
+        setReload(!reload);
+        setState({ ...state, cPage: 1 });
+        setReplyTo(undefined);
+        return data?.id;
+      } else {
+        throw new Error("Failed to add note");
+      }
+    } catch (error) {
+      Notification.Error({
+        msg: "Failed to add note. Please try again.",
+      });
+      return undefined;
     }
-    return data?.id;
   };
 
   useEffect(() => {

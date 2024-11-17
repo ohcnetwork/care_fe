@@ -9,8 +9,8 @@ import RichTextEditor from "@/components/Common/RichTextEditor";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
 import PatientConsultationNotesList from "@/components/Facility/PatientConsultationNotesList";
 import {
-  PaitentNotesReplyModel,
   PatientNoteStateType,
+  PatientNotesReplyModel,
 } from "@/components/Facility/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -44,7 +44,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
-  const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
+  const [reply_to, setReplyTo] = useState<PatientNotesReplyModel | undefined>(
     undefined,
   );
 
@@ -251,6 +251,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                     onAddNote={onAddNote}
                     isAuthorized={isAuthorized}
                     onRefetch={() => setReload(true)}
+                    maxRows={10}
                   />
                 </DoctorNoteReplyPreviewCard>
               )}

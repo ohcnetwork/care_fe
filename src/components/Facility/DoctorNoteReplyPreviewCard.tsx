@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PaitentNotesReplyModel } from "@/components/Facility/models";
+import { PatientNotesReplyModel } from "@/components/Facility/models";
 
 import { USER_TYPES_MAP } from "@/common/constants";
 
@@ -10,7 +10,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import MarkdownPreview from "../Common/MarkdownPreview";
 
 interface Props {
-  parentNote: PaitentNotesReplyModel | undefined;
+  parentNote: PatientNotesReplyModel | undefined;
   children: React.ReactNode;
   cancelReply?: () => void;
 }
@@ -54,15 +54,18 @@ const DoctorNoteReplyPreviewCard = ({
             </div>
           </div>
           {cancelReply && (
-            <div
+            <button
+              type="button"
               className="mr-2 cursor-pointer p-1 text-2xl"
               onClick={cancelReply}
+              aria-label="Cancel reply"
+              title="Cancel reply"
             >
               <CareIcon
                 icon="l-times"
                 className="m-1 rounded-full bg-gray-400 p-1 text-white hover:bg-gray-500"
               />
-            </div>
+            </button>
           )}
         </div>
         <div className="max-h-14 overflow-hidden pb-2 pl-14 text-sm text-gray-700">

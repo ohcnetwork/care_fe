@@ -582,7 +582,7 @@ export interface PatientNotesEditModel {
   note: string;
 }
 
-export interface PaitentNotesReplyModel {
+export interface PatientNotesReplyModel {
   id: string;
   note: string;
   user_type?: UserRole | "RemoteSpecialist";
@@ -601,11 +601,11 @@ export interface PatientNotesModel {
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
-  reply_to_object?: PaitentNotesReplyModel;
-  replies: PaitentNotesReplyModel[];
+  reply_to_object?: PatientNotesReplyModel;
+  replies: PatientNotesReplyModel[];
   files: FileUploadModel[];
-  root_note_object?: PaitentNotesReplyModel;
-  child_notes: PaitentNotesReplyModel[];
+  root_note_object?: PatientNotesReplyModel;
+  child_notes: PatientNotesReplyModel[];
   mentioned_users: UserBareMinimum[];
 }
 

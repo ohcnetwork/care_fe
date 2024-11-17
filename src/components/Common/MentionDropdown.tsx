@@ -12,6 +12,13 @@ interface MentionsDropdownProps {
   filter: string;
 }
 
+const KEYS = {
+  ENTER: "Enter",
+  ARROW_UP: "ArrowUp",
+  ARROW_DOWN: "ArrowDown",
+  ESCAPE: "Escape",
+} as const;
+
 const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
   onSelect,
   position,
@@ -45,7 +52,10 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === "Enter" && filteredUsers.length > 0) {
+      if (document.activeElement !== editorRef.current) {
+        return;
+      }
+      if (event.key === KEYS.ENTER && filteredUsers.length > 0) {
         event.preventDefault();
         if (selectedIndex !== null) {
           onSelect({
@@ -58,13 +68,16 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
             username: filteredUsers[0].username,
           });
         }
-      } else if (event.key === "ArrowDown") {
+      } else if (event.key === KEYS.ESCAPE) {
+        event.preventDefault();
+        onSelect({ id: "", username: "" });
+      } else if (event.key === KEYS.ARROW_DOWN) {
         event.preventDefault();
         setSelectedIndex((prevIndex) => {
           if (prevIndex === null) return 0;
           return Math.min(filteredUsers.length - 1, prevIndex + 1);
         });
-      } else if (event.key === "ArrowUp") {
+      } else if (event.key === KEYS.ARROW_UP) {
         event.preventDefault();
         setSelectedIndex((prevIndex) => {
           if (prevIndex === null) return filteredUsers.length - 1;
@@ -72,7 +85,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
         });
       }
     },
-    [filteredUsers, selectedIndex, onSelect],
+    [filteredUsers, selectedIndex, onSelect, editorRef],
   );
 
   useEffect(() => {
@@ -86,8 +99,14 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
     <div
       className="absolute z-10 max-h-36 w-64 overflow-y-auto rounded-md bg-white text-sm shadow-lg"
       style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
+      role="listbox"
+      aria-label="User mentions"
     >
-      {loading && <div className="p-2 text-gray-500">Loading...</div>}
+      {loading && (
+        <div className="p-2 text-gray-500" role="status" aria-live="polite">
+          <span className="inline-block animate-spin">⌛</span> Loading users...
+        </div>
+      )}
       {filteredUsers.length > 0 && !loading ? (
         filteredUsers.map((user, index) => (
           <div
@@ -95,6 +114,8 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
             className={`flex cursor-pointer items-center gap-2 p-2 ${
               index === selectedIndex ? "bg-gray-100" : "hover:bg-gray-100"
             }`}
+            role="option"
+            aria-selected={index === selectedIndex}
             onClick={() =>
               onSelect({ id: user.id.toString(), username: user.username })
             }
@@ -102,11 +123,15 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
               {user.first_name[0]}
             </span>
-            {user.username}
+            <span className="truncate" title={user.username}>
+              {user.username}
+            </span>
           </div>
         ))
       ) : (
-        <div className="p-2 text-gray-500">No users found</div>
+        <div className="p-2 text-gray-500" role="status" aria-live="polite">
+          No users found
+        </div>
       )}
     </div>
   );

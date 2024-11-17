@@ -78,6 +78,7 @@ const MarkdownPreview = ({
       <a
         {...props}
         target="_blank"
+        rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
         className="text-blue-500 underline"
       />

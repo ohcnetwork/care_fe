@@ -8,8 +8,8 @@ import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPre
 import PatientConsultationNotesList from "@/components/Facility/PatientConsultationNotesList";
 import PatientNotesDetailedView from "@/components/Facility/PatientNotesDetailedView";
 import {
-  PaitentNotesReplyModel,
   PatientNoteStateType,
+  PatientNotesReplyModel,
 } from "@/components/Facility/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -44,7 +44,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
+  const [reply_to, setReplyTo] = useState<PatientNotesReplyModel | undefined>(
     undefined,
   );
   const [mode, setMode] = useState<"thread-view" | "default-view">(
@@ -182,6 +182,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
                   onAddNote={onAddNote}
                   isAuthorized={patientActive}
                   onRefetch={() => setReload(true)}
+                  maxRows={10}
                 />
               </DoctorNoteReplyPreviewCard>
             </div>

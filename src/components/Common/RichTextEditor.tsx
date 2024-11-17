@@ -18,6 +18,7 @@ interface RichTextEditorProps {
   onAddNote: () => Promise<string | undefined>;
   isAuthorized?: boolean;
   onRefetch?: () => void;
+  maxRows?: number;
 }
 
 const lineStyles = {
@@ -37,6 +38,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onAddNote,
   isAuthorized = true,
   onRefetch,
+  maxRows,
 }) => {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const [showMentions, setShowMentions] = useState(false);
@@ -131,12 +133,37 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setMentionFilter("");
   };
 
+  const adjustTextareaHeight = useCallback(
+    (textarea: HTMLTextAreaElement) => {
+      textarea.style.height = "auto";
+
+      const style = window.getComputedStyle(textarea);
+      const borderHeight =
+        parseInt(style.borderTopWidth) + parseInt(style.borderBottomWidth);
+      const paddingHeight =
+        parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+
+      const lineHeight = parseInt(style.lineHeight);
+      const maxHeight = maxRows
+        ? lineHeight * maxRows + borderHeight + paddingHeight
+        : Infinity;
+
+      const newHeight = Math.min(
+        textarea.scrollHeight + borderHeight,
+        maxHeight,
+      );
+      textarea.style.height = `${newHeight}px`;
+    },
+    [maxRows],
+  );
+
   const handleInput = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newMarkdown = event.target.value;
       const caretPosition = event.target.selectionStart;
 
       setMarkdown(newMarkdown);
+      adjustTextareaHeight(event.target);
 
       const textBeforeCaret = newMarkdown.substring(0, caretPosition);
       const lastAtSymbolIndex = textBeforeCaret.lastIndexOf("@");
@@ -158,8 +185,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         setShowMentions(false);
       }
     },
-    [],
+    [adjustTextareaHeight],
   );
+
+  useEffect(() => {
+    if (editorRef.current) {
+      adjustTextareaHeight(editorRef.current);
+    }
+  }, [markdown, adjustTextareaHeight]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
@@ -510,11 +543,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <textarea
             id="discussion_notes_textarea"
             ref={editorRef}
-            className="max-h-[300px] min-h-[70px] w-full resize-none overflow-y-auto border-none p-2 align-middle text-sm outline-none focus:outline-none focus:ring-0"
+            className={classNames(
+              "w-full resize-none border-none p-2 align-middle text-sm outline-none focus:outline-none focus:ring-0",
+              maxRows ? "overflow-y-auto" : "overflow-hidden",
+            )}
             value={markdown}
-            onChange={(e) => {
-              setMarkdown(e.target.value);
-            }}
             onInput={handleInput}
             onKeyDown={onKeyDown}
           />

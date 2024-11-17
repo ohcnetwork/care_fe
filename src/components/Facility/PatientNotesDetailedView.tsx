@@ -11,7 +11,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
 import PatientNoteCard from "./PatientNoteCard";
-import { PaitentNotesReplyModel, PatientNotesModel } from "./models";
+import { PatientNotesModel, PatientNotesReplyModel } from "./models";
 
 interface Props {
   patientId: string;
@@ -28,7 +28,7 @@ const PatientNotesDetailedView = (props: Props) => {
   const [reload, setReload] = useState(false);
   const [state, setState] = useState<PatientNotesModel>();
   const [noteField, setNoteField] = useState("");
-  const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
+  const [reply_to, setReplyTo] = useState<PatientNotesReplyModel | undefined>(
     undefined,
   );
 
@@ -57,6 +57,7 @@ const PatientNotesDetailedView = (props: Props) => {
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
+      setReload(true);
     }
 
     return data?.id;
@@ -79,7 +80,7 @@ const PatientNotesDetailedView = (props: Props) => {
       setState(data);
     }
     setIsLoading(false);
-    setReload?.(false);
+    setReload(false);
   };
 
   // Fetch notes when reload is triggered
@@ -96,7 +97,7 @@ const PatientNotesDetailedView = (props: Props) => {
 
   // Set reload to true on component mount
   useEffect(() => {
-    setReload?.(true);
+    setReload(true);
   }, []);
 
   if (isLoading) {
@@ -132,7 +133,7 @@ const PatientNotesDetailedView = (props: Props) => {
           <div className="flex flex-1 flex-col overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2">
               <h4 className="text-lg text-slate-600">Replies</h4>
-              {state.replies.length > 0 && (
+              {state.child_notes.length > 0 && (
                 <div className="text-sm text-gray-500">
                   {state.child_notes.length}{" "}
                   {state.child_notes.length > 1 ? "replies" : "reply"}
@@ -175,6 +176,7 @@ const PatientNotesDetailedView = (props: Props) => {
                 onChange={setNoteField}
                 initialMarkdown={noteField}
                 onRefetch={() => setReload(true)}
+                maxRows={10}
               />
             </DoctorNoteReplyPreviewCard>
           </div>

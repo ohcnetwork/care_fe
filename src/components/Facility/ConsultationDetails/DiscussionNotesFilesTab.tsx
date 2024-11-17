@@ -11,6 +11,7 @@ import useFileManager from "@/hooks/useFileManager";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 
@@ -54,33 +55,56 @@ export const DiscussionNotesFiles = (props: DiscussionNotesProps) => {
     setOffset(offset);
   };
 
-  const type = "NOTES";
-  const activeFilesQuery = useQuery(routes.listConsultationFileUploads, {
+  const FILE_TYPE = "NOTES" as const;
+
+  const {
+    data: activeFilesData,
+    loading: activeFilesLoading,
+    refetch: refetchActive,
+  } = useQuery(routes.listConsultationFileUploads, {
     query: {
       is_archived: false,
       limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
+      offset,
     },
     pathParams: { consultation_external_id: props.consultationId },
   });
 
-  const archivedFilesQuery = useQuery(routes.listConsultationFileUploads, {
+  const {
+    data: archivedFilesData,
+    loading: archivedFilesLoading,
+    refetch: refetchArchived,
+  } = useQuery(routes.listConsultationFileUploads, {
     query: {
       is_archived: true,
       limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
+      offset,
     },
     pathParams: { consultation_external_id: props.consultationId },
   });
 
   const queries = {
-    UNARCHIVED: activeFilesQuery,
-    ARCHIVED: archivedFilesQuery,
+    UNARCHIVED: {
+      data: activeFilesData,
+      loading: activeFilesLoading,
+      refetch: refetchActive,
+    },
+    ARCHIVED: {
+      data: archivedFilesData,
+      loading: archivedFilesLoading,
+      refetch: refetchArchived,
+    },
   };
 
   const loading = Object.values(queries).some((q) => q.loading);
   const refetchAll = async () =>
-    Promise.all(Object.values(queries).map((q) => q.refetch()));
+    Promise.all(
+      Object.values(queries).map((q) =>
+        q.refetch?.().catch(() => {
+          Notification.Error({ msg: "Failed to refetch files" });
+        }),
+      ),
+    );
 
   const fileQuery = queries[tab as keyof typeof queries];
 
@@ -90,7 +114,7 @@ export const DiscussionNotesFiles = (props: DiscussionNotesProps) => {
   ];
 
   const fileManager = useFileManager({
-    type,
+    type: FILE_TYPE,
     onArchive: refetchAll,
     onEdit: refetchAll,
   });
@@ -135,12 +159,12 @@ export const DiscussionNotesFiles = (props: DiscussionNotesProps) => {
           </div>
         )}
       </div>
-      {(fileQuery?.data?.results || []).length > RESULTS_PER_PAGE_LIMIT && (
+      {fileQuery?.data && fileQuery.data.count > RESULTS_PER_PAGE_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination
             cPage={currentPage}
             defaultPerPage={RESULTS_PER_PAGE_LIMIT}
-            data={{ totalCount: (fileQuery?.data?.results || []).length }}
+            data={{ totalCount: fileQuery?.data?.count }}
             onChange={handlePagination}
           />
         </div>

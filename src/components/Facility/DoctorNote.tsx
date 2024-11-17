@@ -49,20 +49,22 @@ const DoctorNote = (props: DoctorNoteProps) => {
           scrollableTarget="patient-notes-list"
         >
           {state.notes.map((note) => {
+            const noteCard = (
+              <PatientNoteCard
+                note={note}
+                setReload={setReload}
+                disableEdit={disableEdit}
+                setReplyTo={setReplyTo}
+                mode={mode}
+                allowThreadView={mode === "thread-view"}
+                allowReply={mode !== "thread-view"}
+                setThreadViewNote={setThreadViewNote}
+              />
+            );
             if (mode === "thread-view" && !note.root_note_object) {
               return (
-                <div className="mt-3">
-                  <PatientNoteCard
-                    key={note.id}
-                    note={note}
-                    setReload={setReload}
-                    disableEdit={disableEdit}
-                    setReplyTo={setReplyTo}
-                    mode={mode}
-                    allowThreadView
-                    allowReply={false}
-                    setThreadViewNote={setThreadViewNote}
-                  />
+                <div key={note.id} className="mt-3">
+                  {noteCard}
                 </div>
               );
             } else if (mode === "default-view") {
@@ -71,14 +73,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
                   key={note.id}
                   parentNote={note.reply_to_object}
                 >
-                  <div className="mt-3">
-                    <PatientNoteCard
-                      note={note}
-                      setReload={setReload}
-                      disableEdit={disableEdit}
-                      setReplyTo={setReplyTo}
-                    />
-                  </div>
+                  <div className="mt-3">{noteCard}</div>
                 </DoctorNoteReplyPreviewCard>
               );
             }
