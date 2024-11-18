@@ -100,11 +100,7 @@ const getNameAndStatusCard = (
             {user.username}
           </span>
         </div>
-        <div>
-          {showDetailsButton &&
-            CanUserAccess(user) &&
-            GetDetailsButton(user.username)}
-        </div>
+        <div>{showDetailsButton && GetDetailsButton(user.username)}</div>
       </div>
     </div>
   );
@@ -315,9 +311,7 @@ const UserListRow = ({
               : ""}
         </td>
       )}
-      <td className="px-4 py-4">
-        {CanUserAccess(user) && GetDetailsButton(user.username)}
-      </td>
+      <td className="px-4 py-4">{GetDetailsButton(user.username)}</td>
     </tr>
   );
 };

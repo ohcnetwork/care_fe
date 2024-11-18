@@ -13,12 +13,14 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { LocalStorageKeys } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
-import { showAvatarEdit } from "@/Utils/permissions";
+import { editUserPermissions, showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
 import { formatDisplayName, sleep } from "@/Utils/utils";
+
+import { UserViewDetails } from "./UserViewDetails";
 
 export default function UserInformation({ username }: { username: string }) {
   const { t } = useTranslation();
@@ -80,6 +82,9 @@ export default function UserInformation({ username }: { username: string }) {
     }
   };
 
+  const avatarPermissions = showAvatarEdit(authUser, userData);
+  const editPermissions = editUserPermissions(authUser, userData);
+
   return (
     <>
       <AvatarEditModal
@@ -90,40 +95,45 @@ export default function UserInformation({ username }: { username: string }) {
         handleDelete={handleAvatarDelete}
         onClose={() => setEditAvatar(false)}
       />
-      <div className="overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
-        <div className="my-4 flex justify-between">
-          <div className="flex items-center">
-            <Avatar
-              imageUrl={userData?.read_profile_picture_url}
-              name={formatDisplayName(userData)}
-              className="h-20 w-20"
-            />
-            <div className="my-4 ml-4 flex flex-col gap-2">
-              <ButtonV2
-                onClick={(_) => setEditAvatar(!editAvatar)}
-                type="button"
-                id="edit-cancel-profile-button"
-                className="border border-gray-200 bg-gray-50 text-black hover:bg-gray-100"
-                shadow={false}
-                disabled={!showAvatarEdit(authUser, userData)}
-                tooltip={
-                  !showAvatarEdit(authUser, userData)
-                    ? t("edit_avatar_permission_error")
-                    : undefined
-                }
-              >
-                {t("change_avatar")}
-              </ButtonV2>
-              <p className="text-xs leading-5 text-gray-500">
-                {t("change_avatar_note")}
-              </p>
+      {editPermissions && (
+        <div className="overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+          {avatarPermissions && (
+            <div className="my-4 bg-white flex justify-between">
+              <div className="flex items-center">
+                <Avatar
+                  imageUrl={userData?.read_profile_picture_url}
+                  name={formatDisplayName(userData)}
+                  className="h-20 w-20"
+                />
+                <div className="my-4 ml-4 flex flex-col gap-2">
+                  <ButtonV2
+                    onClick={(_) => setEditAvatar(!editAvatar)}
+                    type="button"
+                    id="edit-cancel-profile-button"
+                    className="border border-gray-200 bg-gray-50 text-black hover:bg-gray-100"
+                    shadow={false}
+                    disabled={!showAvatarEdit(authUser, userData)}
+                    tooltip={
+                      !showAvatarEdit(authUser, userData)
+                        ? t("edit_avatar_permission_error")
+                        : undefined
+                    }
+                  >
+                    {t("change_avatar")}
+                  </ButtonV2>
+                  <p className="text-xs leading-5 text-gray-500">
+                    {t("change_avatar_note")}
+                  </p>
+                </div>
+              </div>
             </div>
+          )}
+          <div id="user-edit-form">
+            <UserAddEditForm username={username} />
           </div>
         </div>
-        <div id="user-edit-form">
-          <UserAddEditForm username={username} />
-        </div>
-      </div>
+      )}
+      {!editPermissions && <UserViewDetails user={userData} />}
     </>
   );
 }

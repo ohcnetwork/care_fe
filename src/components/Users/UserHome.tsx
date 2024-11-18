@@ -12,7 +12,10 @@ import UserBanner from "@/components/Users/UserBanner";
 import UserSummaryTab from "@/components/Users/UserSummary";
 import { UserModel } from "@/components/Users/models";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import * as Notification from "@/Utils/Notifications";
+import { editUserPermissions } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
@@ -24,12 +27,14 @@ export interface UserHomeProps {
 export interface tabChildProp {
   body: (childProps: userChildProps) => JSX.Element | undefined;
   name?: string;
+  hidden?: boolean;
 }
 
 export default function UserHome(props: UserHomeProps) {
   const { username, tab } = props;
   const [userData, setUserData] = useState<UserModel>();
   const { t } = useTranslation();
+  const authUser = useAuthUser();
 
   const { loading, refetch: refetchUserDetails } = useQuery(
     routes.getUserDetails,
@@ -51,10 +56,16 @@ export default function UserHome(props: UserHomeProps) {
     },
   );
 
+  if (loading || !userData) {
+    return <Loading />;
+  }
+
   const roleInfoBeVisible = () => {
     if (["Doctor", "Nurse"].includes(userData?.user_type ?? "")) return true;
     return false;
   };
+
+  const editPermissions = editUserPermissions(authUser, userData);
 
   const TABS: {
     PROFILE: tabChildProp;
@@ -65,8 +76,12 @@ export default function UserHome(props: UserHomeProps) {
     SKILLS: {
       body: RoleAndSkillsTab,
       name: roleInfoBeVisible() ? "QUALIFICATIONS_SKILLS" : "SKILLS",
+      hidden: !editPermissions,
     },
-    FACILITIES: { body: LinkedFacilitiesTab },
+    FACILITIES: {
+      body: LinkedFacilitiesTab,
+      hidden: !editPermissions,
+    },
   };
 
   const normalizedTab = tab.toUpperCase();
@@ -76,10 +91,6 @@ export default function UserHome(props: UserHomeProps) {
 
   if (!currentTab) {
     return <Error404 />;
-  }
-
-  if (loading || !userData) {
-    return <Loading />;
   }
 
   const SelectedTab = TABS[currentTab].body;
@@ -103,25 +114,27 @@ export default function UserHome(props: UserHomeProps) {
                     className="flex space-x-6 overflow-x-auto"
                     id="usermanagement_tab_nav"
                   >
-                    {keysOf(TABS).map((p) => {
-                      const tabName = TABS[p]?.name ?? p;
-                      return (
-                        <Link
-                          key={p}
-                          className={classNames(
-                            "min-w-max-content cursor-pointer whitespace-nowrap text-sm font-semibold capitalize",
-                            currentTab === p
-                              ? "border-b-2 border-primary-500 text-primary-600 hover:border-secondary-300"
-                              : "text-secondary-700 hover:text-secondary-700",
-                          )}
-                          href={`/users/${username}/${p.toLocaleLowerCase()}`}
-                        >
-                          <div className="px-3 py-1.5" id={p.toLowerCase()}>
-                            {t(`USERMANAGEMENT_TAB__${tabName}`)}
-                          </div>
-                        </Link>
-                      );
-                    })}
+                    {keysOf(TABS)
+                      .filter((p) => !TABS[p].hidden)
+                      .map((p) => {
+                        const tabName = TABS[p]?.name ?? p;
+                        return (
+                          <Link
+                            key={p}
+                            className={classNames(
+                              "min-w-max-content cursor-pointer whitespace-nowrap text-sm font-semibold capitalize",
+                              currentTab === p
+                                ? "border-b-2 border-primary-500 text-primary-600 hover:border-secondary-300"
+                                : "text-secondary-700 hover:text-secondary-700",
+                            )}
+                            href={`/users/${username}/${p.toLocaleLowerCase()}`}
+                          >
+                            <div className="px-3 py-1.5" id={p.toLowerCase()}>
+                              {t(`USERMANAGEMENT_TAB__${tabName}`)}
+                            </div>
+                          </Link>
+                        );
+                      })}
                   </nav>
                 </div>
               </div>
