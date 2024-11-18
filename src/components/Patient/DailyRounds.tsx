@@ -144,7 +144,7 @@ export const DailyRounds = (props: any) => {
   const [diagnoses, setDiagnoses] = useState<ConsultationDiagnosis[]>();
   const [showDiscontinuedPrescriptions, setShowDiscontinuedPrescriptions] =
     useState(false);
-  const headerText = !id ? "Add Consultation Update" : "Info";
+  const headerText = !id ? t("add") + " " + t("log_update") : "Info";
   const buttonText = !id
     ? !["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)
       ? t("save")
@@ -411,7 +411,7 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${obj.id}/update`,
             );
           }
         }
@@ -439,7 +439,7 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${obj.id}/critical_care/update`,
             );
           }
         }
@@ -553,7 +553,7 @@ export const DailyRounds = (props: any) => {
       }}
       backUrl={
         id
-          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates`
           : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
       }
       className="mx-auto max-w-4xl"
