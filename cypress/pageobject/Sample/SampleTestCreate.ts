@@ -1,6 +1,7 @@
 export class SampleTestPage {
   visitSampleRequestPage(): void {
     cy.verifyAndClickElement("#sample-request-btn", "Request Sample Test");
+    cy.url().should("include", "/sample-test");
   }
 
   selectSampleType(option: string): void {
@@ -100,7 +101,7 @@ export class SampleTestPage {
   }
 
   verifySampleTestReq(): void {
-    cy.wait("@sampleDetails").its("response.statusCode").should("eq", 200);
+    cy.wait("@sampleDetails").its("response.statusCode").should("eq", 201);
   }
 
   interceptGetSampleTestReq(): void {

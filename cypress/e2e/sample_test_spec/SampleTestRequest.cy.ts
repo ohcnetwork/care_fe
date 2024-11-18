@@ -55,11 +55,11 @@ describe("Sample Test", () => {
     sampleTestPage.checkHasSari();
     sampleTestPage.checkHasAri();
     sampleTestPage.checkIsUnusualCourse();
+    sampleTestPage.interceptSampleTestReq();
     // Submit the form and verify notification
     cy.clickSubmitButton("Confirm your request to send sample for testing");
-    sampleTestPage.interceptSampleTestReq();
-    cy.verifyNotification("Sample test created successfully");
     sampleTestPage.verifySampleTestReq();
+    cy.verifyNotification("Sample test created successfully");
     // Check the updated request history
     sampleTestPage.checkRequestHistory(
       sampleTestStatus,
