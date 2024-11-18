@@ -46,16 +46,26 @@ const MarkdownPreview = ({
     title?: string | null;
     text: string;
   }) {
+    try {
+      const url = new URL(href);
+      if (!["http:", "https:"].includes(url.protocol)) {
+        return text;
+      }
+      href = url.toString();
+    } catch {
+      return text;
+    }
     return `<a href="${href}" target="_blank" rel="noopener noreferrer" title="${
       title || ""
     }">${text}</a>`;
   };
 
   const processedMarkdown = markdown
-    .replace(/@(\w+)/g, (_, username) => {
+    .replace(/@([a-zA-Z0-9_]{3,30})/g, (_, username) => {
       const user = MentionedUsers[username];
       if (user) {
-        return `<span class="mention cursor-pointer font-medium text-primary hover:underline" data-username="${username}">@${username}</span>`;
+        const sanitizedUsername = username.replace(/[<>"'&]/g, "");
+        return `<span class="mention cursor-pointer font-medium text-primary hover:underline" data-username="${sanitizedUsername}">@${sanitizedUsername}</span>`;
       } else {
         return `@${username}`;
       }

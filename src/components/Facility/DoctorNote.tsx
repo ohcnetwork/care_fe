@@ -10,7 +10,7 @@ import {
 
 interface DoctorNoteProps {
   state: PatientNoteStateType;
-  setReload: any;
+  setReload?: (value: boolean) => void;
   handleNext: () => void;
   disableEdit?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
