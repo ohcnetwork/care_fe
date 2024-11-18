@@ -95,9 +95,7 @@ export class SampleTestPage {
   }
 
   interceptSampleTestReq(): void {
-    cy.intercept("GET", "**/api/v1/patient/*/test_sample/**").as(
-      "sampleDetails",
-    );
+    cy.intercept("GET", "**/api/v1/patient/*/test_sample/").as("sampleDetails");
   }
 
   verifySampleTestReq(): void {
