@@ -77,7 +77,14 @@ const TransferPatientDialog = (props: Props) => {
   const handleChange = (e: FieldChangeEvent<unknown>) => {
     const value = String(e.value);
 
-    if (value.length <= 4) {
+    if (e.name === "year_of_birth") {
+      if (value.length <= 4) {
+        dispatch({
+          type: "set_form",
+          form: { ...state.form, [e.name]: e.value },
+        });
+      }
+    } else {
       dispatch({
         type: "set_form",
         form: { ...state.form, [e.name]: e.value },
