@@ -80,7 +80,7 @@ export default function UserQualifications({ username }: { username: string }) {
     loading: isLoading,
     refetch: refetchUserData,
   } = useQuery(routes.getUserDetails, {
-    query: {
+    pathParams: {
       username: username,
     },
     onResponse: (result) => {

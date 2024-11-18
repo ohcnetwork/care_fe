@@ -34,7 +34,7 @@ export default function UserHome(props: UserHomeProps) {
   const { loading, refetch: refetchUserDetails } = useQuery(
     routes.getUserDetails,
     {
-      query: {
+      pathParams: {
         username: username,
       },
       onResponse: ({ res, data, error }) => {

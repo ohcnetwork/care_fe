@@ -173,10 +173,10 @@ const UserAddEditForm = (props: UserProps) => {
     data: userData,
     refetch: refetchUserData,
   } = useQuery(routes.getUserDetails, {
-    query: {
-      username: username,
+    pathParams: {
+      username: username ?? "",
     },
-    prefetch: editUser,
+    prefetch: editUser && !!username,
     onResponse: (result) => {
       if (!editUser || !result || !result.res || !result.data) return;
       const userData = result.data;

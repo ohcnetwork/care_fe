@@ -30,7 +30,7 @@ export default function UserInformation({ username }: { username: string }) {
     loading: isLoading,
     refetch: refetchUserData,
   } = useQuery(routes.getUserDetails, {
-    query: {
+    pathParams: {
       username: username,
     },
   });
