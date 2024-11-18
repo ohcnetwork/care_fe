@@ -84,8 +84,8 @@ module.exports = {
     },
   },
   content: [
-    "./src/**/*.{html,md,js,jsx,ts,tsx,res}",
-    "./apps/**/*.{html,md,js,jsx,ts,tsx,res}",
+    "./src/**/*.{html,md,js,jsx,ts,tsx}",
+    "./apps/**/*.{html,md,js,jsx,ts,tsx}",
     "./index.html",
   ],
   plugins: [
