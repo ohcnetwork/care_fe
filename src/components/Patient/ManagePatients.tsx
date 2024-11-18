@@ -358,7 +358,7 @@ export const PatientManager = () => {
   );
 
   const LastAdmittedToTypeBadges = () => {
-    const badge = (key: string, value: any, id: string) => {
+    const badge = (key: string, value: string | undefined, id: string) => {
       return (
         value && (
           <FilterBadge
@@ -387,7 +387,7 @@ export const PatientManager = () => {
   };
 
   const HasConsentTypesBadges = () => {
-    const badge = (key: string, value: any, id: string) => {
+    const badge = (key: string, value: string | undefined, id: string) => {
       return (
         value && (
           <FilterBadge
@@ -739,7 +739,7 @@ export const PatientManager = () => {
     managePatients = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-secondary-600">
-          No Patients Found
+          {t("no_patients_found")}
         </p>
       </div>
     );
@@ -892,6 +892,7 @@ export const PatientManager = () => {
             />
             {!!params.facility && (
               <ButtonV2
+                className="w-full lg:w-fit"
                 id="doctor-connect-patient-button"
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {
