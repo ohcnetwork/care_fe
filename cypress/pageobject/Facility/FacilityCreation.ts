@@ -51,7 +51,7 @@ class FacilityPage {
   }
 
   submitForm() {
-    cy.get("button#submit").click();
+    cy.submitButton("Save Facility");
   }
 
   selectBedType(bedType: string) {

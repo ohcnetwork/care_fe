@@ -59,11 +59,6 @@ describe("Facility Creation", () => {
   const triageErrorMessage = ["This field is required"];
   const facilityType = "Primary Health Centres";
 
-  const nonAdminUsers = [
-    { username: "dummynurse1", password: "Coronasafe@123" },
-    { username: "devdoctor", password: "Coronasafe@123" },
-  ];
-
   before(() => {
     loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
@@ -340,13 +335,18 @@ describe("Facility Creation", () => {
   });
 
   it("Access Restriction for Non-Admin Users to facility creation page", () => {
-    nonAdminUsers.forEach((user) => {
-      loginPage.login(user.username, user.password);
-      cy.visit("/facility/create");
+    const nonAdminLoginMethods = [
+      loginPage.loginAsDevDoctor.bind(loginPage),
+      loginPage.loginAsStaff.bind(loginPage),
+    ];
 
+    nonAdminLoginMethods.forEach((loginMethod) => {
+      loginMethod();
+      cy.visit("/facility/create");
       facilityPage.verifyErrorNotification(
         "You don't have permission to perform this action. Contact the admin",
       );
+      cy.clearCookies();
     });
   });
 
