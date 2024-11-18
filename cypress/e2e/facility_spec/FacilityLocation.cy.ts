@@ -61,9 +61,8 @@ describe("Location Management Section", () => {
   it("Add a Bed to facility location along with duplication and deleting a bed", () => {
     cy.wait(2000);
     // mandatory field verification in bed creation
-    cy.document().then(($doc) => {
-      const manageBedButton = $doc.querySelector("#manage-bed-button");
-      if (manageBedButton) {
+    cy.get("body").then(($body) => {
+      if ($body.find("#manage-bed-button").length > 0) {
         facilityLocation.clickManageBedButton();
       } else {
         facilityLocation.clickAddNewLocationButton();

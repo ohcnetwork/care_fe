@@ -270,9 +270,8 @@ describe("Facility Homepage Function", () => {
     cy.get("[id='manage-facility-dropdown']").scrollIntoView().click();
     cy.get("[id=location-management]").click();
     // create new location and add a bed to the facility
-    cy.document().then(($doc) => {
-      const manageBedButton = $doc.querySelector("#manage-bed-button");
-      if (manageBedButton) {
+    cy.get("body").then(($body) => {
+      if ($body.find("#manage-bed-button").length > 0) {
         facilityLocation.clickManageBedButton();
       } else {
         facilityLocation.clickAddNewLocationButton();
@@ -306,7 +305,7 @@ describe("Facility Homepage Function", () => {
       "1A00",
       "add-icd11-diagnosis-as-unconfirmed",
     );
-    patientTreatmentPlan.fillTreatingPhysican(doctorName);
+    patientTreatmentPlan.fillTreatingPhysician(doctorName);
     patientConsultationPage.selectBed("Bed 1");
     cy.submitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");

@@ -174,7 +174,38 @@ describe("Facility Creation", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.submitForm();
     userCreationPage.verifyErrorMessages(facilityErrorMessage);
-    facilityPage.createNewFacility(testFacilityData);
+    facilityPage.visitCreateFacilityPage();
+    facilityPage.fillBasicDetails(testFacilityData.basic);
+    facilityPage.fillLocationDetails(testFacilityData.location);
+    facilityPage.fillOxygenDetails(testFacilityData.oxygen);
+    facilityPage.submitForm();
+    cy.closeNotification();
+    // add the bed capacity
+    facilityPage.selectBedType("Oxygen Supported Bed");
+    facilityPage.fillTotalCapacity(bedCapacity);
+    facilityPage.fillCurrentlyOccupied(bedOccupancy);
+    facilityPage.clickbedcapcityaddmore();
+    cy.closeNotification();
+    facilityPage.selectBedType("Ordinary Bed");
+    facilityPage.fillTotalCapacity(bedCapacity);
+    facilityPage.fillCurrentlyOccupied(bedOccupancy);
+    facilityPage.clickbedcapcityaddmore();
+    cy.closeNotification();
+    facilityPage.getTotalBedCapacity().contains(totalCapacity);
+    facilityPage.getTotalBedCapacity().contains(totalOccupancy);
+    facilityPage.clickcancelbutton();
+    // create multiple bed capacity and verify card reflection
+    facilityPage.selectAreaOfSpecialization("General Medicine");
+    facilityPage.fillDoctorCount(doctorCapacity);
+    facilityPage.clickdoctorcapacityaddmore();
+    cy.closeNotification();
+    facilityPage.selectAreaOfSpecialization("Pulmonology");
+    facilityPage.fillDoctorCount(doctorCapacity);
+    facilityPage.clickdoctorcapacityaddmore();
+    cy.closeNotification();
+    facilityPage.getTotalDoctorCapacity().contains(doctorCapacity);
+    facilityPage.clickcancelbutton();
+    facilityPage.verifyfacilitynewurl();
     // verify the facility card
     facilityPage.getFacilityName().contains(facilityName).should("be.visible");
     facilityPage

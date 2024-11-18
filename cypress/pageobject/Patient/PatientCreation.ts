@@ -55,7 +55,6 @@ export class PatientPage {
     cy.get("#name").click().type(patientName);
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
-    cy.wait(2000);
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
     cy.get("#patient-name-age").should("be.visible").contains(patientName);
     cy.get("#create-consultation").should("be.visible");
