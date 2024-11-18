@@ -316,6 +316,9 @@ export default function NotificationsList({
           });
 
           setIsSubscribed("NotSubscribed");
+          Warn({
+            msg: t("unsubscribed_successfully"),
+          });
         } catch (e) {
           Error({ msg: t("unsubscribe_failed") });
         }
