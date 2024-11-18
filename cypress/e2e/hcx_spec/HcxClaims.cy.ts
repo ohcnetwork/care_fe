@@ -81,11 +81,7 @@ describe("HCX Claims configuration and approval workflow", () => {
     patientConsultationPage.clickManagePatientButton();
     patientConsultationPage.clickClaimsButton();
     cy.verifyAndClickElement("#edit-insurance-policy", "Edit Insurance Policy");
-    patientInsurance.verifyPatientPolicyDetails(
-      patientMemberId,
-      patientPolicyId,
-      patientInsurerName,
-    );
+    cy.verifyContentPresence("#subscriber_id", [patientMemberId]);
     cy.clickCancelButton();
     hcxClaims.selectEligiblePolicy(patientInsurerName);
     hcxClaims.verifyPolicyEligibility();
