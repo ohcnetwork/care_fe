@@ -6,7 +6,7 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 import GenericEvent from "@/components/Facility/ConsultationDetails/Events/GenericEvent";
 import { getEventIcon } from "@/components/Facility/ConsultationDetails/Events/iconMap";
 import { EventGeneric } from "@/components/Facility/ConsultationDetails/Events/types";
-import LoadingLogUpdateCard from "@/components/Facility/Consultations/DailyRounds/LoadingCard";
+import LoadingLogUpdateCard from "@/components/Facility/Consultations/LogUpdates/LoadingCard";
 
 import { useSlugs } from "@/hooks/useSlug";
 

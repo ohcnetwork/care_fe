@@ -95,7 +95,7 @@ export default function CriticalCareEditor(props: Props) {
                 ghost
                 className="w-full bg-primary-100/50 py-3"
                 border
-                href={`${consultationDashboardUrl}/daily-rounds/${props.id}/update`}
+                href={`${consultationDashboardUrl}/log_updates/${props.id}/update`}
               >
                 <CareIcon
                   icon="l-info-circle"
@@ -178,7 +178,7 @@ type SectionEditorProps = {
 };
 
 const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
-  const [consultationId, id] = useSlugs("consultation", "daily_rounds");
+  const [consultationId, id] = useSlugs("consultation", "log_updates");
   const [diff, setDiff] = useState<Partial<DailyRoundsModel>>({});
   const [isProcessing, setIsProcessing] = useState(false);
 

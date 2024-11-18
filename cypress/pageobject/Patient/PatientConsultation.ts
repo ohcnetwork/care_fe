@@ -115,8 +115,8 @@ export class PatientConsultationPage {
 
   clickViewConsultationButton() {
     cy.verifyAndClickElement(
-      "#view_consultation_updates",
-      "View Consultation / Consultation Updates",
+      "#view_consultation_and_log_updates",
+      "View Consultation / Log Updates",
     );
   }
 
