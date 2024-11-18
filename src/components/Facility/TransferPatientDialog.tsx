@@ -75,10 +75,14 @@ const TransferPatientDialog = (props: Props) => {
   const maxYear = new Date().getFullYear();
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
-    dispatch({
-      type: "set_form",
-      form: { ...state.form, [e.name]: e.value },
-    });
+    const value = String(e.value);
+
+    if (value.length <= 4) {
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, [e.name]: e.value },
+      });
+    }
   };
 
   const handleOnBlur = (e: React.FocusEvent<HTMLInputElement>) => {
