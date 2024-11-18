@@ -65,7 +65,7 @@ describe("Manage User", () => {
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
-    cy.verifyNotification("Skill added sucessfully");
+    cy.verifyNotification("Skill added successfully");
     cy.closeNotification();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickCloseSlideOver();
