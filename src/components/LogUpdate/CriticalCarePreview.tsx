@@ -61,7 +61,7 @@ export default function CriticalCarePreview(props: Props) {
 
       <Card className="md:rounded-xl lg:p-8">
         <h2 className="mb-3 flex flex-col gap-4 text-black md:flex-row md:items-center">
-          <span>Consultation Updates</span>
+          <span>{t("log_updates")}</span>
           <div className="max-w-min whitespace-nowrap rounded-full border border-primary-300 bg-primary-100 px-2.5 py-1.5 text-sm font-semibold text-primary-500">
             <span>{t(`ROUNDS_TYPE__${data.rounds_type}`)}</span>
           </div>

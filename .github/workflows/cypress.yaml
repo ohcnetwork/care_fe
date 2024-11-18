@@ -116,7 +116,6 @@ jobs:
           group: "UI-Chrome"
         env:
           CYPRESS_SPLIT_TESTS: "true"
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
@@ -133,7 +132,7 @@ jobs:
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v3
-        if: steps.pr_origin.outputs.is_forked == 'true'
+        if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
         with:
           name: cypress-videos
           path: cypress/videos
