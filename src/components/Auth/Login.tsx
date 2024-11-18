@@ -348,6 +348,7 @@ const Login = (props: { forgot?: boolean }) => {
                         </div>
                       ) : (
                         <button
+                          id="login-button"
                           type="submit"
                           className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600"
                         >
