@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import LogUpdateCardAttribute from "@/components/Facility/Consultations/DailyRounds/LogUpdateCardAttribute";
+import LogUpdateCardAttribute from "@/components/Facility/Consultations/LogUpdates/LogUpdateCardAttribute";
 import { DailyRoundsModel } from "@/components/Patient/models";
 
 // TODO: remove this method once events module is ready
