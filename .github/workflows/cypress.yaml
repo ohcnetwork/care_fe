@@ -133,7 +133,7 @@ jobs:
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v3
-        if: steps.pr_origin.outputs.is_forked == 'true'
+        if: failure() && steps.pr_origin.outputs.is_forked == 'true'
         with:
           name: cypress-videos
           path: cypress/videos
