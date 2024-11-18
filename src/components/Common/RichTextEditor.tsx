@@ -740,26 +740,27 @@ const getCaretCoordinates = (
 ) => {
   const div = document.createElement("div");
   const span = document.createElement("span");
-  const computed = getComputedStyle(element);
+  try {
+    const computed = getComputedStyle(element);
 
-  div.style.position = "absolute";
-  div.style.whiteSpace = "pre-wrap";
-  div.style.visibility = "hidden";
+    div.style.position = "absolute";
+    div.style.whiteSpace = "pre-wrap";
+    div.style.visibility = "hidden";
 
-  for (let i = 0; i < computed.length; i++) {
-    const prop = computed[i];
-    div.style.setProperty(prop, computed.getPropertyValue(prop));
+    for (let i = 0; i < computed.length; i++) {
+      const prop = computed[i];
+      div.style.setProperty(prop, computed.getPropertyValue(prop));
+    }
+
+    div.textContent = element.value.substring(0, position);
+    span.textContent = element.value.substring(position) || ".";
+
+    div.appendChild(span);
+    document.body.appendChild(div);
+
+    const { top, left } = span.getBoundingClientRect();
+    return { top, left, start: position };
+  } finally {
+    document.body.removeChild(div);
   }
-
-  div.textContent = element.value.substring(0, position);
-  span.textContent = element.value.substring(position) || ".";
-
-  div.appendChild(span);
-  document.body.appendChild(div);
-
-  const { offsetTop: top, offsetLeft: left } = span;
-
-  document.body.removeChild(div);
-
-  return { top, left, start: position };
 };

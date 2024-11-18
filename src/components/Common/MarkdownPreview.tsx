@@ -76,34 +76,43 @@ const MarkdownPreview = ({
 
   useEffect(() => {
     const mentionElements = document.querySelectorAll(".mention");
-
-    const handleMouseEnter = (event: Event) => {
-      const element = event.target as HTMLElement;
-      const username = element.getAttribute("data-username");
-      if (username) {
-        setHoveredUser(username);
-        const rect = element.getBoundingClientRect();
-        setHoverPosition({
-          x: rect.left,
-          y: rect.top,
-        });
-      }
-    };
-
-    const handleMouseLeave = () => {
-      setHoveredUser(null);
-      setHoverPosition(null);
-    };
+    const listeners: Array<{
+      element: Element;
+      enter: () => void;
+      leave: () => void;
+    }> = [];
 
     mentionElements.forEach((ele) => {
-      ele.addEventListener("mouseenter", handleMouseEnter);
-      ele.addEventListener("mouseleave", handleMouseLeave);
+      const handleEnter = () => {
+        const username = ele.getAttribute("data-username");
+        if (username) {
+          setHoveredUser(username);
+          const rect = ele.getBoundingClientRect();
+          setHoverPosition({
+            x: rect.left,
+            y: rect.top,
+          });
+        }
+      };
+      const handleLeave = () => {
+        setHoveredUser(null);
+        setHoverPosition(null);
+      };
+
+      ele.addEventListener("mouseenter", handleEnter);
+      ele.addEventListener("mouseleave", handleLeave);
+
+      listeners.push({
+        element: ele,
+        enter: handleEnter,
+        leave: handleLeave,
+      });
     });
 
     return () => {
-      mentionElements.forEach((ele) => {
-        ele.removeEventListener("mouseenter", handleMouseEnter);
-        ele.removeEventListener("mouseleave", handleMouseLeave);
+      listeners.forEach(({ element, enter, leave }) => {
+        element.removeEventListener("mouseenter", enter);
+        element.removeEventListener("mouseleave", leave);
       });
     };
   }, [sanitizedHtml]);

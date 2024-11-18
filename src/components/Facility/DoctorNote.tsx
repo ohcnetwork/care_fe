@@ -67,7 +67,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
                   {noteCard}
                 </div>
               );
-            } else if (mode === "default-view") {
+            } else {
               return (
                 <DoctorNoteReplyPreviewCard
                   key={note.id}
