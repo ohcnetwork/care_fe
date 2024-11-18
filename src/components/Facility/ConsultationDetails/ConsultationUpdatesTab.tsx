@@ -21,8 +21,8 @@ import ReadMore from "@/components/Common/Readmore";
 import Tabs from "@/components/Common/Tabs";
 import EventsList from "@/components/Facility/ConsultationDetails/Events/EventsList";
 import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
-import DailyRoundsFilter from "@/components/Facility/Consultations/DailyRoundsFilter";
-import DailyRoundsList from "@/components/Facility/Consultations/DailyRoundsList";
+import LogUpdatesFilter from "@/components/Facility/Consultations/LogUpdatesFilter";
+import LogUpdatesList from "@/components/Facility/Consultations/LogUpdatesList";
 import { BedModel } from "@/components/Facility/models";
 import PrescriptionsTable from "@/components/Medicine/PrescriptionsTable";
 import EncounterSymptomsCard from "@/components/Symptoms/SymptomsCard";
@@ -688,7 +688,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   ),
                   value: 1,
                 },
-                { text: t("daily_rounds"), value: 0 },
+                { text: t("log_updates"), value: 0 },
               ]}
               onTabChange={(v) => setShowEvents(!!v)}
               currentTab={showEvents ? 1 : 0}
@@ -756,7 +756,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           {showEvents ? (
             <EventsList query={eventsQuery!} />
           ) : (
-            <DailyRoundsList
+            <LogUpdatesList
               consultation={props.consultationData}
               query={dailyRoundsQuery!}
             />
@@ -773,7 +773,7 @@ function DailyRoundsSortDropdown({
   setDailyRoundsQuery: (query: QueryParams) => void;
 }) {
   return (
-    <DailyRoundsFilter
+    <LogUpdatesFilter
       onApply={(query) => {
         setDailyRoundsQuery(query);
       }}
