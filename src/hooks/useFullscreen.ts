@@ -35,6 +35,7 @@ export default function useFullscreen() {
       elem.webkitExitFullscreen(); // Safari
     else document.exitFullscreen();
   }
+
   const setFullscreen = (
     value: boolean,
     element?: HTMLElement,
