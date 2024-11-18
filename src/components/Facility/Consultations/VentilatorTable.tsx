@@ -30,9 +30,13 @@ export default function VentilatorTable(props: VentilatorTableProps) {
       switch (ventilator_interface) {
         case "INVASIVE":
         case "NON_INVASIVE":
-          return t(`VENTILATOR_MODE__${ventilator_mode}`);
+          return ventilator_mode
+            ? t(`VENTILATOR_MODE__${ventilator_mode}`)
+            : "None";
         case "OXYGEN_SUPPORT":
-          return t(`OXYGEN_MODALITY__${ventilator_oxygen_modality}`);
+          return ventilator_oxygen_modality
+            ? t(`OXYGEN_MODALITY__${ventilator_oxygen_modality}`)
+            : "None";
         default:
           return null;
       }
@@ -55,9 +59,9 @@ export default function VentilatorTable(props: VentilatorTableProps) {
     switch (ventilatorInterface) {
       case "INVASIVE":
       case "NON_INVASIVE":
-        return round.ventilator_mode;
+        return round.ventilator_mode ?? "None";
       case "OXYGEN_SUPPORT":
-        return round.ventilator_oxygen_modality;
+        return round.ventilator_oxygen_modality ?? "None";
       default:
         return null;
     }
@@ -74,8 +78,9 @@ export default function VentilatorTable(props: VentilatorTableProps) {
         const nextInterfaceOrModality = getModeOrModality(nextRound);
         if (
           nextInterfaceOrModality &&
-          currentRound.ventilator_interface == nextRound.ventilator_interface &&
-          currentInterfaceOrModality == nextInterfaceOrModality
+          currentRound.ventilator_interface ===
+            nextRound.ventilator_interface &&
+          currentInterfaceOrModality === nextInterfaceOrModality
         ) {
           index += 1;
         } else {
@@ -105,6 +110,8 @@ export default function VentilatorTable(props: VentilatorTableProps) {
   const sortedData: DailyRoundsModel[] = dailyRoundsList.sort(
     compareByDateString("taken_at"),
   );
+  const tableBody = VentilatorTableBody(sortedData);
+  if (!tableBody.length) return null;
 
   return (
     <div className="my-3 w-full overflow-x-scroll rounded-lg border bg-white px-4 pt-3 shadow">
@@ -122,7 +129,7 @@ export default function VentilatorTable(props: VentilatorTableProps) {
             </th>
           </tr>
         </thead>
-        <tbody>{VentilatorTableBody(sortedData)}</tbody>
+        <tbody>{tableBody}</tbody>
       </table>
     </div>
   );
