@@ -69,7 +69,6 @@ const UpdateStatusDialog = (props: Props) => {
   const [contentType, setcontentType] = useState<string>("");
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
-  const [uploadDone, setUploadDone] = useState<boolean>(false);
 
   const currentStatus = SAMPLE_TEST_STATUS.find(
     (i) => i.text === sample.status,
@@ -123,7 +122,6 @@ const UpdateStatusDialog = (props: Props) => {
       (xhr: XMLHttpRequest) => {
         if (xhr.status >= 200 && xhr.status < 300) {
           setUploadStarted(false);
-          setUploadDone(true);
           request(routes.editUpload, {
             pathParams: {
               id: data.id,
@@ -156,13 +154,15 @@ const UpdateStatusDialog = (props: Props) => {
     );
     return e.target.files[0];
   };
+  const removeFile = () => {
+    setfile(undefined);
+  };
   const handleUpload = async () => {
     const f = file;
     if (f === undefined) return;
     const category = "UNSPECIFIED";
     const name = f.name;
     setUploadStarted(true);
-    setUploadDone(false);
 
     const { data } = await request(routes.createUpload, {
       body: {
@@ -226,6 +226,7 @@ const UpdateStatusDialog = (props: Props) => {
               <div className="mb-4 mt-3 flex flex-wrap justify-between gap-2">
                 <label className="button-size-default button-shape-square button-primary-default inline-flex h-min max-w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500">
                   <CareIcon icon="l-file-upload-alt" className="text-lg" />
+
                   <span className="max-w-full truncate">
                     {file ? file.name : t("choose_file")}
                   </span>
@@ -236,10 +237,17 @@ const UpdateStatusDialog = (props: Props) => {
                     hidden
                   />
                 </label>
+                {file && (
+                  <CareIcon
+                    icon="l-times"
+                    className="text-lg cursor-pointer mt-2 mr-4"
+                    onClick={removeFile}
+                  />
+                )}
                 <Submit
                   type="submit"
                   onClick={handleUpload}
-                  disabled={uploadDone}
+                  disabled={file ? false : true}
                 >
                   <CareIcon icon="l-cloud-upload" className="text-lg" />
                   <span>Upload</span>
