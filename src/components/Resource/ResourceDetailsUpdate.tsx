@@ -25,7 +25,6 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { handleNegativeValue } from "@/Utils/utils";
 
 interface resourceProps {
   id: string;
@@ -49,14 +48,8 @@ const requiredFields: any = {
   approving_facility_object: {
     errorText: "Resource approving facility can not be empty.",
   },
-  assigned_facility_object: {
+  assigned_facility_type: {
     errorText: "Please Select Facility Type",
-  },
-  title: {
-    errorText: "Title is required.",
-  },
-  reason: {
-    errorText: "Description is required.",
   },
 };
 
@@ -108,15 +101,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      if (
-        field === "approving_facility_object" ||
-        field === "assigned_facility_object"
-      ) {
-        if (!state.form[field] || !state.form[field]?.name) {
-          errors[field] = requiredFields[field].errorText;
-          isInvalidForm = true;
-        }
-      } else if (!state.form[field] || state.form[field].trim().length === 0) {
+      if (!state.form[field] || !state.form[field].length) {
         errors[field] = requiredFields[field].errorText;
         isInvalidForm = true;
       }
@@ -159,7 +144,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   });
 
   const handleSubmit = async () => {
-    const validForm = !validateForm();
+    const validForm = validateForm();
 
     if (validForm) {
       setIsLoading(true);
@@ -248,7 +233,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 setSelected={(obj) =>
                   setFacility(obj, "approving_facility_object")
                 }
-                errors={state.errors.approving_facility_object}
+                errors={state.errors.approving_facility}
               />
             </div>
 
@@ -258,13 +243,13 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </FieldLabel>
               <FacilitySelect
                 multiple={false}
-                name="assigned_facility_object"
+                name="assigned_facility"
                 facilityType={1510}
                 selected={state.form.assigned_facility_object}
                 setSelected={(obj) =>
                   setFacility(obj, "assigned_facility_object")
                 }
-                errors={state.errors.assigned_facility_object}
+                errors={state.errors.assigned_facility}
               />
             </div>
             <div>
@@ -272,22 +257,18 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 label="Required Quantity"
                 name="requested_quantity"
                 type="number"
-                min={1}
                 value={state.form.requested_quantity}
                 onChange={handleChange}
-                onInput={handleNegativeValue}
               />
             </div>
             <div>
               <TextFormField
                 name="assigned_quantity"
                 type="number"
-                min={1}
                 label="Approved Quantity"
                 value={state.form.assigned_quantity}
                 onChange={handleChange}
                 disabled={state.form.status !== "PENDING"}
-                onInput={handleNegativeValue}
               />
             </div>
 
@@ -295,12 +276,11 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               <TextFormField
                 name="title"
                 type="text"
-                label="Request Title"
+                label="Request Title*"
                 placeholder="Type your title here"
                 value={state.form.title}
                 onChange={handleChange}
                 error={state.errors.title}
-                required
               />
             </div>
 
@@ -311,9 +291,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 placeholder="Type your description here"
                 value={state.form.reason}
                 onChange={handleChange}
-                label="Description of request"
+                label="Description of request*"
                 error={state.errors.reason}
-                required
               />
             </div>
 

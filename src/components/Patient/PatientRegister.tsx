@@ -25,7 +25,6 @@ import {
   FacilityModel,
   WardModel,
 } from "@/components/Facility/models";
-import { UserModel } from "@/components/Users/models";
 import {
   FieldError,
   PhoneNumberValidator,
@@ -53,6 +52,7 @@ import {
   PatientMeta,
   PatientModel,
 } from "@/components/Patient/models";
+import { UserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";

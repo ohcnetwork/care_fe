@@ -544,13 +544,3 @@ export const fahrenheitToCelsius = (fahrenheit: number) => {
 export const keysOf = <T extends object>(obj: T) => {
   return Object.keys(obj) as (keyof T)[];
 };
-
-export const handleNegativeValue = (
-  event: React.FormEvent<HTMLInputElement>,
-): void => {
-  const input = event.currentTarget;
-  input.value = input.value.replace(/-/g, "");
-  if (isNaN(Number(input.value))) {
-    input.value = "";
-  }
-};

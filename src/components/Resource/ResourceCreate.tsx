@@ -30,7 +30,7 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { handleNegativeValue, parsePhoneNumber } from "@/Utils/utils";
+import { parsePhoneNumber } from "@/Utils/utils";
 
 interface resourceProps {
   facilityId: number;
@@ -300,11 +300,8 @@ export default function ResourceCreate(props: resourceProps) {
         <TextFormField
           label={t("required_quantity")}
           name="requested_quantity"
-          type="number"
-          min={1}
           value={state.form.required_quantity}
           onChange={handleChange}
-          onInput={handleNegativeValue}
         />
 
         <div className="md:col-span-2">
