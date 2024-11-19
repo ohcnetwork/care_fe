@@ -59,7 +59,7 @@ export function PrescriptionDropdown(props: {
       >
         {options.map((option, i) => {
           return (
-            <div className="flex justify-between">
+            <div className="flex justify-between" key={i}>
               <button
                 id="frequency-interval"
                 type="button"

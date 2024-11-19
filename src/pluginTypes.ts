@@ -34,6 +34,7 @@ export type AdditionalDischargeProceduresComponentType = React.FC<{
   consultation: ConsultationModel;
 }>;
 
+export type ScribeComponentType = React.FC;
 export type ManageFacilityOptionsComponentType = React.FC<{
   facility?: FacilityModel;
 }>;
@@ -63,6 +64,7 @@ export type SupportedPluginComponents = {
   ExtendPatientInfoCard: ExtendPatientInfoCardComponentType;
   ManagePatientOptions: ManagePatientOptionsComponentType;
   AdditionalDischargeProcedures: AdditionalDischargeProceduresComponentType;
+  Scribe: ScribeComponentType;
   ManageFacilityOptions: ManageFacilityOptionsComponentType;
   ConsultationContextEnabler: React.FC;
   ExtendFacilityConfigure: ExtendFacilityConfigureComponentType;
