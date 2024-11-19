@@ -194,14 +194,14 @@ describe("Location Management Section", () => {
     facilityLocation.clickAddNewLocationButton();
     facilityLocation.enterLocationName("Test Location with Beds");
     facilityLocation.selectLocationType("OTHER");
-    cy.submitButton("Add Location");
+    cy.clickSubmitButton("Add Location");
     cy.verifyNotification("Location created successfully");
     cy.closeNotification();
     facilityLocation.clickManageBedButton();
     facilityLocation.clickAddBedButton();
     facilityLocation.enterBedName("Bed 1");
     facilityLocation.selectBedType("Regular");
-    cy.submitButton("Add Bed(s)");
+    cy.clickSubmitButton("Add Bed(s)");
     cy.verifyNotification("1 Bed created successfully");
     cy.closeNotification();
     facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
