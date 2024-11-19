@@ -21,7 +21,7 @@ import useQuery from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
 
 export interface UserHomeProps {
-  username: string;
+  username?: string;
   tab: string;
 }
 export interface tabChildProp {
@@ -30,10 +30,14 @@ export interface tabChildProp {
 }
 
 export default function UserHome(props: UserHomeProps) {
-  const { username, tab } = props;
+  const { tab } = props;
+  let { username } = props;
   const [userData, setUserData] = useState<UserModel>();
   const { t } = useTranslation();
   const authUser = useAuthUser();
+  if (!username) {
+    username = authUser.username;
+  }
 
   const { loading, refetch: refetchUserDetails } = useQuery(
     routes.getUserDetails,
@@ -133,6 +137,7 @@ export default function UserHome(props: UserHomeProps) {
             </div>
             <SelectedTab
               userData={userData}
+              username={username}
               {...props}
               refetchUserData={refetchUserDetails}
             />

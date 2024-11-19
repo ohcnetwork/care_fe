@@ -6,7 +6,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
-import UserAddEditForm from "@/components/Users/UserAddEditForm";
+import { UserViewDetails } from "@/components/Users/UserViewDetails";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -20,12 +20,11 @@ import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
 import { formatDisplayName, sleep } from "@/Utils/utils";
 
-import { UserViewDetails } from "./UserViewDetails";
+import UserEditDetails from "./UserEditDetails";
 
 export default function UserInformation({ username }: { username: string }) {
   const { t } = useTranslation();
   const [editAvatar, setEditAvatar] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const authUser = useAuthUser();
 
   const {
@@ -86,43 +85,6 @@ export default function UserInformation({ username }: { username: string }) {
   const avatarPermissions = showAvatarEdit(authUser, userData);
   const editPermissions = editUserPermissions(authUser, userData);
 
-  const ViewEditToggle = ({
-    isEditing,
-    setIsEditing,
-  }: {
-    isEditing: boolean;
-    setIsEditing: (value: boolean) => void;
-  }) => (
-    <div className="mb-4 inline-flex rounded-lg bg-gray-100 p-1">
-      <button
-        onClick={() => setIsEditing(false)}
-        className={`
-          px-4 py-2 text-sm font-medium rounded-md transition-colors
-          ${
-            !isEditing
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
-          }
-        `}
-      >
-        {t("view")}
-      </button>
-      <button
-        onClick={() => setIsEditing(true)}
-        className={`
-          px-4 py-2 text-sm font-medium rounded-md transition-colors
-          ${
-            isEditing
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
-          }
-        `}
-      >
-        {t("edit")}
-      </button>
-    </div>
-  );
-
   return (
     <>
       <AvatarEditModal
@@ -166,27 +128,14 @@ export default function UserInformation({ username }: { username: string }) {
               </div>
             </div>
           )}
-          <div
-            id="user-edit-form"
-            className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white"
-          >
-            <ViewEditToggle isEditing={isEditing} setIsEditing={setIsEditing} />
-            {isEditing ? (
-              <UserAddEditForm
-                username={username}
-                onSubmitSuccess={() => setIsEditing(false)}
-              />
-            ) : (
-              <UserViewDetails user={userData} />
-            )}
-          </div>
+          <UserEditDetails
+            username={username}
+            userData={userData}
+            onSubmitSuccess={refetchUserData}
+          />
         </div>
       )}
-      {!editPermissions && (
-        <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
-          <UserViewDetails user={userData} />
-        </div>
-      )}
+      {!editPermissions && <UserViewDetails user={userData} />}
     </>
   );
 }

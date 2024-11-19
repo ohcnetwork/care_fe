@@ -25,9 +25,11 @@ const checkIfStateOrDistrictAdminInSameLocation = (
 
 export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
   // Auth user should be higher in hierarchy than target user
+  // User can't delete their own account
   if (
     USER_TYPES.indexOf(authUser.user_type) <=
-    USER_TYPES.indexOf(targetUser.user_type)
+      USER_TYPES.indexOf(targetUser.user_type) ||
+    authUser.username === targetUser.username
   )
     return false;
 

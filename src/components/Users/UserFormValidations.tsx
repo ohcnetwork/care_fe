@@ -29,6 +29,69 @@ export type UserForm = {
   weekly_working_hours?: string | null;
 };
 
+export const newUserFields: Array<keyof UserForm> = [
+  "user_type",
+  "username",
+  "password",
+  "c_password",
+  "first_name",
+  "last_name",
+  "email",
+  "phone_number",
+  "alt_phone_number",
+  "phone_number_is_whatsapp",
+  "gender",
+  "date_of_birth",
+  "state",
+  "district",
+  "local_body",
+  "facilities",
+  "home_facility",
+  "qualification",
+  "doctor_experience_commenced_on",
+  "doctor_medical_council_registration",
+  "weekly_working_hours",
+  "video_connect_link",
+];
+
+export const editUserFields: Array<keyof UserForm> = [
+  "first_name",
+  "last_name",
+  "date_of_birth",
+  "gender",
+  "email",
+  "video_connect_link",
+  "phone_number",
+  "alt_phone_number",
+  "phone_number_is_whatsapp",
+  "qualification",
+  "doctor_experience_commenced_on",
+  "doctor_medical_council_registration",
+  "weekly_working_hours",
+];
+
+export const editBasicInfoFields: Array<keyof UserForm> = [
+  "first_name",
+  "last_name",
+  "date_of_birth",
+  "gender",
+];
+
+export const editContactInfoFields: Array<keyof UserForm> = [
+  "email",
+  "phone_number",
+  "alt_phone_number",
+  "phone_number_is_whatsapp",
+];
+
+export const editProfessionalInfoFields: Array<keyof UserForm> = [
+  "qualification",
+  "doctor_experience_commenced_on",
+  "doctor_medical_council_registration",
+  "weekly_working_hours",
+  "video_connect_link",
+];
+
 export type EditForm = {
   user_type: string;
   qualification?: string | null;

@@ -46,42 +46,54 @@ export const Badge = ({
   );
 };
 
-export const UserViewDetails = ({ user }: UserViewDetailsProps) => {
+export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="pt-2 pb-5">
-        <Badge text={t("basic_info")} />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <LabelValue label={t("username")} value={user.username} />
-          <LabelValue label={t("user_type")} value={user.user_type} />
-          <LabelValue label={t("first_name")} value={user.first_name} />
-          <LabelValue label={t("last_name")} value={user.last_name} />
-          <LabelValue label={t("gender")} value={user.gender} />
-          <LabelValue
-            label={t("date_of_birth")}
-            value={
-              user.date_of_birth
-                ? new Date(user.date_of_birth).toLocaleDateString()
-                : null
-            }
-          />
-        </div>
+    <div className="pt-2 pb-5">
+      <Badge text={t("basic_info")} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <LabelValue label={t("username")} value={user.username} />
+        <LabelValue label={t("user_type")} value={user.user_type} />
+        <LabelValue label={t("first_name")} value={user.first_name} />
+        <LabelValue label={t("last_name")} value={user.last_name} />
+        <LabelValue label={t("gender")} value={user.gender} />
+        <LabelValue
+          label={t("date_of_birth")}
+          value={
+            user.date_of_birth
+              ? new Date(user.date_of_birth).toLocaleDateString()
+              : null
+          }
+        />
       </div>
+    </div>
+  );
+};
 
-      <div className="pt-2 pb-5">
-        <Badge text={t("contact_info")} />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <LabelValue label={t("email")} value={user.email} />
-          <LabelValue label={t("phone_number")} value={user.phone_number} />
-          <LabelValue
-            label={t("whatsapp_number")}
-            value={user.alt_phone_number}
-          />
-        </div>
+export const ContactInfoDetails = ({ user }: UserViewDetailsProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="pt-2 pb-5">
+      <Badge text={t("contact_info")} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <LabelValue label={t("email")} value={user.email} />
+        <LabelValue label={t("phone_number")} value={user.phone_number} />
+        <LabelValue
+          label={t("whatsapp_number")}
+          value={user.alt_phone_number}
+        />
       </div>
+    </div>
+  );
+};
 
+export const ProfessionalInfoDetails = ({ user }: UserViewDetailsProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
       {(user.user_type === "Doctor" || user.user_type === "Nurse") && (
         <div className="pt-2 pb-5">
           <Badge text={t("professional_info")} />
@@ -110,6 +122,22 @@ export const UserViewDetails = ({ user }: UserViewDetailsProps) => {
           </div>
         </div>
       )}
+    </>
+  );
+};
+
+export const UserViewDetails = ({ user }: UserViewDetailsProps) => {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+        <BasicInfoDetails user={user} />
+      </div>
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+        <ContactInfoDetails user={user} />
+      </div>
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+        <ProfessionalInfoDetails user={user} />
+      </div>
     </div>
   );
 };

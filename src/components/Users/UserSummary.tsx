@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
+import LanguageSelector from "@/components/Common/LanguageSelector";
 import userColumns from "@/components/Common/UserColumns";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
 import UserInformation from "@/components/Users/UserInformation";
@@ -66,15 +67,26 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
       <div className="mt-10 flex flex-col gap-y-12">
         {userColumns(
           t("personal_information"),
-          t("personal_information_note"),
+          authUser.username === userData.username
+            ? t("personal_information_note_self")
+            : t("personal_information_note"),
           UserInformation,
           userColumnsData,
         )}
         {passwordResetPermitted &&
           userColumns(
             t("reset_password"),
-            t("reset_password_note"),
+            authUser.username === userData.username
+              ? t("reset_password_note_self")
+              : t("reset_password_note"),
             UserResetPassword,
+            userColumnsData,
+          )}
+        {authUser.username === userData.username &&
+          userColumns(
+            t("language_selection"),
+            t("set_your_local_language"),
+            LanguageSelector,
             userColumnsData,
           )}
         {deletePermitted && (

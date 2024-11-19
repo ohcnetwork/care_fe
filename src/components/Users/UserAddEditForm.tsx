@@ -53,13 +53,7 @@ import {
   dateQueryString,
   isValidUrl,
   parsePhoneNumber,
-  scrollTo,
 } from "@/Utils/utils";
-
-interface UserProps {
-  username?: string;
-  onSubmitSuccess?: () => void;
-}
 
 interface StateObj {
   id: number;
@@ -90,6 +84,12 @@ const initForm: UserForm = {
   weekly_working_hours: undefined,
   video_connect_link: undefined,
 };
+
+interface UserProps {
+  username?: string;
+  includedFields?: Array<keyof UserForm>;
+  onSubmitSuccess?: () => void;
+}
 
 const STAFF_OR_NURSE_USER = [
   "Staff",
@@ -164,7 +164,7 @@ export const validateRule = (
 const UserAddEditForm = (props: UserProps) => {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-  const { username } = props;
+  const { username, includedFields } = props;
   const editUser = username ? true : false;
   const formVals = useRef(initForm);
   const [facilityErrors, setFacilityErrors] = useState("");
@@ -542,12 +542,15 @@ const UserAddEditForm = (props: UserProps) => {
 
   const validateForm = (formData: UserForm) => {
     const errors: Partial<Record<keyof UserForm, FieldError>> = {};
-    const facilityError = validateFacility(formData, selectedFacility);
+    const fieldsToValidate = includedFields || Object.keys(formData);
+    const facilityError = fieldsToValidate.includes("facilities")
+      ? validateFacility(formData, selectedFacility)
+      : null;
     if (facilityError) {
       errors.facilities = facilityError;
     }
     let currentError = null;
-    Object.keys(formData).forEach((field) => {
+    fieldsToValidate.forEach((field) => {
       switch (field) {
         case "user_type":
           if (!formData[field]) {
@@ -684,10 +687,6 @@ const UserAddEditForm = (props: UserProps) => {
           break;
       }
     });
-    const firstError = Object.keys(errors).find((e) => e);
-    if (firstError) {
-      scrollTo(firstError);
-    }
     return errors;
   };
 
@@ -732,44 +731,50 @@ const UserAddEditForm = (props: UserProps) => {
     return (
       <>
         {(state.form.user_type === "Doctor" ||
-          state.form.user_type === "Nurse") && (
-          <TextFormField
-            {...field("qualification")}
-            required
-            label={t("qualification")}
-            placeholder={t("qualification")}
-            onChange={(e) => {
-              handleFieldChange(e, field);
-            }}
-            className="flex-1"
-            aria-label={t("qualification")}
-          />
-        )}
+          state.form.user_type === "Nurse") &&
+          includedFields?.includes("qualification") && (
+            <TextFormField
+              {...field("qualification")}
+              required
+              label={t("qualification")}
+              placeholder={t("qualification")}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              className="flex-1"
+              aria-label={t("qualification")}
+            />
+          )}
         {state.form.user_type === "Doctor" && (
           <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-            <TextFormField
-              {...field("doctor_experience_commenced_on")}
-              required
-              label={t("years_of_experience")}
-              placeholder={t("years_of_experience_of_the_doctor")}
-              onChange={(e) => {
-                handleFieldChange(e, field);
-              }}
-              className="flex-1"
-              aria-label={t("years_of_experience")}
-            />
-
-            <TextFormField
-              {...field("doctor_medical_council_registration")}
-              required
-              label={t("medical_council_registration")}
-              placeholder={t("doctor_s_medical_council_registration")}
-              onChange={(e) => {
-                handleFieldChange(e, field);
-              }}
-              className="flex-1"
-              aria-label={t("medical_council_registration")}
-            />
+            {includedFields?.includes("doctor_experience_commenced_on") && (
+              <TextFormField
+                {...field("doctor_experience_commenced_on")}
+                required
+                label={t("years_of_experience")}
+                placeholder={t("years_of_experience_of_the_doctor")}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                }}
+                className="flex-1"
+                aria-label={t("years_of_experience")}
+              />
+            )}
+            {includedFields?.includes(
+              "doctor_medical_council_registration",
+            ) && (
+              <TextFormField
+                {...field("doctor_medical_council_registration")}
+                required
+                label={t("medical_council_registration")}
+                placeholder={t("doctor_s_medical_council_registration")}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                }}
+                className="flex-1"
+                aria-label={t("medical_council_registration")}
+              />
+            )}
           </div>
         )}
       </>
@@ -779,42 +784,44 @@ const UserAddEditForm = (props: UserProps) => {
   const renderPhoneNumberFields = (field: FormContextValue<UserForm>) => {
     return (
       <>
-        <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-          <div className="flex flex-1 flex-col">
+        {includedFields?.includes("phone_number") && (
+          <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+            <div className="flex flex-1 flex-col">
+              <PhoneNumberFormField
+                {...field("phone_number")}
+                placeholder={t("phone_number")}
+                label={t("phone_number")}
+                required
+                types={["mobile", "landline"]}
+                onChange={(e) => {
+                  handlePhoneChange(e, field);
+                }}
+                className=""
+                aria-label={t("phone_number")}
+              />
+              <CheckBoxFormField
+                name="phone_number_is_whatsapp"
+                value={state.form.phone_number_is_whatsapp}
+                onChange={(e) => {
+                  handlePhoneChange(e, field);
+                }}
+                label={t("is_phone_a_whatsapp_number")}
+              />
+            </div>
             <PhoneNumberFormField
-              {...field("phone_number")}
-              placeholder={t("phone_number")}
-              label={t("phone_number")}
-              required
-              types={["mobile", "landline"]}
+              {...field("alt_phone_number")}
+              placeholder={t("whatsapp_phone_number")}
+              label={t("whatsapp_number")}
+              disabled={state.form.phone_number_is_whatsapp}
+              types={["mobile"]}
               onChange={(e) => {
                 handlePhoneChange(e, field);
               }}
-              className=""
-              aria-label={t("phone_number")}
-            />
-            <CheckBoxFormField
-              name="phone_number_is_whatsapp"
-              value={state.form.phone_number_is_whatsapp}
-              onChange={(e) => {
-                handlePhoneChange(e, field);
-              }}
-              label={t("is_phone_a_whatsapp_number")}
+              className="flex-1"
+              aria-label={t("whatsapp_number")}
             />
           </div>
-          <PhoneNumberFormField
-            {...field("alt_phone_number")}
-            placeholder={t("whatsapp_phone_number")}
-            label={t("whatsapp_number")}
-            disabled={state.form.phone_number_is_whatsapp}
-            types={["mobile"]}
-            onChange={(e) => {
-              handlePhoneChange(e, field);
-            }}
-            className="flex-1"
-            aria-label={t("whatsapp_number")}
-          />
-        </div>
+        )}
       </>
     );
   };
@@ -822,84 +829,88 @@ const UserAddEditForm = (props: UserProps) => {
   const renderUsernameField = (field: FormContextValue<UserForm>) => {
     return (
       <>
-        <TextFormField
-          {...field("username")}
-          label={t("username")}
-          placeholder={t("username")}
-          required
-          autoComplete="new-username"
-          value={usernameInput}
-          onChange={(e) => {
-            handleFieldChange(e, field);
-            setUsernameInput(e.value);
-          }}
-          onFocus={() => setUsernameInputInFocus(true)}
-          onBlur={() => {
-            setUsernameInputInFocus(false);
-          }}
-          aria-label={t("username")}
-        />
-        {usernameInputInFocus && (
-          <div className="text-small pl-2 text-secondary-500">
-            <div>
-              {usernameExists !== userExistsEnums.idle && (
-                <>
-                  {usernameExists === userExistsEnums.checking ? (
-                    <span>
-                      <CareIcon icon="l-record-audio" className="text-xl" />{" "}
-                      checking...
-                    </span>
-                  ) : (
+        {includedFields?.includes("username") && (
+          <>
+            <TextFormField
+              {...field("username")}
+              label={t("username")}
+              placeholder={t("username")}
+              required
+              autoComplete="new-username"
+              value={usernameInput}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+                setUsernameInput(e.value);
+              }}
+              onFocus={() => setUsernameInputInFocus(true)}
+              onBlur={() => {
+                setUsernameInputInFocus(false);
+              }}
+              aria-label={t("username")}
+            />
+            {usernameInputInFocus && (
+              <div className="text-small pl-2 text-secondary-500">
+                <div>
+                  {usernameExists !== userExistsEnums.idle && (
                     <>
-                      {usernameExists === userExistsEnums.exists ? (
-                        <div>
-                          <CareIcon
-                            icon="l-times-circle"
-                            className="text-xl text-red-500"
-                          />{" "}
-                          <span className="text-red-500">
-                            {t("username_not_available")}
-                          </span>
-                        </div>
+                      {usernameExists === userExistsEnums.checking ? (
+                        <span>
+                          <CareIcon icon="l-record-audio" className="text-xl" />{" "}
+                          checking...
+                        </span>
                       ) : (
-                        <div>
-                          <CareIcon
-                            icon="l-check-circle"
-                            className="text-xl text-green-500"
-                          />{" "}
-                          <span className="text-primary-500">
-                            {t("username_available")}
-                          </span>
-                        </div>
+                        <>
+                          {usernameExists === userExistsEnums.exists ? (
+                            <div>
+                              <CareIcon
+                                icon="l-times-circle"
+                                className="text-xl text-red-500"
+                              />{" "}
+                              <span className="text-red-500">
+                                {t("username_not_available")}
+                              </span>
+                            </div>
+                          ) : (
+                            <div>
+                              <CareIcon
+                                icon="l-check-circle"
+                                className="text-xl text-green-500"
+                              />{" "}
+                              <span className="text-primary-500">
+                                {t("username_available")}
+                              </span>
+                            </div>
+                          )}
+                        </>
                       )}
                     </>
                   )}
-                </>
-              )}
-            </div>
-            <div aria-live="polite">
-              {validateRule(
-                usernameInput.length >= 4 && usernameInput.length <= 16,
-                "Username should be 4-16 characters long",
-                !state.form.username,
-              )}
-              {validateRule(
-                /^[a-z0-9._-]*$/.test(usernameInput),
-                "Username can only contain lowercase letters, numbers, and . _ -",
-                !state.form.username,
-              )}
-              {validateRule(
-                /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
-                "Username must start and end with a letter or number",
-                !state.form.username,
-              )}
-              {validateRule(
-                !/(?:[._-]{2,})/.test(usernameInput),
-                "Username can't contain consecutive special characters . _ -",
-                !state.form.username,
-              )}
-            </div>
-          </div>
+                </div>
+                <div aria-live="polite">
+                  {validateRule(
+                    usernameInput.length >= 4 && usernameInput.length <= 16,
+                    "Username should be 4-16 characters long",
+                    !state.form.username,
+                  )}
+                  {validateRule(
+                    /^[a-z0-9._-]*$/.test(usernameInput),
+                    "Username can only contain lowercase letters, numbers, and . _ -",
+                    !state.form.username,
+                  )}
+                  {validateRule(
+                    /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
+                    "Username must start and end with a letter or number",
+                    !state.form.username,
+                  )}
+                  {validateRule(
+                    !/(?:[._-]{2,})/.test(usernameInput),
+                    "Username can't contain consecutive special characters . _ -",
+                    !state.form.username,
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </>
     );
@@ -909,76 +920,80 @@ const UserAddEditForm = (props: UserProps) => {
     return (
       <>
         <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-          <div className="flex flex-1 flex-col">
-            <TextFormField
-              {...field("password")}
-              label={t("password")}
-              placeholder={t("password")}
-              required
-              autoComplete="new-password"
-              type="password"
-              onFocus={() => setPasswordInputInFocus(true)}
-              onBlur={() => setPasswordInputInFocus(false)}
-              onChange={(e) => {
-                handleFieldChange(e, field);
-              }}
-              aria-label={t("password")}
-            />
-            {passwordInputInFocus && state.form.password && (
-              <div
-                className="text-small pl-2 text-secondary-500"
-                aria-live="polite"
-              >
-                {validateRule(
-                  state.form.password.length >= 8,
-                  "Password should be atleast 8 characters long",
-                  !state.form.password,
-                )}
-                {validateRule(
-                  state.form.password !== state.form.password.toUpperCase(),
-                  "Password should contain at least 1 lowercase letter",
-                  !state.form.password,
-                )}
-                {validateRule(
-                  state.form.password !== state.form.password.toLowerCase(),
-                  "Password should contain at least 1 uppercase letter",
-                  !state.form.password,
-                )}
-                {validateRule(
-                  /\d/.test(state.form.password),
-                  "Password should contain at least 1 number",
-                  !state.form.password,
-                )}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-1 flex-col">
-            <TextFormField
-              {...field("c_password")}
-              label={t("confirm_password")}
-              placeholder={t("confirm_password")}
-              required
-              type="password"
-              autoComplete="off"
-              onFocus={() => setConfirmPasswordInputInFocus(true)}
-              onBlur={() => setConfirmPasswordInputInFocus(false)}
-              onChange={(e) => {
-                handleFieldChange(e, field);
-              }}
-              aria-label={t("confirm_password")}
-            />
-            {confirmPasswordInputInFocus &&
-              state.form.c_password &&
-              state.form.c_password.length > 0 && (
-                <div aria-live="polite">
+          {includedFields?.includes("password") && (
+            <div className="flex flex-1 flex-col">
+              <TextFormField
+                {...field("password")}
+                label={t("password")}
+                placeholder={t("password")}
+                required
+                autoComplete="new-password"
+                type="password"
+                onFocus={() => setPasswordInputInFocus(true)}
+                onBlur={() => setPasswordInputInFocus(false)}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                }}
+                aria-label={t("password")}
+              />
+              {passwordInputInFocus && state.form.password && (
+                <div
+                  className="text-small pl-2 text-secondary-500"
+                  aria-live="polite"
+                >
                   {validateRule(
-                    state.form.c_password === state.form.password,
-                    "Confirm password should match the entered password",
-                    !state.form.c_password,
+                    state.form.password.length >= 8,
+                    "Password should be atleast 8 characters long",
+                    !state.form.password,
+                  )}
+                  {validateRule(
+                    state.form.password !== state.form.password.toUpperCase(),
+                    "Password should contain at least 1 lowercase letter",
+                    !state.form.password,
+                  )}
+                  {validateRule(
+                    state.form.password !== state.form.password.toLowerCase(),
+                    "Password should contain at least 1 uppercase letter",
+                    !state.form.password,
+                  )}
+                  {validateRule(
+                    /\d/.test(state.form.password),
+                    "Password should contain at least 1 number",
+                    !state.form.password,
                   )}
                 </div>
               )}
-          </div>
+            </div>
+          )}
+          {includedFields?.includes("c_password") && (
+            <div className="flex flex-1 flex-col">
+              <TextFormField
+                {...field("c_password")}
+                label={t("confirm_password")}
+                placeholder={t("confirm_password")}
+                required
+                type="password"
+                autoComplete="off"
+                onFocus={() => setConfirmPasswordInputInFocus(true)}
+                onBlur={() => setConfirmPasswordInputInFocus(false)}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                }}
+                aria-label={t("confirm_password")}
+              />
+              {confirmPasswordInputInFocus &&
+                state.form.c_password &&
+                state.form.c_password.length > 0 && (
+                  <div aria-live="polite">
+                    {validateRule(
+                      state.form.c_password === state.form.password,
+                      "Confirm password should match the entered password",
+                      !state.form.c_password,
+                    )}
+                  </div>
+                )}
+            </div>
+          )}
         </div>
       </>
     );
@@ -988,64 +1003,74 @@ const UserAddEditForm = (props: UserProps) => {
     return (
       <>
         <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-          <TextFormField
-            {...field("first_name")}
-            required
-            label={t("first_name")}
-            className="flex-1"
-            onChange={(e) => {
-              handleFieldChange(e, field);
-            }}
-            aria-label={t("first_name")}
-          />
-          <TextFormField
-            {...field("last_name")}
-            required
-            label={t("last_name")}
-            className="flex-1"
-            onChange={(e) => {
-              handleFieldChange(e, field);
-            }}
-            aria-label={t("last_name")}
-          />
+          {includedFields?.includes("first_name") && (
+            <TextFormField
+              {...field("first_name")}
+              required
+              label={t("first_name")}
+              className="flex-1"
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              aria-label={t("first_name")}
+            />
+          )}
+          {includedFields?.includes("last_name") && (
+            <TextFormField
+              {...field("last_name")}
+              required
+              label={t("last_name")}
+              className="flex-1"
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              aria-label={t("last_name")}
+            />
+          )}
         </div>
-        <TextFormField
-          {...field("email")}
-          label={t("email")}
-          placeholder={t("email")}
-          required
-          onChange={(e) => {
-            handleFieldChange(e, field);
-          }}
-          aria-label={t("email")}
-        />
-        <div className="flex flex-col justify-between gap-x-3 sm:flex-row sm:items-center">
-          <DateFormField
-            {...field("date_of_birth")}
-            label={t("date_of_birth")}
+        {includedFields?.includes("email") && (
+          <TextFormField
+            {...field("email")}
+            label={t("email")}
+            placeholder={t("email")}
             required
-            value={getDate(state.form.date_of_birth)}
-            onChange={(e) => {
-              handleDateChange(e, field);
-            }}
-            disableFuture
-            className="flex-1"
-            aria-label={t("date_of_birth")}
-          />
-          <SelectFormField
-            {...field("gender")}
-            label={t("gender")}
-            required
-            value={state.form.gender}
-            options={GENDER_TYPES}
-            optionLabel={(o) => o.text}
-            optionValue={(o) => o.text}
             onChange={(e) => {
               handleFieldChange(e, field);
             }}
-            className="flex-1"
-            aria-label={t("gender")}
+            aria-label={t("email")}
           />
+        )}
+        <div className="flex flex-col justify-between gap-x-3 sm:flex-row sm:items-center">
+          {includedFields?.includes("date_of_birth") && (
+            <DateFormField
+              {...field("date_of_birth")}
+              label={t("date_of_birth")}
+              required
+              value={getDate(state.form.date_of_birth)}
+              onChange={(e) => {
+                handleDateChange(e, field);
+              }}
+              disableFuture
+              className="flex-1"
+              aria-label={t("date_of_birth")}
+            />
+          )}
+          {includedFields?.includes("gender") && (
+            <SelectFormField
+              {...field("gender")}
+              label={t("gender")}
+              required
+              value={state.form.gender}
+              options={GENDER_TYPES}
+              optionLabel={(o) => o.text}
+              optionValue={(o) => o.text}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              className="flex-1"
+              aria-label={t("gender")}
+            />
+          )}
         </div>
       </>
     );
@@ -1057,29 +1082,33 @@ const UserAddEditForm = (props: UserProps) => {
     return (
       <>
         <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-          <TextFormField
-            {...field("weekly_working_hours")}
-            name="weekly_working_hours"
-            label={t("average_weekly_working_hours")}
-            className="flex-1"
-            type="number"
-            min={0}
-            max={168}
-            onChange={(e) => {
-              handleFieldChange(e, field);
-            }}
-            aria-label={t("average_weekly_working_hours")}
-          />
-          <TextFormField
-            {...field("video_connect_link")}
-            label={t("video_conference_link")}
-            className="flex-1"
-            type="url"
-            onChange={(e) => {
-              handleFieldChange(e, field);
-            }}
-            aria-label={t("video_conference_link")}
-          />
+          {includedFields?.includes("weekly_working_hours") && (
+            <TextFormField
+              {...field("weekly_working_hours")}
+              name="weekly_working_hours"
+              label={t("average_weekly_working_hours")}
+              className="flex-1"
+              type="number"
+              min={0}
+              max={168}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              aria-label={t("average_weekly_working_hours")}
+            />
+          )}
+          {includedFields?.includes("video_connect_link") && (
+            <TextFormField
+              {...field("video_connect_link")}
+              label={t("video_conference_link")}
+              className="flex-1"
+              type="url"
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              aria-label={t("video_conference_link")}
+            />
+          )}
         </div>
       </>
     );
@@ -1090,63 +1119,72 @@ const UserAddEditForm = (props: UserProps) => {
   ) => {
     return (
       <>
-        {isStateLoading ? (
-          <CircularProgress />
-        ) : (
-          <SelectFormField
-            {...field("state")}
-            label={t("state")}
-            required
-            placeholder={t("choose_state")}
-            options={states}
-            optionLabel={(o) => o.name}
-            optionValue={(o) => o.id}
-            onChange={(e) => {
-              handleFieldChange(e, field);
-              if (e) setSelectedStateId(e.value);
-            }}
-            aria-label={t("state")}
-          />
+        {includedFields?.includes("state") && (
+          <>
+            {isStateLoading ? (
+              <CircularProgress />
+            ) : (
+              <SelectFormField
+                {...field("state")}
+                label={t("state")}
+                required
+                placeholder={t("choose_state")}
+                options={states}
+                optionLabel={(o) => o.name}
+                optionValue={(o) => o.id}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                  if (e) setSelectedStateId(e.value);
+                }}
+                aria-label={t("state")}
+              />
+            )}
+          </>
         )}
-
-        {isDistrictLoading ? (
-          <CircularProgress />
-        ) : (
-          <SelectFormField
-            {...field("district")}
-            label={t("district")}
-            required
-            placeholder={t("choose_district")}
-            options={districts}
-            optionLabel={(o) => o.name}
-            optionValue={(o) => o.id}
-            onChange={(e) => {
-              handleFieldChange(e, field);
-              if (e) setSelectedDistrictId(e.value);
-            }}
-            aria-label={t("district")}
-          />
+        {includedFields?.includes("district") && (
+          <>
+            {isDistrictLoading ? (
+              <CircularProgress />
+            ) : (
+              <SelectFormField
+                {...field("district")}
+                label={t("district")}
+                required
+                placeholder={t("choose_district")}
+                options={districts}
+                optionLabel={(o) => o.name}
+                optionValue={(o) => o.id}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                  if (e) setSelectedDistrictId(e.value);
+                }}
+                aria-label={t("district")}
+              />
+            )}
+          </>
         )}
-
-        {showLocalbody &&
-          (isLocalbodyLoading ? (
-            <CircularProgress />
-          ) : (
-            <SelectFormField
-              {...field("local_body")}
-              label={t("local_body")}
-              required
-              position="above"
-              placeholder={t("choose_localbody")}
-              options={localBodies}
-              optionLabel={(o) => o.name}
-              optionValue={(o) => o.id}
-              onChange={(e) => {
-                handleFieldChange(e, field);
-              }}
-              aria-label={t("local_body")}
-            />
-          ))}
+        {includedFields?.includes("local_body") && (
+          <>
+            {isLocalbodyLoading ? (
+              <CircularProgress />
+            ) : (
+              <SelectFormField
+                {...field("local_body")}
+                label={t("local_body")}
+                required
+                position="above"
+                placeholder={t("choose_localbody")}
+                options={localBodies}
+                optionLabel={(o) => o.name}
+                optionValue={(o) => o.id}
+                onChange={(e) => {
+                  handleFieldChange(e, field);
+                }}
+                aria-label={t("local_body")}
+              />
+            )}
+          </>
+        )}
       </>
     );
   };
@@ -1156,44 +1194,50 @@ const UserAddEditForm = (props: UserProps) => {
   ) => {
     return (
       <>
-        <div className="w-full">
-          <FieldLabel>{t("facilities")}</FieldLabel>
-          <FacilitySelect
-            multiple={true}
-            name="facilities"
-            selected={selectedFacility}
-            setSelected={setFacility}
-            errors={facilityErrors}
-            showAll={false}
-            aria-label={t("facilities")}
-          />
-        </div>
+        {includedFields?.includes("facilities") && (
+          <div className="w-full">
+            <FieldLabel>{t("facilities")}</FieldLabel>
+            <FacilitySelect
+              multiple={true}
+              name="facilities"
+              selected={selectedFacility}
+              setSelected={setFacility}
+              errors={facilityErrors}
+              showAll={false}
+              aria-label={t("facilities")}
+            />
+          </div>
+        )}
         <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-          <SelectFormField
-            {...field("user_type")}
-            required
-            label={t("user_type")}
-            options={userTypes}
-            optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
-            onChange={(e) => {
-              handleFieldChange(e, field);
-            }}
-            optionValue={(o) => o.id}
-            className="flex-1"
-            aria-label={t("user_type")}
-          />
-          <SelectFormField
-            {...field("home_facility")}
-            label={t("home_facility")}
-            options={selectedFacility ?? []}
-            optionLabel={(option) => option.name}
-            optionValue={(option) => option.id}
-            onChange={(e) => {
-              handleFieldChange(e, field);
-            }}
-            className="flex-1"
-            aria-label={t("home_facility")}
-          />
+          {includedFields?.includes("user_type") && (
+            <SelectFormField
+              {...field("user_type")}
+              required
+              label={t("user_type")}
+              options={userTypes}
+              optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              optionValue={(o) => o.id}
+              className="flex-1"
+              aria-label={t("user_type")}
+            />
+          )}
+          {includedFields?.includes("home_facility") && (
+            <SelectFormField
+              {...field("home_facility")}
+              label={t("home_facility")}
+              options={selectedFacility ?? []}
+              optionLabel={(option) => option.name}
+              optionValue={(option) => option.id}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              className="flex-1"
+              aria-label={t("home_facility")}
+            />
+          )}
         </div>
       </>
     );
@@ -1217,15 +1261,14 @@ const UserAddEditForm = (props: UserProps) => {
       {(field) => (
         <>
           <div className="my-4 flex flex-col gap-y-2">
-            {!editUser && renderFacilityUserTypeHomeFacilityFields(field)}
-            {!editUser && renderDoctorOrNurseFields(field)}
+            {renderFacilityUserTypeHomeFacilityFields(field)}
+            {renderDoctorOrNurseFields(field)}
             {renderPhoneNumberFields(field)}
-            {!editUser && renderUsernameField(field)}
-            {!editUser && renderPasswordFields(field)}
+            {renderUsernameField(field)}
+            {renderPasswordFields(field)}
             {renderPersonalInfoFields(field)}
-            {editUser && renderHoursAndConferenceLinkFields(field)}
-            {editUser && renderDoctorOrNurseFields(field)}
-            {!editUser && renderStateDistrictLocalBodyFields(field)}
+            {renderHoursAndConferenceLinkFields(field)}
+            {renderStateDistrictLocalBodyFields(field)}
           </div>
         </>
       )}

@@ -5,6 +5,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Page from "@/components/Common/Page";
 import UserAddEditForm from "@/components/Users/UserAddEditForm";
+import { newUserFields } from "@/components/Users/UserFormValidations";
 
 const UserAdd = () => {
   const { t } = useTranslation();
@@ -24,7 +25,7 @@ const UserAdd = () => {
       }
       backUrl="/users"
     >
-      <UserAddEditForm />
+      <UserAddEditForm includedFields={newUserFields} />
     </Page>
   );
 };
