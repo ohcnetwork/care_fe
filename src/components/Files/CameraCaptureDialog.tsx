@@ -20,14 +20,14 @@ export interface CameraCaptureDialogProps {
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const { show, onHide, onCapture } = props;
 
-  const [cameraFacingFront, setCameraFacingFront] = useState(true);
+  const [cameraFacingMode, setCameraFacingMode] = useState("environment");
   const [previewImage, setPreviewImage] = useState(null);
   const webRef = useRef<any>(null);
 
   const videoConstraints = {
     width: { ideal: 4096 },
     height: { ideal: 2160 },
-    facingMode: "user",
+    facingMode: "environment",
   };
   useEffect(() => {
     if (!show) return;
@@ -52,6 +52,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       }
     };
   }, [show, onHide]);
+
   const handleSwitchCamera = useCallback(() => {
     const supportedConstraints =
       navigator.mediaDevices.getSupportedConstraints();
@@ -60,7 +61,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       typeof supportedConstraints.facingMode === "string" &&
       (supportedConstraints.facingMode as string).includes("environment")
     ) {
-      setCameraFacingFront((prevState) => !prevState);
+      setCameraFacingMode(
+        cameraFacingMode === "environment" ? "user" : "environment",
+      );
     } else {
       Notify.Warn({
         msg: t("switch_camera_is_not_available"),
@@ -83,8 +86,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       onCapture(myFile, `capture.${extension}`);
     });
   };
-
-  const cameraFacingMode = cameraFacingFront ? "user" : "environment";
 
   return (
     <DialogModal
