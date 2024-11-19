@@ -32,6 +32,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const videoConstraints = {
     width: { ideal: 4096 },
     height: { ideal: 2160 },
+    facingMode: cameraFacingMode,
   };
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ video: true }).catch(() => {
@@ -45,6 +46,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const handleSwitchCamera = useCallback(() => {
     const supportedConstraints =
       navigator.mediaDevices.getSupportedConstraints();
+    console.log(supportedConstraints);
     if (
       !isLaptopScreen &&
       typeof supportedConstraints.facingMode === "string" &&
@@ -100,10 +102,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               audio={false}
               screenshotFormat="image/jpeg"
               ref={webRef}
-              videoConstraints={{
-                ...videoConstraints,
-                facingMode: cameraFacingMode,
-              }}
+              videoConstraints={videoConstraints}
             />
           </div>
         ) : (
@@ -119,7 +118,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
           {!previewImage ? (
             <ButtonV2 onClick={handleSwitchCamera} className="m-2">
               {t("switch")}
-              {navigator.mediaDevices.getSupportedConstraints()?.toString()}
             </ButtonV2>
           ) : (
             <></>
