@@ -60,6 +60,7 @@ describe("Manage User", () => {
     advanceFilters.clickAdvancedFiltersButton();
     userPage.typeInFirstName(firstNameUserSkill);
     userPage.typeInLastName(lastNameUserSkill);
+    userPage.selectHomeFacility(facilitytolinkskill);
     advanceFilters.applySelectedFilter();
     userPage.checkUsernameText(usernameToLinkSkill);
     manageUserPage.clicklinkedskillbutton();

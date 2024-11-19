@@ -276,7 +276,7 @@ class FacilityPage {
   }
 
   confirmDeleteFacility() {
-    cy.submitButton("Delete");
+    cy.clickSubmitButton("Delete");
   }
 
   selectLocation(location: string) {
@@ -299,6 +299,10 @@ class FacilityPage {
   }
 
   verifySuccessNotification(message: string) {
+    cy.verifyNotification(message);
+  }
+
+  verifyErrorNotification(message: string) {
     cy.verifyNotification(message);
   }
 
