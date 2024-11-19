@@ -1,22 +1,26 @@
+import dayjs from "dayjs";
+import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import Page from "@/components/Common/Page";
+import Form from "@/components/Form/Form";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
 import { GENDER_TYPES } from "@/common/constants";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import DateFormField from "../Form/FormFields/DateFormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   formatPatientAge,
   humanizeStrings,
-} from "../../Utils/utils";
-import Page from "@/components/Common/components/Page";
-import Form from "../Form/Form";
-import { useTranslation } from "react-i18next";
-import { navigate } from "raviger";
-import dayjs from "dayjs";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+} from "@/Utils/utils";
 
 type DeathReport = {
   name?: string;
@@ -410,7 +414,6 @@ export default function PrintDeathReport(props: { id: string }) {
                       <DateFormField
                         {...field("date_declared_positive")}
                         label={t("date_declared_positive")}
-                        position="LEFT"
                         className="w-full"
                         disableFuture
                       />
@@ -428,14 +431,12 @@ export default function PrintDeathReport(props: { id: string }) {
                       <DateFormField
                         {...field("date_of_test")}
                         label={t("date_of_test")}
-                        position="LEFT"
                       />
                     </div>
                     <div>
                       <DateFormField
                         {...field("date_of_result")}
                         label={t("date_of_result")}
-                        position="LEFT"
                         disableFuture
                       />
                     </div>
@@ -477,7 +478,6 @@ export default function PrintDeathReport(props: { id: string }) {
                       <DateFormField
                         {...field("date_of_admission")}
                         label="Date of admission"
-                        position="LEFT"
                         disableFuture
                       />
                     </div>
@@ -485,7 +485,6 @@ export default function PrintDeathReport(props: { id: string }) {
                       <DateFormField
                         {...field("date_of_death")}
                         label="Date of death"
-                        position="LEFT"
                         disableFuture
                       />
                     </div>
@@ -534,7 +533,6 @@ export default function PrintDeathReport(props: { id: string }) {
                       <DateFormField
                         {...field("kottayam_sample_date")}
                         label="Sample sent to NIV/IUCBR Kottayam on"
-                        position="LEFT"
                       />
                     </div>
                   </div>

@@ -23,7 +23,7 @@ export class PatientPage {
 
   selectFacility(facilityName: string) {
     cy.typeAndSelectOption("input[name='facilities']", facilityName);
-    cy.submitButton("Select");
+    cy.clickSubmitButton("Select");
   }
 
   interceptCreatePatientAPI() {
@@ -52,14 +52,12 @@ export class PatientPage {
 
   typePatientDateOfBirth(dateOfBirth: string) {
     cy.clickAndSelectOption("#patientAge", "DOB");
-    cy.get("#date_of_birth").scrollIntoView();
-    cy.get("#date_of_birth").should("be.visible").click();
-    cy.get("#date-input").click().type(dateOfBirth);
+    cy.clickAndTypeDate("#date_of_birth", dateOfBirth);
   }
 
   typePatientAge(age: string) {
     cy.clickAndSelectOption("#patientAge", "Age");
-    cy.submitButton("Confirm");
+    cy.clickSubmitButton("Confirm");
     cy.get("#age").clear().type(age);
   }
 
@@ -80,13 +78,11 @@ export class PatientPage {
   }
 
   typeLastMenstruationStartDate(date: string) {
-    cy.get("#last_menstruation_start_date").click();
-    cy.get("#date-input").click().type(date);
+    cy.clickAndTypeDate("#last_menstruation_start_date", date);
   }
 
   typeDateOfDelivery(date: string) {
-    cy.get("#date_of_delivery").click();
-    cy.get("#date-input").click().type(date);
+    cy.clickAndTypeDate("#date_of_delivery", date);
   }
 
   clickPermanentAddress() {
@@ -222,6 +218,10 @@ export class PatientPage {
 
   visitUpdatePatientUrl() {
     cy.visit(patient_url + "/update");
+  }
+
+  clickPatientUpdateDetails() {
+    cy.verifyAndClickElement("#update-patient-details", "Update Details");
   }
 
   interceptFacilities() {

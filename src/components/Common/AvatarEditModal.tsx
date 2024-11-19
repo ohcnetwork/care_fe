@@ -1,17 +1,21 @@
 import React, {
-  useState,
   ChangeEventHandler,
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
-import { Warn } from "@/Utils/Notifications";
-import useDragAndDrop from "@/Utils/useDragAndDrop";
-import ButtonV2, { Cancel, Submit } from "./components/ButtonV2";
-import Webcam from "react-webcam";
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
-import DialogModal from "./Dialog";
+import Webcam from "react-webcam";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+
+import useDragAndDrop from "@/hooks/useDragAndDrop";
+
+import { Warn } from "@/Utils/Notifications";
 
 interface Props {
   title: string;
@@ -34,6 +38,8 @@ const VideoConstraints = {
     facingMode: { exact: "environment" },
   },
 } as const;
+
+const isImageFile = (file?: File) => file?.type.split("/")[0] === "image";
 
 type IVideoConstraint =
   (typeof VideoConstraints)[keyof typeof VideoConstraints];
@@ -87,11 +93,12 @@ const AvatarEditModal = ({
   };
 
   useEffect(() => {
-    if (selectedFile) {
-      const objectUrl = URL.createObjectURL(selectedFile);
-      setPreview(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+    if (!isImageFile(selectedFile)) {
+      return;
     }
+    const objectUrl = URL.createObjectURL(selectedFile!);
+    setPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
   }, [selectedFile]);
 
   const onSelectFile: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -99,7 +106,7 @@ const AvatarEditModal = ({
       setSelectedFile(undefined);
       return;
     }
-    if (e.target.files[0]?.type.split("/")[0] !== "image") {
+    if (!isImageFile(e.target.files[0])) {
       Warn({ msg: "Please upload an image file!" });
       return;
     }
@@ -114,8 +121,10 @@ const AvatarEditModal = ({
 
     setIsProcessing(true);
     setIsCaptureImgBeingUploaded(true);
-
     await handleUpload(selectedFile, () => {
+      setSelectedFile(undefined);
+      setPreview(undefined);
+      setPreviewImage(null);
       setIsCaptureImgBeingUploaded(false);
       setIsProcessing(false);
     });
@@ -134,7 +143,7 @@ const AvatarEditModal = ({
     dragProps.setDragOver(false);
     setIsDragging(false);
     const droppedFile = e?.dataTransfer?.files[0];
-    if (droppedFile.type.split("/")[0] !== "image")
+    if (!isImageFile(droppedFile))
       return dragProps.setFileDropError("Please drop an image file to upload!");
     setSelectedFile(droppedFile);
   };
@@ -283,7 +292,7 @@ const AvatarEditModal = ({
                 <ButtonV2
                   id="save-cover-image"
                   onClick={uploadAvatar}
-                  disabled={isProcessing}
+                  disabled={isProcessing || !selectedFile}
                 >
                   {isProcessing ? (
                     <CareIcon

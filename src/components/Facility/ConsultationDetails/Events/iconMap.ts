@@ -1,4 +1,4 @@
-import { IconName } from "../../../../CAREUI/icons/CareIcon";
+import { IconName } from "@/CAREUI/icons/CareIcon";
 
 const eventIconMap: Record<string, IconName> = {
   INTERNAL_TRANSFER: "l-exchange-alt",

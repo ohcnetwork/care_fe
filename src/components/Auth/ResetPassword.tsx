@@ -1,16 +1,23 @@
-import { useEffect, useState } from "react";
-import request from "../../Utils/request/request";
-import * as Notification from "../../Utils/Notifications";
 import { navigate } from "raviger";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LocalStorageKeys } from "@/common/constants";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { validateRule } from "../Users/UserAdd";
-import { validatePassword } from "@/common/validation";
-import routes from "../../Redux/api";
 
-export const ResetPassword = (props: any) => {
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { validateRule } from "@/components/Users/UserAdd";
+
+import { LocalStorageKeys } from "@/common/constants";
+import { validatePassword } from "@/common/validation";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+
+interface ResetPasswordProps {
+  token: string;
+}
+
+const ResetPassword = (props: ResetPasswordProps) => {
   const initForm: any = {
     password: "",
     confirm: "",
@@ -128,18 +135,22 @@ export const ResetPassword = (props: any) => {
                   {validateRule(
                     form.password?.length >= 8,
                     "Password should be atleast 8 characters long",
+                    !form.password,
                   )}
                   {validateRule(
                     form.password !== form.password.toUpperCase(),
                     "Password should contain at least 1 lowercase letter",
+                    !form.password,
                   )}
                   {validateRule(
                     form.password !== form.password.toLowerCase(),
                     "Password should contain at least 1 uppercase letter",
+                    !form.password,
                   )}
                   {validateRule(
                     /\d/.test(form.password),
                     "Password should contain at least 1 number",
+                    !form.password,
                   )}
                 </div>
               )}
@@ -154,9 +165,11 @@ export const ResetPassword = (props: any) => {
               />
               {confirmPasswordInputInFocus &&
                 form.confirm.length > 0 &&
+                form.password.length > 0 &&
                 validateRule(
                   form.confirm === form.password,
                   "Confirm password should match the entered password",
+                  !form.password && form.password.length > 0,
                 )}
             </div>
             <div className="grid p-4 sm:flex sm:justify-between">
@@ -169,3 +182,5 @@ export const ResetPassword = (props: any) => {
     </div>
   );
 };
+
+export default ResetPassword;

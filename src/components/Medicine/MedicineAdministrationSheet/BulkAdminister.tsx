@@ -1,10 +1,12 @@
-import { useTranslation } from "react-i18next";
-import { Prescription } from "../models";
 import { useState } from "react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import SlideOver from "../../../CAREUI/interactive/SlideOver";
-import MedicineAdministration from "../MedicineAdministration";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import MedicineAdministration from "@/components/Medicine/MedicineAdministration";
+import { Prescription } from "@/components/Medicine/models";
 
 interface Props {
   prescriptions: Prescription[];

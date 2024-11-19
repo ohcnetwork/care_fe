@@ -1,23 +1,27 @@
 import { useState } from "react";
-import { Writable } from "../../Utils/types";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import SymptomsApi from "@/components/Symptoms/api";
 import {
   EncounterSymptom,
   OTHER_SYMPTOM_CHOICE,
   SYMPTOM_CHOICES,
-} from "./types";
-import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
-import DateFormField from "../Form/FormFields/DateFormField";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { classNames, dateQueryString } from "../../Utils/utils";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useSlug from "@/common/hooks/useSlug";
-import useQuery from "../../Utils/request/useQuery";
-import SymptomsApi from "./api";
-import request from "../../Utils/request/request";
-import { Success } from "../../Utils/Notifications";
-import { sortByOnsetDate } from "./utils";
+} from "@/components/Symptoms/types";
+import { sortByOnsetDate } from "@/components/Symptoms/utils";
+
+import useSlug from "@/hooks/useSlug";
+
+import { Success } from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { Writable } from "@/Utils/types";
+import { classNames, dateQueryString } from "@/Utils/utils";
 
 export const CreateSymptomsBuilder = (props: {
   value: Writable<EncounterSymptom>[];
@@ -97,7 +101,10 @@ export const EncounterSymptomsBuilder = (props: {
   }
 
   return (
-    <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
+    <div
+      className="flex w-full flex-col items-start rounded-lg border border-secondary-400"
+      data-scribe-subform="Symptoms"
+    >
       <ul
         className={classNames(
           "flex w-full flex-col p-4",
@@ -134,6 +141,7 @@ export const EncounterSymptomsBuilder = (props: {
             <li
               key={symptom.id}
               className="border-b-2 border-dashed border-secondary-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
+              data-scribe-subform-entry
             >
               <SymptomEntry
                 value={symptom}
@@ -191,7 +199,6 @@ const SymptomEntry = (props: {
         name="cure_date"
         value={symptom.cure_date ? new Date(symptom.cure_date) : undefined}
         disableFuture
-        position="CENTER"
         placeholder="Date of cure"
         min={new Date(symptom.onset_date)}
         disabled={disabled}
@@ -291,9 +298,11 @@ const AddSymptom = (props: {
     : true;
 
   return (
-    <div className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap">
+    <div
+      className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap"
+      data-scribe-subform-creator
+    >
       <DateFormField
-        className="w-full md:w-36"
         name="onset_date"
         id="symptoms_onset_date"
         placeholder="Date of onset"
@@ -376,18 +385,28 @@ export const SymptomText = (props: {
 
   const isOtherSymptom = symptom.id === OTHER_SYMPTOM_CHOICE.id;
 
-  return isOtherSymptom ? (
+  return (
     <>
-      <span className="font-normal">Other: </span>
-      <span
-        className={classNames(
-          !props.value.other_symptom?.trim() && "italic text-secondary-700",
-        )}
-      >
-        {props.value.other_symptom || "Not specified"}
-      </span>
+      {isOtherSymptom ? (
+        <>
+          <span className="font-normal">Other: </span>
+          <span
+            className={classNames(
+              !props.value.other_symptom?.trim() && "italic text-secondary-700",
+            )}
+          >
+            {props.value.other_symptom || "Not specified"}
+          </span>
+        </>
+      ) : (
+        symptom.text
+      )}
+      <input
+        type="hidden"
+        name="symptom"
+        value={`${isOtherSymptom ? "Other: " + props.value.other_symptom : symptom.text}`}
+        readOnly
+      />
     </>
-  ) : (
-    symptom.text
   );
 };

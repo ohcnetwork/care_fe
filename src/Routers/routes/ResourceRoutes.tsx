@@ -1,9 +1,11 @@
+import { Redirect } from "raviger";
+
+import BoardView from "@/components/Resource/ResourceBoard";
 import ResourceDetails from "@/components/Resource/ResourceDetails";
 import { ResourceDetailsUpdate } from "@/components/Resource/ResourceDetailsUpdate";
-import ListView from "@/components/Resource/ListView";
-import BoardView from "@/components/Resource/ResourceBoardView";
-import { Redirect } from "raviger";
-import { AppRoutes } from "../AppRouter";
+import ListView from "@/components/Resource/ResourceList";
+
+import { AppRoutes } from "@/Routers/AppRouter";
 
 const getDefaultView = () =>
   localStorage.getItem("defaultResourceView") === "list" ? "list" : "board";

@@ -1,6 +1,6 @@
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Inventory Management Section", () => {
   const facilityPage = new FacilityPage();
@@ -9,7 +9,7 @@ describe("Inventory Management Section", () => {
   const inventoryName = "PPE";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

@@ -1,4 +1,41 @@
-import * as Notification from "../../Utils/Notifications";
+import dayjs from "dayjs";
+import { Link, navigate } from "raviger";
+import { ReactNode, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import Chip from "@/CAREUI/display/Chip";
+import CountBlock from "@/CAREUI/display/Count";
+import FilterBadge from "@/CAREUI/display/FilterBadge";
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import { Avatar } from "@/components/Common/Avatar";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { ExportMenu } from "@/components/Common/Export";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import SortDropdownMenu from "@/components/Common/SortDropdown";
+import Tabs from "@/components/Common/Tabs";
+import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
+import { getDiagnosesByIds } from "@/components/Diagnosis/utils";
+import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
+import DoctorVideoSlideover from "@/components/Facility/DoctorVideoSlideover";
+import { FacilityModel, PatientCategory } from "@/components/Facility/models";
+import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import SearchInput from "@/components/Form/SearchInput";
+import {
+  DIAGNOSES_FILTER_LABELS,
+  DiagnosesFilterKey,
+  FILTER_BY_DIAGNOSES_KEYS,
+} from "@/components/Patient/DiagnosesFilter";
+import PatientFilter from "@/components/Patient/PatientFilter";
+import { isPatientMandatoryDataFilled } from "@/components/Patient/Utils";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useFilters from "@/hooks/useFilters";
 
 import {
   ADMITTED_TO,
@@ -10,54 +47,20 @@ import {
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
 } from "@/common/constants";
-import { FacilityModel, PatientCategory } from "../Facility/models";
-import { Link, navigate } from "raviger";
-import { ReactNode, useEffect, useState } from "react";
 import { parseOptionId } from "@/common/utils";
 
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Chip from "../../CAREUI/display/Chip";
-import CountBlock from "../../CAREUI/display/Count";
-import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
-import { ExportMenu } from "@/components/Common/Export";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import FilterBadge from "../../CAREUI/display/FilterBadge";
-import PatientFilter from "./PatientFilter";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import SearchInput from "../Form/SearchInput";
-import SortDropdownMenu from "@/components/Common/SortDropdown";
+import { triggerGoal } from "@/Integrations/Plausible";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   formatPatientAge,
   humanizeStrings,
   isAntenatal,
   parsePhoneNumber,
-} from "../../Utils/utils";
-import useFilters from "@/common/hooks/useFilters";
-import { useTranslation } from "react-i18next";
-import Page from "@/components/Common/components/Page";
-import dayjs from "dayjs";
-import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import {
-  DIAGNOSES_FILTER_LABELS,
-  DiagnosesFilterKey,
-  FILTER_BY_DIAGNOSES_KEYS,
-} from "./DiagnosesFilter";
-import { ICD11DiagnosisModel } from "../Diagnosis/types";
-import { getDiagnosesByIds } from "../Diagnosis/utils";
-import Tabs from "@/components/Common/components/Tabs";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import { isPatientMandatoryDataFilled } from "./Utils";
-import request from "../../Utils/request/request";
-import { Avatar } from "@/components/Common/Avatar";
+} from "@/Utils/utils";
 
-import Loading from "@/components/Common/Loading";
 interface TabPanelProps {
   children?: ReactNode;
   dir?: string;
@@ -389,7 +392,7 @@ export const PatientManager = () => {
   );
 
   const LastAdmittedToTypeBadges = () => {
-    const badge = (key: string, value: any, id: string) => {
+    const badge = (key: string, value: string | undefined, id: string) => {
       return (
         value && (
           <FilterBadge
@@ -418,7 +421,7 @@ export const PatientManager = () => {
   };
 
   const HasConsentTypesBadges = () => {
-    const badge = (key: string, value: any, id: string) => {
+    const badge = (key: string, value: string | undefined, id: string) => {
       return (
         value && (
           <FilterBadge
@@ -770,7 +773,7 @@ export const PatientManager = () => {
     managePatients = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-secondary-600">
-          No Patients Found
+          {t("no_patients_found")}
         </p>
       </div>
     );
@@ -834,7 +837,7 @@ export const PatientManager = () => {
             >
               <CareIcon icon="l-plus" className="text-lg" />
               <p id="add-patient-div" className="lg:my-[2px]">
-                Add Patient Details
+                Add Patient
               </p>
             </ButtonV2>
           </div>
@@ -872,6 +875,7 @@ export const PatientManager = () => {
             />
             {!!params.facility && (
               <ButtonV2
+                className="w-full lg:w-fit"
                 id="doctor-connect-patient-button"
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {

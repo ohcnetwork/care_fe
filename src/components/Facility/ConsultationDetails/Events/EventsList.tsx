@@ -1,21 +1,21 @@
 import { useTranslation } from "react-i18next";
-import { TimelineNode } from "../../../../CAREUI/display/Timeline";
-import PaginatedList from "../../../../CAREUI/misc/PaginatedList";
-import { useSlugs } from "@/common/hooks/useSlug";
-import routes from "../../../../Redux/api";
-import LoadingLogUpdateCard from "../../Consultations/DailyRounds/LoadingCard";
-import GenericEvent from "./GenericEvent";
-import { getEventIcon } from "./iconMap";
-import { EventGeneric } from "./types";
-import SortDropdownMenu from "@/components/Common/SortDropdown";
-import { EVENTS_SORT_OPTIONS } from "@/common/constants";
-import { QueryParams } from "../../../../Utils/request/types";
-import { useState } from "react";
 
-export default function EventsList() {
+import { TimelineNode } from "@/CAREUI/display/Timeline";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+
+import GenericEvent from "@/components/Facility/ConsultationDetails/Events/GenericEvent";
+import { getEventIcon } from "@/components/Facility/ConsultationDetails/Events/iconMap";
+import { EventGeneric } from "@/components/Facility/ConsultationDetails/Events/types";
+import LoadingLogUpdateCard from "@/components/Facility/Consultations/LogUpdates/LoadingCard";
+
+import { useSlugs } from "@/hooks/useSlug";
+
+import routes from "@/Utils/request/api";
+import { QueryParams } from "@/Utils/request/types";
+
+export default function EventsList({ query }: { query: QueryParams }) {
   const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
-  const [query, setQuery] = useState<QueryParams>();
 
   return (
     <PaginatedList
@@ -25,14 +25,6 @@ export default function EventsList() {
     >
       {() => (
         <>
-          <div className="m-1 flex flex-1 justify-end">
-            <SortDropdownMenu
-              options={EVENTS_SORT_OPTIONS}
-              selected={query?.ordering?.toString()}
-              onSelect={setQuery}
-            />
-          </div>
-
           <div className="mt-4 flex w-full flex-col gap-4">
             <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
@@ -76,6 +68,12 @@ export default function EventsList() {
                       }
 
                       const values = Object.fromEntries(entries);
+                      if (
+                        values.ventilator_interface === "INVASIVE" ||
+                        values.ventilator_interface === "NON_INVASIVE"
+                      ) {
+                        values.ventilator_interface += " VENTILATOR";
+                      }
 
                       switch (item.event_type.name) {
                         case "INTERNAL_TRANSFER":

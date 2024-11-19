@@ -1,11 +1,15 @@
-import { useState, useEffect } from "react";
-import * as Notify from "./Notifications";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import * as Notify from "@/Utils/Notifications";
 
 const useSegmentedRecording = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
   const [audioBlobs, setAudioBlobs] = useState<Blob[]>([]);
   const [restart, setRestart] = useState(false);
+  const [microphoneAccess, setMicrophoneAccess] = useState(false); // New state
+  const { t } = useTranslation();
 
   const bufferInterval = 1 * 1000;
   const splitSizeLimit = 20 * 1000000; // 20MB
@@ -22,15 +26,17 @@ const useSegmentedRecording = () => {
         requestRecorder().then(
           (newRecorder) => {
             setRecorder(newRecorder);
+            setMicrophoneAccess(true); // Set access to true on success
             if (restart) {
               setIsRecording(true);
             }
           },
           () => {
             Notify.Error({
-              msg: "Please grant microphone permission to record audio.",
+              msg: t("audio__permission_message"),
             });
             setIsRecording(false);
+            setMicrophoneAccess(false); // Set access to false on failure
           },
         );
       }
@@ -95,8 +101,16 @@ const useSegmentedRecording = () => {
     return () => recorder.removeEventListener("dataavailable", handleData);
   }, [recorder, isRecording, bufferInterval, audioBlobs, restart]);
 
-  const startRecording = () => {
-    setIsRecording(true);
+  const startRecording = async () => {
+    try {
+      const newRecorder = await requestRecorder();
+      setRecorder(newRecorder);
+      setMicrophoneAccess(true);
+      setIsRecording(true);
+    } catch (error) {
+      setMicrophoneAccess(false);
+      throw new Error("Microphone access denied");
+    }
   };
 
   const stopRecording = () => {
@@ -113,6 +127,7 @@ const useSegmentedRecording = () => {
     stopRecording,
     resetRecording,
     audioBlobs,
+    microphoneAccess, // Return microphoneAccess
   };
 };
 

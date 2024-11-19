@@ -1,7 +1,9 @@
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
+import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+
 interface LocationSelectProps {
   name: string;
   disabled?: boolean;

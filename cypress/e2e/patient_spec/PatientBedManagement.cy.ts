@@ -1,7 +1,7 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
+import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import PatientLogupdate from "../../pageobject/Patient/PatientLogupdate";
-import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 
 describe("Patient swtich bed functionality", () => {
   const loginPage = new LoginPage();
@@ -15,7 +15,7 @@ describe("Patient swtich bed functionality", () => {
   const switchPatientTwo = "Dummy Patient 7";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

@@ -1,31 +1,50 @@
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import { useState } from "react";
-import { ConsultationTabProps } from "./index";
-import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
-import { BedModel } from "../models";
-import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
-import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
-import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
+import { useTranslation } from "react-i18next";
+
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import {
+  AssetBedModel,
+  AssetClass,
+  AssetData,
+} from "@/components/Assets/AssetTypes";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import PageTitle from "@/components/Common/PageTitle";
+import ReadMore from "@/components/Common/Readmore";
+import Tabs from "@/components/Common/Tabs";
+import EventsList from "@/components/Facility/ConsultationDetails/Events/EventsList";
+import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
+import LogUpdatesFilter from "@/components/Facility/Consultations/LogUpdatesFilter";
+import LogUpdatesList from "@/components/Facility/Consultations/LogUpdatesList";
+import { BedModel } from "@/components/Facility/models";
+import PrescriptionsTable from "@/components/Medicine/PrescriptionsTable";
+import EncounterSymptomsCard from "@/components/Symptoms/SymptomsCard";
+import HL7PatientVitalsMonitor from "@/components/VitalsMonitor/HL7PatientVitalsMonitor";
+import VentilatorPatientVitalsMonitor from "@/components/VitalsMonitor/VentilatorPatientVitalsMonitor";
+import useVitalsAspectRatioConfig from "@/components/VitalsMonitor/useVitalsAspectRatioConfig";
+import { getVitalsMonitorSocketUrl } from "@/components/VitalsMonitor/utils";
+
 import { DISCHARGE_REASONS } from "@/common/constants";
-import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
-import Chip from "../../../CAREUI/display/Chip";
+import { EVENTS_SORT_OPTIONS } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import { QueryParams } from "@/Utils/request/types";
+import useQuery from "@/Utils/request/useQuery";
 import {
   formatDate,
   formatDateTime,
   formatPatientAge,
   isAntenatal,
   isPostPartum,
-} from "../../../Utils/utils";
-import ReadMore from "@/components/Common/components/Readmore";
-import DailyRoundsList from "../Consultations/DailyRoundsList";
-import EventsList from "./Events/EventsList";
-import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
-import useQuery from "../../../Utils/request/useQuery";
-import routes from "../../../Redux/api";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import EncounterSymptomsCard from "../../Symptoms/SymptomsCard";
-import Tabs from "@/components/Common/components/Tabs";
-
-import PageTitle from "@/components/Common/PageTitle";
+} from "@/Utils/utils";
+import { classNames } from "@/Utils/utils";
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
@@ -33,6 +52,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
   const [showEvents, setShowEvents] = useState(true);
+  const [eventsQuery, setEventsQuery] = useState<QueryParams>();
+  const [dailyRoundsQuery, setDailyRoundsQuery] = useState<QueryParams>();
+  const { t } = useTranslation();
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -651,32 +673,110 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
-          <Tabs
-            className="mt-3 w-full lg:w-full"
-            tabs={[
-              {
-                text: (
-                  <div className="flex items-center justify-center gap-1 text-sm">
-                    Events
-                    <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
-                      beta
-                    </span>
-                  </div>
-                ),
-                value: 1,
-              },
-              { text: "Daily Rounds", value: 0 },
-            ]}
-            onTabChange={(v) => setShowEvents(!!v)}
-            currentTab={showEvents ? 1 : 0}
-          />
+          <div className="flex items-center">
+            <Tabs
+              className="mr-2 mt-3 w-full lg:w-full"
+              tabs={[
+                {
+                  text: (
+                    <div className="flex items-center justify-center gap-1 text-sm">
+                      {t("events")}
+                      <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
+                        {t("beta")}
+                      </span>
+                    </div>
+                  ),
+                  value: 1,
+                },
+                { text: t("log_updates"), value: 0 },
+              ]}
+              onTabChange={(v) => setShowEvents(!!v)}
+              currentTab={showEvents ? 1 : 0}
+            />
+            {showEvents ? (
+              <Popover className="relative mt-3">
+                <PopoverButton>
+                  <ButtonV2
+                    className="border p-3"
+                    variant={eventsQuery?.ordering ? "primary" : "secondary"}
+                  >
+                    <CareIcon icon="l-filter" />
+                  </ButtonV2>
+                </PopoverButton>
+                <Transition
+                  enter="transition ease-out duration-200"
+                  enterFrom="opacity-0 translate-y-1"
+                  enterTo="opacity-100 translate-y-0"
+                  leave="transition ease-in duration-150"
+                  leaveFrom="opacity-100 translate-y-0"
+                  leaveTo="opacity-0 translate-y-1"
+                >
+                  <PopoverPanel className="absolute right-0 z-30">
+                    <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
+                      <div className="relative flex flex-col rounded-b-lg bg-white">
+                        {EVENTS_SORT_OPTIONS.map(({ isAscending, value }) => {
+                          return (
+                            <div
+                              className={classNames(
+                                "dropdown-item-primary pointer-events-auto m-2 flex w-56 cursor-pointer items-center justify-start gap-3 rounded border-0 px-4 py-2 text-sm font-normal transition-all duration-200 ease-in-out",
+                                eventsQuery?.ordering?.toString() === value
+                                  ? "bg-primary-100 !font-medium text-primary-500"
+                                  : "",
+                              )}
+                              onClick={() => {
+                                setEventsQuery({
+                                  ordering: value,
+                                });
+                              }}
+                            >
+                              <CareIcon
+                                className="text-primary-600"
+                                icon={
+                                  isAscending
+                                    ? "l-sort-amount-up"
+                                    : "l-sort-amount-down"
+                                }
+                              />
+                              <span>{t("SORT_OPTIONS__" + value)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </PopoverPanel>
+                </Transition>
+              </Popover>
+            ) : (
+              <DailyRoundsSortDropdown
+                setDailyRoundsQuery={setDailyRoundsQuery}
+              />
+            )}
+          </div>
+
           {showEvents ? (
-            <EventsList />
+            <EventsList query={eventsQuery!} />
           ) : (
-            <DailyRoundsList consultation={props.consultationData} />
+            <LogUpdatesList
+              consultation={props.consultationData}
+              query={dailyRoundsQuery!}
+            />
           )}
         </div>
       </div>
     </div>
   );
 };
+
+function DailyRoundsSortDropdown({
+  setDailyRoundsQuery,
+}: {
+  setDailyRoundsQuery: (query: QueryParams) => void;
+}) {
+  return (
+    <LogUpdatesFilter
+      onApply={(query) => {
+        setDailyRoundsQuery(query);
+      }}
+    />
+  );
+}

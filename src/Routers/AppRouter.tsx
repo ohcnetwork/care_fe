@@ -1,32 +1,32 @@
-import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
-import { useState, useEffect } from "react";
+import careConfig from "@careConfig";
+import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { useEffect, useState } from "react";
 
-import ShowPushNotification from "@/components/Notifications/ShowPushNotification";
-import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
-import Error404 from "@/components/ErrorPages/404";
+import IconIndex from "@/CAREUI/icons/Index";
+
 import {
   DesktopSidebar,
   MobileSidebar,
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
 } from "@/components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS } from "@/common/constants";
+import Error404 from "@/components/ErrorPages/404";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
-import HealthInformation from "@/components/ABDM/HealthInformation";
-import ABDMFacilityRecords from "@/components/ABDM/ABDMFacilityRecords";
+import { NoticeBoard } from "@/components/Notifications/NoticeBoard";
+import ShowPushNotification from "@/components/Notifications/ShowPushNotification";
 
-import UserRoutes from "./routes/UserRoutes";
-import PatientRoutes from "./routes/PatientRoutes";
-import SampleRoutes from "./routes/SampleRoutes";
-import FacilityRoutes from "./routes/FacilityRoutes";
-import ConsultationRoutes from "./routes/ConsultationRoutes";
-import HCXRoutes from "./routes/HCXRoutes";
-import ShiftingRoutes from "./routes/ShiftingRoutes";
-import AssetRoutes from "./routes/AssetRoutes";
-import ResourceRoutes from "./routes/ResourceRoutes";
-import { usePluginRoutes } from "@/common/hooks/useCareApps";
-import careConfig from "@careConfig";
-import IconIndex from "../CAREUI/icons/Index";
+import { usePluginRoutes } from "@/hooks/useCareApps";
+
+import { BLACKLISTED_PATHS } from "@/common/constants";
+
+import AssetRoutes from "@/Routers/routes/AssetRoutes";
+import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
+import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
+import PatientRoutes from "@/Routers/routes/PatientRoutes";
+import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
+import SampleRoutes from "@/Routers/routes/SampleRoutes";
+import ShiftingRoutes from "@/Routers/routes/ShiftingRoutes";
+import UserRoutes from "@/Routers/routes/UserRoutes";
 
 export type RouteParams<T extends string> =
   T extends `${string}:${infer Param}/${infer Rest}`
@@ -58,13 +58,6 @@ const Routes: AppRoutes = {
   "/notifications/:id": ({ id }) => <ShowPushNotification id={id} />,
   "/notice_board": () => <NoticeBoard />,
 
-  "/abdm/health-information/:id": ({ id }) => (
-    <HealthInformation artefactId={id} />
-  ),
-  "/facility/:facilityId/abdm": ({ facilityId }) => (
-    <ABDMFacilityRecords facilityId={facilityId} />
-  ),
-
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
   "/icons": () => <IconIndex />,
@@ -78,16 +71,12 @@ export default function AppRouter() {
 
   let routes = Routes;
 
-  if (careConfig.hcx.enabled) {
-    routes = { ...HCXRoutes, ...routes };
-  }
-
   useRedirect("/user", "/users");
 
   // Merge in Plugin Routes
   routes = {
-    ...routes,
     ...pluginRoutes,
+    ...routes,
   };
 
   const pages = useRoutes(routes) || <Error404 />;
@@ -169,7 +158,10 @@ export default function AppRouter() {
             id="pages"
             className="flex-1 overflow-y-scroll bg-gray-100 pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow">
+            <div
+              className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow"
+              data-cui-page
+            >
               {pages}
             </div>
           </main>

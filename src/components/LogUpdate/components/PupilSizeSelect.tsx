@@ -1,7 +1,8 @@
-import { classNames, getValueDescription } from "../../../Utils/utils";
-import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
-import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import { LogUpdateSectionProps } from "../utils";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import { LogUpdateSectionProps } from "@/components/LogUpdate/utils";
+
+import { classNames, getValueDescription } from "@/Utils/utils";
 
 const PupilSizeValueDescriptions = [
   { till: 2, text: "Constricted", color: "red" },

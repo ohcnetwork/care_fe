@@ -59,10 +59,10 @@ export class AssetPage {
     cy.get("[data-testid=asset-support-email-input] input").type(supportEmail);
     cy.get("[data-testid=asset-vendor-name-input] input").type(vendorName);
     cy.get("[data-testid=asset-serial-number-input] input").type(serialNumber);
-    cy.get(
-      "[data-testid=asset-last-serviced-on-input] input[type='text']",
-    ).click();
-    cy.get("#date-input").click().type(lastServicedOn);
+    cy.clickAndTypeDate(
+      "[data-testid=asset-last-serviced-on-input]",
+      lastServicedOn,
+    );
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 
@@ -117,10 +117,10 @@ export class AssetPage {
     cy.get("[data-testid=asset-vendor-name-input] input")
       .clear()
       .type(vendorName);
-    cy.get(
-      "[data-testid=asset-last-serviced-on-input] input[type='text']",
-    ).click();
-    cy.get("#date-input").click().clear().type(lastServicedOn);
+    cy.clickAndTypeDate(
+      "[data-testid=asset-last-serviced-on-input]",
+      lastServicedOn,
+    );
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
@@ -267,8 +267,7 @@ export class AssetPage {
   }
 
   enterAssetservicedate(text: string) {
-    cy.get("input[name='last_serviced_on']").click();
-    cy.get("#date-input").click().type(text);
+    cy.clickAndTypeDate("input[name='last_serviced_on']", text);
   }
 
   scrollintoWarrantyDetails() {

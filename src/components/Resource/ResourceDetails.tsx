@@ -1,20 +1,19 @@
-import { useState } from "react";
-import { classNames, formatDateTime, formatName } from "../../Utils/utils";
 import { navigate } from "raviger";
-import * as Notification from "../../Utils/Notifications";
-import CommentSection from "./CommentSection";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Page from "@/components/Common/components/Page";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import CommentSection from "@/components/Resource/ResourceCommentSection";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime, formatName } from "@/Utils/utils";
+
 export default function ResourceDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
-  const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =
-    useState(false);
   const { data, loading } = useQuery(routes.getResourceDetails, {
     pathParams: { id: props.id },
     onResponse: ({ res, data }) => {
@@ -23,25 +22,6 @@ export default function ResourceDetails(props: { id: string }) {
       }
     },
   });
-
-  const handleResourceDelete = async () => {
-    setOpenDeleteResourceDialog(true);
-    const { res, data } = await request(routes.deleteResourceRecord, {
-      pathParams: { id: props.id },
-    });
-    if (res?.status === 204) {
-      Notification.Success({
-        msg: "Resource record has been deleted successfully.",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while deleting Resource: " + (data?.detail || ""),
-      });
-    }
-
-    navigate("/resource");
-  };
-
   const showFacilityCard = (facilityData: any) => {
     return (
       <div className="mt-2 h-full rounded-lg border bg-white p-4 text-black shadow">
@@ -325,28 +305,6 @@ export default function ResourceDetails(props: { id: string }) {
                 <div className="break-words">{data.reason || "--"}</div>
               </div>
             </div>
-
-            <div className="mt-4 flex justify-end">
-              <div>
-                <ButtonV2
-                  className="w-full"
-                  variant="danger"
-                  onClick={() => setOpenDeleteResourceDialog(true)}
-                >
-                  Delete Record
-                </ButtonV2>
-
-                <ConfirmDialog
-                  title="Authorize resource delete"
-                  description="Are you sure you want to delete this record?"
-                  action="Delete"
-                  variant="danger"
-                  show={openDeleteResourceDialog}
-                  onClose={() => setOpenDeleteResourceDialog(false)}
-                  onConfirm={handleResourceDelete}
-                />
-              </div>
-            </div>
           </div>
           <h4 className="mt-8">Audit Log</h4>
 
@@ -357,7 +315,7 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
               <div className="mt-1 text-sm leading-5 text-secondary-900">
                 <div className="text-sm">
-                  {formatName(data.created_by_object)}
+                  {data.created_by_object && formatName(data.created_by_object)}
                 </div>
                 <div className="text-xs">
                   {data.created_date && formatDateTime(data.created_date)}

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { classNames } from "../../../Utils/utils";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { classNames } from "@/Utils/utils";
 
 export function PrescriptionDropdown(props: {
   options: string[] | number[];
@@ -57,7 +59,7 @@ export function PrescriptionDropdown(props: {
       >
         {options.map((option, i) => {
           return (
-            <div className="flex justify-between">
+            <div className="flex justify-between" key={i}>
               <button
                 id="frequency-interval"
                 type="button"

@@ -1,14 +1,17 @@
 import { createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { PerformedByModel } from "@/components/HCX/misc";
-import { classNames, formatName } from "../../Utils/utils";
-import CareIcon, { IconName } from "../icons/CareIcon";
-import RecordMeta from "./RecordMeta";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { UserBareMinimum } from "@/components/Users/models";
+
+import { classNames, formatName } from "@/Utils/utils";
 
 export interface TimelineEvent<TType = string> {
   type: TType;
   timestamp: string;
-  by: PerformedByModel | undefined;
+  by: UserBareMinimum | undefined;
   icon: IconName;
   iconStyle?: string;
   iconWrapperStyle?: string;

@@ -121,9 +121,14 @@ Cypress.Commands.add("clearAllFilters", () => {
   return cy.get("#clear-all-filters").click();
 });
 
-Cypress.Commands.add("submitButton", (buttonText = "Submit") => {
+Cypress.Commands.add("clickSubmitButton", (buttonText = "Submit") => {
   cy.get("button[type='submit']").contains(buttonText).scrollIntoView();
   cy.get("button[type='submit']").contains(buttonText).click();
+});
+
+Cypress.Commands.add("clickCancelButton", (buttonText = "Cancel") => {
+  cy.get("#cancel").contains(buttonText).scrollIntoView();
+  cy.get("#cancel").contains(buttonText).click();
 });
 
 Cypress.Commands.add(
@@ -183,10 +188,16 @@ Cypress.Commands.add("selectRadioOption", (name: string, value: string) => {
   cy.get(`input[type='radio'][name='${name}'][value=${value}]`).click();
 });
 
-Cypress.Commands.add("clickAndTypeDate", (selector: string, date: string) => {
+Cypress.Commands.add("clickAndTypeDate", (selector, date) => {
   cy.get(selector).scrollIntoView();
   cy.get(selector).click();
-  cy.get("#date-input").click().type(date);
+  cy.get('[data-test-id="date-input"]:visible [data-time-input]').each((el) =>
+    cy.wrap(el).clear(),
+  );
+  cy.get(`[data-test-id="date-input"]:visible [data-time-input="0"]`)
+    .click()
+    .type(date);
+  cy.get("body").click(0, 0);
 });
 
 Cypress.Commands.add(

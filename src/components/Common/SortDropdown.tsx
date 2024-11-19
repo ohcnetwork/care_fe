@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DropdownMenu, { DropdownItem } from "./components/Menu";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
 
 export interface SortOption {
   isAscending: boolean;
@@ -27,9 +29,9 @@ export default function SortDropdownMenu(props: Props) {
       icon={<CareIcon icon="l-sort" />}
       containerClassName="w-full md:w-auto"
     >
-      {props.options.map(({ isAscending, value }) => (
+      {props.options.map(({ isAscending, value }, i) => (
         <DropdownItem
-          key={value}
+          key={i}
           className={
             props.selected === value
               ? "bg-primary-100 !font-medium text-primary-500"
