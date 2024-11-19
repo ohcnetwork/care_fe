@@ -35,12 +35,14 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true }).catch(() => {
-      Notify.Warn({
-        msg: t("camera_permission_denied"),
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: cameraFacingMode } })
+      .catch(() => {
+        Notify.Warn({
+          msg: t("camera_permission_denied"),
+        });
+        onHide();
       });
-      onHide();
-    });
   }, [show]);
 
   const handleSwitchCamera = useCallback(async () => {
