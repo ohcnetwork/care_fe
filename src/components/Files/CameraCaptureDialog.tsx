@@ -34,33 +34,17 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     height: { ideal: 2160 },
   };
   useEffect(() => {
-    if (!show) return;
-
-    let stream: MediaStream | null = null;
-
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((mediaStream) => {
-        stream = mediaStream;
-      })
-      .catch(() => {
-        Notify.Warn({
-          msg: t("camera_permission_denied"),
-        });
-        onHide();
+    navigator.mediaDevices.getUserMedia({ video: true }).catch(() => {
+      Notify.Warn({
+        msg: t("camera_permission_denied"),
       });
-
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [show, onHide]);
+      onHide();
+    });
+  }, [show]);
 
   const handleSwitchCamera = useCallback(() => {
     const supportedConstraints =
       navigator.mediaDevices.getSupportedConstraints();
-    console.log(supportedConstraints);
     if (
       !isLaptopScreen &&
       typeof supportedConstraints.facingMode === "string" &&
@@ -75,10 +59,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       });
     }
   }, []);
-
-  useEffect(() => {
-    console.log(cameraFacingMode);
-  }, [cameraFacingMode]);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -139,6 +119,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
           {!previewImage ? (
             <ButtonV2 onClick={handleSwitchCamera} className="m-2">
               {t("switch")}
+              {navigator.mediaDevices.getSupportedConstraints()?.toString()}
             </ButtonV2>
           ) : (
             <></>
