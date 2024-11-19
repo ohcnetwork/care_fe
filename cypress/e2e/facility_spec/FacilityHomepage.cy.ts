@@ -6,6 +6,7 @@ import FacilityNotify from "../../pageobject/Facility/FacilityNotify";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import { UserPage } from "../../pageobject/Users/UserSearch";
+import { advanceFilters } from "../../pageobject/utils/advanceFilterHelpers";
 
 describe("Facility Homepage Function", () => {
   const loginPage = new LoginPage();
@@ -61,18 +62,19 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify the functionality of advance filter", () => {
-    userPage.clickAdvancedFilters();
-    facilityPage.selectState(stateName);
-    facilityPage.selectDistrict(district);
-    facilityPage.selectLocalBody(localBody);
-    facilityPage.clickUpdateFacilityType(facilityType);
-    userPage.applyFilter();
+    advanceFilters.clickAdvancedFiltersButton();
+    advanceFilters.selectState(stateName);
+    advanceFilters.selectDistrict(district);
+    advanceFilters.selectLocalBody(localBody);
+    advanceFilters.selectFacilityType(facilityType);
+    advanceFilters.applySelectedFilter();
     facilityPage.verifyStateBadgeContent(stateName);
     facilityPage.verifyDistrictBadgeContent(district);
     facilityPage.verifyLocalBodyBadgeContent(localBody);
     facilityPage.verifyFacilityTypeBadgeContent(facilityType);
     manageUserPage.assertFacilityInCard(facilityName);
-    userPage.clearFilters();
+    advanceFilters.clickAdvancedFiltersButton();
+    advanceFilters.clickClearAdvanceFilters();
     userPage.verifyDataTestIdNotVisible("State");
     userPage.verifyDataTestIdNotVisible("District");
     userPage.verifyDataTestIdNotVisible("Facility type");
@@ -116,11 +118,11 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
-    userPage.clickAdvancedFilters();
-    facilityPage.selectState(stateName);
-    facilityPage.selectDistrict(district);
-    facilityPage.selectLocalBody(localBody);
-    userPage.applyFilter();
+    advanceFilters.clickAdvancedFiltersButton();
+    advanceFilters.selectState(stateName);
+    advanceFilters.selectDistrict(district);
+    advanceFilters.selectLocalBody(localBody);
+    advanceFilters.applySelectedFilter();
     // go to cns page in the facility details page
     manageUserPage.typeFacilitySearch(facilityName);
     facilityPage.verifyFacilityBadgeContent(facilityName);
@@ -150,7 +152,7 @@ describe("Facility Homepage Function", () => {
     facilityNotify.verifyFacilityName(facilityName);
     facilityNotify.fillNotifyText(notificationMessage);
     facilityNotify.interceptPostNotificationReq();
-    cy.submitButton("Notify");
+    cy.clickSubmitButton("Notify");
     facilityNotify.verifyPostNotificationReq();
     cy.verifyNotification("Facility Notified");
     cy.closeNotification();
@@ -158,7 +160,7 @@ describe("Facility Homepage Function", () => {
     // Verify the frontend error on empty message
     facilityHome.clickFacilityNotifyButton();
     facilityNotify.verifyFacilityName(facilityName);
-    cy.submitButton("Notify");
+    cy.clickSubmitButton("Notify");
     facilityNotify.verifyErrorMessage(notificationErrorMsg);
     // close pop-up and verify
     facilityHome.verifyAndCloseNotifyModal();

@@ -57,6 +57,7 @@ describe("Facility Creation", () => {
     "This field is required",
   ];
   const triageErrorMessage = ["This field is required"];
+  const facilityType = "Primary Health Centres";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -117,7 +118,7 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
     userCreationPage.verifyErrorMessages(facilityErrorMessage);
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.clickfacilityfeatureoption();
     facilityFeature.forEach((featureText) => {
       cy.get("[role='option']").contains(featureText).click();
@@ -206,7 +207,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with single bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -246,7 +247,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with no bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -285,7 +286,7 @@ describe("Facility Creation", () => {
     facilityPage.visitUpdateFacilityPage(facilityUrl1);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
-    facilityPage.clickUpdateFacilityType("Primary Health Centres");
+    facilityPage.selectFacilityType(facilityType);
     facilityPage.fillAddress(facilityUpdateAddress);
     facilityPage.fillOxygenCapacity(oxygenCapacity);
     facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
@@ -314,6 +315,39 @@ describe("Facility Creation", () => {
     facilityPage.verifySuccessNotification(
       "Facility middleware updated successfully",
     );
+  });
+
+  it("Should display error when district admin tries to create facility in a different district", () => {
+    facilityPage.visitCreateFacilityPage();
+    facilityPage.fillFacilityName(facilityName);
+    facilityPage.selectFacilityType(facilityType);
+    facilityPage.fillPincode("682001");
+    facilityPage.selectStateOnPincode("Kerala");
+    facilityPage.selectDistrictOnPincode("Kottayam");
+    facilityPage.selectLocalBody("Arpookara");
+    facilityPage.selectWard("5");
+    facilityPage.fillAddress(facilityAddress);
+    facilityPage.fillPhoneNumber(facilityNumber);
+    facilityPage.submitForm();
+    facilityPage.verifyErrorNotification(
+      "You do not have permission to perform this action.",
+    );
+  });
+
+  it("Access Restriction for Non-Admin Users to facility creation page", () => {
+    const nonAdminLoginMethods = [
+      loginPage.loginAsDevDoctor.bind(loginPage),
+      loginPage.loginAsStaff.bind(loginPage),
+    ];
+
+    nonAdminLoginMethods.forEach((loginMethod) => {
+      loginMethod();
+      cy.visit("/facility/create");
+      facilityPage.verifyErrorNotification(
+        "You don't have permission to perform this action. Contact the admin",
+      );
+      cy.clearCookies();
+    });
   });
 
   afterEach(() => {
