@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDebounce } from "use-debounce";
 
 import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
@@ -291,8 +292,10 @@ export const PatientManager = () => {
     return cleanedData;
   };
 
+  const [debouncedParams] = useDebounce(params, 500); // Debounce time in milliseconds
+
   const { loading: isLoading, data } = useQuery(routes.patientList, {
-    query: params,
+    query: debouncedParams, // Pass the debounced params
   });
 
   const getTheCategoryFromId = () => {
