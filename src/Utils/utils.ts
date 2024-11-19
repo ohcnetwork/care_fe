@@ -549,12 +549,8 @@ export const handleNegativeValue = (
   event: React.FormEvent<HTMLInputElement>,
 ): void => {
   const input = event.currentTarget;
-
-  // Remove all instances of '-' from the input value
   input.value = input.value.replace(/-/g, "");
-
-  // Optional: Ensure the input value is a valid number
   if (isNaN(Number(input.value))) {
-    input.value = ""; // Reset to empty if input is not a number
+    input.value = "";
   }
 };
