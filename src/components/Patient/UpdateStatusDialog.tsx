@@ -243,11 +243,7 @@ const UpdateStatusDialog = (props: Props) => {
                     onClick={removeFile}
                   />
                 )}
-                <Submit
-                  type="submit"
-                  onClick={handleUpload}
-                  disabled={file ? false : true}
-                >
+                <Submit type="submit" onClick={handleUpload} disabled={!file}>
                   <CareIcon icon="l-cloud-upload" className="text-lg" />
                   <span>Upload</span>
                 </Submit>
