@@ -185,7 +185,7 @@ describe("Location Management Section", () => {
     facilityLocation.clickAddNewLocationButton();
     facilityLocation.enterLocationName("Test Location with Beds");
     facilityLocation.selectLocationType("OTHER");
-    cy.submitButton("Add Location");
+    cy.clickSubmitButton("Add Location");
     cy.verifyNotification("Location created successfully");
     cy.closeNotification();
     facilityLocation.clickManageBedButton();

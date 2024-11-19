@@ -1299,6 +1299,7 @@ export const PatientHome = (props: any) => {
                       )
                     }
                     authorizeFor={NonReadOnlyUsers}
+                    id="sample-request-btn"
                   >
                     <span className="flex w-full items-center justify-start gap-2">
                       <CareIcon icon="l-medkit" className="text-xl" />

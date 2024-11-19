@@ -319,7 +319,7 @@ class FacilityPage {
   }
 
   confirmDeleteFacility() {
-    cy.submitButton("Delete");
+    cy.clickSubmitButton("Delete");
   }
 
   selectLocation(location: string) {

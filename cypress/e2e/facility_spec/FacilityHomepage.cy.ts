@@ -193,7 +193,7 @@ describe("Facility Homepage Function", () => {
     facilityNotify.verifyFacilityName(facilityName);
     facilityNotify.fillNotifyText(notificationMessage);
     facilityNotify.interceptPostNotificationReq();
-    cy.submitButton("Notify");
+    cy.clickSubmitButton("Notify");
     facilityNotify.verifyPostNotificationReq();
     cy.verifyNotification("Facility Notified");
     cy.closeNotification();
@@ -201,7 +201,7 @@ describe("Facility Homepage Function", () => {
     // Verify the frontend error on empty message
     facilityHome.clickFacilityNotifyButton();
     facilityNotify.verifyFacilityName(facilityName);
-    cy.submitButton("Notify");
+    cy.clickSubmitButton("Notify");
     facilityNotify.verifyErrorMessage(notificationErrorMsg);
     // close pop-up and verify
     facilityHome.verifyAndCloseNotifyModal();
@@ -307,7 +307,7 @@ describe("Facility Homepage Function", () => {
     );
     patientTreatmentPlan.fillTreatingPhysician(doctorName);
     patientConsultationPage.selectBed("Bed 1");
-    cy.submitButton("Create Consultation");
+    cy.clickSubmitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // verify the occupancy badge reflection
     cy.visit("/facility");
