@@ -226,7 +226,6 @@ const UpdateStatusDialog = (props: Props) => {
               <div className="mb-4 mt-3 flex flex-wrap justify-between gap-2">
                 <label className="button-size-default button-shape-square button-primary-default inline-flex h-min max-w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500">
                   <CareIcon icon="l-file-upload-alt" className="text-lg" />
-
                   <span className="max-w-full truncate">
                     {file ? file.name : t("choose_file")}
                   </span>
