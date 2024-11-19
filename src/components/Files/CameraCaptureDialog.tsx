@@ -27,7 +27,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const videoConstraints = {
     width: { ideal: 4096 },
     height: { ideal: 2160 },
-    facingMode: "environment",
   };
   useEffect(() => {
     if (!show) return;
@@ -61,8 +60,8 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       typeof supportedConstraints.facingMode === "string" &&
       (supportedConstraints.facingMode as string).includes("environment")
     ) {
-      setCameraFacingMode(
-        cameraFacingMode === "environment" ? "user" : "environment",
+      setCameraFacingMode((prevMode) =>
+        prevMode === "environment" ? "user" : "environment",
       );
     } else {
       Notify.Warn({
