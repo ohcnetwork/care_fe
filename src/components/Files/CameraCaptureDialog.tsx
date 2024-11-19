@@ -43,9 +43,19 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     });
   }, [show]);
 
-  const handleSwitchCamera = useCallback(() => {
+  const handleSwitchCamera = useCallback(async () => {
     const supportedConstraints =
       navigator.mediaDevices.getSupportedConstraints();
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoInputs = devices.filter(
+      (device) => device.kind === "videoinput",
+    );
+    console.log(devices);
+    // Check if any of the video inputs is labeled as "back" or has other identifiers
+    const backCamera = videoInputs.some((device) =>
+      device.label.toLowerCase().includes("back"),
+    );
+    console.log(backCamera);
     console.log(supportedConstraints);
     if (
       !isLaptopScreen &&
