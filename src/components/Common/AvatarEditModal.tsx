@@ -292,7 +292,7 @@ const AvatarEditModal = ({
                 <ButtonV2
                   id="save-cover-image"
                   onClick={uploadAvatar}
-                  disabled={isProcessing}
+                  disabled={isProcessing || !selectedFile}
                 >
                   {isProcessing ? (
                     <CareIcon

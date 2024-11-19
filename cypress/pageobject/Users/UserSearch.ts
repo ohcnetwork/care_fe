@@ -35,10 +35,6 @@ export class UserPage {
     cy.get(this.removeIcon).click();
   }
 
-  clickAdvancedFilters() {
-    cy.get("#advanced-filter").contains("Advanced Filters").click();
-  }
-
   typeInFirstName(firstName: string) {
     cy.get("#first_name").click().type(firstName);
   }
@@ -72,17 +68,8 @@ export class UserPage {
     cy.typeAndSelectOption("input[name='home_facility']", facility);
   }
 
-  applyFilter() {
-    cy.get("#apply-filter").click();
-  }
-
   verifyDataTestIdText(testId: string, text: string) {
     cy.get(`[data-testid="${testId}"]`).contains(text).should("be.visible");
-  }
-
-  clearFilters() {
-    this.clickAdvancedFilters();
-    cy.get("#clear-filter").contains("Clear").click();
   }
 
   verifyDataTestIdNotVisible(testId: string) {

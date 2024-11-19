@@ -121,9 +121,14 @@ Cypress.Commands.add("clearAllFilters", () => {
   return cy.get("#clear-all-filters").click();
 });
 
-Cypress.Commands.add("submitButton", (buttonText = "Submit") => {
+Cypress.Commands.add("clickSubmitButton", (buttonText = "Submit") => {
   cy.get("button[type='submit']").contains(buttonText).scrollIntoView();
   cy.get("button[type='submit']").contains(buttonText).click();
+});
+
+Cypress.Commands.add("clickCancelButton", (buttonText = "Cancel") => {
+  cy.get("#cancel").contains(buttonText).scrollIntoView();
+  cy.get("#cancel").contains(buttonText).click();
 });
 
 Cypress.Commands.add(

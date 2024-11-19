@@ -1,4 +1,5 @@
 import careConfig from "@careConfig";
+import { t } from "i18next";
 import { navigate } from "raviger";
 import { useState } from "react";
 
@@ -169,7 +170,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
         </div>
         <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
           <ButtonV2
-            id="view_consultation_updates"
+            id="view_consultation_and_log_updates"
             className="h-auto whitespace-pre-wrap border border-secondary-500 bg-white text-black hover:bg-secondary-300"
             onClick={() =>
               navigate(
@@ -177,7 +178,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               )
             }
           >
-            View Consultation / Consultation Updates
+            {t("view_consultation_and_log_updates")}
           </ButtonV2>
           <ButtonV2
             className="h-auto whitespace-pre-wrap border border-secondary-500 bg-white text-black hover:bg-secondary-300"
@@ -200,14 +201,14 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   setOpen(true);
                 } else {
                   navigate(
-                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`,
+                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/log_updates/`,
                   );
                 }
               }}
               disabled={!!itemData.discharge_date}
               authorizeFor={NonReadOnlyUsers}
             >
-              Add Consultation Updates
+              {t("add") + " " + t("log_update")}
             </ButtonV2>
           )}
         </div>

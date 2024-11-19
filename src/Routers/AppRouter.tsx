@@ -158,7 +158,10 @@ export default function AppRouter() {
             id="pages"
             className="flex-1 overflow-y-scroll bg-gray-100 pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow">
+            <div
+              className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border bg-gray-50 p-3 shadow"
+              data-cui-page
+            >
               {pages}
             </div>
           </main>

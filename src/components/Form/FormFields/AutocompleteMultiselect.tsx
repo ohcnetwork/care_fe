@@ -20,6 +20,7 @@ import {
   dropdownOptionClassNames,
 } from "@/components/Form/MultiSelectMenuV2";
 
+import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
 import { classNames } from "@/Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
@@ -87,6 +88,7 @@ export const AutocompleteMutliSelect = <T, V>(
 ) => {
   const [query, setQuery] = useState(""); // Ensure lower case
   const comboButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     query.length >= (props.minQueryLength || 1) &&
       props.onQuery &&
@@ -112,8 +114,27 @@ export const AutocompleteMutliSelect = <T, V>(
   const value = options.filter((o) => props.value.includes(o.value));
   const filteredOptions = options.filter((o) => o.search.includes(query));
 
+  const domValue = useValueInjectionObserver<V[]>({
+    targetElement: menuRef.current,
+    attribute: "data-cui-listbox-value",
+  });
+
+  useEffect(() => {
+    if (props.value !== domValue && typeof domValue !== "undefined")
+      props.onChange(domValue);
+  }, [domValue]);
+
   return (
-    <div className={props.className} id={props.id}>
+    <div
+      className={props.className}
+      id={props.id}
+      ref={menuRef}
+      data-cui-listbox
+      data-cui-listbox-options={JSON.stringify(
+        options.map((option) => [option.value, option.label?.toString()]),
+      )}
+      data-cui-listbox-value={JSON.stringify(props.value)}
+    >
       <Combobox
         immediate
         disabled={props.disabled}
@@ -168,8 +189,9 @@ export const AutocompleteMutliSelect = <T, V>(
           </div>
           {value.length !== 0 && (
             <div className="flex flex-wrap gap-2 p-2">
-              {value.map((v) => (
+              {value.map((v, i) => (
                 <MultiSelectOptionChip
+                  key={i}
                   label={v.label}
                   onRemove={() =>
                     props.onChange(
