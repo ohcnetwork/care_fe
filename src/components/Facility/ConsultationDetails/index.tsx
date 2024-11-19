@@ -192,9 +192,10 @@ export const ConsultationDetails = (props: any) => {
   const SelectedTab = tabs[tab];
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${selected === true
-      ? "border-primary-500 hover:border-secondary-300 text-primary-600 border-b-2"
-      : "text-secondary-700 hover:text-secondary-700"
+    `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${
+      selected === true
+        ? "border-primary-500 hover:border-secondary-300 text-primary-600 border-b-2"
+        : "text-secondary-700 hover:text-secondary-700"
     }`;
 
   return (
@@ -221,8 +222,8 @@ export const ConsultationDetails = (props: any) => {
                   name:
                     consultationData.suggestion === "A"
                       ? `Admitted on ${formatDateTime(
-                        consultationData.encounter_date!,
-                      )}`
+                          consultationData.encounter_date!,
+                        )}`
                       : consultationData.suggestion_text,
                 },
               }}
@@ -276,8 +277,8 @@ export const ConsultationDetails = (props: any) => {
                 onClick={() =>
                   showPatientNotesPopup
                     ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
-                    )
+                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
+                      )
                     : setShowPatientNotesPopup(true)
                 }
                 className="btn btn-primary m-1 w-full hover:text-white"
@@ -313,14 +314,14 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                     {(consultationData.discharge_date ??
                       consultationData.encounter_date) && (
-                        <div className="text-3xl font-bold">
-                          {relativeTime(
-                            consultationData.discharge_date
-                              ? consultationData.discharge_date
-                              : consultationData.encounter_date,
-                          )}
-                        </div>
-                      )}
+                      <div className="text-3xl font-bold">
+                        {relativeTime(
+                          consultationData.discharge_date
+                            ? consultationData.discharge_date
+                            : consultationData.encounter_date,
+                        )}
+                      </div>
+                    )}
                     <div className="-mt-2 text-xs">
                       {consultationData.encounter_date &&
                         formatDateTime(consultationData.encounter_date)}
