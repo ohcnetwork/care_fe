@@ -19,8 +19,13 @@ export interface CameraCaptureDialogProps {
 
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const { show, onHide, onCapture } = props;
+  const { width } = useWindowDimensions();
+  const LaptopScreenBreakpoint = 640;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
 
-  const [cameraFacingMode, setCameraFacingMode] = useState("environment");
+  const [cameraFacingMode, setCameraFacingMode] = useState(
+    isLaptopScreen ? "user" : "environment",
+  );
   const [previewImage, setPreviewImage] = useState(null);
   const webRef = useRef<any>(null);
 
@@ -55,6 +60,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const handleSwitchCamera = useCallback(() => {
     const supportedConstraints =
       navigator.mediaDevices.getSupportedConstraints();
+    console.log(supportedConstraints);
     if (
       !isLaptopScreen &&
       typeof supportedConstraints.facingMode === "string" &&
@@ -70,9 +76,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     }
   }, []);
 
-  const { width } = useWindowDimensions();
-  const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  useEffect(() => {
+    console.log(cameraFacingMode);
+  }, [cameraFacingMode]);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
