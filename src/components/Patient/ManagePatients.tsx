@@ -292,7 +292,7 @@ export const PatientManager = () => {
     return cleanedData;
   };
 
-  const [debouncedParams] = useDebounce(params, 500); // Debounce time in milliseconds
+  const [debouncedParams] = useDebounce(params, 1000); // Debounce time in milliseconds
 
   const { loading: isLoading, data } = useQuery(routes.patientList, {
     query: debouncedParams, // Pass the debounced params
