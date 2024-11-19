@@ -34,11 +34,13 @@ type Props<T extends FormDetails> = {
   children: (props: FormContextValue<T>) => React.ReactNode;
   hideRestoreDraft?: boolean;
   resetFormVals?: boolean;
+  hideCancelButton?: boolean;
 };
 
 const Form = <T extends FormDetails>({
   asyncGetDefaults,
   validate,
+  hideCancelButton = false,
   ...props
 }: Props<T>) => {
   const initial = { form: props.defaults, errors: {} };
@@ -130,10 +132,12 @@ const Form = <T extends FormDetails>({
             <Consumer>{props.children}</Consumer>
           </div>
           <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
-            <Cancel
-              onClick={handleCancel}
-              label={props.cancelLabel ?? "Cancel"}
-            />
+            {!hideCancelButton && (
+              <Cancel
+                onClick={handleCancel}
+                label={props.cancelLabel ?? "Cancel"}
+              />
+            )}
             <Submit
               data-testid="submit-button"
               type="submit"

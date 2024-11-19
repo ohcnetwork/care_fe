@@ -2,6 +2,8 @@ import careConfig from "@careConfig";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ButtonV2 from "@/components/Common/ButtonV2";
@@ -18,13 +20,14 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
-import { formatDisplayName, sleep } from "@/Utils/utils";
+import { classNames, formatDisplayName, sleep } from "@/Utils/utils";
 
 import { UserViewDetails } from "./UserViewDetails";
 
 export default function UserInformation({ username }: { username: string }) {
   const { t } = useTranslation();
   const [editAvatar, setEditAvatar] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const authUser = useAuthUser();
 
   const {
@@ -85,6 +88,22 @@ export default function UserInformation({ username }: { username: string }) {
   const avatarPermissions = showAvatarEdit(authUser, userData);
   const editPermissions = editUserPermissions(authUser, userData);
 
+  const editButton = (
+    <div className="flex justify-end">
+      <ButtonV2
+        onClick={() => setIsEditing(!isEditing)}
+        type="button"
+        id="toggle-edit-mode-button"
+        className="flex items-center gap-2 rounded-sm border border-gray-100 bg-white px-3 py-1.5 text-sm text-[#009D48] shadow-sm hover:bg-gray-50"
+        shadow={false}
+      >
+        <CareIcon icon="l-edit" className="h-4 w-4" />
+
+        {isEditing ? t("view_user_profile") : t("edit_user_profile")}
+      </ButtonV2>
+    </div>
+  );
+
   return (
     <>
       <AvatarEditModal
@@ -96,9 +115,9 @@ export default function UserInformation({ username }: { username: string }) {
         onClose={() => setEditAvatar(false)}
       />
       {editPermissions && (
-        <div className="overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+        <div>
           {avatarPermissions && (
-            <div className="my-4 bg-white flex justify-between">
+            <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
               <div className="flex items-center">
                 <Avatar
                   imageUrl={userData?.read_profile_picture_url}
@@ -128,8 +147,26 @@ export default function UserInformation({ username }: { username: string }) {
               </div>
             </div>
           )}
-          <div id="user-edit-form">
-            <UserAddEditForm username={username} />
+          <div
+            id="user-edit-form"
+            className={classNames(
+              "overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white",
+            )}
+          >
+            {isEditing ? (
+              <>
+                {editButton}
+                <UserAddEditForm
+                  username={username}
+                  onSubmitSuccess={() => setIsEditing(false)}
+                />
+              </>
+            ) : (
+              <>
+                {editButton}
+                <UserViewDetails user={userData} />
+              </>
+            )}
           </div>
         </div>
       )}

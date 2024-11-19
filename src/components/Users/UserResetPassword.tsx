@@ -102,6 +102,7 @@ export default function UserResetPassword({
         hideRestoreDraft
         noPadding
         disabled={isSubmitting}
+        hideCancelButton
       >
         {(field) => (
           <div className="grid grid-cols-6 gap-4">

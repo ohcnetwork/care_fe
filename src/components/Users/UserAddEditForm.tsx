@@ -58,6 +58,7 @@ import {
 
 interface UserProps {
   username?: string;
+  onSubmitSuccess?: () => void;
 }
 
 interface StateObj {
@@ -193,6 +194,15 @@ const UserAddEditForm = (props: UserProps) => {
         phone_number_is_whatsapp:
           userData.phone_number?.toString() ===
           userData.alt_phone_number?.toString(),
+        user_type: userData.user_type,
+        qualification: userData.qualification,
+        doctor_experience_commenced_on: userData.doctor_experience_commenced_on
+          ? dayjs()
+              .diff(dayjs(userData.doctor_experience_commenced_on), "years")
+              .toString()
+          : undefined,
+        doctor_medical_council_registration:
+          userData.doctor_medical_council_registration,
       };
       dispatch({
         type: "set_form",
@@ -275,6 +285,7 @@ const UserAddEditForm = (props: UserProps) => {
         msg: error?.message ?? t("user_details_update_error"),
       });
     }
+    props.onSubmitSuccess?.();
   };
 
   const [state, dispatch] = useAutoSaveReducer<UserForm>(
@@ -811,88 +822,84 @@ const UserAddEditForm = (props: UserProps) => {
   const renderUsernameField = (field: FormContextValue<UserForm>) => {
     return (
       <>
-        {!editUser && (
-          <>
-            <TextFormField
-              {...field("username")}
-              label={t("username")}
-              placeholder={t("username")}
-              required
-              autoComplete="new-username"
-              value={usernameInput}
-              onChange={(e) => {
-                handleFieldChange(e, field);
-                setUsernameInput(e.value);
-              }}
-              onFocus={() => setUsernameInputInFocus(true)}
-              onBlur={() => {
-                setUsernameInputInFocus(false);
-              }}
-              aria-label={t("username")}
-            />
-            {usernameInputInFocus && (
-              <div className="text-small pl-2 text-secondary-500">
-                <div>
-                  {usernameExists !== userExistsEnums.idle && (
+        <TextFormField
+          {...field("username")}
+          label={t("username")}
+          placeholder={t("username")}
+          required
+          autoComplete="new-username"
+          value={usernameInput}
+          onChange={(e) => {
+            handleFieldChange(e, field);
+            setUsernameInput(e.value);
+          }}
+          onFocus={() => setUsernameInputInFocus(true)}
+          onBlur={() => {
+            setUsernameInputInFocus(false);
+          }}
+          aria-label={t("username")}
+        />
+        {usernameInputInFocus && (
+          <div className="text-small pl-2 text-secondary-500">
+            <div>
+              {usernameExists !== userExistsEnums.idle && (
+                <>
+                  {usernameExists === userExistsEnums.checking ? (
+                    <span>
+                      <CareIcon icon="l-record-audio" className="text-xl" />{" "}
+                      checking...
+                    </span>
+                  ) : (
                     <>
-                      {usernameExists === userExistsEnums.checking ? (
-                        <span>
-                          <CareIcon icon="l-record-audio" className="text-xl" />{" "}
-                          checking...
-                        </span>
+                      {usernameExists === userExistsEnums.exists ? (
+                        <div>
+                          <CareIcon
+                            icon="l-times-circle"
+                            className="text-xl text-red-500"
+                          />{" "}
+                          <span className="text-red-500">
+                            {t("username_not_available")}
+                          </span>
+                        </div>
                       ) : (
-                        <>
-                          {usernameExists === userExistsEnums.exists ? (
-                            <div>
-                              <CareIcon
-                                icon="l-times-circle"
-                                className="text-xl text-red-500"
-                              />{" "}
-                              <span className="text-red-500">
-                                {t("username_not_available")}
-                              </span>
-                            </div>
-                          ) : (
-                            <div>
-                              <CareIcon
-                                icon="l-check-circle"
-                                className="text-xl text-green-500"
-                              />{" "}
-                              <span className="text-primary-500">
-                                {t("username_available")}
-                              </span>
-                            </div>
-                          )}
-                        </>
+                        <div>
+                          <CareIcon
+                            icon="l-check-circle"
+                            className="text-xl text-green-500"
+                          />{" "}
+                          <span className="text-primary-500">
+                            {t("username_available")}
+                          </span>
+                        </div>
                       )}
                     </>
                   )}
-                </div>
-                <div aria-live="polite">
-                  {validateRule(
-                    usernameInput.length >= 4 && usernameInput.length <= 16,
-                    "Username should be 4-16 characters long",
-                    !state.form.username,
-                  )}
-                  {validateRule(
-                    /^[a-z0-9._-]*$/.test(usernameInput),
-                    "Username can only contain lowercase letters, numbers, and . _ -",
-                    !state.form.username,
-                  )}
-                  {validateRule(
-                    /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
-                    "Username must start and end with a letter or number",
-                    !state.form.username,
-                  )}
-                  {validateRule(
-                    !/(?:[._-]{2,})/.test(usernameInput),
-                    "Username can't contain consecutive special characters . _ -",
-                    !state.form.username,
-                  )}
-                </div>
-              </div>
-            )}
-          </>
+                </>
+              )}
+            </div>
+            <div aria-live="polite">
+              {validateRule(
+                usernameInput.length >= 4 && usernameInput.length <= 16,
+                "Username should be 4-16 characters long",
+                !state.form.username,
+              )}
+              {validateRule(
+                /^[a-z0-9._-]*$/.test(usernameInput),
+                "Username can only contain lowercase letters, numbers, and . _ -",
+                !state.form.username,
+              )}
+              {validateRule(
+                /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
+                "Username must start and end with a letter or number",
+                !state.form.username,
+              )}
+              {validateRule(
+                !/(?:[._-]{2,})/.test(usernameInput),
+                "Username can't contain consecutive special characters . _ -",
+                !state.form.username,
+              )}
+            </div>
+          </div>
         )}
       </>
     );
@@ -901,80 +908,78 @@ const UserAddEditForm = (props: UserProps) => {
   const renderPasswordFields = (field: FormContextValue<UserForm>) => {
     return (
       <>
-        {!editUser && (
-          <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-            <div className="flex flex-1 flex-col">
-              <TextFormField
-                {...field("password")}
-                label={t("password")}
-                placeholder={t("password")}
-                required
-                autoComplete="new-password"
-                type="password"
-                onFocus={() => setPasswordInputInFocus(true)}
-                onBlur={() => setPasswordInputInFocus(false)}
-                onChange={(e) => {
-                  handleFieldChange(e, field);
-                }}
-                aria-label={t("password")}
-              />
-              {passwordInputInFocus && state.form.password && (
-                <div
-                  className="text-small pl-2 text-secondary-500"
-                  aria-live="polite"
-                >
+        <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+          <div className="flex flex-1 flex-col">
+            <TextFormField
+              {...field("password")}
+              label={t("password")}
+              placeholder={t("password")}
+              required
+              autoComplete="new-password"
+              type="password"
+              onFocus={() => setPasswordInputInFocus(true)}
+              onBlur={() => setPasswordInputInFocus(false)}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              aria-label={t("password")}
+            />
+            {passwordInputInFocus && state.form.password && (
+              <div
+                className="text-small pl-2 text-secondary-500"
+                aria-live="polite"
+              >
+                {validateRule(
+                  state.form.password.length >= 8,
+                  "Password should be atleast 8 characters long",
+                  !state.form.password,
+                )}
+                {validateRule(
+                  state.form.password !== state.form.password.toUpperCase(),
+                  "Password should contain at least 1 lowercase letter",
+                  !state.form.password,
+                )}
+                {validateRule(
+                  state.form.password !== state.form.password.toLowerCase(),
+                  "Password should contain at least 1 uppercase letter",
+                  !state.form.password,
+                )}
+                {validateRule(
+                  /\d/.test(state.form.password),
+                  "Password should contain at least 1 number",
+                  !state.form.password,
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex flex-1 flex-col">
+            <TextFormField
+              {...field("c_password")}
+              label={t("confirm_password")}
+              placeholder={t("confirm_password")}
+              required
+              type="password"
+              autoComplete="off"
+              onFocus={() => setConfirmPasswordInputInFocus(true)}
+              onBlur={() => setConfirmPasswordInputInFocus(false)}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              aria-label={t("confirm_password")}
+            />
+            {confirmPasswordInputInFocus &&
+              state.form.c_password &&
+              state.form.c_password.length > 0 && (
+                <div aria-live="polite">
                   {validateRule(
-                    state.form.password.length >= 8,
-                    "Password should be atleast 8 characters long",
-                    !state.form.password,
-                  )}
-                  {validateRule(
-                    state.form.password !== state.form.password.toUpperCase(),
-                    "Password should contain at least 1 lowercase letter",
-                    !state.form.password,
-                  )}
-                  {validateRule(
-                    state.form.password !== state.form.password.toLowerCase(),
-                    "Password should contain at least 1 uppercase letter",
-                    !state.form.password,
-                  )}
-                  {validateRule(
-                    /\d/.test(state.form.password),
-                    "Password should contain at least 1 number",
-                    !state.form.password,
+                    state.form.c_password === state.form.password,
+                    "Confirm password should match the entered password",
+                    !state.form.c_password,
                   )}
                 </div>
               )}
-            </div>
-            <div className="flex flex-1 flex-col">
-              <TextFormField
-                {...field("c_password")}
-                label={t("confirm_password")}
-                placeholder={t("confirm_password")}
-                required
-                type="password"
-                autoComplete="off"
-                onFocus={() => setConfirmPasswordInputInFocus(true)}
-                onBlur={() => setConfirmPasswordInputInFocus(false)}
-                onChange={(e) => {
-                  handleFieldChange(e, field);
-                }}
-                aria-label={t("confirm_password")}
-              />
-              {confirmPasswordInputInFocus &&
-                state.form.c_password &&
-                state.form.c_password.length > 0 && (
-                  <div aria-live="polite">
-                    {validateRule(
-                      state.form.c_password === state.form.password,
-                      "Confirm password should match the entered password",
-                      !state.form.c_password,
-                    )}
-                  </div>
-                )}
-            </div>
           </div>
-        )}
+        </div>
       </>
     );
   };
@@ -1046,6 +1051,154 @@ const UserAddEditForm = (props: UserProps) => {
     );
   };
 
+  const renderHoursAndConferenceLinkFields = (
+    field: FormContextValue<UserForm>,
+  ) => {
+    return (
+      <>
+        <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+          <TextFormField
+            {...field("weekly_working_hours")}
+            name="weekly_working_hours"
+            label={t("average_weekly_working_hours")}
+            className="flex-1"
+            type="number"
+            min={0}
+            max={168}
+            onChange={(e) => {
+              handleFieldChange(e, field);
+            }}
+            aria-label={t("average_weekly_working_hours")}
+          />
+          <TextFormField
+            {...field("video_connect_link")}
+            label={t("video_conference_link")}
+            className="flex-1"
+            type="url"
+            onChange={(e) => {
+              handleFieldChange(e, field);
+            }}
+            aria-label={t("video_conference_link")}
+          />
+        </div>
+      </>
+    );
+  };
+
+  const renderStateDistrictLocalBodyFields = (
+    field: FormContextValue<UserForm>,
+  ) => {
+    return (
+      <>
+        {isStateLoading ? (
+          <CircularProgress />
+        ) : (
+          <SelectFormField
+            {...field("state")}
+            label={t("state")}
+            required
+            placeholder={t("choose_state")}
+            options={states}
+            optionLabel={(o) => o.name}
+            optionValue={(o) => o.id}
+            onChange={(e) => {
+              handleFieldChange(e, field);
+              if (e) setSelectedStateId(e.value);
+            }}
+            aria-label={t("state")}
+          />
+        )}
+
+        {isDistrictLoading ? (
+          <CircularProgress />
+        ) : (
+          <SelectFormField
+            {...field("district")}
+            label={t("district")}
+            required
+            placeholder={t("choose_district")}
+            options={districts}
+            optionLabel={(o) => o.name}
+            optionValue={(o) => o.id}
+            onChange={(e) => {
+              handleFieldChange(e, field);
+              if (e) setSelectedDistrictId(e.value);
+            }}
+            aria-label={t("district")}
+          />
+        )}
+
+        {showLocalbody &&
+          (isLocalbodyLoading ? (
+            <CircularProgress />
+          ) : (
+            <SelectFormField
+              {...field("local_body")}
+              label={t("local_body")}
+              required
+              position="above"
+              placeholder={t("choose_localbody")}
+              options={localBodies}
+              optionLabel={(o) => o.name}
+              optionValue={(o) => o.id}
+              onChange={(e) => {
+                handleFieldChange(e, field);
+              }}
+              aria-label={t("local_body")}
+            />
+          ))}
+      </>
+    );
+  };
+
+  const renderFacilityUserTypeHomeFacilityFields = (
+    field: FormContextValue<UserForm>,
+  ) => {
+    return (
+      <>
+        <div className="w-full">
+          <FieldLabel>{t("facilities")}</FieldLabel>
+          <FacilitySelect
+            multiple={true}
+            name="facilities"
+            selected={selectedFacility}
+            setSelected={setFacility}
+            errors={facilityErrors}
+            showAll={false}
+            aria-label={t("facilities")}
+          />
+        </div>
+        <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
+          <SelectFormField
+            {...field("user_type")}
+            required
+            label={t("user_type")}
+            options={userTypes}
+            optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
+            onChange={(e) => {
+              handleFieldChange(e, field);
+            }}
+            optionValue={(o) => o.id}
+            className="flex-1"
+            aria-label={t("user_type")}
+          />
+          <SelectFormField
+            {...field("home_facility")}
+            label={t("home_facility")}
+            options={selectedFacility ?? []}
+            optionLabel={(option) => option.name}
+            optionValue={(option) => option.id}
+            onChange={(e) => {
+              handleFieldChange(e, field);
+            }}
+            className="flex-1"
+            aria-label={t("home_facility")}
+          />
+        </div>
+      </>
+    );
+  };
+
   return (
     <Form<UserForm>
       disabled={isLoading}
@@ -1059,152 +1212,20 @@ const UserAddEditForm = (props: UserProps) => {
       hideRestoreDraft={editUser}
       noPadding
       resetFormVals
+      hideCancelButton={editUser}
     >
       {(field) => (
         <>
           <div className="my-4 flex flex-col gap-y-2">
-            {!editUser && (
-              <div className="w-full">
-                <FieldLabel>{t("facilities")}</FieldLabel>
-                <FacilitySelect
-                  multiple={true}
-                  name="facilities"
-                  selected={selectedFacility}
-                  setSelected={setFacility}
-                  errors={facilityErrors}
-                  showAll={false}
-                  aria-label={t("facilities")}
-                />
-              </div>
-            )}
-            {!editUser && (
-              <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-                <SelectFormField
-                  {...field("user_type")}
-                  required
-                  label={t("user_type")}
-                  options={userTypes}
-                  optionLabel={(o) =>
-                    o.role + (o.readOnly ? " (Read Only)" : "")
-                  }
-                  onChange={(e) => {
-                    handleFieldChange(e, field);
-                  }}
-                  optionValue={(o) => o.id}
-                  className="flex-1"
-                  aria-label={t("user_type")}
-                />
-                <SelectFormField
-                  {...field("home_facility")}
-                  label={t("home_facility")}
-                  options={selectedFacility ?? []}
-                  optionLabel={(option) => option.name}
-                  optionValue={(option) => option.id}
-                  onChange={(e) => {
-                    handleFieldChange(e, field);
-                  }}
-                  className="flex-1"
-                  aria-label={t("home_facility")}
-                />
-              </div>
-            )}
-            {renderDoctorOrNurseFields(field)}
+            {!editUser && renderFacilityUserTypeHomeFacilityFields(field)}
+            {!editUser && renderDoctorOrNurseFields(field)}
             {renderPhoneNumberFields(field)}
-            {renderUsernameField(field)}
-            {renderPasswordFields(field)}
+            {!editUser && renderUsernameField(field)}
+            {!editUser && renderPasswordFields(field)}
             {renderPersonalInfoFields(field)}
-
-            {editUser && (
-              <>
-                <div className="flex flex-col justify-between gap-x-3 sm:flex-row">
-                  <TextFormField
-                    {...field("weekly_working_hours")}
-                    name="weekly_working_hours"
-                    label={t("average_weekly_working_hours")}
-                    className="flex-1"
-                    type="number"
-                    min={0}
-                    max={168}
-                    onChange={(e) => {
-                      handleFieldChange(e, field);
-                    }}
-                    aria-label={t("average_weekly_working_hours")}
-                  />
-                  <TextFormField
-                    {...field("video_connect_link")}
-                    label={t("video_conference_link")}
-                    className="flex-1"
-                    type="url"
-                    onChange={(e) => {
-                      handleFieldChange(e, field);
-                    }}
-                    aria-label={t("video_conference_link")}
-                  />
-                </div>
-              </>
-            )}
-
-            {!editUser && (
-              <>
-                {isStateLoading ? (
-                  <CircularProgress />
-                ) : (
-                  <SelectFormField
-                    {...field("state")}
-                    label={t("state")}
-                    required
-                    placeholder={t("choose_state")}
-                    options={states}
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                    onChange={(e) => {
-                      handleFieldChange(e, field);
-                      if (e) setSelectedStateId(e.value);
-                    }}
-                    aria-label={t("state")}
-                  />
-                )}
-
-                {isDistrictLoading ? (
-                  <CircularProgress />
-                ) : (
-                  <SelectFormField
-                    {...field("district")}
-                    label={t("district")}
-                    required
-                    placeholder={t("choose_district")}
-                    options={districts}
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                    onChange={(e) => {
-                      handleFieldChange(e, field);
-                      if (e) setSelectedDistrictId(e.value);
-                    }}
-                    aria-label={t("district")}
-                  />
-                )}
-
-                {showLocalbody &&
-                  (isLocalbodyLoading ? (
-                    <CircularProgress />
-                  ) : (
-                    <SelectFormField
-                      {...field("local_body")}
-                      label={t("local_body")}
-                      required
-                      position="above"
-                      placeholder={t("choose_localbody")}
-                      options={localBodies}
-                      optionLabel={(o) => o.name}
-                      optionValue={(o) => o.id}
-                      onChange={(e) => {
-                        handleFieldChange(e, field);
-                      }}
-                      aria-label={t("local_body")}
-                    />
-                  ))}
-              </>
-            )}
+            {editUser && renderHoursAndConferenceLinkFields(field)}
+            {editUser && renderDoctorOrNurseFields(field)}
+            {!editUser && renderStateDistrictLocalBodyFields(field)}
           </div>
         </>
       )}

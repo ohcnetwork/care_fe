@@ -26,7 +26,6 @@ export interface UserHomeProps {
 }
 export interface tabChildProp {
   body: (childProps: userChildProps) => JSX.Element | undefined;
-  name?: string;
   hidden?: boolean;
 }
 
@@ -60,11 +59,6 @@ export default function UserHome(props: UserHomeProps) {
     return <Loading />;
   }
 
-  const roleInfoBeVisible = () => {
-    if (["Doctor", "Nurse"].includes(userData?.user_type ?? "")) return true;
-    return false;
-  };
-
   const editPermissions = editUserPermissions(authUser, userData);
 
   const TABS: {
@@ -75,7 +69,6 @@ export default function UserHome(props: UserHomeProps) {
     PROFILE: { body: UserSummaryTab },
     SKILLS: {
       body: RoleAndSkillsTab,
-      name: roleInfoBeVisible() ? "QUALIFICATIONS_SKILLS" : "SKILLS",
       hidden: !editPermissions,
     },
     FACILITIES: {
@@ -117,7 +110,6 @@ export default function UserHome(props: UserHomeProps) {
                     {keysOf(TABS)
                       .filter((p) => !TABS[p].hidden)
                       .map((p) => {
-                        const tabName = TABS[p]?.name ?? p;
                         return (
                           <Link
                             key={p}
@@ -130,7 +122,7 @@ export default function UserHome(props: UserHomeProps) {
                             href={`/users/${username}/${p.toLocaleLowerCase()}`}
                           >
                             <div className="px-3 py-1.5" id={p.toLowerCase()}>
-                              {t(`USERMANAGEMENT_TAB__${tabName}`)}
+                              {t(`USERMANAGEMENT_TAB__${p}`)}
                             </div>
                           </Link>
                         );

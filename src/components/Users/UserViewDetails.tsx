@@ -28,19 +28,21 @@ interface BadgeProps {
 
 export const Badge = ({
   text,
-  bgColor = "bg-green-600",
-  textColor = "text-white",
+  textColor = "text-black",
   className = "",
 }: BadgeProps) => {
   return (
-    <span
-      className={`
-          inline-flex items-center rounded-full px-3 py-1 text-sm my-4
-          ${bgColor} ${textColor} ${className}
-        `.trim()}
-    >
-      {text}
-    </span>
+    <div className="relative mb-4">
+      <div className="mt-1 h-1 w-3 bg-blue-600" />
+      <span
+        className={`
+          inline-flex items-center rounded-full text-sm
+         ${textColor} ${className}
+        `}
+      >
+        {text}
+      </span>
+    </div>
   );
 };
 
@@ -49,7 +51,7 @@ export const UserViewDetails = ({ user }: UserViewDetailsProps) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="overflow-visible rounded-lg bg-white px-4 pt-2 pb-5 shadow sm:rounded-lg sm:px-6">
+      <div className="pt-2 pb-5">
         <Badge text={t("basic_info")} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <LabelValue label={t("username")} value={user.username} />
@@ -68,7 +70,7 @@ export const UserViewDetails = ({ user }: UserViewDetailsProps) => {
         </div>
       </div>
 
-      <div className="overflow-visible rounded-lg bg-white px-4 pt-2 pb-5 shadow sm:rounded-lg sm:px-6">
+      <div className="pt-2 pb-5">
         <Badge text={t("contact_info")} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <LabelValue label={t("email")} value={user.email} />
@@ -81,7 +83,7 @@ export const UserViewDetails = ({ user }: UserViewDetailsProps) => {
       </div>
 
       {(user.user_type === "Doctor" || user.user_type === "Nurse") && (
-        <div className="overflow-visible rounded-lg bg-white pt-2 pb-5 shadow sm:rounded-lg sm:px-6">
+        <div className="pt-2 pb-5">
           <Badge text={t("professional_info")} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <LabelValue label={t("qualification")} value={user.qualification} />
