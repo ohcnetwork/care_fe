@@ -43,7 +43,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         });
         onHide();
       });
-  }, [show]);
+  }, [show, cameraFacingMode]);
 
   const handleSwitchCamera = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
