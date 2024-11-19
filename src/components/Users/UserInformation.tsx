@@ -2,8 +2,6 @@ import careConfig from "@careConfig";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ButtonV2 from "@/components/Common/ButtonV2";
@@ -20,7 +18,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
-import { classNames, formatDisplayName, sleep } from "@/Utils/utils";
+import { formatDisplayName, sleep } from "@/Utils/utils";
 
 import { UserViewDetails } from "./UserViewDetails";
 
@@ -88,19 +86,40 @@ export default function UserInformation({ username }: { username: string }) {
   const avatarPermissions = showAvatarEdit(authUser, userData);
   const editPermissions = editUserPermissions(authUser, userData);
 
-  const editButton = (
-    <div className="flex justify-end">
-      <ButtonV2
-        onClick={() => setIsEditing(!isEditing)}
-        type="button"
-        id="toggle-edit-mode-button"
-        className="flex items-center gap-2 rounded-sm border border-gray-100 bg-white px-3 py-1.5 text-sm text-[#009D48] shadow-sm hover:bg-gray-50"
-        shadow={false}
+  const ViewEditToggle = ({
+    isEditing,
+    setIsEditing,
+  }: {
+    isEditing: boolean;
+    setIsEditing: (value: boolean) => void;
+  }) => (
+    <div className="mb-4 inline-flex rounded-lg bg-gray-100 p-1">
+      <button
+        onClick={() => setIsEditing(false)}
+        className={`
+          px-4 py-2 text-sm font-medium rounded-md transition-colors
+          ${
+            !isEditing
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }
+        `}
       >
-        <CareIcon icon="l-edit" className="h-4 w-4" />
-
-        {isEditing ? t("view_user_profile") : t("edit_user_profile")}
-      </ButtonV2>
+        {t("view")}
+      </button>
+      <button
+        onClick={() => setIsEditing(true)}
+        className={`
+          px-4 py-2 text-sm font-medium rounded-md transition-colors
+          ${
+            isEditing
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }
+        `}
+      >
+        {t("edit")}
+      </button>
     </div>
   );
 
@@ -149,28 +168,25 @@ export default function UserInformation({ username }: { username: string }) {
           )}
           <div
             id="user-edit-form"
-            className={classNames(
-              "overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white",
-            )}
+            className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white"
           >
+            <ViewEditToggle isEditing={isEditing} setIsEditing={setIsEditing} />
             {isEditing ? (
-              <>
-                {editButton}
-                <UserAddEditForm
-                  username={username}
-                  onSubmitSuccess={() => setIsEditing(false)}
-                />
-              </>
+              <UserAddEditForm
+                username={username}
+                onSubmitSuccess={() => setIsEditing(false)}
+              />
             ) : (
-              <>
-                {editButton}
-                <UserViewDetails user={userData} />
-              </>
+              <UserViewDetails user={userData} />
             )}
           </div>
         </div>
       )}
-      {!editPermissions && <UserViewDetails user={userData} />}
+      {!editPermissions && (
+        <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+          <UserViewDetails user={userData} />
+        </div>
+      )}
     </>
   );
 }

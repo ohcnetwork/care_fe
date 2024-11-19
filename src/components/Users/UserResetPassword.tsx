@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import Form from "@/components/Form/Form";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserAddEditForm";
@@ -9,6 +11,8 @@ import { UpdatePasswordForm, UserModel } from "@/components/Users/models";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+
+import ButtonV2 from "../Common/ButtonV2";
 
 interface PasswordForm {
   username: string;
@@ -24,6 +28,7 @@ export default function UserResetPassword({
 }) {
   const { t } = useTranslation();
   const [isSubmitting, setisSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const initForm: PasswordForm = {
     username: userData.username,
@@ -92,8 +97,8 @@ export default function UserResetPassword({
     setisSubmitting(false);
   };
 
-  return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+  const renderPasswordForm = () => {
+    return (
       <Form<PasswordForm>
         defaults={initForm}
         validate={validateForm}
@@ -180,6 +185,28 @@ export default function UserResetPassword({
           </div>
         )}
       </Form>
+    );
+  };
+
+  const editButton = () => (
+    <div className="mb-4 flex justify-start">
+      <ButtonV2
+        onClick={() => setIsEditing(!isEditing)}
+        type="button"
+        id="change-edit-password-button"
+        className="flex items-center gap-2 rounded-sm border border-gray-100 bg-white px-3 py-1.5 text-sm text-[#009D48] shadow-sm hover:bg-gray-50"
+        shadow={false}
+      >
+        <CareIcon icon={isEditing ? "l-times" : "l-edit"} className="h-4 w-4" />
+        {isEditing ? t("cancel") : t("change_password")}
+      </ButtonV2>
+    </div>
+  );
+
+  return (
+    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+      {editButton()}
+      {isEditing && renderPasswordForm()}
     </div>
   );
 }
