@@ -31,13 +31,27 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   };
   useEffect(() => {
     if (!show) return;
-    navigator.mediaDevices.getUserMedia({ video: true }).catch(() => {
-      Notify.Warn({
-        msg: t("camera_permission_denied"),
+
+    let stream: MediaStream | null = null;
+
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((mediaStream) => {
+        stream = mediaStream;
+      })
+      .catch(() => {
+        Notify.Warn({
+          msg: t("camera_permission_denied"),
+        });
+        onHide();
       });
-      onHide();
-    });
-  }, [show]);
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [show, onHide]);
   const handleSwitchCamera = useCallback(() => {
     const supportedConstraints =
       navigator.mediaDevices.getSupportedConstraints();
@@ -70,9 +84,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     });
   };
 
-  const cameraFacingMode = cameraFacingFront
-    ? "user"
-    : { exact: "environment" };
+  const cameraFacingMode = cameraFacingFront ? "user" : "environment";
 
   return (
     <DialogModal
