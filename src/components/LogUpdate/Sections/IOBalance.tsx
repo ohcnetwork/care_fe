@@ -1,10 +1,15 @@
 import { Fragment } from "react/jsx-runtime";
-import { DailyRoundsModel } from "../../Patient/models";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import {
+  LogUpdateSectionMeta,
+  LogUpdateSectionProps,
+} from "@/components/LogUpdate/utils";
+import { DailyRoundsModel } from "@/components/Patient/models";
 
 export const IOBalanceSections = [
   {

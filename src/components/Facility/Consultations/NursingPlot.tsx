@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import { NURSING_CARE_PROCEDURES, PAGINATION_LIMIT } from "@/common/constants";
+import { useTranslation } from "react-i18next";
 
 import Pagination from "@/components/Common/Pagination";
-import { formatDateTime } from "../../../Utils/utils";
-import { useTranslation } from "react-i18next";
-import { NursingPlotFields } from "../models";
+import { NursingPlotFields } from "@/components/Facility/models";
+
+import { NURSING_CARE_PROCEDURES, PAGINATION_LIMIT } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 export const NursingPlot = ({ consultationId }: any) => {
   const { t } = useTranslation();

@@ -1,6 +1,7 @@
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
+import AutoCompleteAsync from "@/components/Form/AutoCompleteAsync";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface DistrictSelectProps {
   name: string;

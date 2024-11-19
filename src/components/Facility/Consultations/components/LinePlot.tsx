@@ -1,44 +1,32 @@
-import ReactEchartsCore from "echarts-for-react/lib/core";
-import { BarChart, LineChart } from "echarts/charts";
-import {
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  ToolboxComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  VisualMapPiecewiseComponent,
-} from "echarts/components";
+import { Suspense, lazy } from "react";
 
-import * as echarts from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
-import { properRoundOf } from "../../../../Utils/utils";
-echarts.use([
-  BarChart,
-  LineChart,
-  CanvasRenderer,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  LegendComponent,
-  TitleComponent,
-  ToolboxComponent,
-  TooltipComponent,
-  VisualMapComponent,
-  VisualMapPiecewiseComponent,
-]);
+import CircularProgress from "@/components/Common/CircularProgress";
+
+import { properRoundOf } from "@/Utils/utils";
+
+const ReactEcharts = lazy(
+  () => import("@/components/Facility/Consultations/components/ReactEcharts"),
+);
 
 export const LinePlot = (props: any) => {
   const {
     title,
     name,
-    xData,
-    yData,
     low = null,
     high = null,
     defaultSpace,
+    verticalMarkerData = null,
   } = props;
+  let { xData, yData } = props;
+  const yDatacount = yData.filter(
+    (item: number | null): item is number =>
+      item !== null && !Number.isNaN(item),
+  ).length;
+  if (yDatacount === 0) {
+    yData = [];
+    xData = [];
+  }
+
   let generalOptions: any = {
     grid: {
       top: "40px",
@@ -126,6 +114,25 @@ export const LinePlot = (props: any) => {
       },
     ],
   };
+
+  if (verticalMarkerData && yDatacount > 0) {
+    let series = generalOptions.series[0];
+    series = {
+      ...series,
+      markLine: {
+        silent: true,
+        data: verticalMarkerData,
+        symbol: "none",
+        lineStyle: {
+          color: "#000000",
+        },
+      },
+    };
+    generalOptions = {
+      ...generalOptions,
+      series,
+    };
+  }
 
   if (props.type && props.type === "WAVEFORM") {
     generalOptions = {
@@ -234,12 +241,19 @@ export const LinePlot = (props: any) => {
           {value ? properRoundOf(value) : "NA"}
         </span>
       ))}
-      <ReactEchartsCore
-        echarts={echarts}
-        option={generalOptions}
-        className={props.classes}
-        lazyUpdate={props.type === "WAVEFORM"}
-      />
+      <Suspense
+        fallback={
+          <div className="grid h-16 place-items-center">
+            <CircularProgress />
+          </div>
+        }
+      >
+        <ReactEcharts
+          option={generalOptions}
+          className={props.classes}
+          lazyUpdate={props.type === "WAVEFORM"}
+        />
+      </Suspense>
     </>
   );
 };

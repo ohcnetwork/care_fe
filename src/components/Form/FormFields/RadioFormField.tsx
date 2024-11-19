@@ -1,7 +1,12 @@
 import { ChangeEventHandler, ReactNode } from "react";
-import { classNames } from "../../../Utils/utils";
-import FormField from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import { classNames } from "@/Utils/utils";
 
 type Props<T, V = string> = FormFieldBaseProps<V | null> & {
   options: readonly T[];
@@ -34,7 +39,7 @@ const RadioFormField = <T, V extends string>(props: Props<T, V>) => {
               type="radio"
               id="none"
               name={props.name}
-              value={undefined}
+              value={"__NULL__"}
               checked={field.value == null}
               onChange={() => field.handleChange(null)}
             />

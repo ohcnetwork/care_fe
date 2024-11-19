@@ -1,14 +1,17 @@
 import { useEffect, useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications";
-import { CapacityModal, OptionsType } from "./models";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { BED_TYPES } from "@/common/constants";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import { CapacityModal, OptionsType } from "@/components/Facility/models";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import { BED_TYPES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;
@@ -74,6 +77,8 @@ export const BedCapacity = (props: BedCapacityProps) => {
         const existingData = capacityQuery.data?.results;
         // if all options are diabled
         if (existingData.length === BED_TYPES.length) {
+          setBedTypes([]);
+          setIsLoading(false);
           return;
         }
         // disable existing bed types
@@ -274,18 +279,20 @@ export const BedCapacity = (props: BedCapacityProps) => {
 
           <div className="cui-form-button-group mt-4">
             <Cancel onClick={handleClose} />
-            {!isLastOptionType && headerText === "Add Bed Capacity" && (
+            {headerText === "Add Bed Capacity" && (
               <Submit
                 id="bed-capacity-save-and-exit"
                 onClick={(e) => handleSubmit(e, "Save and Exit")}
                 label="Save Bed Capacity"
               />
             )}
-            <Submit
-              id="bed-capacity-save"
-              onClick={(e) => handleSubmit(e)}
-              label={buttonText}
-            />
+            {!isLastOptionType && (
+              <Submit
+                id="bed-capacity-save"
+                onClick={(e) => handleSubmit(e)}
+                label={buttonText}
+              />
+            )}
           </div>
         </div>
       )}

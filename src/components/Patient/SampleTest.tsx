@@ -1,23 +1,27 @@
 import { navigate } from "raviger";
-
 import { useReducer, useState } from "react";
-import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import { SampleTestModel } from "./models";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import Page from "@/components/Common/components/Page";
+
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import { SampleTestModel } from "@/components/Patient/models";
+
+import useAppHistory from "@/hooks/useAppHistory";
+
+import { ICMR_CATEGORY, SAMPLE_TYPE_CHOICES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 const initForm: SampleTestModel = {
   isFastTrack: false,
   fast_track: "",
@@ -212,9 +216,10 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           options={SAMPLE_TYPE_CHOICES}
           optionLabel={(option) => option.text}
           optionValue={(option) => option.id}
+          id="sample-type"
         />
 
-        {state.form.sample_type === "OTHER TYPE" && (
+        {state.form.sample_type === "9" && (
           <TextAreaFormField
             {...field("sample_type_other", "Sample Test Type Details")}
             required
@@ -226,6 +231,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           options={ICMR_CATEGORY}
           optionLabel={(option) => option}
           optionValue={(option) => option}
+          id="icmr-category"
         />
         <div className="mb-6 flex flex-col gap-1">
           <p className="font-medium">
@@ -251,7 +257,11 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           </span>
         </div>
 
-        <TextFormField {...field("icmr_label", "ICMR Label")} required />
+        <TextFormField
+          {...field("icmr_label", "ICMR Label")}
+          required
+          id="icmr-label"
+        />
         <div className="mb-6 w-full flex-none">
           <FieldLabel>Testing Facility</FieldLabel>
           <FacilitySelect
@@ -270,22 +280,29 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           />
         </div>
         <CheckBoxFormField
+          id="is_fast_track"
           {...field("isFastTrack", "Is fast-track testing required?")}
         />
         {state.form.isFastTrack && (
           <TextAreaFormField
+            id="fast_track"
             {...field("fast_track", "Reasons for fast-track testing")}
             required
           />
         )}
 
-        <TextFormField {...field("doctor_name", "Doctor's Name")} />
+        <TextFormField
+          id="doctor_name"
+          {...field("doctor_name", "Doctor's Name")}
+        />
         <CheckBoxFormField
+          id="is_atypical_presentation"
           {...field("is_atypical_presentation", "Is atypical presentation?")}
         />
         {state.form.is_atypical_presentation && (
           <div>
             <TextAreaFormField
+              id="atypical_presentation"
               {...field(
                 "atypical_presentation",
                 "Atypical presentation details",
@@ -294,26 +311,38 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
             />
           </div>
         )}
-        <TextAreaFormField {...field("diagnosis", "Diagnosis")} />
         <TextAreaFormField
+          id="diagnosis"
+          {...field("diagnosis", "Diagnosis")}
+        />
+        <TextAreaFormField
+          id="etiology_identified"
           {...field("etiology_identified", "Etiology identified")}
         />
         <TextAreaFormField
+          id="diff_diagnosis"
           {...field("diff_diagnosis", "Differential diagnosis")}
         />
 
         <CheckBoxFormField
+          id="has_sari"
           {...field("has_sari", "Has SARI (Severe Acute Respiratory illness)?")}
         />
         <CheckBoxFormField
+          id="has_ari"
           {...field("has_ari", "Has ARI (Acute Respiratory illness)?")}
         />
         <CheckBoxFormField
+          id="is_unusual_course"
           {...field("is_unusual_course", "Is unusual course?")}
         />
         <div className="mt-4 flex flex-col justify-end gap-2 lg:flex-row">
           <Cancel onClick={() => goBack()} />
-          <Submit onClick={handleSubmit} label={buttonText} />
+          <Submit
+            onClick={handleSubmit}
+            label={buttonText}
+            id="sample-test-submit-btn"
+          />
         </div>
       </form>
     </Page>

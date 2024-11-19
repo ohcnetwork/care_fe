@@ -1,4 +1,59 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import { startCase, toLower } from "lodash-es";
+import { debounce } from "lodash-es";
+import { navigate } from "raviger";
+import { useCallback, useReducer, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import AccordionV2 from "@/components/Common/AccordionV2";
+import ButtonV2 from "@/components/Common/ButtonV2";
+import CollapseV2 from "@/components/Common/CollapseV2";
+import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import DialogModal from "@/components/Common/Dialog";
+import Loading from "@/components/Common/Loading";
+import PageTitle from "@/components/Common/PageTitle";
+import Spinner from "@/components/Common/Spinner";
+import Error404 from "@/components/ErrorPages/404";
+import { ILocalBodies } from "@/components/ExternalResult/models";
+import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import TransferPatientDialog from "@/components/Facility/TransferPatientDialog";
+import {
+  DistrictModel,
+  DupPatientModel,
+  WardModel,
+} from "@/components/Facility/models";
+import {
+  FieldError,
+  PhoneNumberValidator,
+  RequiredFieldValidator,
+} from "@/components/Form/FieldValidators";
+import Form from "@/components/Form/Form";
+import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import SelectMenuV2 from "@/components/Form/SelectMenuV2";
+import InsuranceDetailsBuilder from "@/components/HCX/InsuranceDetailsBuilder";
+import { HCXPolicyModel } from "@/components/HCX/models";
+import HCXPolicyValidator from "@/components/HCX/validators";
+import {
+  Occupation,
+  PatientMeta,
+  PatientModel,
+} from "@/components/Patient/models";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 
 import {
   BLOOD_GROUPS,
@@ -10,20 +65,17 @@ import {
   SOCIOECONOMIC_STATUS_CHOICES,
   VACCINES,
 } from "@/common/constants";
-import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
-import {
-  FieldError,
-  PhoneNumberValidator,
-  RequiredFieldValidator,
-} from "../Form/FieldValidators";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import { Occupation, PatientMeta, PatientModel } from "./models";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import countryList from "@/common/static/countries.json";
+import { statusType, useAbortableEffect } from "@/common/utils";
+import { validatePincode } from "@/common/validation";
+
+import { PLUGIN_Component } from "@/PluginEngine";
+import { RestoreDraftButton } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import { usePubSub } from "@/Utils/pubsubContext";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import {
   compareBy,
   dateQueryString,
@@ -31,55 +83,9 @@ import {
   includesIgnoreCase,
   parsePhoneNumber,
   scrollTo,
-} from "../../Utils/utils";
-import { statusType, useAbortableEffect } from "@/common/utils";
-import { useCallback, useReducer, useRef, useState } from "react";
+} from "@/Utils/utils";
 
-import { AbhaNumberModel } from "../ABDM/types/abha";
-import AccordionV2 from "@/components/Common/components/AccordionV2";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import { Button } from "@/components/ui/button";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import CollapseV2 from "@/components/Common/components/CollapseV2";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import DateFormField from "../Form/FormFields/DateFormField";
-import DialogModal from "@/components/Common/Dialog";
-import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import Error404 from "../ErrorPages/404";
-import Form from "../Form/Form";
-import { FormContextValue } from "../Form/FormContext";
-import { HCXPolicyModel } from "../HCX/models";
-import HCXPolicyValidator from "../HCX/validators";
-import { ILocalBodies } from "../ExternalResult/models";
-import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
-import LinkAbhaNumber from "../ABDM/LinkAbhaNumber/index";
-import Loading from "@/components/Common/Loading";
-import PageTitle from "@/components/Common/PageTitle";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { RestoreDraftButton } from "@/Utils/AutoSave";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import Spinner from "@/components/Common/Spinner";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import careConfig from "@careConfig";
-import { startCase, toLower } from "lodash-es";
-import countryList from "@/common/static/countries.json";
-import { debounce } from "lodash-es";
-import { navigate } from "raviger";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import { useTranslation } from "react-i18next";
-import { validatePincode } from "@/common/validation";
-
-type PatientForm = PatientModel &
+export type PatientForm = PatientModel &
   PatientMeta & { age?: number; is_postpartum?: boolean };
 
 interface PatientRegisterProps extends PatientModel {
@@ -141,7 +147,6 @@ const initForm: any = {
   number_of_doses: "0",
   vaccine_name: null,
   last_vaccinated_date: null,
-  abha_number: null,
   ...medicalHistoryChoices,
   ration_card_category: null,
 };
@@ -211,7 +216,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
   const [patientName, setPatientName] = useState("");
-  const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
     [],
@@ -220,6 +224,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     useState(false);
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
+
+  const { publish } = usePubSub();
 
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
@@ -272,13 +278,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const { res, data } = await request(routes.getPatient, {
         pathParams: { id: id ? id : 0 },
       });
-      const { data: abhaNumberData } = await request(
-        routes.abdm.abhaNumber.get,
-        {
-          pathParams: { abhaNumberId: id ?? "" },
-          silent: true,
-        },
-      );
 
       if (!status.aborted) {
         if (res?.ok && data) {
@@ -291,8 +290,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             age: data.year_of_birth
               ? new Date().getFullYear() - data.year_of_birth
               : "",
-            health_id_number: abhaNumberData?.abha_number || "",
-            health_id: abhaNumberData?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
             gender: data.gender ? data.gender : undefined,
             state: data.state ? data.state : "",
@@ -376,11 +373,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     },
     [id],
   );
-
-  const { data: healthFacility } = useQuery(routes.abdm.healthFacility.get, {
-    pathParams: { facility_id: facilityId },
-    silent: true,
-  });
 
   useQuery(routes.hcx.policies.list, {
     query: {
@@ -693,27 +685,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           controllerRef: submitController,
         });
     if (res?.ok && requestData) {
-      if (state.form.abha_number) {
-        const { res, data } = await request(
-          routes.abdm.healthId.linkAbhaNumberAndPatient,
-          {
-            body: {
-              patient: requestData.id,
-              abha_number: state.form.abha_number,
-            },
-          },
-        );
-
-        if (res?.status === 200 && data) {
-          Notification.Success({
-            msg: t("abha_number_linked_successfully"),
-          });
-        } else {
-          Notification.Error({
-            msg: t("failed_to_link_abha_number"),
-          });
-        }
-      }
+      publish("patient:upsert", requestData);
 
       await Promise.all(
         insuranceDetails.map(async (obj) => {
@@ -752,68 +724,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     }
     setIsLoading(false);
-  };
-
-  const populateAbhaValues = (
-    abhaProfile: AbhaNumberModel,
-    field: FormContextValue<PatientForm>,
-  ) => {
-    const values = {
-      abha_number: abhaProfile.external_id,
-      health_id_number: abhaProfile.abha_number,
-      health_id: abhaProfile.health_id,
-    };
-
-    if (abhaProfile.name)
-      field("name").onChange({
-        name: "name",
-        value: abhaProfile.name,
-      });
-
-    if (abhaProfile.mobile) {
-      field("phone_number").onChange({
-        name: "phone_number",
-        value: parsePhoneNumber(abhaProfile.mobile, "IN"),
-      });
-
-      field("emergency_phone_number").onChange({
-        name: "emergency_phone_number",
-        value: parsePhoneNumber(abhaProfile.mobile, "IN"),
-      });
-    }
-
-    if (abhaProfile.gender)
-      field("gender").onChange({
-        name: "gender",
-        value: { M: "1", F: "2", O: "3" }[abhaProfile.gender],
-      });
-
-    if (abhaProfile.date_of_birth)
-      field("date_of_birth").onChange({
-        name: "date_of_birth",
-        value: new Date(abhaProfile.date_of_birth),
-      });
-
-    if (abhaProfile.pincode)
-      field("pincode").onChange({
-        name: "pincode",
-        value: abhaProfile.pincode,
-      });
-
-    if (abhaProfile.address) {
-      field("address").onChange({
-        name: "address",
-        value: abhaProfile.address,
-      });
-
-      field("permanent_address").onChange({
-        name: "permanent_address",
-        value: abhaProfile.address,
-      });
-    }
-
-    dispatch({ type: "set_form", form: { ...state.form, ...values } });
-    setShowLinkAbhaNumberModal(false);
   };
 
   const handleMedicalCheckboxChange = (e: any, id: number, field: any) => {
@@ -1023,32 +933,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   result in duplication of patient records.
                 </p>
               </div>
-              {!state.form.abha_number && (
-                <div className="flex justify-center md:justify-end">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Button
-                          variant="outline_primary"
-                          disabled={!healthFacility}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setShowLinkAbhaNumberModal(true);
-                          }}
-                        >
-                          <CareIcon icon="l-user-square" className="mr-2" />
-                          <span>{t("generate_link_abha")}</span>
-                        </Button>
-                      </TooltipTrigger>
-                      {!healthFacility && (
-                        <TooltipContent className="max-w-sm break-words text-sm">
-                          {t("abha_disabled_due_to_no_health_facility")}
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              )}
               {showAlertMessage.show && (
                 <ConfirmDialog
                   title={showAlertMessage.title}
@@ -1060,59 +944,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   show
                 />
               )}
-              {careConfig.abdm.enabled && (
-                <div className="mb-8 overflow-visible">
-                  {showLinkAbhaNumberModal && (
-                    <LinkAbhaNumber
-                      show={showLinkAbhaNumberModal}
-                      onClose={() => setShowLinkAbhaNumberModal(false)}
-                      onSuccess={(data) => {
-                        if (id) {
-                          Notification.Warn({
-                            msg: "To link Abha Number, please save the patient details",
-                          });
-                        }
-
-                        populateAbhaValues(data, field);
-                      }}
-                    />
-                  )}
-                  {state.form.abha_number && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
-                      <div id="abha-number">
-                        <TextFormField
-                          id="abha-number"
-                          name="abha-number"
-                          label="ABHA Number"
-                          type="text"
-                          value={state.form.health_id_number}
-                          onChange={() => null}
-                          disabled={true}
-                          error=""
-                        />
-                      </div>
-                      <div id="health-id">
-                        {state.form.health_id ? (
-                          <TextFormField
-                            id="health-id"
-                            name="health-id"
-                            label="Abha Address"
-                            type="text"
-                            value={state.form.health_id}
-                            onChange={() => null}
-                            disabled={true}
-                            error=""
-                          />
-                        ) : (
-                          <div className="mt-4 text-sm text-secondary-500">
-                            No Abha Address Associated with this ABHA Number
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              <PLUGIN_Component
+                __name="ExtendPatientRegisterForm"
+                facilityId={facilityId}
+                patientId={id}
+                state={state}
+                dispatch={dispatch}
+                field={field}
+              />
               <div className="mb-8 overflow-visible">
                 <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                   Personal Details

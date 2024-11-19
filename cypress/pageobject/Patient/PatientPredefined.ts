@@ -1,11 +1,10 @@
 // PatientPredefined.js
-
-import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 import {
-  generatePhoneNumber,
   generateEmergencyPhoneNumber,
+  generatePhoneNumber,
 } from "../utils/constants";
 
 class PatientPredefined {

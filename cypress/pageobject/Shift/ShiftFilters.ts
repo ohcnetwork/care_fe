@@ -1,8 +1,4 @@
 class ShiftingPage {
-  advancedFilterButton() {
-    return cy.get("#advanced-filter");
-  }
-
   originFacilityInput() {
     return cy.get("input[name='origin_facility']");
   }

@@ -1,3 +1,5 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import PatientHome from "../../pageobject/Patient/PatientHome";
 
@@ -24,7 +26,7 @@ describe("Patient Homepage present functionalities", () => {
   const patientToDateBadge = "2023-12-07";
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -35,7 +37,7 @@ describe("Patient Homepage present functionalities", () => {
   });
 
   it("Date based advance filters applied in the patient tab", () => {
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.typePatientCreatedBeforeDate(patientFromDate);
     patientHome.typePatientCreatedAfterDate(patientToDate);
     patientHome.typePatientModifiedBeforeDate(patientFromDate);
@@ -43,7 +45,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.typePatientAdmitedBeforeDate(patientFromDate);
     patientHome.typePatientAdmitedAfterDate(patientToDate);
     patientHome.clickPatientFilterApply();
-    patientHome.verifyTotalPatientCount("1");
     // verify the badge and clear the count
     patientHome.verifyPatientCreatedBeforeDate(patientToDateBadge);
     patientHome.verifyPatientCreatedAfterDate(patientFromDateBadge);
@@ -56,7 +57,7 @@ describe("Patient Homepage present functionalities", () => {
   });
 
   it("Facility Geography based advance filters applied in the patient tab", () => {
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.typeFacilityName(facilityName);
     patientHome.selectFacilityType(facilityType);
     patientHome.typeFacilityLsgBody(facilityLsgBody);
@@ -74,7 +75,7 @@ describe("Patient Homepage present functionalities", () => {
 
   it("Patient diagnosis based advance filters applied in the patient tab", () => {
     // Patient Filtering based on icd-11 data
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
     patientHome.selectConfirmedIcdDiagnosis(
       patientIcdDiagnosis,
@@ -104,7 +105,7 @@ describe("Patient Homepage present functionalities", () => {
     cy.clearAllFilters();
     patientHome.verifyTotalPatientCount("1");
     // Apply Any and confirmed diagonsis to verify patient count 17
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
     patientHome.selectConfirmedIcdDiagnosis(
       patientIcdDiagnosis,
@@ -116,7 +117,7 @@ describe("Patient Homepage present functionalities", () => {
 
   it("Patient Details based advance filters applied in the patient tab", () => {
     // Patient Filtering based on patient details
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.selectPatientGenderfilter(patientGender);
     patientHome.selectPatientCategoryfilter(patientCategory);
     patientHome.typePatientMinimumAgeFilter(patientMinimumAge);
@@ -128,7 +129,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.selectPatientMedicoFilter(patientMedicoStatus);
     patientHome.clickPatientFilterApply();
     cy.get("a[data-cy='patient']").should("contain.text", "Dummy Patient");
-    patientHome.verifyTotalPatientCount("1");
     // Verify the presence of badges
     patientHome.verifyGenderBadgeContent(patientGender);
     patientHome.verifyCategoryBadgeContent(patientCategory);

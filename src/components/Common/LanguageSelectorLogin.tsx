@@ -1,8 +1,9 @@
+import careConfig from "@careConfig";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { classNames } from "../../Utils/utils";
-import careConfig from "@careConfig";
-import { LANGUAGES } from "../../i18n";
+
+import { classNames } from "@/Utils/utils";
+import { LANGUAGES } from "@/i18n";
 
 export const LanguageSelectorLogin = () => {
   const { i18n, t } = useTranslation();

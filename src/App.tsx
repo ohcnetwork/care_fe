@@ -1,30 +1,37 @@
 import { Suspense } from "react";
-import Routers from "./Routers";
-import Integrations from "./Integrations";
-import Loading from "@/components/Common/Loading";
-import HistoryAPIProvider from "./Providers/HistoryAPIProvider";
-import AuthUserProvider from "./Providers/AuthUserProvider";
-import PluginEngine from "./PluginEngine";
-import { FeatureFlagsProvider } from "./Utils/featureFlags";
+
 import { Toaster } from "@/components/ui/toaster";
+
+import Loading from "@/components/Common/Loading";
+
+import Integrations from "@/Integrations";
+import PluginEngine from "@/PluginEngine";
+import AuthUserProvider from "@/Providers/AuthUserProvider";
+import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
+import Routers from "@/Routers";
+import { FeatureFlagsProvider } from "@/Utils/featureFlags";
+
+import { PubSubProvider } from "./Utils/pubsubContext";
 
 const App = () => {
   return (
     <Suspense fallback={<Loading />}>
-      <PluginEngine>
-        <HistoryAPIProvider>
-          <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
-            <FeatureFlagsProvider>
-              <Routers.AppRouter />
-            </FeatureFlagsProvider>
-          </AuthUserProvider>
+      <PubSubProvider>
+        <PluginEngine>
+          <HistoryAPIProvider>
+            <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
+              <FeatureFlagsProvider>
+                <Routers.AppRouter />
+              </FeatureFlagsProvider>
+            </AuthUserProvider>
 
-          {/* Integrations */}
-          <Integrations.Sentry disabled={!import.meta.env.PROD} />
-          <Integrations.Plausible />
-        </HistoryAPIProvider>
-        <Toaster />
-      </PluginEngine>
+            {/* Integrations */}
+            <Integrations.Sentry disabled={!import.meta.env.PROD} />
+            <Integrations.Plausible />
+          </HistoryAPIProvider>
+          <Toaster />
+        </PluginEngine>
+      </PubSubProvider>
     </Suspense>
   );
 };

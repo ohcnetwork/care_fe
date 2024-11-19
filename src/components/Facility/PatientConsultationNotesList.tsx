@@ -1,11 +1,18 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+
+import CircularProgress from "@/components/Common/CircularProgress";
+import DoctorNote from "@/components/Facility/DoctorNote";
+import {
+  PatientNoteStateType,
+  PatientNotesModel,
+} from "@/components/Facility/models";
+
+import useSlug from "@/hooks/useSlug";
+
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-import CircularProgress from "@/components/Common/components/CircularProgress";
-import routes from "../../Redux/api";
-import { PatientNoteStateType, PatientNotesModel } from "./models";
-import useSlug from "@/common/hooks/useSlug";
-import DoctorNote from "./DoctorNote";
-import request from "../../Utils/request/request";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
