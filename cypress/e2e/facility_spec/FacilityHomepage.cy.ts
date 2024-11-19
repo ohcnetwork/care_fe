@@ -152,7 +152,7 @@ describe("Facility Homepage Function", () => {
     facilityNotify.verifyFacilityName(facilityName);
     facilityNotify.fillNotifyText(notificationMessage);
     facilityNotify.interceptPostNotificationReq();
-    cy.submitButton("Notify");
+    cy.clickSubmitButton("Notify");
     facilityNotify.verifyPostNotificationReq();
     cy.verifyNotification("Facility Notified");
     cy.closeNotification();
@@ -160,7 +160,7 @@ describe("Facility Homepage Function", () => {
     // Verify the frontend error on empty message
     facilityHome.clickFacilityNotifyButton();
     facilityNotify.verifyFacilityName(facilityName);
-    cy.submitButton("Notify");
+    cy.clickSubmitButton("Notify");
     facilityNotify.verifyErrorMessage(notificationErrorMsg);
     // close pop-up and verify
     facilityHome.verifyAndCloseNotifyModal();
