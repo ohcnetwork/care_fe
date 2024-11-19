@@ -216,6 +216,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           options={SAMPLE_TYPE_CHOICES}
           optionLabel={(option) => option.text}
           optionValue={(option) => option.id}
+          id="sample-type"
         />
 
         {state.form.sample_type === "9" && (
@@ -230,6 +231,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           options={ICMR_CATEGORY}
           optionLabel={(option) => option}
           optionValue={(option) => option}
+          id="icmr-category"
         />
         <div className="mb-6 flex flex-col gap-1">
           <p className="font-medium">
@@ -255,7 +257,11 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           </span>
         </div>
 
-        <TextFormField {...field("icmr_label", "ICMR Label")} required />
+        <TextFormField
+          {...field("icmr_label", "ICMR Label")}
+          required
+          id="icmr-label"
+        />
         <div className="mb-6 w-full flex-none">
           <FieldLabel>Testing Facility</FieldLabel>
           <FacilitySelect
@@ -274,22 +280,29 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           />
         </div>
         <CheckBoxFormField
+          id="is_fast_track"
           {...field("isFastTrack", "Is fast-track testing required?")}
         />
         {state.form.isFastTrack && (
           <TextAreaFormField
+            id="fast_track"
             {...field("fast_track", "Reasons for fast-track testing")}
             required
           />
         )}
 
-        <TextFormField {...field("doctor_name", "Doctor's Name")} />
+        <TextFormField
+          id="doctor_name"
+          {...field("doctor_name", "Doctor's Name")}
+        />
         <CheckBoxFormField
+          id="is_atypical_presentation"
           {...field("is_atypical_presentation", "Is atypical presentation?")}
         />
         {state.form.is_atypical_presentation && (
           <div>
             <TextAreaFormField
+              id="atypical_presentation"
               {...field(
                 "atypical_presentation",
                 "Atypical presentation details",
@@ -298,26 +311,38 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
             />
           </div>
         )}
-        <TextAreaFormField {...field("diagnosis", "Diagnosis")} />
         <TextAreaFormField
+          id="diagnosis"
+          {...field("diagnosis", "Diagnosis")}
+        />
+        <TextAreaFormField
+          id="etiology_identified"
           {...field("etiology_identified", "Etiology identified")}
         />
         <TextAreaFormField
+          id="diff_diagnosis"
           {...field("diff_diagnosis", "Differential diagnosis")}
         />
 
         <CheckBoxFormField
+          id="has_sari"
           {...field("has_sari", "Has SARI (Severe Acute Respiratory illness)?")}
         />
         <CheckBoxFormField
+          id="has_ari"
           {...field("has_ari", "Has ARI (Acute Respiratory illness)?")}
         />
         <CheckBoxFormField
+          id="is_unusual_course"
           {...field("is_unusual_course", "Is unusual course?")}
         />
         <div className="mt-4 flex flex-col justify-end gap-2 lg:flex-row">
           <Cancel onClick={() => goBack()} />
-          <Submit onClick={handleSubmit} label={buttonText} />
+          <Submit
+            onClick={handleSubmit}
+            label={buttonText}
+            id="sample-test-submit-btn"
+          />
         </div>
       </form>
     </Page>
