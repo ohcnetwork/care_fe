@@ -350,7 +350,7 @@ const Login = (props: { forgot?: boolean }) => {
                         <button
                           id="login-button"
                           type="submit"
-                          className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
+                          className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600"
                         >
                           {t("login")}
                         </button>
