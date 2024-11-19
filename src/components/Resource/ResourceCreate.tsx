@@ -30,7 +30,7 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { parsePhoneNumber } from "@/Utils/utils";
+import { handleNegativeValue, parsePhoneNumber } from "@/Utils/utils";
 
 interface resourceProps {
   facilityId: number;
@@ -304,6 +304,7 @@ export default function ResourceCreate(props: resourceProps) {
           min={1}
           value={state.form.required_quantity}
           onChange={handleChange}
+          onInput={handleNegativeValue}
         />
 
         <div className="md:col-span-2">

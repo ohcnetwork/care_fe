@@ -65,8 +65,8 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         type={props.type === "password" ? getPasswordFieldType() : props.type}
         name={field.name}
         value={field.value}
-        min={Number(props?.min)}
-        max={Number(props?.max)}
+        min={Number(props?.min || Number.MIN_SAFE_INTEGER)}
+        max={Number(props?.max || Number.MAX_SAFE_INTEGER)}
         required={field.required}
         onChange={(e) => field.handleChange(e.target.value)}
       />
