@@ -28,7 +28,7 @@ describe("Patient Investigation Creation from Patient consultation page", () => 
       "Haematology",
       "Urine Test",
     ]);
-    cy.submitButton("Save Investigation");
+    cy.clickSubmitButton("Save Investigation");
     cy.verifyNotification("Please Enter at least one value");
     cy.closeNotification();
     // Temporary workflow for investigation since we dont have dummy data and moving away from existing module

@@ -48,7 +48,7 @@ describe("HCX Claims configuration and approval workflow", () => {
       firstInsuranceIdentifier,
       patientInsurerName,
     );
-    cy.submitButton("Save Details");
+    cy.clickSubmitButton("Save Details");
     cy.verifyNotification("Patient updated successfully");
     cy.closeNotification();
     // Navigate to Consultation View and capture dynamic consultation ID
@@ -80,6 +80,8 @@ describe("HCX Claims configuration and approval workflow", () => {
     // Raise a HCX Pre-auth
     patientConsultationPage.clickManagePatientButton();
     patientConsultationPage.clickClaimsButton();
+    cy.verifyAndClickElement("#edit-insurance-policy", "Edit Insurance Policy");
+    cy.clickCancelButton();
     hcxClaims.selectEligiblePolicy(patientInsurerName);
     hcxClaims.verifyPolicyEligibility();
     cy.verifyNotification("Checking Policy Eligibility");
