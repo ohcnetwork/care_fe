@@ -125,19 +125,3 @@ export const ProfessionalInfoDetails = ({ user }: UserViewDetailsProps) => {
     </>
   );
 };
-
-export const UserViewDetails = ({ user }: UserViewDetailsProps) => {
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
-        <BasicInfoDetails user={user} />
-      </div>
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
-        <ContactInfoDetails user={user} />
-      </div>
-      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
-        <ProfessionalInfoDetails user={user} />
-      </div>
-    </div>
-  );
-};

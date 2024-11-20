@@ -7,19 +7,40 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import LanguageSelector from "@/components/Common/LanguageSelector";
 import userColumns from "@/components/Common/UserColumns";
+import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
-import UserInformation from "@/components/Users/UserInformation";
+import {
+  UserBasicInfoView,
+  UserContactInfoView,
+  UserProfessionalInfoView,
+} from "@/components/Users/UserEditDetails";
 import UserResetPassword from "@/components/Users/UserResetPassword";
+import {
+  BasicInfoDetails,
+  ContactInfoDetails,
+  ProfessionalInfoDetails,
+} from "@/components/Users/UserViewDetails";
 import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import * as Notification from "@/Utils/Notifications";
-import { showUserDelete, showUserPasswordReset } from "@/Utils/permissions";
+import {
+  editUserPermissions,
+  showAvatarEdit,
+  showUserDelete,
+  showUserPasswordReset,
+} from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 
-export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
+export default function UserSummaryTab({
+  userData,
+  refetchUserData,
+}: {
+  userData?: UserModel;
+  refetchUserData?: () => void;
+}) {
   const { t } = useTranslation();
   const [showDeleteDialog, setshowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -49,9 +70,66 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
     }
   };
 
-  const userColumnsData = { userData, username: userData.username };
+  const userColumnsData = {
+    userData,
+    username: userData.username,
+    refetchUserData,
+  };
   const deletePermitted = showUserDelete(authUser, userData);
   const passwordResetPermitted = showUserPasswordReset(authUser, userData);
+  const avatarPermitted = showAvatarEdit(authUser, userData);
+  const editPermissions = editUserPermissions(authUser, userData);
+
+  const renderBasicInformation = () => {
+    if (editPermissions) {
+      return (
+        <UserBasicInfoView
+          username={userData.username}
+          userData={userData}
+          onSubmitSuccess={refetchUserData}
+        />
+      );
+    }
+    return (
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+        <BasicInfoDetails user={userData} />
+      </div>
+    );
+  };
+
+  const renderContactInformation = () => {
+    if (editPermissions) {
+      return (
+        <UserContactInfoView
+          username={userData.username}
+          userData={userData}
+          onSubmitSuccess={refetchUserData}
+        />
+      );
+    }
+    return (
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+        <ContactInfoDetails user={userData} />
+      </div>
+    );
+  };
+
+  const renderProfessionalInformation = () => {
+    if (editPermissions) {
+      return (
+        <UserProfessionalInfoView
+          username={userData.username}
+          userData={userData}
+          onSubmitSuccess={refetchUserData}
+        />
+      );
+    }
+    return (
+      <div className="overflow-visible px-4 py-5 sm:px-6 rounded-lg shadow sm:rounded-lg bg-white">
+        <ProfessionalInfoDetails user={userData} />
+      </div>
+    );
+  };
 
   return (
     <>
@@ -64,15 +142,41 @@ export default function UserSummaryTab({ userData }: { userData?: UserModel }) {
           }}
         />
       )}
-      <div className="mt-10 flex flex-col gap-y-12">
+      <div className="mt-10 flex flex-col gap-y-6">
+        {avatarPermitted &&
+          userColumns(
+            t("edit_avatar"),
+            authUser.username === userData.username
+              ? t("edit_avatar_note_self")
+              : t("edit_avatar_note"),
+            UserAvatar,
+            userColumnsData,
+          )}
         {userColumns(
           t("personal_information"),
           authUser.username === userData.username
             ? t("personal_information_note_self")
             : t("personal_information_note"),
-          UserInformation,
+          renderBasicInformation,
           userColumnsData,
         )}
+        {userColumns(
+          t("contact_info"),
+          authUser.username === userData.username
+            ? t("contact_info_note_self")
+            : t("contact_info_note"),
+          renderContactInformation,
+          userColumnsData,
+        )}
+        {(userData.user_type === "Doctor" || userData.user_type === "Nurse") &&
+          userColumns(
+            t("professional_info"),
+            authUser.username === userData.username
+              ? t("professional_info_note_self")
+              : t("professional_info_note"),
+            renderProfessionalInformation,
+            userColumnsData,
+          )}
         {passwordResetPermitted &&
           userColumns(
             t("reset_password"),

@@ -17,7 +17,7 @@ import { UserModel } from "@/components/Users/models";
 interface UserEditDetailsProps {
   username: string;
   userData: UserModel;
-  onSubmitSuccess: () => void;
+  onSubmitSuccess?: () => void;
 }
 
 export function UserBasicInfoView({
@@ -35,7 +35,7 @@ export function UserBasicInfoView({
     isEditing: boolean;
     setIsEditing: (value: boolean) => void;
   }) => (
-    <div className="mb-4 inline-flex rounded-lg bg-gray-100 p-1">
+    <div className="mb-2 inline-flex rounded-lg bg-gray-100 p-1">
       <button
         onClick={() => setIsEditing(false)}
         className={`
@@ -77,7 +77,7 @@ export function UserBasicInfoView({
           includedFields={editBasicInfoFields}
           onSubmitSuccess={() => {
             setIsEditing(false);
-            onSubmitSuccess();
+            onSubmitSuccess?.();
           }}
         />
       ) : (
@@ -144,7 +144,7 @@ export function UserContactInfoView({
           includedFields={editContactInfoFields}
           onSubmitSuccess={() => {
             setIsEditing(false);
-            onSubmitSuccess();
+            onSubmitSuccess?.();
           }}
         />
       ) : (
@@ -216,38 +216,12 @@ export function UserProfessionalInfoView({
           includedFields={editProfessionalInfoFields}
           onSubmitSuccess={() => {
             setIsEditing(false);
-            onSubmitSuccess();
+            onSubmitSuccess?.();
           }}
         />
       ) : (
         <ProfessionalInfoDetails user={userData} />
       )}
-    </div>
-  );
-}
-
-export default function UserEditDetails({
-  username,
-  userData,
-  onSubmitSuccess,
-}: UserEditDetailsProps) {
-  return (
-    <div className="flex flex-col gap-6">
-      <UserBasicInfoView
-        username={username}
-        userData={userData}
-        onSubmitSuccess={onSubmitSuccess}
-      />
-      <UserContactInfoView
-        username={username}
-        userData={userData}
-        onSubmitSuccess={onSubmitSuccess}
-      />
-      <UserProfessionalInfoView
-        username={username}
-        userData={userData}
-        onSubmitSuccess={onSubmitSuccess}
-      />
     </div>
   );
 }

@@ -6,23 +6,20 @@ import { Avatar } from "@/components/Common/Avatar";
 import AvatarEditModal from "@/components/Common/AvatarEditModal";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
-import { UserViewDetails } from "@/components/Users/UserViewDetails";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
-import { editUserPermissions, showAvatarEdit } from "@/Utils/permissions";
+import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
 import { formatDisplayName, sleep } from "@/Utils/utils";
 
-import UserEditDetails from "./UserEditDetails";
-
-export default function UserInformation({ username }: { username: string }) {
+export default function UserAvatar({ username }: { username: string }) {
   const { t } = useTranslation();
   const [editAvatar, setEditAvatar] = useState(false);
   const authUser = useAuthUser();
@@ -82,9 +79,6 @@ export default function UserInformation({ username }: { username: string }) {
     }
   };
 
-  const avatarPermissions = showAvatarEdit(authUser, userData);
-  const editPermissions = editUserPermissions(authUser, userData);
-
   return (
     <>
       <AvatarEditModal
@@ -95,47 +89,37 @@ export default function UserInformation({ username }: { username: string }) {
         handleDelete={handleAvatarDelete}
         onClose={() => setEditAvatar(false)}
       />
-      {editPermissions && (
-        <div>
-          {avatarPermissions && (
-            <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
-              <div className="flex items-center">
-                <Avatar
-                  imageUrl={userData?.read_profile_picture_url}
-                  name={formatDisplayName(userData)}
-                  className="h-20 w-20"
-                />
-                <div className="my-4 ml-4 flex flex-col gap-2">
-                  <ButtonV2
-                    onClick={(_) => setEditAvatar(!editAvatar)}
-                    type="button"
-                    id="edit-cancel-profile-button"
-                    className="border border-gray-200 bg-gray-50 text-black hover:bg-gray-100"
-                    shadow={false}
-                    disabled={!showAvatarEdit(authUser, userData)}
-                    tooltip={
-                      !showAvatarEdit(authUser, userData)
-                        ? t("edit_avatar_permission_error")
-                        : undefined
-                    }
-                  >
-                    {t("change_avatar")}
-                  </ButtonV2>
-                  <p className="text-xs leading-5 text-gray-500">
-                    {t("change_avatar_note")}
-                  </p>
-                </div>
-              </div>
+      <div>
+        <div className="my-4 overflow-visible rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex justify-between">
+          <div className="flex items-center">
+            <Avatar
+              imageUrl={userData?.read_profile_picture_url}
+              name={formatDisplayName(userData)}
+              className="h-20 w-20"
+            />
+            <div className="my-4 ml-4 flex flex-col gap-2">
+              <ButtonV2
+                onClick={(_) => setEditAvatar(!editAvatar)}
+                type="button"
+                id="edit-cancel-profile-button"
+                className="border border-gray-200 bg-gray-50 text-black hover:bg-gray-100"
+                shadow={false}
+                disabled={!showAvatarEdit(authUser, userData)}
+                tooltip={
+                  !showAvatarEdit(authUser, userData)
+                    ? t("edit_avatar_permission_error")
+                    : undefined
+                }
+              >
+                {t("change_avatar")}
+              </ButtonV2>
+              <p className="text-xs leading-5 text-gray-500">
+                {t("change_avatar_note")}
+              </p>
             </div>
-          )}
-          <UserEditDetails
-            username={username}
-            userData={userData}
-            onSubmitSuccess={refetchUserData}
-          />
+          </div>
         </div>
-      )}
-      {!editPermissions && <UserViewDetails user={userData} />}
+      </div>
     </>
   );
 }
