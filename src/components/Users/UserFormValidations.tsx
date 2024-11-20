@@ -96,15 +96,8 @@ export const editProfessionalInfoFieldsForNurseDoctor: Array<keyof UserForm> = [
   ...editProfessionalInfoFields,
 ];
 
-export type EditForm = {
-  user_type: string;
-  qualification?: string | null;
-  doctor_experience_commenced_on?: string | null;
-  doctor_medical_council_registration?: string | null;
-};
-
 export const ValidateQualification = (
-  formData: UserForm | EditForm,
+  formData: UserForm,
   translator: TFunction,
 ) => {
   if (
@@ -117,7 +110,7 @@ export const ValidateQualification = (
 };
 
 export const ValidateDoctorExperienceCommencedOn = (
-  formData: UserForm | EditForm,
+  formData: UserForm,
   translator: TFunction,
 ) => {
   if (formData.user_type === "Doctor") {
@@ -135,7 +128,7 @@ export const ValidateDoctorExperienceCommencedOn = (
 };
 
 export const ValidateDoctorMedicalCouncilRegistration = (
-  formData: UserForm | EditForm,
+  formData: UserForm,
   translator: TFunction,
 ) => {
   if (
@@ -143,6 +136,23 @@ export const ValidateDoctorMedicalCouncilRegistration = (
     !formData["doctor_medical_council_registration"]
   ) {
     return translator("medical_council_registration_required");
+  }
+  return null;
+};
+
+export const ValidateVideoLink = (
+  formData: UserForm,
+  translator: TFunction,
+) => {
+  if (!formData["video_connect_link"]) return null;
+
+  try {
+    const parsed = new URL(formData["video_connect_link"]);
+    if (!["https:", "http:"].includes(parsed.protocol)) {
+      return translator("invalid_url");
+    }
+  } catch {
+    return translator("invalid_url");
   }
   return null;
 };

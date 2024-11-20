@@ -55,7 +55,7 @@ export default function UserAvatar({ username }: { username: string }) {
         if (xhr.status === 200) {
           await sleep(1000);
           refetchUserData();
-          Notification.Success({ msg: "Profile picture updated." });
+          Notification.Success({ msg: t("avatar_updated_success") });
           setEditAvatar(false);
         }
       },

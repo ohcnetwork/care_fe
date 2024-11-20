@@ -26,6 +26,7 @@ import {
   ValidateDoctorExperienceCommencedOn,
   ValidateDoctorMedicalCouncilRegistration,
   ValidateQualification,
+  ValidateVideoLink,
 } from "@/components/Users/UserFormValidations";
 import { GetUserTypes } from "@/components/Users/UserListAndCard";
 import { GenderType, UserModel } from "@/components/Users/models";
@@ -48,12 +49,7 @@ import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import {
-  classNames,
-  dateQueryString,
-  isValidUrl,
-  parsePhoneNumber,
-} from "@/Utils/utils";
+import { classNames, dateQueryString, parsePhoneNumber } from "@/Utils/utils";
 
 interface StateObj {
   id: number;
@@ -677,10 +673,9 @@ const UserAddEditForm = (props: UserProps) => {
           }
           break;
         case "video_connect_link":
-          if (formData[field]) {
-            if (isValidUrl(formData[field]) === false) {
-              errors[field] = t("invalid_url");
-            }
+          currentError = ValidateVideoLink(formData, t);
+          if (currentError) {
+            errors[field] = currentError;
           }
           break;
         default:
