@@ -1,3 +1,4 @@
+import { Link } from "raviger";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,6 +22,8 @@ import {
   properRoundOf,
   rangeValueDescription,
 } from "@/Utils/utils";
+
+import { Button } from "../ui/button";
 
 type Props = {
   facilityId: string;
@@ -57,18 +60,18 @@ export default function CriticalCarePreview(props: Props) {
         >
           {t("back_to_consultation")}
         </ButtonV2>
-        <div>
-          <div className="mt-2">
-            <ButtonV2
-              id="update-log"
-              data-testid="update-log-button"
-              aria-label={t("update_log")}
-              href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/daily-rounds/${props.id}/update`}
-            >
-              {t("update_log")}
-            </ButtonV2>
-          </div>
-        </div>
+        <Link
+          className="mt-2"
+          href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/log_updates/${props.id}/update`}
+        >
+          <Button
+            id="update-log"
+            data-testid="update-log-button"
+            aria-label={t("update_log")}
+          >
+            {t("update_log")}
+          </Button>
+        </Link>
       </div>
 
       <Card className="md:rounded-xl lg:p-8">
