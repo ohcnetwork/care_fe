@@ -32,13 +32,13 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const patientInsulinDosage = "56";
   const patientFluidBalance = "500";
   const patientNetBalance = "1000";
-  const patientOne = "Dummy Patient 9";
+  const patientOne = "Dummy Patient Nine";
   const bedOne = "Dummy Bed 5";
-  const patientTwo = "Dummy Patient 10";
+  const patientTwo = "Dummy Patient Ten";
   const bedTwo = "Dummy Bed 2";
-  const patientThree = "Dummy Patient 8";
+  const patientThree = "Dummy Patient Eight";
   const bedThree = "Dummy Bed 3";
-  const domicilaryPatient = "Dummy Patient 11";
+  const domicilaryPatient = "Dummy Patient Eleven";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -55,7 +55,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(domicilaryPatient);
     patientConsultationPage.clickEditConsultationButton();
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
-    cy.submitButton("Update Consultation");
+    cy.clickSubmitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
@@ -74,7 +74,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.submitButton("Save");
+    cy.clickSubmitButton("Save");
     cy.verifyNotification("Tele-medicine Log created successfully");
   });
 
@@ -108,11 +108,11 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPrescription.selectMedicine("DOLO");
     patientPrescription.enterDosage("4");
     patientPrescription.selectDosageFrequency("Twice daily");
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     // Submit the doctors log update
-    cy.submitButton("Save and Continue");
+    cy.clickSubmitButton("Save and Continue");
     cy.wait(2000);
     cy.verifyNotification("Progress Note created successfully");
     cy.closeNotification();
@@ -120,13 +120,13 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectCriticalCareSection("Neurological Monitoring");
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.get("#left_pupil_light_reaction-option-FIXED").click();
-    cy.submitButton("Update Details");
+    cy.clickSubmitButton("Update Details");
     cy.verifyNotification(
       "Neurological Monitoring details succesfully updated.",
     );
     cy.closeNotification();
     // Final Submission of the form
-    cy.submitButton("Complete");
+    cy.clickSubmitButton("Complete");
     cy.verifyNotification("Progress Note Log Update filed successfully");
     cy.closeNotification();
     // Verify the data reflection
@@ -143,7 +143,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickUpdateDetail();
     patientLogupdate.typeSystolic(patientModifiedSystolic);
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
-    cy.submitButton("Continue");
+    cy.clickSubmitButton("Continue");
     cy.verifyNotification("Progress Note updated successfully");
   });
 
@@ -156,7 +156,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickLogupdate();
     patientLogupdate.selectRoundType("Detailed Update");
     patientLogupdate.selectPatientCategory(patientCategory);
-    cy.submitButton("Save and Continue");
+    cy.clickSubmitButton("Save and Continue");
     cy.verifyNotification("Detailed Update created successfully");
     cy.closeNotification();
     // Select two Section - First One is Respiratory Support
@@ -166,7 +166,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectOxygenSupport();
     patientLogupdate.typeOxygenFlowRate(patientOxygenFlowRate);
     patientLogupdate.typeVentilatorSpo2(patientSpo2);
-    cy.submitButton("Update Details");
+    cy.clickSubmitButton("Update Details");
     cy.verifyNotification("Respiratory Support details succesfully updated.");
     cy.closeNotification();
     // Second Section will be Blood Sugar
@@ -174,10 +174,10 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeBloodSugar(patientBloodSugar);
     patientLogupdate.typeInsulinDosage(patientInsulinDosage);
     cy.get("#insulin_intake_frequency-option-BD").click();
-    cy.submitButton("Update Details");
+    cy.clickSubmitButton("Update Details");
     cy.verifyNotification("Blood Sugar details succesfully updated.");
     // Submit the form and verify the details
-    cy.submitButton("Complete");
+    cy.clickSubmitButton("Complete");
     cy.verifyNotification("Detailed Log Update filed successfully");
     cy.closeNotification();
     cy.contains("button", "Log Updates").click();
@@ -203,10 +203,10 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectCriticalCareSection("Dialysis");
     patientLogupdate.typeFluidBalance(patientFluidBalance);
     patientLogupdate.typeNetBalance(patientNetBalance);
-    cy.submitButton("Update Details");
+    cy.clickSubmitButton("Update Details");
     cy.verifyNotification("Dialysis details succesfully updated.");
     cy.closeNotification();
-    cy.submitButton("Complete");
+    cy.clickSubmitButton("Complete");
     cy.verifyNotification("Detailed Log Update filed successfully");
     cy.closeNotification();
     //Reverify the editted and newly added data
@@ -251,7 +251,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.submitButton("Save");
+    cy.clickSubmitButton("Save");
     cy.wait(2000);
     cy.verifyNotification("Brief Update created successfully");
     // Verify the card content
@@ -263,7 +263,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(domicilaryPatient);
     patientConsultationPage.clickEditConsultationButton();
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
-    cy.submitButton("Update Consultation");
+    cy.clickSubmitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
@@ -281,7 +281,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.submitButton("Save");
+    cy.clickSubmitButton("Save");
     cy.verifyNotification("Brief Update created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
@@ -307,7 +307,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSystolic(patientModifiedSystolic);
     patientLogupdate.clearIntoElementById("#diastolic");
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
-    cy.submitButton("Continue");
+    cy.clickSubmitButton("Continue");
     cy.verifyNotification("Brief Update updated successfully");
     cy.contains("button", "Log Updates").click();
     patientLogupdate.clickLogUpdateViewDetails(
@@ -324,7 +324,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(domicilaryPatient);
     patientConsultationPage.clickEditConsultationButton();
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
-    cy.submitButton("Update Consultation");
+    cy.clickSubmitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
@@ -336,7 +336,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeTemperature(patientTemperature);
     patientLogupdate.typeRespiratory(patientRespiratory);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.submitButton("Save");
+    cy.clickSubmitButton("Save");
     cy.verifyNotification("Brief Update created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["9"]);
@@ -346,7 +346,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
     patientLogupdate.typePulse(patientPulse);
-    cy.submitButton("Save");
+    cy.clickSubmitButton("Save");
     cy.verifyNotification("Brief Update created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["-"]);
