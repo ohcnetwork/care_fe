@@ -23,25 +23,28 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const LaptopScreenBreakpoint = 640;
   const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
 
-  const [cameraFacingMode, setCameraFacingMode] = useState(!isLaptopScreen);
+  const [cameraFacingMode, setCameraFacingMode] = useState(
+    isLaptopScreen ? "user" : "environment",
+  );
   const [previewImage, setPreviewImage] = useState(null);
   const webRef = useRef<any>(null);
 
   const videoConstraints = {
     width: { ideal: 4096 },
     height: { ideal: 2160 },
-    facingMode: cameraFacingMode ? "user" : "environment",
+    facingMode: cameraFacingMode,
   };
   useEffect(() => {
     navigator.mediaDevices
-      .getUserMedia({ video: videoConstraints })
+      .getUserMedia({ video: { facingMode: cameraFacingMode } })
+      .then((stream) => (webRef.current = stream))
       .catch(() => {
         Notify.Warn({
           msg: t("camera_permission_denied"),
         });
         onHide();
       });
-  }, [show, cameraFacingMode, onHide]);
+  }, [show, cameraFacingMode]);
 
   const handleSwitchCamera = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -52,7 +55,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       device.label.toLowerCase().includes("back"),
     );
     if (!isLaptopScreen && backCamera) {
-      setCameraFacingMode((prevMode) => !prevMode);
+      setCameraFacingMode((prevMode) =>
+        prevMode === "environment" ? "user" : "environment",
+      );
     } else {
       Notify.Warn({
         msg: t("switch_camera_is_not_available"),
