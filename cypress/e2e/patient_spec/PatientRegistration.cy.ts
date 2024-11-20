@@ -243,7 +243,7 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
     cy.verifyNotification(
-      "Patient ${patientTransferName} (Male) transferred successfully",
+      `Patient ${patientTransferName} (Male) transferred successfully`,
     );
     patientTransfer.clickConsultationCancelButton();
     // allow the transfer button of a patient
