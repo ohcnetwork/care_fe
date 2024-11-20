@@ -27,6 +27,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     isLaptopScreen ? "user" : "environment",
   );
   const [previewImage, setPreviewImage] = useState(null);
+  const [currentStream, setCurrentStream] = useState<MediaStream | null>(null);
   const webRef = useRef<any>(null);
 
   const videoConstraints = {
@@ -60,11 +61,27 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     };
   }, [show, cameraFacingMode]);
 
+  const handleUserMedia = useCallback(
+    (stream: MediaStream) => {
+      // Stop the previous stream's tracks if any
+      if (currentStream) {
+        currentStream.getTracks().forEach((track) => track.stop());
+      }
+
+      // Set the new stream
+      setCurrentStream(stream);
+      // Attach the new stream to the video element
+      if (webRef.current && webRef.current.video) {
+        webRef.current.video.srcObject = stream;
+      }
+    },
+    [currentStream],
+  );
+
   const handleSwitchCamera = useCallback(async () => {
-    if (webRef.current?.video?.srcObject) {
-      const stream = webRef.current.video.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
-      webRef.current.video.srcObject = null;
+    // Stop the current stream before switching
+    if (currentStream) {
+      currentStream.getTracks().forEach((track) => track.stop());
     }
 
     // Get the available video input devices
@@ -86,7 +103,15 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         msg: t("switch_camera_is_not_available"),
       });
     }
-  }, [isLaptopScreen]);
+  }, [isLaptopScreen, currentStream]);
+
+  useEffect(() => {
+    return () => {
+      if (currentStream) {
+        currentStream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [currentStream]);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -132,6 +157,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                 ...videoConstraints,
                 facingMode: cameraFacingMode,
               }}
+              onUserMedia={(stream) => handleUserMedia(stream)}
             />
           </div>
         ) : (
