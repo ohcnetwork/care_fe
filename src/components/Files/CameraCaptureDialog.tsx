@@ -21,66 +21,86 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const { show, onHide, onCapture } = props;
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint;
 
   const [isBackCamera, setIsBackCamera] = useState(!isLaptopScreen);
-  const [previewImage, setPreviewImage] = useState(null);
-  const webRef = useRef<any>(null);
-
-  const videoConstraints = {
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>(
+    [],
+  );
+  const [videoConstraints, setVideoConstraints] = useState({
     width: { ideal: 4096 },
     height: { ideal: 2160 },
     facingMode: isBackCamera ? "environment" : "user",
-  };
+    deviceId: "",
+  });
+  const webRef = useRef<Webcam>(null);
+
   useEffect(() => {
+    async function getAvailableCameras() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(
+        (device) => device.kind === "videoinput",
+      );
+      setAvailableCameras(videoDevices);
+    }
+
     if (show) {
+      getAvailableCameras();
+    }
+  }, [show]);
+
+  useEffect(() => {
+    if (show && availableCameras.length > 0) {
       navigator.mediaDevices
         .getUserMedia({
-          video: { facingMode: videoConstraints.facingMode },
+          video: videoConstraints,
         })
         .catch(() => {
           Notify.Warn({ msg: t("camera_permission_denied") });
           onHide();
         });
     }
-  }, [show]);
+  }, [show, videoConstraints]);
 
   const handleSwitchCamera = useCallback(async () => {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoInputs = devices.filter(
-      (device) => device.kind === "videoinput",
-    );
-    const backCameraAvailable = videoInputs.some((device) =>
-      device.label.toLowerCase().includes("back"),
-    );
+    if (availableCameras.length > 1) {
+      const currentIndex = availableCameras.findIndex(
+        (device) => device.deviceId === videoConstraints.deviceId,
+      );
+      const nextIndex = (currentIndex + 1) % availableCameras.length;
+      const nextCamera = availableCameras[nextIndex];
 
-    if (!isLaptopScreen && backCameraAvailable) {
-      try {
-        const constraints = {
-          video: { facingMode: isBackCamera ? "environment" : "user" },
-        };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        stream.getTracks().forEach((track) => stream.removeTrack(track));
-        setIsBackCamera((prev) => !prev);
-      } catch (error) {
-        console.error("Error while switching camera:", error);
-        Notify.Warn({ msg: t("switch_camera_failed") });
-      }
+      setVideoConstraints((prev) => ({
+        ...prev,
+        deviceId: nextCamera.deviceId,
+        facingMode: nextCamera.label.toLowerCase().includes("back")
+          ? "environment"
+          : "user",
+      }));
+
+      setIsBackCamera(nextCamera.label.toLowerCase().includes("back"));
     } else {
       Notify.Warn({ msg: t("switch_camera_is_not_available") });
     }
-  }, [isBackCamera, isLaptopScreen]);
+  }, [availableCameras, videoConstraints.deviceId]);
 
   const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const extension = blob.type.split("/").pop();
-      const myFile = new File([blob], `capture.${extension}`, {
-        type: blob.type,
-      });
-      onCapture(myFile, `capture.${extension}`);
-    });
+    if (webRef.current) {
+      const imageSrc = webRef.current.getScreenshot();
+      setPreviewImage(imageSrc);
+      if (imageSrc) {
+        fetch(imageSrc)
+          .then((res) => res.blob())
+          .then((blob) => {
+            const extension = blob.type.split("/").pop();
+            const myFile = new File([blob], `capture.${extension}`, {
+              type: blob.type,
+            });
+            onCapture(myFile, `capture.${extension}`);
+          });
+      }
+    }
   };
 
   return (
