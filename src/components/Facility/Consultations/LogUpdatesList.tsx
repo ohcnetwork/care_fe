@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import Timeline, { TimelineNode } from "@/CAREUI/display/Timeline";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
-import DefaultLogUpdateCard from "@/components/Facility/Consultations/DailyRounds/DefaultLogUpdateCard";
-import LoadingLogUpdateCard from "@/components/Facility/Consultations/DailyRounds/LoadingCard";
-import VirtualNursingAssistantLogUpdateCard from "@/components/Facility/Consultations/DailyRounds/VirtualNursingAssistantLogUpdateCard";
+import DefaultLogUpdateCard from "@/components/Facility/Consultations/LogUpdates/DefaultLogUpdateCard";
+import LoadingLogUpdateCard from "@/components/Facility/Consultations/LogUpdates/LoadingCard";
+import VirtualNursingAssistantLogUpdateCard from "@/components/Facility/Consultations/LogUpdates/VirtualNursingAssistantLogUpdateCard";
 import { ConsultationModel } from "@/components/Facility/models";
 import { DailyRoundsModel } from "@/components/Patient/models";
 
@@ -21,7 +21,7 @@ interface Props {
   query: QueryParams;
 }
 
-export default function DailyRoundsList({ consultation, query }: Props) {
+export default function LogUpdatesList({ consultation, query }: Props) {
   const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
 
@@ -37,7 +37,7 @@ export default function DailyRoundsList({ consultation, query }: Props) {
             <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
                 <span className="flex justify-center rounded-lg bg-white p-3 text-secondary-700">
-                  {t("no_consultation_updates")}
+                  {t("no_log_updates")}
                 </span>
               </PaginatedList.WhenEmpty>
               <PaginatedList.WhenLoading>
