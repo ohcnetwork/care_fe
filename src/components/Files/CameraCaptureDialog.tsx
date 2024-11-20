@@ -37,7 +37,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: cameraFacingMode } })
-      .then((stream) => (webRef.current = stream))
       .catch(() => {
         Notify.Warn({
           msg: t("camera_permission_denied"),
@@ -66,6 +65,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   }, []);
 
   const captureImage = () => {
+    console.log(webRef.current);
     setPreviewImage(webRef.current.getScreenshot());
     const canvas = webRef.current.getCanvas();
     canvas?.toBlob((blob: Blob) => {
@@ -105,7 +105,10 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               audio={false}
               screenshotFormat="image/jpeg"
               ref={webRef}
-              videoConstraints={videoConstraints}
+              videoConstraints={{
+                ...videoConstraints,
+                facingMode: cameraFacingMode,
+              }}
             />
           </div>
         ) : (
