@@ -30,7 +30,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const videoConstraints = {
     width: { ideal: 4096 },
     height: { ideal: 2160 },
-    facingMode: cameraFacingMode ? "user" : { exact: "environment" },
+    facingMode: { exact: cameraFacingMode ? "user" : "environment" },
   };
   useEffect(() => {
     navigator.mediaDevices
@@ -41,7 +41,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         });
         onHide();
       });
-  }, [show]);
+  }, [show, cameraFacingMode]);
 
   const handleSwitchCamera = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
