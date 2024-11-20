@@ -820,7 +820,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     !isLoading &&
     facilityId &&
     facilityObject &&
-    !PatientRegisterAuth(authUser, facilityObject, facilityId)
+    !patientRegisterAuth(authUser, facilityObject, facilityId)
   ) {
     return <Error404 />;
   }
@@ -1697,7 +1697,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   );
 };
 
-export function PatientRegisterAuth(
+export function patientRegisterAuth(
   authUser: UserModel,
   facilityObject: FacilityModel | undefined,
   facilityId: string,

@@ -48,7 +48,7 @@ import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
 import { sleep } from "@/Utils/utils";
 
-import { PatientRegisterAuth } from "../Patient/PatientRegister";
+import { patientRegisterAuth } from "../Patient/PatientRegister";
 
 type Props = {
   facilityId: string;
@@ -460,7 +460,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-              {PatientRegisterAuth(authUser, facilityData, facilityId) && (
+              {patientRegisterAuth(authUser, facilityData, facilityId) && (
                 <ButtonV2
                   variant="primary"
                   ghost
