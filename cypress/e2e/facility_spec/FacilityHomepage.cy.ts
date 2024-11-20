@@ -1,5 +1,6 @@
 // FacilityCreation
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
+
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import FacilityNotify from "../../pageobject/Facility/FacilityNotify";
@@ -15,7 +16,6 @@ describe("Facility Homepage Function", () => {
   const facilityPage = new FacilityPage();
   const manageUserPage = new ManageUserPage();
   const userPage = new UserPage();
-  const assetPagination = new AssetPagination();
   const facilitiesAlias = "downloadFacilitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
@@ -83,10 +83,10 @@ describe("Facility Homepage Function", () => {
 
   it("Search a facility in homepage and pagination", () => {
     // pagination of the facility page
-    assetPagination.navigateToNextPage();
-    assetPagination.verifyNextUrl();
-    assetPagination.navigateToPreviousPage();
-    assetPagination.verifyPreviousUrl();
+    pageNavigation.navigateToNextPage();
+    pageNavigation.verifyCurrentPageNumber(2);
+    pageNavigation.navigateToPreviousPage();
+    pageNavigation.verifyCurrentPageNumber(1);
     // search for a facility
     manageUserPage.typeFacilitySearch(facilityName);
     facilityPage.verifyFacilityBadgeContent(facilityName);

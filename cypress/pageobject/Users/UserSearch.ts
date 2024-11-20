@@ -76,18 +76,6 @@ export class UserPage {
     cy.get(`[data-testid="${testId}"]`).should("not.be.visible");
   }
 
-  navigateToNextPage() {
-    cy.get("button#next-pages").click();
-  }
-
-  navigateToPreviousPage() {
-    cy.get("button#prev-pages").click();
-  }
-
-  verifyCurrentPageNumber(pageNumber: number) {
-    cy.url().should("include", `page=${pageNumber}`);
-  }
-
   verifyMultipleBadgesWithSameId(alreadylinkedusersviews: string[]) {
     alreadylinkedusersviews.forEach((username) => {
       cy.get(`#name-${username}`).scrollIntoView().should("be.visible");

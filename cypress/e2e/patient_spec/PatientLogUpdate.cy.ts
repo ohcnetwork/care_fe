@@ -32,13 +32,13 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const patientInsulinDosage = "56";
   const patientFluidBalance = "500";
   const patientNetBalance = "1000";
-  const patientOne = "Dummy Patient 9";
+  const patientOne = "Dummy Patient Nine";
   const bedOne = "Dummy Bed 5";
-  const patientTwo = "Dummy Patient 10";
+  const patientTwo = "Dummy Patient Ten";
   const bedTwo = "Dummy Bed 2";
-  const patientThree = "Dummy Patient 8";
+  const patientThree = "Dummy Patient Eight";
   const bedThree = "Dummy Bed 3";
-  const domicilaryPatient = "Dummy Patient 11";
+  const domicilaryPatient = "Dummy Patient Eleven";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
