@@ -4,8 +4,8 @@ import FacilityLocation from "pageobject/Facility/FacilityLocation";
 import { PatientConsultationPage } from "pageobject/Patient/PatientConsultation";
 import { PatientData, PatientPage } from "pageobject/Patient/PatientCreation";
 import PatientTreatmentPlan from "pageobject/Patient/PatientTreatmentPlan";
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
 
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import FacilityNotify from "../../pageobject/Facility/FacilityNotify";
@@ -21,7 +21,6 @@ describe("Facility Homepage Function", () => {
   const facilityPage = new FacilityPage();
   const manageUserPage = new ManageUserPage();
   const userPage = new UserPage();
-  const assetPagination = new AssetPagination();
   const patientPage = new PatientPage();
   const patientConsultationPage = new PatientConsultationPage();
   const patientTreatmentPlan = new PatientTreatmentPlan();
@@ -124,10 +123,10 @@ describe("Facility Homepage Function", () => {
 
   it("Search a facility in homepage and pagination", () => {
     // pagination of the facility page
-    assetPagination.navigateToNextPage();
-    assetPagination.verifyNextUrl();
-    assetPagination.navigateToPreviousPage();
-    assetPagination.verifyPreviousUrl();
+    pageNavigation.navigateToNextPage();
+    pageNavigation.verifyCurrentPageNumber(2);
+    pageNavigation.navigateToPreviousPage();
+    pageNavigation.verifyCurrentPageNumber(1);
     // search for a facility
     manageUserPage.typeFacilitySearch(facilityName);
     facilityPage.verifyFacilityBadgeContent(facilityName);

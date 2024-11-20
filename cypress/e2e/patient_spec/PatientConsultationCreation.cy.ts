@@ -375,7 +375,7 @@ describe("Patient Consultation in multiple combination", () => {
   });
 
   it("Edit created consultation to existing patient", () => {
-    patientPage.visitPatient("Dummy Patient 13");
+    patientPage.visitPatient("Dummy Patient Thirteen");
     patientConsultationPage.clickEditConsultationButton();
     patientConsultationPage.typePatientIllnessHistory("editted");
     patientConsultationPage.selectPatientDiagnosis(
