@@ -244,7 +244,10 @@ export default function NotificationsList({
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
-    if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
+    if (!navigator.serviceWorker) {
+      return;
+    }
+    if (["NotSubscribed", "SubscribedOnAnotherDevice"].includes(status)) {
       if (Notification.permission === "denied") {
         Warn({
           msg: t("notification_permission_denied"),
@@ -286,49 +289,47 @@ export default function NotificationsList({
 
   let manageResults: any = null;
 
-  const unsubscribe = () => {
-    navigator.serviceWorker.ready
-      .then(function (reg) {
-        setIsSubscribing(true);
-        reg.pushManager
-          .getSubscription()
-          .then(function (subscription) {
-            subscription
-              ?.unsubscribe()
-              .then(async function (_successful) {
-                const data = {
-                  pf_endpoint: "",
-                  pf_p256dh: "",
-                  pf_auth: "",
-                };
+  const unsubscribe = async () => {
+    try {
+      const reg = await navigator.serviceWorker.ready;
 
-                await request(routes.updateUserPnconfig, {
-                  pathParams: { username: username },
-                  body: data,
-                });
+      if (!reg.pushManager) {
+        Error({ msg: t("unsubscribe_failed") });
+        return;
+      }
 
-                Warn({
-                  msg: t("unsubscribed_successfully"),
-                });
+      setIsSubscribing(true);
 
-                setIsSubscribed("NotSubscribed");
-                setIsSubscribing(false);
-              })
-              .catch(function (_e) {
-                Error({
-                  msg: t("unsubscribe_failed"),
-                });
-              });
-          })
-          .catch(function (_e) {
-            Error({ msg: t("subscription_error") });
+      const subscription = await reg.pushManager.getSubscription();
+
+      if (subscription) {
+        try {
+          await subscription.unsubscribe();
+
+          await request(routes.updateUserPnconfig, {
+            pathParams: { username },
+            body: {
+              pf_endpoint: "",
+              pf_p256dh: "",
+              pf_auth: "",
+            },
           });
-      })
-      .catch(function (_e) {
-        Sentry.captureException(_e);
-      });
-  };
 
+          setIsSubscribed("NotSubscribed");
+          Warn({
+            msg: t("unsubscribed_successfully"),
+          });
+        } catch (e) {
+          Error({ msg: t("unsubscribe_failed") });
+        }
+      }
+    } catch (e) {
+      Sentry.captureException(e);
+      Error({ msg: t("subscription_error") });
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
   async function subscribe() {
     setIsSubscribing(true);
     try {
