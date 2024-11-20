@@ -17,6 +17,8 @@ describe("Manage User", () => {
   const lastNameUserSkill = "Doctor";
   const userCreationPage = new UserCreationPage();
   const usernameforworkinghour = "devdistrictadmin";
+  const nurseUsername = "dummynurse1";
+  const doctorUsername = "devdoctor";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
   const facilitytolinkskill = "Dummy Facility 40";
@@ -34,26 +36,153 @@ describe("Manage User", () => {
     cy.awaitUrl("/users");
   });
 
-  it("edit a user and verify its reflection in profile", () => {
-    userPage.typeInSearchInput(usernameforworkinghour);
-    userPage.checkUsernameText(usernameforworkinghour);
-    manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
+  // To Do: Add avatar upload
+  /* it("District Admin can change their own avatar", () => {
+    userPage.typeInSearchInput(nurseUsername);
+    userPage.checkUsernameText(nurseUsername);
+    manageUserPage.clickMoreDetailsButton(nurseUsername);
     manageUserPage.verifyMoreDetailsPage();
-    manageUserPage.editUserDetails(
-      "Devo",
-      "Districto",
-      "dev@test.com",
-      "01081999",
-      "Female",
-    );
+    manageUserPage.verifyChangeAvatarButtonVisible();
+    manageUserPage.clickChangeAvatarButton();
+  }); */
+
+  it("edit a nurse user's basic information and verify its reflection", () => {
+    userPage.typeInSearchInput(nurseUsername);
+    userPage.checkUsernameText(nurseUsername);
+    manageUserPage.clickMoreDetailsButton(nurseUsername);
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickBasicInfoViewButton();
+    manageUserPage.clickBasicInfoEditButton();
+    manageUserPage.clearUserBasicInfo();
     manageUserPage.clickSubmit();
+    manageUserPage.verifyErrorText("First Name is required");
+    manageUserPage.verifyErrorText("Last Name is required");
+    manageUserPage.editUserBasicInfo("Devo", "Districto", "11081999", "Female");
+    manageUserPage.clickSubmit();
+    manageUserPage.clickBasicInfoViewButton();
     manageUserPage.verifyEditUserDetails(
       "Devo",
       "Districto",
-      "dev@test.com",
-      "01/08/1999",
+      "8/11/1999",
       "Female",
     );
+  });
+
+  it("edit a nurse user's contact information and verify its reflection", () => {
+    userPage.typeInSearchInput(nurseUsername);
+    userPage.checkUsernameText(nurseUsername);
+    manageUserPage.clickMoreDetailsButton(nurseUsername);
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickContactInfoViewButton();
+    manageUserPage.clickContactInfoEditButton();
+    manageUserPage.clearUserContactInfo();
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyErrorText("Please enter a valid email address");
+    manageUserPage.verifyErrorText("Please enter a valid phone number");
+    manageUserPage.editUserContactInfo("dev@gmail.com", "6234343435");
+    manageUserPage.clickSubmit();
+    manageUserPage.clickContactInfoViewButton();
+    manageUserPage.verifyEditUserContactInfo("dev@gmail.com", "6234343435");
+  });
+
+  it("edit a nurse user's professional information and verify its reflection", () => {
+    userPage.typeInSearchInput(nurseUsername);
+    userPage.checkUsernameText(nurseUsername);
+    manageUserPage.clickMoreDetailsButton(nurseUsername);
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickProfessionalInfoViewButton();
+    manageUserPage.clickProfessionalInfoEditButton();
+    // Should have qualification field
+    // Should not have years of experience and medical council registration fields
+    manageUserPage.verifyQualificationExist();
+    manageUserPage.verifyYoeAndCouncilRegistrationDoesntExist();
+    manageUserPage.clearDoctorOrNurseProfessionalInfo(false);
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyErrorText("Qualification is required");
+    manageUserPage.editUserProfessionalInfo("Msc");
+    manageUserPage.clickSubmit();
+    manageUserPage.clickProfessionalInfoViewButton();
+    manageUserPage.verifyEditUserProfessionalInfo("Msc");
+  });
+
+  it("edit a doctor user's professional information and verify its reflection", () => {
+    // Should have qualification, years of experience and medical council registration
+    userPage.typeInSearchInput(usernameToLinkFacilitydoc1);
+    userPage.checkUsernameText(usernameToLinkFacilitydoc1);
+    manageUserPage.clickMoreDetailsButton(usernameToLinkFacilitydoc1);
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickProfessionalInfoViewButton();
+    manageUserPage.verifyQualificationExist();
+    manageUserPage.verifyYoeAndCouncilRegistrationExist();
+    manageUserPage.clickProfessionalInfoEditButton();
+    manageUserPage.clearDoctorOrNurseProfessionalInfo(true);
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyErrorText("Qualification is required");
+    manageUserPage.verifyErrorText("Years of experience is required");
+    manageUserPage.verifyErrorText("Medical Council Registration is required");
+    manageUserPage.editUserProfessionalInfo("Msc", "120", "1234567890");
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyErrorText(
+      "Please enter a valid number between 0 and 100.",
+    );
+    manageUserPage.clearDoctorOrNurseProfessionalInfo(true);
+    manageUserPage.editUserProfessionalInfo("Msc", "10", "1234567890");
+    manageUserPage.clickSubmit();
+    manageUserPage.clickProfessionalInfoViewButton();
+    const experienceCommencedOn = new Date(Date.now());
+    experienceCommencedOn.setFullYear(experienceCommencedOn.getFullYear() - 10);
+    const formattedDate = experienceCommencedOn.toISOString().split("T")[0];
+    manageUserPage.verifyEditUserProfessionalInfo(
+      "Msc",
+      formattedDate,
+      "1234567890",
+    );
+  });
+
+  it("Nurse user doesn't have edit options (users above them in hierarchy) or password change option (for other users)", () => {
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsNurse();
+    loginPage.ensureLoggedIn();
+    cy.visit("/users");
+    userPage.typeInSearchInput(doctorUsername);
+    userPage.checkUsernameText(doctorUsername);
+    manageUserPage.clickMoreDetailsButton(doctorUsername);
+    manageUserPage.verifyMoreDetailsPage(false);
+    manageUserPage.verifyUsername(doctorUsername);
+    manageUserPage.verifyBasicInfoEditButtonNotExist();
+    manageUserPage.verifyContactInfoEditButtonNotExist();
+    manageUserPage.verifyProfessionalInfoEditButtonNotExist();
+    manageUserPage.verifyPasswordEditButtonNotExist();
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsDistrictAdmin();
+    loginPage.ensureLoggedIn();
+  });
+
+  it("District Admin can change a user's password", () => {
+    userPage.typeInSearchInput(nurseUsername);
+    userPage.checkUsernameText(nurseUsername);
+    manageUserPage.clickMoreDetailsButton(nurseUsername);
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickPasswordEditButton();
+    manageUserPage.changePassword("Coronasafe@123", "Coronasafe@1233");
+    manageUserPage.clickSubmit();
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsNurse("Coronasafe@1233");
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsDistrictAdmin();
+    loginPage.ensureLoggedIn();
+    cy.visit("/users");
+    userPage.typeInSearchInput(nurseUsername);
+    userPage.checkUsernameText(nurseUsername);
+    manageUserPage.clickMoreDetailsButton(nurseUsername);
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickPasswordEditButton();
+    manageUserPage.changePassword("Coronasafe@1233", "Coronasafe@123");
+    manageUserPage.clickSubmit();
   });
 
   it("linking skills for users and verify its reflection in profile", () => {
@@ -64,7 +193,6 @@ describe("Manage User", () => {
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedSkillTab();
     cy.wait(500);
-    manageUserPage.verifyDoctorQualificationDoesNotExist();
     manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
@@ -101,14 +229,12 @@ describe("Manage User", () => {
     manageUserPage.clickMoreDetailsButton(usernameToLinkSkill);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickLinkedSkillTab();
-    manageUserPage.verifyDoctorQualification();
     manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     cy.verifyNotification("Skill added successfully");
     cy.closeNotification();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
-    manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
     manageUserPage.navigateToFacility();
     manageUserPage.typeFacilitySearch(facilitytolinkskill);
@@ -119,22 +245,28 @@ describe("Manage User", () => {
   });
 
   it("add working hour for a user and verify its reflection in card and user profile", () => {
-    // verify mandatory field error and select working hour for a user
+    // verify qualification and yoe and council registration fields are not present
+    // verify field error and add working hour
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
     manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.verifyProfileTabPage();
-    manageUserPage.clearweeklyhourfield();
+    manageUserPage.clickProfessionalInfoViewButton();
+    manageUserPage.verifyQualificationDoesntExist();
+    manageUserPage.verifyYoeAndCouncilRegistrationDoesntExist();
+    manageUserPage.clickProfessionalInfoEditButton();
+    manageUserPage.clearProfessionalInfo();
+    manageUserPage.typeInWeeklyWorkingHours("200");
     manageUserPage.clickSubmit();
     manageUserPage.verifyErrorText(
       "Average weekly working hours must be a number between 0 and 168",
     );
+    manageUserPage.clearProfessionalInfo();
     manageUserPage.typeInWeeklyWorkingHours(workinghour);
     manageUserPage.clickSubmit();
-    // verify the data is reflected in user card and profile page
+    // verify the data is reflected in the page
     manageUserPage.verifyWorkingHours(workinghour);
-    manageUserPage.navigateToProfile();
     manageUserPage.verifyProfileWorkingHours(workinghour);
   });
 

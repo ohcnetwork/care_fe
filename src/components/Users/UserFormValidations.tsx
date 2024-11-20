@@ -85,11 +85,15 @@ export const editContactInfoFields: Array<keyof UserForm> = [
 ];
 
 export const editProfessionalInfoFields: Array<keyof UserForm> = [
+  "weekly_working_hours",
+  "video_connect_link",
+];
+
+export const editProfessionalInfoFieldsForNurseDoctor: Array<keyof UserForm> = [
   "qualification",
   "doctor_experience_commenced_on",
   "doctor_medical_council_registration",
-  "weekly_working_hours",
-  "video_connect_link",
+  ...editProfessionalInfoFields,
 ];
 
 export type EditForm = {
@@ -107,7 +111,7 @@ export const ValidateQualification = (
     (formData.user_type === "Doctor" || formData.user_type === "Nurse") &&
     !formData["qualification"]
   ) {
-    return translator("field_required");
+    return translator("qualification_required");
   }
   return null;
 };
@@ -118,7 +122,7 @@ export const ValidateDoctorExperienceCommencedOn = (
 ) => {
   if (formData.user_type === "Doctor") {
     if (!formData["doctor_experience_commenced_on"]) {
-      return translator("field_required");
+      return translator("doctor_experience_required");
     } else if (
       !validateNumber(formData["doctor_experience_commenced_on"] ?? "") ||
       Number(formData["doctor_experience_commenced_on"]) < 0 ||
@@ -138,7 +142,7 @@ export const ValidateDoctorMedicalCouncilRegistration = (
     formData.user_type === "Doctor" &&
     !formData["doctor_medical_council_registration"]
   ) {
-    return translator("field_required");
+    return translator("medical_council_registration_required");
   }
   return null;
 };

@@ -168,15 +168,14 @@ export default function UserSummaryTab({
           renderContactInformation,
           userColumnsData,
         )}
-        {(userData.user_type === "Doctor" || userData.user_type === "Nurse") &&
-          userColumns(
-            t("professional_info"),
-            authUser.username === userData.username
-              ? t("professional_info_note_self")
-              : t("professional_info_note"),
-            renderProfessionalInformation,
-            userColumnsData,
-          )}
+        {userColumns(
+          t("professional_info"),
+          authUser.username === userData.username
+            ? t("professional_info_note_self")
+            : t("professional_info_note"),
+          renderProfessionalInformation,
+          userColumnsData,
+        )}
         {passwordResetPermitted &&
           userColumns(
             t("reset_password"),

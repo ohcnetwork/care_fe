@@ -101,7 +101,7 @@ export default function UserAvatar({ username }: { username: string }) {
               <ButtonV2
                 onClick={(_) => setEditAvatar(!editAvatar)}
                 type="button"
-                id="edit-cancel-profile-button"
+                id="change-avatar"
                 className="border border-gray-200 bg-gray-50 text-black hover:bg-gray-100"
                 shadow={false}
                 disabled={!showAvatarEdit(authUser, userData)}

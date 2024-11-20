@@ -56,27 +56,31 @@ export class ManageUserPage {
     cy.get("#submit").click();
   }
 
-  clearweeklyhourfield() {
-    cy.get("#weekly_working_hours").click().clear();
-  }
-
   verifyErrorText(expectedError: string) {
-    cy.get(".error-text").should("contain", expectedError).and("be.visible");
+    cy.get(".error-text").first().scrollIntoView();
+    cy.get(".error-text")
+      .should("be.visible")
+      .then(($elements) => {
+        const errorTextArray = Array.from($elements).map(
+          (el) => el.textContent,
+        );
+        expect(errorTextArray).to.include(expectedError);
+      });
   }
 
-  editUserDetails(
+  clearUserBasicInfo() {
+    cy.get("input[name='first_name']").click().clear();
+    cy.get("input[name='last_name']").click().clear();
+  }
+
+  editUserBasicInfo(
     fName: string,
     lName: string,
-    email: string,
     dateOfBirth: string,
     gender: string,
   ) {
-    cy.get("#first_name").click().clear();
-    cy.get("#first_name").click().type(fName);
-    cy.get("#last_name").click().clear();
-    cy.get("#last_name").click().type(lName);
-    cy.get("#email").click().clear();
-    cy.get("#email").click().type(email);
+    cy.get("input[name='first_name']").click().type(fName);
+    cy.get("input[name='last_name']").click().type(lName);
     cy.clickAndTypeDate("#date_of_birth", dateOfBirth);
     cy.get("#gender").click();
     cy.get("[role='option']").contains(gender).click();
@@ -85,19 +89,98 @@ export class ManageUserPage {
   verifyEditUserDetails(
     fName: string,
     lName: string,
-    email: string,
     dateOfBirth: string,
     gender: string,
   ) {
-    cy.get("#first_name").should("have.value", fName);
-    cy.get("#last_name").should("have.value", lName);
-    cy.get("#email").should("have.value", email);
-    cy.get("#date_of_birth").should("have.value", dateOfBirth);
-    cy.get("#gender").should("contain.text", gender);
+    cy.get("#view-first_name").should("contain.text", fName);
+    cy.get("#view-last_name").should("contain.text", lName);
+    cy.get("#view-date_of_birth").should("contain.text", dateOfBirth);
+    cy.get("#view-gender").should("contain.text", gender);
+  }
+
+  clearUserContactInfo() {
+    cy.get("input[name='email']").click().clear();
+    cy.get("input[name='phone_number']").click().clear();
+    cy.get("input[name='phone_number_is_whatsapp']").should("be.checked");
+  }
+
+  editUserContactInfo(email: string, phoneNumber: string) {
+    cy.get("input[name='email']").click().type(email);
+    cy.get("input[name='phone_number']").click().type(phoneNumber);
+    cy.get("input[name='phone_number_is_whatsapp']").should("be.checked");
+  }
+
+  verifyEditUserContactInfo(email: string, phoneNumber: string) {
+    cy.get("#view-email").should("contain.text", email);
+    cy.get("#view-phone_number").should("contain.text", phoneNumber);
+    cy.get("#view-whatsapp_number").should("contain.text", phoneNumber);
+  }
+
+  clearDoctorOrNurseProfessionalInfo(yoeAndCouncilRegistration: boolean) {
+    cy.get("input[name='qualification']").click().clear();
+    if (yoeAndCouncilRegistration) {
+      cy.get("input[name='doctor_experience_commenced_on']").click().clear();
+      cy.get("input[name='doctor_medical_council_registration']")
+        .click()
+        .clear();
+    }
+  }
+
+  clearProfessionalInfo() {
+    cy.get("input[name='weekly_working_hours']").click().clear();
+    cy.get("input[name='video_connect_link']").click().clear();
+  }
+
+  editUserProfessionalInfo(
+    qualification: string,
+    yearsOfExperience?: string,
+    medicalCouncilRegistration?: string,
+  ) {
+    cy.get("input[name='qualification']").click().type(qualification);
+    if (yearsOfExperience) {
+      cy.get("input[name='doctor_experience_commenced_on']")
+        .click()
+        .type(yearsOfExperience);
+    }
+    if (medicalCouncilRegistration) {
+      cy.get("input[name='doctor_medical_council_registration']")
+        .click()
+        .type(medicalCouncilRegistration);
+    }
+  }
+
+  verifyEditUserProfessionalInfo(
+    qualification: string,
+    yearsOfExperience?: string,
+    medicalCouncilRegistration?: string,
+  ) {
+    cy.get("#view-qualification").should("contain.text", qualification);
+    if (yearsOfExperience) {
+      cy.get("#view-years_of_experience").should(
+        "contain.text",
+        yearsOfExperience,
+      );
+    }
+    if (medicalCouncilRegistration) {
+      cy.get("#view-doctor_medical_council_registration").should(
+        "contain.text",
+        medicalCouncilRegistration,
+      );
+    }
+  }
+
+  verifyPasswordEditButtonNotExist() {
+    cy.get("#change-edit-password-button").should("not.exist");
+  }
+
+  changePassword(oldPassword: string, newPassword: string) {
+    cy.get("input[name='old_password']").click().type(oldPassword);
+    cy.get("input[name='new_password_1']").click().type(newPassword);
+    cy.get("input[name='new_password_2']").click().type(newPassword);
   }
 
   typeInWeeklyWorkingHours(hours: string) {
-    cy.get("#weekly_working_hours").click().type(hours);
+    cy.get("input[name='weekly_working_hours']").click().type(hours);
   }
 
   navigateToProfile() {
@@ -116,8 +199,8 @@ export class ManageUserPage {
   }
 
   verifyProfileWorkingHours(expectedHours: string) {
-    cy.get("#averageworkinghour-profile-details").should(
-      "contain",
+    cy.get("#view-average_weekly_working_hours").should(
+      "contain.text",
       expectedHours,
     );
   }
@@ -161,18 +244,106 @@ export class ManageUserPage {
   }
 
   clickMoreDetailsButton(username: string) {
+    cy.intercept("GET", "**/api/v1/users/**").as("getUserDetails");
     cy.get(`#more-details-${username}`).click();
+    cy.wait("@getUserDetails");
   }
 
-  verifyMoreDetailsPage() {
-    cy.intercept("GET", "**/api/v1/users/get_user/**").as("getUserDetails");
-    cy.wait("@getUserDetails");
+  verifyMoreDetailsPage(hasPermissions = true) {
     cy.get("#username").should("be.visible");
     cy.get("#role").should("be.visible");
     cy.get("#usermanagement_tab_nav").should("be.visible");
     cy.get("#profile").should("be.visible");
-    cy.get("#facilities").should("be.visible");
-    cy.get("#skills").should("be.visible");
+    if (hasPermissions) {
+      cy.get("#facilities").should("be.visible");
+      cy.get("#skills").should("be.visible");
+    }
+    cy.get("#view-username").scrollIntoView();
+    cy.get("#view-username").should("be.visible");
+  }
+
+  verifyChangeAvatarButtonVisible() {
+    cy.get("#change-avatar").should("be.visible");
+  }
+
+  clickChangeAvatarButton() {
+    cy.get("#change-avatar").click();
+  }
+
+  clickBasicInfoViewButton() {
+    cy.get("#basic-info-view-button").scrollIntoView();
+    cy.get("#basic-info-view-button").should("be.visible");
+    cy.get("#basic-info-view-button").click();
+  }
+
+  clickBasicInfoEditButton() {
+    cy.get("#basic-info-edit-button").scrollIntoView();
+    cy.get("#basic-info-edit-button").should("be.visible");
+    cy.get("#basic-info-edit-button").click();
+  }
+
+  clickContactInfoViewButton() {
+    cy.get("#contact-info-view-button").scrollIntoView();
+    cy.get("#contact-info-view-button").should("be.visible");
+    cy.get("#contact-info-view-button").click();
+  }
+
+  clickContactInfoEditButton() {
+    cy.get("#contact-info-edit-button").scrollIntoView();
+    cy.get("#contact-info-edit-button").should("be.visible");
+    cy.get("#contact-info-edit-button").click();
+  }
+
+  clickProfessionalInfoViewButton() {
+    cy.get("#professional-info-view-button").scrollIntoView();
+    cy.get("#professional-info-view-button").should("be.visible");
+    cy.get("#professional-info-view-button").click();
+  }
+
+  clickProfessionalInfoEditButton() {
+    cy.get("#professional-info-edit-button").scrollIntoView();
+    cy.get("#professional-info-edit-button").should("be.visible");
+    cy.get("#professional-info-edit-button").click();
+  }
+
+  clickPasswordEditButton() {
+    cy.get("#change-edit-password-button").scrollIntoView();
+    cy.get("#change-edit-password-button").should("be.visible");
+    cy.get("#change-edit-password-button").click();
+  }
+
+  verifyQualificationDoesntExist() {
+    cy.get("input[name='qualification']").should("not.exist");
+  }
+
+  verifyQualificationExist() {
+    cy.get("#view-qualification").should("be.visible");
+  }
+
+  verifyYoeAndCouncilRegistrationDoesntExist() {
+    cy.get("#view-years_of_experience").should("not.exist");
+    cy.get("#view-doctor_medical_council_registration").should("not.exist");
+  }
+
+  verifyYoeAndCouncilRegistrationExist() {
+    cy.get("#view-years_of_experience").should("be.visible");
+    cy.get("#view-doctor_medical_council_registration").should("be.visible");
+  }
+
+  verifyUsername(username: string) {
+    cy.get("#view-username").should("contain", username);
+  }
+
+  verifyBasicInfoEditButtonNotExist() {
+    cy.get("#basic-info-edit-button").should("not.exist");
+  }
+
+  verifyContactInfoEditButtonNotExist() {
+    cy.get("#contact-info-edit-button").should("not.exist");
+  }
+
+  verifyProfessionalInfoEditButtonNotExist() {
+    cy.get("#professional-info-edit-button").should("not.exist");
   }
 
   verifyProfileTabPage() {
@@ -180,11 +351,11 @@ export class ManageUserPage {
   }
 
   verifyDoctorQualification() {
-    cy.get("input[name='qualification']").should("be.visible");
+    cy.get("#view-qualification").should("be.visible");
   }
 
   verifyDoctorQualificationDoesNotExist() {
-    cy.get("input[name='qualification']").should("not.exist");
+    cy.get("#view-qualification").should("not.exist");
   }
 
   verifyLinkedSkillsTabPage() {
