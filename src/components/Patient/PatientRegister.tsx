@@ -67,7 +67,7 @@ import {
 } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 import { statusType, useAbortableEffect } from "@/common/utils";
-import { validatePincode } from "@/common/validation";
+import { validateName, validatePincode } from "@/common/validation";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { RestoreDraftButton } from "@/Utils/AutoSave";
@@ -421,6 +421,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       switch (field) {
         case "address":
         case "name":
+          if (!validateName(form[field])) {
+            errors[field] = "Please enter valid name";
+          }
+          return;
         case "gender":
           errors[field] = RequiredFieldValidator()(form[field]);
           return;
