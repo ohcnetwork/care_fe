@@ -36,7 +36,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     if (show) {
       navigator.mediaDevices
         .getUserMedia({
-          video: { facingMode: isBackCamera ? "environment" : "user" },
+          video: videoConstraints,
         })
         .catch(() => {
           Notify.Warn({ msg: t("camera_permission_denied") });
@@ -57,13 +57,21 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     if (!isLaptopScreen && backCameraAvailable) {
       try {
         const constraints = {
-          video: { facingMode: isBackCamera ? "environment" : "user" },
+          video: { facingMode: isBackCamera ? "user" : "environment" },
         };
+
+        const currentStream = webRef.current?.video.srcObject as MediaStream;
+        if (currentStream) {
+          currentStream.getTracks().forEach((track) => track.stop());
+          webRef.current.video.srcObject = null;
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        stream.getTracks().forEach((track) => track.stop());
+        if (webRef.current) {
+          webRef.current.video.srcObject = stream;
+        }
         setIsBackCamera((prev) => !prev);
       } catch (error) {
-        console.error("Error while switching camera:", error);
         Notify.Warn({ msg: t("switch_camera_failed") });
       }
     } else {
