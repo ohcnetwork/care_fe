@@ -56,7 +56,10 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
 
     return () => {
       if (activeStream) {
-        activeStream.getTracks().forEach((track) => track.stop());
+        activeStream.getTracks().forEach((track) => {
+          activeStream?.removeTrack(track);
+          track.stop();
+        });
       }
     };
   }, [show, cameraFacingMode]);
@@ -65,7 +68,10 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     (stream: MediaStream) => {
       // Stop the previous stream's tracks if any
       if (currentStream) {
-        currentStream.getTracks().forEach((track) => track.stop());
+        currentStream.getTracks().forEach((track) => {
+          stream.removeTrack(track);
+          track.stop();
+        });
       }
 
       // Set the new stream
@@ -81,7 +87,10 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const handleSwitchCamera = useCallback(async () => {
     // Stop the current stream before switching
     if (currentStream) {
-      currentStream.getTracks().forEach((track) => track.stop());
+      currentStream.getTracks().forEach((track) => {
+        currentStream.removeTrack(track);
+        track.stop();
+      });
     }
 
     // Get the available video input devices
@@ -108,7 +117,10 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   useEffect(() => {
     return () => {
       if (currentStream) {
-        currentStream.getTracks().forEach((track) => track.stop());
+        currentStream.getTracks().forEach((track) => {
+          currentStream.removeTrack(track);
+          track.stop();
+        });
       }
     };
   }, [currentStream]);
