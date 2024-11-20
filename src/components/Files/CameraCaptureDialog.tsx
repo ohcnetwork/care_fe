@@ -69,6 +69,8 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (webRef.current) {
           webRef.current.video.srcObject = stream;
+        } else {
+          Notify.Warn({ msg: "Stream Not Available" });
         }
         setIsBackCamera((prev) => !prev);
       } catch (error) {
@@ -77,7 +79,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     } else {
       Notify.Warn({ msg: t("switch_camera_is_not_available") });
     }
-  }, [isBackCamera, isLaptopScreen]);
+  }, []);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
