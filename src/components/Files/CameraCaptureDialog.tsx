@@ -57,29 +57,19 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     if (!isLaptopScreen && backCameraAvailable) {
       try {
         const constraints = {
-          video: { facingMode: isBackCamera ? "user" : "environment" },
+          video: { facingMode: isBackCamera ? "environment" : "user" },
         };
-
-        const currentStream = webRef.current?.video.srcObject as MediaStream;
-        if (currentStream) {
-          currentStream.getTracks().forEach((track) => track.stop());
-          webRef.current.video.srcObject = null;
-        }
-
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        if (webRef.current) {
-          webRef.current.video.srcObject = stream;
-        } else {
-          Notify.Warn({ msg: "Stream Not Available" });
-        }
+        stream.getTracks().forEach((track) => stream.removeTrack(track));
         setIsBackCamera((prev) => !prev);
       } catch (error) {
+        console.error("Error while switching camera:", error);
         Notify.Warn({ msg: t("switch_camera_failed") });
       }
     } else {
       Notify.Warn({ msg: t("switch_camera_is_not_available") });
     }
-  }, []);
+  }, [isBackCamera, isLaptopScreen]);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
