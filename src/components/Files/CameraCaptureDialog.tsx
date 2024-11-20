@@ -30,18 +30,18 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const videoConstraints = {
     width: { ideal: 4096 },
     height: { ideal: 2160 },
-    facingMode: { exact: cameraFacingMode ? "user" : "environment" },
+    facingMode: cameraFacingMode ? "user" : "environment",
   };
   useEffect(() => {
     navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: videoConstraints.facingMode } })
+      .getUserMedia({ video: videoConstraints })
       .catch(() => {
         Notify.Warn({
           msg: t("camera_permission_denied"),
         });
         onHide();
       });
-  }, [show, cameraFacingMode]);
+  }, [show, cameraFacingMode, onHide]);
 
   const handleSwitchCamera = useCallback(async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
