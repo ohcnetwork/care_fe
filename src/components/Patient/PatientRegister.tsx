@@ -421,12 +421,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
-        case "address":
         case "name":
           if (!validateName(form[field])) {
-            errors[field] = "Please enter valid name";
+            errors[field] = t("invalid_name");
           }
           return;
+        case "address":
         case "gender":
           errors[field] = RequiredFieldValidator()(form[field]);
           return;
