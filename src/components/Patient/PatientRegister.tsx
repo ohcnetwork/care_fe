@@ -22,6 +22,7 @@ import TransferPatientDialog from "@/components/Facility/TransferPatientDialog";
 import {
   DistrictModel,
   DupPatientModel,
+  FacilityModel,
   WardModel,
 } from "@/components/Facility/models";
 import {
@@ -51,6 +52,7 @@ import {
   PatientMeta,
   PatientModel,
 } from "@/components/Patient/models";
+import { UserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -818,31 +820,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     return <Loading />;
   }
 
-  const PatientRegisterAuth = () => {
-    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-    if (
-      !showAllFacilityUsers.includes(authUser.user_type) &&
-      authUser.home_facility_object?.id === facilityId
-    ) {
-      return true;
-    }
-    if (
-      authUser.user_type === "DistrictAdmin" &&
-      authUser.district === facilityObject?.district
-    ) {
-      return true;
-    }
-    if (
-      authUser.user_type === "StateAdmin" &&
-      authUser.state === facilityObject?.state
-    ) {
-      return true;
-    }
-
-    return false;
-  };
-
-  if (!isLoading && facilityId && facilityObject && !PatientRegisterAuth()) {
+  if (
+    !isLoading &&
+    facilityId &&
+    facilityObject &&
+    !patientRegisterAuth(authUser, facilityObject, facilityId)
+  ) {
     return <Error404 />;
   }
 
@@ -1717,3 +1700,31 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     </Form>
   );
 };
+
+export function patientRegisterAuth(
+  authUser: UserModel,
+  facilityObject: FacilityModel | undefined,
+  facilityId: string,
+) {
+  const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+  if (
+    !showAllFacilityUsers.includes(authUser.user_type) &&
+    authUser.home_facility_object?.id === facilityId
+  ) {
+    return true;
+  }
+  if (
+    authUser.user_type === "DistrictAdmin" &&
+    authUser.district === facilityObject?.district
+  ) {
+    return true;
+  }
+  if (
+    authUser.user_type === "StateAdmin" &&
+    authUser.state === facilityObject?.state
+  ) {
+    return true;
+  }
+
+  return false;
+}
