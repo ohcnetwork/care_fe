@@ -14,9 +14,9 @@ function runTests(
     const cypressAudioName = "cypress audio";
     const cypressFileName = "cypress name";
     const newFileName = "cypress modified name";
-    const patientNameOne = "Dummy Patient 3";
-    const patientNameTwo = "Dummy Patient 4";
-    const patientNameThree = "Dummy Patient 5";
+    const patientNameOne = "Dummy Patient Three";
+    const patientNameTwo = "Dummy Patient Four";
+    const patientNameThree = "Dummy Patient Five";
     before(() => {
       loginPage.loginAsDistrictAdmin();
       cy.saveLocalStorage();
