@@ -302,6 +302,10 @@ class FacilityPage {
     cy.verifyNotification(message);
   }
 
+  verifyErrorNotification(message: string) {
+    cy.verifyNotification(message);
+  }
+
   visitAlreadyCreatedFacility() {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
