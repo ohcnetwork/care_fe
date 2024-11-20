@@ -35,24 +35,48 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
   useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: cameraFacingMode } })
-      .catch(() => {
+    let activeStream: MediaStream | null = null;
+
+    const initializeCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: cameraFacingMode },
+        });
+        activeStream = stream;
+      } catch (error) {
         Notify.Warn({
           msg: t("camera_permission_denied"),
         });
         onHide();
-      });
+      }
+    };
+
+    initializeCamera();
+
+    return () => {
+      if (activeStream) {
+        activeStream.getTracks().forEach((track) => track.stop());
+      }
+    };
   }, [show, cameraFacingMode]);
 
   const handleSwitchCamera = useCallback(async () => {
+    if (webRef.current?.video?.srcObject) {
+      const stream = webRef.current.video.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      webRef.current.video.srcObject = null;
+    }
+
+    // Get the available video input devices
     const devices = await navigator.mediaDevices.enumerateDevices();
     const videoInputs = devices.filter(
       (device) => device.kind === "videoinput",
     );
+
     const backCamera = videoInputs.some((device) =>
       device.label.toLowerCase().includes("back"),
     );
+
     if (!isLaptopScreen && backCamera) {
       setCameraFacingMode((prevMode) =>
         prevMode === "environment" ? "user" : "environment",
@@ -62,10 +86,9 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         msg: t("switch_camera_is_not_available"),
       });
     }
-  }, []);
+  }, [isLaptopScreen]);
 
   const captureImage = () => {
-    console.log(webRef.current);
     setPreviewImage(webRef.current.getScreenshot());
     const canvas = webRef.current.getCanvas();
     canvas?.toBlob((blob: Blob) => {
