@@ -27,6 +27,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     isLaptopScreen ? "user" : "environment",
   );
   const [previewImage, setPreviewImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const webRef = useRef<any>(null);
 
   const videoConstraints = {
@@ -34,47 +35,84 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     height: { ideal: 2160 },
     facingMode: cameraFacingMode,
   };
+
   useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: cameraFacingMode } })
-      .catch(() => {
-        Notify.Warn({
-          msg: t("camera_permission_denied"),
+    if (show) {
+      setIsLoading(true);
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: cameraFacingMode } })
+        .then(() => {
+          setIsLoading(false);
+        })
+        .catch(() => {
+          setIsLoading(false);
+          Notify.Error({
+            msg: t("camera_permission_denied"),
+          });
+          onHide();
         });
-        onHide();
-      });
+    }
   }, [show, cameraFacingMode]);
 
   const handleSwitchCamera = useCallback(async () => {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoInputs = devices.filter(
-      (device) => device.kind === "videoinput",
-    );
-    const backCamera = videoInputs.some((device) =>
-      device.label.toLowerCase().includes("back"),
-    );
-    if (!isLaptopScreen && backCamera) {
-      setCameraFacingMode((prevMode) =>
-        prevMode === "environment" ? "user" : "environment",
+    try {
+      setIsLoading(true);
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoInputs = devices.filter(
+        (device) => device.kind === "videoinput",
       );
-    } else {
-      Notify.Warn({
-        msg: t("switch_camera_is_not_available"),
+      const backCamera = videoInputs.some((device) =>
+        device.label.toLowerCase().includes("back"),
+      );
+      if (!isLaptopScreen && backCamera) {
+        setCameraFacingMode((prevMode) =>
+          prevMode === "environment" ? "user" : "environment",
+        );
+      } else {
+        Notify.Warn({
+          msg: t("switch_camera_is_not_available"),
+        });
+      }
+    } catch (error) {
+      Notify.Error({
+        msg: t("error_switching_camera"),
       });
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const extension = blob.type.split("/").pop();
-      const myFile = new File([blob], `capture.${extension}`, {
-        type: blob.type,
+    try {
+      setIsLoading(true);
+      setPreviewImage(webRef.current.getScreenshot());
+      const canvas = webRef.current.getCanvas();
+      canvas?.toBlob((blob: Blob) => {
+        const extension = blob.type.split("/").pop();
+        const myFile = new File([blob], `capture.${extension}`, {
+          type: blob.type,
+        });
+        onCapture(myFile, `capture.${extension}`);
+        setIsLoading(false);
       });
-      onCapture(myFile, `capture.${extension}`);
-    });
+    } catch (error: any) {
+      setIsLoading(false);
+      Notify.Error({
+        msg: error.message,
+      });
+    }
   };
+
+  const onUserMediaError = useCallback(
+    (error: string | DOMException) => {
+      setIsLoading(false);
+      Notify.Error({
+        msg: error instanceof DOMException ? error.message : error,
+      });
+      onHide();
+    },
+    [onHide],
+  );
 
   return (
     <DialogModal
@@ -96,7 +134,14 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       onClose={onHide}
     >
       <div>
-        {!previewImage ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <CareIcon
+              icon="l-spinner"
+              className="animate-spin text-4xl text-primary-500"
+            />
+          </div>
+        ) : !previewImage ? (
           <div className="m-3">
             <Webcam
               forceScreenshotSourceSize
@@ -105,11 +150,12 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
               screenshotFormat="image/jpeg"
               ref={webRef}
               videoConstraints={videoConstraints}
+              onUserMediaError={onUserMediaError}
             />
           </div>
         ) : (
           <div className="m-3">
-            <img src={previewImage} />
+            <img src={previewImage} alt="Captured" />
           </div>
         )}
       </div>
@@ -117,51 +163,40 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       {/* buttons for mobile screens */}
       <div className="m-4 flex justify-evenly sm:hidden">
         <div>
-          {!previewImage ? (
+          {!previewImage && !isLoading && (
             <ButtonV2 onClick={handleSwitchCamera} className="m-2">
               {t("switch")}
             </ButtonV2>
-          ) : (
-            <></>
           )}
         </div>
         <div>
-          {!previewImage ? (
-            <>
-              <div>
-                <ButtonV2
-                  onClick={() => {
-                    captureImage();
-                  }}
-                  className="m-2"
-                >
-                  {t("capture")}
-                </ButtonV2>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex space-x-2">
-                <ButtonV2
-                  onClick={() => {
-                    setPreviewImage(null);
-                  }}
-                  className="m-2"
-                >
-                  {t("retake")}
-                </ButtonV2>
-                <Submit
-                  onClick={() => {
-                    setPreviewImage(null);
-                    onHide();
-                  }}
-                  className="m-2"
-                >
-                  {t("submit")}
-                </Submit>
-              </div>
-            </>
-          )}
+          {!previewImage && !isLoading ? (
+            <div>
+              <ButtonV2 onClick={captureImage} className="m-2">
+                {t("capture")}
+              </ButtonV2>
+            </div>
+          ) : previewImage && !isLoading ? (
+            <div className="flex space-x-2">
+              <ButtonV2
+                onClick={() => {
+                  setPreviewImage(null);
+                }}
+                className="m-2"
+              >
+                {t("retake")}
+              </ButtonV2>
+              <Submit
+                onClick={() => {
+                  setPreviewImage(null);
+                  onHide();
+                }}
+                className="m-2"
+              >
+                {t("submit")}
+              </Submit>
+            </div>
+          ) : null}
         </div>
         <div className="sm:flex-1">
           <ButtonV2
@@ -179,48 +214,42 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       {/* buttons for laptop screens */}
       <div className={`${isLaptopScreen ? " " : "hidden"}`}>
         <div className="m-4 flex lg:hidden">
-          <ButtonV2 onClick={handleSwitchCamera}>
-            <CareIcon icon="l-camera-change" className="text-lg" />
-            {`${t("switch")} ${t("camera")}`}
-          </ButtonV2>
+          {!isLoading && (
+            <ButtonV2 onClick={handleSwitchCamera}>
+              <CareIcon icon="l-camera-change" className="text-lg" />
+              {`${t("switch")} ${t("camera")}`}
+            </ButtonV2>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 p-4">
           <div>
-            {!previewImage ? (
-              <>
-                <div>
-                  <ButtonV2
-                    onClick={() => {
-                      captureImage();
-                    }}
-                  >
-                    <CareIcon icon="l-capture" className="text-lg" />
-                    {t("capture")}
-                  </ButtonV2>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex space-x-2">
-                  <ButtonV2
-                    onClick={() => {
-                      setPreviewImage(null);
-                    }}
-                  >
-                    {t("retake")}
-                  </ButtonV2>
-                  <Submit
-                    onClick={() => {
-                      onHide();
-                      setPreviewImage(null);
-                    }}
-                  >
-                    {t("submit")}
-                  </Submit>
-                </div>
-              </>
-            )}
+            {!previewImage && !isLoading ? (
+              <div>
+                <ButtonV2 onClick={captureImage}>
+                  <CareIcon icon="l-capture" className="text-lg" />
+                  {t("capture")}
+                </ButtonV2>
+              </div>
+            ) : previewImage && !isLoading ? (
+              <div className="flex space-x-2">
+                <ButtonV2
+                  onClick={() => {
+                    setPreviewImage(null);
+                  }}
+                >
+                  {t("retake")}
+                </ButtonV2>
+                <Submit
+                  onClick={() => {
+                    onHide();
+                    setPreviewImage(null);
+                  }}
+                >
+                  {t("submit")}
+                </Submit>
+              </div>
+            ) : null}
           </div>
           <div className="sm:flex-1" />
           <ButtonV2
