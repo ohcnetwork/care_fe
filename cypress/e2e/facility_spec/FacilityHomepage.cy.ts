@@ -45,7 +45,7 @@ describe("Facility Homepage Function", () => {
     phoneNumber: "9898464555",
     isEmergencyNumber: true,
     age: "20",
-    name: "Dummy Patient Fourty Two",
+    name: "François-O'Neil",
     gender: "Male",
     address: "42 is the answer to everything",
     pincode: "682001",
