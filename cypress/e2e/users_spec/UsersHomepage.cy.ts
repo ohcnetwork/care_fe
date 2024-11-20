@@ -1,4 +1,5 @@
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
 
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { UserPage } from "../../pageobject/Users/UserSearch";
@@ -84,10 +85,10 @@ describe("User Homepage", () => {
   });
 
   it("Next/Previous Page Navigation", () => {
-    userPage.navigateToNextPage();
-    userPage.verifyCurrentPageNumber(2);
-    userPage.navigateToPreviousPage();
-    userPage.verifyCurrentPageNumber(1);
+    pageNavigation.navigateToNextPage();
+    pageNavigation.verifyCurrentPageNumber(2);
+    pageNavigation.navigateToPreviousPage();
+    pageNavigation.verifyCurrentPageNumber(1);
   });
 
   afterEach(() => {
