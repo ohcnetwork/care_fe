@@ -25,7 +25,7 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { handleNegativeValue } from "@/Utils/utils";
+import { sanitizeNumberInput } from "@/Utils/utils";
 
 interface resourceProps {
   id: string;
@@ -275,7 +275,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 min={1}
                 value={state.form.requested_quantity}
                 onChange={handleChange}
-                onInput={handleNegativeValue}
+                onInput={sanitizeNumberInput}
               />
             </div>
             <div>
@@ -287,7 +287,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 value={state.form.assigned_quantity}
                 onChange={handleChange}
                 disabled={state.form.status !== "PENDING"}
-                onInput={handleNegativeValue}
+                onInput={sanitizeNumberInput}
               />
             </div>
 
