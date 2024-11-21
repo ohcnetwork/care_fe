@@ -1,4 +1,5 @@
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
 
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { UserPage } from "../../pageobject/Users/UserSearch";
@@ -16,7 +17,7 @@ describe("User Homepage", () => {
   const altPhoneNumber = "8878825662";
   const homeFacility = "Dummy Facility 40";
   const nurseUserName = "dummynurse1";
-  const doctorUserName = "devdoctor1";
+  const doctorUserName = "dev-doctor2";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
@@ -84,10 +85,10 @@ describe("User Homepage", () => {
   });
 
   it("Next/Previous Page Navigation", () => {
-    userPage.navigateToNextPage();
-    userPage.verifyCurrentPageNumber(2);
-    userPage.navigateToPreviousPage();
-    userPage.verifyCurrentPageNumber(1);
+    pageNavigation.navigateToNextPage();
+    pageNavigation.verifyCurrentPageNumber(2);
+    pageNavigation.navigateToPreviousPage();
+    pageNavigation.verifyCurrentPageNumber(1);
   });
 
   afterEach(() => {

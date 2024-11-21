@@ -99,6 +99,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@julr/vite-plugin-validate-env": "^1.1.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/typography": "^0.5.15",
@@ -145,7 +146,8 @@
     "vite": "^5.4.10",
     "vite-plugin-checker": "^0.8.0",
     "vite-plugin-pwa": "^0.20.5",
-    "vite-plugin-static-copy": "^2.0.0"
+    "vite-plugin-static-copy": "^2.0.0",
+    "zod": "^3.23.8"
   },
   "browserslist": {
     "production": [

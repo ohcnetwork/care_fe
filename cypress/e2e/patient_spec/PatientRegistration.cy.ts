@@ -64,7 +64,7 @@ describe("Patient Creation with consultation", () => {
   const patientOneSecondInsurerName = "Care Payor";
   const patientTransferPhoneNumber = "9849511866";
   const patientTransferFacility = "Dummy Shifting Center";
-  const patientTransferName = "Dummy Patient 10";
+  const patientTransferName = "Dummy Patient Twelve";
   const patientOccupation = "Student";
 
   before(() => {
@@ -243,7 +243,7 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
     cy.verifyNotification(
-      "Patient Dummy Patient 10 (Male) transferred successfully",
+      `Patient ${patientTransferName} (Male) transferred successfully`,
     );
     patientTransfer.clickConsultationCancelButton();
     // allow the transfer button of a patient
