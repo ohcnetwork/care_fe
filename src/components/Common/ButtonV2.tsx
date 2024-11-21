@@ -101,7 +101,7 @@ export const buttonStyles = ({
   shadow = !ghost,
 }: ButtonStyleProps) => {
   return classNames(
-    "inline-flex h-min cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 mtrequired",
+    "inline-flex h-min cursor-pointer mt-2 items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 mtrequired",
     `button-size-${size}`,
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,

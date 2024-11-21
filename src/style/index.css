@@ -1315,16 +1315,3 @@ input[type="number"] {
         --radius:  0.5rem;
     }
 }
-@media screen and (max-width:915px){
-    .containerss{
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-bottom: 5px;
-    }
-    .bshadow{
-        border:solid rgb(168, 168, 168);
-    }
-    .mtrequired{
-        margin-top: 0.5rem;
-    }
-}
