@@ -69,7 +69,7 @@ import {
 } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 import { statusType, useAbortableEffect } from "@/common/utils";
-import { validatePincode } from "@/common/validation";
+import { validateName, validatePincode } from "@/common/validation";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { RestoreDraftButton } from "@/Utils/AutoSave";
@@ -421,8 +421,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
+        case "name": {
+          const requiredError = RequiredFieldValidator()(form[field]);
+          if (requiredError) {
+            errors[field] = requiredError;
+          } else if (!validateName(form[field])) {
+            errors[field] = t("min_char_length_error", { min_length: 3 });
+          }
+          return;
+        }
         case "address":
-        case "name":
         case "gender":
           errors[field] = RequiredFieldValidator()(form[field]);
           return;

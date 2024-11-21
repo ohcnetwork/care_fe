@@ -37,6 +37,10 @@ export const getRandomNumbers = (min: number, max: number) => {
   return Math.floor(Math.random() * max) + min;
 };
 
+export const validateName = (name: string) => {
+  return name.length >= 3;
+};
+
 export const validateUsername = (username: string) => {
   const pattern = /^(?!.*[._-]{2})[a-z0-9](?:[a-z0-9._-]{2,14}[a-z0-9])$/s;
   return pattern.test(username);

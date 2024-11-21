@@ -31,6 +31,7 @@ import {
 import { useAbortableEffect } from "@/common/utils";
 import {
   validateEmailAddress,
+  validateName,
   validatePassword,
   validateUsername,
 } from "@/common/validation";
@@ -412,6 +413,9 @@ export const UserAdd = (props: UserProps) => {
               .split("_")
               .map((word) => word[0].toUpperCase() + word.slice(1))
               .join(" ")} is required`;
+            invalidForm = true;
+          } else if (!validateName(state.form[field])) {
+            errors[field] = t("min_char_length_error", { min_length: 3 });
             invalidForm = true;
           }
           return;
