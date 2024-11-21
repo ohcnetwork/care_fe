@@ -1,7 +1,7 @@
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
 import { v4 as uuidv4 } from "uuid";
 
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
@@ -12,7 +12,6 @@ describe("Location Management Section", () => {
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const facilityLocation = new FacilityLocation();
-  const assetPagination = new AssetPagination();
   const facilityHome = new FacilityHome();
 
   const EXPECTED_LOCATION_ERROR_MESSAGES = [
@@ -172,8 +171,8 @@ describe("Location Management Section", () => {
     facilityLocation.setMultipleBeds(numberOfModifiedBeds);
     assetPage.clickassetupdatebutton();
     // pagination
-    assetPagination.navigateToNextPage();
-    assetPagination.navigateToPreviousPage();
+    pageNavigation.navigateToNextPage();
+    pageNavigation.navigateToPreviousPage();
     facilityLocation.closeNotification();
   });
 
@@ -194,14 +193,14 @@ describe("Location Management Section", () => {
     facilityLocation.clickAddNewLocationButton();
     facilityLocation.enterLocationName("Test Location with Beds");
     facilityLocation.selectLocationType("OTHER");
-    cy.submitButton("Add Location");
+    cy.clickSubmitButton("Add Location");
     cy.verifyNotification("Location created successfully");
     cy.closeNotification();
     facilityLocation.clickManageBedButton();
     facilityLocation.clickAddBedButton();
     facilityLocation.enterBedName("Bed 1");
     facilityLocation.selectBedType("Regular");
-    cy.submitButton("Add Bed(s)");
+    cy.clickSubmitButton("Add Bed(s)");
     cy.verifyNotification("1 Bed created successfully");
     cy.closeNotification();
     facilityLocation.loadLocationManagementPage("Dummy Shifting Center");

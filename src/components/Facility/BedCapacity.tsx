@@ -70,6 +70,12 @@ export const BedCapacity = (props: BedCapacityProps) => {
       });
       if (capacityQuery?.data) {
         const existingData = capacityQuery.data?.results;
+        // if all options are diabled
+        if (existingData.length === BED_TYPES.length) {
+          setBedTypes([]);
+          setIsLoading(false);
+          return;
+        }
         // disable existing bed types
         const updatedBedTypes = BED_TYPES.map((type) => {
           const isExisting = existingData.find(
