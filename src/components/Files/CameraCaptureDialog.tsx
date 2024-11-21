@@ -27,7 +27,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     isLaptopScreen ? "user" : "environment",
   );
   const [previewImage, setPreviewImage] = useState(null);
-  const [currentStream, setCurrentStream] = useState<MediaStream | null>(null);
   const webRef = useRef<any>(null);
 
   const videoConstraints = {
@@ -36,73 +35,38 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
     facingMode: cameraFacingMode,
   };
   useEffect(() => {
-    let activeStream: MediaStream | null = null;
+    if (!show) return;
+    let stream: MediaStream | null = null;
 
-    const initializeCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: cameraFacingMode },
-        });
-        activeStream = stream;
-      } catch (error) {
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: cameraFacingMode } })
+      .then((mediaStream) => {
+        stream = mediaStream;
+      })
+      .catch(() => {
         Notify.Warn({
           msg: t("camera_permission_denied"),
         });
         onHide();
-      }
-    };
-
-    initializeCamera();
+      });
 
     return () => {
-      if (activeStream) {
-        activeStream.getTracks().forEach((track) => {
-          activeStream?.removeTrack(track);
+      if (stream) {
+        stream.getTracks().forEach((track) => {
           track.stop();
         });
       }
     };
-  }, [show, cameraFacingMode]);
-
-  const handleUserMedia = useCallback(
-    (stream: MediaStream) => {
-      // Stop the previous stream's tracks if any
-      if (currentStream) {
-        currentStream.getTracks().forEach((track) => {
-          stream.removeTrack(track);
-          track.stop();
-        });
-      }
-
-      // Set the new stream
-      setCurrentStream(stream);
-      // Attach the new stream to the video element
-      if (webRef.current && webRef.current.video) {
-        webRef.current.video.srcObject = stream;
-      }
-    },
-    [currentStream],
-  );
+  }, [show, cameraFacingMode, onHide]);
 
   const handleSwitchCamera = useCallback(async () => {
-    // Stop the current stream before switching
-    if (currentStream) {
-      currentStream.getTracks().forEach((track) => {
-        currentStream.removeTrack(track);
-        track.stop();
-      });
-    }
-
-    // Get the available video input devices
     const devices = await navigator.mediaDevices.enumerateDevices();
     const videoInputs = devices.filter(
       (device) => device.kind === "videoinput",
     );
-
     const backCamera = videoInputs.some((device) =>
       device.label.toLowerCase().includes("back"),
     );
-
     if (!isLaptopScreen && backCamera) {
       setCameraFacingMode((prevMode) =>
         prevMode === "environment" ? "user" : "environment",
@@ -112,18 +76,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
         msg: t("switch_camera_is_not_available"),
       });
     }
-  }, [isLaptopScreen, currentStream]);
-
-  useEffect(() => {
-    return () => {
-      if (currentStream) {
-        currentStream.getTracks().forEach((track) => {
-          currentStream.removeTrack(track);
-          track.stop();
-        });
-      }
-    };
-  }, [currentStream]);
+  }, []);
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -169,7 +122,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                 ...videoConstraints,
                 facingMode: cameraFacingMode,
               }}
-              onUserMedia={(stream) => handleUserMedia(stream)}
             />
           </div>
         ) : (
