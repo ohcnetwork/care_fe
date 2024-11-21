@@ -914,7 +914,7 @@ export const PatientManager = () => {
                       });
                     }, 500);
                   }}
-                  className="mr-5 w-full lg:w-fit"
+                  className="mr-5 w-full lg:w-fit mt-2"
                 >
                   <CareIcon icon="l-export" />
                   <span className="lg:my-[3px]">Export</span>
