@@ -7,7 +7,7 @@ describe("Patient Investigation Creation from Patient consultation page", () => 
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const patientInvestigation = new PatientInvestigation();
-  const patientName = "Dummy Patient 14";
+  const patientName = "Dummy Patient Thirteen";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();
