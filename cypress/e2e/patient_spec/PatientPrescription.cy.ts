@@ -26,7 +26,7 @@ describe("Patient Medicine Administration", () => {
   });
 
   it("Add a new medicine | Verify the Edit and Discontinue Medicine workflow |", () => {
-    patientPage.visitPatient("Dummy Patient 9");
+    patientPage.visitPatient("Dummy Patient Nine");
     patientPrescription.visitMedicineTab();
     patientPrescription.visitEditPrescription();
     // Add a normal Medicine to the patient
@@ -63,7 +63,7 @@ describe("Patient Medicine Administration", () => {
   });
 
   it("Add a PRN Prescription medicine | Group Administrate it |", () => {
-    patientPage.visitPatient("Dummy Patient 6");
+    patientPage.visitPatient("Dummy Patient Six");
     patientPrescription.visitMedicineTab();
     patientPrescription.visitEditPrescription();
     // Add First Medicine
@@ -97,7 +97,7 @@ describe("Patient Medicine Administration", () => {
   });
 
   it("Add a new titrated medicine for a patient | Individual Administeration |", () => {
-    patientPage.visitPatient("Dummy Patient 5");
+    patientPage.visitPatient("Dummy Patient Five");
     patientPrescription.visitMedicineTab();
     patientPrescription.visitEditPrescription();
     patientPrescription.clickAddPrescription();
@@ -136,7 +136,7 @@ describe("Patient Medicine Administration", () => {
   });
 
   it("Add a new medicine for a patient and verify the duplicate medicine validation", () => {
-    patientPage.visitPatient("Dummy Patient 4");
+    patientPage.visitPatient("Dummy Patient Four");
     patientPrescription.visitMedicineTab();
     patientPrescription.visitEditPrescription();
     patientPrescription.clickAddPrescription();
