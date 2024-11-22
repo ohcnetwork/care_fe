@@ -149,7 +149,10 @@ export const ValidateVideoLink = (
   try {
     const parsed = new URL(formData["video_connect_link"]);
     if (!["https:", "http:"].includes(parsed.protocol)) {
-      return translator("invalid_url");
+      return translator("invalid_url_http_https");
+    }
+    if (parsed.href.toLowerCase().includes("javascript:")) {
+      return translator("invalid_url_javascript");
     }
   } catch {
     return translator("invalid_url");

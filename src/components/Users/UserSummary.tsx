@@ -58,13 +58,13 @@ export default function UserSummaryTab({
     setIsDeleting(false);
     if (res?.status === 204) {
       Notification.Success({
-        msg: "User deleted successfully",
+        msg: t("user_deleted_successfully"),
       });
       setshowDeleteDialog(!showDeleteDialog);
       navigate("/users");
     } else {
       Notification.Error({
-        msg: "Error while deleting User: " + (error || ""),
+        msg: t("user_delete_error") + ": " + (error || ""),
       });
       setshowDeleteDialog(!showDeleteDialog);
     }

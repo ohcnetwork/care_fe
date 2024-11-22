@@ -695,12 +695,12 @@ const UserAddEditForm = (props: UserProps) => {
     if (res?.ok) {
       dispatch({ type: "set_form", form: initForm });
       Notification.Success({
-        msg: "User added successfully",
+        msg: t("user_added_successfully"),
       });
       navigate("/users");
     } else {
       Notification.Error({
-        msg: error?.message ?? "Error while adding user",
+        msg: error?.message ?? t("user_add_error"),
       });
     }
     setIsLoading(false);
