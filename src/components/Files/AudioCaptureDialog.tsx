@@ -59,7 +59,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   const handleStopRecording = () => {
     if (status !== "RECORDING") return;
-    // releaseMic();
     setStatus("RECORDED");
     stopRecording();
     timer.stop();
