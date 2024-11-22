@@ -63,7 +63,7 @@ class PatientLogupdate {
   }
 
   typeSpo2(spo: string) {
-    cy.get("#ventilator_spo2").click().type(spo);
+    cy.typeAndSelectOption("#ventilator_spo2", spo);
   }
 
   selectRhythm(rhythm: string) {
