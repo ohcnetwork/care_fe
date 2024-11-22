@@ -63,7 +63,6 @@ export const Demography = (props: PatientProps) => {
   const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
     query: {
       patient: id,
-      limit: 1,
     },
   });
 
