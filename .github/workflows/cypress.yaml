@@ -88,14 +88,16 @@ jobs:
             node_modules
           key: ${{ runner.os }}-build-${{ github.sha }}
 
+      - name: Create PR origin file
+        run: |
+          mkdir -p .github
+          echo "${{ steps.pr_origin.outputs.is_forked }}" > .github/pr_origin
+
       - name: Cache PR origin info
         uses: actions/cache@v3
         with:
           path: .github/pr_origin
           key: ${{ runner.os }}-pr-origin-${{ github.sha }}
-        run: |
-          mkdir -p .github
-          echo "${{ steps.pr_origin.outputs.is_forked }}" > .github/pr_origin
 
   cypress-run:
     needs: prepare
