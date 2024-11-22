@@ -69,8 +69,8 @@ jobs:
           docker save $(docker images -q) > docker-cache/images.tar
           # Pull alpine image first
           docker pull alpine
-          # Save volumes
-          docker run --rm --volumes-from $(docker ps -q) -v $(pwd)/docker-cache:/backup alpine tar cvf /backup/volumes.tar /var/lib/docker/volumes/
+          # Save volumes - all at once
+          docker run --rm -v /var/lib/docker/volumes/:/volumes -v $(pwd)/docker-cache:/backup alpine tar cvf /backup/volumes.tar /volumes/
 
       - name: Cache Docker state
         uses: actions/cache@v3
