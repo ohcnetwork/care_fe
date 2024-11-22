@@ -65,7 +65,7 @@ export default function UserResetPassword({
     if (!formData.new_password_2) {
       errors.new_password_2 = t("please_confirm_password");
     } else if (formData.new_password_1 !== formData.new_password_2) {
-      errors.new_password_2 = t("passwords_not_matching");
+      errors.new_password_2 = t("password_mismatch");
     }
 
     if (formData.new_password_1 === formData.old_password) {
@@ -176,7 +176,7 @@ export default function UserResetPassword({
                   {validateRule(
                     field("new_password_1").value ===
                       field("new_password_2").value,
-                    t("passwords_not_matching"),
+                    t("password_mismatch"),
                     !field("new_password_2").value,
                   )}
                 </div>

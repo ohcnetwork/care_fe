@@ -605,7 +605,7 @@ const UserAddEditForm = (props: UserProps) => {
           if (!formData.password) {
             errors.c_password = t("confirm_password_required");
           } else if (formData.password !== formData.c_password) {
-            errors.c_password = t("passwords_not_matching");
+            errors.c_password = t("password_mismatch");
           }
           break;
         case "first_name":
@@ -938,22 +938,22 @@ const UserAddEditForm = (props: UserProps) => {
                 >
                   {validateRule(
                     state.form.password.length >= 8,
-                    "Password should be atleast 8 characters long",
+                    t("password_length_validation"),
                     !state.form.password,
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toUpperCase(),
-                    "Password should contain at least 1 lowercase letter",
+                    t("password_lowercase_validation"),
                     !state.form.password,
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toLowerCase(),
-                    "Password should contain at least 1 uppercase letter",
+                    t("password_uppercase_validation"),
                     !state.form.password,
                   )}
                   {validateRule(
                     /\d/.test(state.form.password),
-                    "Password should contain at least 1 number",
+                    t("password_number_validation"),
                     !state.form.password,
                   )}
                 </div>
@@ -982,7 +982,7 @@ const UserAddEditForm = (props: UserProps) => {
                   <div aria-live="polite">
                     {validateRule(
                       state.form.c_password === state.form.password,
-                      "Confirm password should match the entered password",
+                      t("password_mismatch"),
                       !state.form.c_password,
                     )}
                   </div>
