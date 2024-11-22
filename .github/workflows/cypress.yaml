@@ -43,7 +43,21 @@ jobs:
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
 
-      - name: Setup backend 🐳
+      - name: Get backend commit SHA
+        id: backend-sha
+        run: |
+          BACKEND_SHA=$(curl -s "https://api.github.com/repos/ohcnetwork/care/commits/${{ steps.backend-branch.outputs.branch }}" | jq -r .sha)
+          echo "sha=$BACKEND_SHA" >> $GITHUB_OUTPUT
+
+      - name: Restore backend cache
+        id: backend-cache
+        uses: actions/cache@v3
+        with:
+          path: docker-cache
+          key: ${{ runner.os }}-backend-${{ steps.backend-sha.outputs.sha }}
+
+      - name: Setup backend if cache miss 🐳
+        if: steps.backend-cache.outputs.cache-hit != 'true'
         run: |
           cd care
           echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
@@ -51,6 +65,12 @@ jobs:
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
           make docker_config_file=docker-compose.pre-built.yaml up 
           make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
+
+          # Export Docker state only on cache miss
+          docker pull alpine
+          mkdir -p docker-cache
+          docker save $(docker images -q) > docker-cache/images.tar
+          docker run --rm -v /var/lib/docker/volumes/:/volumes -v $(pwd)/docker-cache:/backup alpine tar cvf /backup/volumes.tar /volumes/
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
@@ -61,22 +81,6 @@ jobs:
           max_attempts: 5
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
           on_retry_command: sleep 5
-
-      - name: Export Docker state
-        run: |
-          mkdir -p docker-cache
-          # Save images
-          docker save $(docker images -q) > docker-cache/images.tar
-          # Pull alpine image first
-          docker pull alpine
-          # Save volumes - all at once
-          docker run --rm -v /var/lib/docker/volumes/:/volumes -v $(pwd)/docker-cache:/backup alpine tar cvf /backup/volumes.tar /volumes/
-
-      - name: Cache Docker state
-        uses: actions/cache@v3
-        with:
-          path: docker-cache
-          key: ${{ runner.os }}-docker-${{ github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -94,9 +98,7 @@ jobs:
       - name: Cache build output
         uses: actions/cache@v3
         with:
-          path: |
-            dist
-            node_modules
+          path: build
           key: ${{ runner.os }}-build-${{ github.sha }}
 
   cypress-run:
@@ -112,15 +114,12 @@ jobs:
       REACT_ENABLED_APPS: "ohcnetwork/care_hcx_fe@main"
       REACT_ENABLE_HCX: true
     steps:
-      - name: Checkout 📥
-        uses: actions/checkout@v3
-
       - name: Checkout care 📥
         uses: actions/checkout@v3
         with:
           repository: ohcnetwork/care
           path: care
-          ref: ${{ steps.backend-branch.outputs.branch }}
+          ref: ${{ needs.prepare.outputs.backend_branch }}
 
       - name: Restore Docker cache
         uses: actions/cache@v3
@@ -128,12 +127,13 @@ jobs:
           path: docker-cache
           key: ${{ runner.os }}-docker-${{ github.sha }}
 
-      - name: Restore Docker state
+      - name: Load Docker images
+        run: docker load < docker-cache/images.tar || echo "No docker images to restore"
+
+      - name: Restore Docker volumes
         run: |
-          # Load images
-          docker load < docker-cache/images.tar || echo "No docker images to restore"
-          # Restore volumes
-          docker run --rm -v $(pwd)/docker-cache:/backup -v /var/lib/docker/volumes/:/var/lib/docker/volumes/ alpine tar xvf /backup/volumes.tar || echo "No volumes to restore"
+          sudo mkdir -p /var/lib/docker/volumes/
+          sudo docker run --rm -v $(pwd)/docker-cache:/backup -v /var/lib/docker/volumes/:/volumes alpine tar xvf /backup/volumes.tar || echo "No volumes to restore"
 
       - name: Start backend 🐳
         run: |
@@ -153,17 +153,19 @@ jobs:
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
           on_retry_command: sleep 5
 
-      - name: Restore build cache
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Restore build output
         uses: actions/cache@v3
         with:
-          path: |
-            dist
-            node_modules
+          path: build
           key: ${{ runner.os }}-build-${{ github.sha }}
 
-      - name: Set PR origin from prepare job
-        id: pr_origin
-        run: echo "is_forked=${{ needs.prepare.outputs.is_forked }}" >> $GITHUB_OUTPUT
+      - name: Install serve
+        run: npm install -g serve
 
       - name: Install Specific Chrome Version
         run: |
@@ -172,12 +174,12 @@ jobs:
           sudo apt-get install ./google-chrome-stable_current_amd64.deb
 
       - name: Cypress run for Non-Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'false'
+        if: needs.prepare.outputs.is_forked == 'false'
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
-          start: "npx vite preview --host"
+          start: serve -l 4000 build
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: chrome
@@ -192,7 +194,7 @@ jobs:
           COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
 
       - name: Cypress run for Forked PRs 🥬
-        if: steps.pr_origin.outputs.is_forked == 'true'
+        if: needs.prepare.outputs.is_forked == 'true'
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
@@ -222,7 +224,7 @@ jobs:
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v3
-        if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
+        if: ${{ failure() && needs.prepare.outputs.is_forked == 'true' }}
         with:
           name: cypress-videos
           path: cypress/videos
