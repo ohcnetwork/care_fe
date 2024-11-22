@@ -714,17 +714,22 @@ export const DailyRounds = (props: any) => {
                   {
                     value: 0,
                     className: "text-danger-500",
-                    label: "Low",
+                    label: t("SPO2_LEVEL_SEVERE_HYPOXEMIA"),
                   },
                   {
-                    value: 90,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
+                    value: 86,
                     className: "text-danger-500",
-                    label: "High",
+                    label: t("SPO2_LEVEL_MODERATE_HYPOXEMIA"),
+                  },
+                  {
+                    value: 91,
+                    className: "text-warning-400",
+                    label: t("SPO2_LEVEL_MILD_HYPOXEMIA"),
+                  },
+                  {
+                    value: 95,
+                    className: "text-primary-500",
+                    label: t("SPO2_LEVEL_NORMAL"),
                   },
                 ]}
               />
@@ -786,36 +791,6 @@ export const DailyRounds = (props: any) => {
                     value: 16,
                     className: "text-danger-500",
                     label: "Tachypnea",
-                  },
-                ]}
-              />
-
-              <TextFormField
-                {...field("ventilator_spo2")}
-                labelSuffix="%"
-                type="number"
-                min={0}
-                max={100}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: t("SPO2_LEVEL_SEVERE_HYPOXEMIA"),
-                  },
-                  {
-                    value: 86,
-                    className: "text-danger-500",
-                    label: t("SPO2_LEVEL_MODERATE_HYPOXEMIA"),
-                  },
-                  {
-                    value: 91,
-                    className: "text-warning-400",
-                    label: t("SPO2_LEVEL_MILD_HYPOXEMIA"),
-                  },
-                  {
-                    value: 95,
-                    className: "text-primary-500",
-                    label: t("SPO2_LEVEL_NORMAL"),
                   },
                 ]}
               />
