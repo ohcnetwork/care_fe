@@ -106,7 +106,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   const releaseMic = () => {
     if (mediaStreamRef.current) {
-      console.log("if called");
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       mediaStreamRef.current = null;
     }
