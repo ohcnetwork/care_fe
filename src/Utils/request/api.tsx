@@ -1149,13 +1149,6 @@ const routes = {
     TRes: Type<FileUploadModel>(),
   },
 
-  // Consultation FileUploads
-  listConsultationFileUploads: {
-    path: "/api/v1/consultation/{consultation_external_id}/files/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FileUploadModel>>(),
-  },
-
   // Investigation
   listInvestigations: {
     path: "/api/v1/investigation/",

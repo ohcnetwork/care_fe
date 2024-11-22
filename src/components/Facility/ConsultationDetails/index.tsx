@@ -20,7 +20,6 @@ import { ConsultationPressureSoreTab } from "@/components/Facility/ConsultationD
 import { ConsultationSummaryTab } from "@/components/Facility/ConsultationDetails/ConsultationSummaryTab";
 import { ConsultationUpdatesTab } from "@/components/Facility/ConsultationDetails/ConsultationUpdatesTab";
 import { ConsultationVentilatorTab } from "@/components/Facility/ConsultationDetails/ConsultationVentilatorTab";
-import { DiscussionNotesFiles } from "@/components/Facility/ConsultationDetails/DiscussionNotesFilesTab";
 import DoctorVideoSlideover from "@/components/Facility/DoctorVideoSlideover";
 import PatientNotesSlideover from "@/components/Facility/PatientNotesSlideover";
 import { ConsultationModel } from "@/components/Facility/models";
@@ -60,7 +59,6 @@ const defaultTabs = {
   SUMMARY: ConsultationSummaryTab,
   MEDICINES: ConsultationMedicinesTab,
   FILES: ConsultationFilesTab,
-  DISCUSSION_NOTES_FILES: DiscussionNotesFiles,
   INVESTIGATIONS: ConsultationInvestigationsTab,
   ABG: ConsultationABGTab,
   NURSING: ConsultationNursingTab,
