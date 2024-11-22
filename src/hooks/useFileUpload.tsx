@@ -253,6 +253,7 @@ export default function useFileUpload(
     setFiles([]);
     setUploadFileNames([]);
   };
+
   const Dialogues = (
     <>
       <CameraCaptureDialog

@@ -171,8 +171,8 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             variant="secondary"
             onClick={() => {
               setPreviewImage(null);
-              onHide();
               onResetCapture();
+              onHide();
             }}
             className="m-2"
           >
@@ -232,8 +232,8 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             variant="secondary"
             onClick={() => {
               setPreviewImage(null);
-              onHide();
               onResetCapture();
+              onHide();
             }}
           >
             {`${t("close")} ${t("camera")}`}

@@ -1,5 +1,5 @@
 import { Link } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -26,6 +26,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   const { show, onHide, onCapture, autoRecord = false } = props;
   const [status, setStatus] = useState<Status | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
   const { t } = useTranslation();
 
   const { audioURL, resetRecording, startRecording, stopRecording } =
@@ -42,7 +43,8 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   const handleStartRecording = () => {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
-      .then(() => {
+      .then((stream) => {
+        mediaStreamRef.current = stream;
         setStatus("RECORDING");
         startRecording();
         timer.start();
@@ -57,6 +59,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   const handleStopRecording = () => {
     if (status !== "RECORDING") return;
+    releaseMic();
     setStatus("RECORDED");
     stopRecording();
     timer.stop();
@@ -100,6 +103,16 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
       setStatus(null);
     };
   }, [show]);
+
+  const releaseMic = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => {
+        track.stop();
+        mediaStreamRef.current?.removeTrack(track);
+      });
+      mediaStreamRef.current = null; // Clear the ref
+    }
+  };
 
   useEffect(() => {
     if (autoRecord && show && status === "RECORDING") {
