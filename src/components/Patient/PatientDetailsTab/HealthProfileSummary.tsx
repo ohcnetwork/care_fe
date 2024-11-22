@@ -52,7 +52,7 @@ export const HealthProfileSummary = (props: PatientProps) => {
   };
 
   return (
-    <div className="mt-4 px-4 md:px-0">
+    <div className="mt-4 px-4 md:px-0" data-test-id="patient-health-profile">
       <div className="group my-2 w-full rounded bg-white p-4 shadow">
         <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
         <div className="h-full space-y-2">

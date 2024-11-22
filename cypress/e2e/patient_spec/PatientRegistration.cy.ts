@@ -130,6 +130,7 @@ describe("Patient Creation with consultation", () => {
       "Middle Class",
       "Family member",
     );
+
     patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
       patientOneOngoingMedication,
