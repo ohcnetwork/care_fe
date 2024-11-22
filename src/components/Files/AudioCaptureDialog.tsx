@@ -59,7 +59,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   const handleStopRecording = () => {
     if (status !== "RECORDING") return;
-    releaseMic();
+    // releaseMic();
     setStatus("RECORDED");
     stopRecording();
     timer.stop();
@@ -106,11 +106,9 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
 
   const releaseMic = () => {
     if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => {
-        track.stop();
-        mediaStreamRef.current?.removeTrack(track);
-      });
-      mediaStreamRef.current = null; // Clear the ref
+      console.log("if called");
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
     }
   };
 
@@ -118,6 +116,10 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     if (autoRecord && show && status === "RECORDING") {
       handleStartRecording();
     }
+
+    return () => {
+      mediaStreamRef.current && releaseMic();
+    };
   }, [autoRecord, status, show]);
 
   return (
