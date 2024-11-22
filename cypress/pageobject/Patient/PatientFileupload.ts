@@ -20,7 +20,9 @@ export class PatientFileUpload {
 
   recordAudio() {
     cy.get("#record-audio").click();
-    cy.wait(5000);
+    cy.wait(2000);
+    cy.get("#start-recording").click();
+    cy.wait(2000);
     cy.get("#stop-recording").click();
     cy.wait(1000);
     cy.get("#save-recording").click();
