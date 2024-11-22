@@ -34,6 +34,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const bed = props.consultationData.current_bed?.bed_object;
   const feedStateSessionKey = `encounterFeedState[${props.consultationId}]`;
   const [preset, setPreset] = useState<CameraPreset>();
+  const [selectedPreset, setSelectedPreset] = useState<CameraPreset>();
   const [showPresetSaveConfirmation, setShowPresetSaveConfirmation] =
     useState(false);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
@@ -100,6 +101,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
       if (preset) {
         setPreset(preset);
+        setSelectedPreset(preset);
       }
     },
   });
@@ -126,6 +128,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     await presetsQuery.refetch();
 
     setPreset(updated);
+    setSelectedPreset(updated);
     setHasMoved(false);
     setIsUpdatingPreset(false);
     setShowPresetSaveConfirmation(false);
@@ -180,11 +183,9 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         <CameraFeed
           key={key}
           asset={asset}
-          preset={preset?.position}
+          preset={selectedPreset?.position}
           onMove={() => {
-            if (!preset) {
-              return;
-            }
+            setSelectedPreset(undefined);
             setHasMoved(true);
             setTimeout(async () => {
               const { data } = await operate({ type: "get_status" });
@@ -193,7 +194,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                   feedStateSessionKey,
                   JSON.stringify({
                     type: "position",
-                    assetBed: preset.asset_bed.id,
+                    assetBed: "",
                     value: (data as GetStatusResponse).result.position,
                   } satisfies LastAccessedPosition),
                 );
@@ -222,7 +223,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                 <CameraPresetSelect
                   options={presets}
                   label={(obj) => obj.name}
-                  value={preset}
+                  value={selectedPreset}
                   onChange={(value) => {
                     triggerGoal("Camera Preset Clicked", {
                       presetName: preset?.name,
@@ -232,6 +233,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                     });
                     setHasMoved(false);
                     setPreset(value);
+                    setSelectedPreset(value);
                   }}
                 />
                 {isUpdatingPreset ? (
