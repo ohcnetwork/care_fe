@@ -15,10 +15,11 @@ export interface CameraCaptureDialogProps {
   show: boolean;
   onHide: () => void;
   onCapture: (file: File, fileName: string) => void;
+  onResetCapture: () => void;
 }
 
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
-  const { show, onHide, onCapture } = props;
+  const { show, onHide, onCapture, onResetCapture } = props;
 
   const [cameraFacingFront, setCameraFacingFront] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
@@ -146,6 +147,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                 <ButtonV2
                   onClick={() => {
                     setPreviewImage(null);
+                    onResetCapture();
                   }}
                   className="m-2"
                 >
@@ -170,6 +172,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             onClick={() => {
               setPreviewImage(null);
               onHide();
+              onResetCapture();
             }}
             className="m-2"
           >
@@ -207,6 +210,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                   <ButtonV2
                     onClick={() => {
                       setPreviewImage(null);
+                      onResetCapture();
                     }}
                   >
                     {t("retake")}
@@ -229,6 +233,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             onClick={() => {
               setPreviewImage(null);
               onHide();
+              onResetCapture();
             }}
           >
             {`${t("close")} ${t("camera")}`}
