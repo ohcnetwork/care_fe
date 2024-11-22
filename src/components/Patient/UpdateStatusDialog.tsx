@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -10,31 +10,24 @@ import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
-import {
-  CreateFileResponse,
-  SampleTestModel,
-} from "@/components/Patient/models";
+
+import useFileUpload from "@/hooks/useFileUpload";
 
 import {
-  HEADER_CONTENT_TYPES,
   SAMPLE_FLOW_RULES,
   SAMPLE_TEST_RESULT,
   SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
-import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import uploadFile from "@/Utils/request/uploadFile";
 
 interface Props {
-  sample: SampleTestModel;
-  handleOk: (sample: SampleTestModel, status: number, result: number) => void;
+  sample: any;
+  handleOk: (sample: any, status: number, result: number) => void;
   handleCancel: () => void;
 }
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
-
 const statusFlow = { ...SAMPLE_FLOW_RULES };
 
 const initForm: any = {
@@ -65,10 +58,12 @@ const UpdateStatusDialog = (props: Props) => {
   const { t } = useTranslation();
   const { sample, handleOk, handleCancel } = props;
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
-  const [file, setfile] = useState<File>();
-  const [contentType, setcontentType] = useState<string>("");
-  const [uploadPercent, setUploadPercent] = useState(0);
-  const [uploadStarted, setUploadStarted] = useState<boolean>(false);
+
+  const fileUpload = useFileUpload({
+    type: "SAMPLE_MANAGEMENT",
+    allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
+    allowNameFallback: true,
+  });
 
   const currentStatus = SAMPLE_TEST_STATUS.find(
     (i) => i.text === sample.status,
@@ -103,80 +98,16 @@ const UpdateStatusDialog = (props: Props) => {
     dispatch({ type: "set_form", form });
   };
 
-  const uploadfile = (data: CreateFileResponse) => {
-    const url = data.signed_url;
-    const internal_name = data.internal_name;
-
-    const f = file;
-    if (f === undefined) return;
-    const newFile = new File([f], `${internal_name}`);
-
-    uploadFile(
-      url,
-      newFile,
-      "PUT",
-      {
-        "Content-Type": contentType,
-        "Content-disposition": "inline",
-      },
-      (xhr: XMLHttpRequest) => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setUploadStarted(false);
-          request(routes.editUpload, {
-            pathParams: {
-              id: data.id,
-              fileType: "SAMPLE_MANAGEMENT",
-              associatingId: sample.id?.toString() ?? "",
-            },
-            body: { upload_completed: true },
-          });
-          Notification.Success({ msg: "File Uploaded Successfully" });
-        } else {
-          setUploadStarted(false);
-        }
-      },
-      setUploadPercent,
-      () => {
-        setUploadStarted(false);
-      },
-    );
-  };
-
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files == null) {
-      throw new Error("Error finding e.target.files");
-    }
-    setfile(e.target.files[0]);
-    const fileName = e.target.files[0].name;
-    const ext: string = fileName.split(".")[1];
-    setcontentType(
-      HEADER_CONTENT_TYPES[ext as keyof typeof HEADER_CONTENT_TYPES],
-    );
-    return e.target.files[0];
-  };
-  const removeFile = () => {
-    setfile(undefined);
-  };
   const handleUpload = async () => {
-    const f = file;
-    if (f === undefined) return;
-    const category = "UNSPECIFIED";
-    const name = f.name;
-    setUploadStarted(true);
-
-    const { data } = await request(routes.createUpload, {
-      body: {
-        original_name: name,
-        file_type: "SAMPLE_MANAGEMENT",
-        name: `${sample.patient_name} Sample Report`,
-        associating_id: sample.id ?? "",
-        file_category: category,
-        mime_type: contentType,
-      },
-    });
-
-    if (data) {
-      uploadfile(data);
+    if (fileUpload.files.length > 0) {
+      await fileUpload.handleFileUpload(sample.id);
+      if (!fileUpload.error) {
+        Notification.Success({ msg: "File Uploaded Successfully" });
+      } else {
+        Notification.Error({ msg: `Upload failed: ${fileUpload.error}` });
+      }
+    } else {
+      Notification.Error({ msg: "No file selected for upload" });
     }
   };
 
@@ -218,34 +149,34 @@ const UpdateStatusDialog = (props: Props) => {
               onChange={handleChange}
             />
             <span className="font-semibold leading-relaxed">
-              Upload Report :
+              Upload Report:
             </span>
-            {uploadStarted ? (
-              <LinearProgressWithLabel value={uploadPercent} />
+            {fileUpload.progress !== null &&
+            fileUpload.progress !== undefined ? (
+              <LinearProgressWithLabel value={fileUpload.progress} />
             ) : (
               <div className="mb-4 mt-3 flex flex-wrap justify-between gap-2">
                 <label className="button-size-default button-shape-square button-primary-default inline-flex h-min max-w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500">
                   <CareIcon icon="l-file-upload-alt" className="text-lg" />
                   <span className="max-w-full truncate">
-                    {file ? file.name : t("choose_file")}
+                    {fileUpload.files?.[0]?.name || t("choose_file")}
                   </span>
-                  <input
-                    title="changeFile"
-                    onChange={onFileChange}
-                    type="file"
-                    hidden
-                  />
+                  <fileUpload.Input />
                 </label>
-                {file && (
+                {fileUpload.fileNames.length > 0 && (
                   <CareIcon
                     icon="l-times"
                     className="text-lg cursor-pointer mt-2 mr-4"
-                    onClick={removeFile}
+                    onClick={fileUpload.clearFiles}
                   />
                 )}
-                <Submit type="submit" onClick={handleUpload} disabled={!file}>
+                <Submit
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={!fileUpload.files.length}
+                >
                   <CareIcon icon="l-cloud-upload" className="text-lg" />
-                  <span>Upload</span>
+                  <span>{t("upload")}</span>
                 </Submit>
               </div>
             )}
