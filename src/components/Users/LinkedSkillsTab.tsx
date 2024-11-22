@@ -15,7 +15,7 @@ type Props = {
   username: string;
 };
 
-export default function RoleAndSkillsTab(props: Props) {
+export default function LinkedSkillsTab(props: Props) {
   const { userData, username } = props;
   const { t } = useTranslation();
   const authUser = useAuthUser();

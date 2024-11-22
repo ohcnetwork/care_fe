@@ -81,7 +81,7 @@ export class UserPage {
   }
 
   verifyMultipleBadgesWithSameId(alreadylinkedusersviews: string[]) {
-    alreadylinkedusersviews.forEach((username) => {
+    cy.wrap(alreadylinkedusersviews).each((username) => {
       cy.get(`#name-${username}`).scrollIntoView().should("be.visible");
     });
   }

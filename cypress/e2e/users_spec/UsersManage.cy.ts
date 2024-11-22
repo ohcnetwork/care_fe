@@ -140,7 +140,7 @@ describe("Manage User", () => {
     );
   });
 
-  it("Nurse user doesn't have edit options (users above them in hierarchy) or password change option (for other users)", () => {
+  it("Nurse user doesn't have edit options or password change option (for other users)", () => {
     loginPage.ensureLoggedIn();
     loginPage.clickSignOutBtn();
     loginPage.loginManuallyAsNurse();

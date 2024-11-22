@@ -47,7 +47,7 @@ export default function UserSummaryTab({
   const authUser = useAuthUser();
 
   if (!userData) {
-    return;
+    return <></>;
   }
 
   const handleSubmit = async () => {

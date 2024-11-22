@@ -208,12 +208,18 @@ const UserAddEditForm = (props: UserProps) => {
     },
   });
 
-  const prepData = (formData: UserForm, isCreate: boolean = false) => {
+  const prepData = (
+    formData: UserForm,
+    isCreate: boolean = false,
+  ): Partial<UserForm> => {
+    const fields = includedFields ?? Object.keys(formData);
+    let baseData: Partial<UserForm> = {};
     const phoneNumber = parsePhoneNumber(formData.phone_number) ?? "";
     const altPhoneNumber = formData.phone_number_is_whatsapp
       ? phoneNumber
       : (parsePhoneNumber(formData.alt_phone_number) ?? "");
-    let baseData: Partial<UserForm> = {
+
+    let fieldMappings: Partial<UserForm> = {
       first_name: formData.first_name,
       last_name: formData.last_name,
       email: formData.email,
@@ -248,8 +254,8 @@ const UserAddEditForm = (props: UserProps) => {
     };
 
     if (isCreate) {
-      baseData = {
-        ...baseData,
+      fieldMappings = {
+        ...fieldMappings,
         user_type: formData.user_type,
         password: formData.password,
         facilities: formData.facilities ? formData.facilities : undefined,
@@ -259,6 +265,15 @@ const UserAddEditForm = (props: UserProps) => {
         district: formData.district,
         local_body: showLocalbody ? formData.local_body : undefined,
       };
+    }
+
+    for (const field of fields) {
+      if (field in fieldMappings) {
+        baseData = {
+          ...baseData,
+          [field as keyof UserForm]: fieldMappings[field as keyof UserForm],
+        };
+      }
     }
 
     return baseData;

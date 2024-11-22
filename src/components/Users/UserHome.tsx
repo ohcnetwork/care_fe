@@ -7,7 +7,7 @@ import Page from "@/components/Common/Page";
 import { userChildProps } from "@/components/Common/UserColumns";
 import Error404 from "@/components/ErrorPages/404";
 import LinkedFacilitiesTab from "@/components/Users/LinkedFacilitiesTab";
-import RoleAndSkillsTab from "@/components/Users/RoleAndSkillsTab";
+import LinkedSkillsTab from "@/components/Users/LinkedSkillsTab";
 import UserBanner from "@/components/Users/UserBanner";
 import UserSummaryTab from "@/components/Users/UserSummary";
 import { UserModel } from "@/components/Users/models";
@@ -72,7 +72,7 @@ export default function UserHome(props: UserHomeProps) {
   } = {
     PROFILE: { body: UserSummaryTab },
     SKILLS: {
-      body: RoleAndSkillsTab,
+      body: LinkedSkillsTab,
       hidden: !editPermissions,
     },
     FACILITIES: {

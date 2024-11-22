@@ -161,7 +161,7 @@ describe("User Creation", () => {
     userCreationPage.selectDropdownOption("state", "Kerala");
     userCreationPage.selectDropdownOption("district", "Ernakulam");
     userCreationPage.clickElementById("submit");
-    userCreationPage.verifyNotification("User added successfully");
+    userCreationPage.verifyNotification("User Added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
     userCreationPage.verifyElementContainsText(
