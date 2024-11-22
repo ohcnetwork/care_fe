@@ -26,6 +26,10 @@ export class UserPage {
     cy.get(`${this.usernameText}-${username}`).should("contain.text", username);
   }
 
+  checkUsernameTextDoesNotExist(username: string) {
+    cy.get(`${this.usernameText}-${username}`).should("not.exist");
+  }
+
   checkUsernameBadgeVisibility(shouldBeVisible: boolean) {
     const assertion = shouldBeVisible ? "be.visible" : "not.be.visible";
     cy.get(this.usernameBadge).should(assertion);

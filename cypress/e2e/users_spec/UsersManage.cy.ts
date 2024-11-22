@@ -19,6 +19,7 @@ describe("Manage User", () => {
   const usernameforworkinghour = "devdistrictadmin";
   const nurseUsername = "dummynurse1";
   const doctorUsername = "devdoctor";
+  const doctorToDelete = "dummydoctor12";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
   const facilitytolinkskill = "Dummy Facility 40";
@@ -91,11 +92,11 @@ describe("Manage User", () => {
     manageUserPage.clickMoreDetailsButton(nurseUsername);
     manageUserPage.verifyMoreDetailsPage();
     manageUserPage.clickProfessionalInfoViewButton();
-    manageUserPage.clickProfessionalInfoEditButton();
     // Should have qualification field
     // Should not have years of experience and medical council registration fields
     manageUserPage.verifyQualificationExist();
     manageUserPage.verifyYoeAndCouncilRegistrationDoesntExist();
+    manageUserPage.clickProfessionalInfoEditButton();
     manageUserPage.clearDoctorOrNurseProfessionalInfo(false);
     manageUserPage.clickSubmit();
     manageUserPage.verifyErrorText("Qualification is required");
@@ -160,6 +161,23 @@ describe("Manage User", () => {
     loginPage.ensureLoggedIn();
   });
 
+  it("Nurse user doesn't have delete option for other users", () => {
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsNurse();
+    loginPage.ensureLoggedIn();
+    cy.visit("/users");
+    userPage.typeInSearchInput(doctorUsername);
+    userPage.checkUsernameText(doctorUsername);
+    manageUserPage.clickMoreDetailsButton(doctorUsername);
+    manageUserPage.verifyMoreDetailsPage(false);
+    manageUserPage.verifyDeleteButtonNotExist();
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsDistrictAdmin();
+    loginPage.ensureLoggedIn();
+  });
+
   it("District Admin can change a user's password", () => {
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
@@ -183,6 +201,20 @@ describe("Manage User", () => {
     manageUserPage.clickPasswordEditButton();
     manageUserPage.changePassword("Coronasafe@1233", "Coronasafe@123");
     manageUserPage.clickSubmit();
+  });
+
+  it("District Admin can delete a user", () => {
+    userPage.typeInSearchInput(doctorToDelete);
+    userPage.checkUsernameText(doctorToDelete);
+    manageUserPage.clickMoreDetailsButton(doctorToDelete);
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.verifyDeleteButtonVisible();
+    manageUserPage.clickDeleteButton();
+    manageUserPage.clickSubmit();
+    cy.verifyNotification("User Deleted Successfully");
+    cy.closeNotification();
+    userPage.typeInSearchInput(doctorToDelete);
+    userPage.checkUsernameTextDoesNotExist(doctorToDelete);
   });
 
   it("linking skills for users and verify its reflection in profile", () => {

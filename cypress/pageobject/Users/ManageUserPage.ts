@@ -367,6 +367,19 @@ export class ManageUserPage {
     cy.get("#select-facility").should("be.visible");
   }
 
+  verifyDeleteButtonNotExist() {
+    cy.get("[data-testid='user-delete-button']").should("not.exist");
+  }
+
+  verifyDeleteButtonVisible() {
+    cy.get("[data-testid='user-delete-button']").scrollIntoView();
+    cy.get("[data-testid='user-delete-button']").should("be.visible");
+  }
+
+  clickDeleteButton() {
+    cy.get("[data-testid='user-delete-button']").click();
+  }
+
   clickAddSkillButton() {
     cy.intercept("GET", "**/api/v1/skill/**").as("getSkills");
     cy.get("#add-skill-button").click();
