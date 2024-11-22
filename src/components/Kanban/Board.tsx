@@ -58,7 +58,7 @@ export default function KanbanBoard<T extends { id: string }>(
       </div>
       <DragDropContext onDragEnd={props.onDragEnd}>
         <div className="h-full overflow-scroll" ref={board}>
-          <div className="flex items-stretch px-0 pb-2 max-[915px]:flex-wrap max-[915px]:gap-5 max-[915px]:mb-5">
+          <div className="flex items-stretch px-0 pb-2 md:flex-wrap md:gap-5 md:mb-5 lg:gap-6 lg:mb-6 xl:gap-8 xl:mb-8">
             {props.sections.map((section, i) => (
               <KanbanSection<T>
                 key={i}
@@ -146,7 +146,7 @@ export function KanbanSection<T extends { id: string }>(
         <div
           ref={provided.innerRef}
           className={
-            "relative mr-2 w-[300px] shrink-0 rounded-xl bg-secondary-200 max-[915px]:border max-[915px]:border-solid max-[915px]:border-[rgb(168,168,168)]"
+            "relative mr-2 w-[300px] shrink-0 rounded-xl bg-secondary-200 max-[915px]:border max-[915px]:border-solid max-[915px]:border-gray-400"
           }
         >
           <div className="sticky top-0 rounded-xl bg-secondary-200 pt-2">
