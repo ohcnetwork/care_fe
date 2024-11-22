@@ -59,12 +59,18 @@ jobs:
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
           on_retry_command: sleep 10
 
-      - name: Cache Docker images and volumes
+      - name: Export Docker state
+        run: |
+          mkdir -p docker-cache
+          # Save images
+          docker save $(docker images -q) > docker-cache/images.tar
+          # Save volumes
+          docker run --rm --volumes-from $(docker ps -q) -v $(pwd)/docker-cache:/backup alpine tar cvf /backup/volumes.tar /var/lib/docker/volumes/
+
+      - name: Cache Docker state
         uses: actions/cache@v3
         with:
-          path: |
-            /var/lib/docker
-            ~/.docker
+          path: docker-cache
           key: ${{ runner.os }}-docker-${{ github.sha }}
 
       - name: Set up Node.js
@@ -131,13 +137,12 @@ jobs:
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
 
-      - name: Restore Docker cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            /var/lib/docker
-            ~/.docker
-          key: ${{ runner.os }}-docker-${{ github.sha }}
+      - name: Restore Docker state
+        run: |
+          # Load images
+          docker load < docker-cache/images.tar
+          # Restore volumes
+          docker run --rm -v $(pwd)/docker-cache:/backup -v /var/lib/docker/volumes/:/var/lib/docker/volumes/ alpine tar xvf /backup/volumes.tar
 
       - name: Start backend 🐳
         run: |
