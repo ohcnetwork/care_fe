@@ -111,7 +111,12 @@ export default defineConfig(({ mode }) => {
           REACT_SENTRY_DSN: z.string().url().optional(),
           REACT_SENTRY_ENVIRONMENT: z.string().optional(),
 
-          REACT_PLAUSIBLE_SITE_DOMAIN: z.string().url().optional(),
+          REACT_PLAUSIBLE_SITE_DOMAIN: z
+            .string()
+            .regex(/^[a-zA-Z0-9][a-zA-Z0-9-_.]*\.[a-zA-Z]{2,}$/)
+            .optional()
+            .describe("Domain name without protocol (e.g., sub.domain.com)"),
+
           REACT_PLAUSIBLE_SERVER_URL: z.string().url().optional(),
           REACT_CDN_URLS: z
             .string()

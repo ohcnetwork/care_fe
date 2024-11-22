@@ -1,4 +1,5 @@
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
 
 import LoginPage from "../../pageobject/Login/LoginPage";
 import PatientHome from "../../pageobject/Patient/PatientHome";
@@ -163,15 +164,15 @@ describe("Patient Homepage present functionalities", () => {
       .invoke("text")
       .then((patientOne: string) => {
         firstPatientPageOne = patientOne.trim();
-        patientHome.clickNextPage();
-        patientHome.verifySecondPageUrl();
+        pageNavigation.navigateToNextPage();
+        pageNavigation.verifyCurrentPageNumber(2);
         cy.get('[data-cy="patient"]')
           .first()
           .invoke("text")
           .then((patientTwo: string) => {
             const firstPatientPageTwo = patientTwo.trim();
             expect(firstPatientPageOne).not.to.eq(firstPatientPageTwo);
-            patientHome.clickPreviousPage();
+            pageNavigation.navigateToPreviousPage();
           });
       });
   });
