@@ -8,9 +8,98 @@ on:
   workflow_dispatch:
 
 jobs:
-  cypress-run:
+  prepare:
     permissions: write-all
     if: github.repository == 'ohcnetwork/care_fe'
+    runs-on: ubuntu-latest
+    env:
+      REACT_CARE_API_URL: http://localhost:9000
+      REACT_ENABLED_APPS: "ohcnetwork/care_hcx_fe@main"
+      REACT_ENABLE_HCX: true
+    steps:
+      - name: Checkout 📥
+        uses: actions/checkout@v3
+
+      - name: Determine PR Origin
+        id: pr_origin
+        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
+
+      - name: Set backend branch
+        id: backend-branch
+        run: |
+          if [[ '${{ github.event.pull_request.base.ref }}' == 'staging' ]]; then
+            echo "branch=staging" >> $GITHUB_OUTPUT
+          else
+            echo "branch=develop" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout care 📥
+        uses: actions/checkout@v3
+        with:
+          repository: ohcnetwork/care
+          path: care
+          ref: ${{ steps.backend-branch.outputs.branch }}
+
+      - name: Setup backend 🐳
+        run: |
+          cd care
+          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
+          echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
+          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
+          make docker_config_file=docker-compose.pre-built.yaml up 
+          make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
+        env:
+          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
+
+      - name: Wait for care to be up ♻
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 2
+          max_attempts: 10
+          command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+          on_retry_command: sleep 10
+
+      - name: Cache Docker images and volumes
+        uses: actions/cache@v3
+        with:
+          path: |
+            /var/lib/docker
+            ~/.docker
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies 📦
+        run: npm run install-all
+
+      - name: Build ⚙️
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+
+      - name: Cache build output
+        uses: actions/cache@v3
+        with:
+          path: |
+            dist
+            node_modules
+          key: ${{ runner.os }}-build-${{ github.sha }}
+
+      - name: Cache PR origin info
+        uses: actions/cache@v3
+        with:
+          path: .github/pr_origin
+          key: ${{ runner.os }}-pr-origin-${{ github.sha }}
+        run: |
+          mkdir -p .github
+          echo "${{ steps.pr_origin.outputs.is_forked }}" > .github/pr_origin
+
+  cypress-run:
+    needs: prepare
+    permissions: write-all
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -40,40 +129,50 @@ jobs:
           path: care
           ref: ${{ steps.backend-branch.outputs.branch }}
 
-      - name: Start care docker containers 🐳
+      - name: Restore Docker cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            /var/lib/docker
+            ~/.docker
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+
+      - name: Start backend 🐳
         run: |
           cd care
           echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
           echo "CORS_ALLOWED_ORIGINS=\"[\\\"http://localhost:4000\\\"]\"" >> docker/.prebuilt.env
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
-          make docker_config_file=docker-compose.pre-built.yaml up 
-          make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
-          cd ..
+          make docker_config_file=docker-compose.pre-built.yaml up
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Wait for care to be up ♻
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 1
-          max_attempts: 5
+          timeout_minutes: 2
+          max_attempts: 10
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
-          on_retry_command: sleep 5
+          on_retry_command: sleep 10
 
-      - name: Determine PR Origin
-        id: pr_origin
-        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Restore build cache
+        uses: actions/cache@v3
         with:
-          node-version: "20"
+          path: |
+            dist
+            node_modules
+          key: ${{ runner.os }}-build-${{ github.sha }}
 
-      - name: Install dependencies 📦
-        run: npm run install-all
+      - name: Restore PR origin info
+        uses: actions/cache@v3
+        with:
+          path: .github/pr_origin
+          key: ${{ runner.os }}-pr-origin-${{ github.sha }}
 
-      - name: Build ⚙️
-        run: npm run build
+      - name: Set PR origin
+        id: pr_origin
+        run: |
+          echo "::set-output name=is_forked::$(cat .github/pr_origin)"
 
       - name: Install Specific Chrome Version
         run: |
