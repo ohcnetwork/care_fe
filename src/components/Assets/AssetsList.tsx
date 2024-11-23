@@ -45,7 +45,7 @@ const AssetsList = () => {
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
-  const [totalCount, setTotalCount] = useState<number | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
@@ -75,7 +75,7 @@ const AssetsList = () => {
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
         setAssets(data.results);
-        setTotalCount(data?.count);
+        setTotalCount(data.count);
       }
     },
   });
@@ -370,8 +370,8 @@ const AssetsList = () => {
       <div className="mt-5 gap-3 space-y-2 lg:flex">
         <CountBlock
           text="Total Assets"
-          count={totalCount ? totalCount : null}
-          loading={loading}
+          count={totalCount}
+          loading={loading || !totalCount}
           icon="l-monitor-heart-rate"
           className="flex-1"
         />

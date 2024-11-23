@@ -344,8 +344,8 @@ export default function SampleViewAdmin() {
           <div className="w-full">
             <CountBlock
               text="Total Samples Taken"
-              count={sampeleData ? sampeleData.count : null}
-              loading={isLoading}
+              count={sampeleData?.count || 0}
+              loading={isLoading || !sampeleData}
               icon="l-thermometer"
               className="flex-1"
             />

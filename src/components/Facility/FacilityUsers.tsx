@@ -276,8 +276,8 @@ export default function FacilityUsers(props: any) {
         {facilityUserData && (
           <CountBlock
             text={t("total_users")}
-            count={facilityData ? facilityUserData?.count : null}
-            loading={isLoading}
+            count={facilityUserData.count}
+            loading={isLoading || !facilityUserData}
             icon="l-user-injured"
             className="flex-1"
           />

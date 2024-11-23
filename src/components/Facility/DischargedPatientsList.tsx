@@ -214,7 +214,7 @@ const DischargedPatientsList = ({
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
   const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
     useState("");
-  const [count, setCount] = useState<number | null>(null);
+  const [count, setCount] = useState(0);
 
   const setPhoneNum = (phone_number: string) => {
     setPhoneNumber(phone_number);
@@ -286,8 +286,8 @@ const DischargedPatientsList = ({
           <div className="flex-1">
             <CountBlock
               text="Discharged Patients"
-              count={count ? count : null}
-              loading={facilityQuery.loading || count == null}
+              count={count}
+              loading={facilityQuery.loading || !count}
               icon="l-user-injured"
               className="pb-12"
             />

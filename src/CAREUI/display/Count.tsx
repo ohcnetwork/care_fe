@@ -3,7 +3,7 @@ import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import { classNames } from "@/Utils/utils";
 
 interface Props {
-  count: number | null;
+  count: number;
   text: string;
   loading: boolean;
   icon: IconName;
@@ -21,7 +21,7 @@ export default function CountBlock(props: Props) {
           <dt className="mb-1 truncate text-sm font-semibold text-secondary-700">
             {props.text}
           </dt>
-          {props.loading || props.count == null ? (
+          {props.loading ? (
             <dd className="h-10 w-full max-w-[100px] animate-pulse rounded-lg bg-secondary-300" />
           ) : (
             <dd id="count" className="text-5xl font-black leading-9">
