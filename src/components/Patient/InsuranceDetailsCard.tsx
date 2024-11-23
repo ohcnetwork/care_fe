@@ -14,7 +14,7 @@ export const InsuranceDetailsCard = (props: InsuranceDetails) => {
   return (
     <div className="w-full">
       <div className="h-full space-y-2 pr-5">
-        <div className="grid grid-cols-1 gap-2 rounded-md border border-secondary-400 bg-gray-50 p-5 sm:grid-cols-2 md:grid-cols-2">
+        <div className="mb-2 grid grid-cols-1 gap-2 rounded-md border border-secondary-400 bg-gray-50 p-5 sm:grid-cols-2 md:grid-cols-2">
           <div className=" ">
             <div className="text-sm font-semibold leading-5 text-zinc-400">
               {t("insurance__member_id")}
