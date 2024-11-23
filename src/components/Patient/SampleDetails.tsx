@@ -5,7 +5,7 @@ import Card from "@/CAREUI/display/Card";
 
 import { Badge } from "@/components/ui/badge";
 import { CardContent, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import  Separator  from "@/components/ui/separator";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
