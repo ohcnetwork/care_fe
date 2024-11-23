@@ -41,8 +41,6 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchNotes = async () => {
-    setIsLoading(true);
-
     const { data } = await request(routes.getPatientNotes, {
       pathParams: {
         patientId: props.state.patientId || "",
@@ -69,18 +67,20 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
         }));
       }
     }
-    setIsLoading(false);
-    setReload?.(false);
   };
 
   useEffect(() => {
     if (reload) {
-      fetchNotes();
+      fetchNotes().then(() => {
+        setIsLoading(false);
+        setReload?.(false);
+      });
     }
   }, [reload]);
 
   useEffect(() => {
-    fetchNotes();
+    setIsLoading(true);
+    setReload?.(true);
   }, [thread]);
 
   useEffect(() => {
