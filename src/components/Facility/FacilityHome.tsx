@@ -38,6 +38,7 @@ import {
   USER_TYPES,
 } from "@/common/constants";
 
+import { PLUGIN_Component } from "@/PluginEngine";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import { CameraFeedPermittedUserTypes } from "@/Utils/permissions";
@@ -46,6 +47,8 @@ import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
 import { sleep } from "@/Utils/utils";
+
+import { patientRegisterAuth } from "../Patient/PatientRegister";
 
 type Props = {
   facilityId: string;
@@ -423,13 +426,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                 >
                   {t("view_users")}
                 </DropdownItem>
-                <DropdownItem
-                  id="view-abdm-records"
-                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
-                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
-                >
-                  {t("view_abdm_records")}
-                </DropdownItem>
+                <PLUGIN_Component
+                  __name="ManageFacilityOptions"
+                  facility={facilityData}
+                />
                 {hasPermissionToDeleteFacility ? (
                   <DropdownItem
                     id="delete-facility"
@@ -460,17 +460,19 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-              <ButtonV2
-                variant="primary"
-                ghost
-                border
-                className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() => navigate(`/facility/${facilityId}/patient`)}
-                authorizeFor={NonReadOnlyUsers}
-              >
-                <CareIcon icon="l-plus" className="text-lg" />
-                <span className="text-sm">{t("add_details_of_patient")}</span>
-              </ButtonV2>
+              {patientRegisterAuth(authUser, facilityData, facilityId) && (
+                <ButtonV2
+                  variant="primary"
+                  ghost
+                  border
+                  className="mt-2 flex w-full flex-row justify-center md:w-auto"
+                  onClick={() => navigate(`/facility/${facilityId}/patient`)}
+                  authorizeFor={NonReadOnlyUsers}
+                >
+                  <CareIcon icon="l-plus" className="text-lg" />
+                  <span className="text-sm">{t("add_details_of_patient")}</span>
+                </ButtonV2>
+              )}
               <ButtonV2
                 id="view-patient-facility-list"
                 variant="primary"

@@ -1,6 +1,7 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientFileUpload } from "../../pageobject/Patient/PatientFileupload";
+
 const loginPage = new LoginPage();
 const patientPage = new PatientPage();
 const patientFileUpload = new PatientFileUpload();
@@ -13,9 +14,9 @@ function runTests(
     const cypressAudioName = "cypress audio";
     const cypressFileName = "cypress name";
     const newFileName = "cypress modified name";
-    const patientNameOne = "Dummy Patient 3";
-    const patientNameTwo = "Dummy Patient 4";
-    const patientNameThree = "Dummy Patient 5";
+    const patientNameOne = "Dummy Patient Three";
+    const patientNameTwo = "Dummy Patient Four";
+    const patientNameThree = "Dummy Patient Five";
     before(() => {
       loginPage.loginAsDistrictAdmin();
       cy.saveLocalStorage();

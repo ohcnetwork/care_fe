@@ -22,7 +22,7 @@ export class PatientPage {
 
   selectFacility(facilityName: string) {
     cy.typeAndSelectOption("input[name='facilities']", facilityName);
-    cy.submitButton("Select");
+    cy.clickSubmitButton("Select");
   }
 
   interceptCreatePatientAPI() {
@@ -56,7 +56,7 @@ export class PatientPage {
 
   typePatientAge(age: string) {
     cy.clickAndSelectOption("#patientAge", "Age");
-    cy.submitButton("Confirm");
+    cy.clickSubmitButton("Confirm");
     cy.get("#age").clear().type(age);
   }
 
@@ -217,6 +217,10 @@ export class PatientPage {
 
   visitUpdatePatientUrl() {
     cy.visit(patient_url + "/update");
+  }
+
+  clickPatientUpdateDetails() {
+    cy.verifyAndClickElement("#update-patient-details", "Update Details");
   }
 
   interceptFacilities() {

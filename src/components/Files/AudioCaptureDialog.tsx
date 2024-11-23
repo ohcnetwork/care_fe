@@ -4,10 +4,11 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import useRecorder from "@/hooks/useRecorder";
 import { useTimer } from "@/hooks/useTimer";
 
 import * as Notify from "@/Utils/Notifications";
+
+import useVoiceRecorder from "../../Utils/useVoiceRecorder";
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -27,8 +28,8 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
   const [status, setStatus] = useState<Status | null>(null);
   const { t } = useTranslation();
 
-  const [audioURL, , startRecording, stopRecording, , resetRecording] =
-    useRecorder((permission: boolean) => {
+  const { audioURL, resetRecording, startRecording, stopRecording } =
+    useVoiceRecorder((permission: boolean) => {
       if (!permission) {
         handleStopRecording();
         resetRecording();
@@ -132,7 +133,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
         <div>
           <h2 className="font-bold text-white">{t("audio__record")}</h2>
           <div className="text-secondary-200">{t("audio__record_helper")}</div>
-          <div className="mt-4">
+          <div className="mt-4" id="start-recording">
             <button
               onClick={handleStartRecording}
               className="inline-flex aspect-square w-32 items-center justify-center rounded-full bg-white/10 text-6xl text-white hover:bg-white/20"
