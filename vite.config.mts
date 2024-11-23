@@ -169,7 +169,6 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       include: [
         ...getPluginDependencies(),
-        "@radix-ui/react-separator",
       ],
     },
     build: {
