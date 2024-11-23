@@ -1,17 +1,21 @@
 import React, {
-  useState,
   ChangeEventHandler,
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
-import { Warn } from "@/Utils/Notifications";
-import useDragAndDrop from "@/Utils/useDragAndDrop";
-import ButtonV2, { Cancel, Submit } from "./components/ButtonV2";
-import Webcam from "react-webcam";
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
-import DialogModal from "./Dialog";
+import Webcam from "react-webcam";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+
+import useDragAndDrop from "@/hooks/useDragAndDrop";
+
+import { Warn } from "@/Utils/Notifications";
 
 interface Props {
   title: string;
@@ -288,7 +292,7 @@ const AvatarEditModal = ({
                 <ButtonV2
                   id="save-cover-image"
                   onClick={uploadAvatar}
-                  disabled={isProcessing}
+                  disabled={isProcessing || !selectedFile}
                 >
                   {isProcessing ? (
                     <CareIcon

@@ -1,5 +1,10 @@
 import { EventEmitter } from "events";
-import { VitalsDataBase, VitalsValueBase, VitalsWaveformBase } from "./types";
+
+import {
+  VitalsDataBase,
+  VitalsValueBase,
+  VitalsWaveformBase,
+} from "@/components/VitalsMonitor/types";
 
 const WAVEFORM_KEY_MAP: Record<string, EventName> = {
   P: "pressure-waveform",

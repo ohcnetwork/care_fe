@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
-import useSlug from "@/common/hooks/useSlug";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import AddICD11Diagnosis from "@/components/Diagnosis/ConsultationDiagnosisBuilder/AddICD11Diagnosis";
+import ConsultationDiagnosisEntry from "@/components/Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisEntry";
+import PrincipalDiagnosisSelect from "@/components/Diagnosis/ConsultationDiagnosisBuilder/PrincipalDiagnosisSelect";
+import DiagnosesRoutes from "@/components/Diagnosis/routes";
 import {
   ConsultationDiagnosis,
   CreateDiagnosis,
   ICD11DiagnosisModel,
-} from "../types";
-import AddICD11Diagnosis from "./AddICD11Diagnosis";
-import ConsultationDiagnosisEntry from "./ConsultationDiagnosisEntry";
-import request from "../../../Utils/request/request";
-import DiagnosesRoutes from "../routes";
-import * as Notification from "../../../Utils/Notifications";
-import PrincipalDiagnosisSelect from "./PrincipalDiagnosisSelect";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+} from "@/components/Diagnosis/types";
+
+import useSlug from "@/hooks/useSlug";
+
+import * as Notification from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
 
 interface CreateDiagnosesProps {
   className?: string;

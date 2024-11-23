@@ -1,7 +1,8 @@
-import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { v4 as uuidv4 } from "uuid";
-import LoginPage from "../../pageobject/Login/LoginPage";
+
+import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Asset", () => {
   const assetPage = new AssetPage();
@@ -11,7 +12,7 @@ describe("Asset", () => {
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
-    loginPage.loginAsDisctrictAdmin();
+    loginPage.loginAsDistrictAdmin();
     cy.saveLocalStorage();
   });
 

@@ -1,7 +1,8 @@
-import { useLocationChange } from "raviger";
-import Script from "@/components/Common/Script";
-import { useEffect } from "react";
 import careConfig from "@careConfig";
+import { useLocationChange } from "raviger";
+import { useEffect } from "react";
+
+import Script from "@/components/Common/Script";
 
 export default function Plausible() {
   useLocationChange(() => {
@@ -9,6 +10,16 @@ export default function Plausible() {
   });
 
   useEffect(() => {
+    const missingConfig = [];
+    if (!careConfig.plausible.domain) missingConfig.push("domain");
+    if (!careConfig.plausible.server) missingConfig.push("server");
+    if (missingConfig.length > 0) {
+      console.error(
+        `Plausible analytics disabled. Missing configuration: ${missingConfig.join(", ")}`,
+      );
+      return;
+    }
+
     plausible("pageview");
   }, []);
 

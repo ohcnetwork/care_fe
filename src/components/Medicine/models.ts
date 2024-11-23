@@ -1,4 +1,4 @@
-import { PRESCRIPTION_ROUTES } from "./CreatePrescriptionForm";
+import { PRESCRIPTION_ROUTES } from "@/components/Medicine/CreatePrescriptionForm";
 import { UserBareMinimum } from "@/components/Users/models";
 
 export const DOSAGE_UNITS = [

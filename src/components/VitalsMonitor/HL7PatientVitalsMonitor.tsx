@@ -1,14 +1,21 @@
-import { useEffect } from "react";
-import useHL7VitalsMonitor from "./useHL7VitalsMonitor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import WaveformLabels from "./WaveformLabels";
-import { classNames } from "../../Utils/utils";
-import { IVitalsComponentProps, VitalsValueBase } from "./types";
-import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "@/common/hooks/useAuthUser";
 import dayjs from "dayjs";
-import VitalsMonitorHeader from "./VitalsMonitorHeader";
-import VitalsMonitorFooter from "./VitalsMonitorFooter";
+import { useEffect } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import VitalsMonitorFooter from "@/components/VitalsMonitor/VitalsMonitorFooter";
+import VitalsMonitorHeader from "@/components/VitalsMonitor/VitalsMonitorHeader";
+import WaveformLabels from "@/components/VitalsMonitor/WaveformLabels";
+import {
+  IVitalsComponentProps,
+  VitalsValueBase,
+} from "@/components/VitalsMonitor/types";
+import useHL7VitalsMonitor from "@/components/VitalsMonitor/useHL7VitalsMonitor";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import { classNames } from "@/Utils/utils";
 
 const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;

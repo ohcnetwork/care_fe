@@ -1,4 +1,4 @@
-// FacilityPage.ts
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 class FacilityPage {
   visitCreateFacilityPage() {
@@ -14,19 +14,19 @@ class FacilityPage {
     cy.get("#search").click().type(facilityName);
   }
 
+  selectFacilityType(facility: string) {
+    advanceFilters.selectFacilityType(facility);
+  }
+
+  selectLocalBody(localBody: string) {
+    advanceFilters.selectLocalBody(localBody);
+  }
+
   visitUpdateFacilityPage(url: string) {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.visit(url);
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
     cy.get("#manage-facility-dropdown button").should("be.visible");
-  }
-
-  clickUpdateFacilityType(facilityType: string) {
-    cy.get("#facility_type")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(facilityType).click();
-      });
   }
 
   fillFacilityName(name: string) {
@@ -35,21 +35,6 @@ class FacilityPage {
 
   fillPincode(pincode: string) {
     cy.get("#pincode").click().type(pincode);
-  }
-
-  selectState(state: string) {
-    cy.get("div#state button").click();
-    cy.get("[role='option']").contains(state).click();
-  }
-
-  selectDistrict(district: string) {
-    cy.get("div#district button").click();
-    cy.get("[role='option']").contains(district).click();
-  }
-
-  selectLocalBody(localBody: string) {
-    cy.get("div#local_body button").click();
-    cy.get("[role='option']").contains(localBody).click();
   }
 
   selectWard(ward: string) {
@@ -291,7 +276,7 @@ class FacilityPage {
   }
 
   confirmDeleteFacility() {
-    cy.submitButton("Delete");
+    cy.clickSubmitButton("Delete");
   }
 
   selectLocation(location: string) {
@@ -314,6 +299,10 @@ class FacilityPage {
   }
 
   verifySuccessNotification(message: string) {
+    cy.verifyNotification(message);
+  }
+
+  verifyErrorNotification(message: string) {
     cy.verifyNotification(message);
   }
 

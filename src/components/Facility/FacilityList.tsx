@@ -1,23 +1,27 @@
-import { useEffect } from "react";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CountBlock from "../../CAREUI/display/Count";
-import ExportMenu from "@/components/Common/Export";
-import { FACILITY_TYPES } from "@/common/constants";
-import { FacilityCard } from "./FacilityCard";
-import FacilityFilter from "./FacilityFilter";
-import { FacilityModel } from "./models";
-import Page from "@/components/Common/components/Page";
-import SearchInput from "../Form/SearchInput";
-
 import { navigate } from "raviger";
-import useFilters from "@/common/hooks/useFilters";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+
+import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { FacilityCard } from "@/components/Facility/FacilityCard";
+import FacilityFilter from "@/components/Facility/FacilityFilter";
+import { FacilityModel } from "@/components/Facility/models";
+import SearchInput from "@/components/Form/SearchInput";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useFilters from "@/hooks/useFilters";
+
+import { FACILITY_TYPES } from "@/common/constants";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+
 export const FacilityList = () => {
   const {
     qParams,

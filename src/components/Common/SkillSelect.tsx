@@ -1,8 +1,10 @@
 import { useCallback } from "react";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import { SkillModel, SkillObjectModel } from "../Users/models";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
+
+import AutoCompleteAsync from "@/components/Form/AutoCompleteAsync";
+import { SkillModel, SkillObjectModel } from "@/components/Users/models";
+
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 
 interface SkillSelectProps {
   id?: string;
