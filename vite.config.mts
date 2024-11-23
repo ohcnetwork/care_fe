@@ -177,7 +177,6 @@ export default defineConfig(({ mode }) => {
       assetsDir: "bundle",
       sourcemap: true,
       rollupOptions: {
-        external: ["@radix-ui/react-separator"],
         output: {
           manualChunks(id, { getModuleInfo }) {
             if (id.includes("node_modules")) {
