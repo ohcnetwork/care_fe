@@ -454,7 +454,7 @@ const AssetsList = () => {
           <div className="grow">
             <div className="py-8 md:px-5">
               {manageAssets}
-              {totalCount !== null && <Pagination totalCount={totalCount} />}
+              <Pagination totalCount={totalCount} />
             </div>
           </div>
         </>
