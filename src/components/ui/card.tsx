@@ -36,7 +36,6 @@ const CardTitle = React.forwardRef<
   <h2
     ref={ref}
     className={cn("font-semibold leading-none tracking-tight", className)}
-    aria-description="true"
     {...props}
   />
 ));
