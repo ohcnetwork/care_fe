@@ -12,6 +12,8 @@ type Props = {
   disabled?: boolean;
   className?: string;
   title: string;
+  onClose?: boolean;
+  closeFeature?: (value: boolean) => void;
 };
 
 export default function PrintPreview(props: Props) {
@@ -20,16 +22,25 @@ export default function PrintPreview(props: Props) {
 
   return (
     <Page title={props.title}>
-      <div className="mx-auto my-8 w-[50rem]">
-        <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
+      <div className="mx-auto my-8 max-w-full px-4 lg:w-[50rem]">
+        <div className="mb-3 flex flex-wrap justify-end gap-2">
           <ButtonV2 disabled={props.disabled} onClick={print}>
             <CareIcon icon="l-print" className="text-lg" />
             {t("print")}
           </ButtonV2>
+          {props.onClose && (
+            <ButtonV2
+              variant="secondary"
+              onClick={() => props.closeFeature && props.closeFeature(false)}
+            >
+              <CareIcon icon="l-times" className="mr-2 text-base" />{" "}
+              {t("close")}
+            </ButtonV2>
+          )}
         </div>
 
         <ZoomProvider initialScale={normalScale}>
-          <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out lg:origin-top print:transform-none">
+          <ZoomTransform className="origin-top-left bg-white p-4 text-sm shadow-2xl transition-all duration-200 ease-in-out lg:origin-top lg:p-10 print:transform-none">
             <div
               id="section-to-print"
               className={classNames("w-full", props.className)}
@@ -38,7 +49,9 @@ export default function PrintPreview(props: Props) {
             </div>
           </ZoomTransform>
 
-          <ZoomControls disabled={props.disabled} />
+          <div className="hidden sm:block">
+            <ZoomControls disabled={props.disabled} />
+          </div>
         </ZoomProvider>
       </div>
     </Page>
