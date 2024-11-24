@@ -167,9 +167,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     optimizeDeps: {
-      include: [
-        ...getPluginDependencies(),
-      ],
+      include: getPluginDependencies(),
     },
     build: {
       outDir: "build",
