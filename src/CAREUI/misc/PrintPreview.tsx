@@ -17,7 +17,7 @@ type Props = {
 };
 
 export default function PrintPreview(props: Props) {
-  const normalScale = useBreakpoints({ default: 0.44, md: 1 });
+  const normalScale = useBreakpoints({ default: 1, md: 1 });
   const { t } = useTranslation();
 
   return (
