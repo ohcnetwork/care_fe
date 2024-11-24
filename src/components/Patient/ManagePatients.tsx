@@ -2,7 +2,6 @@ import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useDebounce } from "use-debounce";
 
 import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
@@ -14,6 +13,7 @@ import SortDropdownMenu from "@/components/Common/SortDropdown";
 import Tabs from "@/components/Common/Tabs";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import useDebounce from "@/hooks/useDebounce";
 import useFilters from "@/hooks/useFilters";
 
 import {
@@ -292,10 +292,8 @@ export const PatientManager = () => {
     return cleanedData;
   };
 
-  const [debouncedParams] = useDebounce(params, 1000); // Debounce time in milliseconds
-
   const { loading: isLoading, data } = useQuery(routes.patientList, {
-    query: debouncedParams, // Pass the debounced params
+    query: JSON.parse(useDebounce(JSON.stringify(params), 1000)),
   });
 
   const getTheCategoryFromId = () => {
