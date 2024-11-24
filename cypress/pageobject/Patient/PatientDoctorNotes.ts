@@ -5,6 +5,7 @@ export class PatientDoctorNotes {
   }
 
   addDiscussionNotes(notes: string) {
+    cy.wait(3000);
     cy.get("#discussion_notes_textarea").scrollIntoView();
     cy.get("#discussion_notes_textarea").click().type(notes);
   }

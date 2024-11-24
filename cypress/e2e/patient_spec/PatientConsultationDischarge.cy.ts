@@ -106,6 +106,7 @@ describe("Patient Discharge based on multiple reason", () => {
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
+    cy.wait(2000);
     cy.closeNotification();
     // submit the discharge pop-up
     cy.clickSubmitButton("Confirm Discharge");

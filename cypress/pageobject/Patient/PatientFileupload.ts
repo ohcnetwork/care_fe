@@ -35,6 +35,7 @@ export class PatientFileUpload {
   }
 
   verifyUploadFilePresence(fileName: string) {
+    cy.wait(3000);
     cy.get("#file-div").scrollIntoView();
     cy.verifyContentPresence("#file-div", [fileName]);
   }
