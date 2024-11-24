@@ -302,7 +302,7 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <PrintPreview title={t("Patient Referral Letter")}>
+      <PrintPreview title={t("Patient Referral Letter")} onClose={true} closeFeature={setIsPrintMode} >
         <Card
           id="section-to-print"
           className="print mx-auto w-full bg-white sm:mx-2 sm:my-2"
@@ -429,16 +429,7 @@ export default function ShiftDetails(props: { id: string }) {
   return (
     <div>
       {isPrintMode ? (
-        <div className="my-4 xl:relative">
-          <div className="relative top-[190px] my-5 mr-[100px] flex justify-end gap-3 xl:absolute xl:right-6 xl:top-7 xl:justify-end">
-            <ButtonV2
-              onClick={(_) => setIsPrintMode(false)}
-              variant="secondary"
-            >
-              <CareIcon icon="l-times" className="mr-2 text-base" />{" "}
-              {t("close")}
-            </ButtonV2>
-          </div>
+        <div className="my-4">
           {printData(data)}
         </div>
       ) : (
