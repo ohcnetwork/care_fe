@@ -201,7 +201,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
       ).length;
 
       if (
-        source !== "save-and-add-more" ||
+        source !== "bed-capacity-save" ||
         disabledBedTypesLength === BED_TYPES.length
       )
         handleClose();
@@ -242,6 +242,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
           <Form
             defaults={state.form}
             onSubmit={handleSubmit}
+            submitBtnId="bed-capacity-save-and-exit"
             onCancel={handleClose}
             submitLabel={buttonText}
             className="my-auto p-0"
@@ -252,7 +253,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
                 ? []
                 : [
                     {
-                      id: "save-and-add-more",
+                      id: "bed-capacity-save",
                       type: "submit",
                       label: additionalButtonLabel,
                     },

@@ -29,6 +29,7 @@ type Props<T extends FormDetails> = {
   noPadding?: true;
   disabled?: boolean;
   submitLabel?: string;
+  submitBtnId?: string;
   cancelLabel?: string;
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
@@ -149,7 +150,7 @@ const Form = <T extends FormDetails>({
               label={props.cancelLabel ?? "Cancel"}
             />
             <Submit
-              id="save"
+              id={props.submitBtnId ?? "submit"}
               data-testid="submit-button"
               type="submit"
               disabled={disabled || !isDirty}

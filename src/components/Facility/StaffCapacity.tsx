@@ -138,7 +138,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
       });
       handleUpdate();
     }
-    if (source !== "save-and-add-more") handleClose();
+    if (source !== "doctor-save") handleClose();
   };
 
   return (
@@ -149,6 +149,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
         <Form
           defaults={state.form}
           onSubmit={handleSubmit}
+          submitBtnId="save-and-exit"
           onCancel={handleClose}
           submitLabel={buttonText}
           className="my-auto p-0"
@@ -159,7 +160,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
               ? []
               : [
                   {
-                    id: "save-and-add-more",
+                    id: "doctor-save",
                     type: "submit",
                     label: additionalButtonLabel,
                   },
