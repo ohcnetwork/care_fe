@@ -284,6 +284,7 @@ export const Demography = (props: PatientProps) => {
             id: "volunteer-contact",
             details: [
               <EmergencyContact
+                key="volunteer-contact"
                 number={patientData.assigned_to_object?.alt_phone_number}
                 name={
                   patientData.assigned_to_object

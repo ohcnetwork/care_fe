@@ -1,6 +1,6 @@
 export class SampleTestPage {
   visitSampleRequestPage(): void {
-    cy.get("a").contains("Sample Tests").click();
+    cy.get("a").contains("Service Request").click();
     cy.verifyAndClickElement("#sample-request-btn", "Request Sample Test");
     cy.url().should("include", "/sample-test");
   }

@@ -477,7 +477,7 @@ export const PatientHome = (props: {
                 </div>
                 <div className="mt-2 h-full space-y-2">
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
-                    {page == "service-request" && NonReadOnlyUsers && (
+                    {page == "service-request" && (
                       <div>
                         <ButtonV2
                           className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
