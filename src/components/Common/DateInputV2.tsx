@@ -109,9 +109,7 @@ const DateInputV2: React.FC<Props> = ({
         setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "month").toDate());
         break;
       case "month":
-        if (
-          datePickerHeaderDate.getFullYear() < (max?.getFullYear() ?? -Infinity)
-        ) {
+        if (!max || datePickerHeaderDate.getFullYear() < max.getFullYear()) {
           setDatePickerHeaderDate((prev) =>
             dayjs(prev).add(1, "year").toDate(),
           );
