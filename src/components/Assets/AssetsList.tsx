@@ -210,7 +210,7 @@ const AssetsList = () => {
     );
 
   let manageAssets = null;
-  if (loading) {
+  if (loading || !assetsExist) {
     manageAssets = (
       <div className="col-span-3 w-full py-8 text-center">
         <Loading />
