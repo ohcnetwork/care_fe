@@ -156,7 +156,9 @@ export default function UserSummaryTab({
           t("personal_information"),
           authUser.username === userData.username
             ? t("personal_information_note_self")
-            : t("personal_information_note"),
+            : editPermissions
+              ? t("personal_information_note")
+              : t("personal_information_note_view"),
           renderBasicInformation,
           userColumnsData,
         )}
@@ -164,7 +166,9 @@ export default function UserSummaryTab({
           t("contact_info"),
           authUser.username === userData.username
             ? t("contact_info_note_self")
-            : t("contact_info_note"),
+            : editPermissions
+              ? t("contact_info_note")
+              : t("contact_info_note_view"),
           renderContactInformation,
           userColumnsData,
         )}
@@ -172,7 +176,9 @@ export default function UserSummaryTab({
           t("professional_info"),
           authUser.username === userData.username
             ? t("professional_info_note_self")
-            : t("professional_info_note"),
+            : editPermissions
+              ? t("professional_info_note")
+              : t("professional_info_note_view"),
           renderProfessionalInformation,
           userColumnsData,
         )}
@@ -181,7 +187,9 @@ export default function UserSummaryTab({
             t("reset_password"),
             authUser.username === userData.username
               ? t("reset_password_note_self")
-              : t("reset_password_note"),
+              : editPermissions
+                ? t("reset_password_note")
+                : t("reset_password_note_view"),
             UserResetPassword,
             userColumnsData,
           )}
