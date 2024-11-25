@@ -1,14 +1,17 @@
-import fs from "fs";
-import path from "path";
-import { defineConfig, loadEnv } from "vite";
-import { createRequire } from "node:module";
-import { VitePWA } from "vite-plugin-pwa";
+import { ValidateEnv } from "@julr/vite-plugin-validate-env";
 import react from "@vitejs/plugin-react-swc";
-import checker from "vite-plugin-checker";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 import DOMPurify from "dompurify";
+import fs from "fs";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
+import { createRequire } from "node:module";
+import path from "path";
+import { defineConfig, loadEnv } from "vite";
+import checker from "vite-plugin-checker";
+import { VitePWA } from "vite-plugin-pwa";
+import { viteStaticCopy } from "vite-plugin-static-copy";
+import { z } from "zod";
+
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 
 const pdfWorkerPath = path.join(
@@ -100,6 +103,29 @@ export default defineConfig(({ mode }) => {
       ),
     },
     plugins: [
+      ValidateEnv({
+        validator: "zod",
+        schema: {
+          REACT_CARE_API_URL: z.string().url(),
+
+          REACT_SENTRY_DSN: z.string().url().optional(),
+          REACT_SENTRY_ENVIRONMENT: z.string().optional(),
+
+          REACT_PLAUSIBLE_SITE_DOMAIN: z
+            .string()
+            .regex(/^[a-zA-Z0-9][a-zA-Z0-9-_.]*\.[a-zA-Z]{2,}$/)
+            .optional()
+            .describe("Domain name without protocol (e.g., sub.domain.com)"),
+
+          REACT_PLAUSIBLE_SERVER_URL: z.string().url().optional(),
+          REACT_CDN_URLS: z
+            .string()
+            .optional()
+            .transform((val) => val?.split(" "))
+            .pipe(z.array(z.string().url()).optional())
+            .describe("Optional: Space-separated list of CDN URLs"),
+        },
+      }),
       viteStaticCopy({
         targets: [
           {

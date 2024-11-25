@@ -21,13 +21,12 @@ import HL7PatientVitalsMonitor from "@/components/VitalsMonitor/HL7PatientVitals
 import useVitalsAspectRatioConfig from "@/components/VitalsMonitor/useVitalsAspectRatioConfig";
 import { getVitalsMonitorSocketUrl } from "@/components/VitalsMonitor/utils";
 
+import useBreakpoints from "@/hooks/useBreakpoints";
 import useFilters from "@/hooks/useFilters";
 import useFullscreen from "@/hooks/useFullscreen";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
-
-const PER_PAGE_LIMIT = 6;
 
 const SORT_OPTIONS: SortOption[] = [
   { isAscending: true, value: "bed__name" },
@@ -41,31 +40,34 @@ interface Props {
 }
 
 export default function CentralNursingStation({ facilityId }: Props) {
+  const perPageLimit = useBreakpoints({
+    default: 6,
+    "4xl": 9,
+    "4k": 24,
+  });
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
-    limit: PER_PAGE_LIMIT,
+    limit: perPageLimit,
   });
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
       ...qParams,
       page: qParams.page || 1,
-      limit: PER_PAGE_LIMIT,
-      offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
+      limit: perPageLimit,
+      offset: (qParams.page ? qParams.page - 1 : 0) * perPageLimit,
       asset_class: "HL7MONITOR",
       ordering: qParams.ordering || "bed__name",
       bed_is_occupied:
         qParams.monitors_without_patient === "true" ? undefined : "true",
     },
   });
-
   const totalCount = query.data?.count ?? 0;
   const data = query.data?.results.map((obj) => ({
     patientAssetBed: obj,
     socketUrl: getVitalsMonitorSocketUrl(obj.asset),
   }));
-
   const { config, hash } = useVitalsAspectRatioConfig({
     default: 6 / 11,
     sm: 17 / 11,
@@ -88,7 +90,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           <Pagination
             className=""
             cPage={qParams.page}
-            defaultPerPage={PER_PAGE_LIMIT}
+            defaultPerPage={perPageLimit}
             data={{ totalCount }}
             onChange={(page) => updatePage(page)}
           />
@@ -216,21 +218,23 @@ export default function CentralNursingStation({ facilityId }: Props) {
           {t("no_vitals_present")}
         </div>
       ) : (
-        <div className="3xl:grid-cols-3 mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2">
-          {data.map((props, i) => (
-            <div className="overflow-hidden text-clip" key={i}>
-              <HL7PatientVitalsMonitor
-                patientCurrentBedAssignmentDate={
-                  props.patientAssetBed?.patient?.last_consultation?.current_bed
-                    ?.start_date
-                }
-                key={`${props.patientAssetBed?.bed.id}-${hash}`}
-                patientAssetBed={props.patientAssetBed}
-                socketUrl={props.socketUrl || ""}
-                config={config}
-              />
-            </div>
-          ))}
+        <div className="@container">
+          <div className="mt-1 grid grid-cols-1 gap-1 @5xl:grid-cols-2 @7xl:grid-cols-3 @[140rem]:grid-cols-4 @[180rem]:grid-cols-5 @[240rem]:grid-cols-6">
+            {data.map((props, i) => (
+              <div className="overflow-hidden text-clip" key={i}>
+                <HL7PatientVitalsMonitor
+                  patientCurrentBedAssignmentDate={
+                    props.patientAssetBed?.patient?.last_consultation
+                      ?.current_bed?.start_date
+                  }
+                  key={`${props.patientAssetBed?.bed.id}-${hash}`}
+                  patientAssetBed={props.patientAssetBed}
+                  socketUrl={props.socketUrl || ""}
+                  config={config}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </Page>

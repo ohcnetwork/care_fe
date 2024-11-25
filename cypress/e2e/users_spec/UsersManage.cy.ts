@@ -60,19 +60,15 @@ describe("Manage User", () => {
     advanceFilters.clickAdvancedFiltersButton();
     userPage.typeInFirstName(firstNameUserSkill);
     userPage.typeInLastName(lastNameUserSkill);
+    userPage.selectHomeFacility(facilitytolinkskill);
     advanceFilters.applySelectedFilter();
     userPage.checkUsernameText(usernameToLinkSkill);
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
-    manageUserPage.clickCloseSlideOver();
-    cy.wait(5000); // temporary hack to fix the failure
-    manageUserPage.clicklinkedskillbutton();
+    cy.verifyNotification("Skill added successfully");
+    cy.closeNotification();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
-    manageUserPage.clickUnlinkSkill();
-    manageUserPage.clickSubmit();
-    manageUserPage.selectSkillFromDropdown(linkedskill);
-    manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
     manageUserPage.navigateToFacility();

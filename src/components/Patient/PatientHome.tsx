@@ -242,14 +242,6 @@ export const PatientHome = (props: any) => {
     );
   };
 
-  const isPatientEligibleForNewConsultation = (patientData: PatientModel) => {
-    return patientData.is_active &&
-      (!patientData?.last_consultation ||
-        patientData?.last_consultation?.discharge_date)
-      ? true
-      : false;
-  };
-
   return (
     <Page
       title={t("patient_details")}
@@ -1062,49 +1054,6 @@ export const PatientHome = (props: any) => {
           <div className="hidden lg:block">
             <div className="mt-4 grid grid-cols-6 gap-5 xl:grid-cols-7">
               <div
-                className={classNames(
-                  "w-full rounded-lg border",
-                  isPatientEligibleForNewConsultation(patientData)
-                    ? "cursor-pointer border-green-700 hover:bg-primary-400"
-                    : "border-secondary-700 text-secondary-700 hover:cursor-not-allowed",
-                )}
-                onClick={() =>
-                  isPatientEligibleForNewConsultation(patientData) &&
-                  navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                  )
-                }
-              >
-                <div
-                  className={classNames(
-                    "h-full space-y-2 rounded-lg bg-white p-4 shadow",
-                    isPatientEligibleForNewConsultation(patientData) &&
-                      "hover:bg-secondary-200",
-                  )}
-                >
-                  <div
-                    className={classNames(
-                      "text-center",
-                      isPatientEligibleForNewConsultation(patientData) &&
-                        "text-green-700",
-                    )}
-                  >
-                    <span>
-                      <CareIcon
-                        icon="l-chat-bubble-user"
-                        className="text-5xl"
-                      />
-                    </span>
-                  </div>
-
-                  <div>
-                    <p className="text-center text-sm font-medium">
-                      Add Consultation
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
                 className="w-full"
                 onClick={() => navigate(`/patient/${id}/investigation_reports`)}
               >
@@ -1293,28 +1242,6 @@ export const PatientHome = (props: any) => {
                 <div>
                   <ButtonV2
                     className="w-full"
-                    disabled={
-                      !(
-                        patientData.is_active &&
-                        (!patientData?.last_consultation ||
-                          patientData?.last_consultation?.discharge_date)
-                      )
-                    }
-                    onClick={() =>
-                      navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                      )
-                    }
-                  >
-                    <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon icon="l-chat-bubble-user" className="text-xl" />
-                      Add Consultation
-                    </span>
-                  </ButtonV2>
-                </div>
-                <div>
-                  <ButtonV2
-                    className="w-full"
                     onClick={() =>
                       navigate(`/patient/${id}/investigation_reports`)
                     }
@@ -1368,6 +1295,7 @@ export const PatientHome = (props: any) => {
                       )
                     }
                     authorizeFor={NonReadOnlyUsers}
+                    id="sample-request-btn"
                   >
                     <span className="flex w-full items-center justify-start gap-2">
                       <CareIcon icon="l-medkit" className="text-xl" />

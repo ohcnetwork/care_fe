@@ -317,6 +317,39 @@ describe("Facility Creation", () => {
     );
   });
 
+  it("Should display error when district admin tries to create facility in a different district", () => {
+    facilityPage.visitCreateFacilityPage();
+    facilityPage.fillFacilityName(facilityName);
+    facilityPage.selectFacilityType(facilityType);
+    facilityPage.fillPincode("682001");
+    facilityPage.selectStateOnPincode("Kerala");
+    facilityPage.selectDistrictOnPincode("Kottayam");
+    facilityPage.selectLocalBody("Arpookara");
+    facilityPage.selectWard("5");
+    facilityPage.fillAddress(facilityAddress);
+    facilityPage.fillPhoneNumber(facilityNumber);
+    facilityPage.submitForm();
+    facilityPage.verifyErrorNotification(
+      "You do not have permission to perform this action.",
+    );
+  });
+
+  it("Access Restriction for Non-Admin Users to facility creation page", () => {
+    const nonAdminLoginMethods = [
+      loginPage.loginAsDevDoctor.bind(loginPage),
+      loginPage.loginAsStaff.bind(loginPage),
+    ];
+
+    nonAdminLoginMethods.forEach((loginMethod) => {
+      loginMethod();
+      cy.visit("/facility/create");
+      facilityPage.verifyErrorNotification(
+        "You don't have permission to perform this action. Contact the admin",
+      );
+      cy.clearCookies();
+    });
+  });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
