@@ -57,7 +57,7 @@ export const DailyRoundListDetails = (props: any) => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {[
             {
-              label: "Temperature",
+              label: t("LOG_UPDATE_FIELD_LABEL__temperature"),
               value: dailyRoundListDetailsData.temperature,
             },
             {
@@ -66,44 +66,55 @@ export const DailyRoundListDetails = (props: any) => {
                 ? formatDateTime(dailyRoundListDetailsData.taken_at)
                 : "-",
             },
-            { label: "SpO2", value: dailyRoundListDetailsData.ventilator_spo2 },
+            {
+              label: t("LOG_UPDATE_FIELD_LABEL__ventilator_spo2"),
+              value: dailyRoundListDetailsData.ventilator_spo2,
+            },
             {
               label: "Admitted To *",
               value: dailyRoundListDetailsData.admitted_to,
             },
             {
-              label: "Physical Examination Info",
+              label: t("LOG_UPDATE_FIELD_LABEL__physical_examination_info"),
               value: dailyRoundListDetailsData.physical_examination_info,
             },
             {
-              label: "Other Details",
+              label: t("other_details"),
               value: dailyRoundListDetailsData.other_details,
             },
-            { label: "Pulse (bpm)", value: dailyRoundListDetailsData.pulse },
             {
-              label: "BP",
+              label: t("LOG_UPDATE_FIELD_LABEL__pulse") + " (bpm)",
+              value: dailyRoundListDetailsData.pulse,
+            },
+            {
+              label: t("LOG_UPDATE_FIELD_LABEL__bp"),
               value: (
                 <div className="flex space-x-10">
                   <span>
-                    Systolic: {dailyRoundListDetailsData.bp?.systolic ?? "-"}
+                    {t("systolic")}:{" "}
+                    {dailyRoundListDetailsData.bp?.systolic ?? "-"}
                   </span>
                   <span>
-                    Diastolic: {dailyRoundListDetailsData.bp?.diastolic ?? "-"}
+                    {t("diastolic")}:{" "}
+                    {dailyRoundListDetailsData.bp?.diastolic ?? "-"}
                   </span>
                 </div>
               ),
             },
             {
-              label: "Respiratory Rate (bpm)",
+              label: t("LOG_UPDATE_FIELD_LABEL__resp") + " (bpm)",
               value: dailyRoundListDetailsData.resp,
             },
-            { label: "Rhythm", value: dailyRoundListDetailsData.rhythm },
             {
-              label: "Rhythm Description",
+              label: t("LOG_UPDATE_FIELD_LABEL__rhythm"),
+              value: dailyRoundListDetailsData.rhythm,
+            },
+            {
+              label: t("LOG_UPDATE_FIELD_LABEL__rhythm_detail"),
               value: dailyRoundListDetailsData.rhythm_detail,
             },
             {
-              label: "Level Of Consciousness",
+              label: t("LOG_UPDATE_FIELD_LABEL__consciousness_level"),
               value: dailyRoundListDetailsData.consciousness_level
                 ? t(
                     `CONSCIOUSNESS_LEVEL__${dailyRoundListDetailsData.consciousness_level}`,
@@ -114,11 +125,11 @@ export const DailyRoundListDetails = (props: any) => {
               label: "Recommend Discharge",
               value: dailyRoundListDetailsData.recommend_discharge ? (
                 <span className="inline-block px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">
-                  Yes
+                  {t("yes")}
                 </span>
               ) : (
                 <span className="inline-block px-3 py-1 text-xs font-semibold text-gray-600 bg-gray-200 rounded-full">
-                  No
+                  {t("no")}
                 </span>
               ),
             },
