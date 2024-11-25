@@ -35,123 +35,106 @@ export const DailyRoundListDetails = (props: any) => {
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates`}
     >
       <div
-        className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500"
+        className="mt-4 h-full rounded-lg border border-gray-300 bg-white p-6 text-gray-800 shadow-sm hover:shadow-md hover:border-primary-500"
         id="consultation-preview"
       >
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center border-b pb-4 mb-4">
           <div className="max-w-md">
             <div>
-              <span className="font-semibold leading-relaxed">
-                Patient Category:{" "}
+              <span className="text-lg font-medium">Patient Category: </span>
+              <span className="text-lg text-gray-600">
+                {dailyRoundListDetailsData.patient_category ?? "-"}
               </span>
-              {dailyRoundListDetailsData.patient_category ?? "-"}
             </div>
           </div>
-
-          <div>
-            <div className="mt-2">
-              <ButtonV2
-                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${id}/update`}
-              >
-                Update Details
-              </ButtonV2>
-            </div>
-          </div>
+          <ButtonV2
+            href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${id}/update`}
+          >
+            Update Details
+          </ButtonV2>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <span className="font-semibold leading-relaxed">Temperature: </span>
-            {dailyRoundListDetailsData.temperature ?? "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">Taken at: </span>
-            {dailyRoundListDetailsData.taken_at
-              ? formatDateTime(dailyRoundListDetailsData.taken_at)
-              : "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">SpO2: </span>
-            {dailyRoundListDetailsData.ventilator_spo2 ?? "-"}
-          </div>
-          <div className="capitalize md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Admitted To *:{" "}
-            </span>
-            {dailyRoundListDetailsData.admitted_to ?? "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Physical Examination Info:{" "}
-            </span>
-            {dailyRoundListDetailsData.physical_examination_info ?? "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Other Details:{" "}
-            </span>
-            {dailyRoundListDetailsData.other_details ?? "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">Pulse(bpm): </span>
-            {dailyRoundListDetailsData.pulse ?? "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">BP</span>
-            <div className="flex flex-row space-x-20">
-              <div className="flex">
-                <span className="font-semibold leading-relaxed">
-                  Systolic:{" "}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {[
+            {
+              label: "Temperature",
+              value: dailyRoundListDetailsData.temperature,
+            },
+            {
+              label: "Taken at",
+              value: dailyRoundListDetailsData.taken_at
+                ? formatDateTime(dailyRoundListDetailsData.taken_at)
+                : "-",
+            },
+            { label: "SpO2", value: dailyRoundListDetailsData.ventilator_spo2 },
+            {
+              label: "Admitted To *",
+              value: dailyRoundListDetailsData.admitted_to,
+            },
+            {
+              label: "Physical Examination Info",
+              value: dailyRoundListDetailsData.physical_examination_info,
+            },
+            {
+              label: "Other Details",
+              value: dailyRoundListDetailsData.other_details,
+            },
+            { label: "Pulse (bpm)", value: dailyRoundListDetailsData.pulse },
+            {
+              label: "BP",
+              value: (
+                <div className="flex space-x-10">
+                  <span>
+                    Systolic: {dailyRoundListDetailsData.bp?.systolic ?? "-"}
+                  </span>
+                  <span>
+                    Diastolic: {dailyRoundListDetailsData.bp?.diastolic ?? "-"}
+                  </span>
+                </div>
+              ),
+            },
+            {
+              label: "Respiratory Rate (bpm)",
+              value: dailyRoundListDetailsData.resp,
+            },
+            { label: "Rhythm", value: dailyRoundListDetailsData.rhythm },
+            {
+              label: "Rhythm Description",
+              value: dailyRoundListDetailsData.rhythm_detail,
+            },
+            {
+              label: "Level Of Consciousness",
+              value: dailyRoundListDetailsData.consciousness_level
+                ? t(
+                    `CONSCIOUSNESS_LEVEL__${dailyRoundListDetailsData.consciousness_level}`,
+                  )
+                : "-",
+            },
+            {
+              label: "Recommend Discharge",
+              value: dailyRoundListDetailsData.recommend_discharge ? (
+                <span className="inline-block px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">
+                  Yes
                 </span>
-                {dailyRoundListDetailsData.bp?.systolic ?? "-"}
-              </div>
-              <div className="flex">
-                {" "}
-                <span className="font-semibold leading-relaxed">
-                  Diastolic:
+              ) : (
+                <span className="inline-block px-3 py-1 text-xs font-semibold text-gray-600 bg-gray-200 rounded-full">
+                  No
                 </span>
-                {dailyRoundListDetailsData.bp?.diastolic ?? "-"}
-              </div>
+              ),
+            },
+          ].map(({ label, value }, index) => (
+            <div
+              key={index}
+              className="p-4 border rounded-md bg-gray-50 hover:bg-gray-100"
+            >
+              <span className="block text-sm font-semibold text-gray-700">
+                {label}:
+              </span>
+              <span className="block text-sm text-gray-600">
+                {value ?? "-"}
+              </span>
             </div>
-          </div>
-
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Respiratory Rate (bpm):
-            </span>
-
-            {dailyRoundListDetailsData.resp ?? "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">Rhythm: </span>
-            {dailyRoundListDetailsData.rhythm ?? "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Rhythm Description:{" "}
-            </span>
-            {dailyRoundListDetailsData.rhythm_detail ?? "-"}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              Level Of Consciousness:{" "}
-            </span>
-            {(dailyRoundListDetailsData.consciousness_level &&
-              t(
-                `CONSCIOUSNESS_LEVEL__${dailyRoundListDetailsData.consciousness_level}`,
-              )) ||
-              "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              Recommend Discharge:{" "}
-            </span>
-            {dailyRoundListDetailsData.recommend_discharge ? (
-              <span className="badge badge-pill badge-warning">Yes</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">No</span>
-            )}
-          </div>
+          ))}
         </div>
       </div>
     </Page>
