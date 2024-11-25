@@ -178,7 +178,12 @@ describe("Manage User", () => {
     loginPage.ensureLoggedIn();
   });
 
-  it("District Admin can change a user's password", () => {
+  it("Nurse user can change their own password", () => {
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsNurse();
+    loginPage.ensureLoggedIn();
+    cy.visit("/users");
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
     manageUserPage.clickMoreDetailsButton(nurseUsername);
@@ -190,9 +195,6 @@ describe("Manage User", () => {
     loginPage.clickSignOutBtn();
     loginPage.loginManuallyAsNurse("Coronasafe@1233");
     loginPage.ensureLoggedIn();
-    loginPage.clickSignOutBtn();
-    loginPage.loginManuallyAsDistrictAdmin();
-    loginPage.ensureLoggedIn();
     cy.visit("/users");
     userPage.typeInSearchInput(nurseUsername);
     userPage.checkUsernameText(nurseUsername);
@@ -201,6 +203,10 @@ describe("Manage User", () => {
     manageUserPage.clickPasswordEditButton();
     manageUserPage.changePassword("Coronasafe@1233", "Coronasafe@123");
     manageUserPage.clickSubmit();
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsDistrictAdmin();
+    loginPage.ensureLoggedIn();
   });
 
   it("District Admin can delete a user", () => {

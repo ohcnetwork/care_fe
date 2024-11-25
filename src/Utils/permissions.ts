@@ -40,22 +40,11 @@ export const showUserPasswordReset = (
   authUser: UserModel,
   targetUser: UserModel,
 ) => {
-  if (authUser.username === targetUser.username) return true;
-
-  // Auth user should be higher in hierarchy than target user
-  if (
-    USER_TYPES.indexOf(authUser.user_type) <=
-    USER_TYPES.indexOf(targetUser.user_type)
-  )
-    return false;
-
-  return checkIfStateOrDistrictAdminInSameLocation(authUser, targetUser);
+  return authUser.username === targetUser.username || authUser.is_superuser;
 };
 
 export const showAvatarEdit = (authUser: UserModel, targetUser: UserModel) => {
-  if (authUser.username === targetUser.username || authUser.is_superuser)
-    return true;
-  return false;
+  return authUser.username === targetUser.username || authUser.is_superuser;
 };
 export const editUserPermissions = (
   authUser: UserModel,
