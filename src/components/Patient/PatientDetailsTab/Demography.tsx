@@ -329,19 +329,21 @@ export const Demography = (props: PatientProps) => {
         data-testid="patient-details"
       >
         <div className="sticky top-20 hidden text-sm font-medium text-gray-600 lg:flex lg:basis-1/5 lg:flex-col gap-2">
-          {data.map((subtab, i) => (
-            <button
-              key={i}
-              className={`cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
-                activeSection === subtab.id
-                  ? "bg-white text-green-800"
-                  : "hover:bg-white hover:text-green-800"
-              }`}
-              onClick={() => scrollToSection(subtab.id)}
-            >
-              {t(`patient__${subtab.id}`)}
-            </button>
-          ))}
+          {data
+            .filter((s) => !s.hidden)
+            .map((subtab, i) => (
+              <button
+                key={i}
+                className={`cursor-pointer rounded-lg p-3 transition-colors duration-300 text-left ${
+                  activeSection === subtab.id
+                    ? "bg-white text-green-800"
+                    : "hover:bg-white hover:text-green-800"
+                }`}
+                onClick={() => scrollToSection(subtab.id)}
+              >
+                {t(`patient__${subtab.id}`)}
+              </button>
+            ))}
         </div>
 
         <div className="lg:basis-4/5">

@@ -2,15 +2,16 @@ import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
-import CircularProgress from "@/components/Common/CircularProgress";
-import { ShiftingModel } from "@/components/Facility/models";
-import ShiftingBlock from "@/components/Shifting/ShiftingBlock";
+import { formatFilter } from "@/components/Resource/ResourceCommons";
+import ShiftingTable from "@/components/Shifting/ShiftingTable";
+
+import useFilters from "@/hooks/useFilters";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 import { PatientProps } from ".";
 import { PatientModel } from "../models";
@@ -18,6 +19,9 @@ import { PatientModel } from "../models";
 const ShiftingHistory = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
   const { t } = useTranslation();
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    cacheBlacklist: ["patient_name"],
+  });
 
   const isPatientInactive = (patientData: PatientModel, facilityId: string) => {
     return (
@@ -25,6 +29,17 @@ const ShiftingHistory = (props: PatientProps) => {
       !(patientData?.last_consultation?.facility === facilityId)
     );
   };
+
+  const { data: shiftData, loading } = useQuery(routes.listShiftRequests, {
+    query: {
+      ...formatFilter({
+        ...qParams,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+      }),
+      patient: id,
+    },
+    prefetch: !!id,
+  });
 
   return (
     <section className="mt-4">
@@ -47,29 +62,10 @@ const ShiftingHistory = (props: PatientProps) => {
           </span>
         </ButtonV2>
       </div>
-      <PaginatedList
-        route={routes.listShiftRequests}
-        query={{ patient: id }}
-        perPage={12}
-      >
-        {() => (
-          <div className="mt-4">
-            <PaginatedList.WhenLoading>
-              <CircularProgress />
-            </PaginatedList.WhenLoading>
-            <PaginatedList.WhenEmpty className="flex items-center justify-center text-secondary-500 py-10 px-4">
-              <>{t("no_results_found")}</>
-            </PaginatedList.WhenEmpty>
-            <PaginatedList.Items<ShiftingModel> className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
-              {(item) => (
-                <div className="bg-white border border-secondary-300 rounded-lg">
-                  <ShiftingBlock shift={item} />
-                </div>
-              )}
-            </PaginatedList.Items>
-          </div>
-        )}
-      </PaginatedList>
+      <ShiftingTable hidePatient data={shiftData?.results} loading={loading} />
+      <div>
+        <Pagination totalCount={shiftData?.count || 0} />
+      </div>{" "}
     </section>
   );
 };
