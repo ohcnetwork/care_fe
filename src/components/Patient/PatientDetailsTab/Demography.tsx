@@ -278,20 +278,23 @@ export const Demography = (props: PatientProps) => {
         },
       ],
     },
-    {
-      id: "volunteer-contact",
-      hidden: !patientData.assigned_to_object,
-      details: [
-        <EmergencyContact
-          number={patientData.assigned_to_object?.alt_phone_number}
-          name={
-            patientData.assigned_to_object
-              ? formatName(patientData.assigned_to_object)
-              : undefined
-          }
-        />,
-      ],
-    },
+    ...(patientData.assigned_to_object
+      ? [
+          {
+            id: "volunteer-contact",
+            details: [
+              <EmergencyContact
+                number={patientData.assigned_to_object?.alt_phone_number}
+                name={
+                  patientData.assigned_to_object
+                    ? formatName(patientData.assigned_to_object)
+                    : undefined
+                }
+              />,
+            ],
+          },
+        ]
+      : []),
     {
       id: "insurance-details",
       details: [

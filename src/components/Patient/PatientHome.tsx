@@ -191,6 +191,16 @@ export const PatientHome = (props: {
     });
   };
 
+  const isPatientInactive = (patientData: PatientModel, facilityId: string) => {
+    return (
+      !patientData.is_active ||
+      !(
+        patientData?.last_consultation &&
+        patientData.last_consultation.facility === facilityId
+      )
+    );
+  };
+
   const Tab = patientTabs.find((t) => t.route === page)?.component;
 
   return (
@@ -467,6 +477,72 @@ export const PatientHome = (props: {
                 </div>
                 <div className="mt-2 h-full space-y-2">
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
+                    {page == "service-request" && NonReadOnlyUsers && (
+                      <div>
+                        <ButtonV2
+                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
+                          disabled={isPatientInactive(
+                            patientData,
+                            facilityId || "",
+                          )}
+                          size="large"
+                          onClick={() =>
+                            navigate(
+                              `/facility/${patientData?.facility}/patient/${id}/sample-test`,
+                            )
+                          }
+                          authorizeFor={NonReadOnlyUsers}
+                          id="sample-request-btn"
+                        >
+                          <span className="flex w-full items-center justify-start gap-2">
+                            <CareIcon icon="l-medkit" className="text-xl" />
+                            {t("request_sample_test")}
+                          </span>
+                        </ButtonV2>
+                      </div>
+                    )}
+                    {page == "shift" && NonReadOnlyUsers && (
+                      <div>
+                        <ButtonV2
+                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
+                          disabled={isPatientInactive(
+                            patientData,
+                            facilityId || "",
+                          )}
+                          size="large"
+                          onClick={() =>
+                            navigate(
+                              `/facility/${facilityId}/patient/${id}/shift/new`,
+                            )
+                          }
+                          authorizeFor={NonReadOnlyUsers}
+                        >
+                          <span className="flex w-full items-center justify-start gap-2">
+                            <CareIcon icon="l-ambulance" className="text-xl" />
+                            {t("shift")}
+                          </span>
+                        </ButtonV2>
+                      </div>
+                    )}
+
+                    {page == "demography" && NonReadOnlyUsers && (
+                      <div>
+                        <ButtonV2
+                          id="assign-volunteer"
+                          onClick={() => setOpenAssignVolunteerDialog(true)}
+                          disabled={false}
+                          authorizeFor={NonReadOnlyUsers}
+                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
+                          size="large"
+                        >
+                          <span className="flex w-full items-center justify-start gap-2">
+                            <CareIcon icon="l-users-alt" className="text-lg" />{" "}
+                            {t("assign_to_volunteer")}
+                          </span>
+                        </ButtonV2>
+                      </div>
+                    )}
+
                     <div>
                       <ButtonV2
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
@@ -501,24 +577,6 @@ export const PatientHome = (props: {
                         </span>
                       </ButtonV2>
                     </div>
-
-                    {NonReadOnlyUsers && (
-                      <div>
-                        <ButtonV2
-                          id="assign-volunteer"
-                          onClick={() => setOpenAssignVolunteerDialog(true)}
-                          disabled={false}
-                          authorizeFor={NonReadOnlyUsers}
-                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                          size="large"
-                        >
-                          <span className="flex w-full items-center justify-start gap-2">
-                            <CareIcon icon="l-users-alt" className="text-lg" />{" "}
-                            {t("assign_to_volunteer")}
-                          </span>
-                        </ButtonV2>
-                      </div>
-                    )}
 
                     <div>
                       <ButtonV2

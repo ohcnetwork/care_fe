@@ -35,7 +35,7 @@ export const patientTabs = [
     component: ShiftingHistory,
   },
   {
-    route: "request-sample-test",
+    route: "service-request",
     component: SampleTestHistory,
   },
   {

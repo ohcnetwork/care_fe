@@ -1244,6 +1244,7 @@
   "send_sample_to_collection_centre_description": "Are you sure you want to send the sample to Collection Centre?",
   "send_sample_to_collection_centre_title": "Send sample to collection centre",
   "serial_number": "Serial Number",
+  "service-request": "Service Request",
   "serviced_on": "Serviced on",
   "session_expired": "Session Expired",
   "session_expired_msg": "It appears that your session has expired. This could be due to inactivity. Please login again to continue.",
