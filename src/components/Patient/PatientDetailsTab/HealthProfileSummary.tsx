@@ -7,6 +7,8 @@ import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { ADMIN_USER_TYPES } from "@/common/constants";
+
 import { PatientProps } from ".";
 import * as Notification from "../../../Utils/Notifications";
 import { PatientModel } from "../models";
@@ -40,8 +42,6 @@ export const HealthProfileSummary = (props: PatientProps) => {
         </div>
       ));
   }
-
-  const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
 
   const canEditPatient = (authUser: UserModel, patientData: PatientModel) => {
     return (

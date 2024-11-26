@@ -7,6 +7,8 @@ import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
+import { ADMIN_USER_TYPES } from "@/common/constants";
+
 import { formatDateTime } from "@/Utils/utils";
 
 import { PatientProps } from ".";
@@ -24,8 +26,6 @@ export const ImmunisationRecords = (props: PatientProps) => {
       `/facility/${facilityId}/patient/${id}/update?section=${sectionId}`,
     );
   };
-
-  const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
 
   const canEditPatient = (authUser: UserModel, patientData: PatientModel) => {
     return (

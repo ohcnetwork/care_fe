@@ -24,6 +24,7 @@ export const SampleTestHistory = (props: PatientProps) => {
   const [_showAlertMessage, setShowAlertMessage] = useState(false);
 
   const isPatientInactive = (patientData: PatientModel, facilityId: string) => {
+    if (!patientData) return true;
     return (
       !patientData.is_active ||
       !(
