@@ -68,7 +68,7 @@ const FormField = ({
           </FieldLabel>
         )}
         {field?.labelSuffix && (
-          <span className="mb-2 text-xs">{field.labelSuffix}</span>
+          <span className="mb-2 text-xs">{field?.labelSuffix}</span>
         )}
       </div>
       <div className={field?.className}>{props.children}</div>

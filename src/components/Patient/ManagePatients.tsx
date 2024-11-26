@@ -13,7 +13,6 @@ import SortDropdownMenu from "@/components/Common/SortDropdown";
 import Tabs from "@/components/Common/Tabs";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import useDebounce from "@/hooks/useDebounce";
 import useFilters from "@/hooks/useFilters";
 
 import {
@@ -188,6 +187,12 @@ export const PatientManager = () => {
     diagnoses_differential: qParams.diagnoses_differential || undefined,
     review_missed: qParams.review_missed || undefined,
   };
+  const [debouncedSearchParams, setDebouncedSearchParams] = useState(params);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearchParams(params), 1000);
+    return () => clearTimeout(timeout);
+  }, [params]);
 
   useEffect(() => {
     const ids: string[] = [];
@@ -293,7 +298,7 @@ export const PatientManager = () => {
   };
 
   const { loading: isLoading, data } = useQuery(routes.patientList, {
-    query: JSON.parse(useDebounce(JSON.stringify(params), 1000)),
+    query: debouncedSearchParams,
   });
 
   const getTheCategoryFromId = () => {

@@ -100,7 +100,6 @@
     "react-webcam": "^7.2.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
-    "use-debounce": "^10.0.4",
     "use-keyboard-shortcut": "^1.1.6",
     "xlsx": "^0.18.5"
   },

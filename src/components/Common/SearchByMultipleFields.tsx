@@ -82,9 +82,23 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     }
   }, [clearSearch]);
 
+  const handleOptionChange = useCallback(
+    (option: SearchOption) => {
+      setSelectedOption(option);
+      setSearchValue(option.value || "");
+      setFocusedIndex(options.findIndex((op) => op.key === option.key));
+      setOpen(false);
+      inputRef.current?.focus();
+      setError(false);
+      onSearch(option.key, option.value);
+    },
+    [onSearch],
+  );
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement !== inputRef.current) {
+        console.log(inputRef.current !== document.activeElement);
         e.preventDefault();
         setOpen(true);
       } else if (e.key === "ArrowDown") {
@@ -105,9 +119,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       }
 
       options.forEach((option) => {
-        if (e.key === "/") {
-          setOpen(true);
-        } else if (
+        if (
           e.key.toLocaleLowerCase() ===
             option.shortcutKey.toLocaleLowerCase() &&
           open
@@ -120,43 +132,18 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [focusedIndex, open]);
+  }, [focusedIndex, open, handleOptionChange, options]);
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, [selectedOption]);
-  const handleOptionChange = useCallback(
-    (option: SearchOption) => {
-      setSelectedOption(option);
-      setSearchValue(option.value || "");
-      setFocusedIndex(options.findIndex((op) => op.key === option.key));
-      setOpen(false);
-      inputRef.current?.focus();
-      setError(false);
-      onSearch(option.key, option.value);
-    },
-    [onSearch],
-  );
 
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchValue(value);
       onSearch(selectedOption.key, value);
-    },
-    [selectedOption, onSearch],
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Escape") {
-        setSearchValue("");
-        onSearch(selectedOption.key, "");
-      }
-      if (e.key === "/") {
-        e.preventDefault();
-        setOpen(true);
-      }
     },
     [selectedOption, onSearch],
   );
@@ -167,7 +154,6 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       value: searchValue,
       onChange: (e: EventType) =>
         handleSearchChange(e.target ? e.target.value : e.value),
-      onKeyDown: handleKeyDown,
       className: cn(
         "flex-grow border-none shadow-none focus-visible:ring-0 h-10",
         inputClassName,
@@ -196,30 +182,34 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           />
         );
     }
-  }, [
-    selectedOption,
-    searchValue,
-    handleSearchChange,
-    handleKeyDown,
-    t,
-    inputClassName,
-  ]);
+  }, [selectedOption, searchValue, handleSearchChange, t, inputClassName]);
 
   return (
-    <div className={className}>
-      <div className="flex items-center rounded-t-lg border-x border-t border-gray-200 bg-white">
+    <div
+      className={cn(
+        "border rounded-lg border-gray-200 bg-white shadow",
+        className,
+      )}
+    >
+      <div
+        role="searchbox"
+        aria-expanded={open}
+        aria-controls="search-options"
+        aria-haspopup="listbox"
+        className="flex items-center rounded-t-lg"
+      >
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
-              className="focus:ring-0"
+              className="focus:ring-0 px-2 ml-1"
               size="sm"
               onClick={() => setOpen(true)}
             >
-              <CareIcon icon="l-search" className="mr-2 h-4 w-4" />/
+              <CareIcon icon="l-search" className="mr-2 text-base" />/
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
+          <PopoverContent className="w-[250px] p-0">
             <Command>
               <CommandList>
                 <CommandGroup>
@@ -247,11 +237,11 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         {renderSearchInput}
       </div>
       {error && (
-        <div className="error-text ml-3 bg-white text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300">
+        <div className="error-text px-2 mb-1 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300">
           {t("invalid_phone_number")}
         </div>
       )}
-      <div className="flex flex-wrap gap-2 rounded-b-lg border-x border-b border-gray-200 bg-gray-50 p-2 shadow">
+      <div className="flex flex-wrap gap-2 rounded-b-lg bg-gray-50 border-t border-t-gray-100 p-2">
         {options.map((option) => (
           <Button
             key={option.key}
@@ -260,7 +250,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             size="xs"
             className={cn(
               selectedOption.key === option.key
-                ? "bg-primary-100 text-primary-700"
+                ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200",
               buttonClassName,
             )}
