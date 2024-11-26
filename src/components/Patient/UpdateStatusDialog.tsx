@@ -21,9 +21,11 @@ import {
 
 import * as Notification from "@/Utils/Notifications";
 
+import { SampleTestModel } from "./models";
+
 interface Props {
-  sample: any;
-  handleOk: (sample: any, status: number, result: number) => void;
+  sample: SampleTestModel;
+  handleOk: (sample: SampleTestModel, status: number, result: number) => void;
   handleCancel: () => void;
 }
 
@@ -100,7 +102,11 @@ const UpdateStatusDialog = (props: Props) => {
 
   const handleUpload = async () => {
     if (fileUpload.files.length > 0) {
-      await fileUpload.handleFileUpload(sample.id);
+      if (sample.id) {
+        await fileUpload.handleFileUpload(sample.id);
+      } else {
+        Notification.Error({ msg: "Sample ID is missing" });
+      }
       if (!fileUpload.error) {
         Notification.Success({ msg: "File Uploaded Successfully" });
       } else {
@@ -149,7 +155,7 @@ const UpdateStatusDialog = (props: Props) => {
               onChange={handleChange}
             />
             <span className="font-semibold leading-relaxed">
-              Upload Report:
+              {t("upload_report")}:
             </span>
             {fileUpload.progress !== null &&
             fileUpload.progress !== undefined ? (
