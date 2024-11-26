@@ -869,6 +869,7 @@
   "middleware_hostname": "Middleware Hostname",
   "middleware_hostname_example": "e.g. example.ohc.network",
   "middleware_hostname_sourced_from": "Middleware hostname sourced from {{ source }}",
+  "min_char_length_error": "Must be at least {{ min_length }} characters",
   "min_password_len_8": "Minimum password length 8",
   "min_time_bw_doses": "Min. time b/w doses",
   "minimize": "Minimize",
