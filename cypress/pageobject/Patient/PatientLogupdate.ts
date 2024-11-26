@@ -2,7 +2,6 @@ class PatientLogupdate {
   clickLogupdate() {
     cy.get("#log-update").scrollIntoView();
     cy.verifyAndClickElement("#log-update", "Log Update");
-    cy.wait(3000);
   }
 
   clickSwitchBed() {
@@ -16,7 +15,6 @@ class PatientLogupdate {
   selectBed(bed: string) {
     cy.typeAndSelectOption("input[name='bed']", bed);
     cy.get("#update-switchbed").click();
-    cy.wait(3000);
   }
 
   selectPatientCategory(category: string) {
@@ -78,7 +76,6 @@ class PatientLogupdate {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
     cy.get(element).first().contains("View Details").click();
-    cy.wait(3000);
   }
 
   clickLogUpdateUpdateLog(element: string, patientCategory: string) {
@@ -89,7 +86,6 @@ class PatientLogupdate {
 
   clickUpdateDetail() {
     cy.verifyAndClickElement("#consultation-preview", "Update Details");
-    cy.wait(3000);
   }
 
   clearIntoElementById(elementId) {

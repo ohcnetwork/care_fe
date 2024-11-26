@@ -284,8 +284,7 @@ class FacilityPage {
     cy.get("#facility-location-button").click();
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
-    cy.wait(2000);
-    cy.get("div#map-close").click();
+    cy.get("div#map-close").should("be.visible").click();
   }
 
   fillMiddleWareAddress(url: string) {
@@ -355,16 +354,14 @@ class FacilityPage {
   }
 
   fillInventoryDetails(name: string, status: string, quantity: string) {
-    cy.wait(2000);
-    cy.get("div#id").should("not.be.disabled").click();
-    cy.get("div#id ul li").contains(name).click();
     cy.get("div#isIncoming").click();
     cy.get("div#isIncoming ul li").contains(status).click();
+    cy.get("div#id").click();
+    cy.get("div#id ul li").contains(name).click();
     cy.get("[name='quantity']").type(quantity);
   }
 
   fillInventoryMinimumDetails(name: string, quantity: string) {
-    cy.wait(2000);
     cy.get("div#id").click();
     cy.get("div#id ul li").contains(name).click();
     cy.get("[name='quantity']").type(quantity);

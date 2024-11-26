@@ -42,11 +42,9 @@ describe("Manage User", () => {
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
-    cy.wait(3000);
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickCloseSlideOver();
-    cy.wait(5000);
     manageUserPage.navigateToProfile();
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
@@ -68,7 +66,6 @@ describe("Manage User", () => {
     manageUserPage.clickAddSkillButton();
     cy.verifyNotification("Skill added successfully");
     cy.closeNotification();
-    cy.wait(5000);
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
