@@ -97,37 +97,42 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "/" && document.activeElement !== inputRef.current) {
-        console.log(inputRef.current !== document.activeElement);
+      if (
+        e.key === "/" &&
+        !(document.activeElement instanceof HTMLInputElement)
+      ) {
         e.preventDefault();
         setOpen(true);
-      } else if (e.key === "ArrowDown") {
-        setFocusedIndex((prevIndex) =>
-          prevIndex === options.length - 1 ? 0 : prevIndex + 1,
-        );
-      } else if (e.key === "ArrowUp") {
-        setFocusedIndex((prevIndex) =>
-          prevIndex === 0 ? options.length - 1 : prevIndex - 1,
-        );
-      } else if (e.key === "Enter") {
-        handleOptionChange(options[focusedIndex]);
       }
-
-      if (e.key === "Escape") {
-        inputRef.current?.focus();
-        setOpen(false);
-      }
-
-      options.forEach((option) => {
-        if (
-          e.key.toLocaleLowerCase() ===
-            option.shortcutKey.toLocaleLowerCase() &&
-          open
-        ) {
-          e.preventDefault();
-          handleOptionChange(option);
+      if (open) {
+        if (e.key === "ArrowDown") {
+          setFocusedIndex((prevIndex) =>
+            prevIndex === options.length - 1 ? 0 : prevIndex + 1,
+          );
+        } else if (e.key === "ArrowUp") {
+          setFocusedIndex((prevIndex) =>
+            prevIndex === 0 ? options.length - 1 : prevIndex - 1,
+          );
+        } else if (e.key === "Enter") {
+          handleOptionChange(options[focusedIndex]);
         }
-      });
+
+        if (e.key === "Escape") {
+          inputRef.current?.focus();
+          setOpen(false);
+        }
+
+        options.forEach((option) => {
+          if (
+            e.key.toLocaleLowerCase() ===
+              option.shortcutKey.toLocaleLowerCase() &&
+            open
+          ) {
+            e.preventDefault();
+            handleOptionChange(option);
+          }
+        });
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
