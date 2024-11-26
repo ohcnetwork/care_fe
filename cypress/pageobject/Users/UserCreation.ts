@@ -1,14 +1,5 @@
 // UserCreation.ts
 export class UserCreationPage {
-  clickProfileName() {
-    cy.get("#user-profile-name").click();
-  }
-  clickProfileButton() {
-    cy.verifyAndClickElement("#profile-button", "Profile");
-  }
-  clickEditProfileButton() {
-    cy.verifyAndClickElement("#edit-cancel-profile-button", "Edit Profile");
-  }
   clickAddUserButton() {
     cy.verifyAndClickElement("#addUserButton", "Add New User");
   }
@@ -21,44 +12,11 @@ export class UserCreationPage {
   typeLastName(lastName: string) {
     cy.get("#lastName").click().type(lastName);
   }
-  typeEmail(email: string) {
-    cy.get("#email").click().type(email);
-  }
   typePassword(password: string) {
     cy.get("#password").click().type(password);
   }
-  typePhoneNumber(phone_number: string) {
-    cy.get("#phoneNumber").click().type(phone_number);
-  }
   typeConfirmPassword(password: string) {
     cy.get("#c_password").click().type(password);
-  }
-  typeQualification(qualification: string) {
-    cy.get("#qualification").click().type(qualification);
-  }
-  typeDoctorExperience(experience: string) {
-    cy.get("#doctor_experience_commenced_on").click().type(experience);
-  }
-  typeDoctorMedicalCouncilRegNo(regNo: string) {
-    cy.get("#doctor_medical_council_registration").click().type(regNo);
-  }
-  typeWeeklyWorkingHours(workingHrs: string) {
-    cy.get("#weekly_working_hours").click().type(workingHrs);
-  }
-  typeAltPhoneNumber(emergencyPhoneNumber: string) {
-    cy.get("#altPhoneNumber").click().type(emergencyPhoneNumber);
-  }
-  typeDateOfBirth(dob: string) {
-    cy.clickAndTypeDate("#date_of_birth", dob);
-  }
-  typeNewUserFirstName(firstName: string) {
-    cy.get("#first_name").click().type(firstName);
-  }
-  typeNewUserLastName(lastName: string) {
-    cy.get("#last_name").click().type(lastName);
-  }
-  typeNewUserPhoneNumber(phoneNumber: string) {
-    cy.get("#phone_number").click().type(phoneNumber);
   }
   clearFirstName() {
     cy.get("#firstName").click().clear();
@@ -66,19 +24,6 @@ export class UserCreationPage {
   clearLastName() {
     cy.get("#lastName").click().clear();
   }
-  clearPhoneNumber() {
-    cy.get("#phoneNumber").click().clear();
-  }
-  clearAltPhoneNumber() {
-    cy.get("#altPhoneNumber").click().clear();
-  }
-  clearWeeklyWorkingHours() {
-    cy.get("#weekly_working_hours").click().clear();
-  }
-  clearEmail() {
-    cy.get("#email").click().clear();
-  }
-
   selectUserType(role: string) {
     cy.clickAndSelectOption("#user_type", role);
   }
@@ -98,9 +43,6 @@ export class UserCreationPage {
 
   selectFacility(name: string) {
     cy.typeAndSelectOption("input[name='facilities']", name);
-    cy.get("input[name='facilities'] + button")
-      .find("#dropdown-toggle")
-      .click();
   }
 
   verifyElementContainsText(elementId: string, expectedText: string) {

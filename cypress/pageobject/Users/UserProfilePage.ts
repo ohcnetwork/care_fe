@@ -19,6 +19,19 @@ export default class UserProfilePage {
     cy.clickAndTypeDate("#date_of_birth", date_of_birth);
   }
 
+  clearPhoneNumber() {
+    cy.get("#phoneNumber").click().clear();
+  }
+  clearAltPhoneNumber() {
+    cy.get("#altPhoneNumber").click().clear();
+  }
+  clearWorkingHours() {
+    cy.get("#weekly_working_hours").click().clear();
+  }
+  clearEmail() {
+    cy.get("#email").click().clear();
+  }
+
   selectGender(gender: string) {
     cy.get("#gender").click();
     cy.get("#gender-option-" + gender).click();
@@ -28,11 +41,11 @@ export default class UserProfilePage {
     cy.get("#email").click().clear().type(email);
   }
 
-  typePhone(phone: string) {
+  typePhoneNumber(phone: string) {
     cy.get("#phoneNumber").click().clear().type(phone);
   }
 
-  typeWhatsApp(phone: string) {
+  typeAltPhoneNumber(phone: string) {
     cy.get("#altPhoneNumber").click().clear().type(phone);
   }
 

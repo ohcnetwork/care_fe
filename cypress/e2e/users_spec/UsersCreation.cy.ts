@@ -1,3 +1,6 @@
+import ManageUserPage from "pageobject/Users/ManageUserPage";
+import UserProfilePage from "pageobject/Users/UserProfilePage";
+
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
@@ -11,6 +14,8 @@ import {
 describe("User Creation", () => {
   const userPage = new UserPage();
   const loginPage = new LoginPage();
+  const userProfilePage = new UserProfilePage();
+  const manageUserPage = new ManageUserPage();
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
@@ -87,25 +92,26 @@ describe("User Creation", () => {
   });
 
   it("Update the existing user profile and verify its reflection", () => {
-    userCreationPage.clickProfileName();
-    userCreationPage.clickProfileButton();
+    manageUserPage.navigateToProfile();
     cy.verifyContentPresence("#username-profile-details", [userName]);
-    userCreationPage.clickEditProfileButton();
+    userProfilePage.clickEditProfileButton();
     userCreationPage.clearFirstName();
     userCreationPage.typeFirstName(firstName);
     userCreationPage.clearLastName();
     userCreationPage.typeLastName(lastName);
-    userCreationPage.selectGender(gender);
-    userCreationPage.clearPhoneNumber();
-    userCreationPage.typePhoneNumber(phone_number);
-    userCreationPage.clearAltPhoneNumber();
-    userCreationPage.typeAltPhoneNumber(emergency_phone_number);
-    userCreationPage.clearEmail();
-    userCreationPage.typeEmail(email);
-    userCreationPage.clearWeeklyWorkingHours();
-    userCreationPage.typeWeeklyWorkingHours(weeklyWorkingHrs);
-    userCreationPage.typeDateOfBirth(dob);
-    cy.submitButton(updateBtn);
+    userProfilePage.selectGender(gender);
+    userProfilePage.clearPhoneNumber();
+    userProfilePage.typePhoneNumber(phone_number);
+    userProfilePage.clearAltPhoneNumber();
+    userProfilePage.typeAltPhoneNumber(emergency_phone_number);
+    userProfilePage.clearEmail();
+    userProfilePage.typeEmail(email);
+    userProfilePage.clearWorkingHours();
+    userProfilePage.typeWorkingHours(weeklyWorkingHrs);
+    userProfilePage.typedate_of_birth(dob);
+    cy.intercept("PATCH", "/api/v1/users/*").as("updateUser");
+    cy.clickSubmitButton(updateBtn);
+    cy.wait("@updateUser").its("response.statusCode").should("eq", 200);
     cy.verifyContentPresence("#contactno-profile-details", [
       "+91" + phone_number,
     ]);
@@ -123,15 +129,14 @@ describe("User Creation", () => {
   });
 
   it("Update the existing user profile Form Mandatory File Error", () => {
-    userCreationPage.clickProfileName();
-    userCreationPage.clickProfileButton();
-    userCreationPage.clickEditProfileButton();
+    manageUserPage.navigateToProfile();
+    userProfilePage.clickEditProfileButton();
     userCreationPage.clearFirstName();
     userCreationPage.clearLastName();
-    userCreationPage.clearPhoneNumber();
-    userCreationPage.clearAltPhoneNumber();
-    userCreationPage.clearWeeklyWorkingHours();
-    cy.submitButton(updateBtn);
+    userProfilePage.clearPhoneNumber();
+    userProfilePage.clearAltPhoneNumber();
+    userProfilePage.clearWorkingHours();
+    cy.clickSubmitButton(updateBtn);
     userCreationPage.verifyErrorMessages(EXPECTED_PROFILE_ERROR_MESSAGES);
   });
 
@@ -140,22 +145,25 @@ describe("User Creation", () => {
     userCreationPage.selectFacility(homeFacility);
     userCreationPage.typeUserName(username);
     userCreationPage.typePassword(password);
-    userCreationPage.selectHomeFacility(homeFacility);
-    userCreationPage.typeNewUserPhoneNumber(phone_number);
-    userCreationPage.typeDateOfBirth(newUserDob);
-    userCreationPage.selectUserType(role);
     userCreationPage.typeConfirmPassword(password);
-    userCreationPage.typeQualification(qualification);
-    userCreationPage.typeDoctorExperience(experince);
-    userCreationPage.typeDoctorMedicalCouncilRegNo(regNo);
-    userCreationPage.typeNewUserFirstName(newUserFirstName);
-    userCreationPage.typeNewUserLastName(newUserLastName);
-    userCreationPage.typeEmail(email);
+    userCreationPage.selectHomeFacility(homeFacility);
+    userPage.typeInPhoneNumber(phone_number);
+    userProfilePage.typedate_of_birth(newUserDob);
+    userCreationPage.selectUserType(role);
+    userProfilePage.typeQualification(qualification);
+    userProfilePage.typeDoctorYoE(experince);
+    userProfilePage.typeMedicalCouncilRegistration(regNo);
+    userPage.typeInFirstName(newUserFirstName);
+    userPage.typeInLastName(newUserLastName);
+    userProfilePage.typeEmail(email);
     userCreationPage.selectGender(gender);
     userCreationPage.selectState(state);
     userCreationPage.selectDistrict(district);
-    cy.submitButton(saveBtn);
+    cy.intercept("POST", "/api/v1/users/add_user/").as("createUser");
+    cy.clickSubmitButton(saveBtn);
+    cy.wait("@createUser").its("response.statusCode").should("eq", 201);
     cy.verifyNotification("User added successfully");
+
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
     cy.verifyContentPresence("#name", [newUserFirstName]);
@@ -169,7 +177,7 @@ describe("User Creation", () => {
 
   it("create new user form throwing mandatory field error", () => {
     userCreationPage.clickAddUserButton();
-    cy.submitButton(saveBtn);
+    cy.clickSubmitButton(saveBtn);
     cy.get(".error-text", { timeout: 10000 }).should("be.visible");
     userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
   });
