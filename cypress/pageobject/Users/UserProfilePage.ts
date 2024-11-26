@@ -15,8 +15,8 @@ export default class UserProfilePage {
     cy.get("#submit").click();
   }
 
-  typedate_of_birth(date_of_birth: string) {
-    cy.clickAndTypeDate("#date_of_birth", date_of_birth);
+  typeDateOfBirth(dob: string) {
+    cy.clickAndTypeDate("#date_of_birth", dob);
   }
 
   clearPhoneNumber() {
@@ -49,8 +49,8 @@ export default class UserProfilePage {
     cy.get("#altPhoneNumber").click().clear().type(phone);
   }
 
-  typeWorkingHours(workinghours: string) {
-    cy.get("#weekly_working_hours").click().clear().type(workinghours);
+  typeWorkingHours(workingHours: string) {
+    cy.get("#weekly_working_hours").click().clear().type(workingHours);
   }
 
   typeQualification = (qualification: string) => {
@@ -68,11 +68,8 @@ export default class UserProfilePage {
       .type(medicalCouncilRegistration);
   };
 
-  assertdate_of_birth(date_of_birth: string) {
-    cy.get("#date_of_birth-profile-details").should(
-      "contain.text",
-      date_of_birth,
-    );
+  assertDateOfBirth(dob: string) {
+    cy.get("#date_of_birth-profile-details").should("contain.text", dob);
   }
 
   assertGender(gender: string) {
@@ -83,18 +80,18 @@ export default class UserProfilePage {
     cy.get("#emailid-profile-details").should("contain.text", email);
   }
 
-  assertPhone(phone: string) {
+  assertPhoneNumber(phone: string) {
     cy.get("#contactno-profile-details").should("contain.text", phone);
   }
 
-  assertWhatsApp(phone: string) {
+  assertAltPhoneNumber(phone: string) {
     cy.get("#whatsapp-profile-details").should("contain.text", phone);
   }
 
-  assertWorkingHours(workinghours: string) {
+  assertWorkingHours(workingHours: string) {
     cy.get("#averageworkinghour-profile-details").should(
       "contain.text",
-      workinghours,
+      workingHours,
     );
   }
 }

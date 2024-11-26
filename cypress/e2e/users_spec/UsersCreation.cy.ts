@@ -65,7 +65,7 @@ describe("User Creation", () => {
   const email = "test@test.com";
   const password = "Test@123";
   const qualification = "MBBS";
-  const experince = "2";
+  const experience = "2";
   const regNo = "123456789";
   const newUserFirstName = "cypress test";
   const newUserLastName = "staff user";
@@ -108,7 +108,7 @@ describe("User Creation", () => {
     userProfilePage.typeEmail(email);
     userProfilePage.clearWorkingHours();
     userProfilePage.typeWorkingHours(weeklyWorkingHrs);
-    userProfilePage.typedate_of_birth(dob);
+    userProfilePage.typeDateOfBirth(dob);
     cy.intercept("PATCH", "/api/v1/users/*").as("updateUser");
     cy.clickSubmitButton(updateBtn);
     cy.wait("@updateUser").its("response.statusCode").should("eq", 200);
@@ -148,10 +148,10 @@ describe("User Creation", () => {
     userCreationPage.typeConfirmPassword(password);
     userCreationPage.selectHomeFacility(homeFacility);
     userPage.typeInPhoneNumber(phone_number);
-    userProfilePage.typedate_of_birth(newUserDob);
+    userProfilePage.typeDateOfBirth(newUserDob);
     userCreationPage.selectUserType(role);
     userProfilePage.typeQualification(qualification);
-    userProfilePage.typeDoctorYoE(experince);
+    userProfilePage.typeDoctorYoE(experience);
     userProfilePage.typeMedicalCouncilRegistration(regNo);
     userPage.typeInFirstName(newUserFirstName);
     userPage.typeInLastName(newUserLastName);
@@ -171,7 +171,7 @@ describe("User Creation", () => {
     cy.verifyContentPresence("#district", [district]);
     cy.verifyContentPresence("#home_facility", [homeFacility]);
     cy.verifyContentPresence("#qualification", [qualification]);
-    cy.verifyContentPresence("#doctor-experience", [experince]);
+    cy.verifyContentPresence("#doctor-experience", [experience]);
     cy.verifyContentPresence("#medical-council-registration", [regNo]);
   });
 

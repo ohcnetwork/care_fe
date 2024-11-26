@@ -32,7 +32,7 @@ describe("Manage User Profile", () => {
   it("Set Dob, Gender, Email, Phone and Working Hours for a user and verify its reflection in user profile", () => {
     userProfilePage.clickEditProfileButton();
 
-    userProfilePage.typedate_of_birth(date_of_birth);
+    userProfilePage.typeDateOfBirth(date_of_birth);
     userProfilePage.selectGender(gender);
     userProfilePage.typeEmail(email);
     userProfilePage.typePhoneNumber(phone);
@@ -46,11 +46,11 @@ describe("Manage User Profile", () => {
 
     cy.verifyNotification("Details updated successfully");
 
-    userProfilePage.assertdate_of_birth("01/01/1999");
+    userProfilePage.assertDateOfBirth("01/01/1999");
     userProfilePage.assertGender(gender);
     userProfilePage.assertEmail(email);
-    userProfilePage.assertPhone(phone);
-    userProfilePage.assertWhatsApp(phone);
+    userProfilePage.assertPhoneNumber(phone);
+    userProfilePage.assertAltPhoneNumber(phone);
     userProfilePage.assertWorkingHours(workinghours);
   });
 
