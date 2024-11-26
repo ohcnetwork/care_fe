@@ -773,9 +773,9 @@ export const PatientManager = () => {
     },
     {
       key: "patient_no",
-      label: "UHID",
+      label: "IP/OP No",
       type: "text" as const,
-      placeholder: "search_by_uhid",
+      placeholder: "search_by_patient_no",
       value: qParams.patient_no || "",
       shortcutKey: "u",
     },
@@ -818,6 +818,7 @@ export const PatientManager = () => {
       title={t("patients")}
       hideBack={true}
       breadcrumbs={false}
+      className="px-4 md:px-6"
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
           <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
@@ -996,7 +997,7 @@ export const PatientManager = () => {
         }}
       />
 
-      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
+      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 sm:grid-cols-4 md:px-0">
         <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
           <div className="flex-1" id="total-patientcount">
             <CountBlock
@@ -1004,12 +1005,12 @@ export const PatientManager = () => {
               count={data?.count || 0}
               loading={isLoading}
               icon="l-user-injured"
-              className="pb-12"
+              className="mb-4"
             />
           </div>
         </div>
         <div className="col-span-3 w-full">
-          <div className="mt-2">
+          <div className="mb-4">
             <SearchByMultipleFields
               options={searchOptions}
               onSearch={handleSearch}
