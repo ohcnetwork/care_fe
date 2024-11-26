@@ -550,4 +550,7 @@ export const sanitizeNumberInput = (
 ): void => {
   const input = event.currentTarget;
   input.value = input.value.replace(/[^0-9]/g, "");
+  if (parseFloat(input.value || "1") < parseFloat(input?.min || "0")) {
+    input.value = input?.min || "0";
+  }
 };

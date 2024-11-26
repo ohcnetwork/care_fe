@@ -46,7 +46,7 @@ const initForm: any = {
   reason: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "+91",
-  required_quantity: null,
+  requested_quantity: null,
 };
 
 const requiredFields: any = {
@@ -191,7 +191,7 @@ export default function ResourceCreate(props: resourceProps) {
         refering_facility_contact_number: parsePhoneNumber(
           state.form.refering_facility_contact_number,
         ),
-        requested_quantity: state.form.requested_quantity || 0,
+        requested_quantity: state.form.requested_quantity || 1,
       };
 
       const { res, data } = await request(routes.createResource, {
@@ -302,7 +302,7 @@ export default function ResourceCreate(props: resourceProps) {
           name="requested_quantity"
           type="number"
           min={1}
-          value={state.form.required_quantity}
+          value={state.form.requested_quantity}
           onChange={handleChange}
           onInput={sanitizeNumberInput}
         />

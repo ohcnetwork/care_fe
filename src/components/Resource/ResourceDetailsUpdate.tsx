@@ -174,11 +174,11 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         title: state.form.title,
         reason: state.form.reason,
         assigned_to: state.form.assigned_to,
-        requested_quantity: state.form.requested_quantity || 0,
+        requested_quantity: state.form.requested_quantity || 1,
         assigned_quantity:
           state.form.status === "PENDING"
             ? state.form.assigned_quantity
-            : resourceDetails?.assigned_quantity || 0,
+            : resourceDetails?.assigned_quantity || 1,
       };
 
       const { res, data } = await request(routes.updateResource, {
