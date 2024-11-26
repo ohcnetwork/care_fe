@@ -318,6 +318,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       }
     >
       <Card className="my-2">
+        {/* Card */}
         <CardHeader className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="space-y-1 flex gap-2 items-center">
