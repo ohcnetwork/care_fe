@@ -274,9 +274,6 @@ export default function ListView() {
           </div>
 
           <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
             <ButtonV2
               className="py-[11px]"
               onClick={() => navigate("/shifting/board", { query: qParams })}
@@ -284,6 +281,9 @@ export default function ListView() {
               <CareIcon icon="l-list-ul" className="rotate-90" />
               {t("board_view")}
             </ButtonV2>
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
           </div>
         </>
       }
