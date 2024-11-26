@@ -19,7 +19,9 @@ class PatientPredefined {
     patientPage.typePatientDateOfBirth("01012001");
     patientPage.typePatientName("Patient With Predefined Data");
     patientPage.selectPatientGender("Male");
-    patientPage.typePatientAddress("Test Patient Address");
+    patientPage.typePatientAddress(
+      "149/J, 3rd Block, Koramangala, Karnataka - 560034",
+    );
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
