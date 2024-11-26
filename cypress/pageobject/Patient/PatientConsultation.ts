@@ -13,6 +13,7 @@ export class PatientConsultationPage {
   selectSymptomsDate(date: string) {
     cy.clickAndTypeDate("#symptoms_onset_date", date);
   }
+
   clickAddSymptom() {
     cy.get("#add-symptom").click();
   }
@@ -110,5 +111,31 @@ export class PatientConsultationPage {
       "Edit Consultation Details",
     );
     cy.wait(3000);
+  }
+
+  interceptPatientDetailsAPI(): void {
+    cy.intercept("GET", "**/api/v1/patient/**").as("patientDetails");
+  }
+
+  verifyPatientDetailsResponse(): void {
+    cy.wait("@patientDetails").its("response.statusCode").should("eq", 200);
+  }
+
+  clickViewConsultationButton() {
+    cy.verifyAndClickElement(
+      "#view_consultation_and_log_updates",
+      "View Consultation / Log Updates",
+    );
+  }
+
+  clickManagePatientButton() {
+    cy.verifyAndClickElement("#show-more", "Manage Patient");
+  }
+
+  clickClaimsButton() {
+    cy.get("#log-update").scrollIntoView();
+    cy.intercept(/\/api\/hcx\/policy\/\?.*/).as("policyStatus");
+    cy.get("#consultation-buttons").contains("Claims").click();
+    cy.wait("@policyStatus").its("response.statusCode").should("eq", 200);
   }
 }

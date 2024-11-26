@@ -1,7 +1,7 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
+import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import PatientLogupdate from "../../pageobject/Patient/PatientLogupdate";
-import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 
 describe("Patient swtich bed functionality", () => {
   const loginPage = new LoginPage();
@@ -11,8 +11,8 @@ describe("Patient swtich bed functionality", () => {
   const switchBedOne = "Dummy Bed 4";
   const switchBedTwo = "Dummy Bed 1";
   const switchBedThree = "Dummy Bed 7";
-  const switchPatientOne = "Dummy Patient 6";
-  const switchPatientTwo = "Dummy Patient 7";
+  const switchPatientOne = "Dummy Patient Six";
+  const switchPatientTwo = "Dummy Patient Seven";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();

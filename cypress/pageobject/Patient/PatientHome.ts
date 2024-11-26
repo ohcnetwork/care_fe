@@ -1,16 +1,4 @@
 class PatientHome {
-  clickNextPage() {
-    cy.get("#next-pages").click();
-  }
-
-  verifySecondPageUrl() {
-    cy.url().should("include", "/patients?page=2");
-  }
-
-  clickPreviousPage() {
-    cy.get("#prev-pages").click();
-  }
-
   clickPatientExport() {
     cy.get("#patient-export").click();
   }
@@ -58,10 +46,6 @@ class PatientHome {
       "input[name='last_consultation_encounter_date_end']",
       endDate,
     );
-  }
-
-  clickPatientAdvanceFilters() {
-    cy.get("#advanced-filter").click();
   }
 
   selectPatientGenderfilter(gender: string) {

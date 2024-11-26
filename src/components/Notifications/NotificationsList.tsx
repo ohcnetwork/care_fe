@@ -72,9 +72,9 @@ const NotificationTile = ({
       case "PATIENT_CONSULTATION_UPDATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
       case "PATIENT_CONSULTATION_UPDATE_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/log_updates/${data.daily_round}`;
       case "PATIENT_CONSULTATION_UPDATE_UPDATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/log_updates/${data.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
       case "PATIENT_NOTE_ADDED":
@@ -115,7 +115,9 @@ const NotificationTile = ({
           />
         </div>
       </div>
-      <div className="py-1 text-sm">{result.message}</div>
+      <div className="py-1 text-sm" id="notification-slide-msg">
+        {result.message}
+      </div>
       <div className="flex flex-col justify-end gap-2">
         <div className="py-1 text-right text-xs text-secondary-700">
           {formatDateTime(result.created_date)}
@@ -220,30 +222,6 @@ export default function NotificationsList({
       }
     };
   }, [data, totalCount]);
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setTimeout>;
-    if (isSubscribing) {
-      const checkNotificationPermission = () => {
-        if (Notification.permission === "denied") {
-          Warn({
-            msg: t("notification_permission_denied"),
-          });
-          setIsSubscribing(false);
-          clearInterval(intervalId);
-        } else if (Notification.permission === "granted") {
-          Success({
-            msg: t("notification_permission_granted"),
-          });
-          setIsSubscribing(false);
-          clearInterval(intervalId);
-        }
-      };
-
-      checkNotificationPermission();
-      intervalId = setInterval(checkNotificationPermission, 1000);
-    }
-    return () => clearInterval(intervalId);
-  }, [isSubscribing]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -266,8 +244,18 @@ export default function NotificationsList({
 
   const handleSubscribeClick = () => {
     const status = isSubscribed;
-    if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
-      subscribe();
+    if (!navigator.serviceWorker) {
+      return;
+    }
+    if (["NotSubscribed", "SubscribedOnAnotherDevice"].includes(status)) {
+      if (Notification.permission === "denied") {
+        Warn({
+          msg: t("notification_permission_denied"),
+        });
+        setIsSubscribing(false);
+      } else {
+        subscribe();
+      }
     } else {
       unsubscribe();
     }
@@ -301,84 +289,110 @@ export default function NotificationsList({
 
   let manageResults: any = null;
 
-  const unsubscribe = () => {
-    navigator.serviceWorker.ready
-      .then(function (reg) {
-        setIsSubscribing(true);
-        reg.pushManager
-          .getSubscription()
-          .then(function (subscription) {
-            subscription
-              ?.unsubscribe()
-              .then(async function (_successful) {
-                const data = {
-                  pf_endpoint: "",
-                  pf_p256dh: "",
-                  pf_auth: "",
-                };
+  const unsubscribe = async () => {
+    try {
+      const reg = await navigator.serviceWorker.ready;
 
-                await request(routes.updateUserPnconfig, {
-                  pathParams: { username: username },
-                  body: data,
-                });
+      if (!reg.pushManager) {
+        Error({ msg: t("unsubscribe_failed") });
+        return;
+      }
 
-                setIsSubscribed("NotSubscribed");
-                setIsSubscribing(false);
-              })
-              .catch(function (_e) {
-                Error({
-                  msg: t("unsubscribe_failed"),
-                });
-              });
-          })
-          .catch(function (_e) {
-            Error({ msg: t("subscription_error") });
+      setIsSubscribing(true);
+
+      const subscription = await reg.pushManager.getSubscription();
+
+      if (subscription) {
+        try {
+          await subscription.unsubscribe();
+
+          await request(routes.updateUserPnconfig, {
+            pathParams: { username },
+            body: {
+              pf_endpoint: "",
+              pf_p256dh: "",
+              pf_auth: "",
+            },
           });
-      })
-      .catch(function (_e) {
-        Sentry.captureException(_e);
-      });
-  };
 
+          setIsSubscribed("NotSubscribed");
+          Warn({
+            msg: t("unsubscribed_successfully"),
+          });
+        } catch (e) {
+          Error({ msg: t("unsubscribe_failed") });
+        }
+      }
+    } catch (e) {
+      Sentry.captureException(e);
+      Error({ msg: t("subscription_error") });
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
   async function subscribe() {
     setIsSubscribing(true);
-    const response = await request(routes.getPublicKey);
-    const public_key = response.data?.public_key;
-    const sw = await navigator.serviceWorker.ready;
-    const push = await sw.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: public_key,
-    });
-    const p256dh = btoa(
-      String.fromCharCode.apply(
-        null,
-        new Uint8Array(push.getKey("p256dh") as any) as any,
-      ),
-    );
-    const auth = btoa(
-      String.fromCharCode.apply(
-        null,
-        new Uint8Array(push.getKey("auth") as any) as any,
-      ),
-    );
+    try {
+      const response = await request(routes.getPublicKey);
+      const public_key = response.data?.public_key;
+      const sw = await navigator.serviceWorker.ready;
+      const push = await sw.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: public_key,
+      });
+      const p256dh = btoa(
+        String.fromCharCode.apply(
+          null,
+          new Uint8Array(push.getKey("p256dh") as any) as any,
+        ),
+      );
+      const auth = btoa(
+        String.fromCharCode.apply(
+          null,
+          new Uint8Array(push.getKey("auth") as any) as any,
+        ),
+      );
 
-    const data = {
-      pf_endpoint: push.endpoint,
-      pf_p256dh: p256dh,
-      pf_auth: auth,
-    };
+      const data = {
+        pf_endpoint: push.endpoint,
+        pf_p256dh: p256dh,
+        pf_auth: auth,
+      };
 
-    const { res } = await request(routes.updateUserPnconfig, {
-      pathParams: { username: username },
-      body: data,
-    });
+      const { res } = await request(routes.updateUserPnconfig, {
+        pathParams: { username: username },
+        body: data,
+      });
 
-    if (res?.ok) {
-      setIsSubscribed("SubscribedOnThisDevice");
+      if (res?.ok) {
+        setIsSubscribed("SubscribedOnThisDevice");
+        Success({
+          msg: t("subscribed_successfully"),
+        });
+        setIsSubscribing(false);
+      } else {
+        Error({
+          msg: t("subscription_failed"),
+        });
+        setIsSubscribing(false);
+      }
+    } catch (error) {
+      const permission = Notification.permission;
+
+      if (permission === "denied" || permission === "default") {
+        Warn({
+          msg: t("notification_permission_denied"),
+        });
+        setIsSubscribing(false);
+        return;
+      }
+      Error({
+        msg: t("subscription_failed"),
+      });
+    } finally {
+      setIsSubscribing(false);
     }
-    setIsSubscribing(false);
   }
-
   const handleMarkAllAsRead = async () => {
     setIsMarkingAllAsRead(true);
     await Promise.all(
@@ -474,6 +488,7 @@ export default function NotificationsList({
     <>
       <Item
         text={t("Notifications")}
+        id="notification-slide-btn"
         do={() => setOpen(!open)}
         icon={<CareIcon icon="l-bell" className="h-5" />}
         badgeCount={unreadCount}

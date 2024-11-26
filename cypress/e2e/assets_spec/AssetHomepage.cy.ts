@@ -1,15 +1,16 @@
-import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
-import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
-import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
-import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import LoginPage from "../../pageobject/Login/LoginPage";
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
 import { v4 as uuidv4 } from "uuid";
+
+import { AssetPage } from "../../pageobject/Asset/AssetCreation";
+import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
+import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
+import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Asset Tab", () => {
   const assetSearchPage = new AssetSearchPage();
   const assetQRScanPage = new AssetQRScanPage();
-  const assetPagination = new AssetPagination();
   const assetFilters = new AssetFilters();
   const assetPage = new AssetPage();
   const loginPage = new LoginPage();
@@ -64,23 +65,23 @@ describe("Asset Tab", () => {
       "ONVIF Camera",
       "Camera Loc",
     );
-    assetFilters.clickadvancefilter();
+    advanceFilters.clickAdvancedFiltersButton();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
     assetFilters.assertFacilityText("Dummy Facility 40");
     assetFilters.assertAssetClassText("ONVIF");
     assetFilters.assertStatusText("ACTIVE");
     assetFilters.assertLocationText("Camera Loc");
-    assetFilters.clickadvancefilter();
+    advanceFilters.clickAdvancedFiltersButton();
     assetFilters.clearFilters();
   });
 
   // Verify the pagination in the page
 
   it("Next/Previous Page", () => {
-    assetPagination.navigateToNextPage();
-    assetPagination.verifyNextUrl();
-    assetPagination.navigateToPreviousPage();
-    assetPagination.verifyPreviousUrl();
+    pageNavigation.navigateToNextPage();
+    pageNavigation.verifyCurrentPageNumber(2);
+    pageNavigation.navigateToPreviousPage();
+    pageNavigation.verifyCurrentPageNumber(1);
   });
 
   it("Import new asset", () => {

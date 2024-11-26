@@ -150,7 +150,7 @@ const getDate = (value: any) =>
 export const validateRule = (
   condition: boolean,
   content: JSX.Element | string,
-  isInitialState: boolean,
+  isInitialState: boolean = false,
 ) => {
   return (
     <div>
@@ -415,7 +415,7 @@ export const UserAdd = (props: UserProps) => {
               .join(" ")} is required`;
             invalidForm = true;
           } else if (!validateName(state.form[field])) {
-            errors[field] = "Please enter a valid name";
+            errors[field] = t("min_char_length_error", { min_length: 3 });
             invalidForm = true;
           }
           return;

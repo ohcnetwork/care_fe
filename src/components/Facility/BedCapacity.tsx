@@ -77,6 +77,8 @@ export const BedCapacity = (props: BedCapacityProps) => {
         const existingData = capacityQuery.data?.results;
         // if all options are diabled
         if (existingData.length === BED_TYPES.length) {
+          setBedTypes([]);
+          setIsLoading(false);
           return;
         }
         // disable existing bed types
@@ -277,18 +279,20 @@ export const BedCapacity = (props: BedCapacityProps) => {
 
           <div className="cui-form-button-group mt-4">
             <Cancel onClick={handleClose} />
-            {!isLastOptionType && headerText === "Add Bed Capacity" && (
+            {headerText === "Add Bed Capacity" && (
               <Submit
                 id="bed-capacity-save-and-exit"
                 onClick={(e) => handleSubmit(e, "Save and Exit")}
                 label="Save Bed Capacity"
               />
             )}
-            <Submit
-              id="bed-capacity-save"
-              onClick={(e) => handleSubmit(e)}
-              label={buttonText}
-            />
+            {!isLastOptionType && (
+              <Submit
+                id="bed-capacity-save"
+                onClick={(e) => handleSubmit(e)}
+                label={buttonText}
+              />
+            )}
           </div>
         </div>
       )}

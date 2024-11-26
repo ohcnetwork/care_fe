@@ -27,7 +27,7 @@ export default function SortDropdownMenu(props: Props) {
       variant="secondary"
       className="w-full border border-primary-500 bg-white md:w-auto"
       icon={<CareIcon icon="l-sort" />}
-      containerClassName="w-full md:w-auto"
+      containerClassName="w-full md:w-auto z-20"
     >
       {props.options.map(({ isAscending, value }, i) => (
         <DropdownItem
