@@ -44,8 +44,8 @@ describe("Patient Creation with consultation", () => {
   const patientOneGender = "Male";
   const patientOneUpdatedGender = "Female";
   const patientOneAddress = `149/J, 3rd Block,
-  Koramangala
-  Bangalore, Karnataka - 560034`;
+  Aluva
+  Ernakulam, Kerala - 682001`;
   const patientOnePincode = "682001";
   const patientOneState = "Kerala";
   const patientOneDistrict = "Ernakulam";
