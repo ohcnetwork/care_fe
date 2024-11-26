@@ -611,7 +611,7 @@ const UserAddEditForm = (props: UserProps) => {
           break;
         case "password":
           if (!formData[field]) {
-            errors[field] = t("please_enter_password");
+            errors[field] = t("password_required");
           } else if (!validatePassword(formData[field])) {
             errors.password = t("password_validation");
           }
@@ -629,7 +629,7 @@ const UserAddEditForm = (props: UserProps) => {
           if (!formData[field]) {
             errors[field] = t(`${field}_required`);
           } else if (!validateName(formData[field])) {
-            errors[field] = t("enter_valid_name");
+            errors[field] = t("min_char_length_error", { min_length: 3 });
           }
           break;
         case "email":
