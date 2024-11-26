@@ -5,42 +5,18 @@ import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import Pagination from "@/components/Common/Pagination";
 import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
-import { NursingPlot } from "@/components/Facility/Consultations/NursingPlot";
+import LogUpdateAnalyseTable from "@/components/Facility/Consultations/LogUpdateAnalyseTable";
 import {
+  NursingPlotFields,
+  NursingPlotRes,
   RoutineAnalysisRes,
   RoutineFields,
 } from "@/components/Facility/models";
 
-import { PAGINATION_LIMIT } from "@/common/constants";
+import { NURSING_CARE_PROCEDURES, PAGINATION_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import { classNames, formatDate, formatTime } from "@/Utils/utils";
-
-export default function ConsultationNursingTab(props: ConsultationTabProps) {
-  const { t } = useTranslation();
-  return (
-    <div>
-      <PageTitle
-        title={t("nursing_information")}
-        hideBack
-        breadcrumbs={false}
-      />
-      <div>
-        <h4>{t("routine")}</h4>
-        <RoutineSection {...props} />
-      </div>
-      <div>
-        <h4>{t("nursing_care")}</h4>
-        <NursingPlot
-          facilityId={props.facilityId}
-          patientId={props.patientId}
-          consultationId={props.consultationId}
-        />
-      </div>
-    </div>
-  );
-}
 
 const REVERSE_CHOICES = {
   appetite: {
@@ -114,6 +90,92 @@ const ROUTINE_ROWS = [
   { subField: true, field: "appetite" } as const,
 ];
 
+const NursingPlot = ({ consultationId }: ConsultationTabProps) => {
+  const { t } = useTranslation();
+  const [results, setResults] = useState<{ [date: string]: NursingPlotRes }>(
+    {},
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string,
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: { page: currentPage, fields: NursingPlotFields },
+        pathParams: { consultationId },
+      });
+      if (res?.ok && data) {
+        setResults(data.results as { [date: string]: NursingPlotRes });
+        setTotalCount(data.count);
+      }
+    };
+
+    fetchDailyRounds(currentPage, consultationId);
+  }, [consultationId, currentPage]);
+
+  const handlePagination = (page: number) => setCurrentPage(page);
+
+  let fieldsToDisplay = new Set<string>();
+
+  /**
+   * Transforms nursing procedure results into a structured format where dates are mapped to procedures and their descriptions.
+   * Groups nursing data by date, collecting unique procedures and their corresponding descriptions.
+   */
+  const tableData = Object.entries(results).reduce(
+    (acc: Record<string, Record<string, string>>, [date, result]) => {
+      if ("nursing" in result) {
+        result.nursing.forEach((field) => {
+          if (field.procedure && !acc[date]) acc[date] = {};
+          acc[date][field.procedure] = field.description;
+          // Add procedure to the set of procedures to display
+          fieldsToDisplay.add(field.procedure);
+        });
+      }
+      return acc;
+    },
+    {},
+  );
+
+  fieldsToDisplay = fieldsToDisplay.intersection(
+    new Set(NURSING_CARE_PROCEDURES),
+  );
+
+  const rows = Array.from(fieldsToDisplay).map((procedure) => ({
+    field: procedure,
+    title: t(`NURSING_CARE_PROCEDURE__${procedure}`),
+  }));
+
+  return (
+    <div>
+      <div>
+        {fieldsToDisplay.size == 0 ? (
+          <div className="mt-1 w-full rounded-lg border bg-white p-4 shadow">
+            <div className="flex items-center justify-center text-2xl font-bold text-secondary-500">
+              {t("no_data_found")}
+            </div>
+          </div>
+        ) : (
+          <LogUpdateAnalyseTable data={tableData} rows={rows} />
+        )}
+      </div>
+
+      {totalCount > PAGINATION_LIMIT && fieldsToDisplay.size > 0 && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={PAGINATION_LIMIT}
+            data={{ totalCount }}
+            onChange={handlePagination}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
@@ -158,65 +220,11 @@ const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
 
   return (
     <div className="pb-8 pt-4">
-      <div className="m-2 w-full overflow-hidden overflow-x-auto rounded-lg border border-black shadow md:w-fit">
-        <table className="border-collapse overflow-hidden rounded-lg border bg-secondary-100">
-          <thead className="bg-white shadow">
-            <tr>
-              <th className="w-48 border-b-2 border-r-2 border-black" />
-              {Object.keys(results).map((date) => (
-                <th
-                  key={date}
-                  className="border border-b-2 border-secondary-500 border-b-black p-1 text-sm font-semibold"
-                >
-                  <p>{formatDate(date)}</p>
-                  <p>{formatTime(date)}</p>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-secondary-200">
-            {ROUTINE_ROWS.map((row) => (
-              <tr
-                key={row.field ?? row.title}
-                className={classNames(
-                  row.title && "border-t-2 border-t-secondary-600",
-                )}
-              >
-                <td
-                  className={classNames(
-                    "border border-r-2 border-secondary-500 border-r-black bg-white p-2",
-                    row.subField ? "pl-4 font-medium" : "font-bold",
-                  )}
-                >
-                  {row.title ?? t(`LOG_UPDATE_FIELD_LABEL__${row.field!}`)}
-                </td>
-                {row.field &&
-                  Object.values(results).map((obj, idx) => (
-                    <td
-                      key={`${row.field}-${idx}`}
-                      className={classNames(
-                        "border border-secondary-500 bg-secondary-100 p-2 text-center font-medium",
-                      )}
-                    >
-                      {(() => {
-                        const value = obj[row.field];
-                        if (value == null) {
-                          return "-";
-                        }
-                        if (typeof value === "boolean") {
-                          return t(value ? "yes" : "no");
-                        }
-                        const choices = REVERSE_CHOICES[row.field];
-                        const choice = `${row.field.toUpperCase()}__${choices[value as keyof typeof choices]}`;
-                        return t(choice);
-                      })()}
-                    </td>
-                  ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <LogUpdateAnalyseTable
+        data={results}
+        rows={ROUTINE_ROWS}
+        choices={REVERSE_CHOICES}
+      />
 
       {totalCount != null && totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
@@ -231,3 +239,24 @@ const RoutineSection = ({ consultationId }: ConsultationTabProps) => {
     </div>
   );
 };
+
+export default function ConsultationNursingTab(props: ConsultationTabProps) {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <PageTitle
+        title={t("nursing_information")}
+        hideBack
+        breadcrumbs={false}
+      />
+      <div>
+        <h4 aria-label={t("routine")}>{t("routine")}</h4>
+        <RoutineSection {...props} />
+      </div>
+      <div>
+        <h4 aria-label={t("nursing_care")}>{t("nursing_care")}</h4>
+        <NursingPlot {...props} />
+      </div>
+    </div>
+  );
+}

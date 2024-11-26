@@ -83,7 +83,11 @@ module.exports = {
       },
     },
   },
-  content: ["./src/**/*.{html,md,js,jsx,ts,tsx}", "./apps/**/*.{html,md,js,jsx,ts,tsx}", "./index.html"],
+  content: [
+    "./src/**/*.{html,md,js,jsx,ts,tsx}",
+    "./apps/**/*.{html,md,js,jsx,ts,tsx}",
+    "./index.html",
+  ],
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),

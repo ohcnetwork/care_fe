@@ -155,7 +155,10 @@ export default function SampleViewAdmin() {
             <div className="flex h-full flex-col justify-between px-6 py-4">
               <div>
                 <div className="flex flex-col md:flex-row md:justify-between">
-                  <div className="mb-2 text-xl font-bold capitalize">
+                  <div
+                    id="sample-test-patient-name"
+                    className="mb-2 text-xl font-bold capitalize"
+                  >
                     {item.patient_name}
                   </div>
                   <div>
@@ -274,6 +277,7 @@ export default function SampleViewAdmin() {
                 )}
 
                 <button
+                  id="sample-details-btn"
                   onClick={() => navigate(`/sample/${item.id}`)}
                   className="mt-2 w-full rounded border border-secondary-400 bg-white px-4 py-2 text-center text-sm font-semibold text-secondary-800 shadow hover:bg-secondary-400"
                 >
@@ -350,6 +354,7 @@ export default function SampleViewAdmin() {
           <div className="flex w-full flex-col gap-3">
             <SearchInput
               name="patient_name"
+              id="search_patient_name"
               value={qParams.patient_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search patient"
