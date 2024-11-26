@@ -55,6 +55,7 @@ const AssetsList = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
+  const [showNoAssetsMessage, setShowNoAssetsMessage] = useState(false);
   const params = {
     limit: resultsPerPage,
     page: qParams.page,
@@ -76,6 +77,7 @@ const AssetsList = () => {
       if (res?.status === 200 && data) {
         setAssets(data.results);
         setTotalCount(data.count);
+        setShowNoAssetsMessage(false);
       }
     },
   });
@@ -98,6 +100,22 @@ const AssetsList = () => {
   useEffect(() => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    if (!loading && !assetsExist) {
+      timer = setTimeout(() => setShowNoAssetsMessage(true), 500);
+    } else {
+      setShowNoAssetsMessage(false);
+    }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [loading, assetsExist]);
 
   const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
@@ -210,7 +228,8 @@ const AssetsList = () => {
     );
 
   let manageAssets = null;
-  if (loading || !assetsExist) {
+
+  if (loading || (!assetsExist && !showNoAssetsMessage)) {
     manageAssets = (
       <div className="col-span-3 w-full py-8 text-center">
         <Loading />
@@ -296,7 +315,7 @@ const AssetsList = () => {
         ))}
       </div>
     );
-  } else {
+  } else if (showNoAssetsMessage) {
     manageAssets = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-secondary-600">No Assets Found</p>
@@ -371,7 +390,7 @@ const AssetsList = () => {
         <CountBlock
           text="Total Assets"
           count={totalCount}
-          loading={loading}
+          loading={loading || (!assetsExist && !showNoAssetsMessage)}
           icon="l-monitor-heart-rate"
           className="flex-1"
         />
