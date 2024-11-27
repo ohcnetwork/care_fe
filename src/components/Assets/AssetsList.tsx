@@ -50,12 +50,10 @@ const AssetsList = () => {
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
-  const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const [showFacilityDialog, setShowFacilityDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
-  const [showNoAssetsMessage, setShowNoAssetsMessage] = useState(false);
   const params = {
     limit: resultsPerPage,
     page: qParams.page,
@@ -71,13 +69,16 @@ const AssetsList = () => {
       qParams.warranty_amc_end_of_validity_after || "",
   };
 
-  const { refetch: assetsFetch, loading } = useQuery(routes.listAssets, {
+  const {
+    refetch: assetsFetch,
+    loading,
+    data,
+  } = useQuery(routes.listAssets, {
     query: params,
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
         setAssets(data.results);
         setTotalCount(data.count);
-        setShowNoAssetsMessage(false);
       }
     },
   });
@@ -100,22 +101,6 @@ const AssetsList = () => {
   useEffect(() => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
-
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
-    if (!loading && !assetsExist) {
-      timer = setTimeout(() => setShowNoAssetsMessage(true), 500);
-    } else {
-      setShowNoAssetsMessage(false);
-    }
-
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [loading, assetsExist]);
 
   const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
@@ -228,14 +213,13 @@ const AssetsList = () => {
     );
 
   let manageAssets = null;
-
-  if (loading || (!assetsExist && !showNoAssetsMessage)) {
+  if (loading || !data) {
     manageAssets = (
       <div className="col-span-3 w-full py-8 text-center">
         <Loading />
       </div>
     );
-  } else if (assetsExist) {
+  } else if (data?.count) {
     manageAssets = (
       <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
         {assets.map((asset: AssetData) => (
@@ -315,7 +299,7 @@ const AssetsList = () => {
         ))}
       </div>
     );
-  } else if (showNoAssetsMessage) {
+  } else {
     manageAssets = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-secondary-600">No Assets Found</p>
@@ -390,7 +374,7 @@ const AssetsList = () => {
         <CountBlock
           text="Total Assets"
           count={totalCount}
-          loading={loading || (!assetsExist && !showNoAssetsMessage)}
+          loading={loading || !data}
           icon="l-monitor-heart-rate"
           className="flex-1"
         />
