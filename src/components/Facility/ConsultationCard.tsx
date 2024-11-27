@@ -1,13 +1,14 @@
 import careConfig from "@careConfig";
+import dayjs from "dayjs";
 import { t } from "i18next";
 import { navigate } from "raviger";
 import { useState } from "react";
 
 import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
-import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
 import Beds from "@/components/Facility/Consultations/Beds";
 import { ConsultationModel } from "@/components/Facility/models";
 
@@ -25,10 +26,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
   const { itemData, isLastConsultation, refetch } = props;
   const [open, setOpen] = useState(false);
   const bedDialogTitle = itemData.discharge_date
-    ? "Bed History"
+    ? t("bed_history")
     : !itemData.current_bed
-      ? "Assign Bed"
-      : "Switch Bed";
+      ? t("assign_bed")
+      : t("switch_bed");
   return (
     <>
       <DialogModal
@@ -48,63 +49,59 @@ export const ConsultationCard = (props: ConsultationProps) => {
             hideTitle
           />
         ) : (
-          <div>Invalid Patient Data</div>
+          <div>{t("invalid_patient_data")}</div>
         )}
       </DialogModal>
-      <div className="mt-4 block cursor-pointer rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500">
+      <div className="pb-16 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
+        <Chip
+          size="small"
+          variant={itemData.suggestion === "A" ? "alert" : "primary"}
+          text={
+            itemData.suggestion === "A" ? t("ip_encounter") : t("op_encounter")
+          }
+          className="-translate-y-2"
+        />
+        <div className="text-sm">
+          {dayjs(itemData.created_date).format("DD/MM/YYYY")}
+        </div>
+
         {itemData.is_kasp && (
           <div className="ml-3 mt-2 inline-flex items-center rounded-md bg-yellow-100 px-2.5 py-0.5 text-sm font-medium leading-5 text-yellow-800">
             {careConfig.kasp.string}
           </div>
         )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          {[
+            {
+              label: t("facility"),
+              value: (
+                <>
+                  {itemData.facility_name}
+                  {itemData.is_telemedicine && (
+                    <span className="ml-1">(Telemedicine)</span>
+                  )}
+                </>
+              ),
+            },
+            {
+              label: t("suggestion"),
+              value: itemData.suggestion_text?.toLocaleLowerCase(),
+            },
+            {
+              hide: !itemData.kasp_enabled_date,
+              label: t("kasp_enabled_date", {
+                kasp_string: careConfig.kasp.string,
+              }),
+              value: itemData.kasp_enabled_date
+                ? formatDateTime(itemData.kasp_enabled_date)
+                : undefined,
+            },
 
-        <div className="ml-2 mt-2 grid grid-cols-1 gap-4 md:grid-cols-4">
-          <div className="sm:col-span-1">
-            <div className="sm:col-span-1">
-              <div className="text-sm font-semibold leading-5 text-zinc-400">
-                Facility
-              </div>
-              <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                {itemData.facility_name}{" "}
-                {itemData.is_telemedicine && (
-                  <span className="ml-2">(Telemedicine)</span>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="sm:col-span-1">
-            <div className="capitalize">
-              <div className="sm:col-span-1">
-                <div className="text-sm font-semibold leading-5 text-zinc-400">
-                  Suggestion{" "}
-                </div>
-                <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                  {itemData.suggestion_text?.toLocaleLowerCase()}
-                </div>
-              </div>
-            </div>
-          </div>
-          {itemData.kasp_enabled_date && (
-            <div className="sm:col-span-1">
-              <div className="sm:col-span-1">
-                <div className="text-sm font-semibold leading-5 text-zinc-400">
-                  {careConfig.kasp.string} Enabled date{" "}
-                </div>
-                <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                  {itemData.kasp_enabled_date
-                    ? formatDateTime(itemData.kasp_enabled_date)
-                    : "-"}
-                </div>
-              </div>
-            </div>
-          )}
-          {itemData.admitted && itemData.encounter_date && (
-            <div className="sm:col-span-1">
-              <div className="sm:col-span-1">
-                <div className="text-sm font-semibold leading-5 text-zinc-400">
-                  Admitted on
-                </div>
-                <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
+            {
+              label: t("admitted_on"),
+              hide: !(itemData.admitted && itemData.encounter_date),
+              value: (
+                <>
                   {formatDateTime(itemData.encounter_date)}
                   {itemData.is_readmission && (
                     <Chip
@@ -115,103 +112,77 @@ export const ConsultationCard = (props: ConsultationProps) => {
                       text="Readmission"
                     />
                   )}
-                </div>
+                </>
+              ),
+            },
+            {
+              label: t("admitted"),
+              hide: itemData.admitted,
+              value: t("no"),
+            },
+            {
+              label: t("discharged_on"),
+              hide: !itemData.discharge_date,
+              value: formatDateTime(itemData.discharge_date),
+            },
+          ]
+            .filter((f) => !f.hide)
+            .map((field, i) => (
+              <div key={i}>
+                <div className="text-sm text-gray-600">{field.label}</div>
+                <div className="font-bold">{field.value}</div>
               </div>
-            </div>
-          )}
-          {!itemData.admitted && (
-            <div className="sm:col-span-1">
-              <div className="sm:col-span-1">
-                <div className="text-sm font-semibold leading-5 text-zinc-400">
-                  Admitted{" "}
-                </div>
-                <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                  No
-                </div>
-              </div>
-            </div>
-          )}
-          {itemData.discharge_date && (
-            <div className="sm:col-span-1">
-              <div className="sm:col-span-1">
-                <div className="text-sm font-semibold leading-5 text-zinc-400">
-                  Discharged on{" "}
-                </div>
-                <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                  {formatDateTime(itemData.discharge_date)}
-                </div>
-              </div>
-            </div>
-          )}
+            ))}
         </div>
-        <div className="mt-8 flex flex-col">
-          {
-            <div className="flex flex-col items-center text-sm text-secondary-700 md:flex-row">
-              <div className="font-medium text-black">Created : </div>
-              <div className="ml-1 text-black">
-                <RelativeDateUserMention
-                  tooltipPosition="right"
-                  actionDate={itemData.created_date}
-                  user={itemData.created_by}
-                />
-              </div>
-            </div>
-          }
-          <div className="flex flex-col items-center text-sm text-secondary-700 md:flex-row">
-            <div className="font-medium text-black">Last Modified : </div>
-            <div className="ml-1 text-secondary-700">
-              <RelativeDateUserMention
-                tooltipPosition="right"
-                actionDate={itemData.modified_date}
-                user={itemData.last_edited_by}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
+
+        <div className="flex gap-2 items-center mt-4">
           <ButtonV2
             id="view_consultation_and_log_updates"
-            className="h-auto whitespace-pre-wrap border border-secondary-500 bg-white text-black hover:bg-secondary-300"
+            variant="secondary"
+            className="bg-gray-200 rounded-lg font-semibold shadow-none text-xs"
             onClick={() =>
               navigate(
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`,
               )
             }
           >
-            {t("view_consultation_and_log_updates")}
+            {t("view_updates")}
           </ButtonV2>
           <ButtonV2
-            className="h-auto whitespace-pre-wrap border border-secondary-500 bg-white text-black hover:bg-secondary-300"
+            variant="secondary"
+            className="bg-gray-200 rounded-lg font-semibold shadow-none text-xs"
             onClick={() =>
               navigate(
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`,
               )
             }
           >
-            View / Upload Consultation Files
+            {t("view_files")}
           </ButtonV2>
-          {isLastConsultation && (
-            <ButtonV2
-              className="h-auto whitespace-pre-wrap border border-secondary-500 bg-white text-black hover:bg-secondary-300"
-              onClick={() => {
-                if (itemData.admitted && !itemData.current_bed) {
-                  Notification.Error({
-                    msg: "Please assign a bed to the patient",
-                  });
-                  setOpen(true);
-                } else {
-                  navigate(
-                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/log_updates/`,
-                  );
-                }
-              }}
-              disabled={!!itemData.discharge_date}
-              authorizeFor={NonReadOnlyUsers}
-            >
-              {t("add") + " " + t("log_update")}
-            </ButtonV2>
-          )}
         </div>
+        {isLastConsultation && (
+          <ButtonV2
+            variant="secondary"
+            className="mt-2 shadow-none border border-secondary-300"
+            onClick={() => {
+              if (itemData.admitted && !itemData.current_bed) {
+                Notification.Error({
+                  msg: t("please_assign_bed_to_patient"),
+                });
+                setOpen(true);
+              } else {
+                navigate(
+                  `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/log_updates/`,
+                );
+              }
+            }}
+            disabled={!!itemData.discharge_date}
+            authorizeFor={NonReadOnlyUsers}
+          >
+            <CareIcon icon="l-plus-circle" />
+            {t("add_consultation_update")}
+          </ButtonV2>
+        )}
       </div>
     </>
   );
