@@ -1018,6 +1018,7 @@ export const PatientManager = () => {
         <div className="col-span-3 w-full">
           <div className="mb-4">
             <SearchByMultipleFields
+              id="patient-search"
               options={searchOptions}
               onSearch={handleSearch}
               clearSearch={clearSearch}

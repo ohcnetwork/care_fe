@@ -39,6 +39,7 @@ interface SearchOption {
 }
 
 interface SearchByMultipleFieldsProps {
+  id: string;
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
   initialOption?: SearchOption;
@@ -54,6 +55,7 @@ type EventType = {
 };
 
 const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
+  id,
   options,
   onSearch,
   initialOption,
@@ -169,6 +171,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       case "phone":
         return (
           <PhoneNumberFormField
+            id={id}
             name={selectedOption.key}
             placeholder={t(selectedOption.placeholder)}
             types={["mobile", "landline"]}
@@ -181,6 +184,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       default:
         return (
           <Input
+            id={id}
             type="text"
             placeholder={t(selectedOption.placeholder)}
             {...commonProps}
@@ -253,6 +257,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             onClick={() => handleOptionChange(option)}
             variant="outline"
             size="xs"
+            data-test-id={id + "__" + option.key}
             className={cn(
               selectedOption.key === option.key
                 ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
