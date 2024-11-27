@@ -99,11 +99,17 @@ const Form = <T extends FormDetails>({
       error: validate?.(value),
     });
 
-    if (typeof props.defaults[name] == typeof value) {
-      setIsDirty(props.defaults[name] !== value);
-    } else {
-      setIsDirty(JSON.stringify(props.defaults[name]) !== value);
-    }
+    const defaultValue: unknown = props.defaults[name];
+    const isEqual = (() => {
+      if (typeof defaultValue === "object" && defaultValue !== null) {
+        if (Array.isArray(defaultValue) && Array.isArray(value)) {
+          return JSON.stringify(defaultValue) === JSON.stringify(value);
+        }
+        return defaultValue === value;
+      }
+      return defaultValue === value;
+    })();
+    setIsDirty(!isEqual);
   };
 
   const { Provider, Consumer } = useMemo(() => createFormContext<T>(), []);

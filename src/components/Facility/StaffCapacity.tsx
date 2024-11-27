@@ -119,25 +119,35 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
       area: Number(form.area),
       count: Number(form.count),
     };
-    const { res } = await (id
-      ? request(routes.updateDoctor, {
-          pathParams: { facilityId, id: `${id}` },
-          body: data,
-        })
-      : request(routes.createDoctor, {
-          pathParams: { facilityId },
-          body: data,
-        }));
-    setIsLoading(false);
-    if (res?.ok) {
-      specializationsQuery.refetch();
-      Notification.Success({
-        msg: id
-          ? "Staff count updated successfully"
-          : "Staff count added successfully",
+
+    try {
+      const { res } = await (id
+        ? request(routes.updateDoctor, {
+            pathParams: { facilityId, id: `${id}` },
+            body: data,
+          })
+        : request(routes.createDoctor, {
+            pathParams: { facilityId },
+            body: data,
+          }));
+      setIsLoading(false);
+      if (res?.ok) {
+        specializationsQuery.refetch();
+        Notification.Success({
+          msg: id
+            ? "Staff count updated successfully"
+            : "Staff count added successfully",
+        });
+        handleUpdate();
+      }
+    } catch (error) {
+      Notification.Error({
+        msg: "Failed to update staff capacity",
       });
-      handleUpdate();
+    } finally {
+      setIsLoading(false);
     }
+
     if (source !== "doctor-save") handleClose();
   };
 
