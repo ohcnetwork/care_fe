@@ -31,8 +31,10 @@ export default function useMutation<TData, TBody>(
 
       setIsProcessing(true);
       const response = await request(route, { ...resolvedOptions, controller });
-      setResponse(response);
-      setIsProcessing(false);
+      if (response.error?.name !== "AbortError") {
+        setResponse(response);
+        setIsProcessing(false);
+      }
       return response;
     },
     [route, JSON.stringify(options)],
