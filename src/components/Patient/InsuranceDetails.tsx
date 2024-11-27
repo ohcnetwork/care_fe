@@ -1,7 +1,7 @@
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { HCXPolicyModel } from "@/components/HCX/models";
-import { InsuranceDetialsCard } from "@/components/Patient/InsuranceDetailsCard";
+import { InsuranceDetailsCard } from "@/components/Patient/InsuranceDetailsCard";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
@@ -53,7 +53,7 @@ export const InsuranceDetails = (props: IProps) => {
           data-testid="patient-details"
         >
           {insuranceDetials?.results.map((data: HCXPolicyModel) => (
-            <InsuranceDetialsCard data={data} />
+            <InsuranceDetailsCard data={data} />
           ))}
         </section>
       )}

@@ -191,8 +191,14 @@ export const PatientManager = () => {
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearchParams(params), 1000);
+    console.log("this");
     return () => clearTimeout(timeout);
-  }, [params]);
+  }, [
+    params.name,
+    params.phone_number,
+    params.patient_no,
+    params.emergency_phone_number,
+  ]);
 
   useEffect(() => {
     const ids: string[] = [];
@@ -780,7 +786,7 @@ export const PatientManager = () => {
       shortcutKey: "u",
     },
     {
-      key: "emergency_phone_number",
+      key: "emergency_contact_number",
       label: "Emergency Contact Phone Number",
       type: "phone" as const,
       placeholder: "search_by_emergency_phone_number",
@@ -801,7 +807,7 @@ export const PatientManager = () => {
         name: key === "name" ? value : undefined,
         patient_no: key === "patient_no" ? value : undefined,
         emergency_phone_number:
-          key === "emergency_phone_number"
+          key === "emergency_contact_number"
             ? value.length >= 13 || value === ""
               ? value
               : undefined
