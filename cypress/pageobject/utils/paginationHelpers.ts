@@ -1,7 +1,7 @@
 export const pageNavigation = {
   navigateToNextPage() {
-    cy.intercept("GET", "**/api/patient/?page=2").as("getPage2");
     cy.get("button#next-pages").click();
+    cy.intercept("GET", "**/v1/patient/?page=2").as("getPage2");
     cy.wait("@getPage2");
   },
 
