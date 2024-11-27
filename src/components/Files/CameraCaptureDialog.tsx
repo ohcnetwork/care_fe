@@ -7,7 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 
-import useWindowDimensions from "@/hooks/useWindowDimensions";
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 import * as Notify from "@/Utils/Notifications";
 
@@ -19,9 +19,7 @@ export interface CameraCaptureDialogProps {
 
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
   const { show, onHide, onCapture } = props;
-  const { width } = useWindowDimensions();
-  const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const isLaptopScreen = useBreakpoints({ lg: true, default: false });
 
   const [cameraFacingMode, setCameraFacingMode] = useState(
     isLaptopScreen ? "user" : "environment",
