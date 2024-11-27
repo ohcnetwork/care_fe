@@ -26,7 +26,7 @@ export default function Chip({
     <span
       id={props?.id}
       className={classNames(
-        "inline-flex items-center gap-2 font-medium leading-4",
+        "inline-flex items-center gap-2 font-medium",
 
         {
           small: "rounded px-2 py-1 text-xs",
