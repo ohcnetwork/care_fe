@@ -132,6 +132,7 @@ describe("Patient Creation with consultation", () => {
       "Middle Class",
       "Family member",
     );
+
     patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
       patientOneOngoingMedication,
@@ -216,11 +217,9 @@ describe("Patient Creation with consultation", () => {
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
     cy.get("[data-testid=patient-details]")
-      .contains("member id")
+      .contains("Member ID")
       .scrollIntoView();
     cy.wait(2000);
-    patientInsurance.clickPatientInsuranceViewDetail();
-    cy.wait(3000);
     patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,

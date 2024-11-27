@@ -16,8 +16,8 @@ import request from "@/Utils/request/request";
 import { formatDateTime } from "@/Utils/utils";
 
 interface SampleDetailsProps {
-  facilityId: number;
-  patientId: number;
+  facilityId: string;
+  patientId: string;
   itemData: SampleTestModel;
   refetch: () => void;
   handleApproval: (status: number, sample: SampleTestModel) => void;

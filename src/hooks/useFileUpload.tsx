@@ -249,6 +249,11 @@ export default function useFileUpload(
     setUploadFileNames([]);
   };
 
+  const clearFiles = () => {
+    setFiles([]);
+    setUploadFileNames([]);
+  };
+
   const Dialogues = (
     <>
       <CameraCaptureDialog
@@ -257,6 +262,7 @@ export default function useFileUpload(
         onCapture={(file) => {
           setFiles((prev) => [...prev, file]);
         }}
+        onResetCapture={clearFiles}
       />
       <AudioCaptureDialog
         show={audioModalOpen}
@@ -309,10 +315,7 @@ export default function useFileUpload(
       setFiles((prev) => prev.filter((_, i) => i !== index));
       setUploadFileNames((prev) => prev.filter((_, i) => i !== index));
     },
-    clearFiles: () => {
-      setFiles([]);
-      setUploadFileNames([]);
-    },
+    clearFiles,
     uploading,
   };
 }

@@ -206,83 +206,81 @@ export const ConsultationDetails = (props: any) => {
       }}
     >
       <div>
-        <div>
-          <nav className="relative flex flex-wrap items-start justify-between">
-            <PageTitle
-              title="Patient Dashboard"
-              className="sm:m-0 sm:p-0"
-              crumbsReplacements={{
-                [facilityId]: { name: patientData?.facility_object?.name },
-                [patientId]: { name: patientData?.name },
-                [consultationId]: {
-                  name:
-                    consultationData.suggestion === "A"
-                      ? `Admitted on ${formatDateTime(
-                          consultationData.encounter_date!,
-                        )}`
-                      : consultationData.suggestion_text,
-                },
-              }}
-              breadcrumbs={true}
-              backUrl="/patients"
-            />
-            <div
-              className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
-              id="consultationpage-header"
+        <nav className="relative flex flex-wrap items-start justify-between">
+          <PageTitle
+            title="Patient Dashboard"
+            className="sm:m-0 sm:p-0"
+            crumbsReplacements={{
+              [facilityId]: { name: patientData?.facility_object?.name },
+              [patientId]: { name: patientData?.name },
+              [consultationId]: {
+                name:
+                  consultationData.suggestion === "A"
+                    ? `Admitted on ${formatDateTime(
+                        consultationData.encounter_date!,
+                      )}`
+                    : consultationData.suggestion_text,
+              },
+            }}
+            breadcrumbs={true}
+            backUrl="/patients"
+          />
+          <div
+            className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
+            id="consultationpage-header"
+          >
+            {!consultationData.discharge_date && (
+              <>
+                <button
+                  id="doctor-connect-button"
+                  onClick={() => {
+                    triggerGoal("Doctor Connect Clicked", {
+                      consultationId,
+                      facilityId: patientData.facility,
+                      userId: authUser.id,
+                      page: "ConsultationDetails",
+                    });
+                    setShowDoctors(true);
+                  }}
+                  className="btn btn-primary m-1 w-full hover:text-white"
+                >
+                  Doctor Connect
+                </button>
+                {patientData.last_consultation?.id &&
+                  isCameraAttached &&
+                  CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
+                    <Link
+                      href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                      className="btn btn-primary m-1 w-full hover:text-white"
+                    >
+                      Camera Feed
+                    </Link>
+                  )}
+              </>
+            )}
+            <Link
+              href={`/facility/${patientData.facility}/patient/${patientData.id}`}
+              className="btn btn-primary m-1 w-full hover:text-white"
+              id="patient-details"
             >
-              {!consultationData.discharge_date && (
-                <>
-                  <button
-                    id="doctor-connect-button"
-                    onClick={() => {
-                      triggerGoal("Doctor Connect Clicked", {
-                        consultationId,
-                        facilityId: patientData.facility,
-                        userId: authUser.id,
-                        page: "ConsultationDetails",
-                      });
-                      setShowDoctors(true);
-                    }}
-                    className="btn btn-primary m-1 w-full hover:text-white"
-                  >
-                    Doctor Connect
-                  </button>
-                  {patientData.last_consultation?.id &&
-                    isCameraAttached &&
-                    CameraFeedPermittedUserTypes.includes(
-                      authUser.user_type,
-                    ) && (
-                      <Link
-                        href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                        className="btn btn-primary m-1 w-full hover:text-white"
-                      >
-                        Camera Feed
-                      </Link>
-                    )}
-                </>
-              )}
-              <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-                className="btn btn-primary m-1 w-full hover:text-white"
-                id="patient-details"
-              >
-                Patient Details
-              </Link>
-              <a
-                id="patient_discussion_notes"
-                onClick={() =>
-                  showPatientNotesPopup
-                    ? navigate(
-                        `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
-                      )
-                    : setShowPatientNotesPopup(true)
-                }
-                className="btn btn-primary m-1 w-full hover:text-white"
-              >
-                Discussion Notes
-              </a>
-            </div>
-          </nav>
+              Patient Details
+            </Link>
+            <a
+              id="patient_discussion_notes"
+              onClick={() =>
+                showPatientNotesPopup
+                  ? navigate(
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
+                    )
+                  : setShowPatientNotesPopup(true)
+              }
+              className="btn btn-primary m-1 w-full hover:text-white"
+            >
+              Discussion Notes
+            </a>
+          </div>
+        </nav>
+        <div className="mt-4 w-full border-b-2 border-secondary-200">
           <div className="mt-2 flex w-full flex-col md:flex-row">
             <div className="size-full rounded-lg border bg-white text-black shadow">
               <PatientInfoCard
@@ -399,22 +397,22 @@ export const ConsultationDetails = (props: any) => {
           </div>
           <SelectedTab {...consultationTabProps} />
         </div>
-
-        <DoctorVideoSlideover
-          facilityId={facilityId}
-          show={showDoctors}
-          setShow={setShowDoctors}
-        />
-
-        {showPatientNotesPopup && (
-          <PatientNotesSlideover
-            patientId={patientId}
-            facilityId={facilityId}
-            consultationId={consultationId}
-            setShowPatientNotesPopup={setShowPatientNotesPopup}
-          />
-        )}
       </div>
+
+      <DoctorVideoSlideover
+        facilityId={facilityId}
+        show={showDoctors}
+        setShow={setShowDoctors}
+      />
+
+      {showPatientNotesPopup && (
+        <PatientNotesSlideover
+          patientId={patientId}
+          facilityId={facilityId}
+          consultationId={consultationId}
+          setShowPatientNotesPopup={setShowPatientNotesPopup}
+        />
+      )}
     </ConsultationProvider>
   );
 };
