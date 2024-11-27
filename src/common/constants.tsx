@@ -1,13 +1,15 @@
+import { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { SortOption } from "@/components/Common/SortDropdown";
 import {
   PatientCategory,
   SpokeRelationship,
 } from "@/components/Facility/models";
-import { SortOption } from "@/components/Common/SortDropdown";
-import { dateQueryString } from "../Utils/utils";
-import { IconName } from "../CAREUI/icons/CareIcon";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+
+import { dateQueryString } from "@/Utils/utils";
+
 import { SchemaType } from "./schemaParser";
-import { ConsentHIType, ConsentPurpose } from "@/components/ABDM/types/consent";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -236,7 +238,7 @@ export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 16, text: "General Surgeon" },
   { id: 17, text: "Geriatrician" },
   { id: 18, text: "Hematologist" },
-  { id: 29, text: "Immunologist" },
+  { id: 19, text: "Immunologist" },
   { id: 20, text: "Infectious Disease Specialist" },
   { id: 21, text: "MBBS doctor" },
   { id: 22, text: "Medical Officer" },
@@ -651,12 +653,12 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_CREATED",
-    text: "Patient Consultation Update Created",
+    text: "Patient Log Update Created",
     icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_UPDATED",
-    text: "Patient Consultation Update Updated",
+    text: "Patient Log Update Updated",
     icon: "l-heart-medical",
   },
   {
@@ -1138,26 +1140,6 @@ export const AssetImportSchema: SchemaType = {
     type: "string",
   },
 };
-
-// ABDM
-export const ABDM_CONSENT_PURPOSE = [
-  "CAREMGT",
-  "BTG",
-  "PUBHLTH",
-  "HPAYMT",
-  "DSRCH",
-  "PATRQT",
-] as ConsentPurpose[];
-
-export const ABDM_HI_TYPE = [
-  "Prescription",
-  "DiagnosticReport",
-  "OPConsultation",
-  "DischargeSummary",
-  "ImmunizationRecord",
-  "HealthDocumentRecord",
-  "WellnessRecord",
-] as ConsentHIType[];
 
 export const USER_TYPES_MAP = {
   Pharmacist: "Pharmacist",
@@ -1735,3 +1717,5 @@ export const HEADER_CONTENT_TYPES = {
   svg: "image/svg+xml",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 } as const;
+
+export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;

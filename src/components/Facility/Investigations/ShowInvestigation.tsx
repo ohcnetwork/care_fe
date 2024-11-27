@@ -1,13 +1,17 @@
-import * as _ from "lodash-es";
+import _ from "lodash";
+import { set } from "lodash-es";
 import { useCallback, useReducer } from "react";
-import routes from "../../../Redux/api";
-import * as Notification from "../../../Utils/Notifications";
-import request from "../../../Utils/request/request";
-import useQuery from "../../../Utils/request/useQuery";
-import InvestigationTable from "./InvestigationTable";
 import { useTranslation } from "react-i18next";
-import Page from "@/components/Common/components/Page";
+
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import InvestigationTable from "@/components/Facility/Investigations/InvestigationTable";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+
 const initialState = {
   changedFields: {},
   initialValues: {},
@@ -89,7 +93,7 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
 
   const handleValueChange = (value: any, name: string) => {
     const changedFields = { ...state.changedFields };
-    _.set(changedFields, name, value);
+    set(changedFields, name, value);
     dispatch({ type: "set_changed_fields", changedFields });
   };
 

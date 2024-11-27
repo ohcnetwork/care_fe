@@ -1,6 +1,40 @@
-import { navigate } from "raviger";
+import { error } from "@pnotify/core";
 import dayjs from "dayjs";
+import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import BloodPressureFormField, {
+  BloodPressureValidator,
+} from "@/components/Common/BloodPressureFormField";
+import { Cancel, Submit } from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import TemperatureFormField from "@/components/Common/TemperatureFormField";
+import InvestigationBuilder from "@/components/Common/prescription-builder/InvestigationBuilder";
+import { EditDiagnosesBuilder } from "@/components/Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
+import {
+  ConditionVerificationStatuses,
+  ConsultationDiagnosis,
+} from "@/components/Diagnosis/types";
+import { ICD11DiagnosisModel } from "@/components/Facility/models";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import { FieldErrorText } from "@/components/Form/FormFields/FormField";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import NursingCare from "@/components/LogUpdate/Sections/NursingCare";
+import PrescriptionBuilder from "@/components/Medicine/PrescriptionBuilder";
+import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
+import { DailyRoundTypes, DailyRoundsModel } from "@/components/Patient/models";
+import { EncounterSymptomsBuilder } from "@/components/Symptoms/SymptomsBuilder";
+
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+
 import {
   APPETITE_CHOICES,
   BLADDER_DRAINAGE_CHOICES,
@@ -16,54 +50,22 @@ import {
   TELEMEDICINE_ACTIONS,
   URINATION_FREQUENCY_CHOICES,
 } from "@/common/constants";
-import useAppHistory from "@/common/hooks/useAppHistory";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import * as Notification from "../../Utils/Notifications";
-import { formatDateTime } from "../../Utils/utils";
-import BloodPressureFormField, {
-  BloodPressureValidator,
-} from "@/components/Common/BloodPressureFormField";
-import TemperatureFormField from "@/components/Common/TemperatureFormField";
-import { Cancel, Submit } from "@/components/Common/components/ButtonV2";
-import Page from "@/components/Common/components/Page";
-import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import PatientCategorySelect from "./PatientCategorySelect";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { Scribe } from "../Scribe/Scribe";
-import { SCRIBE_FORMS } from "../Scribe/formDetails";
-import { DailyRoundsModel, DailyRoundTypes } from "./models";
-import InvestigationBuilder from "@/components/Common/prescription-builder/InvestigationBuilder";
-import { FieldErrorText } from "../Form/FormFields/FormField";
-import { error } from "@pnotify/core";
-import { useTranslation } from "react-i18next";
-import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
-import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
-import {
-  ConditionVerificationStatuses,
-  ConsultationDiagnosis,
-} from "../Diagnosis/types";
-import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import useAuthUser from "@/common/hooks/useAuthUser";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import SymptomsApi from "../Symptoms/api";
-import { scrollTo } from "../../Utils/utils";
-import { ICD11DiagnosisModel } from "../Facility/models";
-import DateFormField from "../Form/FormFields/DateFormField";
-import NursingCare from "../LogUpdate/Sections/NursingCare";
 
-import Loading from "@/components/Common/Loading";
+import { PLUGIN_Component } from "@/PluginEngine";
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
+import { scrollTo } from "@/Utils/utils";
+
+import TextFormField from "../Form/FormFields/TextFormField";
+
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
-  const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
   const [diagnosisSuggestions, setDiagnosisSuggestions] = useState<
     ICD11DiagnosisModel[]
   >([]);
@@ -142,7 +144,7 @@ export const DailyRounds = (props: any) => {
   const [diagnoses, setDiagnoses] = useState<ConsultationDiagnosis[]>();
   const [showDiscontinuedPrescriptions, setShowDiscontinuedPrescriptions] =
     useState(false);
-  const headerText = !id ? "Add Consultation Update" : "Info";
+  const headerText = !id ? t("add") + " " + t("log_update") : "Info";
   const buttonText = !id
     ? !["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)
       ? t("save")
@@ -409,7 +411,7 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${obj.id}/update`,
             );
           }
         }
@@ -437,7 +439,7 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${obj.id}/critical_care/update`,
             );
           }
         }
@@ -551,81 +553,16 @@ export const DailyRounds = (props: any) => {
       }}
       backUrl={
         id
-          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates`
           : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
       }
       className="mx-auto max-w-4xl"
     >
-      <div className="flex w-full justify-end md:m-4">
-        <Scribe
-          facilityId={facilityId}
-          form={SCRIBE_FORMS.daily_round}
-          onFormUpdate={async (fields) => {
-            setDiagnosisSuggestions([]);
-            // Symptoms
-            let rounds_type = fields.rounds_type || state.form.rounds_type;
-            if (fields.additional_symptoms) {
-              for (const symptom of fields.additional_symptoms) {
-                const { res } = await request(SymptomsApi.add, {
-                  pathParams: { consultationId },
-                  body: {
-                    ...symptom,
-                  },
-                });
-                if (res?.ok) setSymptomsSeed((s) => s + 1);
-              }
-            }
-
-            // ICD11 Diagnosis
-            if (fields.icd11_diagnosis) {
-              for (const diagnosis of fields.icd11_diagnosis) {
-                // Fetch available diagnoses
-
-                const { res: icdRes, data: icdData } = await request(
-                  routes.listICD11Diagnosis,
-                  {
-                    query: { query: diagnosis.diagnosis },
-                  },
-                );
-
-                if (!icdRes?.ok) {
-                  error({
-                    text: "Failed to fetch ICD11 Diagnosis",
-                  });
-                  continue;
-                }
-
-                const availableDiagnosis = icdData?.slice(0, 5);
-
-                if (availableDiagnosis?.length)
-                  setDiagnosisSuggestions(availableDiagnosis);
-              }
-            }
-
-            if (
-              Object.keys(fields).some((f) =>
-                [
-                  "investigations",
-                  "icd11_diagnosis",
-                  "additional_symptoms",
-                ].includes(f),
-              ) &&
-              roundTypes.some((t) => t === "DOCTORS_LOG")
-            ) {
-              rounds_type = "DOCTORS_LOG";
-            }
-
-            dispatch({
-              type: "set_form",
-              form: { ...state.form, ...fields, rounds_type },
-            });
-            fields.action !== undefined && setPreviousAction(fields.action);
-            fields.review_interval !== undefined &&
-              setPreviousReviewInterval(Number(fields.review_interval));
-          }}
-        />
-      </div>
-      <form className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11">
+      <PLUGIN_Component __name="Scribe" />
+      <form
+        className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11"
+        data-scribe-form
+      >
         <DraftSection
           handleDraftSelect={(newState) => {
             dispatch({ type: "set_state", state: newState });
@@ -633,7 +570,7 @@ export const DailyRounds = (props: any) => {
           formData={state.form}
         />
         <div className="flex flex-col gap-6 md:flex-row">
-          <div className="w-full md:w-1/3">
+          <div className="w-full md:w-1/3" data-scribe-ignore>
             <DateFormField
               {...field("taken_at")}
               label="Measured at"
@@ -654,7 +591,7 @@ export const DailyRounds = (props: any) => {
               errorClassName="hidden"
             />
           </div>
-          <div className="w-full md:w-1/3">
+          <div className="w-full md:w-1/3" data-scribe-ignore>
             <SelectFormField
               {...selectField("rounds_type", roundTypes)}
               required
@@ -672,9 +609,8 @@ export const DailyRounds = (props: any) => {
 
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
           <div className="pb-6 md:col-span-2">
-            <FieldLabel>Symptoms</FieldLabel>
+            <FieldLabel>{t("symptoms")}</FieldLabel>
             <EncounterSymptomsBuilder
-              key={symptomsSeed}
               onChange={() => {
                 handleFormFieldChange({
                   name: "symptoms_dirty",
@@ -683,7 +619,6 @@ export const DailyRounds = (props: any) => {
               }}
             />
           </div>
-
           <TextAreaFormField {...field("physical_examination_info")} rows={5} />
           <TextAreaFormField {...field("other_details")} rows={5} />
 
@@ -705,8 +640,8 @@ export const DailyRounds = (props: any) => {
                 />
                 <SelectFormField
                   {...field("is_experiencing_dysuria")}
-                  options={[true, false]}
-                  optionLabel={(c) => t(c ? "yes" : "no")}
+                  options={["true", "false"]}
+                  optionLabel={(c) => t(c === "true" ? "yes" : "no")}
                 />
                 <SelectFormField
                   {...selectField(
@@ -743,12 +678,12 @@ export const DailyRounds = (props: any) => {
 
               <BloodPressureFormField {...field("bp")} id="bloodPressure" />
 
-              <RangeAutocompleteFormField
+              <TextFormField
                 {...field("pulse")}
-                unit="bpm"
-                start={0}
-                end={200}
-                step={1}
+                labelSuffix="bpm"
+                type="number"
+                min={0}
+                max={200}
                 thresholds={[
                   {
                     value: 0,
@@ -767,17 +702,47 @@ export const DailyRounds = (props: any) => {
                   },
                 ]}
               />
+
+              <TextFormField
+                {...field("ventilator_spo2")}
+                labelSuffix="%"
+                type="number"
+                min={0}
+                max={100}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
+                    label: t("SPO2_LEVEL_SEVERE_HYPOXEMIA"),
+                  },
+                  {
+                    value: 86,
+                    className: "text-danger-500",
+                    label: t("SPO2_LEVEL_MODERATE_HYPOXEMIA"),
+                  },
+                  {
+                    value: 91,
+                    className: "text-warning-400",
+                    label: t("SPO2_LEVEL_MILD_HYPOXEMIA"),
+                  },
+                  {
+                    value: 95,
+                    className: "text-primary-500",
+                    label: t("SPO2_LEVEL_NORMAL"),
+                  },
+                ]}
+              />
             </>
           )}
 
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
             <>
-              <RangeAutocompleteFormField
+              <TextFormField
                 {...field("blood_sugar_level")}
-                unit="mg/dL"
-                start={0}
-                end={700}
-                step={1}
+                labelSuffix="mg/dL"
+                min={0}
+                max={700}
+                type="number"
                 thresholds={[
                   {
                     value: 0,
@@ -798,18 +763,18 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
+
           {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
             state.form.rounds_type,
           ) && (
             <>
               <TemperatureFormField {...field("temperature")} />
-
-              <RangeAutocompleteFormField
+              <TextFormField
                 {...field("resp")}
-                unit="bpm"
-                start={0}
-                end={150}
-                step={1}
+                type="number"
+                labelSuffix="bpm"
+                min={0}
+                max={150}
                 thresholds={[
                   {
                     value: 0,
@@ -825,31 +790,6 @@ export const DailyRounds = (props: any) => {
                     value: 16,
                     className: "text-danger-500",
                     label: "Tachypnea",
-                  },
-                ]}
-              />
-
-              <RangeAutocompleteFormField
-                {...field("ventilator_spo2")}
-                unit="%"
-                start={0}
-                end={100}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Low",
-                  },
-                  {
-                    value: 90,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "High",
                   },
                 ]}
               />
@@ -884,9 +824,8 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
-
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
-            <div className="md:col-span-2">
+            <div className="md:col-span-2" data-scribe-ignore>
               <hr className="my-4 md:col-span-2" />
               <div className="mb-4 mt-8 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
@@ -910,7 +849,7 @@ export const DailyRounds = (props: any) => {
           )}
 
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
-            <div className="md:col-span-2">
+            <div className="md:col-span-2" data-scribe-ignore>
               <hr className="mb-4 mt-8 md:col-span-2" />
               <div className="mb-4 mt-8 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{t("nursing_care")}</h3>
@@ -918,7 +857,10 @@ export const DailyRounds = (props: any) => {
               <NursingCare
                 log={{ nursing: state.form.nursing }}
                 onChange={(log) =>
-                  handleFormFieldChange({ name: "nursing", value: log.nursing })
+                  handleFormFieldChange({
+                    name: "nursing",
+                    value: log.nursing,
+                  })
                 }
               />
             </div>
@@ -926,7 +868,10 @@ export const DailyRounds = (props: any) => {
 
           {state.form.rounds_type === "DOCTORS_LOG" && (
             <>
-              <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2">
+              <div
+                className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2"
+                data-scribe-ignore
+              >
                 <div id="diagnosis-list">
                   <h3 className="mb-4 mt-8 text-lg font-semibold">
                     {t("diagnosis")}
@@ -1006,7 +951,6 @@ export const DailyRounds = (props: any) => {
               </div>
             </>
           )}
-
           {state.form.rounds_type !== "DOCTORS_LOG" && (
             <>
               <hr className="mb-4 mt-8 md:col-span-2" />

@@ -1,4 +1,4 @@
-import UserDetails from "./UserDetails";
+import UserDetails from "@/components/Common/UserDetails";
 
 const UserDetailComponent = ({
   id,

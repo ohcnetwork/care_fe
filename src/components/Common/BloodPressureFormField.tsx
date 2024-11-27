@@ -1,13 +1,14 @@
 import { useTranslation } from "react-i18next";
-import { FieldValidator } from "../Form/FieldValidators";
-import FormField from "../Form/FormFields/FormField";
+
+import { FieldValidator } from "@/components/Form/FieldValidators";
+import FormField from "@/components/Form/FormFields/FormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
 import {
   FieldChangeEvent,
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
-import { BloodPressure } from "../Patient/models";
-import TextFormField from "../Form/FormFields/TextFormField";
+} from "@/components/Form/FormFields/Utils";
+import { BloodPressure } from "@/components/Patient/models";
 
 type Props = FormFieldBaseProps<BloodPressure | null>;
 
@@ -48,7 +49,9 @@ export default function BloodPressureFormField(props: Props) {
           labelClassName="hidden"
           errorClassName="hidden"
         />
-        <span className="px-2 text-2xl font-medium text-secondary-400">/</span>
+        <span className="px-2 pt-2 text-2xl font-medium text-secondary-400">
+          /
+        </span>
         <TextFormField
           className="w-full"
           type="number"

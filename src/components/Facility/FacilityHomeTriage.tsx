@@ -1,9 +1,12 @@
 import { navigate } from "raviger";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import Table from "@/components/Common/components/Table";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Table from "@/components/Common/Table";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 export const FacilityHomeTriage = (props: any) => {
   const triageQuery = useQuery(routes.getTriage, {

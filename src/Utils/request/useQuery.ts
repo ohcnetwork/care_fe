@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QueryRoute, RequestOptions, RequestResult } from "./types";
-import request from "./request";
-import { mergeRequestOptions } from "./utils";
+
+import request from "@/Utils/request/request";
+import {
+  QueryRoute,
+  RequestOptions,
+  RequestResult,
+} from "@/Utils/request/types";
+import { mergeRequestOptions } from "@/Utils/request/utils";
 
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
@@ -32,8 +37,10 @@ export default function useQuery<TData>(
 
       setLoading(true);
       const response = await request(route, { ...resolvedOptions, controller });
-      setResponse(response);
-      setLoading(false);
+      if (response.error?.name !== "AbortError") {
+        setResponse(response);
+        setLoading(false);
+      }
       return response;
     },
     [route, JSON.stringify(options)],

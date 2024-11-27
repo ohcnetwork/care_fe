@@ -7,7 +7,10 @@ interface Props {
 
 export default function Sentry({ disabled }: Props) {
   useEffect(() => {
-    if (disabled || !careConfig.sentry.dsn) {
+    if (disabled || !careConfig.sentry.dsn || !careConfig.sentry.environment) {
+      console.error(
+        "Sentry is not configured correctly. Please check your environment variables.",
+      );
       return;
     }
 

@@ -1,7 +1,8 @@
 import careConfig from "@careConfig";
-import handleResponse from "./handleResponse";
-import { RequestOptions, RequestResult, Route } from "./types";
-import { makeHeaders, makeUrl } from "./utils";
+
+import handleResponse from "@/Utils/request/handleResponse";
+import { RequestOptions, RequestResult, Route } from "@/Utils/request/types";
+import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 
 type ControllerXORControllerRef =
   | {
@@ -69,6 +70,9 @@ export default async function request<TData, TBody>(
       return result;
     } catch (error: any) {
       result = { error, res: undefined, data: undefined };
+      if (error.name === "AbortError") {
+        return result;
+      }
     }
   }
 

@@ -1,8 +1,9 @@
-import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import { DistrictModel, LocalBodyModel } from "../Facility/models";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import { DistrictModel, LocalBodyModel } from "@/components/Facility/models";
+import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
+import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
 
 type Props = FormFieldBaseProps<LocalBodyModel["id"]> & {
   placeholder?: string;

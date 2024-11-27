@@ -1,20 +1,23 @@
+import { camelCase, startCase } from "lodash-es";
 import { navigate } from "raviger";
 import { useState } from "react";
-import { SampleTestModel } from "./models";
-import { SAMPLE_TEST_STATUS } from "@/common/constants";
-import * as Notification from "../../Utils/Notifications";
-import UpdateStatusDialog from "./UpdateStatusDialog";
-import * as _ from "lodash-es";
-import { formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
+import UpdateStatusDialog from "@/components/Patient/UpdateStatusDialog";
+import { SampleTestModel } from "@/components/Patient/models";
+
+import { SAMPLE_TEST_STATUS } from "@/common/constants";
+
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 interface SampleDetailsProps {
-  facilityId: number;
-  patientId: number;
+  facilityId: string;
+  patientId: string;
   itemData: SampleTestModel;
   refetch: () => void;
   handleApproval: (status: number, sample: SampleTestModel) => void;
@@ -76,6 +79,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
 
   return (
     <div
+      id="sample-test-history"
       className={`${
         itemData.result === "POSITIVE"
           ? "border-red-500 bg-red-100 hover:border-red-700"
@@ -97,8 +101,11 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-sm font-semibold leading-5 text-zinc-400">
               Status{" "}
             </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {_.startCase(_.camelCase(itemData.status))}
+            <div
+              id="sample-test-status"
+              className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+            >
+              {startCase(camelCase(itemData.status))}
             </div>
           </div>
         </div>
@@ -107,11 +114,11 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-sm font-semibold leading-5 text-zinc-400">
               Sample Type{" "}
             </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium capitalize leading-5">
-              {(itemData.sample_type !== "OTHER TYPE"
-                ? itemData.sample_type
-                : itemData.sample_type_other
-              )?.toLowerCase()}
+            <div
+              id="sample-test-type"
+              className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium capitalize leading-5"
+            >
+              {itemData.sample_type?.toLowerCase()}
             </div>
           </div>
         </div>
@@ -121,7 +128,10 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Fast-Track{" "}
               </div>
-              <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
+              <div
+                id="sample-test-fast-track"
+                className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+              >
                 {itemData.fast_track}
               </div>
             </div>
@@ -132,8 +142,11 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-sm font-semibold leading-5 text-zinc-400">
               Result{" "}
             </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {_.startCase(_.camelCase(itemData.result))}
+            <div
+              id="sample-test-result"
+              className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+            >
+              {startCase(camelCase(itemData.result))}
             </div>
           </div>
         </div>

@@ -1,58 +1,81 @@
-import Webcam from "react-webcam";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "@/components/Common/Dialog";
-import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
 import { t } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
-import useWindowDimensions from "@/common/hooks/useWindowDimensions";
-import * as Notify from "../../Utils/Notifications";
+import Webcam from "react-webcam";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+
+import useBreakpoints from "@/hooks/useBreakpoints";
+
+import * as Notify from "@/Utils/Notifications";
 
 export interface CameraCaptureDialogProps {
   show: boolean;
   onHide: () => void;
   onCapture: (file: File, fileName: string) => void;
+  onResetCapture: () => void;
 }
 
 export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
-  const { show, onHide, onCapture } = props;
+  const { show, onHide, onCapture, onResetCapture } = props;
+  const isLaptopScreen = useBreakpoints({ lg: true, default: false });
 
-  const [cameraFacingFront, setCameraFacingFront] = useState(true);
+  const [cameraFacingMode, setCameraFacingMode] = useState(
+    isLaptopScreen ? "user" : "environment",
+  );
   const [previewImage, setPreviewImage] = useState(null);
   const webRef = useRef<any>(null);
 
   const videoConstraints = {
     width: { ideal: 4096 },
     height: { ideal: 2160 },
-    facingMode: "user",
+    facingMode: cameraFacingMode,
   };
   useEffect(() => {
     if (!show) return;
-    navigator.mediaDevices.getUserMedia({ video: true }).catch(() => {
-      Notify.Warn({
-        msg: t("camera_permission_denied"),
+    let stream: MediaStream | null = null;
+
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: cameraFacingMode } })
+      .then((mediaStream) => {
+        stream = mediaStream;
+      })
+      .catch(() => {
+        Notify.Warn({
+          msg: t("camera_permission_denied"),
+        });
+        onHide();
       });
-      onHide();
-    });
-  }, [show]);
-  const handleSwitchCamera = useCallback(() => {
-    const supportedConstraints =
-      navigator.mediaDevices.getSupportedConstraints();
-    if (
-      !isLaptopScreen &&
-      typeof supportedConstraints.facingMode === "string" &&
-      (supportedConstraints.facingMode as string).includes("environment")
-    ) {
-      setCameraFacingFront((prevState) => !prevState);
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
+    };
+  }, [show, cameraFacingMode, onHide]);
+
+  const handleSwitchCamera = useCallback(async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoInputs = devices.filter(
+      (device) => device.kind === "videoinput",
+    );
+    const backCamera = videoInputs.some((device) =>
+      device.label.toLowerCase().includes("back"),
+    );
+    if (!isLaptopScreen && backCamera) {
+      setCameraFacingMode((prevMode) =>
+        prevMode === "environment" ? "user" : "environment",
+      );
     } else {
       Notify.Warn({
         msg: t("switch_camera_is_not_available"),
       });
     }
   }, []);
-
-  const { width } = useWindowDimensions();
-  const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
@@ -65,10 +88,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
       onCapture(myFile, `capture.${extension}`);
     });
   };
-
-  const cameraFacingMode = cameraFacingFront
-    ? "user"
-    : { exact: "environment" };
 
   return (
     <DialogModal
@@ -142,6 +161,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                 <ButtonV2
                   onClick={() => {
                     setPreviewImage(null);
+                    onResetCapture();
                   }}
                   className="m-2"
                 >
@@ -165,6 +185,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             variant="secondary"
             onClick={() => {
               setPreviewImage(null);
+              onResetCapture();
               onHide();
             }}
             className="m-2"
@@ -203,6 +224,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                   <ButtonV2
                     onClick={() => {
                       setPreviewImage(null);
+                      onResetCapture();
                     }}
                   >
                     {t("retake")}
@@ -224,6 +246,7 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
             variant="secondary"
             onClick={() => {
               setPreviewImage(null);
+              onResetCapture();
               onHide();
             }}
           >

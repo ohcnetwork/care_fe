@@ -5,11 +5,13 @@ import {
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
 import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
-import { QueryRoute } from "../../Utils/request/types";
-import { QueryOptions } from "../../Utils/request/useQuery";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import request from "../../Utils/request/request";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import request from "@/Utils/request/request";
+import { QueryRoute } from "@/Utils/request/types";
+import { QueryOptions } from "@/Utils/request/useQuery";
 
 interface KanbanBoardProps<T extends { id: string }> {
   title?: ReactNode;
@@ -188,3 +190,5 @@ export function KanbanSection<T extends { id: string }>(
     </Droppable>
   );
 }
+
+export type KanbanBoardType = typeof KanbanBoard;

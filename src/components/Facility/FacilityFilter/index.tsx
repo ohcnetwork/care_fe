@@ -1,12 +1,16 @@
-import { FACILITY_TYPES } from "@/common/constants";
-import useMergeState from "@/common/hooks/useMergeState";
-import FiltersSlideover from "../../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
-import StateAutocompleteFormField from "@/components/Common/StateAutocompleteFormField";
-import { FieldChangeEvent } from "../../Form/FormFields/Utils";
+
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
+
 import DistrictAutocompleteFormField from "@/components/Common/DistrictAutocompleteFormField";
 import LocalBodyAutocompleteFormField from "@/components/Common/LocalBodyAutocompleteFormField";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField";
+import StateAutocompleteFormField from "@/components/Common/StateAutocompleteFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+
+import useMergeState from "@/hooks/useMergeState";
+
+import { FACILITY_TYPES } from "@/common/constants";
 
 function FacilityFilter(props: any) {
   const { t } = useTranslation();

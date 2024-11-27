@@ -1,6 +1,8 @@
-import CareIcon, { IconName } from "../icons/CareIcon";
-import { ButtonVariant } from "@/components/Common/components/ButtonV2";
-import { classNames } from "../../Utils/utils";
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
+import { ButtonVariant } from "@/components/Common/ButtonV2";
+
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   size?: "small" | "medium" | "large";
@@ -24,7 +26,7 @@ export default function Chip({
     <span
       id={props?.id}
       className={classNames(
-        "inline-flex items-center gap-2 font-medium leading-4",
+        "inline-flex items-center gap-2 font-medium",
 
         {
           small: "rounded px-2 py-1 text-xs",

@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { DailyRoundsModel } from "./models";
-import Page from "@/components/Common/components/Page";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { formatDateTime } from "../../Utils/utils";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
 import { useTranslation } from "react-i18next";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { DailyRoundsModel } from "@/components/Patient/models";
+
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime } from "@/Utils/utils";
+
 export const DailyRoundListDetails = (props: any) => {
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId, id } = props;
@@ -28,8 +31,8 @@ export const DailyRoundListDetails = (props: any) => {
 
   return (
     <Page
-      title={`Consultation Update #${id}`}
-      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
+      title={t("log_update") + ` #${id}`}
+      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates`}
     >
       <div
         className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500"
@@ -48,7 +51,7 @@ export const DailyRoundListDetails = (props: any) => {
           <div>
             <div className="mt-2">
               <ButtonV2
-                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}
+                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${id}/update`}
               >
                 Update Details
               </ButtonV2>

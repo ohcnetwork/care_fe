@@ -62,3 +62,4 @@ cypress/fixtures/token.json
 # Care Apps
 /apps/*
 src/pluginMap.ts
+/apps_backup/*

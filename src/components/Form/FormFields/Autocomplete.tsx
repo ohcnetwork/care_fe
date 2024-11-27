@@ -5,16 +5,22 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import { useEffect, useState } from "react";
-
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "@/components/Common/components/HelperComponents";
-import FormField from "./FormField";
-import { classNames } from "../../../Utils/utils";
-import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Avatar } from "@/components/Common/Avatar";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { DropdownTransition } from "@/components/Common/HelperComponents";
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+import { dropdownOptionClassNames } from "@/components/Form/MultiSelectMenuV2";
+
+import { useValueInjectionObserver } from "@/Utils/useValueInjectionObserver";
+import { classNames } from "@/Utils/utils";
+
 type OptionCallback<T, R> = (option: T) => R;
 
 type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
@@ -24,7 +30,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionImage?: OptionCallback<T, string | undefined>;
+  optionImage?: OptionCallback<T, ReactNode | undefined>;
   optionDisabled?: OptionCallback<T, boolean>;
   minQueryLength?: number;
   onQuery?: (query: string) => void;
@@ -76,7 +82,7 @@ type AutocompleteProps<T, V = T> = {
   placeholder?: string;
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
-  optionImage?: OptionCallback<T, string | undefined>;
+  optionImage?: OptionCallback<T, ReactNode | undefined>;
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionDisabled?: OptionCallback<T, boolean>;
@@ -87,7 +93,6 @@ type AutocompleteProps<T, V = T> = {
   isLoading?: boolean;
   allowRawInput?: boolean;
   error?: string;
-  avatar?: boolean;
 } & (
   | {
       required?: false;
@@ -109,6 +114,7 @@ type AutocompleteProps<T, V = T> = {
 export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState(""); // Ensure lower case
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     props.onQuery?.(query);
@@ -159,14 +165,30 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       ? options.filter((o) => o.search.includes(query))
       : options;
 
+  const domValue = useValueInjectionObserver<V>({
+    targetElement: menuRef.current,
+    attribute: "data-cui-listbox-value",
+  });
+
+  useEffect(() => {
+    if (props.value !== domValue && typeof domValue !== "undefined")
+      props.onChange(domValue);
+  }, [domValue]);
+
   return (
     <div
+      ref={menuRef}
       className={
         props.requiredError || props.error
           ? "rounded border border-red-500 " + props.className
           : props.className
       }
       id={props.id}
+      data-cui-listbox
+      data-cui-listbox-options={JSON.stringify(
+        options.map((option) => [option.value, option.label?.toString()]),
+      )}
+      data-cui-listbox-value={JSON.stringify(props.value)}
     >
       <Combobox
         immediate
@@ -241,41 +263,27 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                     disabled={option.disabled}
                   >
                     {({ focus }) => (
-                      <div className="flex flex-col">
-                        <div className="flex items-center">
-                          <div className="flex flex-col">
-                            <div className="relative">
-                              {(option.image || props.avatar) && (
-                                <Avatar
-                                  className="mr-2 h-11 w-11 rounded-full"
-                                  name={option.label}
-                                  imageUrl={option.image}
-                                />
+                      <div className="flex flex-row gap-2">
+                        {option?.image}
+                        <div className="flex flex-grow flex-col">
+                          <div className="flex justify-between">
+                            <span>{option.label}</span>
+                            <span>{option.icon}</span>
+                          </div>
+                          {option.description && (
+                            <div
+                              className={classNames(
+                                "text-sm font-normal",
+                                option.disabled
+                                  ? "text-secondary-700"
+                                  : focus
+                                    ? "text-primary-200"
+                                    : "text-secondary-700",
                               )}
-                              <span className="absolute bottom-0 right-0 z-10">
-                                {option.icon}
-                              </span>
+                            >
+                              {option.description}
                             </div>
-                          </div>
-                          <div className="w-full">
-                            <div className="flex justify-between">
-                              <span>{option.label}</span>
-                            </div>
-                            {option.description && (
-                              <div
-                                className={classNames(
-                                  "text-sm font-normal",
-                                  option.disabled
-                                    ? "text-secondary-700"
-                                    : focus
-                                      ? "text-primary-200"
-                                      : "text-secondary-700",
-                                )}
-                              >
-                                {option.description}
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
                     )}

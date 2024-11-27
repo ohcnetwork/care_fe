@@ -1,42 +1,37 @@
-import * as Notification from "../../Utils/Notifications";
+import careConfig from "@careConfig";
+import { QRCodeSVG } from "qrcode.react";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import PrintPreview from "@/CAREUI/misc/PrintPreview";
+
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { ConsultationModel } from "@/components/Facility/models";
+import { PatientModel } from "@/components/Patient/models";
+import CommentSection from "@/components/Shifting/ShiftingCommentsSection";
 
 import {
   GENDER_TYPES,
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "@/common/constants";
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { Link, navigate } from "raviger";
-import { useState } from "react";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import CommentSection from "./CommentsSection";
-import ConfirmDialog from "@/components/Common/ConfirmDialog";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import Page from "@/components/Common/components/Page";
-import { QRCodeSVG } from "qrcode.react";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import {
-  formatDateTime,
-  formatName,
-  formatPatientAge,
-} from "../../Utils/utils";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
-import { useTranslation } from "react-i18next";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import { ConsultationModel } from "../Facility/models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { PatientModel } from "../Patient/models";
-import careConfig from "@careConfig";
-
-import Loading from "@/components/Common/Loading";
 export default function ShiftDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = careConfig.wartimeShifting
@@ -46,26 +41,6 @@ export default function ShiftDetails(props: { id: string }) {
   const { data, loading } = useQuery(routes.getShiftDetails, {
     pathParams: { id: props.id },
   });
-
-  const handleShiftDelete = async () => {
-    setOpenDeleteShiftDialog(true);
-
-    const { res, data } = await request(routes.deleteShiftRecord, {
-      pathParams: { id: props.id },
-    });
-    if (res?.status == 204) {
-      Notification.Success({
-        msg: t("shifting_deleted"),
-      });
-    } else {
-      Notification.Error({
-        msg: t("error_deleting_shifting") + (data?.detail || ""),
-      });
-    }
-
-    navigate("/shifting");
-  };
-
   const showCopyToclipBoard = (data: any) => {
     return (
       <a href="#">
@@ -93,7 +68,7 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("age") +
       ":" +
-      +(data?.patient_object
+      (data?.patient_object
         ? formatPatientAge(data.patient_object, true)
         : "") +
       "\n" +
@@ -302,119 +277,130 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <PrintPreview title={t("Patient Referral Letter")} onClose={true} closeFeature={setIsPrintMode} >
+      <PrintPreview title={t("Patient Referral Letter")}>
         <Card
           id="section-to-print"
-          className="print mx-auto w-full bg-white sm:mx-2 sm:my-2"
+          className="print mx-auto w-full max-w-4xl bg-white px-4 py-6 sm:px-6 lg:px-8"
         >
-          <CardHeader className="flex flex-col items-start justify-between space-y-2 pb-2 sm:flex-row sm:items-center sm:space-y-0">
+          <CardHeader className="flex flex-col items-center space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
             <CardTitle className="mx-auto my-auto text-lg font-bold sm:text-2xl">
               {t("referral_letter")}
             </CardTitle>
           </CardHeader>
-          <CardContent className="mx-2 space-y-3 sm:space-y-4">
-            <div className="space-y-4">
-              <div className="flex flex-col-reverse items-start justify-end sm:flex-row sm:items-center">
-                {data.is_kasp && (
-                  <img alt="logo" src={careConfig.headerLogo?.dark} />
-                )}
-                <QRCodeSVG
-                  value={`${window.location.origin}/shifting/${data.id}`}
-                  size={120}
+
+          <CardContent className="space-y-6">
+            <div className="flex flex-col-reverse items-start justify-end sm:flex-row sm:items-center">
+              {data.is_kasp && (
+                <img
+                  alt="logo"
+                  src={careConfig.headerLogo?.dark}
+                  className="max-h-12"
                 />
+              )}
+              <QRCodeSVG
+                value={`${window.location.origin}/shifting/${data.id}`}
+                size={120}
+                className="mt-4 sm:mt-0"
+              />
+            </div>
+
+            <div className="mt-6">
+              <span className="font-semibold">{t("name_of_hospital")}: </span>
+              {data.is_kasp
+                ? t("district_program_management_supporting_unit")
+                : data.origin_facility_object?.name || "--"}
+            </div>
+
+            <div className="my-6 border-b-2"></div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <h3 className="mb-2 text-base font-semibold">
+                  {t("patient_information")}
+                </h3>
+                <p className="text-sm">
+                  {t("name")}: {patientData?.name}
+                </p>
+                <p className="text-sm">
+                  {t("age")}: {formatPatientAge(patientData, true)}
+                </p>
+                <p className="text-sm">
+                  {t("gender")}: {patientGender || "-"}
+                </p>
+                <p className="text-sm">
+                  {t("phone")}: {patientData?.phone_number || "-"}
+                </p>
               </div>
-              <div className="mt-6">
-                <span className="font-semibold">{t("name_of_hospital")}: </span>
-                {data.is_kasp
-                  ? t("district_program_management_supporting_unit")
-                  : data.origin_facility_object?.name || "--"}
+
+              <div>
+                <h3 className="mb-2 text-base font-semibold">{t("address")}</h3>
+                <p className="text-sm whitespace-pre-line">
+                  {patientData?.address || "-"}
+                </p>
+                {patientData?.nationality === "India" && (
+                  <>
+                    <p className="text-sm">
+                      {patientData?.ward_object?.name},{" "}
+                      {patientData?.local_body_object?.name}
+                    </p>
+                    <p className="text-sm">
+                      {patientData?.district_object?.name || "-"}
+                    </p>
+                    <p className="text-sm">{patientData?.state_object?.name}</p>
+                  </>
+                )}
               </div>
-              <div className="my-4 border-b-2"></div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <h3 className="mb-1 text-sm font-semibold sm:mb-2 sm:text-base">
-                    Patient Information
-                  </h3>
-                  <p className="text-xs sm:text-sm">
-                    {t("name")}: {patientData?.name}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("age")}: {formatPatientAge(patientData, true)}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("gender")}: {patientGender || "-"}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("phone")}: {patientData?.phone_number || "-"}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="mb-1 text-sm font-semibold sm:mb-2 sm:text-base">
-                    {t("address")}
-                  </h3>
-                  <p className="whitespace-pre-line text-xs sm:text-sm">
-                    {patientData?.address || "-"}
-                  </p>
-                  {patientData?.nationality === "India" && (
-                    <>
-                      <p>
-                        {patientData?.ward_object?.name},{" "}
-                        {patientData?.local_body_object?.name}
-                      </p>
-                      <p>{patientData?.district_object?.name || "-"}</p>
-                      <p>{patientData?.state_object?.name}</p>
-                    </>
-                  )}
-                </div>
+            </div>
+
+            <div className="my-6 border-b-2"></div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <p className="text-sm">
+                  {t("date_of_admission")}:{" "}
+                  {formatDateTime(
+                    consultation.encounter_date || consultation.created_date,
+                  ) || "-"}
+                </p>
+                <p className="text-sm">
+                  {t("unique_id")}: {data.id}
+                </p>
+                <p className="text-sm">
+                  {t("patient_no")}: {consultation.patient_no || "-"}
+                </p>
               </div>
-              <div className="my-4 border-b-2"></div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
-                <div>
-                  <p className="text-xs sm:text-sm">
-                    {t("date_of_admission")}:{" "}
-                    {formatDateTime(
-                      consultation.encounter_date || consultation.created_date,
-                    ) || "-"}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("unique_id")}: {data.id}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("patient_no")}: {consultation.patient_no || "-"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm">
-                    {t("date_of_positive_covid_19_swab")}:{" "}
-                    {(patientData?.date_of_test &&
-                      formatDateTime(patientData.date_of_test)) ||
-                      "-"}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("covid_19_cat_gov")}: {consultation.category || "-"}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("referred_to")}:{" "}
-                    {data.assigned_facility_external ||
-                      data.assigned_facility_object?.name ||
-                      "--"}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("reason_for_referral")}: {data.reason || "--"}
-                  </p>
-                  <p className="text-xs sm:text-sm">
-                    {t("treatment_summary")}:{" "}
-                    {consultation.treatment_plan || "-"}
-                  </p>
-                </div>
+              <div>
+                <p className="text-sm">
+                  {t("date_of_positive_covid_19_swab")}:{" "}
+                  {(patientData?.date_of_test &&
+                    formatDateTime(patientData.date_of_test)) ||
+                    "-"}
+                </p>
+                <p className="text-sm">
+                  {t("covid_19_cat_gov")}: {consultation.category || "-"}
+                </p>
+                <p className="text-sm">
+                  {t("referred_to")}:{" "}
+                  {data.assigned_facility_external ||
+                    data.assigned_facility_object?.name ||
+                    "--"}
+                </p>
+                <p className="text-sm">
+                  {t("reason_for_referral")}: {data.reason || "--"}
+                </p>
+                <p className="text-sm">
+                  {t("treatment_summary")}: {consultation.treatment_plan || "-"}
+                </p>
               </div>
-              <div className="my-4 border-b-2"></div>
-              <div className="text-muted-foreground mt-6 text-center text-xs sm:text-sm">
+            </div>
+
+            <div className="my-6 border-b-2"></div>
+
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">
                 {t("approved_by_district_covid_control_room")}
-              </div>
-              <div className="text-center text-xs sm:text-sm">
-                {t("auto_generated_for_care")}
-              </div>
+              </p>
+              <p className="text-xs">{t("auto_generated_for_care")}</p>
             </div>
           </CardContent>
         </Card>
@@ -429,15 +415,13 @@ export default function ShiftDetails(props: { id: string }) {
   return (
     <div>
       {isPrintMode ? (
-        <div className="my-4">
-          {printData(data)}
-        </div>
+        <div className="my-4">{printData(data)}</div>
       ) : (
         <Page
           title={t("shifting_details")}
           backUrl="/shifting/board"
           options={
-            <div className="flex flex-col gap-2 md:flex-row">
+            <div className="flex gap-2">
               <ButtonV2
                 tooltip={
                   ["COMPLETED", "CANCELLED"].includes(data?.status || "")
@@ -664,25 +648,6 @@ export default function ShiftDetails(props: { id: string }) {
                 }
                 time={data?.modified_date}
               />
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <div>
-                <ButtonV2
-                  variant="danger"
-                  onClick={() => setOpenDeleteShiftDialog(true)}
-                >
-                  {t("delete_record")}
-                </ButtonV2>
-                <ConfirmDialog
-                  title={t("authorize_shift_delete")}
-                  description={t("record_delete_confirm")}
-                  action="Confirm"
-                  show={openDeleteShiftDialog}
-                  onClose={() => setOpenDeleteShiftDialog(false)}
-                  onConfirm={handleShiftDelete}
-                />
-              </div>
             </div>
           </div>
 

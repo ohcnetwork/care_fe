@@ -1,12 +1,41 @@
-import { useState, useReducer, FormEvent } from "react";
+import careConfig from "@careConfig";
+import { FormEvent, useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import AvatarEditModal from "@/components/Common/AvatarEditModal";
+import AvatarEditable from "@/components/Common/AvatarEditable";
+import ButtonV2, { Submit } from "@/components/Common/ButtonV2";
+import LanguageSelector from "@/components/Common/LanguageSelector";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
+import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
+import { validateRule } from "@/components/Users/UserAdd";
+import {
+  GenderType,
+  SkillModel,
+  UpdatePasswordForm,
+} from "@/components/Users/models";
+
+import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
+
 import { GENDER_TYPES, LocalStorageKeys } from "@/common/constants";
 import { validateEmailAddress } from "@/common/validation";
-import * as Notification from "../../Utils/Notifications";
-import LanguageSelector from "@/components/Common/LanguageSelector";
-import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2, { Submit } from "@/components/Common/components/ButtonV2";
+
+import * as Notification from "@/Utils/Notifications";
+import dayjs from "@/Utils/dayjs";
+import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import uploadFile from "@/Utils/request/uploadFile";
+import useQuery from "@/Utils/request/useQuery";
 import {
-  classNames,
   dateQueryString,
   formatDate,
   formatDisplayName,
@@ -14,27 +43,6 @@ import {
   parsePhoneNumber,
   sleep,
 } from "@/Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { GenderType, SkillModel, UpdatePasswordForm } from "./models";
-import UpdatableApp, { checkForUpdate } from "@/components/Common/UpdatableApp";
-import dayjs from "../../Utils/dayjs";
-import useAuthUser, { useAuthContext } from "@/common/hooks/useAuthUser";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { validateRule } from "./UserAdd";
-import { useTranslation } from "react-i18next";
-import AvatarEditable from "@/components/Common/AvatarEditable";
-import Page from "@/components/Common/components/Page";
-import Loading from "@/components/Common/Loading";
-import AvatarEditModal from "@/components/Common/AvatarEditModal";
-import uploadFile from "@/Utils/request/uploadFile";
-import careConfig from "@careConfig";
 
 type EditForm = {
   firstName: string;
@@ -192,6 +200,30 @@ export default function UserProfile() {
       pathParams: { username: authUser.username },
     },
   );
+
+  const validatePassword = (password: string) => {
+    const rules = [
+      {
+        test: (p: string) => p.length >= 8,
+        message: "Password should be at least 8 characters long",
+      },
+      {
+        test: (p: string) => p !== p.toUpperCase(),
+        message: "Password should contain at least 1 lowercase letter",
+      },
+      {
+        test: (p: string) => p !== p.toLowerCase(),
+        message: "Password should contain at least 1 uppercase letter",
+      },
+      {
+        test: (p: string) => /\d/.test(p),
+        message: "Password should contain at least 1 number",
+      },
+    ];
+    return rules.map((rule) =>
+      validateRule(rule.test(password), rule.message, !password),
+    );
+  };
 
   const validateNewPassword = (password: string) => {
     if (
@@ -904,24 +936,7 @@ export default function UserProfile() {
                           required
                         />
                         <div className="text-small mb-2 hidden pl-2 text-secondary-500 peer-focus-within:block">
-                          {validateRule(
-                            changePasswordForm.new_password_1?.length >= 8,
-                            "Password should be atleast 8 characters long",
-                          )}
-                          {validateRule(
-                            changePasswordForm.new_password_1 !==
-                              changePasswordForm.new_password_1.toUpperCase(),
-                            "Password should contain at least 1 lowercase letter",
-                          )}
-                          {validateRule(
-                            changePasswordForm.new_password_1 !==
-                              changePasswordForm.new_password_1.toLowerCase(),
-                            "Password should contain at least 1 uppercase letter",
-                          )}
-                          {validateRule(
-                            /\d/.test(changePasswordForm.new_password_1),
-                            "Password should contain at least 1 number",
-                          )}
+                          {validatePassword(changePasswordForm.new_password_1)}
                         </div>
                       </div>
                       <div className="col-span-6 sm:col-span-3">
@@ -944,6 +959,7 @@ export default function UserProfile() {
                               changePasswordForm.new_password_1 ===
                                 changePasswordForm.new_password_2,
                               "Confirm password should match the new password",
+                              !changePasswordForm.new_password_2,
                             )}
                           </div>
                         )}
@@ -989,31 +1005,34 @@ export default function UserProfile() {
             </p>
           </div>
         </div>
-        {updateStatus.isUpdateAvailable && (
-          <UpdatableApp silentlyAutoUpdate={false}>
-            <ButtonV2 disabled={true}>
+        <div className="mt-5 md:col-span-2 md:mt-0">
+          {updateStatus.isChecking ? (
+            // While checking for updates
+            <ButtonV2 disabled>
               <div className="flex items-center gap-4">
-                <CareIcon icon="l-exclamation" className="text-2xl" />
-                {t("update_available")}
+                <CareIcon icon="l-sync" className="text-2xl animate-spin" />
+                {t("checking_for_update")}
               </div>
             </ButtonV2>
-          </UpdatableApp>
-        )}
-        <div className="mt-5 md:col-span-2 md:mt-0">
-          {!updateStatus.isUpdateAvailable && (
-            <ButtonV2 disabled={updateStatus.isChecking} onClick={checkUpdates}>
-              {" "}
+          ) : updateStatus.isUpdateAvailable ? (
+            // When an update is available
+            <UpdatableApp silentlyAutoUpdate={false}>
+              <ButtonV2 disabled>
+                <div className="flex items-center gap-4">
+                  <CareIcon
+                    icon="l-exclamation"
+                    className="text-2xl text-warning"
+                  />
+                  {t("update_available")}
+                </div>
+              </ButtonV2>
+            </UpdatableApp>
+          ) : (
+            // Default state to check for updates
+            <ButtonV2 onClick={checkUpdates}>
               <div className="flex items-center gap-4">
-                <CareIcon
-                  icon="l-sync"
-                  className={classNames(
-                    "text-2xl",
-                    updateStatus.isChecking && "animate-spin",
-                  )}
-                />
-                {updateStatus.isChecking
-                  ? t("checking_for_update")
-                  : t("check_for_update")}
+                <CareIcon icon="l-sync" className="text-2xl" />
+                {t("check_for_update")}
               </div>
             </ButtonV2>
           )}

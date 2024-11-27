@@ -1,4 +1,3 @@
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import {
   DetailedHTMLProps,
   InputHTMLAttributes,
@@ -6,15 +5,24 @@ import {
   useState,
 } from "react";
 
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import FormField from "./FormField";
-import { classNames } from "../../../Utils/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import FormField from "@/components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/components/Form/FormFields/Utils";
+
+import { classNames, compareBy } from "@/Utils/utils";
+
+import { Threshold } from "./RangeAutocompleteFormField";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> &
   Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     "onChange"
   > & {
+    thresholds?: Threshold[];
     inputClassName?: string | undefined;
     removeDefaultClasses?: true | undefined;
     leading?: React.ReactNode | undefined;
@@ -24,6 +32,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> &
     trailingPadding?: string | undefined;
     leadingPadding?: string | undefined;
     suggestions?: string[];
+    clearable?: boolean | undefined;
   };
 
 const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
@@ -40,25 +49,71 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
     return showPassword ? "text" : "password";
   };
 
-  let child = (
-    <input
-      {...props}
-      ref={ref as React.Ref<HTMLInputElement>}
-      id={field.id}
-      className={classNames(
-        "cui-input-base peer",
-        hasLeading && (props.leadingPadding || "pl-10"),
-        hasTrailing && (props.trailingPadding || "pr-10"),
-        field.error && "border-danger-500",
-        props.inputClassName,
+  const minError =
+    typeof props.min !== "undefined" &&
+    typeof field.value !== "undefined" &&
+    parseFloat(`${props.min}`) > parseFloat(`${field.value}`)
+      ? `Value can not be smaller than ${props.min}`
+      : undefined;
+  const maxError =
+    typeof props.max !== "undefined" &&
+    typeof field.value !== "undefined" &&
+    parseFloat(`${props.max}`) < parseFloat(`${field.value}`)
+      ? `Value can not be greater than ${props.max}`
+      : undefined;
+
+  const sortedThresholds = props.thresholds?.sort(compareBy("value")) || [];
+
+  const getThreshold = (value: number) => {
+    const reversedThresholds = [...sortedThresholds].reverse();
+    const threshold = reversedThresholds.find(
+      (threshold) => value >= threshold.value,
+    );
+    return threshold;
+  };
+
+  const threshold = getThreshold(Number(field.value));
+
+  const labelSuffixWithThreshold = (
+    <div className="flex items-center gap-2">
+      {field.value && props.thresholds && threshold && (
+        <span className={threshold.className}>{threshold.label}</span>
       )}
-      disabled={field.disabled}
-      type={props.type === "password" ? getPasswordFieldType() : props.type}
-      name={field.name}
-      value={field.value}
-      required={field.required}
-      onChange={(e) => field.handleChange(e.target.value)}
-    />
+      <span>{field.labelSuffix}</span>
+    </div>
+  );
+
+  let child = (
+    <div className="relative">
+      <input
+        {...props}
+        ref={ref as React.Ref<HTMLInputElement>}
+        id={field.id}
+        className={classNames(
+          "cui-input-base peer",
+          hasLeading && (props.leadingPadding || "pl-10"),
+          hasTrailing && (props.trailingPadding || "pr-10"),
+          field.error && "border-danger-500",
+          props.inputClassName,
+        )}
+        disabled={field.disabled}
+        type={props.type === "password" ? getPasswordFieldType() : props.type}
+        name={field.name}
+        value={field.value}
+        required={field.required}
+        onChange={(e) => field.handleChange(e.target.value)}
+      />
+      {props.clearable && field.value && (
+        <button
+          type="button"
+          className="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-500"
+          onClick={() => field.handleChange("")}
+          aria-label="Clear input"
+        >
+          <CareIcon icon="l-times-circle" className="text-lg" />
+        </button>
+      )}
+    </div>
   );
 
   if (props.type === "password") {
@@ -139,7 +194,17 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
     );
   }
 
-  return <FormField field={field}>{child}</FormField>;
+  return (
+    <FormField
+      field={{
+        ...field,
+        error: field.error || minError || maxError,
+        labelSuffix: labelSuffixWithThreshold,
+      }}
+    >
+      {child}
+    </FormField>
+  );
 });
 
 export default TextFormField;
