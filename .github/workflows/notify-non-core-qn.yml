@@ -74,8 +74,9 @@ jobs:
 
             if (allowedUsers && !isOrgMember(commenter, allowedUsers)) {
               const commentBody = context.payload.comment.body.trim();
+              const filteredCommentBody = commentBody.split('\n').filter(line => !line.startsWith('>')).join('\n');
 
-              if (!commentBody.startsWith('>') && keywords && containsQuestionKeywords(commentBody, keywords)) {
+              if (keywords && containsQuestionKeywords(filteredCommentBody, keywords)) {
                 if (labels) {
                   await addLabelsToIssue(github, context, labels);
                 }
