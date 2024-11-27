@@ -113,10 +113,19 @@ export class PatientConsultationPage {
     cy.wait(3000);
   }
 
+  interceptPatientDetailsAPI(): void {
+    cy.intercept("GET", "**/api/v1/patient/**").as("patientDetails");
+  }
+
+  verifyPatientDetailsResponse(): void {
+    cy.wait("@patientDetails").its("response.statusCode").should("eq", 200);
+  }
+
   clickViewConsultationButton() {
+    cy.get("a").contains("Encounters").click();
     cy.verifyAndClickElement(
-      "#view_consultation_updates",
-      "View Consultation / Consultation Updates",
+      "#view_consultation_and_log_updates",
+      "View Updates",
     );
   }
 

@@ -136,7 +136,7 @@ export interface PatientModel {
   is_declared_positive?: boolean;
   last_edited?: UserBareMinimum;
   created_by?: UserBareMinimum;
-  assigned_to?: { first_name?: string; username?: string; last_name?: string };
+  assigned_to?: number | null;
   assigned_to_object?: AssignedToObjectModel;
   occupation?: Occupation;
   meta_info?: PatientMeta;

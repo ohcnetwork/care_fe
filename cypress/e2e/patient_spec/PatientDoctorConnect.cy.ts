@@ -7,10 +7,10 @@ describe("Patient Doctor Connect in consultation page", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const doctorconnect = new DoctorConnect();
-  const patientName = "Dummy Patient 11";
+  const patientName = "Dummy Patient Eleven";
   const doctorUser = "Dev Doctor";
   const nurseUser = "Dev Staff";
-  const teleIcuUser = "Dev Doctor Two";
+  const teleIcuUser = "Tester Doctor";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();

@@ -567,6 +567,7 @@
   "patient_name": "मरीज का नाम",
   "patient_no": "ओपी/आईपी संख्या",
   "patient_phone_number": "मरीज़ का फ़ोन नंबर",
+  "patient_profile": "रोगी प्रोफ़ाइल",
   "patient_registration__address": "पता",
   "patient_registration__age": "आयु",
   "patient_registration__comorbidities": "comorbidities",

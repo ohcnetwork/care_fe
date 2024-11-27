@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { startCase, toLower } from "lodash-es";
 import { debounce } from "lodash-es";
 import { navigate } from "raviger";
-import { useCallback, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -22,6 +22,7 @@ import TransferPatientDialog from "@/components/Facility/TransferPatientDialog";
 import {
   DistrictModel,
   DupPatientModel,
+  FacilityModel,
   WardModel,
 } from "@/components/Facility/models";
 import {
@@ -51,6 +52,7 @@ import {
   PatientMeta,
   PatientModel,
 } from "@/components/Patient/models";
+import { UserModel } from "@/components/Users/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -67,7 +69,7 @@ import {
 } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 import { statusType, useAbortableEffect } from "@/common/utils";
-import { validatePincode } from "@/common/validation";
+import { validateName, validatePincode } from "@/common/validation";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { RestoreDraftButton } from "@/Utils/AutoSave";
@@ -229,6 +231,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
+
+  useEffect(() => {
+    const getQueryParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        section: params.get("section"),
+      };
+    };
+
+    const { section } = getQueryParams();
+    if (section) {
+      setTimeout(() => {
+        const element = document.getElementById(section);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 2000);
+    }
+  }, []);
 
   const fetchDistricts = useCallback(async (id: number) => {
     if (id > 0) {
@@ -419,8 +440,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
+        case "name": {
+          const requiredError = RequiredFieldValidator()(form[field]);
+          if (requiredError) {
+            errors[field] = requiredError;
+          } else if (!validateName(form[field])) {
+            errors[field] = t("min_char_length_error", { min_length: 3 });
+          }
+          return;
+        }
         case "address":
-        case "name":
         case "gender":
           errors[field] = RequiredFieldValidator()(form[field]);
           return;
@@ -814,31 +843,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     return <Loading />;
   }
 
-  const PatientRegisterAuth = () => {
-    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-    if (
-      !showAllFacilityUsers.includes(authUser.user_type) &&
-      authUser.home_facility_object?.id === facilityId
-    ) {
-      return true;
-    }
-    if (
-      authUser.user_type === "DistrictAdmin" &&
-      authUser.district === facilityObject?.district
-    ) {
-      return true;
-    }
-    if (
-      authUser.user_type === "StateAdmin" &&
-      authUser.state === facilityObject?.state
-    ) {
-      return true;
-    }
-
-    return false;
-  };
-
-  if (!isLoading && facilityId && facilityObject && !PatientRegisterAuth()) {
+  if (
+    !isLoading &&
+    facilityId &&
+    facilityObject &&
+    !patientRegisterAuth(authUser, facilityObject, facilityId)
+  ) {
     return <Error404 />;
   }
 
@@ -1411,7 +1421,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
               </div>
               {field("nationality").value === "India" && (
-                <div className="mb-8 rounded border p-4">
+                <div id="social-profile" className="mb-8 rounded border p-4">
                   <AccordionV2
                     className="mt-2 shadow-none md:mt-0 lg:mt-0"
                     expandIcon={
@@ -1489,7 +1499,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </AccordionV2>
                 </div>
               )}
-              <div className="mb-8 rounded border p-4">
+              <div id="covid-details" className="mb-8 rounded border p-4">
                 <AccordionV2
                   className="mt-2 shadow-none md:mt-0 lg:mt-0"
                   expandIcon={
@@ -1610,7 +1620,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                 </AccordionV2>
               </div>
-              <div className="mb-8 overflow-visible rounded border p-4">
+              <div
+                id="medical-history"
+                className="mb-8 overflow-visible rounded border p-4"
+              >
                 <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                   Medical History
                 </h1>
@@ -1670,7 +1683,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex w-full flex-col gap-4 rounded border bg-white p-4">
+              <div
+                id="insurance-details"
+                className="flex w-full flex-col gap-4 rounded border bg-white p-4"
+              >
                 <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
                   <h1 className="text-left text-xl font-bold text-purple-500">
                     Insurance Details
@@ -1713,3 +1729,31 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     </Form>
   );
 };
+
+export function patientRegisterAuth(
+  authUser: UserModel,
+  facilityObject: FacilityModel | undefined,
+  facilityId: string,
+) {
+  const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+  if (
+    !showAllFacilityUsers.includes(authUser.user_type) &&
+    authUser.home_facility_object?.id === facilityId
+  ) {
+    return true;
+  }
+  if (
+    authUser.user_type === "DistrictAdmin" &&
+    authUser.district === facilityObject?.district
+  ) {
+    return true;
+  }
+  if (
+    authUser.user_type === "StateAdmin" &&
+    authUser.state === facilityObject?.state
+  ) {
+    return true;
+  }
+
+  return false;
+}

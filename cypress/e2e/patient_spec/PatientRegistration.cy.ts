@@ -40,10 +40,12 @@ describe("Patient Creation with consultation", () => {
   const patientDateOfBirth = "01012001";
   const patientMenstruationStartDate = getRelativeDateString(-10);
   const patientDateOfDelivery = getRelativeDateString(-20);
-  const patientOneName = "Patient With No Consultation";
+  const patientOneName = "Great Napolean 14";
   const patientOneGender = "Male";
   const patientOneUpdatedGender = "Female";
-  const patientOneAddress = "Test Patient Address";
+  const patientOneAddress = `149/J, 3rd Block,
+  Aluva
+  Ernakulam, Kerala - 682001`;
   const patientOnePincode = "682001";
   const patientOneState = "Kerala";
   const patientOneDistrict = "Ernakulam";
@@ -64,7 +66,7 @@ describe("Patient Creation with consultation", () => {
   const patientOneSecondInsurerName = "Care Payor";
   const patientTransferPhoneNumber = "9849511866";
   const patientTransferFacility = "Dummy Shifting Center";
-  const patientTransferName = "Dummy Patient 10";
+  const patientTransferName = "Dummy Patient Twelve";
   const patientOccupation = "Student";
 
   before(() => {
@@ -130,6 +132,7 @@ describe("Patient Creation with consultation", () => {
       "Middle Class",
       "Family member",
     );
+
     patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
       patientOneOngoingMedication,
@@ -214,11 +217,9 @@ describe("Patient Creation with consultation", () => {
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
     cy.get("[data-testid=patient-details]")
-      .contains("member id")
+      .contains("Member ID")
       .scrollIntoView();
     cy.wait(2000);
-    patientInsurance.clickPatientInsuranceViewDetail();
-    cy.wait(3000);
     patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
@@ -243,7 +244,7 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
     cy.verifyNotification(
-      "Patient Dummy Patient 10 (Male) transferred successfully",
+      `Patient ${patientTransferName} (Male) transferred successfully`,
     );
     patientTransfer.clickConsultationCancelButton();
     // allow the transfer button of a patient

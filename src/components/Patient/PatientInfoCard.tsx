@@ -538,7 +538,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
           )}
           {!!consultation?.discharge_date && (
             <div className="flex min-w-max flex-col items-center justify-center">
-              <div className="text-sm font-normal leading-5 text-secondary-500">
+              <div className="text-sm font-normal leading-5 text-gray-600">
                 Discharge Reason
               </div>
               <div className="mt-[6px] text-xl font-semibold leading-5 text-secondary-900">
@@ -582,7 +582,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                       href={
                         consultation?.admitted && !consultation?.current_bed
                           ? undefined
-                          : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`
+                          : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/log_updates`
                       }
                       onClick={() => {
                         if (

@@ -48,6 +48,8 @@ import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
 import { sleep } from "@/Utils/utils";
 
+import { patientRegisterAuth } from "../Patient/PatientRegister";
+
 type Props = {
   facilityId: string;
 };
@@ -458,17 +460,19 @@ export const FacilityHome = ({ facilityId }: Props) => {
               {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                 <LiveMonitoringButton />
               )}
-              <ButtonV2
-                variant="primary"
-                ghost
-                border
-                className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() => navigate(`/facility/${facilityId}/patient`)}
-                authorizeFor={NonReadOnlyUsers}
-              >
-                <CareIcon icon="l-plus" className="text-lg" />
-                <span className="text-sm">{t("add_details_of_patient")}</span>
-              </ButtonV2>
+              {patientRegisterAuth(authUser, facilityData, facilityId) && (
+                <ButtonV2
+                  variant="primary"
+                  ghost
+                  border
+                  className="mt-2 flex w-full flex-row justify-center md:w-auto"
+                  onClick={() => navigate(`/facility/${facilityId}/patient`)}
+                  authorizeFor={NonReadOnlyUsers}
+                >
+                  <CareIcon icon="l-plus" className="text-lg" />
+                  <span className="text-sm">{t("add_details_of_patient")}</span>
+                </ButtonV2>
+              )}
               <ButtonV2
                 id="view-patient-facility-list"
                 variant="primary"
