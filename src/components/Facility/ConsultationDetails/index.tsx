@@ -397,9 +397,6 @@ export const ConsultationDetails = (props: any) => {
           </div>
           <SelectedTab {...consultationTabProps} />
         </div>
-        <div className="px-3 pb-3 md:px-6 md:pb-6">
-          <SelectedTab {...consultationTabProps} />
-        </div>
       </div>
 
       <DoctorVideoSlideover
