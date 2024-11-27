@@ -103,20 +103,16 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     };
   }, [show]);
 
-  const releaseMic = () => {
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
-    }
-  };
-
   useEffect(() => {
     if (autoRecord && show && status === "RECORDING") {
       handleStartRecording();
     }
 
     return () => {
-      mediaStreamRef.current && releaseMic();
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
     };
   }, [autoRecord, status, show]);
 
