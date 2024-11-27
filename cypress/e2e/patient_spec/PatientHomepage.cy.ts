@@ -165,8 +165,6 @@ describe("Patient Homepage present functionalities", () => {
       .then((patientOne: string) => {
         firstPatientPageOne = patientOne.trim();
         pageNavigation.navigateToNextPage();
-        cy.intercept("GET", "**/api/patient/?page=2").as("getPage2");
-        cy.wait("@getPage2");
         pageNavigation.verifyCurrentPageNumber(2);
         cy.get('[data-cy="patient"]')
           .first()
