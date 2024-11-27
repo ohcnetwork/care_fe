@@ -193,12 +193,7 @@ export const PatientManager = () => {
     const timeout = setTimeout(() => setDebouncedSearchParams(params), 1000);
     console.log("this");
     return () => clearTimeout(timeout);
-  }, [
-    params.name,
-    params.phone_number,
-    params.patient_no,
-    params.emergency_phone_number,
-  ]);
+  }, [JSON.stringify(params)]);
 
   useEffect(() => {
     const ids: string[] = [];
