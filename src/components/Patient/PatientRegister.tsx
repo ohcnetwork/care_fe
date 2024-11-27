@@ -2,7 +2,7 @@ import careConfig from "@careConfig";
 import { startCase, toLower } from "lodash-es";
 import { debounce } from "lodash-es";
 import { navigate } from "raviger";
-import { useCallback, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -232,6 +232,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
 
+  useEffect(() => {
+    const getQueryParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        section: params.get("section"),
+      };
+    };
+
+    const { section } = getQueryParams();
+    if (section) {
+      setTimeout(() => {
+        const element = document.getElementById(section);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 2000);
+    }
+  }, []);
+
   const fetchDistricts = useCallback(async (id: number) => {
     if (id > 0) {
       setIsDistrictLoading(true);
@@ -421,12 +440,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
-        case "address":
-        case "name":
-          if (!validateName(form[field])) {
-            errors[field] = "Please enter valid name";
+        case "name": {
+          const requiredError = RequiredFieldValidator()(form[field]);
+          if (requiredError) {
+            errors[field] = requiredError;
+          } else if (!validateName(form[field])) {
+            errors[field] = t("min_char_length_error", { min_length: 3 });
           }
           return;
+        }
+        case "address":
         case "gender":
           errors[field] = RequiredFieldValidator()(form[field]);
           return;
@@ -1398,7 +1421,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
               </div>
               {field("nationality").value === "India" && (
-                <div className="mb-8 rounded border p-4">
+                <div id="social-profile" className="mb-8 rounded border p-4">
                   <AccordionV2
                     className="mt-2 shadow-none md:mt-0 lg:mt-0"
                     expandIcon={
@@ -1476,7 +1499,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </AccordionV2>
                 </div>
               )}
-              <div className="mb-8 rounded border p-4">
+              <div id="covid-details" className="mb-8 rounded border p-4">
                 <AccordionV2
                   className="mt-2 shadow-none md:mt-0 lg:mt-0"
                   expandIcon={
@@ -1597,7 +1620,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                 </AccordionV2>
               </div>
-              <div className="mb-8 overflow-visible rounded border p-4">
+              <div
+                id="medical-history"
+                className="mb-8 overflow-visible rounded border p-4"
+              >
                 <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                   Medical History
                 </h1>
@@ -1657,7 +1683,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   </div>
                 </div>
               </div>
-              <div className="flex w-full flex-col gap-4 rounded border bg-white p-4">
+              <div
+                id="insurance-details"
+                className="flex w-full flex-col gap-4 rounded border bg-white p-4"
+              >
                 <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
                   <h1 className="text-left text-xl font-bold text-purple-500">
                     Insurance Details
