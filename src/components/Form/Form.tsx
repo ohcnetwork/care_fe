@@ -33,7 +33,8 @@ type Props<T extends FormDetails> = {
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
   hideRestoreDraft?: boolean;
-  resetFormVals?: boolean;
+  resetFormValsOnCancel?: boolean;
+  resetFormValsOnSubmit?: boolean;
   hideCancelButton?: boolean;
 };
 
@@ -79,11 +80,13 @@ const Form = <T extends FormDetails>({
         type: "set_errors",
         errors: { ...state.errors, ...errors },
       });
+    } else if (props.resetFormValsOnSubmit) {
+      dispatch({ type: "set_form", form: formVals.current });
     }
   };
 
   const handleCancel = () => {
-    if (props.resetFormVals) {
+    if (props.resetFormValsOnCancel) {
       dispatch({ type: "set_form", form: formVals.current });
     }
     props.onCancel?.();

@@ -1265,7 +1265,7 @@ const UserAddEditForm = (props: UserProps) => {
       }}
       hideRestoreDraft={editUser}
       noPadding
-      resetFormVals
+      resetFormValsOnCancel
       hideCancelButton={editUser}
     >
       {(field) => (

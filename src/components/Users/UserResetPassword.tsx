@@ -103,7 +103,8 @@ export default function UserResetPassword({
         defaults={initForm}
         validate={validateForm}
         onSubmit={handleSubmit}
-        resetFormVals
+        resetFormValsOnCancel
+        resetFormValsOnSubmit
         hideRestoreDraft
         noPadding
         disabled={isSubmitting}

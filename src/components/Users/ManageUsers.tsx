@@ -107,30 +107,18 @@ export default function ManageUsers() {
     return <Loading />;
   }
 
-  if (userListData?.results.length) {
-    manageUsers = (
-      <div>
-        <UserListView
-          users={userListData?.results ?? []}
-          onSearch={(username) => updateQuery({ username })}
-          searchValue={qParams.username}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-        <Pagination totalCount={userListData.count} />
-      </div>
-    );
-  } else if (userListData?.results && userListData?.results.length === 0) {
-    manageUsers = (
-      <div>
-        <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-          <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
-            No Users Found
-          </div>
-        </div>
-      </div>
-    );
-  }
+  manageUsers = (
+    <div>
+      <UserListView
+        users={userListData?.results ?? []}
+        onSearch={(username) => updateQuery({ username })}
+        searchValue={qParams.username}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+      <Pagination totalCount={userListData.count} />
+    </div>
+  );
 
   return (
     <Page title={t("user_management")} hideBack={true} breadcrumbs={false}>

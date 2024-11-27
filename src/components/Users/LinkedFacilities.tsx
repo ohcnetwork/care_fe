@@ -15,6 +15,7 @@ import { FacilityModel } from "@/components/Facility/models";
 import ConfirmFacilityModal from "@/components/Users/ConfirmFacilityModal";
 import { UserModel } from "@/components/Users/models";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
 import AuthorizeFor from "@/Utils/AuthorizeFor";
@@ -49,10 +50,13 @@ export default function LinkedFacilities({
   const [homeFacility, setHomeFacility] = useState<FacilityModel | undefined>();
   const [modalProps, setModalProps] = useState(initModalProps);
   const { t } = useTranslation();
+  const authUser = useAuthUser();
 
   const authorizeForHomeFacility = useIsAuthorized(
     AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
   );
+
+  const isCurrentUser = userData.username === authUser.username;
 
   const { refetch: refetchUserFacilities } = useQuery(routes.userListFacility, {
     pathParams: { username: userData.username },
@@ -241,7 +245,7 @@ export default function LinkedFacilities({
           <div id="home-facility" className="rounded p-1 text-sm">
             {homeFacility.name}
           </div>
-          {authorizeForHomeFacility && (
+          {(authorizeForHomeFacility || isCurrentUser) && (
             <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
               <button
                 id="clear-home-facility"
@@ -285,12 +289,19 @@ export default function LinkedFacilities({
             setSelected={setFacility}
             errors=""
             className="z-10 w-full"
+            disabled={!authorizeForHomeFacility}
           />
           <ButtonV2
             id="link-facility"
             name="Add"
             className="mt-1 rounded-lg px-6 py-[11px] text-base"
             onClick={() => linkFacility(userData.username, facility)}
+            disabled={!authorizeForHomeFacility}
+            tooltip={
+              !authorizeForHomeFacility
+                ? t("contact_your_admin_to_add_facilities")
+                : undefined
+            }
           >
             {t("add_facility")}
           </ButtonV2>

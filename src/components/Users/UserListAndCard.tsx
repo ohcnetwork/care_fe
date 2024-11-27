@@ -246,7 +246,9 @@ const UserListHeader = ({
   return (
     <thead>
       <tr className="bg-gray-50 text-sm font-medium text-gray-500">
-        <th className="px-4 py-3 text-left">{t("name")}</th>
+        <th className="sticky left-0 z-10 bg-gray-50 px-4 py-3 text-left">
+          {t("name")}
+        </th>
         <th className="w-32 px-4 py-3 text-left">{t("status")}</th>
         <th className="px-4 py-3 text-left">{t("role")}</th>
         <th className="px-4 py-3 text-left">{t("home_facility")}</th>
@@ -273,7 +275,7 @@ const UserListRow = ({
       id={`usr_${user.id}`}
       className="hover:bg-gray-50"
     >
-      <td className="px-4 py-4">
+      <td className="sticky left-0 z-10 bg-white px-4 py-4">
         <div className="flex items-center gap-3">
           <Avatar
             imageUrl={user.read_profile_picture_url}
@@ -325,7 +327,7 @@ export const UserList = ({
   );
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="relative min-w-full divide-y divide-gray-200">
         <UserListHeader showDistrictColumn={showDistrictColumn ?? false} />
         <tbody className="divide-y divide-gray-200 bg-white">
           {users?.map((user) => (
@@ -397,10 +399,20 @@ export default function UserListView({
           className="float-right"
         />
       </div>
-      {activeTab === 0 ? (
-        <UserGrid users={users} />
+      {users.length > 0 ? (
+        <>
+          {activeTab === 0 ? (
+            <UserGrid users={users} />
+          ) : (
+            <UserList users={users} />
+          )}
+        </>
       ) : (
-        <UserList users={users} />
+        <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+          <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
+            No Users Found
+          </div>
+        </div>
       )}
     </>
   );

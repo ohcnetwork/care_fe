@@ -6,7 +6,7 @@ import UserDetails from "@/components/Common/UserDetails";
 import UserDetailComponent from "@/components/Common/UserDetailsComponet";
 import { UserModel } from "@/components/Users/models";
 
-import { formatName } from "@/Utils/utils";
+import { formatDisplayName, formatName } from "@/Utils/utils";
 
 import { UserStatusIndicator } from "./UserListAndCard";
 
@@ -21,7 +21,7 @@ export default function UserBanner({ userData }: { userData: UserModel }) {
         <div className="flex flex-row gap-2 self-center">
           <Avatar
             imageUrl={userData?.read_profile_picture_url}
-            name={userData?.username ?? ""}
+            name={formatDisplayName(userData)}
             className="h-20 w-20 md:mr-2 lg:mr-3 lg:h-16 lg:w-16"
           />
           <div className="flex flex-col self-center">
