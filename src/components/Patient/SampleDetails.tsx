@@ -264,10 +264,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
 
   const renderFlow = (flow: FlowModel) => {
     return (
-      <Card
-        key={flow.id}
-        className="mb-2 shadow-sm border border-secondary-300"
-      >
+      <Card key={flow.id}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">

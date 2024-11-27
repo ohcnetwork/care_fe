@@ -219,7 +219,7 @@ const AssetsList = () => {
         <Loading />
       </div>
     );
-  } else if (data?.count) {
+  } else if (data.count) {
     manageAssets = (
       <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
         {assets.map((asset: AssetData) => (
