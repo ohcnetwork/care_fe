@@ -79,7 +79,7 @@ describe("Manage User", () => {
     manageUserPage.clearUserContactInfo();
     manageUserPage.clickSubmit();
     manageUserPage.verifyErrorText("Please enter a valid email address");
-    manageUserPage.verifyErrorText("Please enter a valid phone number");
+    manageUserPage.verifyErrorText("Please enter valid phone number");
     manageUserPage.editUserContactInfo("dev@gmail.com", "6234343435");
     manageUserPage.clickSubmit();
     manageUserPage.clickContactInfoViewButton();
