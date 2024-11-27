@@ -66,7 +66,7 @@ export default function CriticalCarePreview(props: Props) {
         >
           <Button
             id="update-log"
-            className="bg-primary text-white"
+            variant={"primary"}
             data-testid="update-log-button"
             aria-label={t("update_log")}
           >
