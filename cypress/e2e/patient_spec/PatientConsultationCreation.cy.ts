@@ -91,11 +91,11 @@ describe("Patient Consultation in multiple combination", () => {
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     patientTreatmentPlan.typeSpecialInstruction(specialInstruction);
     patientTreatmentPlan.fillTreatingPhysican(doctorName);
-    cy.submitButton("Create Consultation");
+    cy.clickSubmitButton("Create Consultation");
     // the above submit should fail as IP number is missing
     patientConsultationPage.typePatientNumber(patientIpNumber);
     patientConsultationPage.selectBed("Dummy Bed 6");
-    cy.submitButton("Create Consultation");
+    cy.clickSubmitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // Below code for the prescription module only present while creating a new consultation
     patientPrescription.clickAddPrescription();
@@ -104,7 +104,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientPrescription.selectMedicine(medicineOne);
     patientPrescription.enterDosage("3");
     patientPrescription.selectDosageFrequency("Twice daily");
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.wait(2000);
     cy.verifyNotification("Medicine prescribed");
     patientPrescription.clickReturnToDashboard();
@@ -189,7 +189,7 @@ describe("Patient Consultation in multiple combination", () => {
       "#encounter_date",
       "220220241230",
     );
-    cy.submitButton("Create Consultation");
+    cy.clickSubmitButton("Create Consultation");
     cy.verifyNotification(
       "Create Diagnoses - Atleast one diagnosis is required",
     );
@@ -198,7 +198,7 @@ describe("Patient Consultation in multiple combination", () => {
       diagnosis4,
       "add-icd11-diagnosis-as-confirmed",
     );
-    cy.submitButton("Create Consultation");
+    cy.clickSubmitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // verify the data and death report
     patientConsultationPage.verifyTextInConsultation(
@@ -215,7 +215,7 @@ describe("Patient Consultation in multiple combination", () => {
       "#cause_of_death",
       "Cause of Death",
     );
-    cy.submitButton("Preview");
+    cy.clickSubmitButton("Preview");
     cy.preventPrint();
     patientDeathReport.clickPrintDeathReport();
     cy.get("@verifyPrevent").should("be.called");
@@ -261,7 +261,7 @@ describe("Patient Consultation in multiple combination", () => {
     // add telemedicine
     patientTreatmentPlan.clickTelemedicineCheckbox();
     patientTreatmentPlan.assignTelemedicineDoctor(doctorName);
-    cy.submitButton("Create Consultation");
+    cy.clickSubmitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // verify the data reflection -
     patientConsultationPage.verifyTextInConsultation(
@@ -312,7 +312,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     // no review after and no action
     patientTreatmentPlan.fillTreatingPhysican(doctorName);
-    cy.submitButton("Create Consultation");
+    cy.clickSubmitButton("Create Consultation");
     cy.verifyNotification("Patient discharged successfully");
     // verify the Discharge Reason, Diagnosis, treatment physican
     patientConsultationPage.verifyTextInConsultation(
@@ -364,18 +364,18 @@ describe("Patient Consultation in multiple combination", () => {
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
     patientTreatmentPlan.fillTreatingPhysican(doctorName);
     // no review after and no action
-    cy.submitButton("Create Consultation");
+    cy.clickSubmitButton("Create Consultation");
     // Create a shifting request
     cy.closeNotification();
     shiftCreation.typeCurrentFacilityPerson("Current Facility Person");
     shiftCreation.typeCurrentFacilityPhone("9999999999");
     shiftCreation.typeShiftReason("reason for shift");
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Shift request created successfully");
   });
 
   it("Edit created consultation to existing patient", () => {
-    patientPage.visitPatient("Dummy Patient 13");
+    patientPage.visitPatient("Dummy Patient Thirteen");
     patientConsultationPage.clickEditConsultationButton();
     patientConsultationPage.typePatientIllnessHistory("editted");
     patientConsultationPage.selectPatientDiagnosis(
@@ -386,7 +386,7 @@ describe("Patient Consultation in multiple combination", () => {
       cy.get("#condition-verification-status-menu").click();
       cy.get("#add-icd11-diagnosis-as-entered-in-error").click();
     });
-    cy.submitButton("Update Consultation");
+    cy.clickSubmitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
     cy.get("#diagnoses-view").should("not.contain.text", diagnosis5);
     patientConsultationPage.verifyTextInConsultation(

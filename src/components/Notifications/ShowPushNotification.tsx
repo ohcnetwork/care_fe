@@ -24,9 +24,9 @@ export default function ShowPushNotification({ id }: { id: string }) {
       case "PATIENT_CONSULTATION_UPDATED":
         return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}`;
       case "PATIENT_CONSULTATION_UPDATE_CREATED":
-        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/daily-rounds/${caused_objects?.daily_round}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/log_updates/${caused_objects?.daily_round}`;
       case "PATIENT_CONSULTATION_UPDATE_UPDATED":
-        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/daily-rounds/${caused_objects?.daily_round}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/log_updates/${caused_objects?.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/investigation/${caused_objects?.session}`;
       case "PATIENT_NOTE_ADDED":
