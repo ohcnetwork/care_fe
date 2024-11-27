@@ -24,6 +24,7 @@ export const AssetServiceEditModal = (props: {
   service_record: AssetService;
   handleClose: () => void;
   handleUpdate: () => void;
+  refetch: () => void;
   viewOnly?: boolean;
   show: boolean;
 }) => {
@@ -55,6 +56,7 @@ export const AssetServiceEditModal = (props: {
       });
       props.handleUpdate();
       props.handleClose();
+      props.refetch();
     }
   };
 

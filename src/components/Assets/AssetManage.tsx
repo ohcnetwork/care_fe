@@ -69,7 +69,11 @@ const AssetManage = (props: AssetManageProps) => {
   >();
   const [transactionFilter, setTransactionFilter] = useState<any>({});
 
-  const { data: asset, loading } = useQuery(routes.getAsset, {
+  const {
+    data: asset,
+    loading,
+    refetch,
+  } = useQuery(routes.getAsset, {
     pathParams: {
       external_id: assetId,
     },
@@ -595,6 +599,7 @@ const AssetManage = (props: AssetManageProps) => {
             setServiceEditData({ ...serviceEditData, open: false })
           }
           handleUpdate={() => serviceRefetch()}
+          refetch={refetch}
           show={serviceEditData.open}
           viewOnly={serviceEditData.viewOnly}
         />
