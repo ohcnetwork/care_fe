@@ -118,12 +118,20 @@ class FacilityHome {
     this.sidebarItems()
       .should("have.length.at.least", 1)
       .each(($item) => {
+        const expectedText = $item.attr("data-text");
+
         cy.wrap($item, { timeout: 10000 })
           .find('[data-testid="sidebar-icon"]')
           .should("be.visible");
         cy.wrap($item, { timeout: 10000 })
           .find('[data-testid="sidebar-text"]')
-          .should(textVisibility);
+          .should(textVisibility)
+          .then(($text) => {
+            if (textVisibility === "be.visible") {
+              const actualText = $text.text().trim();
+              expect(actualText).to.eq(expectedText);
+            }
+          });
       });
   }
 
