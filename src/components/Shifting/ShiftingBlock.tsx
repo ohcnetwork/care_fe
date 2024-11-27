@@ -13,7 +13,7 @@ import { classNames, formatDateTime, formatName } from "@/Utils/utils";
 
 export default function ShiftingBlock(props: {
   shift: ShiftingModel;
-  onTransfer: () => unknown;
+  onTransfer?: () => unknown;
 }) {
   const { shift, onTransfer } = props;
   const { t } = useTranslation();
@@ -123,25 +123,28 @@ export default function ShiftingBlock(props: {
           <CareIcon icon="l-eye" className="text-lg" /> {t("all_details")}
         </Link>
 
-        {shift.status === "COMPLETED" && shift.assigned_facility && (
-          <>
-            <button
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-secondary-300 bg-secondary-200 p-2 text-sm font-semibold text-inherit transition-all hover:bg-secondary-300"
-              disabled={
-                !shift.patient_object.allow_transfer ||
-                !(
-                  ["DistrictAdmin", "StateAdmin"].includes(
-                    authUser.user_type,
-                  ) ||
-                  authUser.home_facility_object?.id === shift.assigned_facility
-                )
-              }
-              onClick={onTransfer}
-            >
-              {t("transfer_to_receiving_facility")}
-            </button>
-          </>
-        )}
+        {shift.status === "COMPLETED" &&
+          shift.assigned_facility &&
+          onTransfer && (
+            <>
+              <button
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-secondary-300 bg-secondary-200 p-2 text-sm font-semibold text-inherit transition-all hover:bg-secondary-300"
+                disabled={
+                  !shift.patient_object.allow_transfer ||
+                  !(
+                    ["DistrictAdmin", "StateAdmin"].includes(
+                      authUser.user_type,
+                    ) ||
+                    authUser.home_facility_object?.id ===
+                      shift.assigned_facility
+                  )
+                }
+                onClick={onTransfer}
+              >
+                {t("transfer_to_receiving_facility")}
+              </button>
+            </>
+          )}
       </div>
     </div>
   );

@@ -33,7 +33,9 @@ class PatientMedicalHistory {
     patientSymptoms6: string,
     patientSymptoms7: string,
   ) {
-    cy.get("[data-testid=patient-details]").then(($dashboard) => {
+    cy.get("a").contains("Health Profile").click();
+    cy.wait(2000);
+    cy.get("[data-test-id=patient-health-profile]").then(($dashboard) => {
       cy.url().should("include", "/facility/");
       expect($dashboard).to.contain(patientPresentHealth);
       expect($dashboard).to.contain(patientOngoingMedication);
