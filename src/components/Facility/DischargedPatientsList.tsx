@@ -40,6 +40,7 @@ import {
 import { parseOptionId } from "@/common/utils";
 
 import * as Notification from "@/Utils/Notifications";
+import { preventDuplicatePatientsDuetoPolicyId } from "@/Utils/removeDuplicates";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
@@ -84,9 +85,6 @@ const DischargedPatientsList = ({
     limit: resultsPerPage,
     name: qParams.name || undefined,
     patient_no: qParams.patient_no || undefined,
-    is_active:
-      !qParams.last_consultation__new_discharge_reason &&
-      (qParams.is_active || "False"),
     phone_number: qParams.phone_number
       ? parsePhoneNumber(qParams.phone_number)
       : undefined,
@@ -94,8 +92,6 @@ const DischargedPatientsList = ({
       ? parsePhoneNumber(qParams.emergency_phone_number)
       : undefined,
     local_body: qParams.lsgBody || undefined,
-    facility: qParams.facility,
-    facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     created_date_before: qParams.created_date_before || undefined,
@@ -130,6 +126,7 @@ const DischargedPatientsList = ({
       qParams.last_consultation__new_discharge_reason || undefined,
     last_consultation_current_bed__location:
       qParams.last_consultation_current_bed__location || undefined,
+    ventilator_interface: qParams.ventilator_interface || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
@@ -139,18 +136,11 @@ const DischargedPatientsList = ({
     last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
-    is_antenatal: qParams.is_antenatal || undefined,
-    last_menstruation_start_date_after:
-      (qParams.is_antenatal === "true" &&
-        dayjs().subtract(9, "month").format("YYYY-MM-DD")) ||
-      undefined,
-    ventilator_interface: qParams.ventilator_interface || undefined,
     diagnoses: qParams.diagnoses || undefined,
     diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
     diagnoses_provisional: qParams.diagnoses_provisional || undefined,
     diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
     diagnoses_differential: qParams.diagnoses_differential || undefined,
-    review_missed: qParams.review_missed || undefined,
   };
 
   useEffect(() => {
@@ -194,58 +184,6 @@ const DischargedPatientsList = ({
   const isExportAllowed =
     durations.every((x) => x >= 0 && x <= 7) &&
     !durations.every((x) => x === 0);
-
-  const preventDuplicatePatientsDuetoPolicyId = (data: any) => {
-    // Generate a array which contains imforamation of duplicate patient IDs and there respective linenumbers
-    const lines = data.split("\n"); // Split the data into individual lines
-    const idsMap = new Map(); // To store indices of lines with the same patient ID
-
-    lines.map((line: any, i: number) => {
-      const patientId = line.split(",")[0]; // Extract the patient ID from each line
-      if (idsMap.has(patientId)) {
-        idsMap.get(patientId).push(i); // Add the index to the existing array
-      } else {
-        idsMap.set(patientId, [i]); // Create a new array with the current index
-      }
-    });
-
-    const linesWithSameId = Array.from(idsMap.entries())
-      .filter(([_, indices]) => indices.length > 1)
-      .map(([patientId, indices]) => ({
-        patientId,
-        indexSame: indices,
-      }));
-
-    // after getting the array of duplicate patient IDs and there respective linenumbers we will merge the policy IDs of the duplicate patients
-
-    linesWithSameId.map((lineInfo) => {
-      const indexes = lineInfo.indexSame;
-      //get policyid of all the duplicate patients and merge them by seperating them with a semicolon
-      const mergedPolicyId = indexes
-        .map((currentIndex: number) => lines[currentIndex].split(",")[5])
-        .join(";");
-      // replace the policy ID of the first patient with the merged policy ID
-      const arrayOfCurrentLine = lines[indexes[0]].split(",");
-      arrayOfCurrentLine[5] = mergedPolicyId;
-      const lineAfterMerge = arrayOfCurrentLine.join(",");
-      lines[indexes[0]] = `${lineAfterMerge}`;
-    });
-
-    // after merging the policy IDs of the duplicate patients we will remove the duplicate patients from the data
-    const uniqueLines = [];
-    const ids = new Set(); // To keep track of unique patient IDs
-
-    for (const line of lines) {
-      const patientId = line.split(",")[0]; // Extract the patient ID from each line
-      if (!ids.has(patientId)) {
-        uniqueLines.push(line);
-        ids.add(patientId);
-      }
-    }
-
-    const cleanedData = uniqueLines.join("\n"); // Join the unique lines back together
-    return cleanedData;
-  };
 
   const { data: districtData } = useQuery(routes.getDistrict, {
     pathParams: {
@@ -477,7 +415,7 @@ const DischargedPatientsList = ({
                       label: "Export Discharged patients",
                       action: async () => {
                         const query = {
-                          ...qParams,
+                          ...params,
                           csv: true,
                         };
                         const pathParams = { facility_external_id };
