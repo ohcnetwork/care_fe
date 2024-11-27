@@ -37,8 +37,10 @@ export default function useQuery<TData>(
 
       setLoading(true);
       const response = await request(route, { ...resolvedOptions, controller });
-      setResponse(response);
-      setLoading(false);
+      if (response.error?.name !== "AbortError") {
+        setResponse(response);
+        setLoading(false);
+      }
       return response;
     },
     [route, JSON.stringify(options)],
