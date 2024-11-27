@@ -191,7 +191,6 @@ export const PatientManager = () => {
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearchParams(params), 1000);
-    console.log("this");
     return () => clearTimeout(timeout);
   }, [JSON.stringify(params)]);
 
