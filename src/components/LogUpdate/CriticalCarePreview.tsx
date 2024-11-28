@@ -52,7 +52,7 @@ export default function CriticalCarePreview(props: Props) {
 
   return (
     <div className="w-full transition-all duration-200 ease-in-out md:mx-auto md:max-w-5xl md:pt-8">
-      <div className="py-4 flex items-center justify-between max-[368px]:flex-col max-[368px]:items-start">
+      <div className="py-4 flex items-center justify-between max-md:flex-col max-md:items-start">
         <ButtonV2
           id="back-to-consultation"
           variant="secondary"
@@ -60,19 +60,20 @@ export default function CriticalCarePreview(props: Props) {
         >
           {t("back_to_consultation")}
         </ButtonV2>
-        <Link
-          className="mt-2"
-          href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/log_updates/${props.id}/update`}
+        <Button
+          asChild
+          id="update-log"
+          variant={"primary"}
+          data-testid="update-log-button"
+          aria-label={t("update_log")}
         >
-          <Button
-            id="update-log"
-            variant={"primary"}
-            data-testid="update-log-button"
-            aria-label={t("update_log")}
+          <Link
+            className="mt-2"
+            href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/log_updates/${props.id}/update`}
           >
             {t("update_log")}
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <Card className="md:rounded-xl lg:p-8">
