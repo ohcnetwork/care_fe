@@ -170,16 +170,20 @@ const DischargedPatientsList = ({
     ],
   ];
 
-  const durations = date_range_fields.map((field: string[]) => {
-    // XOR (checks if only one of the dates is set)
-    if ((field[0] && !field[1]) || (!field[0] && field[1])) {
-      return -1;
+  const calculateDateRangeDuration = (
+    startDate: string,
+    endDate: string,
+  ): number => {
+    if (!startDate && !endDate) return 0;
+    if (startDate && endDate) {
+      return Math.abs(dayjs(endDate).diff(dayjs(startDate), "days"));
     }
-    if (field[0] && field[1]) {
-      return dayjs(field[0]).diff(dayjs(field[1]), "days");
-    }
-    return 0;
-  });
+    return -1; // Invalid range when only one date is set
+  };
+
+  const durations = date_range_fields.map(([startDate, endDate]) =>
+    calculateDateRangeDuration(startDate, endDate),
+  );
 
   const isExportAllowed =
     durations.every((x) => x >= 0 && x <= 7) &&
