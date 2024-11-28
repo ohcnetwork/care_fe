@@ -277,6 +277,7 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
+      // deploytest
       <PrintPreview title={t("Patient Referral Letter")}>
         <Card
           id="section-to-print"
