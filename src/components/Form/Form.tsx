@@ -100,17 +100,32 @@ const Form = <T extends FormDetails>({
     });
 
     const defaultValue: unknown = props.defaults[name];
-    const isEqal = (() => {
-      if (typeof defaultValue === "object" && defaultValue !== null) {
-        if (Array.isArray(defaultValue) && Array.isArray(value)) {
-          return JSON.stringify(defaultValue) === JSON.stringify(value);
-        }
+
+    const isEqual = (() => {
+      // Handle null/undefined
+      if (defaultValue === null || value === null) {
         return defaultValue === value;
       }
-      return JSON.stringify(defaultValue) === value;
-    })();
 
-    setIsDirty(!isEqal);
+      // Handle arrays
+      if (Array.isArray(defaultValue) && Array.isArray(value)) {
+        return JSON.stringify(defaultValue) === JSON.stringify(value);
+      }
+
+      // Handle objects
+      if (typeof defaultValue === "object" && typeof value === "object") {
+        return JSON.stringify(defaultValue) === JSON.stringify(value);
+      }
+
+      // Handle number/string conversion
+      if (typeof defaultValue === "number" && typeof value === "string") {
+        return defaultValue.toString() === value;
+      }
+
+      // Default case
+      return defaultValue === value;
+    })();
+    setIsDirty(!isEqual);
   };
 
   const { Provider, Consumer } = useMemo(() => createFormContext<T>(), []);
