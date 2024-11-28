@@ -70,6 +70,9 @@ export default async function request<TData, TBody>(
       return result;
     } catch (error: any) {
       result = { error, res: undefined, data: undefined };
+      if (error.name === "AbortError") {
+        return result;
+      }
     }
   }
 
