@@ -412,7 +412,7 @@ export const Demography = (props: PatientProps) => {
                     <h1 className="text-xl">{t(`patient__${subtab.id}`)}</h1>
                     {subtab.allowEdit && (
                       <button
-                        className="flex rounded border border-secondary-400 bg-white px-2 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200"
+                        className={`flex rounded border border-secondary-400 bg-white px-2 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200 ${!patientData.is_active ? "bg-secondary-200 text-secondary-500" : ""}`}
                         disabled={!patientData.is_active}
                         onClick={withPermissionCheck(() =>
                           handleEditClick(subtab.id),
