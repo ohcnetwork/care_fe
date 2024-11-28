@@ -1211,6 +1211,8 @@
   "save_and_continue": "Save and Continue",
   "save_investigation": "Save Investigation",
   "scan_asset_qr": "Scan Asset QR!",
+  "scribe__reviewing_field": "Reviewing field {{currentField}} / {{totalFields}}",
+  "scribe_error": "Could not autofill fields",
   "search_by_emergency_contact_phone_number": "Search by Emergency Contact Phone Number",
   "search_by_patient_name": "Search by Patient Name",
   "search_by_patient_no": "Search by Patient Number",
