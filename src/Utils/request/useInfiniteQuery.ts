@@ -17,9 +17,9 @@ export function useInfiniteQuery<TData>(
   const [totalPages, setTotalPages] = useState<number>(1);
   const [hasNextPage, setHasNextPage] = useState<boolean>(true);
 
-  const { refetch, loading, ...queryResponse } = useQuery(route, {
+  const { refetch, loading, setLoading, ...queryResponse } = useQuery(route, {
     ...options,
-    prefetch: false, // Disable prefetching initially to control manually
+    prefetch: false,
   });
 
   const fetchNextPage = useCallback(async () => {
@@ -38,30 +38,14 @@ export function useInfiniteQuery<TData>(
       setCurrentPage((prev) => prev + 1);
 
       const total = options?.getTotalPages?.(response) || totalPages;
+      console.log(total, currentPage, hasNextPage);
       setTotalPages(total);
       setHasNextPage(currentPage + 1 < total);
+      if (!hasNextPage) {
+        setLoading(false);
+      }
     }
   }, [currentPage, hasNextPage, loading, options, refetch, totalPages]);
-
-  const resetQuery = useCallback(() => {
-    setPages([]);
-    setCurrentPage(1);
-    setTotalPages(1);
-    setHasNextPage(true);
-  }, []);
-
-  const handleNewMessage = useCallback(() => {
-    // resetQuery();
-
-    refetch().then((response) => {
-      if (response) {
-        setPages([response]); // Set the new page of data
-        const total = options?.getTotalPages?.(response) || totalPages;
-        setTotalPages(total);
-        setHasNextPage(total > 1);
-      }
-    });
-  }, [resetQuery, refetch, options, totalPages]);
 
   useEffect(() => {
     if (options?.prefetch ?? true) {
@@ -83,7 +67,6 @@ export function useInfiniteQuery<TData>(
     hasNextPage,
     refetch,
     ...queryResponse,
-    reset: resetQuery,
-    handleNewMessage,
+    // handleNewMessage,
   };
 }

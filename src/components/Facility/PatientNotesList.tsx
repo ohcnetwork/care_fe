@@ -27,27 +27,25 @@ interface PatientNotesProps {
 const PatientNotesList = (props: PatientNotesProps) => {
   const { state, setState, thread, setReplyTo } = props;
 
-  const { pages, loading, fetchNextPage, refetch, handleNewMessage } =
-    useInfiniteQuery<PaginatedResponse<PatientNotesModel>>(
-      routes.getPatientNotes,
-      {
-        key: `patient-notes-${props.patientId}-${thread}`,
-        getNextPageParam: (cPage: number): number =>
-          (cPage - 1) * RESULTS_PER_PAGE_LIMIT,
-        getTotalPages: ({ data }) =>
-          data ? Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT) : 0,
-        query: {
-          thread,
-        },
-        pathParams: {
-          patientId: props.patientId,
-        },
-      },
-    );
+  const { pages, loading, fetchNextPage, refetch } = useInfiniteQuery<
+    PaginatedResponse<PatientNotesModel>
+  >(routes.getPatientNotes, {
+    key: `patient-notes-${props.patientId}-${thread}`,
+    getNextPageParam: (cPage: number): number =>
+      (cPage - 1) * RESULTS_PER_PAGE_LIMIT,
+    getTotalPages: ({ data }) =>
+      data ? Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT) : 0,
+    query: {
+      thread,
+    },
+    pathParams: {
+      patientId: props.patientId,
+    },
+  });
 
   useEffect(() => {
     if (pages.length > 0 && pages[0]?.data) {
-      const combinedNotes = pages.flatMap((page) => page.data!.results);
+      const combinedNotes = pages.flatMap((page) => page.data?.results);
 
       setState((prevState: any) => ({
         ...prevState,
@@ -72,7 +70,6 @@ const PatientNotesList = (props: PatientNotesProps) => {
       handleNext={fetchNextPage}
       setReload={refetch}
       setReplyTo={setReplyTo}
-      onNewMessage={handleNewMessage}
     />
   );
 };

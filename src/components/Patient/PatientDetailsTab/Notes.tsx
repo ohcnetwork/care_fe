@@ -62,7 +62,7 @@ const PatientNotes = (props: PatientNotesProps) => {
     }
 
     try {
-      const { res, data } = await request(routes.addPatientNote, {
+      const { res } = await request(routes.addPatientNote, {
         pathParams: { patientId: patientId },
         body: {
           note: noteField,
@@ -70,15 +70,10 @@ const PatientNotes = (props: PatientNotesProps) => {
           reply_to: reply_to?.id,
         },
       });
-
-      if (res?.status === 201 && data) {
+      if (res?.status === 201) {
         setNoteField("");
-        // setReload(!reload);
-        setState({
-          ...state,
-          notes: [...state.notes, { ...data }], // Ensure notes is always an array
-          cPage: 1,
-        });
+        setReload(!reload);
+        setState({ ...state, cPage: 1 });
         setReplyTo(undefined);
         Notification.Success({ msg: "Note added successfully" });
       }
@@ -135,7 +130,10 @@ const PatientNotes = (props: PatientNotesProps) => {
                   ? "border-primary-500 font-bold text-secondary-800"
                   : "border-secondary-300 text-secondary-800",
               )}
-              onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
+              onClick={() => {
+                setThread(PATIENT_NOTES_THREADS[current]);
+                setState(initialData);
+              }}
             >
               {t(`patient_notes_thread__${current}`)}
             </button>
