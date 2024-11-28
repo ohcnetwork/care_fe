@@ -6,7 +6,6 @@ import Card from "@/CAREUI/display/Card";
 
 import { Badge } from "@/components/ui/badge";
 import { CardContent, CardHeader } from "@/components/ui/card";
-import Separator from "@/components/ui/separator";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
@@ -376,7 +375,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               </div>
             </div>
           )}
-          <Separator />
+          <div className="border-t border-gray-300 my-4"></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sampleDetails?.fast_track && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
@@ -488,7 +487,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
                 </div>
               )}
           </div>
-          <Separator />
+          <div className="border-t border-gray-300 my-4"></div>
           {sampleDetails?.sample_type && (
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">Sample Type:</div>
