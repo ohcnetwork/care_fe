@@ -34,7 +34,7 @@ describe("User Creation", () => {
   ];
   const EXPECTED_ERROR_MESSAGES = [
     "Please select the User Type",
-    "Please enter a valid phone number",
+    "Please enter valid phone number",
     "Please enter the username",
     "Please enter date in DD/MM/YYYY format",
     "Please enter the password",
