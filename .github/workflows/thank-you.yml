@@ -18,24 +18,24 @@ jobs:
         uses: actions/github-script@v6.3.3
         with:
           script: |
-            const thankyouNote = 'Your efforts have helped advance digital healthcare and TeleICU systems. :rocket: Thank you for taking the time out to make CARE better. We hope you continue to innovate and contribute; your impact is immense! :raised_hands:'
+            const thankyouNote = 'Your efforts have helped advance digital healthcare and TeleICU systems. :rocket: Thank you for taking the time out to make CARE better. We hope you continue to innovate and contribute; your impact is immense! :raised_hands:';
             const options = {
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-            }
+            };
 
-            const result = await github.rest.issues.get({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            })
+            const { assignees, user } = await github.rest.issues.get(options);
 
-            const { assignees, user } = result.data
+            const uniqueUsers = new Set(
+              assignees.length > 0
+                ? assignees.map(u => u.login)
+                : [user.login]
+            );
 
-            const taggedUsers = assignees.length > 0 
-              ? assignees.map((u) => '@' + u.login).join(' ') 
-              : '@' + user.login;
+            const taggedUsers = Array.from(uniqueUsers)
+              .map(login => '@' + login)
+              .join(' ');
 
             await github.rest.issues.createComment({ 
               ...options, 
