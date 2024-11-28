@@ -36,7 +36,6 @@ import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useQuery from "@/Utils/request/useQuery";
 import {
-  classNames,
   dateQueryString,
   formatDate,
   formatDisplayName,
@@ -1006,31 +1005,34 @@ export default function UserProfile() {
             </p>
           </div>
         </div>
-        {updateStatus.isUpdateAvailable && (
-          <UpdatableApp silentlyAutoUpdate={false}>
-            <ButtonV2 disabled={true}>
+        <div className="mt-5 md:col-span-2 md:mt-0">
+          {updateStatus.isChecking ? (
+            // While checking for updates
+            <ButtonV2 disabled>
               <div className="flex items-center gap-4">
-                <CareIcon icon="l-exclamation" className="text-2xl" />
-                {t("update_available")}
+                <CareIcon icon="l-sync" className="text-2xl animate-spin" />
+                {t("checking_for_update")}
               </div>
             </ButtonV2>
-          </UpdatableApp>
-        )}
-        <div className="mt-5 md:col-span-2 md:mt-0">
-          {!updateStatus.isUpdateAvailable && (
-            <ButtonV2 disabled={updateStatus.isChecking} onClick={checkUpdates}>
-              {" "}
+          ) : updateStatus.isUpdateAvailable ? (
+            // When an update is available
+            <UpdatableApp silentlyAutoUpdate={false}>
+              <ButtonV2 disabled>
+                <div className="flex items-center gap-4">
+                  <CareIcon
+                    icon="l-exclamation"
+                    className="text-2xl text-warning"
+                  />
+                  {t("update_available")}
+                </div>
+              </ButtonV2>
+            </UpdatableApp>
+          ) : (
+            // Default state to check for updates
+            <ButtonV2 onClick={checkUpdates}>
               <div className="flex items-center gap-4">
-                <CareIcon
-                  icon="l-sync"
-                  className={classNames(
-                    "text-2xl",
-                    updateStatus.isChecking && "animate-spin",
-                  )}
-                />
-                {updateStatus.isChecking
-                  ? t("checking_for_update")
-                  : t("check_for_update")}
+                <CareIcon icon="l-sync" className="text-2xl" />
+                {t("check_for_update")}
               </div>
             </ButtonV2>
           )}
