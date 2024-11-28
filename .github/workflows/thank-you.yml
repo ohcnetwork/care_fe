@@ -25,7 +25,7 @@ jobs:
               repo: context.repo.repo,
             };
 
-            const { assignees, user } = await github.rest.issues.get(options);
+            const { data : { assignees, user } } = await github.rest.issues.get(options);
 
             const uniqueUsers = new Set(
               assignees.length > 0
