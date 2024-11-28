@@ -89,7 +89,12 @@ const DateInputV2: React.FC<Props> = ({
         );
         break;
       case "month":
-        if (!min || datePickerHeaderDate.getFullYear() > min.getFullYear()) {
+        if (
+          !min ||
+          datePickerHeaderDate.getFullYear() > min.getFullYear() ||
+          (datePickerHeaderDate.getFullYear() === min.getFullYear() &&
+            datePickerHeaderDate.getMonth() > min.getMonth())
+        ) {
           setDatePickerHeaderDate((prev) =>
             dayjs(prev).subtract(1, "year").toDate(),
           );
@@ -116,7 +121,7 @@ const DateInputV2: React.FC<Props> = ({
         }
         break;
       case "year":
-        if (!max || year.getFullYear() + 10 >= max.getFullYear()) {
+        if (!max || year.getFullYear() + 10 <= max.getFullYear()) {
           setYear((prev) => dayjs(prev).add(10, "year").toDate());
         }
         break;
@@ -221,11 +226,10 @@ const DateInputV2: React.FC<Props> = ({
     if (min && year < min.getFullYear()) return false;
     if (max && year > max.getFullYear()) return false;
 
-    const date = new Date(year, month, 1);
-    if (min && date < new Date(min.getFullYear(), min.getMonth(), 1))
-      return false;
-    if (max && date > new Date(max.getFullYear(), max.getMonth(), 1))
-      return false;
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    if (min && lastDay < min) return false;
+    if (max && firstDay > max) return false;
 
     return true;
   };
@@ -251,12 +255,14 @@ const DateInputV2: React.FC<Props> = ({
 
   const setMonthValue = (month: number) => () => {
     if (isMonthWithinConstraints(month)) {
+      const lastDayOfMonth = new Date(
+        datePickerHeaderDate.getFullYear(),
+        month + 1,
+        0,
+      ).getDate();
+      const newDate = Math.min(datePickerHeaderDate.getDate(), lastDayOfMonth);
       setDatePickerHeaderDate(
-        new Date(
-          datePickerHeaderDate.getFullYear(),
-          month,
-          datePickerHeaderDate.getDate(),
-        ),
+        new Date(datePickerHeaderDate.getFullYear(), month, newDate),
       );
       setType("date");
     } else {
