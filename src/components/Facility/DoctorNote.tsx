@@ -14,6 +14,7 @@ interface DoctorNoteProps {
   handleNext: () => void;
   disableEdit?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
+  onNewMessage?: () => void;
 }
 
 const DoctorNote = (props: DoctorNoteProps) => {
