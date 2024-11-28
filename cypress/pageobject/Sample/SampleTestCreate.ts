@@ -1,5 +1,6 @@
 export class SampleTestPage {
   visitSampleRequestPage(): void {
+    cy.get("a").contains("Service Request").click();
     cy.verifyAndClickElement("#sample-request-btn", "Request Sample Test");
     cy.url().should("include", "/sample-test");
   }
@@ -60,6 +61,7 @@ export class SampleTestPage {
     fastTrack: string,
     sampleTestResult: string,
   ): void {
+    cy.get("a").contains("Service Request").click();
     cy.verifyContentPresence("#sample-test-status", [sampleTestStatus]);
     cy.verifyContentPresence("#sample-test-type", [sampleTestType]);
     cy.verifyContentPresence("#sample-test-fast-track", [fastTrack]);
