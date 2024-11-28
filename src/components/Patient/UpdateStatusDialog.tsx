@@ -1,9 +1,9 @@
-import { useEffect, useReducer } from "react";
+import { ReactNode, useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import { Submit } from "@/components/Common/ButtonV2";
+import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { LinearProgressWithLabel } from "@/components/Files/FileUpload";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
@@ -66,6 +66,21 @@ const UpdateStatusDialog = (props: Props) => {
     allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
     allowNameFallback: true,
   });
+  const uploadButtons: {
+    name: string;
+    icon: IconName;
+    onClick?: () => void;
+    children?: ReactNode;
+    show?: boolean;
+    id: string;
+  }[] = [
+    {
+      name: t("choose_file"),
+      icon: "l-file-upload-alt",
+      children: <fileUpload.Input />,
+      id: "upload-file",
+    },
+  ];
 
   const currentStatus = SAMPLE_TEST_STATUS.find(
     (i) => i.text === sample.status,
@@ -102,15 +117,21 @@ const UpdateStatusDialog = (props: Props) => {
 
   const handleUpload = async () => {
     if (fileUpload.files.length > 0) {
+      if (!fileUpload.fileNames[0]) {
+        Notification.Error({
+          msg: "Please enter a file name before uploading",
+        });
+        return;
+      }
       if (sample.id) {
         await fileUpload.handleFileUpload(sample.id);
+        if (!fileUpload.error) {
+          return;
+        } else {
+          Notification.Error({ msg: `Upload failed: ${fileUpload.error}` });
+        }
       } else {
         Notification.Error({ msg: "Sample ID is missing" });
-      }
-      if (!fileUpload.error) {
-        Notification.Success({ msg: "File Uploaded Successfully" });
-      } else {
-        Notification.Error({ msg: `Upload failed: ${fileUpload.error}` });
       }
     } else {
       Notification.Error({ msg: "No file selected for upload" });
@@ -157,37 +178,76 @@ const UpdateStatusDialog = (props: Props) => {
             <span className="font-semibold leading-relaxed">
               {t("upload_report")}:
             </span>
-            {fileUpload.progress !== null &&
-            fileUpload.progress !== undefined ? (
-              <LinearProgressWithLabel value={fileUpload.progress} />
-            ) : (
-              <div className="mb-4 mt-3 flex flex-wrap justify-between gap-2">
-                <label className="button-size-default button-shape-square button-primary-default inline-flex h-min max-w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500">
-                  <CareIcon icon="l-file-upload-alt" className="text-lg" />
-                  <span className="max-w-full truncate">
-                    {fileUpload.files?.[0]?.name || t("choose_file")}
+            {fileUpload.files[0] ? (
+              <div className="mb-8 rounded-lg border border-secondary-300 bg-white p-4">
+                <div className="mb-4 flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                  <span>
+                    <CareIcon icon="l-paperclip" className="mr-2" />
+                    {fileUpload.files[0].name}
                   </span>
-                  <fileUpload.Input />
-                </label>
-                {fileUpload.fileNames.length > 0 && (
-                  <CareIcon
-                    icon="l-times"
-                    className="text-lg cursor-pointer mt-2 mr-4"
+                  <button
                     onClick={fileUpload.clearFiles}
-                  />
+                    disabled={fileUpload.uploading}
+                    className="text-lg"
+                  >
+                    <CareIcon icon="l-times" />
+                  </button>
+                </div>
+                <TextFormField
+                  name="sample_file_name"
+                  type="text"
+                  label={t("enter_file_name")}
+                  id="upload-file-name"
+                  value={fileUpload.fileNames[0] || ""}
+                  disabled={fileUpload.uploading}
+                  onChange={(e) => fileUpload.setFileName(e.value)}
+                  error={fileUpload.error || undefined}
+                  required
+                />
+                <div className="flex items-center gap-2">
+                  <ButtonV2
+                    onClick={handleUpload}
+                    loading={fileUpload.uploading}
+                    className="w-full"
+                    id="upload_file_button"
+                  >
+                    <CareIcon icon="l-check" className="" />
+                    {t("upload")}
+                  </ButtonV2>
+                  <ButtonV2
+                    variant="danger"
+                    onClick={fileUpload.clearFiles}
+                    disabled={fileUpload.uploading}
+                  >
+                    <CareIcon icon="l-trash-alt" className="" />
+                    {t("discard")}
+                  </ButtonV2>
+                </div>
+                {!!fileUpload.progress && (
+                  <LinearProgressWithLabel value={fileUpload.progress} />
                 )}
-                <Submit
-                  type="button"
-                  onClick={handleUpload}
-                  disabled={!fileUpload.files.length}
-                >
-                  <CareIcon icon="l-cloud-upload" className="text-lg" />
-                  <span>{t("upload")}</span>
-                </Submit>
+              </div>
+            ) : (
+              <div className="mt-5 mb-8 flex w-full flex-col items-center gap-4 md:flex-row">
+                {uploadButtons
+                  .filter((b) => b.show !== false)
+                  .map((button, i) => (
+                    <label
+                      key={i}
+                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary-500/20 bg-primary-500/10 p-3 text-primary-700 transition-all hover:bg-primary-500/20 md:p-6"
+                      onClick={button.onClick}
+                      id={button.id}
+                    >
+                      <CareIcon icon={button.icon} className="text-2xl" />
+                      <div className="text-lg">{button.name}</div>
+                      {button.children}
+                    </label>
+                  ))}
               </div>
             )}
           </>
         )}
+
         <CheckBoxFormField
           label="I agree to update the sample test status."
           name="confirm"
