@@ -337,7 +337,8 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">Patient:</div>
-              <div className="font-medium">{sampleDetails?.patient_name}</div>
+              {/* <div className="font-medium">{sampleDetails?.patient_name}</div> */}
+              <div className="font-medium">TestName</div>
             </div>
             {sampleDetails?.facility_object && (
               <div className="space-y-1">
