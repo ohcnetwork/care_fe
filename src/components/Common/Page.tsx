@@ -33,13 +33,13 @@ export default function Page(props: PageProps) {
 
   let padding = "";
   if (!props.noImplicitPadding) {
-    if (!props.hideBack || props.componentRight) padding = "md:px-6 px-3 py-1";
+    if (!props.hideBack || props.componentRight) padding = "py-3 md:p-6";
     else padding = "px-6 py-5";
   }
 
   return (
     <div className={classNames(padding, props.className)} ref={props.ref}>
-      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-6">
+      <div className="flex flex-col justify-between gap-2 px-3 md:flex-row md:items-center md:gap-6 md:px-0">
         <PageTitle
           changePageMetadata={props.changePageMetadata}
           title={props.title}

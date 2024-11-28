@@ -1717,3 +1717,5 @@ export const HEADER_CONTENT_TYPES = {
   svg: "image/svg+xml",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 } as const;
+
+export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
