@@ -53,10 +53,10 @@ export class PatientPage {
 
   visitPatientWithNoConsultation(patientName: string) {
     cy.get("#name").click().type(patientName);
-    cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
+    cy.intercept("GET", "**/api/v1/patient/**").as("getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
-    cy.get("#patient-name-age").should("be.visible").contains(patientName);
+    cy.get("#patient-name").should("be.visible").contains(patientName);
     cy.get("#create-consultation").should("be.visible");
     this.clickCreateConsultationOnPatientPageWithNoConsultation();
   }

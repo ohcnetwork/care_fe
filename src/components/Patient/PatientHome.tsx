@@ -225,7 +225,10 @@ export const PatientHome = (props: {
                       />
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold capitalize text-gray-950">
+                      <h1
+                        id="patient-name"
+                        className="text-xl font-bold capitalize text-gray-950"
+                      >
                         {patientData.name}
                       </h1>
                       <h3 className="text-sm font-medium text-gray-600">
@@ -243,6 +246,7 @@ export const PatientHome = (props: {
                           patientData?.last_consultation?.discharge_date) && (
                           <div>
                             <ButtonV2
+                              id="create-consultation"
                               className="w-full"
                               size="default"
                               onClick={() =>
