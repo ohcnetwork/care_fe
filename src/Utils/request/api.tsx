@@ -1001,7 +1001,7 @@ const routes = {
   },
 
   getUserDetails: {
-    path: "/api/v1/users/{username}",
+    path: "/api/v1/users/{username}/",
     method: "GET",
     TRes: Type<UserModel>(),
   },

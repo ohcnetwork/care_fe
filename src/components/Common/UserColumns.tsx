@@ -6,12 +6,17 @@ export type userChildProps = {
   refetchUserData?: () => void;
 };
 
-export default function userColumns(
-  heading: string,
-  note: string,
-  Child: (childProps: userChildProps) => JSX.Element | undefined,
-  childProps: userChildProps,
-) {
+export default function UserColumns({
+  heading,
+  note,
+  Child,
+  childProps,
+}: {
+  heading: string;
+  note: string;
+  Child: (childProps: userChildProps) => JSX.Element | undefined;
+  childProps: userChildProps;
+}) {
   return (
     <section
       className="flex flex-col gap-5 sm:flex-row"

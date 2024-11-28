@@ -6,7 +6,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import LanguageSelector from "@/components/Common/LanguageSelector";
-import userColumns from "@/components/Common/UserColumns";
+import UserColumns from "@/components/Common/UserColumns";
 import UserAvatar from "@/components/Users/UserAvatar";
 import UserDeleteDialog from "@/components/Users/UserDeleteDialog";
 import {
@@ -143,63 +143,76 @@ export default function UserSummaryTab({
         />
       )}
       <div className="mt-10 flex flex-col gap-y-6">
-        {avatarPermitted &&
-          userColumns(
-            t("edit_avatar"),
+        {avatarPermitted && (
+          <UserColumns
+            heading={t("edit_avatar")}
+            note={
+              authUser.username === userData.username
+                ? t("edit_avatar_note_self")
+                : t("edit_avatar_note")
+            }
+            Child={UserAvatar}
+            childProps={userColumnsData}
+          />
+        )}
+        <UserColumns
+          heading={t("personal_information")}
+          note={
             authUser.username === userData.username
-              ? t("edit_avatar_note_self")
-              : t("edit_avatar_note"),
-            UserAvatar,
-            userColumnsData,
-          )}
-        {userColumns(
-          t("personal_information"),
-          authUser.username === userData.username
-            ? t("personal_information_note_self")
-            : editPermissions
-              ? t("personal_information_note")
-              : t("personal_information_note_view"),
-          renderBasicInformation,
-          userColumnsData,
-        )}
-        {userColumns(
-          t("contact_info"),
-          authUser.username === userData.username
-            ? t("contact_info_note_self")
-            : editPermissions
-              ? t("contact_info_note")
-              : t("contact_info_note_view"),
-          renderContactInformation,
-          userColumnsData,
-        )}
-        {userColumns(
-          t("professional_info"),
-          authUser.username === userData.username
-            ? t("professional_info_note_self")
-            : editPermissions
-              ? t("professional_info_note")
-              : t("professional_info_note_view"),
-          renderProfessionalInformation,
-          userColumnsData,
-        )}
-        {passwordResetPermitted &&
-          userColumns(
-            t("reset_password"),
-            authUser.username === userData.username
-              ? t("reset_password_note_self")
+              ? t("personal_information_note_self")
               : editPermissions
-                ? t("reset_password_note")
-                : t("reset_password_note_view"),
-            UserResetPassword,
-            userColumnsData,
-          )}
-        {authUser.username === userData.username &&
-          userColumns(
-            t("language_selection"),
-            t("set_your_local_language"),
-            LanguageSelector,
-            userColumnsData,
-          )}
+                ? t("personal_information_note")
+                : t("personal_information_note_view")
+          }
+          Child={renderBasicInformation}
+          childProps={userColumnsData}
+        />
+        <UserColumns
+          heading={t("contact_info")}
+          note={
+            authUser.username === userData.username
+              ? t("contact_info_note_self")
+              : editPermissions
+                ? t("contact_info_note")
+                : t("contact_info_note_view")
+          }
+          Child={renderContactInformation}
+          childProps={userColumnsData}
+        />
+        <UserColumns
+          heading={t("professional_info")}
+          note={
+            authUser.username === userData.username
+              ? t("professional_info_note_self")
+              : editPermissions
+                ? t("professional_info_note")
+                : t("professional_info_note_view")
+          }
+          Child={renderProfessionalInformation}
+          childProps={userColumnsData}
+        />
+        {passwordResetPermitted && (
+          <UserColumns
+            heading={t("reset_password")}
+            note={
+              authUser.username === userData.username
+                ? t("reset_password_note_self")
+                : editPermissions
+                  ? t("reset_password_note")
+                  : t("reset_password_note_view")
+            }
+            Child={UserResetPassword}
+            childProps={userColumnsData}
+          />
+        )}
+        {authUser.username === userData.username && (
+          <UserColumns
+            heading={t("language_selection")}
+            note={t("set_your_local_language")}
+            Child={LanguageSelector}
+            childProps={userColumnsData}
+          />
+        )}
         {deletePermitted && (
           <div className="mt-3 flex flex-col items-center gap-5 border-t-2 pt-5 sm:flex-row">
             <div className="sm:w-1/4">

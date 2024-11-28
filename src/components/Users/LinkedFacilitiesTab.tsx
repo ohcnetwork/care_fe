@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import userColumns from "@/components/Common/UserColumns";
+import UserColumns from "@/components/Common/UserColumns";
 import LinkedFacilities from "@/components/Users/LinkedFacilities";
 import { UserModel } from "@/components/Users/models";
 
@@ -32,12 +32,12 @@ export default function LinkedFacilitiesTab(props: Props) {
 
   return (
     <div className="mt-10 flex flex-col gap-y-12">
-      {userColumns(
-        t("linked_facilities"),
-        t("linked_facilities_note"),
-        LinkedFacilities,
-        props,
-      )}
+      <UserColumns
+        heading={t("linked_facilities")}
+        note={t("linked_facilities_note")}
+        Child={LinkedFacilities}
+        childProps={props}
+      />
     </div>
   );
 }

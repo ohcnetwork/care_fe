@@ -31,7 +31,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
     routes.getFacilityUsers,
     {
       query: {
-        limit: resultsPerPage.toString(),
+        limit: resultsPerPage,
         offset: (
           (qParams.page ? qParams.page - 1 : 0) * resultsPerPage
         ).toString(),
