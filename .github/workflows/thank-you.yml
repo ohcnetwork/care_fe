@@ -27,15 +27,9 @@ jobs:
 
             const { data : { assignees, user } } = await github.rest.issues.get(options);
 
-            const uniqueUsers = new Set(
-              assignees.length > 0
-                ? assignees.map(u => u.login)
-                : [user.login]
-            );
-
-            const taggedUsers = Array.from(uniqueUsers)
-              .map(login => '@' + login)
-              .join(' ');
+            const taggedUsers = [...new Set(
+              assignees.map(u => "@"+u.login).concat("@"+user.login)  
+            )].join(" ")
 
             await github.rest.issues.createComment({ 
               ...options, 
