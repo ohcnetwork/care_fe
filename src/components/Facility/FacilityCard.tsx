@@ -100,9 +100,9 @@ export const FacilityCard = (props: {
                         </Link>
                         <div
                           data-test-id="occupancy-badge"
-                          className={`tooltip flex items-center gap-1 text-sm ${(facility.patient_count || 0) / (facility.bed_count || 0) > 0.85 ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white" : "text-secondary-700"}`}
+                          className={`tooltip relative flex items-center gap-1 text-sm ${(facility.patient_count || 0) / (facility.bed_count || 0) > 0.85 ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white" : "text-secondary-700"}`}
                         >
-                          <span className="tooltip-text tooltip-top">
+                          <span className="tooltip-text tooltip-top absolute left-1/2 transform -translate-x-1/4 mb-1 z-10 lg:left-1/2 lg:-translate-x-1/2 xl:left-1/2 xl:-translate-x-1/4">
                             {t("live_patients_total_beds")}
                           </span>{" "}
                           <CareIcon icon="l-bed" />
