@@ -15,7 +15,7 @@ import { GENDER_TYPES } from "@/common/constants";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatName, formatPatientAge, patientAgeInYears } from "@/Utils/utils";
 
 import { PatientProps } from ".";
 import * as Notification from "../../../Utils/Notifications";
@@ -188,10 +188,17 @@ export const Demography = (props: PatientProps) => {
           ),
         },
         {
-          label: t("date_of_birth"),
-          value: (
+          label: t(
+            patientData.date_of_birth ? "date_of_birth" : "year_of_birth",
+          ),
+          value: patientData.date_of_birth ? (
             <>
               {dayjs(patientData.date_of_birth).format("DD MMM YYYY")} (
+              {formatPatientAge(patientData, true)})
+            </>
+          ) : (
+            <>
+              {new Date().getFullYear() - patientAgeInYears(patientData)} (
               {formatPatientAge(patientData, true)})
             </>
           ),
