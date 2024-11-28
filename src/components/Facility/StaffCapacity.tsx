@@ -150,6 +150,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
 
     if (source !== "doctor-save") handleClose();
   };
+  console.log(isLastOptionType || headerText == "Add Staff Capacity");
 
   return (
     <div className={className}>
@@ -166,7 +167,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
           noPadding
           hideRestoreDraft
           additionalButtons={
-            isLastOptionType
+            isLastOptionType || headerText !== "Add Staff Capacity"
               ? []
               : [
                   {

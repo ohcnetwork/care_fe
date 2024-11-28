@@ -159,7 +159,7 @@ const Form = <T extends FormDetails>({
               id={props.submitBtnId ?? "submit"}
               data-testid="submit-button"
               type="submit"
-              disabled={disabled || !isDirty}
+              disabled={disabled ?? !isDirty}
               label={props.submitLabel}
             />
             {props.additionalButtons?.map((btn) => {

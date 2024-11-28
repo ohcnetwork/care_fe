@@ -249,7 +249,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
             noPadding
             hideRestoreDraft
             additionalButtons={
-              isLastOptionType
+              isLastOptionType || headerText !== "Add Bed Capacity"
                 ? []
                 : [
                     {
