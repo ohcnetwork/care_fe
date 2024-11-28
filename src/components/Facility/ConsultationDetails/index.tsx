@@ -213,6 +213,10 @@ export const ConsultationDetails = (props: any) => {
             crumbsReplacements={{
               [facilityId]: { name: patientData?.facility_object?.name },
               [patientId]: { name: patientData?.name },
+              consultation: {
+                name: "Consultation",
+                uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`,
+              },
               [consultationId]: {
                 name:
                   consultationData.suggestion === "A"
