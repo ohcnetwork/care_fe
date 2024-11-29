@@ -5,10 +5,9 @@ import { useTranslation } from "react-i18next";
 
 import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
 import { Button } from "@/components/ui/button";
-
-import ButtonV2 from "@/components/Common/ButtonV2";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -374,21 +373,24 @@ export const Demography = (props: PatientProps) => {
               </div>
             </div>
             <div>
-              <ButtonV2
-                id="update-patient-details"
-                variant="secondary"
-                className="mt-4  text-green-800 "
-                disabled={!patientData.is_active}
-                authorizeFor={NonReadOnlyUsers}
-                onClick={withPermissionCheck(() =>
-                  navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/update`,
-                  ),
+              <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+                {({ isAuthorized }) => (
+                  <Button
+                    id="update-patient-details"
+                    variant="outline"
+                    className="mt-4"
+                    disabled={!patientData.is_active || !isAuthorized}
+                    onClick={withPermissionCheck(() =>
+                      navigate(
+                        `/facility/${patientData?.facility}/patient/${id}/update`,
+                      ),
+                    )}
+                  >
+                    <CareIcon icon="l-edit-alt" className="text-lg pr-1" />
+                    {t("edit_profile")}
+                  </Button>
                 )}
-              >
-                <CareIcon icon="l-edit-alt" className="text-lg" />
-                {t("edit_profile")}
-              </ButtonV2>
+              </AuthorizedChild>
             </div>
           </div>
           {/* <div className="mt-4 rounded-md border border-blue-400 bg-blue-50 p-5 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
@@ -426,10 +428,7 @@ export const Demography = (props: PatientProps) => {
                           handleEditClick(subtab.id),
                         )}
                       >
-                        <CareIcon
-                          icon="l-edit-alt"
-                          className="text-md mr-1 mt-1"
-                        />
+                        <CareIcon icon="l-edit-alt" className="text-md pr-1" />
                         {t("edit")}
                       </Button>
                     )}

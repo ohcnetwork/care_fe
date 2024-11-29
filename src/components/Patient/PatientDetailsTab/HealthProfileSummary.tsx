@@ -76,7 +76,7 @@ export const HealthProfileSummary = (props: PatientProps) => {
                 }
               }}
             >
-              <CareIcon icon="l-edit-alt" className="text-md mr-1 mt-1" />
+              <CareIcon icon="l-edit-alt" className="text-md pr-1" />
               {t("edit")}
             </Button>
           </div>
