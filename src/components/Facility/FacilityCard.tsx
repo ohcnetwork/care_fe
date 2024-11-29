@@ -19,6 +19,13 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { formatPhoneNumber, parsePhoneNumber } from "@/Utils/utils";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+
 export const FacilityCard = (props: {
   facility: FacilityModel;
   userType: string;
@@ -98,19 +105,35 @@ export const FacilityCard = (props: {
                         >
                           {facility.name}
                         </Link>
-                        <div
-                          data-test-id="occupancy-badge"
-                          className={`tooltip relative flex items-center gap-1 text-sm ${(facility.patient_count || 0) / (facility.bed_count || 0) > 0.85 ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white" : "text-secondary-700"}`}
-                        >
-                          <span className="tooltip-text tooltip-top absolute left-1/2 transform -translate-x-1/4 mb-1 z-10 lg:left-1/2 lg:-translate-x-1/2 xl:left-1/2 xl:-translate-x-1/4">
-                            {t("live_patients_total_beds")}
-                          </span>{" "}
-                          <CareIcon icon="l-bed" />
-                          <dt>
-                            {t("occupancy")}: {facility.patient_count} /{" "}
-                            {facility.bed_count}{" "}
-                          </dt>
-                        </div>
+                        <TooltipProvider>
+                          <Tooltip delayDuration={0}>
+                            <TooltipTrigger asChild>
+                              <button
+                                data-test-id="occupancy-badge"
+                                className={`relative flex items-center gap-1 text-sm ${
+                                  (facility.patient_count || 0) /
+                                    (facility.bed_count || 0) >
+                                  0.85
+                                    ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white"
+                                    : "text-secondary-700"
+                                }`}
+                              >
+                                <CareIcon icon="l-bed" />
+                                <dt>
+                                  {t("occupancy")}: {facility.patient_count} /{" "}
+                                  {facility.bed_count}
+                                </dt>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              sideOffset={8}
+                              className="z-50 max-w-[90%] break-words text-xs text-center sm:max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl bg-gray-900 text-gray-50 rounded-md p-2 shadow-lg animate-in fade-in-0 zoom-in-95 dark:bg-gray-50 dark:text-gray-900"
+                            >
+                              {t("live_patients_total_beds")}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                       <ButtonV2
                         id="view-cns-button"
