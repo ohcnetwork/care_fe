@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { LinearProgressWithLabel } from "@/components/Files/FileUpload";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
@@ -185,13 +186,14 @@ const UpdateStatusDialog = (props: Props) => {
                     <CareIcon icon="l-paperclip" className="mr-2" />
                     {fileUpload.files[0].name}
                   </span>
-                  <button
+                  <Button
                     onClick={fileUpload.clearFiles}
                     disabled={fileUpload.uploading}
                     className="text-lg"
+                    variant={"destructive"}
                   >
                     <CareIcon icon="l-times" />
-                  </button>
+                  </Button>
                 </div>
                 <TextFormField
                   name="sample_file_name"
@@ -205,23 +207,24 @@ const UpdateStatusDialog = (props: Props) => {
                   required
                 />
                 <div className="flex items-center gap-2">
-                  <ButtonV2
+                  <Button
                     onClick={handleUpload}
-                    loading={fileUpload.uploading}
+                    disabled={fileUpload.uploading}
                     className="w-full"
                     id="upload_file_button"
+                    variant={"primary"}
                   >
-                    <CareIcon icon="l-check" className="" />
+                    <CareIcon icon="l-check" className="mr-2" />
                     {t("upload")}
-                  </ButtonV2>
-                  <ButtonV2
-                    variant="danger"
+                  </Button>
+                  <Button
+                    variant={"destructive"}
                     onClick={fileUpload.clearFiles}
                     disabled={fileUpload.uploading}
                   >
                     <CareIcon icon="l-trash-alt" className="" />
                     {t("discard")}
-                  </ButtonV2>
+                  </Button>
                 </div>
                 {!!fileUpload.progress && (
                   <LinearProgressWithLabel value={fileUpload.progress} />
