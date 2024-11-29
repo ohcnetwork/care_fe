@@ -45,7 +45,7 @@ export default class UserProfilePage {
     cy.get("#phoneNumber").click().clear().type(phone);
   }
 
-  typeAltPhoneNumber(phone: string) {
+  typeWhatsappNumber(phone: string) {
     cy.get("#altPhoneNumber").click().clear().type(phone);
   }
 

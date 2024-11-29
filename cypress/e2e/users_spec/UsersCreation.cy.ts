@@ -19,8 +19,8 @@ describe("User Creation", () => {
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
-  const phone_number = generatePhoneNumber();
-  const emergency_phone_number = generateEmergencyPhoneNumber();
+  const phoneNumber = generatePhoneNumber();
+  const emergencyPhoneNumber = generateEmergencyPhoneNumber();
   const fillFacilityName = "Dummy Facility 40";
   const makeId = (length: number) => {
     let result = "";
@@ -101,9 +101,9 @@ describe("User Creation", () => {
     userCreationPage.typeLastName(lastName);
     userProfilePage.selectGender(gender);
     userProfilePage.clearPhoneNumber();
-    userProfilePage.typePhoneNumber(phone_number);
+    userProfilePage.typePhoneNumber(phoneNumber);
     userProfilePage.clearAltPhoneNumber();
-    userProfilePage.typeAltPhoneNumber(emergency_phone_number);
+    userProfilePage.typeWhatsappNumber(emergencyPhoneNumber);
     userProfilePage.clearEmail();
     userProfilePage.typeEmail(email);
     userProfilePage.clearWorkingHours();
@@ -113,10 +113,10 @@ describe("User Creation", () => {
     cy.clickSubmitButton(updateBtn);
     cy.wait("@updateUser").its("response.statusCode").should("eq", 200);
     cy.verifyContentPresence("#contactno-profile-details", [
-      "+91" + phone_number,
+      "+91" + phoneNumber,
     ]);
     cy.verifyContentPresence("#whatsapp-profile-details", [
-      "+91" + emergency_phone_number,
+      "+91" + emergencyPhoneNumber,
     ]);
     cy.verifyContentPresence("#firstname-profile-details", [firstName]);
     cy.verifyContentPresence("#lastname-profile-details", [lastName]);
@@ -147,7 +147,7 @@ describe("User Creation", () => {
     userCreationPage.typePassword(password);
     userCreationPage.typeConfirmPassword(password);
     userCreationPage.selectHomeFacility(homeFacility);
-    userPage.typeInPhoneNumber(phone_number);
+    userPage.typeInPhoneNumber(phoneNumber);
     userProfilePage.typeDateOfBirth(newUserDob);
     userCreationPage.selectUserType(role);
     userProfilePage.typeQualification(qualification);
