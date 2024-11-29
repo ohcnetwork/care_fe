@@ -24,6 +24,7 @@ export interface FileManagerOptions {
   type: string;
   onArchive?: () => void;
   onEdit?: () => void;
+  uploadedFiles?: FileUploadModel[];
 }
 export interface FileManagerResult {
   viewFile: (file: FileUploadModel, associating_id: string) => void;
@@ -48,7 +49,7 @@ export interface FileManagerResult {
 export default function useFileManager(
   options: FileManagerOptions,
 ): FileManagerResult {
-  const { type: fileType, onArchive, onEdit } = options;
+  const { type: fileType, onArchive, onEdit, uploadedFiles } = options;
 
   const [file_state, setFileState] = useState<StateInterface>({
     open: false,
@@ -72,6 +73,7 @@ export default function useFileManager(
   const [editDialogueOpen, setEditDialogueOpen] =
     useState<FileUploadModel | null>(null);
   const [editError, setEditError] = useState("");
+  const [currentIndex, setCurrentIndex] = useState<number>(-1);
 
   const getExtension = (url: string) => {
     const div1 = url.split("?")[0].split(".");
@@ -80,6 +82,8 @@ export default function useFileManager(
   };
 
   const viewFile = async (file: FileUploadModel, associating_id: string) => {
+    const index = uploadedFiles?.findIndex((f) => f.id === file.id) ?? -1;
+    setCurrentIndex(index);
     setFileUrl("");
     setFileState({ ...file_state, open: true });
     const { data } = await request(routes.retrieveUpload, {
@@ -225,9 +229,12 @@ export default function useFileManager(
         file_state={file_state}
         setFileState={setFileState}
         downloadURL={downloadURL}
+        uploadedFiles={uploadedFiles}
         onClose={handleFilePreviewClose}
         fixedWidth={false}
         className="h-[80vh] w-full md:h-screen"
+        loadFile={viewFile}
+        currentIndex={currentIndex}
       />
       <DialogModal
         show={
