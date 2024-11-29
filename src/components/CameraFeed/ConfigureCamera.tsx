@@ -89,16 +89,15 @@ export default function ConfigureCamera(props: Props) {
 
   const firstBedId =
     linkedAssetBeds?.[0]?.bed_object.id ?? unlinkedBeds?.[0]?.id;
-  useEffect(() => {
-    if (!query.bed && firstBedId) {
-      setQuery({ bed: firstBedId });
-    }
-  }, [query.bed, firstBedId]);
+
+  const selectedBedId = query.bed || firstBedId;
 
   const selectedAssetBed = linkedAssetBeds?.find(
-    (a) => a.bed_object.id === query.bed,
+    (a) => a.bed_object.id === selectedBedId,
   );
-  const selectedUnlinkedBed = unlinkedBeds?.find((bed) => bed.id === query.bed);
+  const selectedUnlinkedBed = unlinkedBeds?.find(
+    (bed) => bed.id === selectedBedId,
+  );
 
   const cameraPresetsQuery = useQuery(FeedRoutes.listAssetBedPresets, {
     pathParams: { assetbed_id: selectedAssetBed?.id ?? "" },
