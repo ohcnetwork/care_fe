@@ -380,9 +380,14 @@ export const PatientHome = (props: {
                         {!!skillsQuery.data?.results?.length &&
                           formatSkills(skillsQuery.data?.results)}
                         {(skillsQuery.data?.results?.length || 0) > 3 && (
-                          <ul className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium">
+                          <ul
+                            className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium"
+                            role="tooltip"
+                          >
                             {skillsQuery.data?.results.map((skill) => (
-                              <li>{skill.skill_object.name}</li>
+                              <li key={skill.skill_object.id}>
+                                {skill.skill_object.name}
+                              </li>
                             ))}
                           </ul>
                         )}
