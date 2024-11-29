@@ -36,7 +36,7 @@ describe("Manage User Profile", () => {
     userProfilePage.selectGender(gender);
     userProfilePage.typeEmail(email);
     userProfilePage.typePhoneNumber(phone);
-    userProfilePage.typeAltPhoneNumber(phone);
+    userProfilePage.typeWhatsappNumber(phone);
     userProfilePage.typeWorkingHours(workinghours);
     userProfilePage.typeQualification(qualification);
     userProfilePage.typeDoctorYoE(doctorYoE);
