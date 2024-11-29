@@ -25,36 +25,56 @@ interface PatientNotesProps {
 }
 
 const PatientNotesList = (props: PatientNotesProps) => {
-  const { state, setState, thread, setReplyTo } = props;
+  const { state, setState, thread, setReplyTo, reload, setReload } = props;
 
-  const { pages, loading, fetchNextPage, refetch } = useInfiniteQuery<
-    PaginatedResponse<PatientNotesModel>
-  >(routes.getPatientNotes, {
-    key: `patient-notes-${props.patientId}-${thread}`,
-    getNextPageParam: (cPage: number): number =>
-      (cPage - 1) * RESULTS_PER_PAGE_LIMIT,
-    getTotalPages: ({ data }) =>
-      data ? Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT) : 0,
-    query: {
-      thread,
-    },
-    pathParams: {
-      patientId: props.patientId,
-    },
-  });
+  const { pages, loading, fetchNextPage, refetch, setCurrentPage } =
+    useInfiniteQuery<PaginatedResponse<PatientNotesModel>>(
+      routes.getPatientNotes,
+      {
+        key: `patient-notes-${props.patientId}-${thread}`,
+        getNextPageParam: (cPage: number): number =>
+          (cPage - 1) * RESULTS_PER_PAGE_LIMIT,
+        getTotalPages: ({ data }) =>
+          data ? Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT) : 0,
+        query: {
+          thread,
+        },
+        pathParams: {
+          patientId: props.patientId,
+        },
+      },
+    );
 
   useEffect(() => {
-    if (pages.length > 0 && pages[0]?.data) {
-      const combinedNotes = pages.flatMap((page) => page.data?.results);
+    if (pages.length > 0 && pages[0]?.data?.results) {
+      const notesMap = pages
+        .flatMap((page) => page.data?.results)
+        .filter((note): note is PatientNotesModel => note !== undefined)
+        .reduce(
+          (acc, note) => acc.set(note.id, note),
+          new Map<string, PatientNotesModel>(),
+        );
+
+      const notesArray = Array.from(notesMap.values());
 
       setState((prevState: any) => ({
         ...prevState,
-        notes: combinedNotes,
+        notes: notesArray, // Array of notes without duplicates
         totalPages: Math.ceil(pages[0].data!.count / RESULTS_PER_PAGE_LIMIT),
-        cPage: Math.ceil(combinedNotes.length / RESULTS_PER_PAGE_LIMIT),
+        cPage: Math.ceil(notesArray.length / RESULTS_PER_PAGE_LIMIT),
       }));
     }
-  }, [pages, setState]);
+  }, [pages, setState, reload]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [thread]);
+
+  useEffect(() => {
+    if (reload) {
+      refetch().finally(() => setReload(false));
+    }
+  }, [reload]);
 
   if (loading && !pages.length) {
     return (

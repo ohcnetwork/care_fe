@@ -82,7 +82,6 @@ const PatientNoteCard = ({
 
   return (
     <>
-      {" "}
       <div
         className={classNames(
           "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-3 text-secondary-800",

@@ -38,7 +38,7 @@ export function useInfiniteQuery<TData>(
       setCurrentPage((prev) => prev + 1);
 
       const total = options?.getTotalPages?.(response) || totalPages;
-      console.log(total, currentPage, hasNextPage);
+
       setTotalPages(total);
       setHasNextPage(currentPage + 1 < total);
       if (!hasNextPage) {
@@ -66,7 +66,8 @@ export function useInfiniteQuery<TData>(
     fetchNextPage,
     hasNextPage,
     refetch,
+    setCurrentPage,
+    setTotalPages,
     ...queryResponse,
-    // handleNewMessage,
   };
 }

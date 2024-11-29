@@ -71,13 +71,16 @@ const PatientNotes = (props: PatientNotesProps) => {
         reply_to: reply_to?.id,
       },
     });
-    console.log(data);
-    console.log(res);
+
     if (res?.status === 201 && data) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
-      setReload(!reload);
-      setState({ ...state, cPage: 1 });
+      setState((prevState) => ({
+        ...state,
+        notes: [data, ...prevState.notes],
+        cPage: 1,
+      }));
+      setReload(true);
       setReplyTo(undefined);
     }
   };
