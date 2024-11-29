@@ -263,6 +263,10 @@ class FacilityPage {
     cy.get("#doctor-save").click();
   }
 
+  clickdoctorcapacitysaveandexit() {
+    cy.get("#save-and-exit").click();
+  }
+
   clickcancelbutton() {
     cy.get("#cancel").click();
   }

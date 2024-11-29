@@ -121,7 +121,7 @@ describe("Facility Manage Functions", () => {
     // edit a existing doctor
     facilityManage.clickEditFacilityDoctorCapacity();
     facilityPage.fillDoctorCount(doctorModifiedCapacity);
-    facilityPage.clickdoctorcapacityaddmore();
+    facilityPage.clickdoctorcapacitysaveandexit();
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Staff count updated successfully",
     );
@@ -151,7 +151,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickEditFacilityBedCapacity();
     facilityPage.fillTotalCapacity(totalUpdatedCapacity);
     facilityPage.fillCurrentlyOccupied(currentUpdatedOccupied);
-    facilityPage.clickbedcapcityaddmore();
+    facilityPage.saveAndExitBedCapacityForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Bed capacity updated successfully",
     );
