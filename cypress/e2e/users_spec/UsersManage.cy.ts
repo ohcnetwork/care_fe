@@ -46,7 +46,7 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000);
     manageUserPage.navigateToProfile();
-    cy.verifyContentPresence("username-profile-details", [
+    cy.verifyContentPresence("#username-profile-details", [
       usernameforworkinghour,
     ]);
     manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
