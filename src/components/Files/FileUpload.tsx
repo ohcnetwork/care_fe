@@ -69,6 +69,8 @@ export interface StateInterface {
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
   rotation: number;
+  id?: string;
+  associating_id?: string;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
@@ -208,8 +210,15 @@ export const FileUpload = (props: FileUploadProps) => {
     type,
     onArchive: refetchAll,
     onEdit: refetchAll,
+    uploadedFiles:
+      fileQuery?.data?.results
+        .slice()
+        .reverse()
+        .map((file) => ({
+          ...file,
+          associating_id: associatedId,
+        })) || [],
   });
-
   const dischargeSummaryFileManager = useFileManager({
     type: "DISCHARGE_SUMMARY",
     onArchive: refetchAll,
@@ -244,7 +253,6 @@ export const FileUpload = (props: FileUploadProps) => {
       id: "record-audio",
     },
   ];
-
   return (
     <div className={`md:p-4 ${props.className}`}>
       {fileUpload.Dialogues}
