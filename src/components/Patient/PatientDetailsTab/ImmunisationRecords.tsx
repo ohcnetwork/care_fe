@@ -42,10 +42,10 @@ export const ImmunisationRecords = (props: PatientProps) => {
       <div className="w-full rounded-md bg-white p-4 shadow-md">
         <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
         <div>
-          <div className="flex flex-row gap-x-4">
+          <div className="flex flex-row justify-between items-center gap-x-4">
             <h1 className="text-xl">{t("covid_details")}</h1>
             <Button
-              variant="rounded_secondary"
+              variant="outline"
               disabled={!patientData.is_active}
               onClick={() => {
                 if (!canEditPatient(authUser, patientData)) {

@@ -58,12 +58,12 @@ export const HealthProfileSummary = (props: PatientProps) => {
       <div className="group my-2 w-full rounded bg-white p-4 shadow">
         <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
         <div className="h-full space-y-2">
-          <div className="flex flex-row">
+          <div className="flex flex-row items-center justify-between">
             <div className="mr-4 text-xl font-bold text-secondary-900">
               {t("medical")}
             </div>
             <Button
-              variant="rounded_secondary"
+              variant="outline"
               disabled={!patientData.is_active}
               aria-label="Edit medical history"
               onClick={() => {
