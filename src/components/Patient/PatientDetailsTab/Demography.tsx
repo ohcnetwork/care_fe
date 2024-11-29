@@ -31,34 +31,28 @@ export const Demography = (props: PatientProps) => {
     useState<AssignedToObjectModel>();
 
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [clickedSection, setClickedSection] = useState<string | null>(null);
 
   useEffect(() => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
-
-    const observedSections: Element[] = [];
     const sections = document.querySelectorAll("div[id]");
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
+        if (clickedSection) return;
+        const visibleSection = entries.find((entry) => entry.isIntersecting);
+        if (visibleSection) {
+          setActiveSection(visibleSection.target.id);
+        }
       },
-      {
-        threshold: 0.6,
-      },
+      { threshold: 0.6 },
     );
 
-    sections.forEach((section) => {
-      observer.observe(section);
-      observedSections.push(section);
-    });
+    sections.forEach((section) => observer.observe(section));
 
     return () => {
-      observedSections.forEach((section) => observer.unobserve(section));
+      sections.forEach((section) => observer.unobserve(section));
     };
-  }, [patientData.assigned_to_object]);
+  }, [clickedSection]);
 
   const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
     query: {
@@ -71,6 +65,8 @@ export const Demography = (props: PatientProps) => {
   )?.text;
 
   const scrollToSection = (sectionId: string) => {
+    setClickedSection(sectionId);
+    setActiveSection(sectionId);
     const section = document.getElementById(sectionId);
     if (section) {
       section.scrollIntoView({ behavior: "smooth" });
