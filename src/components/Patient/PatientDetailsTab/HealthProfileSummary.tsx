@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -61,8 +62,8 @@ export const HealthProfileSummary = (props: PatientProps) => {
             <div className="mr-4 text-xl font-bold text-secondary-900">
               {t("medical")}
             </div>
-            <ButtonV2
-              className="flex rounded border border-secondary-400 bg-white px-1 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200"
+            <Button
+              variant="rounded_secondary"
               disabled={!patientData.is_active}
               aria-label="Edit medical history"
               onClick={() => {
@@ -75,9 +76,9 @@ export const HealthProfileSummary = (props: PatientProps) => {
                 }
               }}
             >
-              <CareIcon icon="l-edit-alt" className="text-md " />
+              <CareIcon icon="l-edit-alt" className="text-md mr-1 mt-1" />
               {t("edit")}
-            </ButtonV2>
+            </Button>
           </div>
 
           <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 md:gap-y-8">

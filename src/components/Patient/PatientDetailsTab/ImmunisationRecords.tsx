@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -43,8 +44,8 @@ export const ImmunisationRecords = (props: PatientProps) => {
         <div>
           <div className="flex flex-row gap-x-4">
             <h1 className="text-xl">{t("covid_details")}</h1>
-            <ButtonV2
-              className=" rounded border border-secondary-400 bg-white px-1 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200 group-hover:flex"
+            <Button
+              variant="rounded_secondary"
               disabled={!patientData.is_active}
               onClick={() => {
                 if (!canEditPatient(authUser, patientData)) {
@@ -56,9 +57,9 @@ export const ImmunisationRecords = (props: PatientProps) => {
                 }
               }}
             >
-              <CareIcon icon="l-edit-alt" className="text-md " />
+              <CareIcon icon="l-edit-alt" className="text-md mr-1 mt-1" />
               {t("edit")}
-            </ButtonV2>
+            </Button>
           </div>
 
           <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
