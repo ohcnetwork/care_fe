@@ -41,11 +41,8 @@ describe("Manage User Profile", () => {
     userProfilePage.typeQualification(qualification);
     userProfilePage.typeDoctorYoE(doctorYoE);
     userProfilePage.typeMedicalCouncilRegistration(medicalCouncilRegistration);
-
     userProfilePage.clickUpdateButton();
-
     cy.verifyNotification("Details updated successfully");
-
     userProfilePage.assertDateOfBirth("01/01/1999");
     userProfilePage.assertGender(gender);
     userProfilePage.assertEmail(email);

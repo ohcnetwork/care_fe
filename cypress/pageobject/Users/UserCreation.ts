@@ -45,8 +45,8 @@ export class UserCreationPage {
     cy.typeAndSelectOption("input[name='facilities']", name);
   }
 
-  verifyElementContainsText(elementId: string, expectedText: string) {
-    cy.get("#" + elementId).should("contain.text", expectedText);
+  clickSaveUserButton() {
+    cy.clickSubmitButton("Save User");
   }
 
   verifyErrorMessages(errorMessages: string[]) {

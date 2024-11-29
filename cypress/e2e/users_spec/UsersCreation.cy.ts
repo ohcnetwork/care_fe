@@ -76,8 +76,6 @@ describe("User Creation", () => {
   const weeklyWorkingHrs = "14";
   const dob = "01011998";
   const formattedDob = "01/01/1998";
-  const updateBtn = "Update";
-  const saveBtn = "Save User";
   const newUserDob = "25081999";
 
   before(() => {
@@ -110,7 +108,7 @@ describe("User Creation", () => {
     userProfilePage.typeWorkingHours(weeklyWorkingHrs);
     userProfilePage.typeDateOfBirth(dob);
     cy.intercept("PATCH", "/api/v1/users/*").as("updateUser");
-    cy.clickSubmitButton(updateBtn);
+    userProfilePage.clickUpdateButton();
     cy.wait("@updateUser").its("response.statusCode").should("eq", 200);
     cy.verifyContentPresence("#contactno-profile-details", [
       "+91" + phoneNumber,
@@ -136,7 +134,7 @@ describe("User Creation", () => {
     userProfilePage.clearPhoneNumber();
     userProfilePage.clearAltPhoneNumber();
     userProfilePage.clearWorkingHours();
-    cy.clickSubmitButton(updateBtn);
+    userProfilePage.clickUpdateButton();
     userCreationPage.verifyErrorMessages(EXPECTED_PROFILE_ERROR_MESSAGES);
   });
 
@@ -160,10 +158,9 @@ describe("User Creation", () => {
     userCreationPage.selectState(state);
     userCreationPage.selectDistrict(district);
     cy.intercept("POST", "/api/v1/users/add_user/").as("createUser");
-    cy.clickSubmitButton(saveBtn);
+    userCreationPage.clickSaveUserButton();
     cy.wait("@createUser").its("response.statusCode").should("eq", 201);
     cy.verifyNotification("User added successfully");
-
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
     cy.verifyContentPresence("#name", [newUserFirstName]);
@@ -177,7 +174,7 @@ describe("User Creation", () => {
 
   it("create new user form throwing mandatory field error", () => {
     userCreationPage.clickAddUserButton();
-    cy.clickSubmitButton(saveBtn);
+    userCreationPage.clickSaveUserButton();
     cy.get(".error-text", { timeout: 10000 }).should("be.visible");
     userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
   });

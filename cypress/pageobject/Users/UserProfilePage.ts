@@ -12,7 +12,7 @@ export default class UserProfilePage {
   }
 
   clickUpdateButton() {
-    cy.get("#submit").click();
+    cy.clickSubmitButton("Update");
   }
 
   typeDateOfBirth(dob: string) {
