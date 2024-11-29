@@ -250,7 +250,6 @@ const UpdateStatusDialog = (props: Props) => {
             )}
           </>
         )}
-
         <CheckBoxFormField
           label="I agree to update the sample test status."
           name="confirm"
