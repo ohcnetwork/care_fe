@@ -314,10 +314,9 @@ export const Demography = (props: PatientProps) => {
                 {t("no_data_found")}
               </div>
             )}
-          <ButtonV2
-            border
+          <Button
+            variant="outline_primary"
             className="mt-4"
-            ghost
             disabled={!patientData.is_active}
             onClick={withPermissionCheck(() =>
               handleEditClick("insurance-details"),
@@ -325,7 +324,7 @@ export const Demography = (props: PatientProps) => {
           >
             <CareIcon icon="l-plus" className="" />
             {t("add_insurance_details")}
-          </ButtonV2>
+          </Button>
         </div>,
       ],
     },
