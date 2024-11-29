@@ -23,7 +23,7 @@ const buttonVariants = cva(
         outline_primary:
           "border border-primary-700 text-primary-700 bg-white shadow-sm hover:bg-primary-700 hover:text-white dark:border-primary-700 dark:bg-primary-700 dark:text-white",
         rounded_secondary:
-          "rounded border border-secondary-400 bg-white px-1 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200 group-hover:flex",
+          "rounded border border-secondary-400 bg-white px-1 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200 ",
       },
       size: {
         default: "h-9 px-4 py-2",
