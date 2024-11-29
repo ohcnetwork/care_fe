@@ -18,26 +18,20 @@ jobs:
         uses: actions/github-script@v6.3.3
         with:
           script: |
-            const thankyouNote = 'Your efforts have helped advance digital healthcare and TeleICU systems. :rocket: Thank you for taking the time out to make CARE better. We hope you continue to innovate and contribute; your impact is immense! :raised_hands:'
+            const thankyouNote = 'Your efforts have helped advance digital healthcare and TeleICU systems. :rocket: Thank you for taking the time out to make CARE better. We hope you continue to innovate and contribute; your impact is immense! :raised_hands:';
             const options = {
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-            }
+            };
 
-            const result = await github.rest.issues.get({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            })
+            const { data : { assignees, user } } = await github.rest.issues.get(options);
 
-            const { assignees, user } = result.data
+            const taggedUsers = [...new Set(
+              assignees.map(u => "@"+u.login).concat("@"+user.login)  
+            )].join(" ")
 
-            const assignees_tagged = assignees.map((user) => '@' + user.login).join(' ')
-            const owner_tagged = '@' + user.login
-
-            if (assignees.length == 0) {
-              await github.rest.issues.createComment({ ...options, body: `${owner_tagged} ${thankyouNote}` })
-            } else {
-              await github.rest.issues.createComment({ ...options, body: `${assignees_tagged} ${owner_tagged} ${thankyouNote}` })
-            }
+            await github.rest.issues.createComment({ 
+              ...options, 
+              body: `${taggedUsers} ${thankyouNote}` 
+            });
