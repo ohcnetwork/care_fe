@@ -418,19 +418,16 @@ export const Demography = (props: PatientProps) => {
                   <div className="flex flex-row gap-x-4 mb-4">
                     <h1 className="text-xl">{t(`patient__${subtab.id}`)}</h1>
                     {subtab.allowEdit && (
-                      <button
+                      <ButtonV2
                         className="flex rounded border border-secondary-400 bg-white px-2 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200"
                         disabled={!patientData.is_active}
                         onClick={withPermissionCheck(() =>
                           handleEditClick(subtab.id),
                         )}
                       >
-                        <CareIcon
-                          icon="l-edit-alt"
-                          className="text-md mr-1 mt-1"
-                        />
+                        <CareIcon icon="l-edit-alt" className="text-md" />
                         {t("edit")}
-                      </button>
+                      </ButtonV2>
                     )}
                   </div>
                   <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
