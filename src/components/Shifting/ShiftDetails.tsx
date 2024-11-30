@@ -304,7 +304,7 @@ export default function ShiftDetails(props: { id: string }) {
               />
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 text-lg">
               <span className="font-semibold">{t("name_of_hospital")}: </span>
               {data.is_kasp
                 ? t("district_program_management_supporting_unit")
@@ -313,40 +313,48 @@ export default function ShiftDetails(props: { id: string }) {
 
             <div className="my-6 border-b-2"></div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 text-lg">
               <div>
-                <h3 className="mb-2 text-base font-semibold">
-                  {t("patient_information")}
-                </h3>
-                <p className="text-sm">
-                  {t("name")}: {patientData?.name}
+                <h3 className="mb-2 font-semibold">{t("Patient Information")}</h3>
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("name")}:{" "}
+                  </span>
+                  {patientData?.name}
                 </p>
-                <p className="text-sm">
-                  {t("age")}: {formatPatientAge(patientData, true)}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("age")}:{" "}
+                  </span>
+                  {formatPatientAge(patientData, true)}
                 </p>
-                <p className="text-sm">
-                  {t("gender")}: {patientGender || "-"}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("gender")}:{" "}
+                  </span>
+                  {patientGender || "-"}
                 </p>
-                <p className="text-sm">
-                  {t("phone")}: {patientData?.phone_number || "-"}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("phone")}:{" "}
+                  </span>{" "}
+                  {patientData?.phone_number || "-"}
                 </p>
               </div>
 
-              <div>
-                <h3 className="mb-2 text-base font-semibold">{t("address")}</h3>
-                <p className="text-sm whitespace-pre-line">
+              <div className="text-lg">
+                <h3 className="mb-2  font-semibold">{t("address")}</h3>
+                <p className=" whitespace-pre-line">
                   {patientData?.address || "-"}
                 </p>
                 {patientData?.nationality === "India" && (
                   <>
-                    <p className="text-sm">
+                    <p>
                       {patientData?.ward_object?.name},{" "}
                       {patientData?.local_body_object?.name}
                     </p>
-                    <p className="text-sm">
-                      {patientData?.district_object?.name || "-"}
-                    </p>
-                    <p className="text-sm">{patientData?.state_object?.name}</p>
+                    <p>{patientData?.district_object?.name || "-"}</p>
+                    <p>{patientData?.state_object?.name}</p>
                   </>
                 )}
               </div>
@@ -354,42 +362,63 @@ export default function ShiftDetails(props: { id: string }) {
 
             <div className="my-6 border-b-2"></div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 text-lg">
               <div>
-                <p className="text-sm">
-                  {t("date_of_admission")}:{" "}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("date_of_admission")}:{" "}
+                  </span>
                   {formatDateTime(
                     consultation.encounter_date || consultation.created_date,
                   ) || "-"}
                 </p>
-                <p className="text-sm">
-                  {t("unique_id")}: {data.id}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("unique_id")}:{" "}
+                  </span>{" "}
+                  {data.id}
                 </p>
-                <p className="text-sm">
-                  {t("patient_no")}: {consultation.patient_no || "-"}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("patient_no")}:{" "}
+                  </span>{" "}
+                  {consultation.patient_no || "-"}
                 </p>
               </div>
-              <div>
-                <p className="text-sm">
-                  {t("date_of_positive_covid_19_swab")}:{" "}
+              <div className="flex flex-col gap-3">
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("date_of_positive_covid_19_swab")}:{" "}
+                  </span>
                   {(patientData?.date_of_test &&
                     formatDateTime(patientData.date_of_test)) ||
                     "-"}
                 </p>
-                <p className="text-sm">
-                  {t("covid_19_cat_gov")}: {consultation.category || "-"}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("covid_19_cat_gov")}:{" "}
+                  </span>{" "}
+                  {consultation.category || "-"}
                 </p>
-                <p className="text-sm">
-                  {t("referred_to")}:{" "}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("referred_to")}:{" "}
+                  </span>
                   {data.assigned_facility_external ||
                     data.assigned_facility_object?.name ||
                     "--"}
                 </p>
-                <p className="text-sm">
-                  {t("reason_for_referral")}: {data.reason || "--"}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("reason_for_referral")}:{" "}
+                  </span>{" "}
+                  {data.reason || "--"}
                 </p>
-                <p className="text-sm">
-                  {t("treatment_summary")}: {consultation.treatment_plan || "-"}
+                <p>
+                  <span className="font-semibold leading-relaxed">
+                    {t("treatment_summary")}:{" "}
+                  </span>{" "}
+                  {consultation.treatment_plan || "-"}
                 </p>
               </div>
             </div>
@@ -397,10 +426,10 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="my-6 border-b-2"></div>
 
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {t("approved_by_district_covid_control_room")}
               </p>
-              <p className="text-xs">{t("auto_generated_for_care")}</p>
+              <p className="text-sm">{t("auto_generated_for_care")}</p>
             </div>
           </CardContent>
         </Card>
