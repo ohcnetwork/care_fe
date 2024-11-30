@@ -315,7 +315,9 @@ export default function ShiftDetails(props: { id: string }) {
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 text-lg">
               <div>
-                <h3 className="mb-2 font-semibold">{t("Patient Information")}</h3>
+                <h3 className="mb-2 font-semibold">
+                  {t("Patient Information")}
+                </h3>
                 <p>
                   <span className="font-semibold leading-relaxed">
                     {t("name")}:{" "}
