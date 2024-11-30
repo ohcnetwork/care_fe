@@ -55,7 +55,7 @@ export default function DropdownMenu({
 
         <MenuItems
           modal={false}
-          className={`absolute right-0 z-10 mt-2 min-w-full origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:min-w-[250px] md:w-max ${props.itemClassName}`}
+          className={`absolute right-0 z-50 mt-2 min-w-full origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:min-w-[250px] md:w-max ${props.itemClassName}`}
         >
           <>{props.children}</>
         </MenuItems>

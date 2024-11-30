@@ -136,7 +136,7 @@ export interface PatientModel {
   is_declared_positive?: boolean;
   last_edited?: UserBareMinimum;
   created_by?: UserBareMinimum;
-  assigned_to?: { first_name?: string; username?: string; last_name?: string };
+  assigned_to?: number | null;
   assigned_to_object?: AssignedToObjectModel;
   occupation?: Occupation;
   meta_info?: PatientMeta;
@@ -165,7 +165,7 @@ export interface SampleTestModel {
   date_of_sample?: string;
   date_of_result?: string;
   consultation?: number;
-  patient_name?: number;
+  patient_name?: string;
   patient_has_sari?: boolean;
   patient_has_confirmed_contact?: boolean;
   patient_has_suspected_contact?: boolean;
