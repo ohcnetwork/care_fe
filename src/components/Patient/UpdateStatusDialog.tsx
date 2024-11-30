@@ -186,14 +186,6 @@ const UpdateStatusDialog = (props: Props) => {
                     <CareIcon icon="l-paperclip" className="mr-2" />
                     {fileUpload.files[0].name}
                   </span>
-                  <Button
-                    onClick={fileUpload.clearFiles}
-                    disabled={fileUpload.uploading}
-                    className="text-lg"
-                    variant={"destructive"}
-                  >
-                    <CareIcon icon="l-times" />
-                  </Button>
                 </div>
                 <TextFormField
                   name="sample_file_name"
@@ -222,7 +214,7 @@ const UpdateStatusDialog = (props: Props) => {
                     onClick={fileUpload.clearFiles}
                     disabled={fileUpload.uploading}
                   >
-                    <CareIcon icon="l-trash-alt" className="" />
+                    <CareIcon icon="l-trash-alt" className="mr-2" />
                     {t("discard")}
                   </Button>
                 </div>
