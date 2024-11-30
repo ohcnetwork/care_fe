@@ -32,6 +32,28 @@ const lineStyles = {
   containsNumber: /\d+/,
 };
 
+interface CaretPosition {
+  start: number;
+  end: number;
+  beforeSelection: string;
+  selection: string;
+  afterSelection: string;
+}
+
+const getCaretPosition = (element: HTMLTextAreaElement): CaretPosition => {
+  const start = element.selectionStart;
+  const end = element.selectionEnd;
+  const text = element.value;
+
+  return {
+    start,
+    end,
+    beforeSelection: text.substring(0, start),
+    selection: text.substring(start, end),
+    afterSelection: text.substring(end),
+  };
+};
+
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   initialMarkdown: markdown = "",
   onChange: setMarkdown,
@@ -61,40 +83,36 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     allowAllExtensions: true,
   });
 
+  const updateMarkdownAndCursor = (
+    newMarkdown: string,
+    cursorPosition: number,
+  ) => {
+    setMarkdown(newMarkdown);
+
+    requestAnimationFrame(() => {
+      if (editorRef.current) {
+        editorRef.current.focus();
+        editorRef.current.setSelectionRange(cursorPosition, cursorPosition);
+      }
+    });
+  };
+
   const insertMarkdown = (prefix: string, suffix: string = prefix) => {
     if (!editorRef.current) return;
 
-    const start = editorRef.current.selectionStart;
-    const end = editorRef.current.selectionEnd;
-    const text = editorRef.current.value;
+    const { beforeSelection, selection, afterSelection } = getCaretPosition(
+      editorRef.current,
+    );
 
-    const beforeSelection = text.substring(0, start);
-    const selection = text.substring(start, end);
-    const afterSelection = text.substring(end);
+    const newText = selection
+      ? `${beforeSelection}${prefix}${selection}${suffix}${afterSelection}`
+      : `${beforeSelection}${prefix}${suffix}${afterSelection}`;
 
-    let newText = "";
-    let newCursorPosition = 0;
+    const newCursorPosition = selection
+      ? beforeSelection.length + prefix.length + selection.length
+      : beforeSelection.length + prefix.length;
 
-    if (selection) {
-      newText = `${beforeSelection}${prefix}${selection}${suffix}${afterSelection}`;
-      newCursorPosition = start + prefix.length + selection.length;
-    } else {
-      newText = `${beforeSelection}${prefix}${suffix}${afterSelection}`;
-      newCursorPosition = start + prefix.length;
-    }
-
-    setMarkdown(newText);
-
-    // Using setTimeout to ensure the new text is set before we try to move the cursor
-    setTimeout(() => {
-      if (editorRef.current) {
-        editorRef.current.focus();
-        editorRef.current.setSelectionRange(
-          newCursorPosition,
-          newCursorPosition,
-        );
-      }
-    }, 0);
+    updateMarkdownAndCursor(newText, newCursorPosition);
   };
 
   useEffect(() => {
@@ -114,20 +132,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const insertMention = (user: { id: string; username: string }) => {
     if (!editorRef.current) return;
 
-    const start = editorRef.current.selectionStart;
-    const text = editorRef.current.value;
-    const lastAtSymbolIndex = text.lastIndexOf("@", start - 1);
+    const { beforeSelection, afterSelection } = getCaretPosition(
+      editorRef.current,
+    );
+    const lastAtSymbolIndex = beforeSelection.lastIndexOf("@");
 
-    const beforeMention = text.substring(0, lastAtSymbolIndex);
-    const afterMention = text.substring(start);
-
+    const beforeMention = beforeSelection.substring(0, lastAtSymbolIndex);
     const displayMention = `@${user.username}`;
-    const newMarkdown = `${beforeMention}${displayMention}${afterMention}`;
-    setMarkdown(newMarkdown);
-
-    editorRef.current.focus();
+    const newMarkdown = `${beforeMention}${displayMention}${afterSelection}`;
     const newCursorPosition = lastAtSymbolIndex + displayMention.length;
-    editorRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+
+    updateMarkdownAndCursor(newMarkdown, newCursorPosition);
 
     setShowMentions(false);
     setMentionFilter("");
@@ -199,8 +214,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       e.preventDefault();
       if (!editorRef.current) return;
 
+      const { start: selectionStart } = getCaretPosition(editorRef.current);
       const text = editorRef.current.value;
-      const selectionStart = editorRef.current.selectionStart || 0;
       const currentLineStart = text.lastIndexOf("\n", selectionStart - 1) + 1;
       const currentLine = text.slice(currentLineStart, selectionStart);
 
@@ -234,32 +249,38 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         newCursorPos = selectionStart + newLine.length;
       }
 
-      editorRef.current.value = newText;
-      editorRef.current.setSelectionRange(newCursorPos, newCursorPos);
-      setMarkdown(newText);
+      updateMarkdownAndCursor(newText, newCursorPos);
     }
   };
 
-  const handleOrderedList = () => {
+  const handleListToggle = (isOrdered: boolean) => {
     if (!editorRef.current) return;
-    const selectionStart = editorRef.current.selectionStart || 0;
-    const selectionEnd = editorRef.current.selectionEnd || 0;
+    const { start: selectionStart, end: selectionEnd } = getCaretPosition(
+      editorRef.current,
+    );
     const text = editorRef.current.value;
 
     if (selectionStart === selectionEnd) {
       const lineIndex = getCurrentLineIndex(selectionStart);
       const currentLine = getCurrentLine(lineIndex);
+      const listStyle = isOrdered
+        ? lineStyles.orderedList
+        : lineStyles.unorderedList;
 
       let newText = "";
-      if (lineStyles.orderedList.test(currentLine)) {
-        newText = currentLine.replace(lineStyles.orderedList, "");
+      if (listStyle.test(currentLine)) {
+        newText = currentLine.replace(listStyle, "");
       } else {
-        const prevLine = getCurrentLine(lineIndex - 1);
-        const prevNumber = lineStyles.orderedList
-          .exec(prevLine)?.[0]
-          .match(lineStyles.containsNumber)?.[0];
-        const nextNumber = prevNumber ? parseInt(prevNumber) + 1 : 1;
-        newText = `${nextNumber}. ${currentLine}`;
+        if (isOrdered) {
+          const prevLine = getCurrentLine(lineIndex - 1);
+          const prevNumber = lineStyles.orderedList
+            .exec(prevLine)?.[0]
+            .match(lineStyles.containsNumber)?.[0];
+          const nextNumber = prevNumber ? parseInt(prevNumber) + 1 : 1;
+          newText = `${nextNumber}. ${currentLine}`;
+        } else {
+          newText = `- ${currentLine}`;
+        }
       }
 
       replaceLine(lineIndex, newText);
@@ -271,69 +292,30 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       let currentNumber = 1;
 
       lines.forEach((line) => {
-        if (lineStyles.orderedList.test(line)) {
-          newText += line.replace(lineStyles.orderedList, "") + "\n";
+        const listStyle = isOrdered
+          ? lineStyles.orderedList
+          : lineStyles.unorderedList;
+        if (listStyle.test(line)) {
+          newText += line.replace(listStyle, "") + "\n";
         } else {
-          newText += `${currentNumber}. ${line}\n`;
-          currentNumber++;
+          newText += isOrdered
+            ? `${currentNumber++}. ${line}\n`
+            : `- ${line}\n`;
         }
       });
 
       newText = newText.trimEnd();
-
       const beforeSelection = text.substring(0, selectionStart);
       const afterSelection = text.substring(selectionEnd);
-
       const updatedText = beforeSelection + newText + afterSelection;
-      setMarkdown(updatedText);
-    }
-  };
 
-  const handleUnorderedList = () => {
-    if (!editorRef.current) return;
-    const selectionStart = editorRef.current.selectionStart || 0;
-    const selectionEnd = editorRef.current.selectionEnd || 0;
-    const text = editorRef.current.value;
-
-    if (selectionStart === selectionEnd) {
-      const lineIndex = getCurrentLineIndex(selectionStart);
-      const currentLine = getCurrentLine(lineIndex);
-
-      let newText = "";
-      if (lineStyles.unorderedList.test(currentLine)) {
-        newText = currentLine.replace(lineStyles.unorderedList, "");
-      } else {
-        newText = `- ${currentLine}`;
-      }
-
-      replaceLine(lineIndex, newText);
-    } else {
-      const selectedText = text.substring(selectionStart, selectionEnd);
-      const lines = selectedText.split("\n");
-
-      let newText = "";
-
-      lines.forEach((line) => {
-        if (lineStyles.unorderedList.test(line)) {
-          newText += line.replace(lineStyles.unorderedList, "") + "\n";
-        } else {
-          newText += `- ${line}\n`;
-        }
-      });
-
-      newText = newText.trimEnd();
-
-      const beforeSelection = text.substring(0, selectionStart);
-      const afterSelection = text.substring(selectionEnd);
-
-      const updatedText = beforeSelection + newText + afterSelection;
-      setMarkdown(updatedText);
+      updateMarkdownAndCursor(updatedText, selectionStart + newText.length);
     }
   };
 
   const handleQuote = () => {
     if (!editorRef.current) return;
-    const selectionStart = editorRef.current.selectionStart || 0;
+    const { start: selectionStart } = getCaretPosition(editorRef.current);
     const lineIndex = getCurrentLineIndex(selectionStart);
     const currentLine = getCurrentLine(lineIndex);
 
@@ -362,14 +344,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     lines[lineIndex] = newText;
     const newValue = lines.join("\n");
-    editorRef.current.value = newValue;
-    setMarkdown(newValue);
-
     const newLineStart =
       lines.slice(0, lineIndex).join("\n").length + (lineIndex > 0 ? 1 : 0);
     const newCursorPosition = newLineStart + newText.length;
-    editorRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
-    editorRef.current.focus();
+
+    updateMarkdownAndCursor(newValue, newCursorPosition);
   };
 
   const getCurrentLineIndex = (cursorPosition: number) => {
@@ -383,47 +362,32 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
     return url;
   };
+
   const handleLink = () => {
     if (!editorRef.current) return;
 
-    const start = editorRef.current.selectionStart;
-    const end = editorRef.current.selectionEnd;
-    const text = editorRef.current.value;
-
-    const selectedText = text.substring(start, end);
+    const { selection } = getCaretPosition(editorRef.current);
 
     setLinkDialogState({
       showDialog: true,
       url: "",
-      linkText: selectedText,
-      selectedText,
+      linkText: selection,
+      selectedText: selection,
     });
   };
 
   const handleInsertLink = () => {
     if (!editorRef.current || !linkDialogState.url.trim()) return;
 
-    const { start } = getCaretCoordinates(
+    const { start, beforeSelection, afterSelection } = getCaretPosition(
       editorRef.current,
-      editorRef.current.selectionStart,
-    );
-
-    const text = editorRef.current.value;
-
-    const beforeSelection = text.substring(0, start);
-    const afterSelection = text.substring(
-      start + linkDialogState.selectedText.length,
     );
 
     const markdownLink = `[${linkDialogState.linkText || linkDialogState.url}](${formatUrl(linkDialogState.url)})`;
     const newText = `${beforeSelection}${markdownLink}${afterSelection}`;
+    const newCursorPosition = start + markdownLink.length;
 
-    setMarkdown(newText);
-    editorRef.current.focus();
-    editorRef.current.setSelectionRange(
-      start + markdownLink.length,
-      start + markdownLink.length,
-    );
+    updateMarkdownAndCursor(newText, newCursorPosition);
 
     setLinkDialogState({
       showDialog: false,
@@ -465,7 +429,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <div className="mx-2 h-6 border-l border-gray-400"></div>
 
         <button
-          onClick={handleUnorderedList}
+          onClick={() => handleListToggle(false)}
           className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-list-ul" className="text-lg" />
@@ -474,7 +438,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </span>
         </button>
         <button
-          onClick={handleOrderedList}
+          onClick={() => handleListToggle(true)}
           className="tooltip rounded bg-gray-200/50 p-1"
         >
           <CareIcon icon="l-list-ol" className="text-lg" />
@@ -511,7 +475,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               !isPreviewMode && "bg-primary-500 text-white",
               isPreviewMode && "text-gray-500 hover:bg-gray-100",
             )}
-            onClick={() => setIsPreviewMode(false)}
+            onClick={() => {
+              setIsPreviewMode(false);
+              // Reset height after switching back to edit mode
+              requestAnimationFrame(() => {
+                if (editorRef.current) {
+                  adjustTextareaHeight(editorRef.current);
+                }
+              });
+            }}
           >
             Edit
           </button>
