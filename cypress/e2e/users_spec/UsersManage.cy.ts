@@ -2,7 +2,6 @@ import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
-import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 
 describe("Manage User", () => {
@@ -15,7 +14,6 @@ describe("Manage User", () => {
   const usernameToLinkSkill = "devdoctor";
   const firstNameUserSkill = "Dev";
   const lastNameUserSkill = "Doctor";
-  const userCreationPage = new UserCreationPage();
   const usernameforworkinghour = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
@@ -48,10 +46,9 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000);
     manageUserPage.navigateToProfile();
-    userCreationPage.verifyElementContainsText(
-      "username-profile-details",
+    cy.verifyContentPresence("#username-profile-details", [
       usernameforworkinghour,
-    );
+    ]);
     manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
   });
 
