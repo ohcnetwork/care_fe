@@ -321,13 +321,13 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <CardHeader className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="space-y-1 flex gap-2 items-center">
-              <div className="text-sm text-muted-foreground">Status:</div>
+              <div className="text-sm text-muted-foreground">{t("Status")}:</div>
               <Badge variant="outline" className="font-semibold">
                 {sampleDetails?.status}
               </Badge>
             </div>
             <div className="space-y-1 sm:text-right flex gap-2 items-center ">
-              <div className="text-sm text-muted-foreground">Result:</div>
+              <div className="text-sm text-muted-foreground">{t("Result")}:</div>
               <Badge variant="secondary" className="font-semibold">
                 {sampleDetails?.result}
               </Badge>
@@ -378,7 +378,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
 
           {sampleDetails?.doctor_name && (
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">
+              <div id="doctor_name" className="text-sm text-muted-foreground">
                 {t("Doctor's Name")}:
               </div>
               <div className="font-medium">
@@ -390,7 +390,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sampleDetails?.fast_track && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                <div className="font-medium text-sm">
+                <div id="fast_track_reason" className="font-medium text-sm">
                   {t("fast_track_testing_reason")}:{" "}
                 </div>
                 <Badge variant={"secondary"}>{sampleDetails.fast_track}</Badge>
@@ -398,12 +398,17 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             {sampleDetails?.diagnosis && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                <div className="font-medium text-sm">{t("diagnosis")}: </div>
+                <div id="diagnosis" className="font-medium text-sm">
+                  {t("diagnosis")}:{" "}
+                </div>
                 <Badge variant={"secondary"}> {sampleDetails.diagnosis}</Badge>
               </div>
             )}
             {sampleDetails?.diff_diagnosis && (
-              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div
+                id="diff_diagnosis"
+                className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg"
+              >
                 <div className="font-medium text-sm">
                   {t("differential_diagnosis")}:{" "}
                 </div>
@@ -414,7 +419,10 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               </div>
             )}
             {sampleDetails?.etiology_identified && (
-              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div
+                id="etiology_identified"
+                className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg"
+              >
                 <div className="font-medium text-sm">
                   {t("Etiology identified")}:{" "}
                 </div>
