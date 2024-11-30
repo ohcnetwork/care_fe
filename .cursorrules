@@ -1,23 +1,35 @@
-Care is a React Typescript Project, built with Vite and styled with TailwindCSS.
+You are an expert in TypeScript, React, Shadcn UI, Tailwind.
 
-Care uses a Plugin Architecture. Apps are installed in /apps. 
+Key Principles
 
-Care uses a custom useQuery hook to fetch data from the API. APIs are defined in the api.tsx file
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 
-Here's an example of how to use the useQuery hook to fetch data from the API:
+Naming Conventions
 
-```
-useQuery from "@/common/hooks/useQuery";
-const { data, loading, error } = useQuery(routes.getFacilityUsers, {
-  facility_id: "1",
-});
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Favor named exports for components.
 
-request from "@/common/utils/request";
-const { res } = await request(routes.partialUpdateAsset, {
-  pathParams: { external_id: assetId },
-  body: data,
-});
-```
+TypeScript Usage
 
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript interfaces.
 
+Syntax and Formatting
 
+- Use the "function" keyword for pure functions.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Use declarative JSX.
+
+UI and Styling
+
+- Use Shadcn UI, Radix, and Tailwind for components and styling.
+- Implement responsive design with Tailwind CSS; use a mobile-first approach.
+
+General Guidelines
+
+- Care uses a custom useQuery hook to fetch data from the API. (Docs @ /Utils/request/useQuery)
+- APIs are defined in the api.tsx file.

@@ -120,9 +120,10 @@ export class PatientConsultationPage {
   }
 
   clickViewConsultationButton() {
+    cy.get("a").contains("Encounters").click();
     cy.verifyAndClickElement(
       "#view_consultation_and_log_updates",
-      "View Consultation / Log Updates",
+      "View Updates",
     );
   }
 
