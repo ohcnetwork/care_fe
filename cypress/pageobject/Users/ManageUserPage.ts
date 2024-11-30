@@ -12,7 +12,9 @@ export class ManageUserPage {
   }
 
   selectSkillFromDropdown(skill: string) {
+    cy.intercept("GET", "/api/v1/skill/*").as("getSkills");
     cy.typeAndSelectOption("input[name='skill']", skill);
+    cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
   }
 
   clickLinkFacility() {

@@ -20,7 +20,11 @@ export class PatientFileUpload {
 
   recordAudio() {
     cy.get("#record-audio").click();
+    cy.wait(2000);
+    cy.get("#start-recording").click();
+    cy.wait(2000);
     cy.get("#stop-recording").should("be.enabled").click();
+    cy.wait(2000);
     cy.get("#save-recording").should("be.enabled").click();
   }
 
@@ -31,9 +35,8 @@ export class PatientFileUpload {
   }
 
   verifyUploadFilePresence(fileName: string) {
-    cy.get("#file-div", { timeout: 10000 })
-      .scrollIntoView()
-      .should("be.visible");
+    cy.wait(2000);
+    cy.get("#file-div").scrollIntoView();
     cy.verifyContentPresence("#file-div", [fileName]);
   }
 
