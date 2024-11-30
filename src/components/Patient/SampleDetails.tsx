@@ -382,7 +382,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
 
           {sampleDetails?.doctor_name && (
             <div className="space-y-1">
-              <div id="doctor_name" className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground">
                 {t("Doctor's Name")}:
               </div>
               <div className="font-medium">
