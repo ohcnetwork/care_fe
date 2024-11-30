@@ -478,6 +478,9 @@ export default function ShiftDetails(props: { id: string }) {
       ) : (
         <Page
           title={t("shifting_details")}
+          crumbsReplacements={{
+            [props.id]: { name: data?.patient_object?.name },
+          }}
           backUrl="/shifting/board"
           options={
             <div className="flex gap-2">
