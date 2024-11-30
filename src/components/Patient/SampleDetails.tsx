@@ -385,7 +385,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <div className="text-sm text-muted-foreground">
                 {t("Doctor's Name")}:
               </div>
-              <div className="font-medium">
+              <div id="doctor_name" className="font-medium">
                 {startCase(camelCase(sampleDetails.doctor_name))}
               </div>
             </div>
