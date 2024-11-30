@@ -337,21 +337,27 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Patient:</div>
+              <div className="text-sm text-muted-foreground">
+                {t("Patient")}:
+              </div>
               <div id="patient_name" className="font-medium">
                 {sampleDetails?.patient_name || "-"}
               </div>
             </div>
             {sampleDetails?.facility_object && (
               <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Facility:</div>
+                <div className="text-sm text-muted-foreground">
+                  {t("Facility")}:
+                </div>
                 <div className="font-medium">
                   {sampleDetails?.facility_object.name}
                 </div>
               </div>
             )}
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Tested on:</div>
+              <div className="text-sm text-muted-foreground">
+                {t("Tested on")}:
+              </div>
               <div className="font-medium">
                 {sampleDetails?.date_of_result
                   ? formatDateTime(sampleDetails.date_of_result)
@@ -359,7 +365,9 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               </div>
             </div>
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Result on:</div>
+              <div className="text-sm text-muted-foreground">
+                {t("Result on")}:
+              </div>
               <div className="font-medium">
                 {sampleDetails?.date_of_result
                   ? formatDateTime(sampleDetails.date_of_result)
@@ -371,7 +379,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           {sampleDetails?.doctor_name && (
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">
-                Doctor&apos;s Name:
+                {t("Doctor's Name")}:
               </div>
               <div className="font-medium">
                 {startCase(camelCase(sampleDetails.doctor_name))}
@@ -383,21 +391,21 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {sampleDetails?.fast_track && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                 <div className="font-medium text-sm">
-                  Fast track testing reason:{" "}
+                  {t("fast_track_testing_reason")}:{" "}
                 </div>
                 <Badge variant={"secondary"}>{sampleDetails.fast_track}</Badge>
               </div>
             )}
             {sampleDetails?.diagnosis && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                <div className="font-medium text-sm">Diagnosis: </div>
+                <div className="font-medium text-sm">{t("diagnosis")}: </div>
                 <Badge variant={"secondary"}> {sampleDetails.diagnosis}</Badge>
               </div>
             )}
             {sampleDetails?.diff_diagnosis && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                 <div className="font-medium text-sm">
-                  Differential diagnosis:{" "}
+                  {t("differential_diagnosis")}:{" "}
                 </div>
                 <Badge variant={"secondary"}>
                   {" "}
@@ -407,7 +415,9 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             {sampleDetails?.etiology_identified && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                <div className="font-medium text-sm">Etiology identified: </div>
+                <div className="font-medium text-sm">
+                  {t("Etiology identified")}:{" "}
+                </div>
                 <Badge variant={"secondary"}>
                   {" "}
                   {sampleDetails.etiology_identified}
@@ -416,7 +426,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                Is Atypical presentation{" "}
+                {t("Is Atypical presentation")}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -424,7 +434,9 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               </Badge>
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-              <div className="font-medium text-sm">Is unusual course </div>
+              <div className="font-medium text-sm">
+                {t("Is unusual course")}
+              </div>
               <Badge variant={"secondary"}>
                 {" "}
                 {yesOrNoBadge(sampleDetails?.is_unusual_course)}
@@ -433,7 +445,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {sampleDetails?.atypical_presentation && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                 <div className="font-medium text-sm">
-                  Atypical presentation details:{" "}
+                  {t("Atypical presentation details")}:{" "}
                 </div>
                 <Badge variant={"secondary"}>
                   {" "}
@@ -443,7 +455,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                SARI - Severe Acute Respiratory illness{" "}
+                {t("SARI - Severe Acute Respiratory illness")}{" "}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -452,7 +464,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                ARI - Acute Respiratory illness{" "}
+                {t("ARI - Acute Respiratory illness")}{" "}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -461,7 +473,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                Contact with confirmed carrier{" "}
+                {t(" Contact with confirmed carrier")}{" "}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -470,7 +482,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                Contact with suspected carrier{" "}
+                {t("Contact with suspected carrier")}{" "}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -481,7 +493,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               sampleDetails.patient_travel_history.length !== 0 && (
                 <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                   <div className="font-medium text-sm">
-                    Countries travelled:{" "}
+                    {t("Countries travelled")}:{" "}
                   </div>
                   <Badge variant={"secondary"}>
                     {" "}
@@ -493,9 +505,10 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           <div className="border-t border-gray-300 my-4"></div>
           {sampleDetails?.sample_type && (
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Sample Type:</div>
+              <div className="text-sm text-muted-foreground">
+                {t("sample_type")}:{" "}
+              </div>
               <div className="font-medium">
-                {" "}
                 {startCase(camelCase(sampleDetails.sample_type))}
               </div>
             </div>
