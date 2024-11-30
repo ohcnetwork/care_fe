@@ -3,24 +3,49 @@ import { useCallback, useEffect, useState } from "react";
 import { QueryRoute, RequestResult } from "@/Utils/request/types";
 import useQuery, { QueryOptions } from "@/Utils/request/useQuery";
 
-export interface InfiniteQueryOptions<TData> extends QueryOptions<TData> {
-  getNextPageParam?: (lastPage: number) => number;
+export interface InfiniteQueryOptions<TData, TItem>
+  extends QueryOptions<TData> {
+  getNextPageParam?: (currentPage: number) => number;
   getTotalPages?: (response: RequestResult<TData>) => number;
+  itemsFromResponse?: (response: RequestResult<TData>) => TItem[];
+  deduplicateBy?: (item: TItem) => string | number;
 }
 
-export function useInfiniteQuery<TData>(
+export function useInfiniteQuery<TData, TItem>(
   route: QueryRoute<TData>,
-  options?: InfiniteQueryOptions<TData>,
+  options?: InfiniteQueryOptions<TData, TItem>,
 ) {
   const [pages, setPages] = useState<RequestResult<TData>[]>([]);
+  const [items, setItems] = useState<TItem[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [hasNextPage, setHasNextPage] = useState<boolean>(true);
 
-  const { refetch, loading, setLoading, ...queryResponse } = useQuery(route, {
+  const { refetch, loading, ...queryResponse } = useQuery(route, {
     ...options,
     prefetch: false,
   });
+
+  const updateItems = useCallback(
+    (newPages: RequestResult<TData>[]) => {
+      const allItems = newPages.flatMap((page) =>
+        options?.itemsFromResponse ? options.itemsFromResponse(page) : [],
+      );
+      const deduplicatedItems = options?.deduplicateBy
+        ? Array.from(
+            allItems
+              .reduce(
+                (map, item) => map.set(options.deduplicateBy!(item), item),
+                new Map<string | number, TItem>(),
+              )
+              .values(),
+          )
+        : allItems;
+
+      setItems(deduplicatedItems);
+    },
+    [options],
+  );
 
   const fetchNextPage = useCallback(async () => {
     if (!hasNextPage || loading) return;
@@ -34,27 +59,36 @@ export function useInfiniteQuery<TData>(
     });
 
     if (response) {
-      setPages((prevPages) => [...prevPages, response]);
+      setPages((prevPages) => {
+        const newPages = [...prevPages, response];
+        updateItems(newPages);
+        return newPages;
+      });
       setCurrentPage((prev) => prev + 1);
 
       const total = options?.getTotalPages?.(response) || totalPages;
-
       setTotalPages(total);
       setHasNextPage(currentPage + 1 < total);
-      if (!hasNextPage) {
-        setLoading(false);
-      }
     }
-  }, [currentPage, hasNextPage, loading, options, refetch, totalPages]);
+  }, [
+    currentPage,
+    hasNextPage,
+    loading,
+    options,
+    refetch,
+    totalPages,
+    updateItems,
+  ]);
 
   useEffect(() => {
     if (options?.prefetch ?? true) {
       refetch().then((response) => {
         if (response) {
           setPages([response]);
+          updateItems([response]);
           const total = options?.getTotalPages?.(response) || totalPages;
           setTotalPages(total);
-          setHasNextPage(total > 1);
+          setHasNextPage(currentPage < total);
         }
       });
     }
@@ -62,10 +96,13 @@ export function useInfiniteQuery<TData>(
 
   return {
     pages,
+    items,
     loading,
     fetchNextPage,
     hasNextPage,
     refetch,
+    currentPage,
+    totalPages,
     setCurrentPage,
     setTotalPages,
     ...queryResponse,
