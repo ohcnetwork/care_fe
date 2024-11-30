@@ -1,69 +1,52 @@
 // UserCreation.ts
 export class UserCreationPage {
-  clickElementById(elementId: string) {
-    cy.get("#" + elementId).click();
+  clickAddUserButton() {
+    cy.verifyAndClickElement("#addUserButton", "Add New User");
+  }
+  typeUserName(username: string) {
+    cy.get("#username").click().type(username);
+  }
+  typeFirstName(firstName: string) {
+    cy.get("#firstName").click().type(firstName);
+  }
+  typeLastName(lastName: string) {
+    cy.get("#lastName").click().type(lastName);
+  }
+  typePassword(password: string) {
+    cy.get("#password").click().type(password);
+  }
+  typeConfirmPassword(password: string) {
+    cy.get("#c_password").click().type(password);
+  }
+  clearFirstName() {
+    cy.get("#firstName").click().clear();
+  }
+  clearLastName() {
+    cy.get("#lastName").click().clear();
+  }
+  selectUserType(role: string) {
+    cy.clickAndSelectOption("#user_type", role);
+  }
+  selectHomeFacility(name: string) {
+    cy.clickAndSelectOption("#home_facility", name);
   }
 
-  typeIntoElementById(elementId: string, value: string) {
-    cy.get("#" + elementId)
-      .click()
-      .type(value);
+  selectGender(gender: string) {
+    cy.clickAndSelectOption("#gender", gender);
   }
-
-  typeIntoElementByIdPostClear(elementId: string, value: string) {
-    cy.get("#" + elementId)
-      .click()
-      .clear()
-      .click()
-      .type(value);
+  selectState(state: string) {
+    cy.clickAndSelectOption("#state", state);
   }
-  typeIntoElementByIdPostClearDob(elementId: string, value: string) {
-    cy.clickAndTypeDate("#" + elementId, value);
-  }
-  clearIntoElementById(elementId: string) {
-    cy.get("#" + elementId)
-      .click()
-      .clear();
-  }
-
-  typeIntoInputByName(inputName: string, value: string) {
-    cy.get("input[name='" + inputName + "']")
-      .click()
-      .type(value);
-  }
-
-  selectOptionContainingText(text: string) {
-    cy.get("[role='option']").contains(text).click();
-  }
-
-  verifyNotification(message: string) {
-    cy.verifyNotification(message);
+  selectDistrict(district: string) {
+    cy.clickAndSelectOption("#district", district);
   }
 
   selectFacility(name: string) {
-    this.typeIntoInputByName("facilities", name);
-    this.selectOptionContainingText(name);
-    cy.get("input[name='facilities'] + button")
-      .find("#dropdown-toggle")
-      .click();
+    cy.typeAndSelectOption("input[name='facilities']", name);
   }
 
-  selectHomeFacility(name: string) {
-    this.clickElementById("home_facility");
-    this.selectOptionContainingText(name);
-  }
-
-  setInputDate(dateElementId: string, dateValue: string) {
-    cy.clickAndTypeDate("#" + dateElementId, dateValue);
-  }
-
-  selectDropdownOption(dropdownId: string, optionText: string) {
-    this.clickElementById(dropdownId);
-    this.selectOptionContainingText(optionText);
-  }
-
-  verifyElementContainsText(elementId: string, expectedText: string) {
-    cy.get("#" + elementId).should("contain.text", expectedText);
+  clickSaveUserButton() {
+    cy.clickSubmitButton("Save User");
   }
 
   verifyErrorMessages(errorMessages: string[]) {
