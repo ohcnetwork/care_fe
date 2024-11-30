@@ -394,7 +394,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sampleDetails?.fast_track && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                <div id="fast_track_reason" className="font-medium text-sm">
+                <div className="font-medium text-sm">
                   {t("fast_track_testing_reason")}:{" "}
                 </div>
                 <Badge variant={"secondary"}>{sampleDetails.fast_track}</Badge>
