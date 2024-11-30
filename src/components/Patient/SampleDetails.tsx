@@ -405,35 +405,30 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             {sampleDetails?.diagnosis && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                <div id="diagnosis" className="font-medium text-sm">
-                  {t("diagnosis")}:{" "}
-                </div>
-                <Badge variant={"secondary"}> {sampleDetails.diagnosis}</Badge>
+                <div className="font-medium text-sm">{t("diagnosis")}: </div>
+                <Badge id="diagnosis" variant={"secondary"}>
+                  {" "}
+                  {sampleDetails.diagnosis}
+                </Badge>
               </div>
             )}
             {sampleDetails?.diff_diagnosis && (
-              <div
-                id="diff_diagnosis"
-                className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg"
-              >
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                 <div className="font-medium text-sm">
                   {t("differential_diagnosis")}:{" "}
                 </div>
-                <Badge variant={"secondary"}>
+                <Badge id="diff_diagnosis" variant={"secondary"}>
                   {" "}
                   {sampleDetails?.diff_diagnosis}
                 </Badge>
               </div>
             )}
             {sampleDetails?.etiology_identified && (
-              <div
-                id="etiology_identified"
-                className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg"
-              >
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                 <div className="font-medium text-sm">
                   {t("Etiology identified")}:{" "}
                 </div>
-                <Badge variant={"secondary"}>
+                <Badge id="etiology_identified" variant={"secondary"}>
                   {" "}
                   {sampleDetails.etiology_identified}
                 </Badge>
