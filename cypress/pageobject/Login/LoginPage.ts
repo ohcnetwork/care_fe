@@ -1,4 +1,4 @@
-// LoginPage.ts
+ // LoginPage.ts
 
 class LoginPage {
   submitButtonSelector = "#login";
