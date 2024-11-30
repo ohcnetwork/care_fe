@@ -321,13 +321,17 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <CardHeader className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="space-y-1 flex gap-2 items-center">
-              <div className="text-sm text-muted-foreground">{t("Status")}:</div>
+              <div className="text-sm text-muted-foreground">
+                {t("Status")}:
+              </div>
               <Badge variant="outline" className="font-semibold">
                 {sampleDetails?.status}
               </Badge>
             </div>
             <div className="space-y-1 sm:text-right flex gap-2 items-center ">
-              <div className="text-sm text-muted-foreground">{t("Result")}:</div>
+              <div className="text-sm text-muted-foreground">
+                {t("Result")}:
+              </div>
               <Badge variant="secondary" className="font-semibold">
                 {sampleDetails?.result}
               </Badge>
