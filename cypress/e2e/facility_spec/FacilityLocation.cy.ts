@@ -36,6 +36,7 @@ describe("Location Management Section", () => {
   const bedType = "ICU";
   const bedStatus = "Vacant";
   const bedModifiedName = "test modified bed";
+  const duplicateBedName = "ICCU";
   const bedModifiedDescrption = "test modified description";
   const bedModifiedType = "Isolation";
   const numberOfBeds = 10;
@@ -90,12 +91,12 @@ describe("Location Management Section", () => {
     facilityHome.verifyAndCloseNotifyModal();
     // edit the created bed
     facilityLocation.editBed(
-      bedModifiedName,
+      duplicateBedName,
       bedModifiedDescrption,
       bedModifiedType,
     );
     // verify the modification
-    facilityLocation.verifyBedNameBadge(bedModifiedName);
+    facilityLocation.verifyBedNameBadge(duplicateBedName);
     facilityLocation.verifyBedBadge(bedModifiedType);
     facilityLocation.verifyBedBadge(bedStatus);
     facilityLocation.closeNotification();
