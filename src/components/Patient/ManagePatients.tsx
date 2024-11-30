@@ -628,7 +628,7 @@ export const PatientManager = () => {
                       )}
                     </>
                   )}
-                  {patient.review_time &&
+                  {/* {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
                     Number(patient.last_consultation?.review_interval) > 0 &&
                     dayjs().isAfter(patient.review_time) && (
@@ -638,7 +638,26 @@ export const PatientManager = () => {
                         startIcon="l-clock"
                         text="Review Missed"
                       />
+                    )} */}
+                  {patient.review_time &&
+                    !patient.last_consultation?.discharge_date &&
+                    Number(patient.last_consultation?.review_interval) > 0 && (
+                      <Chip
+                        size="small"
+                        variant={
+                          dayjs().isAfter(patient.review_time)
+                            ? "danger"
+                            : "alert"
+                        }
+                        startIcon="l-clock"
+                        text={
+                          dayjs().isAfter(patient.review_time)
+                            ? `Review Missed (${Math.abs(dayjs().diff(dayjs(patient.review_time), "days"))} days ago)`
+                            : `Review Due in (${Math.abs(dayjs(patient.review_time).diff(dayjs(), "days"))} days)`
+                        }
+                      />
                     )}
+
                   {patient.last_consultation?.is_readmission && (
                     <Chip
                       size="small"
