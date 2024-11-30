@@ -121,7 +121,7 @@ describe("Facility Manage Functions", () => {
     // edit a existing doctor
     facilityManage.clickEditFacilityDoctorCapacity();
     facilityPage.fillDoctorCount(doctorModifiedCapacity);
-    facilityPage.clickdoctorcapacitysaveandexit();
+    facilityPage.saveAndExitDoctorForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Staff count updated successfully",
     );
