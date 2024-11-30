@@ -177,7 +177,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         requested_quantity: state.form.requested_quantity || 1,
         assigned_quantity:
           state.form.status === "PENDING"
-            ? state.form.assigned_quantity
+            ? state.form.assigned_quantity || 1
             : resourceDetails?.assigned_quantity || 1,
       };
 
@@ -273,7 +273,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 name="requested_quantity"
                 type="number"
                 min={1}
-                value={state.form.requested_quantity}
+                value={state.form.requested_quantity ?? 1}
                 onChange={handleChange}
                 onInput={sanitizeNumberInput}
               />
@@ -284,7 +284,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 type="number"
                 min={1}
                 label="Approved Quantity"
-                value={state.form.assigned_quantity}
+                value={state.form.assigned_quantity ?? 1}
                 onChange={handleChange}
                 disabled={state.form.status !== "PENDING"}
                 onInput={sanitizeNumberInput}
