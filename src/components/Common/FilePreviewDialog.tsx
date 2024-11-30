@@ -4,6 +4,7 @@ import {
   SetStateAction,
   Suspense,
   lazy,
+  useEffect,
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +15,8 @@ import ButtonV2, { Cancel } from "@/components/Common/ButtonV2";
 import CircularProgress from "@/components/Common/CircularProgress";
 import DialogModal from "@/components/Common/Dialog";
 import { StateInterface } from "@/components/Files/FileUpload";
+
+import { FileUploadModel } from "../Patient/models";
 
 const PDFViewer = lazy(() => import("@/components/Common/PDFViewer"));
 
@@ -40,6 +43,9 @@ type FilePreviewProps = {
   className?: string;
   titleAction?: ReactNode;
   fixedWidth?: boolean;
+  uploadedFiles?: FileUploadModel[];
+  loadFile?: (file: FileUploadModel, associating_id: string) => void;
+  currentIndex: number;
 };
 
 const previewExtensions = [
@@ -56,12 +62,28 @@ const previewExtensions = [
 ];
 
 const FilePreviewDialog = (props: FilePreviewProps) => {
-  const { show, onClose, file_state, setFileState, downloadURL, fileUrl } =
-    props;
+  const {
+    show,
+    onClose,
+    file_state,
+    setFileState,
+    downloadURL,
+    fileUrl,
+    uploadedFiles,
+    loadFile,
+    currentIndex,
+  } = props;
   const { t } = useTranslation();
 
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
+  const [index, setIndex] = useState<number>(currentIndex);
+
+  useEffect(() => {
+    if (uploadedFiles && show) {
+      setIndex(currentIndex);
+    }
+  }, [uploadedFiles, show, currentIndex]);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -79,9 +101,27 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     });
   };
 
+  const handleNext = (newIndex: number) => {
+    if (
+      !uploadedFiles?.length ||
+      !loadFile ||
+      newIndex < 0 ||
+      newIndex >= uploadedFiles.length
+    )
+      return;
+
+    const nextFile = uploadedFiles[newIndex];
+    if (!nextFile?.id) return;
+
+    const associating_id = nextFile.associating_id || "";
+    loadFile(nextFile, associating_id);
+    setIndex(newIndex);
+  };
+
   const handleClose = () => {
     setPage(1);
     setNumPages(1);
+    setIndex(-1);
     onClose?.();
   };
 
@@ -102,6 +142,21 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       : `rotate-${normalizedRotation}`;
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!show) return;
+      if (e.key === "ArrowLeft" && index > 0) {
+        handleNext(index - 1);
+      }
+      if (e.key === "ArrowRight" && index < (uploadedFiles?.length || 0) - 1) {
+        handleNext(index + 1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [show, index, uploadedFiles]);
+
   return (
     <DialogModal
       fixedWidth={false}
@@ -109,16 +164,31 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       onClose={() => {
         handleClose();
       }}
-      title={t("file_preview")}
+      title={<span className="text-sm text-gray-600">{t("file_preview")}</span>}
       show={show}
     >
       {fileUrl ? (
         <>
-          <div className="mb-2 flex flex-col items-center justify-between md:flex-row">
-            <p className="text-md font-semibold text-secondary-700">
-              {file_state.name}.{file_state.extension}
-            </p>
-            <div className="flex gap-4">
+          <div className="mb-2 flex flex-col items-start justify-between md:flex-row">
+            <div>
+              <p className="text-2xl font-bold text-gray-800">
+                {file_state.name}.{file_state.extension}
+              </p>
+              {uploadedFiles &&
+                uploadedFiles[index] &&
+                uploadedFiles[index].created_date && (
+                  <p className="mt-1 text-sm text-gray-600">
+                    Created on{" "}
+                    {new Date(
+                      uploadedFiles[index].created_date!,
+                    ).toLocaleString("en-US", {
+                      dateStyle: "long",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                )}
+            </div>
+            <div className="flex gap-4 mt-2 md:mt-0">
               {downloadURL && downloadURL.length > 0 && (
                 <ButtonV2>
                   <a
@@ -135,6 +205,19 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center">
+            {uploadedFiles && uploadedFiles.length > 1 && (
+              <ButtonV2
+                className="cursor-pointer bg-primary-500 rounded-md mr-4"
+                onClick={() => handleNext(index - 1)}
+                disabled={index <= 0}
+                aria-label="Previous file"
+                onKeyDown={(e) =>
+                  e.key === "ArrowLeft" && handleNext(index - 1)
+                }
+              >
+                <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+              </ButtonV2>
+            )}
             <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
               {file_state.isImage ? (
                 <img
@@ -173,6 +256,20 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </div>
               )}
             </div>
+
+            {uploadedFiles && uploadedFiles.length > 1 && (
+              <ButtonV2
+                className="cursor-pointer bg-primary-500 rounded-md ml-4"
+                onClick={() => handleNext(index + 1)}
+                disabled={index >= uploadedFiles.length - 1}
+                aria-label="Next file"
+                onKeyDown={(e) =>
+                  e.key === "ArrowRight" && handleNext(index + 1)
+                }
+              >
+                <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+              </ButtonV2>
+            )}
           </div>
           <div className="flex items-center justify-between">
             <div className="mt-2 flex w-full flex-col justify-center gap-3 md:flex-row">
