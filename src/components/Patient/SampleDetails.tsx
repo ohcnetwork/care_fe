@@ -308,10 +308,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       options={
         sampleDetails?.patient && (
           <div className="my-2 flex justify-center md:justify-end">
-            <Button
-              asChild
-              className="bg-[#0D9F6E] text-white hover:bg-[#0D9F6E]"
-            >
+            <Button asChild variant={"primary"}>
               <Link
                 href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
               >
