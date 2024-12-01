@@ -64,6 +64,7 @@ const AutoCompleteAsync = (props: Props) => {
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hasTyped, setHasTyped] = useState(false); // Track if the user has typed
   const { t } = useTranslation();
 
   const hasSelection =
@@ -91,12 +92,27 @@ const AutoCompleteAsync = (props: Props) => {
     fetchDataAsync(query);
   }, [query, fetchDataAsync]);
 
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = event.target.value;
+    setQuery(newQuery);
+    setHasTyped(newQuery.length > 0); // Set hasTyped to true if input is not empty
+  };
+
+  const handleSelectionChange = (selectedOption: any) => {
+    onChange(selectedOption);
+    setQuery(optionLabel(selectedOption)); // Set the query to the selected option's label
+    setHasTyped(true); // After selecting, set hasTyped to true
+  };
+
+  // Function to determine if the clear button should be shown
+  const shouldShowClearButton = (hasSelection || hasTyped) && query !== ""; // Exclude placeholder when query is empty
+
   return (
     <div className={className}>
       <Combobox
         value={selected}
         disabled={disabled}
-        onChange={onChange}
+        onChange={handleSelectionChange}
         by={compareBy}
         multiple={multiple as any}
         immediate
@@ -118,7 +134,7 @@ const AutoCompleteAsync = (props: Props) => {
               displayValue={() =>
                 hasSelection && !multiple ? optionLabel?.(selected) : ""
               }
-              onChange={({ target }) => setQuery(target.value)}
+              onChange={handleInputChange}
               onFocus={props.onFocus}
               onBlur={() => {
                 props.onBlur?.();
@@ -128,7 +144,7 @@ const AutoCompleteAsync = (props: Props) => {
             {!disabled && (
               <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <div className="absolute right-0 mr-2 flex items-center text-lg text-secondary-900">
-                  {hasSelection && !loading && !required && (
+                  {shouldShowClearButton && !loading && !required && (
                     <div className="tooltip" id="clear-button">
                       <CareIcon
                         icon="l-times-circle"
@@ -136,6 +152,8 @@ const AutoCompleteAsync = (props: Props) => {
                         onClick={(e) => {
                           e.preventDefault();
                           onChange(null);
+                          setQuery(""); // Clear the query when clearing the selection
+                          setHasTyped(false); // Reset the typing flag
                         }}
                       />
                       <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
