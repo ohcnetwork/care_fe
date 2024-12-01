@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
-import RichTextEditor from "@/components/Common/RichTextEditor";
+import DiscussionNotesEditor from "@/components/Common/DiscussionNotesEditor";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
 import PatientConsultationNotesList from "@/components/Facility/PatientConsultationNotesList";
 import {
@@ -245,8 +245,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                   parentNote={reply_to}
                   cancelReply={() => setReplyTo(undefined)}
                 >
-                  <RichTextEditor
-                    initialMarkdown={noteField}
+                  <DiscussionNotesEditor
+                    initialNote={noteField}
                     onChange={setNoteField}
                     onAddNote={onAddNote}
                     isAuthorized={isAuthorized}

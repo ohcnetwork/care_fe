@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import RichTextEditor from "@/components/Common/RichTextEditor";
+import DiscussionNotesEditor from "@/components/Common/DiscussionNotesEditor";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
 
 import * as Notification from "@/Utils/Notifications";
@@ -171,10 +171,10 @@ const PatientNotesDetailedView = (props: Props) => {
               parentNote={reply_to}
               cancelReply={() => setReplyTo(undefined)}
             >
-              <RichTextEditor
+              <DiscussionNotesEditor
                 onAddNote={onAddNote}
                 onChange={setNoteField}
-                initialMarkdown={noteField}
+                initialNote={noteField}
                 onRefetch={() => setReload(true)}
                 maxRows={10}
               />

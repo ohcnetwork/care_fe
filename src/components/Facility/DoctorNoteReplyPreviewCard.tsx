@@ -7,7 +7,7 @@ import { USER_TYPES_MAP } from "@/common/constants";
 import { formatDateTime, relativeDate } from "@/Utils/utils";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import MarkdownPreview from "../Common/MarkdownPreview";
+import NotePreview from "../Common/NotePreview";
 
 interface Props {
   parentNote: PatientNotesReplyModel | undefined;
@@ -69,7 +69,7 @@ const DoctorNoteReplyPreviewCard = ({
           )}
         </div>
         <div className="max-h-14 overflow-hidden pb-2 pl-14 text-sm text-gray-700">
-          <MarkdownPreview markdown={parentNote.note} />
+          <NotePreview initialNote={parentNote.note} />
         </div>
       </div>
       <div>{children}</div>

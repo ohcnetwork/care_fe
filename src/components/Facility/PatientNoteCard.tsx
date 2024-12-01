@@ -7,7 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
-import MarkdownPreview from "@/components/Common/MarkdownPreview";
+import NotePreview from "@/components/Common/NotePreview";
 import Spinner from "@/components/Common/Spinner";
 import {
   PatientNotesEditModel,
@@ -299,8 +299,8 @@ const PatientNoteCard = ({
                 }}
                 className={`pl-11 text-sm text-gray-700 ${allowThreadView ? "cursor-pointer" : ""}`}
               >
-                <MarkdownPreview
-                  markdown={noteField}
+                <NotePreview
+                  initialNote={noteField}
                   mentioned_users={note.mentioned_users}
                 />
                 <div className="flex gap-2">
@@ -380,7 +380,7 @@ const PatientNoteCard = ({
                         Note
                       </p>
                       <div className="text-sm text-secondary-900">
-                        <MarkdownPreview markdown={edit.note} />
+                        <NotePreview initialNote={edit.note} />
                       </div>
                     </div>
                   </div>

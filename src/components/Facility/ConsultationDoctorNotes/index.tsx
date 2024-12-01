@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import DiscussionNotesEditor from "@/components/Common/DiscussionNotesEditor";
 import Page from "@/components/Common/Page";
-import RichTextEditor from "@/components/Common/RichTextEditor";
 import Tabs from "@/components/Common/Tabs";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
 import PatientConsultationNotesList from "@/components/Facility/PatientConsultationNotesList";
@@ -176,8 +176,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
                 parentNote={reply_to}
                 cancelReply={() => setReplyTo(undefined)}
               >
-                <RichTextEditor
-                  initialMarkdown={noteField}
+                <DiscussionNotesEditor
+                  initialNote={noteField}
                   onChange={setNoteField}
                   onAddNote={onAddNote}
                   isAuthorized={patientActive}
