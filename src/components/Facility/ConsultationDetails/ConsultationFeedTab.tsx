@@ -79,25 +79,10 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
               return presets.find((obj) => obj.id === lastState.value);
             }
             if (lastState.type === "position") {
-              const assetBedObj = presets.find(
-                (p) => p.asset_bed.id === lastState.assetBed,
-              )?.asset_bed;
-
-              if (!assetBedObj) {
-                return;
-              }
-
-              return {
-                ...presets[0],
-                id: "",
-                asset_bed: assetBedObj,
-                position: lastState.value,
-              } satisfies CameraPreset;
+              return;
             }
           }
         })() ?? presets[0];
-
-      console.log({ preset, presets });
 
       if (preset) {
         setPreset(preset);
@@ -157,7 +142,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   }
 
   if (!bed || !asset) {
-    return <span>No bed/asset linked allocated</span>;
+    return <span>{t("no_bed_asset_linked_allocated")}</span>;
   }
 
   const cannotSaveToPreset = !hasMoved || !preset?.id;
@@ -165,8 +150,8 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   return (
     <StillWatching>
       <ConfirmDialog
-        title="Update Preset"
-        description="Are you sure you want to update this preset to the current location?"
+        title={t("update_preset")}
+        description={`Are you sure you want to update ${preset?.name} to the current location?`}
         action="Confirm"
         show={showPresetSaveConfirmation}
         onClose={() => setShowPresetSaveConfirmation(false)}
@@ -194,7 +179,6 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                   feedStateSessionKey,
                   JSON.stringify({
                     type: "position",
-                    assetBed: "",
                     value: (data as GetStatusResponse).result.position,
                   } satisfies LastAccessedPosition),
                 );
@@ -226,7 +210,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                   value={selectedPreset}
                   onChange={(value) => {
                     triggerGoal("Camera Preset Clicked", {
-                      presetName: preset?.name,
+                      presetName: selectedPreset?.name,
                       consultationId: props.consultationId,
                       userId: authUser.id,
                       result: "success",
@@ -279,7 +263,6 @@ type LastAccessedPreset = {
 
 type LastAccessedPosition = {
   type: "position";
-  assetBed: string;
   value: PTZPayload;
 };
 
