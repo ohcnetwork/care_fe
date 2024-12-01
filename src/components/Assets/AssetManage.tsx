@@ -598,8 +598,10 @@ const AssetManage = (props: AssetManageProps) => {
           handleClose={() =>
             setServiceEditData({ ...serviceEditData, open: false })
           }
-          handleUpdate={() => serviceRefetch()}
-          refetch={refetch}
+          handleUpdate={() => {
+            serviceRefetch();
+            refetch();
+          }}
           show={serviceEditData.open}
           viewOnly={serviceEditData.viewOnly}
         />
