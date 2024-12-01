@@ -1,13 +1,13 @@
 import { camelCase, capitalize, startCase } from "lodash-es";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader } from "@/components/ui/card";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { FileUpload } from "@/components/Files/FileUpload";
@@ -308,11 +308,16 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       options={
         sampleDetails?.patient && (
           <div className="my-2 flex justify-center md:justify-end">
-            <ButtonV2
-              href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
+            <Button
+              asChild
+              className="bg-[#0D9F6E] text-white hover:bg-[#0D9F6E]"
             >
-              {t("icmr_specimen_referral_form")}
-            </ButtonV2>
+              <Link
+                href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
+              >
+                {t("icmr_specimen_referral_form")}
+              </Link>
+            </Button>
           </div>
         )
       }
