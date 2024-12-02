@@ -143,7 +143,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
         ))}
 
         {items?.length === 0 && (
-          <div className="fixed flex h-full w-full items-center justify-center py-10 text-center font-medium text-secondary-700">
+          <div className="flex h-full w-full items-center justify-center py-10 text-center font-medium text-secondary-700">
             {emptyText}
           </div>
         )}

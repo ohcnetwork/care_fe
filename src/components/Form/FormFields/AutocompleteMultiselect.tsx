@@ -182,7 +182,7 @@ export const AutocompleteMutliSelect = <T, V>(
                     <CareIcon
                       id="dropdown-toggle"
                       icon="l-angle-down"
-                      className="text-lg" // You can adjust this size if necessary
+                      className="text-lg"
                     />
                   )}
                 </div>
