@@ -139,99 +139,48 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify Notice Board Functionality", () => {
-    // Log: Starting the test case
-    cy.log("Starting 'Verify Notice Board Functionality' test");
-
-    // Search facility and verify it's loaded or not
+    // search facility and verify it's loaded or not
     manageUserPage.interceptFacilitySearchReq();
     manageUserPage.typeFacilitySearch(facilityName);
     manageUserPage.verifyFacilitySearchReq();
-
-    // Log: Verifying facility search result
-    cy.log("Facility search completed, verifying facility data");
-
-    // Verify facility name and card reflection
+    // verify facility name and card reflection
     facilityNotify.verifyUrlContains("Dummy+Facility+40");
     facilityPage.verifyFacilityBadgeContent(facilityName);
     manageUserPage.assertFacilityInCard(facilityName);
-
-    // Log: Facility details verified
-    cy.log("Facility name and card reflection verified");
-
-    // Send notification to a facility
+    // send notification to a facility
     facilityHome.clickFacilityNotifyButton();
     facilityNotify.verifyFacilityName(facilityName);
     facilityNotify.fillNotifyText(notificationMessage);
-
-    // Log: Notification filled with message
-    cy.log("Filled notification message: " + notificationMessage);
-
     facilityNotify.interceptPostNotificationReq();
     cy.clickSubmitButton("Notify");
     facilityNotify.verifyPostNotificationReq();
     cy.verifyNotification("Facility Notified");
     cy.closeNotification();
-
-    // Log: Notification successfully sent
-    cy.log("Notification sent and closed");
-
+    cy.wait(2000);
     // Verify the frontend error on empty message
     facilityHome.clickFacilityNotifyButton();
     facilityNotify.verifyFacilityName(facilityName);
     cy.clickSubmitButton("Notify");
     facilityNotify.verifyErrorMessage(notificationErrorMsg);
-
-    // Log: Error message displayed for empty notification
-    cy.log("Error message displayed for empty notification");
-
-    // Close pop-up and verify
+    // close pop-up and verify
     facilityHome.verifyAndCloseNotifyModal();
-
-    // Log: Modal closed
-    cy.log("Notification modal closed");
-
-    // Sign out as district admin and login as Nurse
-    loginPage.ensureLoggedIn(); // Ensure the admin is logged in before logging out
-    loginPage.clickSignOutBtn(); // Sign out admin
-
-    // Log: Logged out as district admin
-    cy.log("Logged out as district admin");
-
-    loginPage.loginManuallyAsNurse(); // Log in as Nurse
-
-    // Log: Logged in as Nurse
-    cy.log("Logged in as Nurse");
-
-    // Wait for the nurse to be logged in by verifying the dashboard URL or nurse-specific element
-
-    // Log: Nurse logged in and dashboard visible
-    cy.log("Nurse dashboard is now visible");
-
+    // signout as district admin and login as a Nurse
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsNurse();
     // Verify Notice Board Reflection
     facilityNotify.interceptGetNotificationReq("MESSAGE");
     facilityNotify.visitNoticeBoard();
     facilityNotify.verifyGetNotificationReq();
     facilityNotify.verifyFacilityNoticeBoardMessage(notificationMessage);
     facilityNotify.interceptGetNotificationReq();
-
-    // Log: Verified notice board message
-    cy.log("Notice board message verified");
-
     // Verify Sidebar Notification Reflection
     facilityNotify.openNotificationSlide();
     facilityNotify.verifyGetNotificationReq();
     cy.verifyContentPresence("#notification-slide-msg", [notificationMessage]);
     facilityNotify.closeNotificationSlide();
-
-    // Log: Sidebar notification verified and closed
-    cy.log("Sidebar notification verified and closed");
-
-    // Sign out as Nurse and ensure login page is visible
     loginPage.ensureLoggedIn();
     loginPage.clickSignOutBtn();
-
-    // Log: Test case completed
-    cy.log("Test case 'Verify Notice Board Functionality' completed");
   });
 
   afterEach(() => {

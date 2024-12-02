@@ -98,6 +98,9 @@ describe("Patient Consultation in multiple combination", () => {
     cy.clickSubmitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // Below code for the prescription module only present while creating a new consultation
+    cy.intercept("POST", "**/api/v1/consultation/*/prescriptions/?").as(
+      "postPrescriptions",
+    );
     patientPrescription.clickAddPrescription();
     patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
@@ -106,6 +109,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
+    cy.wait("@postPrescriptions").its("response.statusCode").should("eq", 201);
     patientPrescription.clickReturnToDashboard();
     // Verify the data's across the dashboard
     patientConsultationPage.verifyTextInConsultation(
