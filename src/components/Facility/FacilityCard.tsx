@@ -117,7 +117,7 @@ export const FacilityCard = (props: {
                         href={`/facility/${facility.id}/cns`}
                         border
                         ghost
-                        className="mt-2 sm:mt-0"
+                        className="mt-2 sm:mt-0 md:mt-1"
                       >
                         <CareIcon
                           icon="l-monitor-heart-rate"

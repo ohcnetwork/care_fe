@@ -796,52 +796,54 @@ export const PatientManager = () => {
       hideBack={true}
       breadcrumbs={false}
       options={
-        <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-          <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
-            <ButtonV2
-              id="add-patient-details"
-              onClick={() => {
-                const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-                if (
-                  qParams.facility &&
-                  showAllFacilityUsers.includes(authUser.user_type)
-                )
-                  navigate(`/facility/${qParams.facility}/patient`);
-                else if (
-                  qParams.facility &&
-                  !showAllFacilityUsers.includes(authUser.user_type) &&
-                  authUser.home_facility_object?.id !== qParams.facility
-                )
-                  Notification.Error({
-                    msg: "Oops! Non-Home facility users don't have permission to perform this action.",
-                  });
-                else if (
-                  !showAllFacilityUsers.includes(authUser.user_type) &&
-                  authUser.home_facility_object?.id
-                ) {
-                  navigate(
-                    `/facility/${authUser.home_facility_object.id}/patient`,
-                  );
-                } else if (onlyAccessibleFacility)
-                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
-                else if (
-                  !showAllFacilityUsers.includes(authUser.user_type) &&
-                  !authUser.home_facility_object?.id
-                )
-                  Notification.Error({
-                    msg: "Oops! No home facility found",
-                  });
-                else setShowDialog("create");
-              }}
-              className="w-full lg:w-fit"
-            >
-              <CareIcon icon="l-plus" className="text-lg" />
-              <p id="add-patient-div" className="lg:my-[2px]">
-                Add Patient
-              </p>
-            </ButtonV2>
+        <div >
+          <div className="flex w-full flex-col items-center justify-between md:flex-row md:gap-4 lg:gap-5">
+            <div className="mb-2 flex w-full flex-col items-center md:w-1/2 lg:w-fit lg:flex-row lg:gap-5">
+              <ButtonV2
+                id="add-patient-details"
+                onClick={() => {
+                  const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+                  if (
+                    qParams.facility &&
+                    showAllFacilityUsers.includes(authUser.user_type)
+                  )
+                    navigate(`/facility/${qParams.facility}/patient`);
+                  else if (
+                    qParams.facility &&
+                    !showAllFacilityUsers.includes(authUser.user_type) &&
+                    authUser.home_facility_object?.id !== qParams.facility
+                  )
+                    Notification.Error({
+                      msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                    });
+                  else if (
+                    !showAllFacilityUsers.includes(authUser.user_type) &&
+                    authUser.home_facility_object?.id
+                  ) {
+                    navigate(
+                      `/facility/${authUser.home_facility_object.id}/patient`,
+                    );
+                  } else if (onlyAccessibleFacility)
+                    navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                  else if (
+                    !showAllFacilityUsers.includes(authUser.user_type) &&
+                    !authUser.home_facility_object?.id
+                  )
+                    Notification.Error({
+                      msg: "Oops! No home facility found",
+                    });
+                  else setShowDialog("create");
+                }}
+                className="w-full md:w-auto lg:w-fit"
+              >
+                <CareIcon icon="l-plus" className="text-lg" />
+                <p id="add-patient-div" className="lg:my-[2px]">
+                  Add Patient
+                </p>
+              </ButtonV2>
+            </div>
           </div>
-          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+          <div className="flex w-full flex-col items-center justify-end gap-2 md:w-1/2 md:flex-row md:gap-3 lg:w-fit lg:ml-3">
             <Tabs
               tabs={[
                 { text: t("live"), value: 0 },
@@ -875,7 +877,7 @@ export const PatientManager = () => {
             />
             {!!params.facility && (
               <ButtonV2
-                className="w-full lg:w-fit"
+                className="w-full md:w-auto lg:w-fit"
                 id="doctor-connect-patient-button"
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {
@@ -891,9 +893,11 @@ export const PatientManager = () => {
               </ButtonV2>
             )}
 
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
+            <div className="w-full md:w-auto">
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+            </div>
             <SortDropdownMenu
               options={PATIENT_SORT_OPTIONS}
               selected={qParams.ordering}
@@ -914,7 +918,7 @@ export const PatientManager = () => {
                       });
                     }, 500);
                   }}
-                  className="mr-5 w-full lg:w-fit"
+                  className="w-full md:w-auto lg:w-fit"
                 >
                   <CareIcon icon="l-export" />
                   <span className="lg:my-[3px]">Export</span>
