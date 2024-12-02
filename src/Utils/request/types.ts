@@ -41,4 +41,5 @@ export interface PaginatedResponse<TItem> {
   next: string | null;
   previous: string | null;
   results: TItem[];
+  total_doctors: number;
 }

@@ -33,16 +33,18 @@ export const FacilityStaffList = (props: any) => {
     },
     onResponse: ({ res, data }) => {
       if (res?.ok && data) {
-        let totalCount = 0;
-        data.results.map((doctor: DoctorModal) => {
-          if (doctor.count) {
-            totalCount += doctor.count;
-          }
-        });
-        setTotalDoctors(totalCount);
+        setTotalDoctors(data?.total_doctors ?? 0);
       }
     },
   });
+
+  const handlePageChange = (page: number) => {
+    updatePage(page);
+    const staffCapacityElement = document.getElementById("staff_capacity");
+    if (staffCapacityElement) {
+      staffCapacityElement.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   let doctorList: any = null;
   if (!doctorsList || !doctorsList.results.length) {
@@ -89,7 +91,10 @@ export const FacilityStaffList = (props: any) => {
 
   return (
     <section id="facility-doctor-capacity-details">
-      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+      <div
+        className="mt-5 rounded bg-white p-3 shadow-sm md:p-6"
+        id="staff_capacity"
+      >
         <div className="justify-between md:flex md:pb-2">
           <div className="mb-2 text-xl font-bold">Staff Capacity</div>
           <ButtonV2
@@ -128,7 +133,8 @@ export const FacilityStaffList = (props: any) => {
         cPage={qParams.page}
         defaultPerPage={resultsPerPage}
         data={{ totalCount: doctorsList?.count ?? 0 }}
-        onChange={(page) => updatePage(page)}
+        ScrollToTop={false}
+        onChange={(page: number) => handlePageChange(page)}
       />
     </section>
   );
