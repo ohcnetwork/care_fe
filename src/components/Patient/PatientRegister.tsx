@@ -858,6 +858,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       validate={validateForm}
       onSubmit={handleSubmit}
       submitLabel={buttonText}
+      {...(insuranceDetails.length > 0 ? { disabled: false } : {})}
       onCancel={() => goBack()}
       className="bg-transparent px-1 py-2 md:px-2"
       onDraftRestore={(newState) => {
