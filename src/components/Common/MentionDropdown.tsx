@@ -60,12 +60,12 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
         if (selectedIndex !== null) {
           onSelect({
             id: filteredUsers[selectedIndex].id.toString(),
-            username: filteredUsers[selectedIndex].username,
+            username: filteredUsers[selectedIndex].username + " ",
           });
         } else {
           onSelect({
             id: filteredUsers[0].id.toString(),
-            username: filteredUsers[0].username,
+            username: filteredUsers[0].username + " ",
           });
         }
       } else if (event.key === KEYS.ESCAPE) {
@@ -117,7 +117,10 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
             role="option"
             aria-selected={index === selectedIndex}
             onClick={() =>
-              onSelect({ id: user.id.toString(), username: user.username })
+              onSelect({
+                id: user.id.toString(),
+                username: user.username + " ",
+              })
             }
           >
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">

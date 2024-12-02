@@ -53,7 +53,8 @@ const NotePreview = ({
   useEffect(() => {
     const handleMentionHover = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.matches(".mention")) return;
+      if (!(target instanceof Element)) return;
+      if (!target.closest("[data-username]")) return;
 
       const username = target.getAttribute("data-username");
       if (!username) return;

@@ -97,7 +97,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setState({ ...state, cPage: 1 });
-      setReload(true);
       setReplyTo(undefined);
     }
     return data?.id;

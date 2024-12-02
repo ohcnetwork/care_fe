@@ -58,7 +58,7 @@ const PatientNoteCard = ({
   const authUser = useAuthUser();
   const patientId = useSlug("patient");
 
-  const file_type = "NOTES";
+  const file_type = "PATIENT_NOTES";
   const [file_state, setFileState] = useState<StateInterface>({
     open: false,
     isImage: false,

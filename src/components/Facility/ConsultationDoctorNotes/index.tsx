@@ -85,7 +85,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       Notification.Success({ msg: "Note added successfully" });
       setState({ ...state, cPage: 1 });
       setNoteField("");
-      setReload(true);
       setReplyTo(undefined);
     }
 
@@ -118,7 +117,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   return (
     <Page
       title="Discussion Notes"
-      className="relative flex h-screen flex-col"
+      className="relative flex h-[calc(100vh-3rem)] flex-col"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
         [patientId]: { name: patientName },

@@ -57,7 +57,6 @@ const PatientNotesDetailedView = (props: Props) => {
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
-      setReload(true);
     }
 
     return data?.id;

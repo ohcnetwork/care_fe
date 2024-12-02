@@ -12,6 +12,37 @@ import { classNames } from "@/Utils/utils";
 import MentionsDropdown from "./MentionDropdown";
 import NotePreview from "./NotePreview";
 
+interface FilePreviewProps {
+  file: File;
+  index: number;
+  onRemove: (index: number) => void;
+}
+
+const FilePreview: React.FC<FilePreviewProps> = ({ file, index, onRemove }) => {
+  return (
+    <div className="relative mt-1 h-20 w-20 cursor-pointer overflow-hidden rounded-lg bg-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-200/50">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove(index);
+        }}
+        className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 transition-colors duration-200 hover:bg-gray-400 hover:text-white"
+      >
+        <CareIcon
+          icon="l-times-circle"
+          className="text-md absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        />
+      </button>
+      <div className="flex h-full w-full flex-col items-center justify-center p-2">
+        <CareIcon icon="l-file" className="shrink-0 text-2xl text-gray-600" />
+        <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
+          {file?.name || "file"}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 interface DiscussionNotesEditorProps {
   initialNote?: string;
   onChange: (text: string) => void;
@@ -37,7 +68,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
   const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   const fileUpload = useFileUpload({
-    type: "NOTES",
+    type: "PATIENT_NOTES",
     category: "UNSPECIFIED",
     multiple: true,
     allowAllExtensions: true,
@@ -151,34 +182,14 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
           />
         )}
         {fileUpload.files.length > 0 && (
-          <div className="flex flex-wrap gap-3 border-t border-gray-200 bg-gray-50/50 p-3">
+          <div className="flex flex-wrap gap-3 border-t border-gray-200 bg-gray-50/50 px-3 py-1">
             {fileUpload.files.map((file, index) => (
-              <div
+              <FilePreview
                 key={index}
-                className="relative mt-1 h-20 w-20 cursor-pointer overflow-hidden rounded-lg bg-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-200/50"
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileUpload.removeFile(index);
-                  }}
-                  className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 transition-colors duration-200 hover:bg-gray-400 hover:text-white"
-                >
-                  <CareIcon
-                    icon="l-times-circle"
-                    className="text-md absolute right-0.5 top-0.5"
-                  />
-                </button>
-                <div className="flex h-full w-full flex-col items-center justify-center p-2">
-                  <CareIcon
-                    icon="l-file"
-                    className="shrink-0 text-2xl text-gray-600"
-                  />
-                  <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
-                    {file?.name || "file"}
-                  </span>
-                </div>
-              </div>
+                file={file}
+                index={index}
+                onRemove={fileUpload.removeFile}
+              />
             ))}
           </div>
         )}
@@ -186,7 +197,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
 
       {/* toolbar*/}
       <div className="flex items-center space-x-1 rounded-b-md border border-gray-300 bg-gray-100 pl-2 sm:space-x-2">
-        <label className="tooltip cursor-pointer rounded bg-gray-200/50 p-1">
+        <label className="tooltip cursor-pointer rounded bg-gray-200/50 p-1 text-gray-700">
           <CareIcon icon="l-paperclip" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-4">
             Attach File
@@ -237,7 +248,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
             editorRef.current.innerHTML = "";
             setIsPreviewMode(false);
           }}
-          className="flex-none rounded-md bg-primary-500 px-4 py-2 text-white transition-colors duration-200 hover:bg-primary-600 disabled:opacity-50"
+          className="max-w-12"
           disabled={!isAuthorized || isPreviewMode}
         >
           <CareIcon icon="l-message" className="text-lg" />
