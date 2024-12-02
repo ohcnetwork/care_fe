@@ -300,6 +300,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
   return (
     <Page
       title={t("sample_test_details")}
+      crumbsReplacements={{ [id]: { name: sampleDetails.patient_name } }}
       backUrl="/sample"
       options={
         sampleDetails?.patient && (
