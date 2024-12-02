@@ -217,18 +217,21 @@ export class AssetPage {
   }
 
   selectassetimportbutton() {
-    cy.get("[data-testid=import-asset-button]").click();
+    cy.get("[data-testid=import-asset-button]")
+      .scrollIntoView()
+      .should("be.visible")
+      .click();
   }
 
   selectJsonExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
-    cy.get("#export-json-option").click();
+    cy.get("#export-json-option").should("be.visible").click();
     cy.wait("@getJsonexport").its("response.statusCode").should("eq", 200);
   }
 
   selectCsvExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
-    cy.get("#export-csv-option").click();
+    cy.get("#export-csv-option").should("be.visible").click();
     cy.wait("@getCsvexport").its("response.statusCode").should("eq", 200);
   }
 
