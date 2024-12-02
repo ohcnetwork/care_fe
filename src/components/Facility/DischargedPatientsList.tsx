@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -45,6 +44,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import {
+  calculateDateRangeDuration,
   formatPatientAge,
   humanizeStrings,
   parsePhoneNumber,
@@ -91,25 +91,36 @@ const DischargedPatientsList = ({
     emergency_phone_number: qParams.emergency_phone_number
       ? parsePhoneNumber(qParams.emergency_phone_number)
       : undefined,
-    local_body: qParams.lsgBody || undefined,
-    district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    ordering: qParams.ordering || undefined,
+
+    gender: qParams.gender || undefined,
+    category: qParams.category || undefined,
+    age_min: qParams.age_min || undefined,
+    age_max: qParams.age_max || undefined,
+    last_consultation_admitted_bed_type_list:
+      qParams.last_consultation_admitted_bed_type_list || undefined,
+    last_consultation__consent_types:
+      qParams.last_consultation__consent_types || undefined,
+    last_consultation__new_discharge_reason:
+      qParams.last_consultation__new_discharge_reason || undefined,
+    last_consultation_is_telemedicine:
+      qParams.last_consultation_is_telemedicine || undefined,
+    ventilator_interface: qParams.ventilator_interface || undefined,
+    last_consultation_medico_legal_case:
+      qParams.last_consultation_medico_legal_case || undefined,
+    ration_card_category: qParams.ration_card_category || undefined,
+
+    diagnoses: qParams.diagnoses || undefined,
+    diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
+    diagnoses_provisional: qParams.diagnoses_provisional || undefined,
+    diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
+    diagnoses_differential: qParams.diagnoses_differential || undefined,
+
     created_date_before: qParams.created_date_before || undefined,
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || undefined,
-    category: qParams.category || undefined,
-    gender: qParams.gender || undefined,
-    age_min: qParams.age_min || undefined,
-    age_max: qParams.age_max || undefined,
-    date_declared_positive_before:
-      qParams.date_declared_positive_before || undefined,
-    date_declared_positive_after:
-      qParams.date_declared_positive_after || undefined,
-    ration_card_category: qParams.ration_card_category || undefined,
-    last_consultation_medico_legal_case:
-      qParams.last_consultation_medico_legal_case || undefined,
     last_consultation_encounter_date_before:
       qParams.last_consultation_encounter_date_before || undefined,
     last_consultation_encounter_date_after:
@@ -118,29 +129,20 @@ const DischargedPatientsList = ({
       qParams.last_consultation_discharge_date_before || undefined,
     last_consultation_discharge_date_after:
       qParams.last_consultation_discharge_date_after || undefined,
-    last_consultation_admitted_bed_type_list:
-      qParams.last_consultation_admitted_bed_type_list || undefined,
-    last_consultation__consent_types:
-      qParams.last_consultation__consent_types || undefined,
-    last_consultation__new_discharge_reason:
-      qParams.last_consultation__new_discharge_reason || undefined,
-    last_consultation_current_bed__location:
-      qParams.last_consultation_current_bed__location || undefined,
-    ventilator_interface: qParams.ventilator_interface || undefined,
+
+    local_body: qParams.lsgBody || undefined,
+    district: qParams.district || undefined,
+
     number_of_doses: qParams.number_of_doses || undefined,
-    covin_id: qParams.covin_id || undefined,
-    is_kasp: qParams.is_kasp || undefined,
     is_declared_positive: qParams.is_declared_positive || undefined,
+    covin_id: qParams.covin_id || undefined,
+    date_declared_positive_before:
+      qParams.date_declared_positive_before || undefined,
+    date_declared_positive_after:
+      qParams.date_declared_positive_after || undefined,
     last_vaccinated_date_before:
       qParams.last_vaccinated_date_before || undefined,
     last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
-    last_consultation_is_telemedicine:
-      qParams.last_consultation_is_telemedicine || undefined,
-    diagnoses: qParams.diagnoses || undefined,
-    diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
-    diagnoses_provisional: qParams.diagnoses_provisional || undefined,
-    diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
-    diagnoses_differential: qParams.diagnoses_differential || undefined,
   };
 
   useEffect(() => {
@@ -169,17 +171,6 @@ const DischargedPatientsList = ({
       params.last_consultation_discharge_date_after,
     ],
   ];
-
-  const calculateDateRangeDuration = (
-    startDate: string,
-    endDate: string,
-  ): number => {
-    if (!startDate && !endDate) return 0;
-    if (startDate && endDate) {
-      return Math.abs(dayjs(endDate).diff(dayjs(startDate), "days"));
-    }
-    return -1; // Invalid range when only one date is set
-  };
 
   const durations = date_range_fields.map(([startDate, endDate]) =>
     calculateDateRangeDuration(startDate, endDate),

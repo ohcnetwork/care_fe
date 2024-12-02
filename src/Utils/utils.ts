@@ -544,3 +544,14 @@ export const fahrenheitToCelsius = (fahrenheit: number) => {
 export const keysOf = <T extends object>(obj: T) => {
   return Object.keys(obj) as (keyof T)[];
 };
+
+export const calculateDateRangeDuration = (
+  startDate: string,
+  endDate: string,
+): number => {
+  if (!startDate && !endDate) return 0;
+  if (startDate && endDate) {
+    return Math.abs(dayjs(endDate).diff(dayjs(startDate), "days"));
+  }
+  return -1; // Invalid range when only one date is set
+};
