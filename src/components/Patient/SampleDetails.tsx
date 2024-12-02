@@ -324,7 +324,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="space-y-1 flex gap-2 items-center">
               <div className="text-sm text-muted-foreground">
-                {t("Status")}:
+                {t("status")}:
               </div>
               <Badge variant="outline" className="font-semibold">
                 {sampleDetails?.status}
@@ -332,7 +332,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="space-y-1 sm:text-right flex gap-2 items-center ">
               <div className="text-sm text-muted-foreground">
-                {t("Result")}:
+                {t("result")}:
               </div>
               <Badge variant="secondary" className="font-semibold">
                 {sampleDetails?.result}
@@ -344,7 +344,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">
-                {t("Patient")}:
+                {t("patient")}:
               </div>
               <div id="patient_name" className="font-medium">
                 {sampleDetails?.patient_name || "-"}
@@ -353,7 +353,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {sampleDetails?.facility_object && (
               <div className="space-y-1">
                 <div className="text-sm text-muted-foreground">
-                  {t("Facility")}:
+                  {t("facility")}:
                 </div>
                 <div className="font-medium">
                   {sampleDetails?.facility_object.name}
@@ -362,7 +362,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">
-                {t("Tested on")}:
+                {t("tested_on")}:
               </div>
               <div className="font-medium">
                 {sampleDetails?.date_of_result
@@ -372,7 +372,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">
-                {t("Result on")}:
+                {t("result_on")}:
               </div>
               <div className="font-medium">
                 {sampleDetails?.date_of_result
@@ -385,7 +385,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           {sampleDetails?.doctor_name && (
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">
-                {t("Doctor's Name")}:
+                {t("doctor's_Name")}:
               </div>
               <div id="doctor_name" className="font-medium">
                 {startCase(camelCase(sampleDetails.doctor_name))}
@@ -428,7 +428,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {sampleDetails?.etiology_identified && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                 <div className="font-medium text-sm">
-                  {t("Etiology identified")}:{" "}
+                  {t("etiology_identified")}:{" "}
                 </div>
                 <Badge id="etiology_identified" variant={"secondary"}>
                   {" "}
@@ -438,7 +438,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                {t("Is Atypical presentation")}
+                {t("is_atypical_presentation")}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -447,7 +447,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                {t("Is unusual course")}
+                {t("is_unusual_course")}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -457,7 +457,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {sampleDetails?.atypical_presentation && (
               <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                 <div className="font-medium text-sm">
-                  {t("Atypical presentation details")}:{" "}
+                  {t("atypical_presentation_details")}:{" "}
                 </div>
                 <Badge variant={"secondary"}>
                   {" "}
@@ -467,7 +467,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                {t("SARI - Severe Acute Respiratory illness")}{" "}
+                {t("sari")}{" "}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -476,7 +476,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                {t("ARI - Acute Respiratory illness")}{" "}
+                {t("ari")}{" "}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -485,7 +485,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                {t(" Contact with confirmed carrier")}{" "}
+                {t("contact_with_confirmed_carrier")}{" "}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -494,7 +494,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
               <div className="font-medium text-sm">
-                {t("Contact with suspected carrier")}{" "}
+                {t("contact_with_suspected_carrier")}{" "}
               </div>
               <Badge variant={"secondary"}>
                 {" "}
@@ -505,7 +505,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               sampleDetails.patient_travel_history.length !== 0 && (
                 <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
                   <div className="font-medium text-sm">
-                    {t("Countries travelled")}:{" "}
+                    {t("countries_travelled")}:{" "}
                   </div>
                   <Badge variant={"secondary"}>
                     {" "}
