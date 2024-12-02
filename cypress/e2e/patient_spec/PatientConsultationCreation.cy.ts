@@ -108,8 +108,8 @@ describe("Patient Consultation in multiple combination", () => {
     patientPrescription.enterDosage("3");
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.clickSubmitButton("Submit");
-    cy.verifyNotification("Medicine prescribed");
     cy.wait("@postPrescriptions").its("response.statusCode").should("eq", 201);
+    cy.verifyNotification("Medicine prescribed");
     patientPrescription.clickReturnToDashboard();
     // Verify the data's across the dashboard
     patientConsultationPage.verifyTextInConsultation(
