@@ -100,7 +100,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
     }, [item]);
 
     return (
-      <div className="flex w-full flex-col items-center gap-4 md:flex-row">
+      <div className="flex w-full flex-col gap-4 md:flex-row">
         {children(item, setItem, processing, errors)}
         {props.type === "creating" && (
           <ButtonV2
@@ -120,7 +120,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
             onClick={() => handleDelete(props.item.id)}
             className="w-full text-xl text-red-500 hover:text-red-700 disabled:grayscale md:w-auto"
           >
-            <CareIcon icon="l-times-circle" />{" "}
+            <CareIcon icon="l-times-circle" />
             <span className="text-sm md:hidden">{t("remove")}</span>
           </button>
         )}
@@ -143,7 +143,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
         ))}
 
         {items?.length === 0 && (
-          <div className="flex h-full w-full items-center justify-center py-10 text-center font-medium text-secondary-700">
+          <div className="fixed flex h-full w-full items-center justify-center py-10 text-center font-medium text-secondary-700">
             {emptyText}
           </div>
         )}

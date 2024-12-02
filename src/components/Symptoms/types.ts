@@ -43,10 +43,20 @@ type ClinicalImpressionStatus =
   | "entered-in-error";
 
 export interface EncounterSymptom extends BaseModel {
-  symptom: (typeof SYMPTOM_CHOICES)[number]["id"];
+  symptom: (typeof SYMPTOM_CHOICES)[number]["id"] | "";
   other_symptom?: string | null;
   onset_date: string;
   cure_date?: string | null;
   readonly clinical_impression_status: ClinicalImpressionStatus;
   readonly is_migrated: boolean;
+}
+
+export interface EncounterSymptomRequest {
+  symptom?:
+    | (typeof SYMPTOM_CHOICES)[number]["id"]
+    | (typeof SYMPTOM_CHOICES)[number]["id"][]
+    | "";
+  other_symptom?: string | null;
+  onset_date?: string;
+  cure_date?: string | null;
 }

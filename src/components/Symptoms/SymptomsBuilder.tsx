@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+import { debounce } from "lodash-es";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -10,6 +12,7 @@ import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 import SymptomsApi from "@/components/Symptoms/api";
 import {
   EncounterSymptom,
+  EncounterSymptomRequest,
   OTHER_SYMPTOM_CHOICE,
   SYMPTOM_CHOICES,
 } from "@/components/Symptoms/types";
@@ -22,6 +25,9 @@ import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import { Writable } from "@/Utils/types";
 import { classNames, dateQueryString } from "@/Utils/utils";
+
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import ModelCrudEditor from "../Form/ModelCrudEditor";
 
 export const CreateSymptomsBuilder = (props: {
   value: Writable<EncounterSymptom>[];
@@ -78,99 +84,280 @@ export const EncounterSymptomsBuilder = (props: {
 }) => {
   const consultationId = useSlug("consultation");
 
-  const [isProcessing, setIsProcessing] = useState(false);
   const { data, loading, refetch } = useQuery(SymptomsApi.list, {
     pathParams: { consultationId },
     query: { limit: 100 },
   });
 
-  if (!data) {
+  const symptoms = sortByOnsetDate(data?.results || []).filter(
+    (item) =>
+      props.showAll || item.clinical_impression_status !== "entered-in-error",
+  );
+
+  const createSymptom = async (body: EncounterSymptomRequest) => {
+    if (Array.isArray(body.symptom)) {
+      const { symptom, onset_date, other_symptom } = body;
+      const objects = symptom.map((symptom: EncounterSymptom["symptom"]) => {
+        return {
+          symptom,
+          onset_date: dateQueryString(onset_date),
+          other_symptom:
+            symptom === OTHER_SYMPTOM_CHOICE.id ? other_symptom : undefined,
+        };
+      });
+
+      if (consultationId) {
+        const responses = await Promise.all(
+          objects.map((body) =>
+            request(SymptomsApi.add, {
+              body,
+              pathParams: { consultationId: consultationId! },
+            }),
+          ),
+        );
+
+        if (responses.every(({ res }) => !!res?.ok)) {
+          Success({ msg: "Symptoms records updated successfully" });
+        }
+      }
+    } else {
+      const { res } = await request(SymptomsApi.add, {
+        pathParams: { consultationId },
+        body,
+      });
+
+      if (res?.ok) {
+        Success({ msg: "Symptom added successfully" });
+      }
+    }
+    refetch();
+  };
+
+  const updateSymptom = async (
+    symptomId: string,
+    body: EncounterSymptomRequest,
+  ) => {
+    const { res } = await request(SymptomsApi.partialUpdate, {
+      pathParams: { consultationId, external_id: symptomId },
+      body,
+    });
+    if (res?.ok) {
+      props.onChange?.();
+      refetch();
+    }
+  };
+
+  const deleteSymptom = async (symptomId: string) => {
+    const { res } = await request(SymptomsApi.markAsEnteredInError, {
+      pathParams: { consultationId, external_id: symptomId },
+    });
+    if (res?.ok) {
+      props.onChange?.();
+      refetch();
+    }
+  };
+
+  const FormRender = (
+    item: EncounterSymptom | EncounterSymptomRequest,
+    setItem: (item: EncounterSymptom | EncounterSymptomRequest) => void,
+    processing: boolean,
+  ) => {
+    const [selected, setSelected] = useState<
+      EncounterSymptom["symptom"] | EncounterSymptom["symptom"][]
+    >(item.symptom || "");
+
+    const [otherSymptom, setOtherSymptom] = useState<string>(
+      item.other_symptom || "",
+    );
+    const [onsetDate, setOnsetDate] = useState<Date | undefined>(
+      item.onset_date ? new Date(item.onset_date) : undefined,
+    );
+    const [onCureDate, setOnCureDate] = useState<Date | undefined>(
+      item.cure_date ? new Date(item.cure_date) : undefined,
+    );
+
+    const activeSymptomIds = symptoms
+      .filter((o) => o.symptom !== OTHER_SYMPTOM_CHOICE.id && !o.cure_date)
+      .map((o) => o.symptom);
+
+    const debouncedSetItem = debounce((value: string) => {
+      setItem({ other_symptom: value, symptom: item.symptom });
+    }, 10000);
+
     return (
-      <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-secondary-200 py-8 text-center font-medium text-secondary-700">
-        <CareIcon icon="l-spinner-alt" className="animate-spin text-lg" />
-        <span>Fetching symptom records...</span>
+      <div
+        className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap"
+        data-scribe-subform-creator
+      >
+        <DateFormField
+          name="onset_date"
+          id="symptoms_onset_date"
+          placeholder="Date of onset"
+          disableFuture
+          value={onsetDate}
+          onChange={({ value }) => {
+            if (!dayjs(onsetDate).isSame(dayjs(value), "second")) {
+              setOnsetDate(value);
+              {
+                "id" in item
+                  ? setItem({
+                      onset_date: dateQueryString(value),
+                      id: item.id,
+                    })
+                  : setItem({ ...item, onset_date: dateQueryString(value) });
+              }
+            }
+          }}
+          errorClassName="hidden"
+        />
+        {"id" in item ? (
+          <DateFormField
+            className="col-span-3 lg:col-span-2 xl:col-span-1"
+            name="cure_date"
+            value={onCureDate}
+            disableFuture
+            placeholder="Date of cure"
+            min={new Date(item.onset_date)}
+            disabled={processing}
+            onChange={({ value }) => {
+              if (!dayjs(onCureDate).isSame(dayjs(value), "second")) {
+                setOnCureDate(value);
+                {
+                  "id" in item
+                    ? setItem({
+                        cure_date: dateQueryString(value),
+                        id: item.id,
+                      })
+                    : setItem({
+                        ...(item as EncounterSymptom),
+                        cure_date: dateQueryString(value),
+                      });
+                }
+              }
+            }}
+            errorClassName="hidden"
+          />
+        ) : (
+          <></>
+        )}
+        <div className="flex w-full flex-col gap-2">
+          {"id" in item ? (
+            <>
+              <SelectFormField
+                id="additional_symptoms"
+                name="symptom"
+                className="w-full"
+                disabled={processing}
+                placeholder="Search for symptoms"
+                value={selected as EncounterSymptom["symptom"][]}
+                onChange={(e) => {
+                  setSelected(e.value[0]);
+                  setItem({
+                    symptom: e.value[0],
+                    id: item.id,
+                  });
+                }}
+                options={SYMPTOM_CHOICES}
+                optionLabel={(option) => option.text}
+                optionValue={(option) => [option.id]}
+                errorClassName="hidden"
+              />
+              {selected === OTHER_SYMPTOM_CHOICE.id && (
+                <TextAreaFormField
+                  id="other_symptoms"
+                  label="Other symptom details"
+                  labelClassName="text-sm"
+                  name="other_symptom"
+                  placeholder="Describe the other symptom"
+                  value={otherSymptom}
+                  onChange={({ value }) => {
+                    setOtherSymptom(value);
+                    debouncedSetItem(value);
+                  }}
+                  errorClassName="hidden"
+                />
+              )}
+            </>
+          ) : item && "onset_date" in item ? (
+            <>
+              <AutocompleteMultiSelectFormField
+                id="additional_symptoms"
+                name="symptom"
+                className="w-full"
+                disabled={processing}
+                placeholder="Search for symptoms"
+                value={selected as EncounterSymptom["symptom"][]}
+                onChange={(e) => {
+                  setSelected(e.value);
+                  setItem({
+                    ...item,
+                    symptom:
+                      e.value as (typeof SYMPTOM_CHOICES)[number]["id"][],
+                  });
+                }}
+                options={SYMPTOM_CHOICES.filter(
+                  ({ id }) => !activeSymptomIds.includes(id),
+                )}
+                optionLabel={(option) => option.text}
+                optionValue={(option) => option.id}
+                errorClassName="hidden"
+              />
+              {Array.isArray(selected) &&
+                (selected as EncounterSymptom["symptom"][]).includes(
+                  OTHER_SYMPTOM_CHOICE.id,
+                ) && (
+                  <TextAreaFormField
+                    id="other_symptoms"
+                    label="Other symptom details"
+                    labelClassName="text-sm"
+                    name="other_symptom"
+                    placeholder="Describe the other symptom"
+                    value={otherSymptom}
+                    onChange={({ value }) => {
+                      setOtherSymptom(value);
+                      setItem({
+                        ...(item as EncounterSymptom),
+                        other_symptom: value,
+                      });
+                    }}
+                    errorClassName="hidden"
+                  />
+                )}
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
     );
-  }
-
-  let items = sortByOnsetDate(data.results);
-  if (!props.showAll) {
-    items = items.filter(
-      (i) => i.clinical_impression_status !== "entered-in-error",
-    );
-  }
+  };
 
   return (
-    <div
-      className="flex w-full flex-col items-start rounded-lg border border-secondary-400"
-      data-scribe-subform="Symptoms"
-    >
-      <ul
-        className={classNames(
-          "flex w-full flex-col p-4",
-          (loading || isProcessing) && "pointer-events-none animate-pulse",
-        )}
+    <>
+      <ModelCrudEditor<
+        EncounterSymptom,
+        EncounterSymptomRequest,
+        Record<string, never>
       >
-        {items.map((symptom) => {
-          const handleUpdate = async (event: FieldChangeEvent<unknown>) => {
-            setIsProcessing(true);
-            const { res } = await request(SymptomsApi.partialUpdate, {
-              pathParams: { consultationId, external_id: symptom.id },
-              body: { [event.name]: event.value },
-            });
-            if (res?.ok) {
-              props.onChange?.();
-              await refetch();
-            }
-            setIsProcessing(false);
-          };
-
-          const handleMarkAsEnteredInError = async () => {
-            setIsProcessing(true);
-            const { res } = await request(SymptomsApi.markAsEnteredInError, {
-              pathParams: { consultationId, external_id: symptom.id },
-            });
-            if (res?.ok) {
-              props.onChange?.();
-              await refetch();
-            }
-            setIsProcessing(false);
-          };
-
-          return (
-            <li
-              key={symptom.id}
-              className="border-b-2 border-dashed border-secondary-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
-              data-scribe-subform-entry
-            >
-              <SymptomEntry
-                value={symptom}
-                disabled={isProcessing}
-                onChange={handleUpdate}
-                onRemove={handleMarkAsEnteredInError}
-              />
-            </li>
-          );
-        })}
-      </ul>
-
-      {items.length === 0 && (
-        <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-secondary-700">
-          Patient is Asymptomatic
-        </div>
-      )}
-
-      <div className="w-full rounded-b-lg border-t-2 border-dashed border-secondary-400 bg-secondary-100 p-4">
-        <AddSymptom
-          existing={data.results}
-          consultationId={consultationId}
-          onAdd={() => {
-            props.onChange?.();
-            refetch();
-          }}
-        />
-      </div>
-    </div>
+        items={symptoms}
+        onCreate={createSymptom}
+        onUpdate={updateSymptom}
+        onDelete={deleteSymptom}
+        loading={loading}
+        errors={{}}
+        emptyText="Patient is Asymptomatic"
+        empty={{
+          symptom: "",
+          onset_date: new Date().toISOString().split("T")[0],
+        }}
+        createText="Add Symptom(s)"
+        allowCreate={(item) =>
+          Array.isArray(item.symptom) ? !item.symptom.length : !item.symptom
+        }
+      >
+        {FormRender}
+      </ModelCrudEditor>
+    </>
   );
 };
 
