@@ -466,18 +466,14 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               </div>
             )}
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-              <div className="font-medium text-sm">
-                {t("sari")}{" "}
-              </div>
+              <div className="font-medium text-sm">{t("sari")} </div>
               <Badge variant={"secondary"}>
                 {" "}
                 {yesOrNoBadge(sampleDetails?.has_sari)}
               </Badge>
             </div>
             <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
-              <div className="font-medium text-sm">
-                {t("ari")}{" "}
-              </div>
+              <div className="font-medium text-sm">{t("ari")} </div>
               <Badge variant={"secondary"}>
                 {" "}
                 {yesOrNoBadge(sampleDetails?.has_ari)}
