@@ -89,16 +89,13 @@ const DateInputV2: React.FC<Props> = ({
         );
         break;
       case "month":
-        if (
-          !min ||
-          datePickerHeaderDate.getFullYear() > min.getFullYear() ||
-          (datePickerHeaderDate.getFullYear() === min.getFullYear() &&
-            datePickerHeaderDate.getMonth() > min.getMonth())
-        ) {
-          setDatePickerHeaderDate((prev) =>
-            dayjs(prev).subtract(1, "year").toDate(),
-          );
-        }
+        setDatePickerHeaderDate((prev) => {
+          const newDate = dayjs(prev).subtract(1, "year").toDate();
+          if (min && newDate < min) {
+            return new Date(min.getFullYear(), min.getMonth(), 1);
+          }
+          return newDate;
+        });
         break;
       case "year":
         if (!min || year.getFullYear() - 10 >= min.getFullYear()) {
@@ -114,11 +111,13 @@ const DateInputV2: React.FC<Props> = ({
         setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "month").toDate());
         break;
       case "month":
-        if (!max || datePickerHeaderDate.getFullYear() < max.getFullYear()) {
-          setDatePickerHeaderDate((prev) =>
-            dayjs(prev).add(1, "year").toDate(),
-          );
-        }
+        setDatePickerHeaderDate((prev) => {
+          const newDate = dayjs(prev).add(1, "year").toDate();
+          if (max && newDate > max) {
+            return new Date(max.getFullYear(), max.getMonth(), 1);
+          }
+          return newDate;
+        });
         break;
       case "year":
         if (!max || year.getFullYear() + 10 <= max.getFullYear()) {
