@@ -259,6 +259,10 @@ class FacilityPage {
     cy.get("#bed-capacity-save").click();
   }
 
+  clickdoctorcapacityaddmore() {
+    cy.get("#doctor-save").click();
+  }
+
   clickcancelbutton() {
     cy.get("#cancel").click();
   }
