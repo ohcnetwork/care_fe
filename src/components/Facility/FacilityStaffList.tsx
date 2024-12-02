@@ -41,9 +41,7 @@ export const FacilityStaffList = (props: any) => {
   const handlePageChange = (page: number) => {
     updatePage(page);
     const staffCapacityElement = document.getElementById("staff_capacity");
-    if (staffCapacityElement) {
-      staffCapacityElement.scrollIntoView({ behavior: "smooth" });
-    }
+    staffCapacityElement?.scrollIntoView({ behavior: "smooth" });
   };
 
   let doctorList: any = null;
@@ -133,7 +131,7 @@ export const FacilityStaffList = (props: any) => {
         cPage={qParams.page}
         defaultPerPage={resultsPerPage}
         data={{ totalCount: doctorsList?.count ?? 0 }}
-        ScrollToTop={false}
+        scrollToTop={false}
         onChange={(page: number) => handlePageChange(page)}
       />
     </section>

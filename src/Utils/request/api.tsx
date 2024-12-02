@@ -89,7 +89,10 @@ import {
   UserModel,
 } from "@/components/Users/models";
 
-import { PaginatedResponse } from "@/Utils/request/types";
+import {
+  DoctorPaginatedResponse,
+  PaginatedResponse,
+} from "@/Utils/request/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -671,7 +674,7 @@ const routes = {
 
   listDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
-    TRes: Type<PaginatedResponse<DoctorModal>>(),
+    TRes: Type<DoctorPaginatedResponse<DoctorModal>>(),
   },
   getDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",

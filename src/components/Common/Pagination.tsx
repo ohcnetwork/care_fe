@@ -12,7 +12,7 @@ interface PaginationProps {
   defaultPerPage: number;
   cPage: number;
   className?: string;
-  ScrollToTop?: boolean;
+  scrollToTop?: boolean;
 }
 const Pagination = ({
   className = "mx-auto my-4",
@@ -20,7 +20,7 @@ const Pagination = ({
   onChange,
   defaultPerPage,
   cPage,
-  ScrollToTop = true,
+  scrollToTop = true,
 }: PaginationProps) => {
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,7 +83,7 @@ const Pagination = ({
     setCurrentPage(page);
     onChange(page, rowsPerPage);
     const pageContainer = window.document.getElementById("pages");
-    if (ScrollToTop) {
+    if (scrollToTop) {
       pageContainer?.scroll({
         top: 0,
         left: 0,

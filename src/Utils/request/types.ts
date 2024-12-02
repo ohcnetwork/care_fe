@@ -41,5 +41,8 @@ export interface PaginatedResponse<TItem> {
   next: string | null;
   previous: string | null;
   results: TItem[];
+}
+
+export interface DoctorPaginatedResponse<T> extends PaginatedResponse<T> {
   total_doctors: number;
 }
