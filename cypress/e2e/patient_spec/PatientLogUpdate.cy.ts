@@ -85,6 +85,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectBed(bedOne);
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
+    cy.intercept("POST", "/api/v1/consultation/*/daily_rounds/").as(
+      "dailyRounds",
+    );
     // Only will be using random non-unique progress note fields
     patientLogupdate.selectRoundType("Progress Note");
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -109,6 +112,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPrescription.enterDosage("4");
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.clickSubmitButton("Submit");
+    cy.wait("@dailyRounds").its("response.statusCode").should("eq", 201);
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     // Submit the doctors log update
