@@ -483,8 +483,9 @@ export default function ShiftDetails(props: { id: string }) {
           }}
           backUrl="/shifting/board"
           options={
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 mt-4">
               <ButtonV2
+                className="w-full sm:w-auto"
                 tooltip={
                   ["COMPLETED", "CANCELLED"].includes(data?.status || "")
                     ? `A shifting request, once ${data?.status.toLowerCase()} cannot be updated`
@@ -501,7 +502,10 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("update_status_details")}
               </ButtonV2>
 
-              <ButtonV2 onClick={() => setIsPrintMode(true)}>
+              <ButtonV2
+                className="w-full sm:w-auto"
+                onClick={() => setIsPrintMode(true)}
+              >
                 <CareIcon icon="l-file-alt" className="mr-2 text-base" />{" "}
                 {t("referral_letter")}
               </ButtonV2>
