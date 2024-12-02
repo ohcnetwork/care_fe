@@ -1092,7 +1092,10 @@ export const PatientManager = () => {
         />
       </div>
       <div>
-        <PatientFilter {...advancedFilter} key={window.location.search} />
+        <PatientFilter
+          {...advancedFilter}
+          key={JSON.stringify(advancedFilter.filter)}
+        />
         <TabPanel value={tabValue} index={0}>
           <div className="mb-4">{managePatients}</div>
         </TabPanel>
