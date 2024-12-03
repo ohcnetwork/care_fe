@@ -213,6 +213,10 @@ export const ConsultationDetails = (props: any) => {
             crumbsReplacements={{
               [facilityId]: { name: patientData?.facility_object?.name },
               [patientId]: { name: patientData?.name },
+              consultation: {
+                name: "Consultation",
+                uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`,
+              },
               [consultationId]: {
                 name:
                   consultationData.suggestion === "A"
@@ -395,9 +399,6 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
           </div>
-          <SelectedTab {...consultationTabProps} />
-        </div>
-        <div className="px-3 pb-3 md:px-6 md:pb-6">
           <SelectedTab {...consultationTabProps} />
         </div>
       </div>
