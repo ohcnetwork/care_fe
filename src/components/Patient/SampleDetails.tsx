@@ -324,7 +324,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="space-y-1 flex gap-2 items-center">
               <div className="text-sm text-muted-foreground">
-                {t("status")}:
+                {t("status")}:{" "}
               </div>
               <Badge variant="outline" className="font-semibold">
                 {sampleDetails?.status}
@@ -332,7 +332,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="space-y-1 sm:text-right flex gap-2 items-center ">
               <div className="text-sm text-muted-foreground">
-                {t("result")}:
+                {t("result")}:{" "}
               </div>
               <Badge variant="secondary" className="font-semibold">
                 {sampleDetails?.result}
@@ -353,7 +353,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             {sampleDetails?.facility_object && (
               <div className="space-y-1">
                 <div className="text-sm text-muted-foreground">
-                  {t("facility")}:
+                  {t("facility")}:{" "}
                 </div>
                 <div className="font-medium">
                   {sampleDetails?.facility_object.name}
@@ -362,7 +362,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             )}
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">
-                {t("tested_on")}:
+                {t("tested_on")}:{" "}
               </div>
               <div className="font-medium">
                 {sampleDetails?.date_of_result
@@ -372,7 +372,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             </div>
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">
-                {t("result_on")}:
+                {t("result_on")}:{" "}
               </div>
               <div className="font-medium">
                 {sampleDetails?.date_of_result
@@ -385,7 +385,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           {sampleDetails?.doctor_name && (
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">
-                {t("doctor's_Name")}:
+                {t("doctors_name")}:
               </div>
               <div id="doctor_name" className="font-medium">
                 {startCase(camelCase(sampleDetails.doctor_name))}
@@ -518,6 +518,16 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               </div>
               <div className="font-medium">
                 {startCase(camelCase(sampleDetails.sample_type))}
+              </div>
+            </div>
+          )}
+          {sampleDetails?.sample_type === "OTHER TYPE" && (
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
+                {t("sample_type_description")}:{" "}
+              </div>
+              <div className="font-medium">
+                {sampleDetails?.sample_type_other}
               </div>
             </div>
           )}
