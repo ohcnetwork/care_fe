@@ -3,9 +3,11 @@ import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 
 import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import { ABGAnalysisFields } from "@/components/LogUpdate/Sections/ABGAnalysis";
 import { IOBalanceSections } from "@/components/LogUpdate/Sections/IOBalance";
@@ -22,8 +24,6 @@ import {
   properRoundOf,
   rangeValueDescription,
 } from "@/Utils/utils";
-
-import { Button } from "../ui/button";
 
 type Props = {
   facilityId: string;
@@ -53,24 +53,23 @@ export default function CriticalCarePreview(props: Props) {
   return (
     <div className="w-full transition-all duration-200 ease-in-out md:mx-auto md:max-w-5xl md:pt-8">
       <div className="py-4 flex items-center justify-between max-md:flex-col max-md:items-start">
-        <ButtonV2
-          id="back-to-consultation"
-          variant="secondary"
-          href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`}
-        >
-          {t("back_to_consultation")}
-        </ButtonV2>
+        <Button id="back-to-consultation" variant="outline" asChild>
+          <Link
+            href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`}
+          >
+            {t("back_to_consultation")}
+          </Link>
+        </Button>
         <Button
           asChild
           id="update-log"
-          variant={"primary"}
-          data-testid="update-log-button"
+          variant="outline_primary"
           aria-label={t("update_log")}
         >
           <Link
-            className="mt-2"
             href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/log_updates/${props.id}/update`}
           >
+            <CareIcon icon="l-edit-alt" className="mr-2 text-lg" />
             {t("update_log")}
           </Link>
         </Button>
