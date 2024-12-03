@@ -277,10 +277,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <PrintPreview title={t("Patient Referral Letter")}>
-        <Card
-          id="section-to-print"
-          className="print mx-auto w-full max-w-4xl bg-white px-4 py-6 sm:px-6 lg:px-8"
-        >
+        <Card className="shadow-none border-none">
           <CardHeader className="flex flex-col items-center space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
             <CardTitle className="mx-auto my-auto text-lg font-bold sm:text-2xl">
               {t("referral_letter")}
