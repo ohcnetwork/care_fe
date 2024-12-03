@@ -992,12 +992,14 @@ export const PatientManager = () => {
       />
 
       <div className="mt-4 gap-4 lg:gap-16 flex flex-col lg:flex-row lg:items-center">
-        <CountBlock
-          text={t("total_patients")}
-          count={data?.count || 0}
-          loading={isLoading}
-          icon="l-user-injured"
-        />
+        <div id="total-patientcount">
+          <CountBlock
+            text={t("total_patients")}
+            count={data?.count || 0}
+            loading={isLoading}
+            icon="l-user-injured"
+          />
+        </div>
 
         <SearchByMultipleFields
           id="patient-search"
