@@ -20,7 +20,9 @@ export class PatientFileUpload {
 
   recordAudio() {
     cy.get("#record-audio").click();
-    cy.wait(5000);
+    cy.wait(2000);
+    cy.get("#start-recording").click();
+    cy.wait(2000);
     cy.get("#stop-recording").click();
     cy.wait(1000);
     cy.get("#save-recording").click();
@@ -58,7 +60,7 @@ export class PatientFileUpload {
 
   clickSaveArchiveFile() {
     cy.intercept("PATCH", "**/api/v1/files/**").as("saveArchiveFile");
-    cy.submitButton("Proceed");
+    cy.clickSubmitButton("Proceed");
     cy.wait("@saveArchiveFile").its("response.statusCode").should("eq", 200);
   }
 
@@ -89,7 +91,7 @@ export class PatientFileUpload {
 
   clickSaveFileName() {
     cy.intercept("PATCH", "**/api/v1/files/**").as("saveFileName");
-    cy.submitButton("Proceed");
+    cy.clickSubmitButton("Proceed");
     cy.wait("@saveFileName").its("response.statusCode").should("eq", 200);
   }
 }

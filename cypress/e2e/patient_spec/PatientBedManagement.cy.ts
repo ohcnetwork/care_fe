@@ -11,8 +11,8 @@ describe("Patient swtich bed functionality", () => {
   const switchBedOne = "Dummy Bed 4";
   const switchBedTwo = "Dummy Bed 1";
   const switchBedThree = "Dummy Bed 7";
-  const switchPatientOne = "Dummy Patient 6";
-  const switchPatientTwo = "Dummy Patient 7";
+  const switchPatientOne = "Dummy Patient Six";
+  const switchPatientTwo = "Dummy Patient Seven";
 
   before(() => {
     loginPage.loginAsDistrictAdmin();

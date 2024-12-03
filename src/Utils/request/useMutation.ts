@@ -10,7 +10,7 @@ import { mergeRequestOptions } from "@/Utils/request/utils";
 
 export default function useMutation<TData, TBody>(
   route: MutationRoute<TData, TBody>,
-  options: RequestOptions<TData>,
+  options: RequestOptions<TData, TBody>,
 ) {
   const [response, setResponse] = React.useState<RequestResult<TData>>();
   const [isProcessing, setIsProcessing] = React.useState(false);
@@ -18,7 +18,7 @@ export default function useMutation<TData, TBody>(
   const controllerRef = React.useRef<AbortController>();
 
   const runQuery = React.useCallback(
-    async (overrides?: RequestOptions<TData>) => {
+    async (overrides?: RequestOptions<TData, TBody>) => {
       controllerRef.current?.abort();
 
       const controller = new AbortController();
@@ -31,8 +31,10 @@ export default function useMutation<TData, TBody>(
 
       setIsProcessing(true);
       const response = await request(route, { ...resolvedOptions, controller });
-      setResponse(response);
-      setIsProcessing(false);
+      if (response.error?.name !== "AbortError") {
+        setResponse(response);
+        setIsProcessing(false);
+      }
       return response;
     },
     [route, JSON.stringify(options)],

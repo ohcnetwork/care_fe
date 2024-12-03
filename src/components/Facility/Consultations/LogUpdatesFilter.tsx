@@ -26,7 +26,7 @@ interface Props {
   onApply: (filter: FilterState) => void;
 }
 
-export default function DailyRoundsFilter(props: Props) {
+export default function LogUpdatesFilter(props: Props) {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<FilterState>({});
 

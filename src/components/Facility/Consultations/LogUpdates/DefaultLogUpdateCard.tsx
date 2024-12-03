@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
-import LogUpdateCardAttribute from "@/components/Facility/Consultations/DailyRounds/LogUpdateCardAttribute";
+import LogUpdateCardAttribute from "@/components/Facility/Consultations/LogUpdates/LogUpdateCardAttribute";
 import { ConsultationModel } from "@/components/Facility/models";
 import { DailyRoundsModel } from "@/components/Patient/models";
 
@@ -26,7 +26,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
   return (
     <div
       className="flex w-full flex-col gap-4 rounded-lg border border-secondary-400 p-4 @container"
-      id="dailyround-entry"
+      id="logupdate-entry"
     >
       <LogUpdateCardAttribute
         attributeKey={"rounds_type"}
@@ -59,8 +59,8 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
             ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
               round.rounds_type!,
             )
-              ? `${consultationUrl}/daily-rounds/${round.id}`
-              : `${consultationUrl}/daily_rounds/${round.id}`
+              ? `${consultationUrl}/log_updates/${round.id}`
+              : `${consultationUrl}/log_updates/${round.id}/critical_care`
           }
         >
           <CareIcon icon="l-eye" className="text-lg" />
@@ -81,8 +81,8 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
               "DOCTORS_LOG",
               "COMMUNITY_NURSES_LOG",
             ].includes(round.rounds_type!)
-              ? `${consultationUrl}/daily-rounds/${round.id}/update`
-              : `${consultationUrl}/daily_rounds/${round.id}/update`
+              ? `${consultationUrl}/log_updates/${round.id}/update`
+              : `${consultationUrl}/log_updates/${round.id}/critical_care/update`
           }
         >
           <CareIcon icon="l-pen" className="text-lg" />

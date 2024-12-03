@@ -81,7 +81,7 @@ const consultationRoutes: AppRoutes = {
         sessionId={sessionId}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({
+  "/facility/:facilityId/patient/:patientId/consultation/:id/log_updates": ({
     facilityId,
     patientId,
     id,
@@ -92,7 +92,7 @@ const consultationRoutes: AppRoutes = {
       consultationId={id}
     />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update":
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/log_updates/:id/update":
     ({ facilityId, patientId, consultationId, id }) => (
       <DailyRounds
         facilityId={facilityId}
@@ -101,7 +101,7 @@ const consultationRoutes: AppRoutes = {
         id={id}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id":
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/log_updates/:id":
     ({ facilityId, patientId, consultationId, id }) => (
       <DailyRoundListDetails
         facilityId={facilityId}
@@ -110,7 +110,7 @@ const consultationRoutes: AppRoutes = {
         id={id}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id":
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/log_updates/:id/critical_care":
     ({ facilityId, patientId, consultationId, id }) => (
       <CriticalCarePreview
         facilityId={facilityId}
@@ -119,7 +119,7 @@ const consultationRoutes: AppRoutes = {
         id={id}
       />
     ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily_rounds/:id/update":
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/log_updates/:id/critical_care/update":
     ({ facilityId, patientId, consultationId, id }) => (
       <CriticalCareEditor
         facilityId={facilityId}

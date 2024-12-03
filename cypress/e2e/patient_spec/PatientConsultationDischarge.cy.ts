@@ -31,11 +31,11 @@ describe("Patient Discharge based on multiple reason", () => {
   });
 
   it("Discharge a LAMA patient in the consultation", () => {
-    patientPage.visitPatient("Dummy Patient 12");
+    patientPage.visitPatient("Discharge Patient One");
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason4);
-    cy.submitButton("Confirm Discharge");
-    cy.submitButton("Acknowledge & Submit");
+    cy.clickSubmitButton("Confirm Discharge");
+    cy.clickSubmitButton("Acknowledge & Submit");
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -47,13 +47,13 @@ describe("Patient Discharge based on multiple reason", () => {
   });
 
   it("Discharge a expired patient in the consultation", () => {
-    patientPage.visitPatient("Dummy Patient 13");
+    patientPage.visitPatient("Discharge Patient Two");
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason3);
     patientDischarge.typeDischargeNote(patientDeathCause);
     patientDischarge.typeDoctorName(doctorName);
-    cy.submitButton("Confirm Discharge");
-    cy.submitButton("Acknowledge & Submit");
+    cy.clickSubmitButton("Confirm Discharge");
+    cy.clickSubmitButton("Acknowledge & Submit");
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -67,7 +67,7 @@ describe("Patient Discharge based on multiple reason", () => {
   });
 
   it("Discharge patient with referred reason to a facility", () => {
-    patientPage.visitPatient("Dummy Patient 16");
+    patientPage.visitPatient("Discharge Patient Three");
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason2);
     patientDischarge.typeDischargeNote(patientDischargeAdvice);
@@ -77,8 +77,8 @@ describe("Patient Discharge based on multiple reason", () => {
     // select a non-registered facility and perform the discharge
     patientDischarge.typeReferringFacility(referringFreetextFacility);
     cy.wait(2000);
-    cy.submitButton("Confirm Discharge");
-    cy.submitButton("Acknowledge & Submit");
+    cy.clickSubmitButton("Confirm Discharge");
+    cy.clickSubmitButton("Acknowledge & Submit");
     cy.wait(2000);
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
@@ -93,7 +93,7 @@ describe("Patient Discharge based on multiple reason", () => {
   });
 
   it("Discharge a recovered patient with all relevant fields", () => {
-    patientPage.visitPatient("Dummy Patient 15");
+    patientPage.visitPatient("Discharge Patient Four");
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason1);
     patientDischarge.typeDischargeNote(patientDischargeAdvice);
@@ -104,13 +104,13 @@ describe("Patient Discharge based on multiple reason", () => {
     patientPrescription.selectMedicine(patientMedicine);
     patientPrescription.enterDosage("4");
     patientPrescription.selectDosageFrequency("Twice daily");
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
     cy.wait(2000);
     cy.closeNotification();
     // submit the discharge pop-up
-    cy.submitButton("Confirm Discharge");
-    cy.submitButton("Acknowledge & Submit");
+    cy.clickSubmitButton("Confirm Discharge");
+    cy.clickSubmitButton("Acknowledge & Submit");
     cy.wait(2000);
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();

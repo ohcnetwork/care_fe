@@ -144,7 +144,7 @@ export const DailyRounds = (props: any) => {
   const [diagnoses, setDiagnoses] = useState<ConsultationDiagnosis[]>();
   const [showDiscontinuedPrescriptions, setShowDiscontinuedPrescriptions] =
     useState(false);
-  const headerText = !id ? "Add Consultation Update" : "Info";
+  const headerText = !id ? t("add") + " " + t("log_update") : "Info";
   const buttonText = !id
     ? !["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)
       ? t("save")
@@ -411,7 +411,7 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${obj.id}/update`,
             );
           }
         }
@@ -439,7 +439,7 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${obj.id}/critical_care/update`,
             );
           }
         }
@@ -553,7 +553,7 @@ export const DailyRounds = (props: any) => {
       }}
       backUrl={
         id
-          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates`
           : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
       }
       className="mx-auto max-w-4xl"
@@ -702,6 +702,36 @@ export const DailyRounds = (props: any) => {
                   },
                 ]}
               />
+
+              <TextFormField
+                {...field("ventilator_spo2")}
+                labelSuffix="%"
+                type="number"
+                min={0}
+                max={100}
+                thresholds={[
+                  {
+                    value: 0,
+                    className: "text-danger-500",
+                    label: t("SPO2_LEVEL_SEVERE_HYPOXEMIA"),
+                  },
+                  {
+                    value: 86,
+                    className: "text-danger-500",
+                    label: t("SPO2_LEVEL_MODERATE_HYPOXEMIA"),
+                  },
+                  {
+                    value: 91,
+                    className: "text-warning-400",
+                    label: t("SPO2_LEVEL_MILD_HYPOXEMIA"),
+                  },
+                  {
+                    value: 95,
+                    className: "text-primary-500",
+                    label: t("SPO2_LEVEL_NORMAL"),
+                  },
+                ]}
+              />
             </>
           )}
 
@@ -764,31 +794,6 @@ export const DailyRounds = (props: any) => {
                 ]}
               />
 
-              <TextFormField
-                {...field("ventilator_spo2")}
-                labelSuffix="%"
-                type="number"
-                min={0}
-                max={100}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Low",
-                  },
-                  {
-                    value: 90,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "High",
-                  },
-                ]}
-              />
-
               <SelectFormField
                 {...field("rhythm")}
                 placeholder={t("HEARTBEAT_RHYTHM__UNKNOWN")}
@@ -819,7 +824,6 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
-
           {state.form.rounds_type === "COMMUNITY_NURSES_LOG" && (
             <div className="md:col-span-2" data-scribe-ignore>
               <hr className="my-4 md:col-span-2" />

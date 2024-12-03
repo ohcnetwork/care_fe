@@ -11,12 +11,10 @@ export default function FileUploadPage(props: {
   type: "CONSULTATION" | "PATIENT";
 }) {
   const { facilityId, patientId, consultationId, type } = props;
-
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
     prefetch: !!patientId,
   });
-
   return (
     <Page
       hideBack={false}

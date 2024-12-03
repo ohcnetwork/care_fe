@@ -110,63 +110,47 @@ export const VentilatorPlot = ({
       case "ventilator_tidal_volume":
       case "ventilator_peep":
         condition =
-          (currentRound.ventilator_interface === "INVASIVE" ||
-            currentRound.ventilator_interface === "NON_INVASIVE") &&
-          !!currentRound.ventilator_mode;
+          currentRound.ventilator_interface === "INVASIVE" ||
+          currentRound.ventilator_interface === "NON_INVASIVE";
         break;
       case "ventilator_fio2":
         condition =
-          currentRound.ventilator_interface === "OXYGEN_SUPPORT" &&
-          currentRound.ventilator_oxygen_modality === "HIGH_FLOW_NASAL_CANNULA";
-        break;
-      case "ventilator_spo2":
-        condition =
-          currentRound.ventilator_interface === "OXYGEN_SUPPORT" &&
-          (currentRound.ventilator_oxygen_modality === "NASAL_PRONGS" ||
-            currentRound.ventilator_oxygen_modality === "SIMPLE_FACE_MASK" ||
-            currentRound.ventilator_oxygen_modality ===
-              "NON_REBREATHING_MASK" ||
+          currentRound.ventilator_interface === "INVASIVE" ||
+          currentRound.ventilator_interface === "NON_INVASIVE" ||
+          (currentRound.ventilator_interface === "OXYGEN_SUPPORT" &&
             currentRound.ventilator_oxygen_modality ===
               "HIGH_FLOW_NASAL_CANNULA");
+        break;
+      case "ventilator_spo2":
+        condition = currentRound.ventilator_interface !== "UNKNOWN";
         break;
       case "etco2":
       case "ventilator_oxygen_modality_flow_rate":
         condition =
-          !!currentRound.ventilator_mode ||
-          !!currentRound.ventilator_oxygen_modality ||
-          false;
+          currentRound.ventilator_interface === "OXYGEN_SUPPORT" &&
+          currentRound.ventilator_oxygen_modality === "HIGH_FLOW_NASAL_CANNULA";
         break;
       case "ventilator_oxygen_modality_oxygen_rate":
         condition =
           currentRound.ventilator_interface === "OXYGEN_SUPPORT" &&
-          (currentRound.ventilator_oxygen_modality === "NASAL_PRONGS" ||
-            currentRound.ventilator_oxygen_modality === "SIMPLE_FACE_MASK" ||
-            currentRound.ventilator_oxygen_modality === "NON_REBREATHING_MASK");
+          currentRound.ventilator_oxygen_modality !== "HIGH_FLOW_NASAL_CANNULA";
         break;
     }
     switch (currentRound.ventilator_interface) {
       case "OXYGEN_SUPPORT":
-        legend =
-          t(
-            `OXYGEN_MODALITY__${currentRound.ventilator_oxygen_modality}_short`,
-          ) +
-          " (" +
-          t("RESPIRATORY_SUPPORT_SHORT__OXYGEN_SUPPORT") +
-          ")";
+        legend = currentRound.ventilator_oxygen_modality
+          ? `${t(`OXYGEN_MODALITY__${currentRound.ventilator_oxygen_modality}_short`)} (${t("RESPIRATORY_SUPPORT_SHORT__OXYGEN_SUPPORT")})`
+          : t("RESPIRATORY_SUPPORT_SHORT__OXYGEN_SUPPORT");
         break;
       case "INVASIVE":
-        legend =
-          t(`VENTILATOR_MODE__${currentRound.ventilator_mode}_short`) +
-          " (" +
-          t("RESPIRATORY_SUPPORT_SHORT__INVASIVE") +
-          ")";
+        legend = currentRound.ventilator_mode
+          ? `${t(`VENTILATOR_MODE__${currentRound.ventilator_mode}_short`)} (${t("RESPIRATORY_SUPPORT_SHORT__INVASIVE")})`
+          : t("RESPIRATORY_SUPPORT_SHORT__INVASIVE");
         break;
       case "NON_INVASIVE":
-        legend =
-          t(`VENTILATOR_MODE__${currentRound.ventilator_mode}_short`) +
-          " (" +
-          t("RESPIRATORY_SUPPORT_SHORT__NON_INVASIVE") +
-          ")";
+        legend = currentRound.ventilator_mode
+          ? `${t(`VENTILATOR_MODE__${currentRound.ventilator_mode}_short`)} (${t("RESPIRATORY_SUPPORT_SHORT__NON_INVASIVE")})`
+          : t("RESPIRATORY_SUPPORT_SHORT__NON_INVASIVE");
         break;
     }
     return { condition, legend };
@@ -178,9 +162,9 @@ export const VentilatorPlot = ({
     switch (ventilatorInterface) {
       case "INVASIVE":
       case "NON_INVASIVE":
-        return round.ventilator_mode;
+        return round.ventilator_mode ?? "None";
       case "OXYGEN_SUPPORT":
-        return round.ventilator_oxygen_modality;
+        return round.ventilator_oxygen_modality ?? "None";
       default:
         return null;
     }
