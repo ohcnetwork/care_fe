@@ -32,25 +32,22 @@ describe("Manage User Profile", () => {
   it("Set Dob, Gender, Email, Phone and Working Hours for a user and verify its reflection in user profile", () => {
     userProfilePage.clickEditProfileButton();
 
-    userProfilePage.typedate_of_birth(date_of_birth);
+    userProfilePage.typeDateOfBirth(date_of_birth);
     userProfilePage.selectGender(gender);
     userProfilePage.typeEmail(email);
-    userProfilePage.typePhone(phone);
-    userProfilePage.typeWhatsApp(phone);
+    userProfilePage.typePhoneNumber(phone);
+    userProfilePage.typeWhatsappNumber(phone);
     userProfilePage.typeWorkingHours(workinghours);
     userProfilePage.typeQualification(qualification);
     userProfilePage.typeDoctorYoE(doctorYoE);
     userProfilePage.typeMedicalCouncilRegistration(medicalCouncilRegistration);
-
     userProfilePage.clickUpdateButton();
-
     cy.verifyNotification("Details updated successfully");
-
-    userProfilePage.assertdate_of_birth("01/01/1999");
+    userProfilePage.assertDateOfBirth("01/01/1999");
     userProfilePage.assertGender(gender);
     userProfilePage.assertEmail(email);
-    userProfilePage.assertPhone(phone);
-    userProfilePage.assertWhatsApp(phone);
+    userProfilePage.assertPhoneNumber(phone);
+    userProfilePage.assertAltPhoneNumber(phone);
     userProfilePage.assertWorkingHours(workinghours);
   });
 

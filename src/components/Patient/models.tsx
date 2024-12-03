@@ -165,7 +165,7 @@ export interface SampleTestModel {
   date_of_sample?: string;
   date_of_result?: string;
   consultation?: number;
-  patient_name?: number;
+  patient_name?: string;
   patient_has_sari?: boolean;
   patient_has_confirmed_contact?: boolean;
   patient_has_suspected_contact?: boolean;
