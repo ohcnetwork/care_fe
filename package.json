@@ -63,7 +63,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.1.4",
-    "@sentry/browser": "^8.37.1",
+    "@sentry/browser": "^8.42.0",
     "@yudiel/react-qr-scanner": "^2.0.8",
     "bowser": "^2.11.0",
     "browser-image-compression": "^2.0.2",
