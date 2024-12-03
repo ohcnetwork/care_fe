@@ -26,7 +26,7 @@ type PropsWithUnit = BaseProps & {
   units?: undefined;
 };
 
-type PropsWithUnits = BaseProps & {
+export type PropsWithUnits = BaseProps & {
   unit?: undefined;
   units: {
     label: string;

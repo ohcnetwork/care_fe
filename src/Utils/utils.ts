@@ -537,6 +537,13 @@ export const celsiusToFahrenheit = (celsius: number) => {
 export const fahrenheitToCelsius = (fahrenheit: number) => {
   return ((fahrenheit - 32) * 5) / 9;
 };
+export const mmHgToKPa = (mmHg: number) => {
+  return mmHg * 0.133322;
+};
+
+export const kPaToMmHg = (kPa: number) => {
+  return kPa / 0.133322;
+};
 
 /**
  * Although same as `Objects.keys(...)`, this provides better type-safety.
