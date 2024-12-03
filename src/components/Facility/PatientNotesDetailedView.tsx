@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -31,6 +31,13 @@ const PatientNotesDetailedView = (props: Props) => {
   const [reply_to, setReplyTo] = useState<PatientNotesReplyModel | undefined>(
     undefined,
   );
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
 
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
@@ -57,6 +64,7 @@ const PatientNotesDetailedView = (props: Props) => {
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
+      setTimeout(scrollToBottom, 100);
     }
 
     return data?.id;
@@ -77,6 +85,7 @@ const PatientNotesDetailedView = (props: Props) => {
 
     if (data) {
       setState(data);
+      setTimeout(scrollToBottom, 100);
     }
     setIsLoading(false);
     setReload(false);
@@ -140,7 +149,7 @@ const PatientNotesDetailedView = (props: Props) => {
               )}
             </div>
 
-            <div className="flex-1 overflow-y-auto px-3">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-3">
               {state.child_notes.map((note) => {
                 const parentNote = state.child_notes.find(
                   (n) => n.id === note.reply_to,
@@ -165,7 +174,7 @@ const PatientNotesDetailedView = (props: Props) => {
             </div>
           </div>
 
-          <div className="mx-3 md:mx-2 mt-1">
+          <div className="m-1 max-sm:mr-3">
             <DoctorNoteReplyPreviewCard
               parentNote={reply_to}
               cancelReply={() => setReplyTo(undefined)}

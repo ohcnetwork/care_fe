@@ -44,7 +44,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchNotes = async () => {
+  const fetchNotes = async (currentPage: number) => {
     setIsLoading(true);
 
     const { data } = await request(routes.getPatientNotes, {
@@ -54,24 +54,19 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
       query: {
         consultation: consultationId,
         thread,
-        offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
+        offset: (currentPage - 1) * RESULTS_PER_PAGE_LIMIT,
       },
     });
 
     if (data) {
-      if (state.cPage === 1) {
-        setState((prevState) => ({
-          ...prevState,
-          notes: data.results,
-          totalPages: Math.ceil(data.count / pageSize),
-        }));
-      } else {
-        setState((prevState) => ({
-          ...prevState,
-          notes: [...prevState.notes, ...data.results],
-          totalPages: Math.ceil(data.count / pageSize),
-        }));
-      }
+      setState((prevState) => ({
+        ...prevState,
+        notes:
+          currentPage === 1
+            ? data.results
+            : [...prevState.notes, ...data.results],
+        totalPages: Math.ceil(data.count / pageSize),
+      }));
     }
     setIsLoading(false);
     setReload?.(false);
@@ -79,12 +74,14 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
 
   useEffect(() => {
     if (reload) {
-      fetchNotes();
+      fetchNotes(state.cPage);
     }
   }, [reload]);
 
   useEffect(() => {
-    fetchNotes();
+    setState((prev) => ({ ...prev, notes: [], cPage: 1 }));
+    // Fetch notes for the first page when thread changes and prevent loading a different page when changing threads
+    fetchNotes(1);
   }, [thread]);
 
   useEffect(() => {
@@ -105,7 +102,8 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     }
   };
 
-  if (isLoading) {
+  // only show during initial fetch, to prevent scroll position from being reset
+  if (isLoading && state.cPage === 1) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />

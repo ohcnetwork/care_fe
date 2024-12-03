@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import DoctorNote from "@/components/Facility/DoctorNote";
@@ -14,11 +14,11 @@ import request from "@/Utils/request/request";
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
-  setState: any;
+  setState: Dispatch<SetStateAction<PatientNoteStateType>>;
   patientId: string;
   facilityId: string;
   reload?: boolean;
-  setReload?: any;
+  setReload?: (value: boolean) => void;
   thread: PatientNotesModel["thread"];
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
 }
@@ -30,9 +30,9 @@ const PatientNotesList = (props: PatientNotesProps) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchNotes = async () => {
+  const fetchNotes = async (currentPage: number) => {
     setIsLoading(true);
-    const { data }: any = await request(routes.getPatientNotes, {
+    const { data } = await request(routes.getPatientNotes, {
       pathParams: { patientId: props.patientId },
       query: {
         offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
@@ -40,48 +40,46 @@ const PatientNotesList = (props: PatientNotesProps) => {
       },
     });
 
-    if (state.cPage === 1) {
-      setState((prevState: any) => ({
+    if (data) {
+      setState((prevState) => ({
         ...prevState,
-        notes: data.results,
-        totalPages: Math.ceil(data.count / pageSize),
-      }));
-    } else {
-      setState((prevState: any) => ({
-        ...prevState,
-        notes: [...prevState.notes, ...data.results],
+        notes:
+          currentPage === 1
+            ? data.results
+            : [...prevState.notes, ...data.results],
         totalPages: Math.ceil(data.count / pageSize),
       }));
     }
+
     setIsLoading(false);
-    setReload(false);
+    setReload?.(false);
   };
 
   useEffect(() => {
     if (reload) {
-      fetchNotes();
+      fetchNotes(state.cPage);
     }
   }, [reload]);
 
   useEffect(() => {
-    fetchNotes();
+    fetchNotes(state.cPage);
   }, [thread]);
 
   useEffect(() => {
-    setReload(true);
+    setReload?.(true);
   }, []);
 
   const handleNext = () => {
     if (state.cPage < state.totalPages) {
-      setState((prevState: any) => ({
+      setState((prevState) => ({
         ...prevState,
         cPage: prevState.cPage + 1,
       }));
-      setReload(true);
+      setReload?.(true);
     }
   };
 
-  if (isLoading) {
+  if (isLoading && state.cPage === 1) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
