@@ -107,9 +107,16 @@ export const FacilityCard = (props: {
                           {facility.name}
                         </Link>
                         <TooltipProvider>
-                          <Tooltip delayDuration={0} open={open}>
-                            <TooltipTrigger asChild>
-                              <button
+                          <Tooltip
+                            delayDuration={0}
+                            open={open}
+                            onOpenChange={setOpen}
+                          >
+                            <TooltipTrigger
+                              asChild
+                              onClick={() => setOpen(!open)}
+                            >
+                              <div
                                 data-test-id="occupancy-badge"
                                 className={`relative flex items-center gap-1 text-sm ${
                                   (facility.patient_count || 0) /
@@ -118,22 +125,15 @@ export const FacilityCard = (props: {
                                     ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white"
                                     : "text-secondary-700"
                                 }`}
-                                onClick={() => setOpen(!open)}
-                                onMouseEnter={() => setOpen(true)}
-                                onMouseLeave={() => setOpen(false)}
                               >
                                 <CareIcon icon="l-bed" />
                                 <dt>
                                   {t("occupancy")}: {facility.patient_count} /{" "}
                                   {facility.bed_count}
                                 </dt>
-                              </button>
+                              </div>
                             </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              sideOffset={8}
-                              className="z-50 max-w-[90%] break-words text-xs text-center sm:max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl bg-gray-900 text-gray-50 rounded-md p-2 shadow-lg animate-in fade-in-0 zoom-in-95 dark:bg-gray-50 dark:text-gray-900"
-                            >
+                            <TooltipContent side="top" sideOffset={8}>
                               {t("live_patients_total_beds")}
                             </TooltipContent>
                           </Tooltip>
