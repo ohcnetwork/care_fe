@@ -19,6 +19,7 @@ describe("Facility Homepage Function", () => {
   const facilitiesAlias = "downloadFacilitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
+  const capacitiesAlias = "downloadCapacitiesCSV";
   const facilityName = "Dummy Facility 40";
   const facilityLocaion = "Dummy Location";
   const stateName = "Kerala";
@@ -110,11 +111,11 @@ describe("Facility Homepage Function", () => {
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Triages");
     facilityHome.verifyDownload(triagesAlias);
-  });
-
-  it("Verify Capacity Export Functionality", () => {
+    // Verify Capacity Export
+    facilityHome.csvDownloadIntercept(capacitiesAlias, "&capacity");
     facilityHome.clickExportButton();
     facilityHome.clickMenuItem("Capacities");
+    facilityHome.verifyDownload(capacitiesAlias);
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
@@ -136,6 +137,19 @@ describe("Facility Homepage Function", () => {
     facilityHome.selectLocation(facilityLocaion);
     facilityHome.clickLiveMonitorButton();
     facilityHome.verifyLiveMonitorUrl();
+  });
+
+  it("Verify sidebar collapse and expand functionality", () => {
+    facilityHome.toggleSidebar();
+    facilityHome.verifyIconsAndTextVisible();
+
+    // Click toggle button to collapse sidebar, verify icons visible and text hidden
+    facilityHome.toggleSidebar();
+    facilityHome.verifyIconsVisibleAndTextHidden();
+
+    // Click toggle button again to expand sidebar, verify icons and text are visible again
+    facilityHome.toggleSidebar();
+    facilityHome.verifyIconsAndTextVisible();
   });
 
   it("Verify Notice Board Functionality", () => {

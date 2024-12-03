@@ -4,6 +4,9 @@ class FacilityHome {
   searchButton = "#search";
   menuItem = "[role='menuitem']";
 
+  sidebarToggle = () => cy.get('[data-testid="sidebar-toggle"]');
+  sidebarItems = () => cy.get('[data-testid="sidebar-item"]');
+
   // Operations
   clickExportButton() {
     cy.get(this.exportButton).scrollIntoView();
@@ -103,6 +106,41 @@ class FacilityHome {
   verifyURLContains(searchText: string) {
     const encodedText = encodeURIComponent(searchText).replace(/%20/g, "+");
     this.getURL().should("include", `search=${encodedText}`);
+  }
+
+  toggleSidebar() {
+    this.sidebarToggle().should("be.visible").click();
+  }
+
+  private verifySidebarElements(
+    textVisibility: "be.visible" | "not.be.visible",
+  ) {
+    this.sidebarItems()
+      .should("have.length.at.least", 1)
+      .each(($item) => {
+        const expectedText = $item.attr("data-text");
+
+        cy.wrap($item, { timeout: 10000 })
+          .find('[data-testid="sidebar-icon"]')
+          .should("be.visible");
+        cy.wrap($item, { timeout: 10000 })
+          .find('[data-testid="sidebar-text"]')
+          .should(textVisibility)
+          .then(($text) => {
+            if (textVisibility === "be.visible") {
+              const actualText = $text.text().trim();
+              expect(actualText).to.eq(expectedText);
+            }
+          });
+      });
+  }
+
+  verifyIconsAndTextVisible() {
+    this.verifySidebarElements("be.visible");
+  }
+
+  verifyIconsVisibleAndTextHidden() {
+    this.verifySidebarElements("not.be.visible");
   }
 }
 
