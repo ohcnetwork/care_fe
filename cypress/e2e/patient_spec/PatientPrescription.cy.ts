@@ -26,7 +26,7 @@ describe("Patient Medicine Administration", () => {
   });
 
   it("Add a new medicine | Verify the Edit and Discontinue Medicine workflow |", () => {
-    patientPage.visitPatient("Dummy Patient 9");
+    patientPage.visitPatient("Dummy Patient Nine");
     patientPrescription.visitMedicineTab();
     patientPrescription.visitEditPrescription();
     // Add a normal Medicine to the patient
@@ -36,7 +36,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.selectMedicine(medicineNameOne);
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.selectDosageFrequency(medicineFrequency);
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     // Edit the existing medicine & Verify they are properly moved to discontinue position
@@ -44,16 +44,16 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.visitMedicineTab();
     cy.verifyAndClickElement("#0", medicineNameOne);
     cy.verifyContentPresence("#submit", ["Discontinue"]); // To verify the pop-up is open
-    cy.submitButton("Edit");
+    cy.clickSubmitButton("Edit");
     patientPrescription.enterDosage(medicineTargetDosage);
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Prescription edited successfully");
     cy.closeNotification();
     // Discontinue a medicine & Verify the notification
     cy.verifyAndClickElement("#0", medicineNameOne);
-    cy.submitButton("Discontinue");
+    cy.clickSubmitButton("Discontinue");
     patientPrescription.enterDiscontinueReason("Medicine is been discontinued");
-    cy.submitButton("Confirm Discontinue");
+    cy.clickSubmitButton("Confirm Discontinue");
     cy.verifyNotification("Prescription discontinued");
     cy.closeNotification();
     // verify the discontinue medicine view
@@ -63,7 +63,7 @@ describe("Patient Medicine Administration", () => {
   });
 
   it("Add a PRN Prescription medicine | Group Administrate it |", () => {
-    patientPage.visitPatient("Dummy Patient 6");
+    patientPage.visitPatient("Dummy Patient Six");
     patientPrescription.visitMedicineTab();
     patientPrescription.visitEditPrescription();
     // Add First Medicine
@@ -73,7 +73,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.selectMedicine(medicineNameOne);
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.enterIndicator(medicineIndicator);
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     // Add Second Medicine
@@ -83,7 +83,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.selectMedicine(medicineNameTwo);
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.enterIndicator(medicineIndicator);
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     patientPrescription.clickReturnToDashboard();
@@ -97,7 +97,7 @@ describe("Patient Medicine Administration", () => {
   });
 
   it("Add a new titrated medicine for a patient | Individual Administeration |", () => {
-    patientPage.visitPatient("Dummy Patient 5");
+    patientPage.visitPatient("Dummy Patient Five");
     patientPrescription.visitMedicineTab();
     patientPrescription.visitEditPrescription();
     patientPrescription.clickAddPrescription();
@@ -108,7 +108,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.enterTargetDosage(medicineTargetDosage);
     patientPrescription.selectDosageFrequency(medicineFrequency);
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     // Administer the medicine in edit form
@@ -116,7 +116,7 @@ describe("Patient Medicine Administration", () => {
     cy.wait(2000);
     patientPrescription.enterAdministerDosage(medicineBaseDosage);
     patientPrescription.enterAdministerNotes(medicineAdministerNote);
-    cy.submitButton("Administer Medicine");
+    cy.clickSubmitButton("Administer Medicine");
     cy.verifyNotification("Medicine(s) administered");
     cy.closeNotification();
     // Verify the Reflection on the Medicine
@@ -129,14 +129,14 @@ describe("Patient Medicine Administration", () => {
     // Go to medicine tab and administer it again
     patientPrescription.visitMedicineTab();
     cy.verifyAndClickElement("#0", medicineNameOne);
-    cy.submitButton("Administer");
+    cy.clickSubmitButton("Administer");
     patientPrescription.enterAdministerDosage(medicineBaseDosage);
-    cy.submitButton("Administer Medicine");
+    cy.clickSubmitButton("Administer Medicine");
     cy.verifyNotification("Medicine(s) administered");
   });
 
   it("Add a new medicine for a patient and verify the duplicate medicine validation", () => {
-    patientPage.visitPatient("Dummy Patient 4");
+    patientPage.visitPatient("Dummy Patient Four");
     patientPrescription.visitMedicineTab();
     patientPrescription.visitEditPrescription();
     patientPrescription.clickAddPrescription();
@@ -145,7 +145,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.selectMedicine(medicineNameOne);
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.selectDosageFrequency(medicineFrequency);
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     // verify the duplicate medicine error message
@@ -155,7 +155,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.selectMedicine(medicineNameOne);
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.selectDosageFrequency(medicineFrequency);
-    cy.submitButton("Submit");
+    cy.clickSubmitButton("Submit");
     cy.verifyNotification(
       "Medicine - This medicine is already prescribed to this patient. Please discontinue the existing prescription to prescribe again.",
     );

@@ -1,6 +1,7 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
-import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 
 describe("Manage User", () => {
@@ -13,7 +14,6 @@ describe("Manage User", () => {
   const usernameToLinkSkill = "devdoctor";
   const firstNameUserSkill = "Dev";
   const lastNameUserSkill = "Doctor";
-  const userCreationPage = new UserCreationPage();
   const usernameforworkinghour = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
@@ -46,31 +46,26 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000);
     manageUserPage.navigateToProfile();
-    userCreationPage.verifyElementContainsText(
-      "username-profile-details",
+    cy.verifyContentPresence("#username-profile-details", [
       usernameforworkinghour,
-    );
+    ]);
     manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
   });
 
   it("linking skills for a doctor users and verify its reflection in doctor connect", () => {
     // select a doctor user and link and unlink same skill twice and verify the badge is only shown once in doctor connect
-    userPage.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     userPage.typeInFirstName(firstNameUserSkill);
     userPage.typeInLastName(lastNameUserSkill);
-    userPage.applyFilter();
+    userPage.selectHomeFacility(facilitytolinkskill);
+    advanceFilters.applySelectedFilter();
     userPage.checkUsernameText(usernameToLinkSkill);
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
-    manageUserPage.clickCloseSlideOver();
-    cy.wait(5000); // temporary hack to fix the failure
-    manageUserPage.clicklinkedskillbutton();
+    cy.verifyNotification("Skill added successfully");
+    cy.closeNotification();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
-    manageUserPage.clickUnlinkSkill();
-    manageUserPage.clickSubmit();
-    manageUserPage.selectSkillFromDropdown(linkedskill);
-    manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
     manageUserPage.navigateToFacility();

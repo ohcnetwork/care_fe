@@ -1,3 +1,6 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import PatientHome from "../../pageobject/Patient/PatientHome";
 
@@ -35,7 +38,7 @@ describe("Patient Homepage present functionalities", () => {
   });
 
   it("Date based advance filters applied in the patient tab", () => {
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.typePatientCreatedBeforeDate(patientFromDate);
     patientHome.typePatientCreatedAfterDate(patientToDate);
     patientHome.typePatientModifiedBeforeDate(patientFromDate);
@@ -55,7 +58,7 @@ describe("Patient Homepage present functionalities", () => {
   });
 
   it("Facility Geography based advance filters applied in the patient tab", () => {
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.typeFacilityName(facilityName);
     patientHome.selectFacilityType(facilityType);
     patientHome.typeFacilityLsgBody(facilityLsgBody);
@@ -73,7 +76,7 @@ describe("Patient Homepage present functionalities", () => {
 
   it("Patient diagnosis based advance filters applied in the patient tab", () => {
     // Patient Filtering based on icd-11 data
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
     patientHome.selectConfirmedIcdDiagnosis(
       patientIcdDiagnosis,
@@ -103,7 +106,7 @@ describe("Patient Homepage present functionalities", () => {
     cy.clearAllFilters();
     patientHome.verifyTotalPatientCount("1");
     // Apply Any and confirmed diagonsis to verify patient count 17
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
     patientHome.selectConfirmedIcdDiagnosis(
       patientIcdDiagnosis,
@@ -115,7 +118,7 @@ describe("Patient Homepage present functionalities", () => {
 
   it("Patient Details based advance filters applied in the patient tab", () => {
     // Patient Filtering based on patient details
-    patientHome.clickPatientAdvanceFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     patientHome.selectPatientGenderfilter(patientGender);
     patientHome.selectPatientCategoryfilter(patientCategory);
     patientHome.typePatientMinimumAgeFilter(patientMinimumAge);
@@ -161,15 +164,15 @@ describe("Patient Homepage present functionalities", () => {
       .invoke("text")
       .then((patientOne: string) => {
         firstPatientPageOne = patientOne.trim();
-        patientHome.clickNextPage();
-        patientHome.verifySecondPageUrl();
+        pageNavigation.navigateToNextPage();
+        pageNavigation.verifyCurrentPageNumber(2);
         cy.get('[data-cy="patient"]')
           .first()
           .invoke("text")
           .then((patientTwo: string) => {
             const firstPatientPageTwo = patientTwo.trim();
             expect(firstPatientPageOne).not.to.eq(firstPatientPageTwo);
-            patientHome.clickPreviousPage();
+            pageNavigation.navigateToPreviousPage();
           });
       });
   });
