@@ -1,7 +1,7 @@
-import { ReactNode, useEffect, useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
@@ -56,7 +56,6 @@ const updateStatusReducer = (state = initialState, action: any) => {
       return state;
   }
 };
-
 const UpdateStatusDialog = (props: Props) => {
   const { t } = useTranslation();
   const { sample, handleOk, handleCancel } = props;
@@ -67,22 +66,6 @@ const UpdateStatusDialog = (props: Props) => {
     allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
     allowNameFallback: true,
   });
-  const uploadButtons: {
-    name: string;
-    icon: IconName;
-    onClick?: () => void;
-    children?: ReactNode;
-    show?: boolean;
-    id: string;
-  }[] = [
-    {
-      name: t("choose_file"),
-      icon: "l-file-upload-alt",
-      children: <fileUpload.Input />,
-      id: "upload-file",
-    },
-  ];
-
   const currentStatus = SAMPLE_TEST_STATUS.find(
     (i) => i.text === sample.status,
   );
@@ -224,20 +207,11 @@ const UpdateStatusDialog = (props: Props) => {
               </div>
             ) : (
               <div className="mt-5 mb-8 flex w-full flex-col items-center gap-4 md:flex-row">
-                {uploadButtons
-                  .filter((b) => b.show !== false)
-                  .map((button, i) => (
-                    <label
-                      key={i}
-                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary-500/20 bg-primary-500/10 p-3 text-primary-700 transition-all hover:bg-primary-500/20 md:p-6"
-                      onClick={button.onClick}
-                      id={button.id}
-                    >
-                      <CareIcon icon={button.icon} className="text-2xl" />
-                      <div className="text-lg">{button.name}</div>
-                      {button.children}
-                    </label>
-                  ))}
+                <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary-500/20 bg-primary-500/10 p-3 text-primary-700 transition-all hover:bg-primary-500/20 md:p-6">
+                  <CareIcon icon={"l-file-upload-alt"} className="text-2xl" />
+                  <div className="text-lg">{t("choose_file")}</div>
+                  <fileUpload.Input />
+                </label>
               </div>
             )}
           </>
