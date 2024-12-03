@@ -36,6 +36,7 @@ export const FacilityCard = (props: {
   const [notifyModalFor, setNotifyModalFor] = useState<string>();
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
+  const [open, setOpen] = useState(false);
 
   const handleNotifySubmit = async (id: any) => {
     if (notifyMessage.trim().length >= 1) {
@@ -106,7 +107,7 @@ export const FacilityCard = (props: {
                           {facility.name}
                         </Link>
                         <TooltipProvider>
-                          <Tooltip delayDuration={0}>
+                          <Tooltip delayDuration={0} open={open}>
                             <TooltipTrigger asChild>
                               <button
                                 data-test-id="occupancy-badge"
@@ -117,6 +118,9 @@ export const FacilityCard = (props: {
                                     ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white"
                                     : "text-secondary-700"
                                 }`}
+                                onClick={() => setOpen(!open)}
+                                onMouseEnter={() => setOpen(true)}
+                                onMouseLeave={() => setOpen(false)}
                               >
                                 <CareIcon icon="l-bed" />
                                 <dt>
