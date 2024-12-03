@@ -15,7 +15,6 @@ export default function FileUploadPage(props: {
     pathParams: { id: patientId },
     prefetch: !!patientId,
   });
-
   return (
     <Page
       hideBack={false}
