@@ -492,13 +492,20 @@ export default function ShiftDetails(props: { id: string }) {
                     : ""
                 }
                 tooltipClassName="tooltip-top -translate-x-28 -translate-y-1 text-xs"
-                disabled={data?.status === "COMPLETED" || data?.status === "CANCELLED"}
-                onClick={() => navigate(`/shifting/${data?.external_id}/update`)}
+                disabled={
+                  data?.status === "COMPLETED" || data?.status === "CANCELLED"
+                }
+                onClick={() =>
+                  navigate(`/shifting/${data?.external_id}/update`)
+                }
               >
                 {t("update_status_details")}
               </ButtonV2>
 
-              <ButtonV2 className="w-full sm:w-auto" onClick={() => setIsPrintMode(true)}>
+              <ButtonV2
+                className="w-full sm:w-auto"
+                onClick={() => setIsPrintMode(true)}
+              >
                 <CareIcon icon="l-file-alt" className="mr-2 text-base" />{" "}
                 {t("referral_letter")}
               </ButtonV2>
