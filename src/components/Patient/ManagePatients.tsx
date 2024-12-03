@@ -187,12 +187,6 @@ export const PatientManager = () => {
     diagnoses_differential: qParams.diagnoses_differential || undefined,
     review_missed: qParams.review_missed || undefined,
   };
-  const [debouncedSearchParams, setDebouncedSearchParams] = useState(params);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSearchParams(params), 1000);
-    return () => clearTimeout(timeout);
-  }, [JSON.stringify(params)]);
 
   useEffect(() => {
     const ids: string[] = [];
@@ -298,7 +292,7 @@ export const PatientManager = () => {
   };
 
   const { loading: isLoading, data } = useQuery(routes.patientList, {
-    query: debouncedSearchParams,
+    query: params,
   });
 
   const getTheCategoryFromId = () => {
@@ -997,28 +991,21 @@ export const PatientManager = () => {
         }}
       />
 
-      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 sm:grid-cols-4 md:px-0">
-        <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1" id="total-patientcount">
-            <CountBlock
-              text={t("total_patients")}
-              count={data?.count || 0}
-              loading={isLoading}
-              icon="l-user-injured"
-              className="mb-4"
-            />
-          </div>
-        </div>
-        <div className="col-span-3 w-full">
-          <div className="mb-4">
-            <SearchByMultipleFields
-              id="patient-search"
-              options={searchOptions}
-              onSearch={handleSearch}
-              clearSearch={clearSearch}
-            />
-          </div>
-        </div>
+      <div className="mt-4 gap-4 lg:gap-16 flex flex-col lg:flex-row lg:items-center">
+        <CountBlock
+          text={t("total_patients")}
+          count={data?.count || 0}
+          loading={isLoading}
+          icon="l-user-injured"
+        />
+
+        <SearchByMultipleFields
+          id="patient-search"
+          options={searchOptions}
+          onSearch={handleSearch}
+          clearSearch={clearSearch}
+          className="w-full"
+        />
       </div>
       <div className="col-span-3 flex flex-wrap">
         <FilterBadges

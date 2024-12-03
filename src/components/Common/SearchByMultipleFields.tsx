@@ -42,7 +42,7 @@ interface SearchByMultipleFieldsProps {
   id: string;
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
-  initialOption?: SearchOption;
+  initialOptionIndex?: number;
   className?: string;
   inputClassName?: string;
   buttonClassName?: string;
@@ -58,17 +58,20 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   id,
   options,
   onSearch,
-  initialOption,
+  initialOptionIndex,
   className,
   inputClassName,
   buttonClassName,
   clearSearch,
 }) => {
   const { t } = useTranslation();
-  const [selectedOption, setSelectedOption] = useState<SearchOption>(
-    initialOption || options[0],
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState(
+    initialOptionIndex || 0,
   );
-  const [searchValue, setSearchValue] = useState(selectedOption.value || "");
+  const selectedOption = options[selectedOptionIndex];
+  const [searchValue, setSearchValue] = useState(
+    options[selectedOptionIndex].value || "",
+  );
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
@@ -85,8 +88,9 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   }, [clearSearch]);
 
   const handleOptionChange = useCallback(
-    (option: SearchOption) => {
-      setSelectedOption(option);
+    (index: number) => {
+      setSelectedOptionIndex(index);
+      const option = options[index];
       setSearchValue(option.value || "");
       setFocusedIndex(options.findIndex((op) => op.key === option.key));
       setOpen(false);
@@ -116,7 +120,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             prevIndex === 0 ? options.length - 1 : prevIndex - 1,
           );
         } else if (e.key === "Enter") {
-          handleOptionChange(options[focusedIndex]);
+          handleOptionChange(focusedIndex);
         }
 
         if (e.key === "Escape") {
@@ -124,14 +128,14 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           setOpen(false);
         }
 
-        options.forEach((option) => {
+        options.forEach((option, i) => {
           if (
             e.key.toLocaleLowerCase() ===
               option.shortcutKey.toLocaleLowerCase() &&
             open
           ) {
             e.preventDefault();
-            handleOptionChange(option);
+            handleOptionChange(i);
           }
         });
       }
@@ -145,12 +149,21 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [selectedOption]);
+  }, [selectedOptionIndex]);
+
+  useEffect(() => {
+    const timeout = setTimeout(
+      () =>
+        selectedOption.value !== searchValue &&
+        onSearch(selectedOption.key, searchValue),
+      1000,
+    );
+    return () => clearTimeout(timeout);
+  }, [searchValue]);
 
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchValue(value);
-      onSearch(selectedOption.key, value);
     },
     [selectedOption, onSearch],
   );
@@ -225,7 +238,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                   {options.map((option, index) => (
                     <CommandItem
                       key={option.key}
-                      onSelect={() => handleOptionChange(option)}
+                      onSelect={() => handleOptionChange(index)}
                       className={cn({
                         "bg-gray-100": focusedIndex === index,
                         "hover:bg-secondary-100": true,
@@ -251,10 +264,10 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         </div>
       )}
       <div className="flex flex-wrap gap-2 rounded-b-lg bg-gray-50 border-t border-t-gray-100 p-2">
-        {options.map((option) => (
+        {options.map((option, i) => (
           <Button
             key={option.key}
-            onClick={() => handleOptionChange(option)}
+            onClick={() => handleOptionChange(i)}
             variant="outline"
             size="xs"
             data-test-id={id + "__" + option.key}

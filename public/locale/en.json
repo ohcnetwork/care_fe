@@ -700,6 +700,7 @@
   "facilities": "Facilities",
   "facility": "Facility",
   "facility_consent_requests_page_title": "Patient Consent List",
+  "facility_district_name": "Facility/District Name",
   "facility_name": "Facility Name",
   "facility_preference": "Facility preference",
   "facility_search_placeholder": "Search by Facility / District Name",
