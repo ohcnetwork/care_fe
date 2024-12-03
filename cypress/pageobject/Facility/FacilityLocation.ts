@@ -2,6 +2,8 @@ class FacilityLocation {
   loadLocationManagementPage(name: string) {
     cy.awaitUrl("/");
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
+    cy.get("#search").click().clear();
+    cy.get("#search").click().type(name);
     cy.get("[id='facility-name-card']").contains(name).click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
     cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");

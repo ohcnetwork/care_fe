@@ -200,49 +200,46 @@ describe("Facility Homepage Function", () => {
     manageUserPage.typeFacilitySearch(facilityWithNoAvailableBeds);
     facilityPage.verifyFacilityBadgeContent(facilityWithNoAvailableBeds);
     manageUserPage.assertFacilityInCard(facilityWithNoAvailableBeds);
-    facilityHome.verifyOccupancyBadgeVisibility();
-    facilityHome.assertFacilityBadgeContent("0", "0");
+    cy.url().then((url) => {
+      const facilityUrl = url.toString();
+      facilityHome.verifyOccupancyBadgeVisibility();
+      facilityHome.assertFacilityBadgeContent("0", "0");
 
-    // create a new patient in the facility
-    cy.visit("/patients");
-    patientPage.createPatient();
-    patientPage.selectFacility(facilityWithNoAvailableBeds);
-    patientPredefined.createPatient();
-    patientPage.patientformvisibility();
-    patientPage.clickCreatePatient();
-    patientPage.verifyPatientIsCreated();
-    // navigate to facility page and verify the occupancy badge
-    cy.visit("/facility");
-    manageUserPage.typeFacilitySearch(facilityWithNoAvailableBeds);
-    facilityPage.verifyFacilityBadgeContent(facilityWithNoAvailableBeds);
-    manageUserPage.assertFacilityInCard(facilityWithNoAvailableBeds);
-    facilityHome.verifyOccupancyBadgeVisibility();
-    facilityHome.assertFacilityBadgeContent("1", "0");
-    facilityHome.assertFacilityBadgeBackgroundColor("rgb(239, 68, 68)");
-    // create a new location and add a bed to the facility
-    facilityLocation.loadLocationManagementPage(facilityWithNoAvailableBeds);
-    // create new location and add a bed to the facility
-    cy.get("body").then(($body) => {
-      if ($body.find("#manage-bed-button").length > 0) {
-        facilityLocation.clickManageBedButton();
-      } else {
-        facilityLocation.clickAddNewLocationButton();
-        facilityPage.fillFacilityName(locationName);
-        facilityLocation.selectLocationType(locationType);
-        assetPage.clickassetupdatebutton();
-        facilityLocation.clickNotification();
-        facilityLocation.clickManageBedButton();
-      }
+      // create a new patient in the facility
+      cy.visit("/patients");
+      patientPage.createPatient();
+      patientPage.selectFacility(facilityWithNoAvailableBeds);
+      patientPredefined.createPatient();
+      patientPage.patientformvisibility();
+      patientPage.clickCreatePatient();
+      patientPage.verifyPatientIsCreated();
+      // navigate to facility page and verify the occupancy badge
+      cy.visit(facilityUrl);
+      facilityHome.verifyOccupancyBadgeVisibility();
+      facilityHome.assertFacilityBadgeContent("1", "0");
+      facilityHome.assertFacilityBadgeBackgroundColor("rgb(239, 68, 68)");
+      // create a new location and add a bed to the facility
+      facilityLocation.loadLocationManagementPage(facilityWithNoAvailableBeds);
+      // create new location and add a bed to the facility
+      cy.get("body").then(($body) => {
+        if ($body.find("#manage-bed-button").length > 0) {
+          facilityLocation.clickManageBedButton();
+        } else {
+          facilityLocation.clickAddNewLocationButton();
+          facilityPage.fillFacilityName(locationName);
+          facilityLocation.selectLocationType(locationType);
+          assetPage.clickassetupdatebutton();
+          facilityLocation.clickNotification();
+          facilityLocation.clickManageBedButton();
+        }
+      });
+      facilityLocation.clickAddBedButton();
+      facilityLocation.addBed("Bed 1", "Test Description", "Regular", 2);
+      // verify the occupancy badge reflection
+      cy.visit(facilityUrl);
+      facilityHome.verifyOccupancyBadgeVisibility();
+      facilityHome.assertFacilityBadgeContent("1", "2");
     });
-    facilityLocation.clickAddBedButton();
-    facilityLocation.addBed("Bed 1", "Test Description", "Regular", 2);
-    // verify the occupancy badge reflection
-    cy.visit("/facility");
-    manageUserPage.typeFacilitySearch(facilityWithNoAvailableBeds);
-    facilityPage.verifyFacilityBadgeContent(facilityWithNoAvailableBeds);
-    manageUserPage.assertFacilityInCard(facilityWithNoAvailableBeds);
-    facilityHome.verifyOccupancyBadgeVisibility();
-    facilityHome.assertFacilityBadgeContent("1", "2");
   });
 
   afterEach(() => {
