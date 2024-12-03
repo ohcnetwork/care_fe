@@ -5,12 +5,11 @@ import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useTranslation } from "react-i18next";
 
-import Card from "@/CAREUI/display/Card";
 import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
