@@ -1,3 +1,4 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 import LoginPage from "../../pageobject/Login/LoginPage";
@@ -8,6 +9,7 @@ describe("Manage User", () => {
   const loginPage = new LoginPage();
   const userPage = new UserPage();
   const manageUserPage = new ManageUserPage();
+  const facilityHome = new FacilityHome();
   const usernameToLinkFacilitydoc1 = "dummydoctor4";
   const usernameToLinkFacilitydoc2 = "dummydoctor5";
   const usernameToLinkFacilitydoc3 = "dummydoctor6";
@@ -68,8 +70,8 @@ describe("Manage User", () => {
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
-    manageUserPage.navigateToFacility();
-    manageUserPage.typeFacilitySearch(facilitytolinkskill);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilitytolinkskill);
     manageUserPage.assertFacilityInCard(facilitytolinkskill);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
@@ -134,8 +136,8 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     //  Go to particular facility doctor connect and all user-id are reflected based on there access
     // Path will be facility page to patient page then doctor connect button
-    manageUserPage.navigateToFacility();
-    manageUserPage.typeFacilitySearch(facilitytolinkusername);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilitytolinkusername);
     manageUserPage.assertFacilityInCard(facilitytolinkusername);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();

@@ -73,7 +73,7 @@ describe("Facility Creation", () => {
 
   it("Verify Facility Triage Function", () => {
     // mandatory field error throw
-    manageUserPage.typeFacilitySearch(facilityName2);
+    facilityHome.typeFacilitySearch(facilityName2);
     facilityPage.verifyFacilityBadgeContent(facilityName2);
     manageUserPage.assertFacilityInCard(facilityName2);
     facilityHome.verifyURLContains(facilityName2);
@@ -238,8 +238,8 @@ describe("Facility Creation", () => {
       .contains(facilityNumber)
       .should("be.visible");
     // verify the facility homepage
-    cy.visit("/facility");
-    manageUserPage.typeFacilitySearch(facilityName);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilityName);
     facilityPage.verifyFacilityBadgeContent(facilityName);
     manageUserPage.assertFacilityInCard(facilityName);
     facilityHome.verifyURLContains(facilityName);

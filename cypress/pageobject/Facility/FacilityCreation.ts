@@ -9,11 +9,6 @@ class FacilityPage {
       .should("eq", 200);
   }
 
-  typeFacilitySearch(facilityName: string) {
-    cy.get("#search").click().clear();
-    cy.get("#search").click().type(facilityName);
-  }
-
   selectFacilityType(facility: string) {
     advanceFilters.selectFacilityType(facility);
   }

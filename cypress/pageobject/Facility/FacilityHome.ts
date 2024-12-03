@@ -1,7 +1,6 @@
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";
-  searchButton = "#search";
   menuItem = "[role='menuitem']";
 
   // Operations
@@ -10,8 +9,13 @@ class FacilityHome {
     cy.get(this.exportButton).click();
   }
 
-  clickSearchButton() {
-    cy.get(this.searchButton).click();
+  navigateToFacilityHomepage() {
+    cy.visit("/facility");
+  }
+
+  typeFacilitySearch(facilityName: string) {
+    cy.get("#search").click().clear();
+    cy.get("#search-by-facility").click().type(facilityName);
   }
 
   clickMenuItem(itemName: string) {

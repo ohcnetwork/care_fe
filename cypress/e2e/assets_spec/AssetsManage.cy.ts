@@ -1,3 +1,5 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
+
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
@@ -16,6 +18,7 @@ describe("Asset", () => {
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
   const assetFilters = new AssetFilters();
+  const facilityHome = new FacilityHome();
   const fillFacilityName = "Dummy Facility 40";
   const assetname = "Dummy Camera";
   const locationName = "Dummy Location 1";
@@ -94,7 +97,7 @@ describe("Asset", () => {
   });
 
   it("Verify Facility Asset Page Redirection", () => {
-    cy.visit("/facility");
+    facilityHome.navigateToFacilityHomepage();
     assetSearchPage.typeSearchKeyword(fillFacilityName);
     assetSearchPage.pressEnter();
     facilityPage.verifyFacilityBadgeContent(fillFacilityName);

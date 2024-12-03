@@ -1,3 +1,4 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
 import ManageUserPage from "pageobject/Users/ManageUserPage";
 import UserProfilePage from "pageobject/Users/UserProfilePage";
 
@@ -19,6 +20,7 @@ describe("User Creation", () => {
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
+  const facilityHome = new FacilityHome();
   const phoneNumber = generatePhoneNumber();
   const emergencyPhoneNumber = generateEmergencyPhoneNumber();
   const fillFacilityName = "Dummy Facility 40";
@@ -180,7 +182,7 @@ describe("User Creation", () => {
   });
 
   it("view user redirection from facility page", () => {
-    cy.visit("/facility");
+    facilityHome.navigateToFacilityHomepage();
     assetSearchPage.typeSearchKeyword(fillFacilityName);
     assetSearchPage.pressEnter();
     facilityPage.verifyFacilityBadgeContent(fillFacilityName);

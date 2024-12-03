@@ -90,15 +90,6 @@ export class ManageUserPage {
     );
   }
 
-  navigateToFacility() {
-    cy.visit("/facility");
-  }
-
-  typeFacilitySearch(facilityName: string) {
-    cy.get("#search").click().clear();
-    cy.get("#search").click().type(facilityName);
-  }
-
   interceptFacilitySearchReq() {
     cy.intercept("GET", "**/api/v1/facility/**").as("searchFacility");
   }
