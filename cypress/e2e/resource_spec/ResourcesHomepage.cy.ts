@@ -40,7 +40,7 @@ describe("Resource Page", () => {
 
   it("Create a resource request", () => {
     cy.visit("/facility");
-    cy.get("#search").click().type("dummy facility 40");
+    cy.get("#facility-search").click().clear().type("dummy facility 40");
     cy.intercept("GET", "**/api/v1/facility/**").as("loadFacilities");
     cy.get("#facility-details").click();
     cy.wait("@loadFacilities").its("response.statusCode").should("eq", 200);

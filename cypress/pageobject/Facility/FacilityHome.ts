@@ -1,7 +1,7 @@
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";
-  searchButton = "#search";
+  searchButton = "#facility-search";
   menuItem = "[role='menuitem']";
 
   // Operations

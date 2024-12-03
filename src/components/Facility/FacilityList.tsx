@@ -193,7 +193,7 @@ export const FacilityList = () => {
           className=""
         />
         <SearchByMultipleFields
-          id="patient-search"
+          id="facility-search"
           options={[
             {
               key: "facility_district_name",

@@ -95,8 +95,7 @@ export class ManageUserPage {
   }
 
   typeFacilitySearch(facilityName: string) {
-    cy.get("#search").click().clear();
-    cy.get("#search").click().type(facilityName);
+    cy.get("#facility-search").click().clear().type(facilityName);
   }
 
   interceptFacilitySearchReq() {
