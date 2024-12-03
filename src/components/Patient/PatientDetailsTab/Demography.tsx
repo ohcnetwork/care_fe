@@ -5,8 +5,9 @@ import { useTranslation } from "react-i18next";
 
 import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -312,10 +313,9 @@ export const Demography = (props: PatientProps) => {
                 {t("no_data_found")}
               </div>
             )}
-          <ButtonV2
-            border
+          <Button
+            variant="outline_primary"
             className="mt-4"
-            ghost
             disabled={!patientData.is_active}
             onClick={withPermissionCheck(() =>
               handleEditClick("insurance-details"),
@@ -323,7 +323,7 @@ export const Demography = (props: PatientProps) => {
           >
             <CareIcon icon="l-plus" className="" />
             {t("add_insurance_details")}
-          </ButtonV2>
+          </Button>
         </div>,
       ],
     },
@@ -373,21 +373,24 @@ export const Demography = (props: PatientProps) => {
               </div>
             </div>
             <div>
-              <ButtonV2
-                id="update-patient-details"
-                variant="secondary"
-                className="mt-4  text-green-800 "
-                disabled={!patientData.is_active}
-                authorizeFor={NonReadOnlyUsers}
-                onClick={withPermissionCheck(() =>
-                  navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/update`,
-                  ),
+              <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+                {({ isAuthorized }) => (
+                  <Button
+                    id="update-patient-details"
+                    variant="outline"
+                    className="mt-4"
+                    disabled={!patientData.is_active || !isAuthorized}
+                    onClick={withPermissionCheck(() =>
+                      navigate(
+                        `/facility/${patientData?.facility}/patient/${id}/update`,
+                      ),
+                    )}
+                  >
+                    <CareIcon icon="l-edit-alt" className="text-lg pr-1" />
+                    {t("edit_profile")}
+                  </Button>
                 )}
-              >
-                <CareIcon icon="l-edit-alt" className="text-lg" />
-                {t("edit_profile")}
-              </ButtonV2>
+              </AuthorizedChild>
             </div>
           </div>
           {/* <div className="mt-4 rounded-md border border-blue-400 bg-blue-50 p-5 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
@@ -415,22 +418,19 @@ export const Demography = (props: PatientProps) => {
                   className="group mt-4 rounded-md bg-white pb-2 pl-5 pt-5 shadow"
                 >
                   <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
-                  <div className="flex flex-row gap-x-4 mb-4">
+                  <div className="flex flex-row items-center justify-between gap-x-4 mb-4 mr-4">
                     <h1 className="text-xl">{t(`patient__${subtab.id}`)}</h1>
                     {subtab.allowEdit && (
-                      <button
-                        className="flex rounded border border-secondary-400 bg-white px-2 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200"
+                      <Button
+                        variant="outline"
                         disabled={!patientData.is_active}
                         onClick={withPermissionCheck(() =>
                           handleEditClick(subtab.id),
                         )}
                       >
-                        <CareIcon
-                          icon="l-edit-alt"
-                          className="text-md mr-1 mt-1"
-                        />
+                        <CareIcon icon="l-edit-alt" className="text-md pr-1" />
                         {t("edit")}
-                      </button>
+                      </Button>
                     )}
                   </div>
                   <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
