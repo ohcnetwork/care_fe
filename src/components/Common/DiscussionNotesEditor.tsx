@@ -9,39 +9,9 @@ import useFileUpload from "@/hooks/useFileUpload";
 import { getCaretCoordinates, getCaretInfo } from "@/Utils/textEditor";
 import { classNames } from "@/Utils/utils";
 
+import { FilePreviewCard } from "./FilePreviewCard";
 import MentionsDropdown from "./MentionDropdown";
 import NotePreview from "./NotePreview";
-
-interface FilePreviewProps {
-  file: File;
-  index: number;
-  onRemove: (index: number) => void;
-}
-
-const FilePreview: React.FC<FilePreviewProps> = ({ file, index, onRemove }) => {
-  return (
-    <div className="relative mt-1 h-20 w-20 cursor-pointer overflow-hidden rounded-lg bg-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-200/50">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove(index);
-        }}
-        className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 transition-colors duration-200 hover:bg-gray-400 hover:text-white"
-      >
-        <CareIcon
-          icon="l-times-circle"
-          className="text-md absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        />
-      </button>
-      <div className="flex h-full w-full flex-col items-center justify-center p-2">
-        <CareIcon icon="l-file" className="shrink-0 text-2xl text-gray-600" />
-        <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
-          {file?.name || "file"}
-        </span>
-      </div>
-    </div>
-  );
-};
 
 interface DiscussionNotesEditorProps {
   initialNote?: string;
@@ -156,7 +126,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
   };
 
   return (
-    <div className="relative m-2">
+    <div className="relative mx-2 mb-2">
       <div
         className={classNames(
           "rounded-t-lg border border-x-gray-300 bg-white shadow-sm transition-all duration-200",
@@ -184,7 +154,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
         {fileUpload.files.length > 0 && (
           <div className="flex flex-wrap gap-3 border-t border-gray-200 bg-gray-50/50 px-3 py-1">
             {fileUpload.files.map((file, index) => (
-              <FilePreview
+              <FilePreviewCard
                 key={index}
                 file={file}
                 index={index}

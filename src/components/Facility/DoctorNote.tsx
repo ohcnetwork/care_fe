@@ -29,12 +29,17 @@ const DoctorNote = (props: DoctorNoteProps) => {
     setThreadViewNote,
   } = props;
 
+  const notes =
+    mode === "thread-view"
+      ? state.notes.filter((note) => !note.root_note_object)
+      : state.notes;
+
   return (
     <div
       className="mt-4 flex h-[500px] grow flex-col-reverse overflow-y-scroll bg-white sm:ml-2"
       id="patient-notes-list"
     >
-      {state.notes.length ? (
+      {notes.length ? (
         <InfiniteScroll
           next={handleNext}
           hasMore={state.cPage < state.totalPages}
@@ -45,10 +50,10 @@ const DoctorNote = (props: DoctorNoteProps) => {
           }
           className="flex h-full flex-col-reverse overflow-hidden"
           inverse={true}
-          dataLength={state.notes.length}
+          dataLength={notes.length}
           scrollableTarget="patient-notes-list"
         >
-          {state.notes.map((note) => {
+          {notes.map((note) => {
             const noteCard = (
               <PatientNoteCard
                 note={note}
@@ -61,7 +66,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
                 setThreadViewNote={setThreadViewNote}
               />
             );
-            if (mode === "thread-view" && !note.root_note_object) {
+            if (mode === "thread-view") {
               return (
                 <div key={note.id} className="mt-3">
                   {noteCard}

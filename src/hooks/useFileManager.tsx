@@ -39,6 +39,7 @@ export interface FileManagerResult {
   getFileType: (
     file: FileUploadModel,
   ) => keyof typeof FILE_EXTENSIONS | "UNKNOWN";
+  getSignedUrl: (file: FileUploadModel) => Promise<string>;
   downloadFile: (
     file: FileUploadModel,
     associating_id: string,
@@ -219,6 +220,14 @@ export default function useFileManager(
 
   const editFile = (file: FileUploadModel, associating_id: string) => {
     setEditDialogueOpen({ ...file, associating_id });
+  };
+
+  const getSignedUrl = async (file: FileUploadModel) => {
+    const { data } = await request(routes.retrieveUpload, {
+      query: { file_type: fileType, associating_id: file.associating_id },
+      pathParams: { id: file.id || "" },
+    });
+    return data?.read_signed_url || "";
   };
 
   const Dialogues = (
@@ -476,6 +485,7 @@ export default function useFileManager(
     Dialogues,
     isPreviewable,
     getFileType,
+    getSignedUrl,
     downloadFile,
     type: fileType,
   };

@@ -165,7 +165,7 @@ const PatientNotesDetailedView = (props: Props) => {
             </div>
           </div>
 
-          <div className="px-3 pb-2">
+          <div className="mx-3 md:mx-2 mt-1">
             <DoctorNoteReplyPreviewCard
               parentNote={reply_to}
               cancelReply={() => setReplyTo(undefined)}

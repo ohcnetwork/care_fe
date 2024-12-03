@@ -49,17 +49,16 @@ type FilePreviewProps = {
 };
 
 const previewExtensions = [
-  "html",
-  "htm",
-  "pdf",
-  "mp4",
-  "mp3",
-  "webm",
-  "jpg",
-  "jpeg",
-  "png",
-  "gif",
-  "webp",
+  ".html",
+  ".htm",
+  ".pdf",
+  ".mp4",
+  ".webm",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
 ];
 
 const FilePreviewDialog = (props: FilePreviewProps) => {

@@ -1,23 +1,22 @@
 import dayjs from "dayjs";
 import { t } from "i18next";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
-import FilePreviewDialog from "@/components/Common/FilePreviewDialog";
+import { FilePreviewCard } from "@/components/Common/FilePreviewCard";
 import NotePreview from "@/components/Common/NotePreview";
 import Spinner from "@/components/Common/Spinner";
 import {
   PatientNotesEditModel,
   PatientNotesModel,
 } from "@/components/Facility/models";
-import { StateInterface } from "@/components/Files/FileUpload";
 import { FileUploadModel } from "@/components/Patient/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import { ExtImage } from "@/hooks/useFileUpload";
+import useFileManager from "@/hooks/useFileManager";
 import useSlug from "@/hooks/useSlug";
 
 import { USER_TYPES_MAP } from "@/common/constants";
@@ -28,9 +27,12 @@ import request from "@/Utils/request/request";
 import {
   classNames,
   formatDateTime,
+  formatDisplayName,
   formatName,
   relativeDate,
 } from "@/Utils/utils";
+
+import { Avatar } from "../Common/Avatar";
 
 const PatientNoteCard = ({
   note,
@@ -55,72 +57,10 @@ const PatientNoteCard = ({
   const [noteField, setNoteField] = useState(note.note);
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistory, setEditHistory] = useState<PatientNotesEditModel[]>([]);
+  const [isPlaying, setIsPlaying] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const authUser = useAuthUser();
   const patientId = useSlug("patient");
-
-  const file_type = "PATIENT_NOTES";
-  const [file_state, setFileState] = useState<StateInterface>({
-    open: false,
-    isImage: false,
-    name: "",
-    extension: "",
-    zoom: 4,
-    isZoomInDisabled: false,
-    isZoomOutDisabled: false,
-    rotation: 0,
-  });
-  const [fileUrl, setFileUrl] = useState<string>("");
-  const [downloadURL, setDownloadURL] = useState("");
-
-  const getExtension = (url: string) => {
-    const extension = url.split("?")[0].split(".").pop();
-    return extension ?? "";
-  };
-  const downloadFileUrl = (url: string) => {
-    fetch(url)
-      .then((res) => res.blob())
-      .then((blob) => {
-        setDownloadURL(URL.createObjectURL(blob));
-      });
-  };
-
-  const loadFile = async (id: string, noteId: string) => {
-    setFileUrl("");
-    setFileState({ ...file_state, open: true });
-    const { data } = await request(routes.retrieveUpload, {
-      query: {
-        file_type: file_type,
-        associating_id: noteId,
-      },
-      pathParams: { id },
-    });
-
-    if (!data) return;
-
-    const signedUrl = data.read_signed_url as string;
-    const extension = getExtension(signedUrl);
-
-    setFileState({
-      ...file_state,
-      open: true,
-      name: data.name?.split(".")[0] ?? "file",
-      extension,
-      isImage: ExtImage.includes(extension),
-    });
-    downloadFileUrl(signedUrl);
-    setFileUrl(signedUrl);
-  };
-
-  const handleClose = () => {
-    setDownloadURL("");
-    setFileState({
-      ...file_state,
-      open: false,
-      zoom: 4,
-      isZoomInDisabled: false,
-      isZoomOutDisabled: false,
-    });
-  };
 
   const fetchEditHistory = async () => {
     const { res, data } = await request(routes.getPatientNoteEditHistory, {
@@ -157,29 +97,47 @@ const PatientNoteCard = ({
     }
   };
 
+  const fileManager = useFileManager({
+    type: "PATIENT_NOTES",
+    uploadedFiles: note?.files,
+  });
+
+  const handleAudioPlay = (file: FileUploadModel) => {
+    if (isPlaying === file.id) {
+      audioRef.current?.pause();
+      setIsPlaying(null);
+    } else {
+      if (audioRef.current) {
+        fileManager.getSignedUrl(file).then((url) => {
+          if (audioRef.current) {
+            audioRef.current.src = url;
+            audioRef.current.play();
+            setIsPlaying(file.id!);
+          }
+        });
+      }
+    }
+  };
+
+  const isAudioFile = (file: FileUploadModel) => {
+    return fileManager.getFileType(file) === "AUDIO";
+  };
+
   return (
     <>
-      {" "}
+      <audio ref={audioRef} onEnded={() => setIsPlaying(null)} />
       <div
         className={classNames(
           "group flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800 max-sm:ml-2",
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
-        <FilePreviewDialog
-          show={file_state.open}
-          fileUrl={fileUrl}
-          file_state={file_state}
-          setFileState={setFileState}
-          downloadURL={downloadURL}
-          onClose={handleClose}
-          fixedWidth={false}
-          className="h-[80vh] w-full md:h-screen"
-        />
         <div className="relative flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-lg font-semibold text-white">
-            {note.created_by_object?.first_name[0]}
-          </div>
+          <Avatar
+            name={formatDisplayName(note.created_by_object)}
+            imageUrl={note.created_by_object.read_profile_picture_url}
+            className="h-8 w-8 rounded-full text-black/50"
+          />
           <div className="flex-grow">
             <div className="flex items-center justify-between">
               <div>
@@ -257,88 +215,79 @@ const PatientNoteCard = ({
           </div>
         </div>
 
-        {
-          <div className="mt-2">
-            {isEditing ? (
-              <div className="flex flex-col">
-                <textarea
-                  rows={2}
-                  className="h-20 w-full resize-none rounded-lg border border-secondary-300 p-2"
-                  value={noteField}
-                  onChange={(e) => setNoteField(e.target.value)}
-                ></textarea>
-                <div className="mt-2 flex justify-end gap-2">
-                  <ButtonV2
-                    className="py-1"
-                    variant="secondary"
-                    border
-                    onClick={() => {
-                      setIsEditing(false);
-                      setNoteField(note.note);
-                    }}
-                    id="cancel-update-note-button"
-                  >
-                    <CareIcon icon="l-times-circle" className="h-5 w-5" />
-                    Cancel
-                  </ButtonV2>
-                  <ButtonV2
-                    className="py-1"
-                    onClick={onUpdateNote}
-                    id="update-note-button"
-                  >
-                    <CareIcon icon="l-check" className="h-5 w-5 text-white" />
-                    Update Note
-                  </ButtonV2>
-                </div>
+        <div className="mt-2">
+          {isEditing ? (
+            <div className="flex flex-col">
+              <textarea
+                rows={2}
+                className="h-20 w-full resize-none rounded-lg border border-secondary-300 p-2"
+                value={noteField}
+                onChange={(e) => setNoteField(e.target.value)}
+              ></textarea>
+              <div className="mt-2 flex justify-end gap-2">
+                <ButtonV2
+                  className="py-1"
+                  variant="secondary"
+                  border
+                  onClick={() => {
+                    setIsEditing(false);
+                    setNoteField(note.note);
+                  }}
+                  id="cancel-update-note-button"
+                >
+                  <CareIcon icon="l-times-circle" className="h-5 w-5" />
+                  Cancel
+                </ButtonV2>
+                <ButtonV2
+                  className="py-1"
+                  onClick={onUpdateNote}
+                  id="update-note-button"
+                >
+                  <CareIcon icon="l-check" className="h-5 w-5 text-white" />
+                  Update Note
+                </ButtonV2>
               </div>
-            ) : (
-              <div
-                onClick={() => {
-                  if (allowThreadView && setThreadViewNote)
-                    setThreadViewNote(note.id);
-                }}
-                className={`pl-11 text-sm text-gray-700 ${allowThreadView ? "cursor-pointer" : ""}`}
-              >
-                <NotePreview
-                  initialNote={noteField}
-                  mentioned_users={note.mentioned_users}
-                />
-                <div className="flex gap-2">
-                  {note?.files?.map((file: FileUploadModel) => (
-                    <div
-                      key={file.id}
-                      className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
-                    >
-                      <div
-                        className="flex h-full w-full flex-col items-center justify-center p-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (file.id) loadFile(file.id, note.id);
-                        }}
-                      >
-                        <CareIcon
-                          icon="l-file"
-                          className="shrink-0 text-2xl text-gray-600"
-                        />
-                        <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
-                          {file.name}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {mode == "thread-view" && note.replies.length > 0 && (
-                  <div className="mt-2 flex items-center text-xs text-gray-500">
-                    <CareIcon icon="l-corner-down-right" className="h-3 w-3" />
-                    {note.child_notes.length}{" "}
-                    {note.child_notes.length === 1 ? "Reply" : "Replies"}
-                  </div>
-                )}
+            </div>
+          ) : (
+            <div
+              onClick={() => {
+                if (allowThreadView && setThreadViewNote)
+                  setThreadViewNote(note.id);
+              }}
+              className={`pl-11 text-sm text-gray-700 ${allowThreadView ? "cursor-pointer" : ""}`}
+            >
+              <NotePreview
+                initialNote={noteField}
+                mentioned_users={note.mentioned_users}
+              />
+              <div className="flex flex-wrap gap-2">
+                {note?.files?.map((file: FileUploadModel) => (
+                  <FilePreviewCard
+                    key={file.id}
+                    file={file}
+                    readonly
+                    isPlaying={isPlaying === file.id}
+                    onPlay={
+                      isAudioFile(file)
+                        ? () => handleAudioPlay(file)
+                        : undefined
+                    }
+                    onClick={() => fileManager.viewFile(file, note.id)}
+                  />
+                ))}
               </div>
-            )}
-          </div>
-        }
+              {mode == "thread-view" && note.replies.length > 0 && (
+                <div className="mt-2 flex items-center text-xs text-gray-500">
+                  <CareIcon icon="l-corner-down-right" className="h-3 w-3" />
+                  {note.child_notes.length}{" "}
+                  {note.child_notes.length === 1 ? "Reply" : "Replies"}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+      {fileManager.Dialogues}
       {showEditHistory && (
         <DialogModal
           show={showEditHistory}

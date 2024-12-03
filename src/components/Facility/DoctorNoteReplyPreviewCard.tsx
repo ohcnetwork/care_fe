@@ -4,9 +4,10 @@ import { PatientNotesReplyModel } from "@/components/Facility/models";
 
 import { USER_TYPES_MAP } from "@/common/constants";
 
-import { formatDateTime, relativeDate } from "@/Utils/utils";
+import { formatDateTime, formatDisplayName, relativeDate } from "@/Utils/utils";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Avatar } from "../Common/Avatar";
 import NotePreview from "../Common/NotePreview";
 
 interface Props {
@@ -28,9 +29,11 @@ const DoctorNoteReplyPreviewCard = ({
       <div className="flex flex-col">
         <div className="flex justify-between pl-3">
           <div className="flex gap-2">
-            <div className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-lg font-semibold text-white">
-              {parentNote.created_by_object?.first_name[0]}
-            </div>
+            <Avatar
+              name={formatDisplayName(parentNote.created_by_object)}
+              imageUrl={parentNote.created_by_object.read_profile_picture_url}
+              className="h-8 w-8 rounded-full text-black/50"
+            />
             <div>
               <div>
                 <span className="text-sm font-semibold text-gray-700">
