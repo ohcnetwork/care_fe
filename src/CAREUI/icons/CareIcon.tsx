@@ -27,10 +27,11 @@ export default function CareIcon({
 }: CareIconProps) {
   // TODO: fill & strokeWidth are defined for only one icon
   // Rethink Implementation
-  const [viewBox, path, fill, strokeWidth, secondaryPath] = {
-    ...iconData,
-    ...duoToneIconData,
-  }[icon] as [
+
+  const [viewBox, path, fill, strokeWidth, secondaryPath] = (
+    (icon.startsWith("d-") ? duoToneIconData : iconData) as typeof iconData &
+      typeof duoToneIconData
+  )[icon] as [
     number,
     string,
     boolean | undefined,
