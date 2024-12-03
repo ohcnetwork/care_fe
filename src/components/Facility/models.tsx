@@ -391,7 +391,10 @@ export const NursingPlotFields = [
 ] as const satisfies (keyof DailyRoundsModel)[];
 
 export type NursingPlotRes = {
-  nursing: any[];
+  nursing: Array<{
+    procedure: string;
+    description: string;
+  }>;
 };
 
 export const RoutineFields = [
