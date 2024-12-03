@@ -652,8 +652,8 @@ export const PatientManager = () => {
                         startIcon="l-clock"
                         text={
                           dayjs().isAfter(patient.review_time)
-                            ? `Review Missed (${Math.abs(dayjs().diff(dayjs(patient.review_time), "days"))} days ago)`
-                            : `Review Due in (${Math.abs(dayjs(patient.review_time).diff(dayjs(), "days"))} days)`
+                            ? `Review Missed ${Math.abs(dayjs().diff(dayjs(patient.review_time), "days"))} days ago`
+                            : `Review Due in ${Math.abs(dayjs(patient.review_time).diff(dayjs(), "days"))} days`
                         }
                       />
                     )}
