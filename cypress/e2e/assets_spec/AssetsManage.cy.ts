@@ -95,8 +95,7 @@ describe("Asset", () => {
 
   it("Verify Facility Asset Page Redirection", () => {
     cy.visit("/facility");
-    assetSearchPage.typeSearchKeyword(fillFacilityName);
-    assetSearchPage.pressEnter();
+    cy.get("#facility-search").click().clear().type(fillFacilityName);
     facilityPage.verifyFacilityBadgeContent(fillFacilityName);
     facilityPage.visitAlreadyCreatedFacility();
     facilityPage.clickManageFacilityDropdown();
