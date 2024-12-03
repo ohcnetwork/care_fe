@@ -29,7 +29,7 @@ describe("Facility Homepage Function", () => {
   const notificationMessage = "Test Notification";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

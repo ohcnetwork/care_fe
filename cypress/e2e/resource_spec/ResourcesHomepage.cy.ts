@@ -10,7 +10,7 @@ describe("Resource Page", () => {
   const phone_number = "9999999999";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

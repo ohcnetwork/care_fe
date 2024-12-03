@@ -3,6 +3,7 @@ import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
+import { nonAdminRoles } from "../../pageobject/utils/userConfig";
 
 describe("Facility Creation", () => {
   let facilityUrl1: string;
@@ -60,7 +61,7 @@ describe("Facility Creation", () => {
   const facilityType = "Primary Health Centres";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -335,13 +336,8 @@ describe("Facility Creation", () => {
   });
 
   it("Access Restriction for Non-Admin Users to facility creation page", () => {
-    const nonAdminLoginMethods = [
-      loginPage.loginAsDevDoctor.bind(loginPage),
-      loginPage.loginAsStaff.bind(loginPage),
-    ];
-
-    nonAdminLoginMethods.forEach((loginMethod) => {
-      loginMethod();
+    nonAdminRoles.forEach((role) => {
+      loginPage.loginByRole(role);
       cy.visit("/facility/create");
       facilityPage.verifyErrorNotification(
         "You don't have permission to perform this action. Contact the admin",

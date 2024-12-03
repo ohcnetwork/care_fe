@@ -12,7 +12,7 @@ describe("Asset", () => {
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

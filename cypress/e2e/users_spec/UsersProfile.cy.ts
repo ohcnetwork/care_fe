@@ -19,7 +19,7 @@ describe("Manage User Profile", () => {
   const facilitySearch = "Dummy Facility 40";
 
   before(() => {
-    loginPage.loginAsDevDoctor();
+    loginPage.loginByRole("devDoctor");
     cy.saveLocalStorage();
   });
 

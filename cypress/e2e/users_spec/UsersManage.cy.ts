@@ -22,7 +22,7 @@ describe("Manage User", () => {
   const linkedskill = "General Medicine";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

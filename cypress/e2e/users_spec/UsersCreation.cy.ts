@@ -79,7 +79,7 @@ describe("User Creation", () => {
   const newUserDob = "25081999";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

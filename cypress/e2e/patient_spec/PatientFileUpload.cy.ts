@@ -18,7 +18,7 @@ function runTests(
     const patientNameTwo = "Dummy Patient Four";
     const patientNameThree = "Dummy Patient Five";
     before(() => {
-      loginPage.loginAsDistrictAdmin();
+      loginPage.loginByRole("districtAdmin");
       cy.saveLocalStorage();
     });
 
@@ -91,7 +91,7 @@ function runTests(
       patientFileUpload.verifyUploadFilePresence(newFileName);
       patientFileUpload.verifyFileRenameOption(false);
       // Login as District Admin
-      loginPage.loginAsDistrictAdmin();
+      loginPage.loginByRole("districtAdmin");
       cy.reload();
       // Verify the file edit option is available
       patientFileUpload.verifyUploadFilePresence(newFileName);
