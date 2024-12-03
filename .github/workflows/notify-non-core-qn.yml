@@ -19,15 +19,15 @@ jobs:
 
     steps:
       - name: Check and Notify
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const isOrgMember = (commenter, allowedUsers) => 
+            const isOrgMember = (commenter, allowedUsers) =>
               allowedUsers.split(',').map(u => u.trim()).includes(commenter);
 
-            const containsQuestionKeywords = (text, keywords) => 
-              keywords.split(',').map(k => k.trim()).some(keyword => 
+            const containsQuestionKeywords = (text, keywords) =>
+              keywords.split(',').map(k => k.trim()).some(keyword =>
                 text.toLowerCase().includes(keyword.toLowerCase())
               );
 
