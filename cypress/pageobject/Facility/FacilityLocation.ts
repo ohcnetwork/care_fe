@@ -7,8 +7,8 @@ class FacilityLocation {
     cy.get("[id='facility-name-card']").contains(name).click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
     cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
-    cy.get("#manage-facility-dropdown button").should("be.visible");
-    cy.get("[id='manage-facility-dropdown']").scrollIntoView().click();
+    cy.get("[id='manage-facility-dropdown']").scrollIntoView();
+    cy.get("#manage-facility-dropdown button").should("be.visible").click();
     cy.get("[id=location-management]").click();
   }
 
