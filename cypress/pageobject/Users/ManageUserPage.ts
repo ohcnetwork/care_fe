@@ -161,21 +161,6 @@ export class ManageUserPage {
     );
   }
 
-  assertFacilityBadgeContent(occupied: string, total: string) {
-    cy.get('[data-test-id="occupancy-badge-text"]').should(
-      "contain.text",
-      `Occupancy: ${occupied} / ${total}`,
-    );
-  }
-
-  assertFacilityBadgeBackgroundColor(color: string) {
-    cy.get('[data-test-id="occupancy-badge"]').should(
-      "have.css",
-      "background-color",
-      color,
-    );
-  }
-
   assertVideoConnectLink(docName: string, link: string) {
     cy.get("ul#options")
       .find("li")

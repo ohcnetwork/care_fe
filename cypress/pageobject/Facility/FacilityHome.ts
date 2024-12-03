@@ -105,6 +105,21 @@ class FacilityHome {
     const encodedText = encodeURIComponent(searchText).replace(/%20/g, "+");
     this.getURL().should("include", `search=${encodedText}`);
   }
+
+  assertFacilityBadgeContent(occupied: string, total: string) {
+    cy.get('[data-test-id="occupancy-badge-text"]').should(
+      "contain.text",
+      `Occupancy: ${occupied} / ${total}`,
+    );
+  }
+
+  assertFacilityBadgeBackgroundColor(color: string) {
+    cy.get('[data-test-id="occupancy-badge"]').should(
+      "have.css",
+      "background-color",
+      color,
+    );
+  }
 }
 
 export default FacilityHome;
