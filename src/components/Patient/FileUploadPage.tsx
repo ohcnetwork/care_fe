@@ -1,3 +1,5 @@
+import { navigate } from "raviger";
+
 import Page from "@/components/Common/Page";
 import { FileUpload } from "@/components/Files/FileUpload";
 
@@ -15,6 +17,10 @@ export default function FileUploadPage(props: {
     pathParams: { id: patientId },
     prefetch: !!patientId,
   });
+  if (!patient?.is_active) {
+    navigate(`/facility/${facilityId}/patient/${patientId}`);
+  }
+
   return (
     <Page
       hideBack={false}

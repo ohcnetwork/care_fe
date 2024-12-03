@@ -489,6 +489,7 @@ export const PatientHome = (props: {
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                         id="upload-patient-files"
                         size="large"
+                        disabled={!patientData.is_active}
                         onClick={() =>
                           navigate(
                             `/facility/${patientData?.facility}/patient/${id}/files`,
@@ -507,7 +508,7 @@ export const PatientHome = (props: {
                         <ButtonV2
                           id="assign-volunteer"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
-                          disabled={false}
+                          disabled={!patientData.is_active}
                           authorizeFor={NonReadOnlyUsers}
                           className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                           size="large"
