@@ -189,6 +189,7 @@ export const FacilityList = () => {
         />
         <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
           <SearchInput
+            id="search-by-facility"
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
