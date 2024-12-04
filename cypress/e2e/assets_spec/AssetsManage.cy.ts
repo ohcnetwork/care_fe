@@ -108,7 +108,7 @@ describe("Asset", () => {
     facilityHome.navigateToFacilityHomepage();
     facilityHome.typeFacilitySearch(fillFacilityName);
     advanceFilters.verifyFilterBadgePresence(
-      "Facility",
+      "Facility/District Name",
       fillFacilityName,
       true,
     );
@@ -121,7 +121,7 @@ describe("Asset", () => {
     facilityPage.clickviewAssetFacilityOption();
     facilityPage.verifyfacilityviewassetredirection();
     advanceFilters.verifyFilterBadgePresence(
-      "Facility",
+      "Facility/District Name",
       fillFacilityName,
       true,
     );
