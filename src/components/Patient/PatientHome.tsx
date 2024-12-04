@@ -239,28 +239,48 @@ export const PatientHome = (props: {
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
                       {patientData?.is_active &&
-                        (!patientData?.last_consultation ||
-                          patientData?.last_consultation?.discharge_date) && (
-                          <div>
-                            <ButtonV2
-                              className="w-full"
-                              size="default"
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                                )
-                              }
-                            >
-                              <span className="flex w-full items-center justify-start gap-2">
-                                <CareIcon
-                                  icon="l-chat-bubble-user"
-                                  className="text-xl"
-                                />
-                                {t("add_consultation")}
-                              </span>
-                            </ButtonV2>
-                          </div>
-                        )}
+                      (!patientData?.last_consultation ||
+                        patientData?.last_consultation?.discharge_date) ? (
+                        <div>
+                          <ButtonV2
+                            className="w-full"
+                            size="default"
+                            onClick={() =>
+                              navigate(
+                                `/facility/${patientData?.facility}/patient/${id}/consultation`,
+                              )
+                            }
+                          >
+                            <span className="flex w-full items-center justify-start gap-2">
+                              <CareIcon
+                                icon="l-chat-bubble-user"
+                                className="text-xl"
+                              />
+                              {t("add_consultation")}
+                            </span>
+                          </ButtonV2>
+                        </div>
+                      ) : (
+                        <div>
+                          <ButtonV2
+                            className="w-full"
+                            size="default"
+                            onClick={() =>
+                              navigate(
+                                `/facility/${patientData.facility}/patient/${id}/consultation/${patientData.last_consultation?.id}/consent-records`,
+                              )
+                            }
+                          >
+                            <span className="flex w-full items-center justify-start gap-2">
+                              <CareIcon
+                                icon="l-chat-bubble-user"
+                                className="text-xl"
+                              />
+                              {t("view_consultation")}
+                            </span>
+                          </ButtonV2>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
