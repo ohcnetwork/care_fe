@@ -42,7 +42,8 @@ const NotePreview = ({
 
   const processText = (content: string) => {
     const withLineBreaks = content.replace(/\n/g, "<br />");
-    const mentionRegex = /@([a-zA-Z0-9_]{3,30})/g;
+    // valid usernames : devdoctor, dev-doctor and dev_doctor
+    const mentionRegex = /@([a-zA-Z0-9_-]+)/g;
 
     const withMentions = withLineBreaks.replace(mentionRegex, (_, username) => {
       const user = mentionedUsersMap[username];

@@ -1,16 +1,15 @@
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import DiscussionNotesEditor from "@/components/Common/DiscussionNotesEditor";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
 import PatientNotesList from "@/components/Facility/PatientNotesList";
 import {
   PatientNoteStateType,
   PatientNotesModel,
 } from "@/components/Facility/models";
-import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -62,7 +61,7 @@ const PatientNotes = (props: PatientNotesProps) => {
     }
 
     try {
-      const { res } = await request(routes.addPatientNote, {
+      const { res, data } = await request(routes.addPatientNote, {
         pathParams: { patientId: patientId },
         body: {
           note: noteField,
@@ -72,11 +71,12 @@ const PatientNotes = (props: PatientNotesProps) => {
       });
       if (res?.status === 201) {
         setNoteField("");
-        setReload(!reload);
         setState({ ...state, cPage: 1 });
         setReplyTo(undefined);
         Notification.Success({ msg: "Note added successfully" });
       }
+
+      return data?.id;
     } catch (error) {
       Notification.Error({
         msg: "Failed to add note. Please try again.",
@@ -146,36 +146,24 @@ const PatientNotes = (props: PatientNotesProps) => {
           thread={thread}
           setReplyTo={setReplyTo}
         />
-        <DoctorNoteReplyPreviewCard
-          parentNote={reply_to}
-          cancelReply={() => setReplyTo(undefined)}
-        >
-          <div className="relative mx-4 flex items-center">
-            <AutoExpandingTextInputFormField
-              maxHeight={160}
-              rows={2}
-              name="note"
-              value={noteField}
-              onChange={(e) => setNoteField(e.value)}
-              className="w-full grow"
-              errorClassName="hidden"
-              innerClassName="pr-10"
-              placeholder={t("notes_placeholder")}
-              disabled={!patientActive}
-            />
-            <ButtonV2
-              onClick={onAddNote}
-              border={false}
-              className="absolute right-2"
-              ghost
-              size="small"
-              disabled={!patientActive}
-              authorizeFor={NonReadOnlyUsers}
+        <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+          {({ isAuthorized }) => (
+            <DoctorNoteReplyPreviewCard
+              parentNote={reply_to}
+              cancelReply={() => setReplyTo(undefined)}
             >
-              <CareIcon icon="l-message" className="text-lg" />
-            </ButtonV2>
-          </div>
-        </DoctorNoteReplyPreviewCard>
+              <DiscussionNotesEditor
+                initialNote={noteField}
+                onChange={setNoteField}
+                onAddNote={onAddNote}
+                isAuthorized={isAuthorized && patientActive}
+                onRefetch={() => setReload(true)}
+                maxRows={10}
+                className="mt-2"
+              />
+            </DoctorNoteReplyPreviewCard>
+          )}
+        </AuthorizedChild>
       </div>
     </div>
   );

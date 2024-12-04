@@ -251,6 +251,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                     isAuthorized={isAuthorized}
                     onRefetch={() => setReload(true)}
                     maxRows={10}
+                    className="mt-2"
                   />
                 </DoctorNoteReplyPreviewCard>
               )}

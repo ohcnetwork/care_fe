@@ -20,6 +20,7 @@ interface DiscussionNotesEditorProps {
   isAuthorized?: boolean;
   onRefetch?: () => void;
   maxRows?: number;
+  className?: string;
 }
 
 const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
@@ -29,6 +30,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
   isAuthorized = true,
   onRefetch,
   maxRows,
+  className,
 }) => {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const [showMentions, setShowMentions] = useState(false);
@@ -133,6 +135,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
         className={classNames(
           "rounded-t-lg border border-x-gray-300 bg-white shadow-sm transition-all duration-200",
           isPreviewMode && "bg-gray-50",
+          className,
         )}
       >
         {isPreviewMode ? (
