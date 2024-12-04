@@ -38,7 +38,6 @@ const PatientNotesDetailedView = (props: Props) => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   };
-
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -47,27 +46,34 @@ const PatientNotesDetailedView = (props: Props) => {
       return;
     }
 
-    const { res, data } = await request(routes.addPatientNote, {
-      pathParams: {
-        patientId: patientId,
-      },
-      body: {
-        note: noteField,
-        thread,
-        consultation: consultationId,
-        reply_to: reply_to?.id || noteId,
-      },
-    });
+    try {
+      const { res, data } = await request(routes.addPatientNote, {
+        pathParams: {
+          patientId: patientId,
+        },
+        body: {
+          note: noteField,
+          thread,
+          consultation: consultationId,
+          reply_to: reply_to?.id || noteId,
+        },
+      });
 
-    setReplyTo(undefined);
+      setReplyTo(undefined);
 
-    if (res?.status === 201) {
-      Notification.Success({ msg: "Note added successfully" });
-      setNoteField("");
-      setTimeout(scrollToBottom, 100);
+      if (res?.status === 201) {
+        Notification.Success({ msg: "Note added successfully" });
+        setNoteField("");
+        setTimeout(scrollToBottom, 100);
+      } else {
+        Notification.Error({ msg: "Failed to add note. Please try again." });
+      }
+
+      return data?.id;
+    } catch (error) {
+      Notification.Error({ msg: "An error occurred while adding the note." });
+      return undefined;
     }
-
-    return data?.id;
   };
   const fetchNotes = async () => {
     setIsLoading(true);

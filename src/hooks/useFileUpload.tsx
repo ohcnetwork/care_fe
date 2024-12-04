@@ -219,7 +219,7 @@ export default function useFileUpload(
     for (const [index, file] of files.entries()) {
       const filename =
         allowNameFallback && uploadFileNames[index] === "" && file
-          ? file.name
+          ? file.name.split(".")[0]
           : uploadFileNames[index];
       if (!filename) {
         setError(t("file_error__single_file_name"));

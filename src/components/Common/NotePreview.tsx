@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { UserBareMinimum } from "@/components/Users/models";
 
@@ -31,6 +31,7 @@ const NotePreview = ({
   initialNote: string;
   mentioned_users?: UserBareMinimum[];
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const mentionedUsersMap = Object.fromEntries(
     mentioned_users.map((u) => [u.username, u]),
   );
@@ -58,6 +59,7 @@ const NotePreview = ({
   };
 
   useEffect(() => {
+    const container = containerRef.current;
     const handleMentionHover = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (!(target instanceof Element)) return;
@@ -77,17 +79,17 @@ const NotePreview = ({
       }
     };
 
-    document.addEventListener("mouseenter", handleMentionHover, true);
-    document.addEventListener("mouseleave", handleMentionHover, true);
+    container?.addEventListener("mouseenter", handleMentionHover, true);
+    container?.addEventListener("mouseleave", handleMentionHover, true);
 
     return () => {
-      document.removeEventListener("mouseenter", handleMentionHover, true);
-      document.removeEventListener("mouseleave", handleMentionHover, true);
+      container?.removeEventListener("mouseenter", handleMentionHover, true);
+      container?.removeEventListener("mouseleave", handleMentionHover, true);
     };
   }, []);
 
   return (
-    <div className="relative prose text-sm prose-p:m-0">
+    <div ref={containerRef} className="relative prose text-sm prose-p:m-0">
       <div dangerouslySetInnerHTML={{ __html: processText(initialNote) }} />
       {hoveredUserData && mentionedUsersMap[hoveredUserData.username] && (
         <div

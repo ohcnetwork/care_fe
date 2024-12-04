@@ -41,13 +41,16 @@ export const getCaretCoordinates = (element: HTMLTextAreaElement) => {
   const marker = document.createElement("span");
   marker.textContent = "I";
   mirror.appendChild(marker);
-  document.body.appendChild(mirror);
-
-  const markerRect = marker.getBoundingClientRect();
-  document.body.removeChild(mirror);
-
-  return {
-    top: markerRect.top - textareaRect.top,
-    left: markerRect.left - textareaRect.left,
-  };
+  try {
+    document.body.appendChild(mirror);
+    const markerRect = marker.getBoundingClientRect();
+    return {
+      top: markerRect.top - textareaRect.top,
+      left: markerRect.left - textareaRect.left,
+    };
+  } finally {
+    if (mirror.parentNode) {
+      document.body.removeChild(mirror);
+    }
+  }
 };

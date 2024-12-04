@@ -9,7 +9,7 @@ import PatientConsultationNotesList from "@/components/Facility/PatientConsultat
 import PatientNotesDetailedView from "@/components/Facility/PatientNotesDetailedView";
 import {
   PatientNoteStateType,
-  PatientNotesReplyModel,
+  PatientNotesModel,
 } from "@/components/Facility/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -44,7 +44,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [reply_to, setReplyTo] = useState<PatientNotesReplyModel | undefined>(
+  const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
     undefined,
   );
   const [mode, setMode] = useState<"thread-view" | "default-view">(

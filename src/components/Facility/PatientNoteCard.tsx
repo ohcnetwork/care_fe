@@ -108,13 +108,18 @@ const PatientNoteCard = ({
       setIsPlaying(null);
     } else {
       if (audioRef.current) {
-        fileManager.getSignedUrl(file).then((url) => {
-          if (audioRef.current) {
-            audioRef.current.src = url;
-            audioRef.current.play();
-            setIsPlaying(file.id!);
-          }
-        });
+        fileManager
+          .getSignedUrl(file)
+          .then((url) => {
+            if (audioRef.current) {
+              audioRef.current.src = url;
+              audioRef.current.play();
+              setIsPlaying(file.id!);
+            }
+          })
+          .catch(() => {
+            setIsPlaying(null);
+          });
       }
     }
   };

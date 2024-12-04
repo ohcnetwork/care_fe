@@ -73,6 +73,15 @@ export function FilePreviewCard({
       {fileType === "AUDIO" && onPlay ? (
         <div
           className="flex h-full w-full flex-col items-center justify-center p-2"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              onPlay();
+            }
+          }}
           onClick={(e) => {
             e.stopPropagation();
             onPlay();

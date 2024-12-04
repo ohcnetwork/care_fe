@@ -222,12 +222,25 @@ export default function useFileManager(
     setEditDialogueOpen({ ...file, associating_id });
   };
 
+  const urlCache = new Map<string, { url: string; timestamp: number }>();
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 min
+
   const getSignedUrl = async (file: FileUploadModel) => {
+    const cacheKey = `${file.id}-${file.associating_id}`;
+    const cached = urlCache.get(cacheKey);
+
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.url;
+    }
+
     const { data } = await request(routes.retrieveUpload, {
       query: { file_type: fileType, associating_id: file.associating_id },
       pathParams: { id: file.id || "" },
     });
-    return data?.read_signed_url || "";
+    const url = data?.read_signed_url || "";
+
+    urlCache.set(cacheKey, { url, timestamp: Date.now() });
+    return url;
   };
 
   const Dialogues = (
