@@ -97,7 +97,9 @@ export class PatientPage {
   }
 
   clickCancelButton() {
+    cy.intercept("GET", "**/api/v1/patient/*/").as("getPatient");
     cy.get("#cancel").click();
+    cy.wait("@getPatient");
   }
 
   selectPatientGender(gender: string) {

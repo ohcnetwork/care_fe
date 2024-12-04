@@ -155,6 +155,7 @@ describe("Patient Creation with consultation", () => {
     patientPage.visitUpdatePatientUrl();
     patientPage.verifyStatusCode();
     patientPage.patientformvisibility();
+    cy.wait(2000);
     // change the gender to female and input data to related changed field
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
@@ -195,7 +196,9 @@ describe("Patient Creation with consultation", () => {
       patientOneSecondInsuranceId,
       patientOneSecondInsurerName,
     );
+    cy.intercept("GET", "**/api/v1/patient/*/").as("getPatient");
     patientPage.clickUpdatePatient();
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
     patientPage.verifyPatientUpdated();
     patientPage.visitPatientUrl();
     // Verify Female Gender change reflection, No Medical History and Insurance Details
