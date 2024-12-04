@@ -1,3 +1,5 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
+
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ResourcePage from "../../pageobject/Resource/ResourcePage";
@@ -7,10 +9,11 @@ describe("Resource Page", () => {
   const loginPage = new LoginPage();
   const resourcePage = new ResourcePage();
   const facilityPage = new FacilityPage();
+  const facilityHome = new FacilityHome();
   const phone_number = "9999999999";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -39,8 +42,8 @@ describe("Resource Page", () => {
   });
 
   it("Create a resource request", () => {
-    cy.visit("/facility");
-    cy.get("#search").click().type("dummy facility 40");
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch("dummy facility 40");
     cy.intercept("GET", "**/api/v1/facility/**").as("loadFacilities");
     cy.get("#facility-details").click();
     cy.wait("@loadFacilities").its("response.statusCode").should("eq", 200);
