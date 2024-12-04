@@ -10,7 +10,7 @@ describe("Patient Investigation Creation from Patient consultation page", () => 
   const patientName = "Dummy Patient Thirteen";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

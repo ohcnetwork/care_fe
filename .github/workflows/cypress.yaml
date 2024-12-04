@@ -18,8 +18,9 @@ jobs:
         containers: [1, 2, 3, 4]
     env:
       REACT_CARE_API_URL: http://localhost:9000
-      REACT_ENABLED_APPS: "ohcnetwork/care_hcx_fe@main"
+      REACT_ENABLED_APPS: "ohcnetwork/care_hcx_fe@main,ohcnetwork/care_abdm_fe@main"
       REACT_ENABLE_HCX: true
+      REACT_ENABLE_ABDM: true
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
