@@ -52,10 +52,10 @@ describe("Location Management Section", () => {
   });
 
   it("Add single & Multiple Bed to facility location along with duplication and deleting a bed", () => {
-    const locationName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const locationName = `ICU-${uuidv4().substring(0, 2)}`;
     const facilityName = "Dummy Request Fulfilment Center";
-    const bedName = `Bed-${uuidv4().substring(0, 2)}}`;
-    const duplicateBedName = `Duplicate-${uuidv4().substring(0, 2)}}`;
+    const bedName = `Bed-${uuidv4().substring(0, 2)}`;
+    const duplicateBedName = `Duplicate-${uuidv4().substring(0, 2)}`;
     const multipleBedName = `Multi-${uuidv4().substring(0, 2)}}`;
     const numberOfBeds = 25;
     // Select a new facility
@@ -119,7 +119,7 @@ describe("Location Management Section", () => {
   });
 
   it("Adds Location to a facility and modify it", () => {
-    const locationName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const locationName = `ICU-${uuidv4().substring(0, 2)}`;
     const locationModifiedName = `ICU-${uuidv4().substring(0, 2)}}`;
     const facilityName = "Dummy Facility 11";
     // Select a new facility
@@ -145,7 +145,7 @@ describe("Location Management Section", () => {
     facilityLocation.verifyLocationDescription(locationDescription);
     facilityLocation.verifyLocationMiddleware(locationMiddleware);
     // verify the duplicate location error message
-    facilityLocation.clickAddLocationButton();
+    facilityLocation.clickAddNewLocationButton();
     facilityLocation.typeLocationName(locationName);
     facilityLocation.clickAddLocationButton();
     cy.verifyNotification(
@@ -168,9 +168,9 @@ describe("Location Management Section", () => {
   });
 
   it("Delete location with linked beds", () => {
-    const locationName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const locationName = `ICU-${uuidv4().substring(0, 2)}`;
     const facilityName = "Dummy Facility 12";
-    const bedName = `Bed-${uuidv4().substring(0, 2)}}`;
+    const bedName = `Bed-${uuidv4().substring(0, 2)}`;
     // Select a new facility
     facilityHome.typeFacilitySearch(facilityName);
     facilityHome.assertFacilityInCard(facilityName);
@@ -212,7 +212,7 @@ describe("Location Management Section", () => {
   });
 
   it("Delete location with linked assets", () => {
-    const locationName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const locationName = `ICU-${uuidv4().substring(0, 2)}`;
     const facilityName = "Dummy Facility 13";
     // Select a new facility
     facilityHome.typeFacilitySearch(facilityName);
