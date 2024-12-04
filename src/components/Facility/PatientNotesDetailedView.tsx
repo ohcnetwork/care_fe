@@ -156,27 +156,39 @@ const PatientNotesDetailedView = (props: Props) => {
             </div>
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-3">
-              {state.child_notes.map((note) => {
-                const parentNote = state.child_notes.find(
-                  (n) => n.id === note.reply_to,
-                );
-                return (
-                  <DoctorNoteReplyPreviewCard
-                    key={note.id}
-                    parentNote={
-                      note.reply_to !== state.id ? parentNote : undefined
-                    }
-                  >
-                    <div className="mt-3">
-                      <PatientNoteCard
-                        note={note as PatientNotesModel}
-                        setReload={setReload}
-                        setReplyTo={setReplyTo}
-                      />
-                    </div>
-                  </DoctorNoteReplyPreviewCard>
-                );
-              })}
+              {state.child_notes.length > 0 ? (
+                state.child_notes.map((note) => {
+                  const parentNote = state.child_notes.find(
+                    (n) => n.id === note.reply_to,
+                  );
+                  return (
+                    <DoctorNoteReplyPreviewCard
+                      key={note.id}
+                      parentNote={
+                        note.reply_to !== state.id ? parentNote : undefined
+                      }
+                    >
+                      <div className="mt-3">
+                        <PatientNoteCard
+                          note={note as PatientNotesModel}
+                          setReload={setReload}
+                          setReplyTo={setReplyTo}
+                        />
+                      </div>
+                    </DoctorNoteReplyPreviewCard>
+                  );
+                })
+              ) : (
+                <div className="flex h-full flex-1 items-center justify-center text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <CareIcon
+                      icon="l-comment-alt"
+                      className="text-4xl text-gray-400"
+                    />
+                    <h4 className="text-lg text-gray-500">No replies yet</h4>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
