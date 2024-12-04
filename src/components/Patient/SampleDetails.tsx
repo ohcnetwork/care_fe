@@ -300,6 +300,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
   return (
     <Page
       title={t("sample_test_details")}
+      crumbsReplacements={{ [id]: { name: sampleDetails.patient_name } }}
       backUrl="/sample"
       options={
         sampleDetails?.patient && (
@@ -477,7 +478,11 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       <div className="mb-4">
         <h4 className="mt-8">{t("sample_test_history")}</h4>
         {sampleDetails?.flow &&
-          sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
+          sampleDetails.flow.map((flow: FlowModel) => (
+            <div key={flow.id} className="mb-2">
+              {renderFlow(flow)}
+            </div>
+          ))}
       </div>
 
       <FileUpload

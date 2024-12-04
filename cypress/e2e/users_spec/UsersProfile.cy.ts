@@ -1,3 +1,5 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import UserProfilePage from "../../pageobject/Users/UserProfilePage";
@@ -6,6 +8,7 @@ describe("Manage User Profile", () => {
   const loginPage = new LoginPage();
   const userProfilePage = new UserProfilePage();
   const manageUserPage = new ManageUserPage();
+  const facilityHome = new FacilityHome();
 
   const date_of_birth = "01011999";
   const gender = "Male";
@@ -19,7 +22,7 @@ describe("Manage User Profile", () => {
   const facilitySearch = "Dummy Facility 40";
 
   before(() => {
-    loginPage.loginAsDevDoctor();
+    loginPage.loginByRole("devDoctor");
     cy.saveLocalStorage();
   });
 
@@ -32,25 +35,22 @@ describe("Manage User Profile", () => {
   it("Set Dob, Gender, Email, Phone and Working Hours for a user and verify its reflection in user profile", () => {
     userProfilePage.clickEditProfileButton();
 
-    userProfilePage.typedate_of_birth(date_of_birth);
+    userProfilePage.typeDateOfBirth(date_of_birth);
     userProfilePage.selectGender(gender);
     userProfilePage.typeEmail(email);
-    userProfilePage.typePhone(phone);
-    userProfilePage.typeWhatsApp(phone);
+    userProfilePage.typePhoneNumber(phone);
+    userProfilePage.typeWhatsappNumber(phone);
     userProfilePage.typeWorkingHours(workinghours);
     userProfilePage.typeQualification(qualification);
     userProfilePage.typeDoctorYoE(doctorYoE);
     userProfilePage.typeMedicalCouncilRegistration(medicalCouncilRegistration);
-
     userProfilePage.clickUpdateButton();
-
     cy.verifyNotification("Details updated successfully");
-
-    userProfilePage.assertdate_of_birth("01/01/1999");
+    userProfilePage.assertDateOfBirth("01/01/1999");
     userProfilePage.assertGender(gender);
     userProfilePage.assertEmail(email);
-    userProfilePage.assertPhone(phone);
-    userProfilePage.assertWhatsApp(phone);
+    userProfilePage.assertPhoneNumber(phone);
+    userProfilePage.assertAltPhoneNumber(phone);
     userProfilePage.assertWorkingHours(workinghours);
   });
 
@@ -68,9 +68,9 @@ describe("Manage User Profile", () => {
     userProfilePage.clickUpdateButton();
     userProfilePage.assertVideoConnectLink("https://www.test.com");
     //  Go to particular facility doctor connect and verify the video connect link is present
-    manageUserPage.navigateToFacility();
-    manageUserPage.typeFacilitySearch(facilitySearch);
-    manageUserPage.assertFacilityInCard(facilitySearch);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilitySearch);
+    facilityHome.assertFacilityInCard(facilitySearch);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertVideoConnectLink("Dev Doctor", "https://www.test.com");
