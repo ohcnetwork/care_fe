@@ -18,12 +18,12 @@ import { useMessageListener } from "@/hooks/useMessageListener";
 import { PATIENT_NOTES_THREADS } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { classNames, keysOf } from "@/Utils/utils";
 
 import { PatientProps } from ".";
-import * as Notification from "../../../Utils/Notifications";
 
 const PatientNotes = (props: PatientProps) => {
   const { patientData, id: patientId, facilityId } = props;
