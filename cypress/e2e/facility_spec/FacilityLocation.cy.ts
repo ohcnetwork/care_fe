@@ -1,3 +1,4 @@
+import { AssetHome } from "pageobject/Asset/AssetHome";
 import LoginPage from "pageobject/Login/LoginPage";
 import { pageNavigation } from "pageobject/utils/paginationHelpers";
 import { v4 as uuidv4 } from "uuid";
@@ -6,14 +7,13 @@ import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
-import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 
 describe("Location Management Section", () => {
   const assetPage = new AssetPage();
-  const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const facilityLocation = new FacilityLocation();
   const facilityHome = new FacilityHome();
+  const assetHome = new AssetHome();
   const loginPage = new LoginPage();
 
   const EXPECTED_LOCATION_ERROR_MESSAGES = [
@@ -24,25 +24,17 @@ describe("Location Management Section", () => {
     "Please enter a name",
     "Please select a bed type",
   ];
-  const locationName = "Test-location";
-  const locationNameTwo = "Test-location-2";
   const locationDescription = "Test Description";
   const locationType = "WARD";
   const locationMiddleware = "dev_middleware.coronasafe.live";
-  const locationModifiedName = "Test Modified location";
   const locationModifiedDescription = "Test Modified Description";
   const locationModifiedType = "ICU";
   const locationModifiedMiddleware = "dev-middleware.coronasafe.live";
-  const bedName = "Test-Bed";
   const bedDescrption = "test description";
   const bedType = "ICU";
   const bedStatus = "Vacant";
-  const bedModifiedName = "test modified bed";
-  const duplicateBedName = "ICCU";
   const bedModifiedDescrption = "test modified description";
   const bedModifiedType = "Isolation";
-  const numberOfBeds = 10;
-  const numberOfModifiedBeds = 25;
   const qr_id_1 = uuidv4();
   const phone_number = "9999999999";
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
@@ -57,33 +49,38 @@ describe("Location Management Section", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
-    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
   });
 
-  it("Add a Bed to facility location along with duplication and deleting a bed", () => {
-    // mandatory field verification in bed creation
-    cy.get("body").then(($body) => {
-      if ($body.find("#manage-bed-button:visible").length) {
-        // If the '#manage-bed-button' is visible
-        facilityLocation.clickManageBedButton();
-      } else {
-        // If the '#manage-bed-button' is not visible
-        facilityLocation.clickAddNewLocationButton();
-        facilityPage.fillFacilityName(locationName);
-        facilityLocation.selectLocationType(locationType);
-        assetPage.clickassetupdatebutton();
-        facilityLocation.clickNotification();
-        facilityLocation.clickManageBedButton();
-      }
-    });
+  it("Add single & Multiple Bed to facility location along with duplication and deleting a bed", () => {
+    const locationName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const facilityName = "Dummy Request Fulfilment Center";
+    const bedName = `Bed-${uuidv4().substring(0, 2)}}`;
+    const duplicateBedName = `Duplicate-${uuidv4().substring(0, 2)}}`;
+    const multipleBedName = `Multi-${uuidv4().substring(0, 2)}}`;
+    const numberOfBeds = 25;
+    // Select a new facility
+    facilityHome.typeFacilitySearch(facilityName);
+    facilityHome.assertFacilityInCard(facilityName);
+    facilityHome.clickViewFacilityDetails();
+    facilityPage.clickManageFacilityDropdown();
+    facilityLocation.clickFacilityLocationManagement();
+    // Create a new location and Bed into it
+    facilityLocation.clickAddNewLocationButton();
+    facilityLocation.typeLocationName(locationName);
+    facilityLocation.selectLocationType(locationType);
+    facilityLocation.clickAddLocationButton();
+    facilityLocation.verifyAddLocationSuccessfulMesssage();
+    // Verify the error message of beds creation form
+    facilityLocation.clickManageBedButton();
     facilityLocation.clickAddBedButton();
-    assetPage.clickassetupdatebutton();
-    userCreationPage.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
-    // create a new single bed and verify
+    facilityLocation.clickSubmitBedsButton();
+    cy.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
+    // Add a new bed to the location
     facilityLocation.enterBedName(bedName);
     facilityLocation.enterBedDescription(bedDescrption);
     facilityLocation.selectBedType(bedType);
-    assetPage.clickassetupdatebutton();
+    facilityLocation.clickSubmitBedsButton();
+    facilityLocation.verifyAddSingleBedSuccessfulMesssage();
     // Verify the bed creation
     facilityLocation.verifyBedNameBadge(bedName);
     facilityLocation.verifyBedBadge(bedType);
@@ -92,156 +89,147 @@ describe("Location Management Section", () => {
     facilityLocation.clickAddBedButton();
     facilityLocation.enterBedName(bedName);
     facilityLocation.selectBedType(bedType);
-    assetPage.clickassetupdatebutton();
-    facilityLocation.verifyNotification(
+    facilityLocation.clickSubmitBedsButton();
+    cy.verifyNotification(
       "Name - Bed with same name already exists in location",
     );
-    facilityHome.verifyAndCloseNotifyModal();
-    // edit the created bed
+    cy.closeNotification();
+    facilityLocation.closeAddLocationForm();
+    // edit the newly created existing bed
     facilityLocation.clickEditBedButton();
     facilityLocation.enterBedName(duplicateBedName);
     facilityLocation.enterBedDescription(bedModifiedDescrption);
     facilityLocation.selectBedType(bedModifiedType);
-    assetPage.clickassetupdatebutton();
+    facilityLocation.clickUpdateBedButton();
+    facilityLocation.verifyEditBedSuccessfulMessage();
     // verify the modification
     facilityLocation.verifyBedNameBadge(duplicateBedName);
     facilityLocation.verifyBedBadge(bedModifiedType);
     facilityLocation.verifyBedBadge(bedStatus);
-    facilityLocation.closeNotification();
+    // Create Multiple Bed
+    facilityLocation.clickAddBedButton();
+    facilityLocation.enterBedName(multipleBedName);
+    facilityLocation.enterBedDescription(bedDescrption);
+    facilityLocation.selectBedType(bedType);
+    facilityLocation.setMultipleBeds(numberOfBeds);
+    facilityLocation.clickSubmitBedsButton();
+    // Verify Pagination in the page
+    pageNavigation.navigateToNextPage();
+    pageNavigation.navigateToPreviousPage();
   });
 
   it("Adds Location to a facility and modify it", () => {
+    const locationName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const locationModifiedName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const facilityName = "Dummy Facility 11";
+    // Select a new facility
+    facilityHome.typeFacilitySearch(facilityName);
+    facilityHome.assertFacilityInCard(facilityName);
+    facilityHome.clickViewFacilityDetails();
+    facilityPage.clickManageFacilityDropdown();
+    facilityLocation.clickFacilityLocationManagement();
     // add a new location form mandatory error
     facilityLocation.clickAddNewLocationButton();
-    assetPage.clickassetupdatebutton();
-    userCreationPage.verifyErrorMessages(EXPECTED_LOCATION_ERROR_MESSAGES);
+    facilityLocation.clickAddLocationButton();
+    cy.verifyErrorMessages(EXPECTED_LOCATION_ERROR_MESSAGES);
     // create a new location
-    facilityPage.fillFacilityName(locationNameTwo);
+    facilityLocation.typeLocationName(locationName);
     facilityLocation.fillDescription(locationDescription);
     facilityLocation.selectLocationType(locationType);
     facilityLocation.fillMiddlewareAddress(locationMiddleware);
-    assetPage.clickassetupdatebutton();
-    facilityLocation.clickNotification();
+    facilityLocation.clickAddLocationButton();
+    facilityLocation.verifyAddLocationSuccessfulMesssage();
     // verify the reflection
-    facilityLocation.verifyLocationName(locationNameTwo);
+    facilityLocation.verifyLocationName(locationName);
     facilityLocation.verifyLocationType(locationType);
     facilityLocation.verifyLocationDescription(locationDescription);
     facilityLocation.verifyLocationMiddleware(locationMiddleware);
-    // modify the existing data
+    // verify the duplicate location error message
+    facilityLocation.clickAddLocationButton();
+    facilityLocation.typeLocationName(locationName);
+    facilityLocation.clickAddLocationButton();
+    cy.verifyNotification(
+      "Name - Asset location with this name and facility already exists.",
+    );
+    cy.closeNotification();
+    facilityLocation.closeAddLocationForm();
     facilityLocation.clickEditLocationButton();
-    facilityPage.fillFacilityName(locationModifiedName);
+    facilityLocation.typeLocationName(locationModifiedName);
     facilityLocation.fillDescription(locationModifiedDescription);
     facilityLocation.selectLocationType(locationModifiedType);
     facilityLocation.fillMiddlewareAddress(locationModifiedMiddleware);
-    assetPage.clickassetupdatebutton();
+    facilityLocation.clickUpdateLocationButton();
+    facilityLocation.verifyEditLocationSuccessfulMessage();
     // verify the reflection
     facilityLocation.verifyLocationName(locationModifiedName);
     facilityLocation.verifyLocationType(locationModifiedType);
     facilityLocation.verifyLocationDescription(locationModifiedDescription);
     facilityLocation.verifyLocationMiddleware(locationModifiedMiddleware);
-    facilityLocation.closeNotification();
-  });
-
-  it("Multiple Bed to a facility location and delete a bed", () => {
-    // create multiple bed and verify
-    facilityLocation.clickManageBedButton();
-    facilityLocation.clickAddBedButton();
-    facilityLocation.enterBedName(bedName);
-    facilityLocation.enterBedDescription(bedDescrption);
-    facilityLocation.selectBedType(bedType);
-    facilityLocation.setMultipleBeds(numberOfBeds);
-    assetPage.clickassetupdatebutton();
-    facilityLocation.clickNotification();
-    // verify the bed creation
-    facilityLocation.verifyBedBadge(bedType);
-    facilityLocation.verifyBedBadge(bedStatus);
-    facilityLocation.verifyIndividualBedName(bedName, numberOfBeds);
-    // delete a bed and verify it
-    facilityLocation.deleteFirstBed();
-    facilityLocation.deleteBedRequest();
-    assetPage.clickassetupdatebutton();
-    facilityLocation.deleteBedRequest();
-    facilityLocation.closeNotification();
-  });
-
-  it("Add Multiple Bed to a facility location and verify pagination", () => {
-    // bed creation
-    facilityLocation.clickManageBedButton();
-    facilityLocation.clickAddBedButton();
-    facilityLocation.enterBedName(bedModifiedName);
-    facilityLocation.enterBedDescription(bedModifiedDescrption);
-    facilityLocation.selectBedType(bedModifiedType);
-    facilityLocation.setMultipleBeds(numberOfModifiedBeds);
-    assetPage.clickassetupdatebutton();
-    // pagination
-    pageNavigation.navigateToNextPage();
-    pageNavigation.navigateToPreviousPage();
-    facilityLocation.closeNotification();
-  });
-
-  it("Delete location", () => {
-    facilityLocation.clickAddNewLocationButton();
-    facilityLocation.enterLocationName("Test Location");
-    facilityLocation.selectLocationType("OTHER");
-    assetPage.clickassetupdatebutton();
-    facilityLocation.deleteLocation("Test Location");
-    assetPage.clickassetupdatebutton();
-    facilityLocation.verifyNotification(
-      "Location Test Location deleted successfully",
-    );
-    facilityLocation.closeNotification();
   });
 
   it("Delete location with linked beds", () => {
+    const locationName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const facilityName = "Dummy Facility 12";
+    const bedName = `Bed-${uuidv4().substring(0, 2)}}`;
+    // Select a new facility
+    facilityHome.typeFacilitySearch(facilityName);
+    facilityHome.assertFacilityInCard(facilityName);
+    facilityHome.clickViewFacilityDetails();
+    facilityPage.clickManageFacilityDropdown();
+    facilityLocation.clickFacilityLocationManagement();
+    // Create a new location with a bed
     facilityLocation.clickAddNewLocationButton();
-    facilityLocation.enterLocationName("Test Location with Beds");
-    facilityLocation.selectLocationType("OTHER");
-    cy.clickSubmitButton("Add Location");
-    cy.verifyNotification("Location created successfully");
-    cy.closeNotification();
+    facilityLocation.enterLocationName(locationName);
+    facilityLocation.selectLocationType(locationType);
+    facilityLocation.verifyAddLocationSuccessfulMesssage();
+    // Create a new bed to the location
     facilityLocation.clickManageBedButton();
     facilityLocation.clickAddBedButton();
-    facilityLocation.enterBedName("Bed 1");
-    facilityLocation.selectBedType("Regular");
-    cy.clickSubmitButton("Add Bed(s)");
-    cy.verifyNotification("1 Bed created successfully");
+    facilityLocation.enterBedName(bedName);
+    facilityLocation.selectBedType(bedType);
+    facilityLocation.verifyAddSingleBedSuccessfulMesssage();
+    // Now try to delete the location with bed in it
+    cy.go("back");
+    facilityLocation.clickDeleteLocation();
+    cy.clickSubmitButton("confirm");
+    cy.verifyNotification("Cannot delete a Location with associated Beds");
     cy.closeNotification();
-    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
-    facilityLocation.deleteLocation("Test Location with Beds");
-    assetPage.clickassetupdatebutton();
-    facilityLocation.verifyNotification(
-      "Cannot delete a Location with associated Beds",
-    );
-    facilityLocation.closeNotification();
 
     // delete bed
-    facilityLocation.clickManageBeds();
+    facilityLocation.clickManageBedButton();
     facilityLocation.deleteFirstBed();
-    assetPage.clickassetupdatebutton();
-    facilityLocation.closeNotification();
+    cy.clickSubmitButton("Delete");
+    cy.verifyNotification("Bed deleted successfully");
+    cy.closeNotification();
 
     // delete location
-    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
-    facilityLocation.deleteLocation("Test Location with Beds");
-    assetPage.clickassetupdatebutton();
-    facilityLocation.verifyNotification(
+    facilityLocation.clickDeleteLocation();
+    cy.clickSubmitButton("confirm");
+    cy.verifyNotification(
       "Location Test Location with Beds deleted successfully",
     );
-    facilityLocation.closeNotification();
+    cy.closeNotification();
   });
 
   it("Delete location with linked assets", () => {
+    const locationName = `ICU-${uuidv4().substring(0, 2)}}`;
+    const facilityName = "Dummy Facility 13";
+    // Select a new facility
+    facilityHome.typeFacilitySearch(facilityName);
+    facilityHome.assertFacilityInCard(facilityName);
+    facilityHome.clickViewFacilityDetails();
+    facilityPage.clickManageFacilityDropdown();
+    facilityLocation.clickFacilityLocationManagement();
+    // Create a new location
     facilityLocation.clickAddNewLocationButton();
-    facilityLocation.enterLocationName("Test Location with linked Assets");
-    facilityLocation.selectLocationType("OTHER");
-    assetPage.clickassetupdatebutton();
-    facilityLocation.verifyNotification("Location created successfully");
-    facilityLocation.closeNotification();
+    facilityLocation.enterLocationName(locationName);
+    facilityLocation.selectLocationType(locationType);
+    facilityLocation.verifyAddLocationSuccessfulMesssage();
     // create asset and link it to location
-    cy.awaitUrl("/assets");
+    assetHome.navigateToAssetsPage();
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Shifting Center");
-    assetPage.selectLocation("Test Location with linked Assets");
+    assetPage.selectFacility(facilityName);
+    assetPage.selectLocation(locationName);
     assetPage.enterAssetDetails(
       "Test Asset linked to Facility",
       "Test Description",
@@ -258,28 +246,36 @@ describe("Location Management Section", () => {
       "Test note for asset creation!",
     );
     assetPage.clickassetupdatebutton();
-    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
-    facilityLocation.deleteLocation("Test Location with linked Assets");
-    assetPage.clickassetupdatebutton();
-    facilityLocation.verifyNotification(
-      "Cannot delete a Location with associated Assets",
-    );
-    facilityLocation.closeNotification();
+    // Select a new facility
+    facilityHome.typeFacilitySearch(facilityName);
+    facilityHome.assertFacilityInCard(facilityName);
+    facilityHome.clickViewFacilityDetails();
+    facilityPage.clickManageFacilityDropdown();
+    facilityLocation.clickFacilityLocationManagement();
+    facilityLocation.clickDeleteLocation();
+    cy.clickSubmitButton("confirm");
+    cy.verifyNotification("Cannot delete a Location with associated Assets");
+    cy.closeNotification();
 
     // delete asset
     facilityLocation.clickManageAssets();
     assetPage.openCreatedAsset();
     assetPage.deleteAsset();
-    facilityLocation.closeNotification();
+    cy.verifyNotification("Asset deleted successfully");
+    cy.closeNotification();
 
     // delete location
-    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
-    facilityLocation.deleteLocation("Test Location with linked Assets");
-    assetPage.clickassetupdatebutton();
-    facilityLocation.verifyNotification(
+    facilityHome.typeFacilitySearch(facilityName);
+    facilityHome.assertFacilityInCard(facilityName);
+    facilityHome.clickViewFacilityDetails();
+    facilityPage.clickManageFacilityDropdown();
+    facilityLocation.clickFacilityLocationManagement();
+    facilityLocation.clickDeleteLocation();
+    cy.clickSubmitButton("confirm");
+    cy.verifyNotification(
       "Location Test Location with linked Assets deleted successfully",
     );
-    facilityLocation.closeNotification();
+    cy.closeNotification();
   });
 
   afterEach(() => {

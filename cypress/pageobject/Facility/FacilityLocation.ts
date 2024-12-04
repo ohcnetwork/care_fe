@@ -1,15 +1,4 @@
 class FacilityLocation {
-  loadLocationManagementPage(name: string) {
-    cy.awaitUrl("/");
-    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
-    cy.get("[id='facility-name-card']").contains(name).click();
-    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
-    cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
-    cy.get("#manage-facility-dropdown button").should("be.visible");
-    cy.get("[id='manage-facility-dropdown']").scrollIntoView().click();
-    cy.get("[id=location-management]").click();
-  }
-
   closeNotification() {
     cy.get(".pnotify")
       .should("exist")
@@ -22,8 +11,16 @@ class FacilityLocation {
     cy.get("#add-new-location").click();
   }
 
+  typeLocationName(locationName: string) {
+    cy.get("#location-name").type(locationName);
+  }
+
   clickFacilityLocationManagement() {
     cy.get("[id=location-management]").click();
+  }
+
+  clickAddLocationButton() {
+    cy.clickSubmitButton("Add Location");
   }
 
   clickEditLocationButton() {
@@ -63,10 +60,6 @@ class FacilityLocation {
     cy.get("#location-type").contains(type);
   }
 
-  verifyNotification(message: string) {
-    cy.get(".pnotify-container").should("contain", message).and("be.visible");
-  }
-
   verifyLocationDescription(description: string) {
     cy.get("#view-location-description").contains(description);
   }
@@ -76,15 +69,39 @@ class FacilityLocation {
   }
 
   clickManageBedButton() {
-    cy.get("#manage-bed-button").first().click();
+    cy.verifyAndClickElement("#manage-bed-button", "Manage Beds");
   }
 
   clickAddBedButton() {
-    cy.get("#add-new-bed").click();
+    cy.verifyAndClickElement("#add-new-bed", "Add New Bed(s)");
   }
 
-  clickNotification() {
-    cy.get(".pnotify-container").click();
+  clickSubmitBedsButton() {
+    cy.clickSubmitButton("Add Bed(s)");
+  }
+
+  closeAddLocationForm() {
+    cy.clickCancelButton("Cancel");
+  }
+
+  verifyAddLocationSuccessfulMesssage() {
+    cy.verifyNotification("Location created successfully");
+    cy.closeNotification();
+  }
+
+  verifyEditBedSuccessfulMessage() {
+    cy.verifyNotification("Bed updated successfully");
+    cy.closeNotification();
+  }
+
+  verifyEditLocationSuccessfulMessage() {
+    cy.verifyNotification("Location updated successfully");
+    cy.closeNotification();
+  }
+
+  verifyAddSingleBedSuccessfulMesssage() {
+    cy.verifyNotification("1 Bed created successfully");
+    cy.closeNotification();
   }
 
   enterBedName(name: string) {
@@ -93,6 +110,14 @@ class FacilityLocation {
 
   enterBedDescription(description: string) {
     cy.get("#bed-description").clear().click().type(description);
+  }
+
+  clickUpdateBedButton() {
+    cy.clickSubmitButton("Update Bed");
+  }
+
+  clickUpdateLocationButton() {
+    cy.clickSubmitButton("Update Location");
   }
 
   selectBedType(type: string) {
@@ -136,12 +161,8 @@ class FacilityLocation {
     cy.get("#manage-assets").click();
   }
 
-  deleteLocation(name: string) {
-    cy.contains("div", name)
-      .should("exist")
-      .then(($div) => {
-        $div.parents("div").eq(2).find("button#delete-location-button").click();
-      });
+  clickDeleteLocation() {
+    cy.verifyAndClickElement("#delete-location-button", "Delete");
   }
 
   deleteFirstBed() {
