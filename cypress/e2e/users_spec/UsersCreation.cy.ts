@@ -1,8 +1,8 @@
 import FacilityHome from "pageobject/Facility/FacilityHome";
 import ManageUserPage from "pageobject/Users/ManageUserPage";
 import UserProfilePage from "pageobject/Users/UserProfilePage";
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
-import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
@@ -19,7 +19,6 @@ describe("User Creation", () => {
   const manageUserPage = new ManageUserPage();
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
-  const assetSearchPage = new AssetSearchPage();
   const facilityHome = new FacilityHome();
   const phoneNumber = generatePhoneNumber();
   const emergencyPhoneNumber = generateEmergencyPhoneNumber();
@@ -183,9 +182,12 @@ describe("User Creation", () => {
 
   it("view user redirection from facility page", () => {
     facilityHome.navigateToFacilityHomepage();
-    assetSearchPage.typeSearchKeyword(fillFacilityName);
-    assetSearchPage.pressEnter();
-    facilityPage.verifyFacilityBadgeContent(fillFacilityName);
+    facilityHome.typeFacilitySearch(fillFacilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      fillFacilityName,
+      true,
+    );
     facilityPage.visitAlreadyCreatedFacility();
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickViewUsersOption();

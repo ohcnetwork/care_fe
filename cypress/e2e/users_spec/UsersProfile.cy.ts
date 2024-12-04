@@ -70,7 +70,7 @@ describe("Manage User Profile", () => {
     //  Go to particular facility doctor connect and verify the video connect link is present
     facilityHome.navigateToFacilityHomepage();
     facilityHome.typeFacilitySearch(facilitySearch);
-    manageUserPage.assertFacilityInCard(facilitySearch);
+    facilityHome.assertFacilityInCard(facilitySearch);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertVideoConnectLink("Dev Doctor", "https://www.test.com");

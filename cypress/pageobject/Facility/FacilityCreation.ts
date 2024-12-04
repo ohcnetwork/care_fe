@@ -308,29 +308,6 @@ class FacilityPage {
     cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
   }
 
-  verifyFacilityBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Facility/District Name']").should(
-      "contain",
-      expectedText,
-    );
-  }
-
-  verifyStateBadgeContent(expectedText: string) {
-    cy.get("[data-testid='State']").should("contain", expectedText);
-  }
-
-  verifyDistrictBadgeContent(expectedText: string) {
-    cy.get("[data-testid='District']").should("contain", expectedText);
-  }
-
-  verifyLocalBodyBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Local Body']").should("contain", expectedText);
-  }
-
-  verifyFacilityTypeBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Facility type']").should("contain", expectedText);
-  }
-
   verifyfacilitycreateassetredirection() {
     cy.url().should("include", "/assets/new");
   }

@@ -375,7 +375,7 @@ const AssetsList = () => {
           icon="l-monitor-heart-rate"
           className="flex-1"
         />
-        <div className="flex-1">
+        <div className="flex-1" id="asset-search">
           <SearchInput
             name="search"
             value={qParams.search}

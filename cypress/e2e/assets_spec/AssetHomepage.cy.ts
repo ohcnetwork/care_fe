@@ -2,10 +2,8 @@ import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 import { pageNavigation } from "pageobject/utils/paginationHelpers";
 import { v4 as uuidv4 } from "uuid";
 
-import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
-import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
-import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import { AssetHome } from "../../pageobject/Asset/AssetHome";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { nonAdminRoles } from "../../pageobject/utils/userConfig";
 
@@ -16,12 +14,15 @@ const rolesToTest: Array<"districtAdmin" | (typeof nonAdminRoles)[number]> = [
 
 rolesToTest.forEach((role) => {
   describe(`Asset Tab Tests for Role: ${role}`, () => {
-    const assetSearchPage = new AssetSearchPage();
-    const assetQRScanPage = new AssetQRScanPage();
+    const assetHome = new AssetHome();
     const assetFilters = new AssetFilters();
-    const assetPage = new AssetPage();
     const loginPage = new LoginPage();
     const assetName = "Dummy Camera 10";
+    const assetStatus = "Active";
+    const assetClass = "ONVIF Camera";
+    const assetLocation = "Camera Loc";
+    const facilityName = "Dummy Facility 40";
+    const newImportAssetName = "New Test Asset";
     const qrCode = uuidv4();
     const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
@@ -37,43 +38,51 @@ rolesToTest.forEach((role) => {
     });
 
     it("Search Asset Name/QR_ID/Serial_number", () => {
-      assetSearchPage.typeSearchKeyword(assetName);
-      assetSearchPage.pressEnter();
-      assetSearchPage.verifyBadgeContent(assetName);
-      assetSearchPage.clickAssetByName(assetName);
-      assetSearchPage.clickUpdateButton();
-      assetSearchPage.clearAndTypeQRCode(qrCode);
-      assetSearchPage.clearAndTypeSerialNumber(serialNumber);
-      assetSearchPage.clickAssetSubmitButton();
-      assetSearchPage.visitAssetsPage();
-      assetSearchPage.typeSearchKeyword(qrCode);
-      assetSearchPage.pressEnter();
-      assetSearchPage.verifyAssetListContains(assetName);
-      assetSearchPage.verifyBadgeContent(qrCode);
-      assetSearchPage.typeSearchKeyword(serialNumber);
-      assetSearchPage.verifyAssetListContains(assetName);
-      assetSearchPage.verifyBadgeContent(serialNumber);
+      assetHome.typeAssetSearch(assetName);
+      advanceFilters.verifyFilterBadgePresence(
+        "Name/Serial No./QR ID",
+        assetName,
+        true,
+      );
+      assetHome.clickAssetByName(assetName);
+      assetHome.clickAssetDetailsUpdateButton();
+      assetHome.clearAndTypeQRCode(qrCode);
+      assetHome.clearAndTypeSerialNumber(serialNumber);
+      assetHome.clickAssetUpdateSubmitButton();
+      assetHome.visitAssetsPage();
+      assetHome.typeAssetSearch(qrCode);
+      assetHome.verifyAssetListContains(assetName);
+      advanceFilters.verifyFilterBadgePresence(
+        "Name/Serial No./QR ID",
+        qrCode,
+        true,
+      );
+      assetHome.typeAssetSearch(serialNumber);
+      assetHome.verifyAssetListContains(assetName);
+      advanceFilters.verifyFilterBadgePresence(
+        "Name/Serial No./QR ID",
+        serialNumber,
+        true,
+      );
     });
 
     it("Scan Asset QR", () => {
-      assetQRScanPage.scanAssetQR();
+      assetHome.scanAssetQR();
     });
 
-    it("Filter Asset", () => {
-      assetFilters.filterAssets(
-        "Dummy Facility 40",
-        "ACTIVE",
-        "ONVIF Camera",
-        "Camera Loc",
-      );
+    it("Advance Filter Asset", () => {
       advanceFilters.clickAdvancedFiltersButton();
-      assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
-      assetFilters.assertFacilityText("Dummy Facility 40");
-      assetFilters.assertAssetClassText("ONVIF");
-      assetFilters.assertStatusText("ACTIVE");
-      assetFilters.assertLocationText("Camera Loc");
+      advanceFilters.typeFacilityName(facilityName);
+      assetFilters.filterAssets(assetStatus, assetClass, assetLocation);
+      advanceFilters.applySelectedFilter();
       advanceFilters.clickAdvancedFiltersButton();
-      assetFilters.clearFilters();
+      advanceFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
+      advanceFilters.verifyFilterBadgePresence("Facility", facilityName, true);
+      advanceFilters.verifyFilterBadgePresence("Asset Class", assetClass, true);
+      advanceFilters.verifyFilterBadgePresence("Status", assetStatus, true);
+      advanceFilters.verifyFilterBadgePresence("Location", assetLocation, true);
+      advanceFilters.clickAdvancedFiltersButton();
+      advanceFilters.clickClearAdvanceFilters();
     });
 
     it("Next/Previous Page", () => {
@@ -83,27 +92,25 @@ rolesToTest.forEach((role) => {
       pageNavigation.verifyCurrentPageNumber(1);
     });
 
-    it("Import new asset", () => {
-      assetPage.selectassetimportbutton();
-      assetPage.selectImportOption();
-      assetPage.selectImportFacility("Dummy Facility 40");
-      assetPage.importAssetFile();
-      assetPage.selectImportLocation("Camera Loc");
-      assetPage.clickImportAsset();
+    it("Import new asset and verify its presence", () => {
+      assetHome.selectassetimportbutton();
+      assetHome.selectImportOption();
+      assetHome.selectImportFacility(facilityName);
+      assetHome.importAssetFile();
+      assetHome.selectImportLocation(assetLocation);
+      assetHome.clickImportAsset();
+      cy.verifyNotification("Assets imported successfully");
+      cy.closeNotification();
+      assetHome.typeAssetSearch(newImportAssetName);
+      assetHome.verifyAssetIsPresent(newImportAssetName);
     });
 
-    it("verify imported asset", () => {
-      assetSearchPage.typeSearchKeyword("New Test Asset");
-      assetSearchPage.pressEnter();
-      assetSearchPage.verifyAssetIsPresent("New Test Asset");
-    });
-
-    it("Export asset", () => {
-      assetPage.selectassetimportbutton();
+    it("Export the list of assets in CSV & Json", () => {
+      assetHome.selectassetimportbutton();
       cy.wait(2000);
-      assetPage.selectJsonExportButton();
-      assetPage.selectassetimportbutton();
-      assetPage.selectCsvExportButton();
+      assetHome.selectJsonExportButton();
+      assetHome.selectassetimportbutton();
+      assetHome.selectCsvExportButton();
     });
 
     afterEach(() => {

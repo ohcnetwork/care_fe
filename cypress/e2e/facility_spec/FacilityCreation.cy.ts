@@ -1,3 +1,5 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import LoginPage from "../../pageobject/Login/LoginPage";
@@ -74,8 +76,12 @@ describe("Facility Creation", () => {
   it("Verify Facility Triage Function", () => {
     // mandatory field error throw
     facilityHome.typeFacilitySearch(facilityName2);
-    facilityPage.verifyFacilityBadgeContent(facilityName2);
-    manageUserPage.assertFacilityInCard(facilityName2);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      facilityName2,
+      true,
+    );
+    facilityHome.assertFacilityInCard(facilityName2);
     facilityHome.verifyURLContains(facilityName2);
     facilityPage.visitAlreadyCreatedFacility();
     facilityPage.scrollToFacilityTriage();
@@ -240,8 +246,12 @@ describe("Facility Creation", () => {
     // verify the facility homepage
     facilityHome.navigateToFacilityHomepage();
     facilityHome.typeFacilitySearch(facilityName);
-    facilityPage.verifyFacilityBadgeContent(facilityName);
-    manageUserPage.assertFacilityInCard(facilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      facilityName,
+      true,
+    );
+    facilityHome.assertFacilityInCard(facilityName);
     facilityHome.verifyURLContains(facilityName);
   });
 
