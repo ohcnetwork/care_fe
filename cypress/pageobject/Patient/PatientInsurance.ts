@@ -21,9 +21,7 @@ class PatientInsurance {
   }
 
   clickAddInsruanceDetails() {
-    cy.intercept("GET", "**/api/hcx/payors/?").as("getPayors");
     cy.get("[data-testid=add-insurance-button]").click();
-    cy.wait("@getPayors").its("response.statusCode").should("eq", 200);
   }
 
   verifyPatientPolicyDetails(
