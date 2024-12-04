@@ -69,7 +69,7 @@ export class AssetHome {
   selectAssetImportButton(action: "click" | "verifyNotExist"): void {
     const selector = "[data-testid=import-asset-button]";
     if (action === "click") {
-      cy.get(selector).click();
+      cy.get(selector).scrollIntoView().should("be.visible").click();
     } else if (action === "verifyNotExist") {
       cy.get(selector).should("not.exist");
     }
@@ -77,13 +77,13 @@ export class AssetHome {
 
   selectJsonExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
-    cy.get("#export-json-option").click();
+    cy.get("#export-json-option").should("be.visible").click();
     cy.wait("@getJsonexport").its("response.statusCode").should("eq", 200);
   }
 
   selectCsvExportButton() {
     cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
-    cy.get("#export-csv-option").click();
+    cy.get("#export-csv-option").should("be.visible").click();
     cy.wait("@getCsvexport").its("response.statusCode").should("eq", 200);
   }
 
