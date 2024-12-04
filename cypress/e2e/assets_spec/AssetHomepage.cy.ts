@@ -18,7 +18,7 @@ rolesToTest.forEach((role) => {
     const assetFilters = new AssetFilters();
     const loginPage = new LoginPage();
     const assetName = "Dummy Camera 10";
-    const assetStatus = "Active";
+    const assetStatus = "ACTIVE";
     const assetClass = "ONVIF Camera";
     const assetLocation = "Camera Loc";
     const facilityName = "Dummy Facility 40";
@@ -49,7 +49,7 @@ rolesToTest.forEach((role) => {
       assetHome.clearAndTypeQRCode(qrCode);
       assetHome.clearAndTypeSerialNumber(serialNumber);
       assetHome.clickAssetUpdateSubmitButton();
-      assetHome.visitAssetsPage();
+      assetHome.navigateToAssetsPage();
       assetHome.typeAssetSearch(qrCode);
       assetHome.verifyAssetListContains(assetName);
       advanceFilters.verifyFilterBadgePresence(
@@ -101,17 +101,24 @@ rolesToTest.forEach((role) => {
       assetHome.clickImportAsset();
       cy.verifyNotification("Assets imported successfully");
       cy.closeNotification();
+      assetHome.navigateToAssetsPage();
       assetHome.typeAssetSearch(newImportAssetName);
       assetHome.verifyAssetIsPresent(newImportAssetName);
     });
 
-    it("Export the list of assets in CSV & Json", () => {
-      assetHome.selectassetimportbutton();
-      cy.wait(2000);
-      assetHome.selectJsonExportButton();
-      assetHome.selectassetimportbutton();
-      assetHome.selectCsvExportButton();
-    });
+    if (role === "districtAdmin") {
+      it("Export the list of assets in CSV & Json", () => {
+        assetHome.selectassetimportbutton();
+        cy.wait(2000);
+        assetHome.selectJsonExportButton();
+        assetHome.selectassetimportbutton();
+        assetHome.selectCsvExportButton();
+      });
+    } else {
+      it("Verify Export button is not visible", () => {
+        cy.get("button[data-testid='import-asset-button']").should("not.exist");
+      });
+    }
 
     afterEach(() => {
       cy.saveLocalStorage();

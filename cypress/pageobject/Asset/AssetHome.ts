@@ -6,7 +6,7 @@ export class AssetHome {
   }
 
   typeAssetSearch(name: string) {
-    cy.get("#asset-search").type(name);
+    cy.get("#asset-search").click().type(name);
   }
 
   verifyAssetIsPresent(assetName: string) {
@@ -41,7 +41,7 @@ export class AssetHome {
     cy.wait("@getAssets").its("response.statusCode").should("eq", 200);
   }
 
-  visitAssetsPage() {
+  navigateToAssetsPage() {
     cy.visit("/assets");
   }
 
