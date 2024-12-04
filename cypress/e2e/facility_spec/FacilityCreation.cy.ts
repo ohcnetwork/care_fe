@@ -47,6 +47,15 @@ describe("Facility Creation", () => {
     "Required",
     "Invalid Phone Number",
   ];
+  const bedErrorMessage = [
+    "This field is required",
+    "Total capacity cannot be 0",
+    "This field is required",
+  ];
+  const doctorErrorMessage = [
+    "This field is required",
+    "This field is required",
+  ];
   const triageErrorMessage = ["This field is required"];
   const facilityType = "Primary Health Centres";
 
@@ -249,9 +258,15 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
     // add no bed capacity and verify form error message
     facilityPage.isVisibleselectBedType();
+    facilityPage.selectBedType("Oxygen Supported Bed");
+    facilityPage.saveAndExitBedCapacityForm();
+    userCreationPage.verifyErrorMessages(bedErrorMessage);
     facilityPage.clickcancelbutton();
     // add no doctor capacity and verify form error message
     facilityPage.isVisibleAreaOfSpecialization();
+    facilityPage.selectAreaOfSpecialization("Pulmonology");
+    facilityPage.clickdoctorcapacityaddmore();
+    userCreationPage.verifyErrorMessages(doctorErrorMessage);
     facilityPage.clickcancelbutton();
     cy.url().then((newUrl) => {
       facilityUrl1 = newUrl;
