@@ -27,7 +27,7 @@ describe("Patient Homepage present functionalities", () => {
   const patientToDateBadge = "2023-12-07";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

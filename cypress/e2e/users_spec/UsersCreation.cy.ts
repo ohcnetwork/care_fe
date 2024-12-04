@@ -1,5 +1,7 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
 import ManageUserPage from "pageobject/Users/ManageUserPage";
 import UserProfilePage from "pageobject/Users/UserProfilePage";
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
@@ -17,6 +19,7 @@ describe("User Creation", () => {
   const manageUserPage = new ManageUserPage();
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
+  const facilityHome = new FacilityHome();
   const phoneNumber = generatePhoneNumber();
   const emergencyPhoneNumber = generateEmergencyPhoneNumber();
   const fillFacilityName = "Dummy Facility 40";
@@ -77,7 +80,7 @@ describe("User Creation", () => {
   const newUserDob = "25081999";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -178,9 +181,13 @@ describe("User Creation", () => {
   });
 
   it("view user redirection from facility page", () => {
-    cy.visit("/facility");
-    cy.get("#facility-search").click().clear().type(fillFacilityName);
-    facilityPage.verifyFacilityBadgeContent(fillFacilityName);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(fillFacilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      fillFacilityName,
+      true,
+    );
     facilityPage.visitAlreadyCreatedFacility();
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickViewUsersOption();

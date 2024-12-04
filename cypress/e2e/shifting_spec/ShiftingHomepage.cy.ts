@@ -1,6 +1,10 @@
+import LoginPage from "pageobject/Login/LoginPage";
+
+const loginPage = new LoginPage();
+
 describe("Shifting Page", () => {
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
