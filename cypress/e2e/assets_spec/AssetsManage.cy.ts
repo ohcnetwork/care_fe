@@ -1,6 +1,8 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
-import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import { AssetHome } from "../../pageobject/Asset/AssetHome";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 
@@ -14,15 +16,15 @@ describe("Asset", () => {
   const assetPage = new AssetPage();
   const loginPage = new LoginPage();
   const facilityPage = new FacilityPage();
-  const assetSearchPage = new AssetSearchPage();
-  const assetFilters = new AssetFilters();
+  const assetHome = new AssetHome();
+  const facilityHome = new FacilityHome();
   const fillFacilityName = "Dummy Facility 40";
   const assetname = "Dummy Camera";
   const locationName = "Dummy Location 1";
   const initiallocationName = "Camera Location";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -33,10 +35,13 @@ describe("Asset", () => {
   });
 
   it("Verify Asset Warranty Expiry Label", () => {
-    assetSearchPage.typeSearchKeyword(assetname);
-    assetSearchPage.pressEnter();
-    assetSearchPage.verifyBadgeContent(assetname);
-    assetSearchPage.clickAssetByName(assetname);
+    assetHome.typeAssetSearch(assetname);
+    advanceFilters.verifyFilterBadgePresence(
+      "Name/Serial No./QR ID",
+      assetname,
+      true,
+    );
+    assetHome.clickAssetByName(assetname);
     assetPage.clickupdatedetailbutton();
     assetPage.scrollintoWarrantyDetails();
     assetPage.enterWarrantyExpiryDate(addDaysToDate(100)); // greater than 3 months
@@ -60,10 +65,13 @@ describe("Asset", () => {
   });
 
   it("Create & Edit a service history and verify reflection", () => {
-    assetSearchPage.typeSearchKeyword(assetname);
-    assetSearchPage.pressEnter();
-    assetSearchPage.verifyBadgeContent(assetname);
-    assetSearchPage.clickAssetByName(assetname);
+    assetHome.typeAssetSearch(assetname);
+    advanceFilters.verifyFilterBadgePresence(
+      "Name/Serial No./QR ID",
+      assetname,
+      true,
+    );
+    assetHome.clickAssetByName(assetname);
     assetPage.clickupdatedetailbutton();
     assetPage.scrollintonotes();
     assetPage.enterAssetNotes("Dummy Notes");
@@ -82,10 +90,13 @@ describe("Asset", () => {
   });
 
   it("Create a asset transaction and verify history", () => {
-    assetSearchPage.typeSearchKeyword(assetname);
-    assetSearchPage.pressEnter();
-    assetSearchPage.verifyBadgeContent(assetname);
-    assetSearchPage.clickAssetByName(assetname);
+    assetHome.typeAssetSearch(assetname);
+    advanceFilters.verifyFilterBadgePresence(
+      "Name/Serial No./QR ID",
+      assetname,
+      true,
+    );
+    assetHome.clickAssetByName(assetname);
     assetPage.clickupdatedetailbutton();
     assetPage.clickassetlocation(locationName);
     assetPage.clickUpdateAsset();
@@ -94,10 +105,13 @@ describe("Asset", () => {
   });
 
   it("Verify Facility Asset Page Redirection", () => {
-    cy.visit("/facility");
-    assetSearchPage.typeSearchKeyword(fillFacilityName);
-    assetSearchPage.pressEnter();
-    facilityPage.verifyFacilityBadgeContent(fillFacilityName);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(fillFacilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      fillFacilityName,
+      true,
+    );
     facilityPage.visitAlreadyCreatedFacility();
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickCreateAssetFacilityOption();
@@ -106,7 +120,11 @@ describe("Asset", () => {
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickviewAssetFacilityOption();
     facilityPage.verifyfacilityviewassetredirection();
-    assetFilters.assertFacilityText(fillFacilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility",
+      fillFacilityName,
+      true,
+    );
     facilityPage.verifyassetfacilitybackredirection();
   });
 

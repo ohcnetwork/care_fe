@@ -1,3 +1,4 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 import LoginPage from "../../pageobject/Login/LoginPage";
@@ -8,6 +9,7 @@ describe("Manage User", () => {
   const loginPage = new LoginPage();
   const userPage = new UserPage();
   const manageUserPage = new ManageUserPage();
+  const facilityHome = new FacilityHome();
   const usernameToLinkFacilitydoc1 = "dummydoctor4";
   const usernameToLinkFacilitydoc2 = "dummydoctor5";
   const usernameToLinkFacilitydoc3 = "dummydoctor6";
@@ -22,7 +24,7 @@ describe("Manage User", () => {
   const linkedskill = "General Medicine";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -68,9 +70,9 @@ describe("Manage User", () => {
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
-    manageUserPage.navigateToFacility();
-    manageUserPage.typeFacilitySearch(facilitytolinkskill);
-    manageUserPage.assertFacilityInCard(facilitytolinkskill);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilitytolinkskill);
+    facilityHome.assertFacilityInCard(facilitytolinkskill);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertSkillIndoctorconnect(linkedskill);
@@ -134,9 +136,9 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     //  Go to particular facility doctor connect and all user-id are reflected based on there access
     // Path will be facility page to patient page then doctor connect button
-    manageUserPage.navigateToFacility();
-    manageUserPage.typeFacilitySearch(facilitytolinkusername);
-    manageUserPage.assertFacilityInCard(facilitytolinkusername);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilitytolinkusername);
+    facilityHome.assertFacilityInCard(facilitytolinkusername);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertDoctorConnectVisibility(usernamerealname);
