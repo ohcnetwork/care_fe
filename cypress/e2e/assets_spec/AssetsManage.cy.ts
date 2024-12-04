@@ -121,7 +121,7 @@ describe("Asset", () => {
     facilityPage.clickviewAssetFacilityOption();
     facilityPage.verifyfacilityviewassetredirection();
     advanceFilters.verifyFilterBadgePresence(
-      "Facility/District Name",
+      "Facility",
       fillFacilityName,
       true,
     );
