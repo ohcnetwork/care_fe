@@ -147,6 +147,7 @@ describe("Location Management Section", () => {
     // verify the duplicate location error message
     facilityLocation.clickAddNewLocationButton();
     facilityLocation.typeLocationName(locationName);
+    facilityLocation.verifyLocationType(locationType);
     facilityLocation.clickAddLocationButton();
     cy.verifyNotification(
       "Name - Asset location with this name and facility already exists.",
