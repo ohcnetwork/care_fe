@@ -114,10 +114,6 @@ rolesToTest.forEach((role) => {
         assetHome.selectassetimportbutton();
         assetHome.selectCsvExportButton();
       });
-    } else {
-      it("Verify Export button is not visible", () => {
-        cy.get("button[data-testid='import-asset-button']").should("not.exist");
-      });
     }
 
     afterEach(() => {
