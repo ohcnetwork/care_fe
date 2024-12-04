@@ -61,11 +61,19 @@ export const Demography = (props: PatientProps) => {
     };
   }, [patientData.assigned_to_object]);
 
-  const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
-    query: {
-      patient: id,
+  const { data: insuranceDetials, refetch } = useQuery(
+    routes.hcx.policies.list,
+    {
+      query: { patient: id },
+      prefetch: false, // Don't prefetch by default
     },
-  });
+  );
+
+  useEffect(() => {
+    if (patientData.id) {
+      refetch();
+    }
+  }, [patientData.id, refetch]);
 
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,

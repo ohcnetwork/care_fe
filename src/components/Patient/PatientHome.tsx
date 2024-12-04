@@ -65,12 +65,6 @@ export const PatientHome = (props: {
     AssignedToObjectModel | undefined
   >(patientData.assigned_to_object);
 
-  const [isPatientHomeMounted, setIsPatientHomeMounted] = useState(false);
-
-  useEffect(() => {
-    setIsPatientHomeMounted(true);
-  }, []);
-
   useEffect(() => {
     setAssignedVolunteer(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
@@ -169,7 +163,7 @@ export const PatientHome = (props: {
     });
   };
 
-  if (isLoading || !isPatientHomeMounted) {
+  if (isLoading) {
     return <Loading />;
   }
 

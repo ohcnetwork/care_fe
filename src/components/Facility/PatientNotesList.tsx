@@ -58,14 +58,10 @@ const PatientNotesList = (props: PatientNotesProps) => {
   };
 
   useEffect(() => {
-    fetchNotes();
-  }, [thread]);
-
-  useEffect(() => {
-    if (reload) {
+    if (reload || thread) {
       fetchNotes();
     }
-  }, [reload]);
+  }, [reload, thread]);
 
   const handleNext = () => {
     if (state.cPage < state.totalPages) {
