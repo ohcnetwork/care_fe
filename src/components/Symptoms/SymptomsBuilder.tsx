@@ -182,7 +182,7 @@ export const EncounterSymptomsBuilder = (props: {
 
     const debouncedSetItem = debounce((value: string) => {
       setItem({ other_symptom: value, symptom: item.symptom });
-    }, 5000);
+    }, 3500);
 
     return (
       <div
