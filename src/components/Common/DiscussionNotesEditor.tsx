@@ -95,8 +95,8 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
       if (mentionText.includes(" ")) return;
 
       setMentionFilter(mentionText);
-      const { top, left } = getCaretCoordinates(event.target);
-      setMentionPosition({ top: top + 30, left: left + 10 });
+      const coordinates = getCaretCoordinates(event.target);
+      setMentionPosition(coordinates);
       setShowMentions(true);
     } else {
       setShowMentions(false);
@@ -109,7 +109,9 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
     const cursorPosition = editorRef.current.selectionStart;
     const currentText = editorRef.current.value;
 
-    const newText = `${currentText.slice(0, cursorPosition)}@${currentText.slice(cursorPosition)}`;
+    const newText = `${currentText.slice(0, cursorPosition)}@${currentText.slice(
+      cursorPosition,
+    )}`;
     setText(newText);
 
     requestAnimationFrame(() => {
@@ -119,8 +121,8 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
       const newPosition = cursorPosition + 1;
       editorRef.current.setSelectionRange(newPosition, newPosition);
 
-      const { top, left } = getCaretCoordinates(editorRef.current);
-      setMentionPosition({ top: top + 20, left });
+      const coordinates = getCaretCoordinates(editorRef.current);
+      setMentionPosition(coordinates);
       setShowMentions(true);
     });
   };

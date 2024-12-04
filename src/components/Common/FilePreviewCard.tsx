@@ -61,7 +61,7 @@ export function FilePreviewCard({
             e.stopPropagation();
             onRemove(index);
           }}
-          className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 transition-colors duration-200 hover:bg-gray-400 hover:text-white"
+          className="absolute right-0 top-0 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 transition-colors duration-200 hover:bg-gray-400 hover:text-white"
         >
           <CareIcon
             icon="l-times-circle"

@@ -3,11 +3,17 @@ import { useEffect, useState } from "react";
 
 import { UserBareMinimum } from "@/components/Users/models";
 
+import { formatDisplayName } from "@/Utils/utils";
+
+import { Avatar } from "./Avatar";
+
 const UserCard = ({ user }: { user: UserBareMinimum }) => (
-  <div className="z-10 flex w-64 items-center space-x-3 rounded-lg bg-gray-200 px-3 pb-3 shadow-lg">
-    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-semibold text-white">
-      {user.first_name[0]}
-    </div>
+  <div className="z-10 flex w-56 items-center space-x-3 rounded-lg bg-gray-200 px-3 pb-3 shadow-lg">
+    <Avatar
+      name={formatDisplayName(user)}
+      imageUrl={user.read_profile_picture_url}
+      className="h-12 w-12 rounded-full text-black/50"
+    />
     <div className="space-y-0">
       <h3 className="text-sm font-semibold text-gray-800">
         {user.first_name} {user.last_name}

@@ -20,29 +20,34 @@ export const getCaretInfo = (element: HTMLTextAreaElement) => {
  */
 export const getCaretCoordinates = (element: HTMLTextAreaElement) => {
   const { start } = getCaretInfo(element);
+  const styles = window.getComputedStyle(element);
+  const textareaRect = element.getBoundingClientRect();
+  const mirror = document.createElement("div");
+  mirror.style.cssText = [
+    "position: fixed",
+    "visibility: hidden",
+    `width: ${element.offsetWidth}px`,
+    `white-space: ${styles.whiteSpace}`,
+    `font-family: ${styles.fontFamily}`,
+    `font-size: ${styles.fontSize}`,
+    `line-height: ${styles.lineHeight}`,
+    `padding: ${styles.padding}`,
+    `top: ${window.scrollY + textareaRect.top}px`,
+    `left: ${window.scrollX + textareaRect.left}px`,
+  ].join(";");
 
-  // Create a hidden div to measure text
-  const div = document.createElement("div");
-  const span = document.createElement("span");
+  mirror.textContent = element.value.substring(0, start);
 
-  // Copy textarea styles to div
-  const style = window.getComputedStyle(element);
-  div.style.cssText = style.cssText;
-  div.style.position = "absolute";
-  div.style.visibility = "hidden";
-  div.style.whiteSpace = "pre-wrap";
+  const marker = document.createElement("span");
+  marker.textContent = "I";
+  mirror.appendChild(marker);
+  document.body.appendChild(mirror);
 
-  // Add text content
-  div.textContent = element.value.substring(0, start);
-  span.textContent = "."; // Marker for position
-  div.appendChild(span);
-
-  document.body.appendChild(div);
-  const coordinates = span.getBoundingClientRect();
-  document.body.removeChild(div);
+  const markerRect = marker.getBoundingClientRect();
+  document.body.removeChild(mirror);
 
   return {
-    top: coordinates.top + window.scrollY,
-    left: coordinates.left + window.scrollX,
+    top: markerRect.top - textareaRect.top,
+    left: markerRect.left - textareaRect.left,
   };
 };
