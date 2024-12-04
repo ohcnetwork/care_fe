@@ -208,51 +208,6 @@ export class AssetPage {
     );
   }
 
-  selectImportFacility(facilityName: string) {
-    cy.get("input[name='facilities']")
-      .type(facilityName)
-      .then(() => {
-        cy.get("[role='option']").contains(facilityName).click();
-      });
-  }
-
-  selectassetimportbutton() {
-    cy.get("[data-testid=import-asset-button]").click();
-  }
-
-  selectJsonExportButton() {
-    cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
-    cy.get("#export-json-option").click();
-    cy.wait("@getJsonexport").its("response.statusCode").should("eq", 200);
-  }
-
-  selectCsvExportButton() {
-    cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
-    cy.get("#export-csv-option").click();
-    cy.wait("@getCsvexport").its("response.statusCode").should("eq", 200);
-  }
-
-  selectImportOption() {
-    cy.get(".import-assets-button").click();
-  }
-
-  importAssetFile() {
-    cy.get("[data-testid=import-file]")
-      .selectFile("cypress/fixtures/sample-asset.xlsx", { force: true })
-      .wait(100);
-  }
-
-  selectImportLocation(locationName: string) {
-    cy.get("[data-testid=select-import-location]").click();
-    cy.get("li[role=option]").contains(locationName).click();
-  }
-
-  clickImportAsset() {
-    cy.intercept("POST", "**/api/v1/asset/").as("importAsset");
-    cy.get("#submit").contains("Import").click();
-    cy.wait("@importAsset").its("response.statusCode").should("eq", 201);
-  }
-
   clickupdatedetailbutton() {
     cy.get("[data-testid=asset-update-button]").click();
   }
