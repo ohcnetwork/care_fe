@@ -22,6 +22,7 @@ import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import { Writable } from "@/Utils/types";
 import { classNames, dateQueryString } from "@/Utils/utils";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 
 export const CreateSymptomsBuilder = (props: {
   value: Writable<EncounterSymptom>[];
@@ -184,9 +185,9 @@ const SymptomEntry = (props: {
   const disabled =
     props.disabled || symptom.clinical_impression_status === "entered-in-error";
   return (
-    <div className="grid grid-cols-6 items-center gap-2 lg:grid-cols-8 xl:grid-cols-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 xl:grid-cols-5 gap-2 items-center p-2">
       <DateFormField
-        className="col-span-3 w-full lg:col-span-2 xl:col-span-1"
+        className="w-full sm:col-span-1 lg:col-span-2 xl:col-span-1"
         name="onset_date"
         value={new Date(symptom.onset_date)}
         disableFuture
@@ -195,7 +196,7 @@ const SymptomEntry = (props: {
         errorClassName="hidden"
       />
       <DateFormField
-        className="col-span-3 w-full lg:col-span-2 xl:col-span-1"
+        className="w-full sm:col-span-1 lg:col-span-2 xl:col-span-1"
         name="cure_date"
         value={symptom.cure_date ? new Date(symptom.cure_date) : undefined}
         disableFuture
@@ -205,7 +206,7 @@ const SymptomEntry = (props: {
         onChange={props.onChange}
         errorClassName="hidden"
       />
-      <div className="col-span-6 flex items-center gap-2 lg:col-span-4 xl:col-span-3">
+      <div className="col-span-1 sm:col-span-2 lg:col-span-4 xl:col-span-3 flex items-center gap-2">
         <div
           className={classNames(
             "cui-input-base w-full font-medium",
@@ -254,7 +255,7 @@ const AddSymptom = (props: {
   consultationId?: string;
 }) => {
   const [processing, setProcessing] = useState(false);
-  const [selected, setSelected] = useState<EncounterSymptom["symptom"][]>([]);
+  const [selectedSymptom, setSelectedSymptom] = useState<EncounterSymptom["symptom"] | null>(null);
   const [otherSymptom, setOtherSymptom] = useState("");
   const [onsetDate, setOnsetDate] = useState<Date>();
 
@@ -263,39 +264,34 @@ const AddSymptom = (props: {
     .map((o) => o.symptom);
 
   const handleAdd = async () => {
-    const objects = selected.map((symptom) => {
-      return {
-        symptom,
-        onset_date: dateQueryString(onsetDate),
-        other_symptom:
-          symptom === OTHER_SYMPTOM_CHOICE.id ? otherSymptom : undefined,
-      };
-    });
+    if (!selectedSymptom || !onsetDate) return;
+
+    const newSymptom: Writable<EncounterSymptom> = {
+      symptom: selectedSymptom,
+      onset_date: dateQueryString(onsetDate),
+      other_symptom:
+        selectedSymptom === OTHER_SYMPTOM_CHOICE.id ? otherSymptom : undefined,
+    };
 
     if (props.consultationId) {
-      const responses = await Promise.all(
-        objects.map((body) =>
-          request(SymptomsApi.add, {
-            body,
-            pathParams: { consultationId: props.consultationId! },
-          }),
-        ),
-      );
+      const { res } = await request(SymptomsApi.add, {
+        body: newSymptom,
+        pathParams: { consultationId: props.consultationId },
+      });
 
-      if (responses.every(({ res }) => !!res?.ok)) {
-        Success({ msg: "Symptoms records updated successfully" });
+      if (res?.ok) {
+        Success({ msg: "Symptom added successfully" });
       }
     }
-    props.onAdd?.(objects);
 
-    setSelected([]);
+    props.onAdd?.([newSymptom]);
+    setSelectedSymptom(null);
     setOtherSymptom("");
+    setOnsetDate(undefined);
   };
 
-  const hasSymptoms = !!selected.length;
-  const otherSymptomValid = selected.includes(OTHER_SYMPTOM_CHOICE.id)
-    ? !!otherSymptom.trim()
-    : true;
+  const otherSymptomValid =
+    selectedSymptom !== OTHER_SYMPTOM_CHOICE.id || !!otherSymptom.trim();
 
   return (
     <div
@@ -312,24 +308,24 @@ const AddSymptom = (props: {
         errorClassName="hidden"
       />
       <div className="flex w-full flex-col gap-2">
-        <AutocompleteMultiSelectFormField
-          id="additional_symptoms"
+        <AutocompleteFormField
+          id="select_symptom"
           name="symptom"
           className="w-full"
           disabled={props.disabled || processing}
-          placeholder="Search for symptoms"
-          value={selected}
-          onChange={(e) => setSelected(e.value)}
+          placeholder="Select a symptom"
+          value={selectedSymptom}
+          onChange={({ value }) => setSelectedSymptom(value)}
           options={SYMPTOM_CHOICES.filter(
-            ({ id }) => !activeSymptomIds.includes(id),
+            ({ id }) => !activeSymptomIds.includes(id)
           )}
           optionLabel={(option) => option.text}
           optionValue={(option) => option.id}
           errorClassName="hidden"
         />
-        {selected.includes(OTHER_SYMPTOM_CHOICE.id) && (
+        {selectedSymptom === OTHER_SYMPTOM_CHOICE.id && (
           <TextAreaFormField
-            id="other_symptoms"
+            id="other_symptom_details"
             label="Other symptom details"
             labelClassName="text-sm"
             name="other_symptom"
@@ -345,16 +341,16 @@ const AddSymptom = (props: {
         type="button"
         className="w-full py-3 md:w-auto"
         disabled={
-          processing || !hasSymptoms || !otherSymptomValid || !onsetDate
+          processing || !selectedSymptom || !otherSymptomValid || !onsetDate
         }
         tooltip={
-          !hasSymptoms
-            ? "No symptoms selected to be added"
+          !selectedSymptom
+            ? "No symptom selected"
             : !otherSymptomValid
-              ? "Other symptom details not specified"
-              : !onsetDate
-                ? "No date of onset specified"
-                : undefined
+            ? "Other symptom details not specified"
+            : !onsetDate
+            ? "No onset date specified"
+            : undefined
         }
         tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs translate-y-1 w-full max-w-96 whitespace-pre-wrap"
         onClick={async () => {
@@ -369,7 +365,7 @@ const AddSymptom = (props: {
             <span>Adding...</span>
           </>
         ) : (
-          <span>Add Symptom(s)</span>
+          <span>Add Symptom</span>
         )}
       </ButtonV2>
     </div>
