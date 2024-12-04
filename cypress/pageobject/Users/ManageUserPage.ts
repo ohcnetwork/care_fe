@@ -90,27 +90,6 @@ export class ManageUserPage {
     );
   }
 
-  navigateToFacility() {
-    cy.visit("/facility");
-  }
-
-  typeFacilitySearch(facilityName: string) {
-    cy.get("#search").click().clear();
-    cy.get("#search").click().type(facilityName);
-  }
-
-  interceptFacilitySearchReq() {
-    cy.intercept("GET", "**/api/v1/facility/**").as("searchFacility");
-  }
-
-  verifyFacilitySearchReq() {
-    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
-  }
-
-  assertFacilityInCard(facilityName: string) {
-    cy.get("#facility-name-card").should("contain", facilityName);
-  }
-
   clickFacilityPatients() {
     cy.get("#facility-patients").should("be.visible");
     cy.get("#facility-patients").click();
