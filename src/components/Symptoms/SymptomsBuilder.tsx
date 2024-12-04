@@ -94,6 +94,10 @@ export const EncounterSymptomsBuilder = (props: {
       props.showAll || item.clinical_impression_status !== "entered-in-error",
   );
 
+  const activeSymptomIds = symptoms
+    .filter((o) => o.symptom !== OTHER_SYMPTOM_CHOICE.id && !o.cure_date)
+    .map((o) => o.symptom);
+
   const createSymptom = async (body: EncounterSymptomRequest) => {
     if (Array.isArray(body.symptom)) {
       const { symptom, onset_date, other_symptom } = body;
@@ -164,7 +168,7 @@ export const EncounterSymptomsBuilder = (props: {
   ) => {
     const [selected, setSelected] = useState<
       EncounterSymptom["symptom"] | EncounterSymptom["symptom"][]
-    >(item.symptom || "");
+    >(item.symptom || []);
 
     const [otherSymptom, setOtherSymptom] = useState<string>(
       item.other_symptom || "",
@@ -176,13 +180,9 @@ export const EncounterSymptomsBuilder = (props: {
       item.cure_date ? new Date(item.cure_date) : undefined,
     );
 
-    const activeSymptomIds = symptoms
-      .filter((o) => o.symptom !== OTHER_SYMPTOM_CHOICE.id && !o.cure_date)
-      .map((o) => o.symptom);
-
     const debouncedSetItem = debounce((value: string) => {
       setItem({ other_symptom: value, symptom: item.symptom });
-    }, 10000);
+    }, 5000);
 
     return (
       <div
@@ -347,12 +347,14 @@ export const EncounterSymptomsBuilder = (props: {
         errors={{}}
         emptyText="Patient is Asymptomatic"
         empty={{
-          symptom: "",
-          onset_date: new Date().toISOString().split("T")[0],
+          symptom: [],
+          onset_date: undefined,
         }}
         createText="Add Symptom(s)"
         allowCreate={(item) =>
-          Array.isArray(item.symptom) ? !item.symptom.length : !item.symptom
+          !item.onset_date && Array.isArray(item.symptom)
+            ? !item.symptom.length
+            : !item.symptom
         }
       >
         {FormRender}
