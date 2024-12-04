@@ -66,8 +66,13 @@ export class AssetHome {
       });
   }
 
-  selectassetimportbutton() {
-    cy.get("[data-testid=import-asset-button]").click();
+  selectAssetImportButton(action: "click" | "verifyNotExist"): void {
+    const selector = "[data-testid=import-asset-button]";
+    if (action === "click") {
+      cy.get(selector).click();
+    } else if (action === "verifyNotExist") {
+      cy.get(selector).should("not.exist");
+    }
   }
 
   selectJsonExportButton() {
