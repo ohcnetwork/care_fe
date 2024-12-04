@@ -72,14 +72,6 @@ export class UserPage {
     cy.typeAndSelectOption("input[name='home_facility']", facility);
   }
 
-  verifyDataTestIdText(testId: string, text: string) {
-    cy.get(`[data-testid="${testId}"]`).contains(text).should("be.visible");
-  }
-
-  verifyDataTestIdNotVisible(testId: string) {
-    cy.get(`[data-testid="${testId}"]`).should("not.be.visible");
-  }
-
   verifyMultipleBadgesWithSameId(alreadylinkedusersviews: string[]) {
     cy.wrap(alreadylinkedusersviews).each((username) => {
       cy.get(`#name-${username}`).scrollIntoView().should("be.visible");
