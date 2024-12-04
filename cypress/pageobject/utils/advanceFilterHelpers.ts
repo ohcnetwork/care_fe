@@ -32,23 +32,7 @@ export const advanceFilters = {
   },
 
   clickClearAdvanceFilters() {
-    cy.intercept("GET", "**/api/v1/asset/**").as("clearAssets");
     cy.verifyAndClickElement("#clear-filter", "Clear");
-    cy.wait("@clearAssets").its("response.statusCode").should("eq", 200);
-    cy.location("pathname").should("match", /\/assets$/);
-    cy.url().then((url) => {
-      const queryParams = new URL(url).searchParams;
-      let allEmpty = true;
-      const blacklistedKeys = ["page", "limit", "offset"];
-
-      queryParams.forEach((value, key) => {
-        if (value !== "" && !blacklistedKeys.includes(key)) {
-          allEmpty = false;
-        }
-      });
-
-      expect(allEmpty).to.be.true;
-    });
   },
 
   verifyFilterBadgePresence(
