@@ -36,7 +36,7 @@ export default function DropdownMenu({
       <Menu as="div" className="relative inline-block w-full text-left">
         <MenuButton
           disabled={props.disabled}
-          className={`button-size-${size} button-${variant}-default button-shape-square flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 mt-2 lg:justify-between ${props.className}`}
+          className={`button-size-${size} button-${variant}-default button-shape-square flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500 lg:justify-between ${props.className}`}
         >
           <div
             className={classNames(
