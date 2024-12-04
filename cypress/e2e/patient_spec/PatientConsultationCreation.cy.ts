@@ -379,7 +379,9 @@ describe("Patient Consultation in multiple combination", () => {
 
   it("Edit created consultation to existing patient", () => {
     patientPage.visitPatient("Dummy Patient Thirteen");
+    cy.intercept("GET", "**/api/v1/consultation/*").as("getConsultation");
     patientConsultationPage.clickEditConsultationButton();
+    cy.wait("@getConsultation").its("response.statusCode").should("eq", 200);
     patientConsultationPage.typePatientIllnessHistory("editted");
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis5,
