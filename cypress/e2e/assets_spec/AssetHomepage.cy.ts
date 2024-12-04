@@ -92,28 +92,30 @@ rolesToTest.forEach((role) => {
       pageNavigation.verifyCurrentPageNumber(1);
     });
 
-    it("Import new asset and verify its presence", () => {
-      assetHome.selectassetimportbutton();
-      assetHome.selectImportOption();
-      assetHome.selectImportFacility(facilityName);
-      assetHome.importAssetFile();
-      assetHome.selectImportLocation(assetLocation);
-      assetHome.clickImportAsset();
-      cy.verifyNotification("Assets imported successfully");
-      cy.closeNotification();
-      assetHome.navigateToAssetsPage();
-      assetHome.typeAssetSearch(newImportAssetName);
-      assetHome.verifyAssetIsPresent(newImportAssetName);
-    });
-
     if (role === "districtAdmin") {
-      it("Export the list of assets in CSV & Json", () => {
+      it("Import new asset and verify its presence", () => {
         assetHome.selectassetimportbutton();
-        cy.wait(2000);
-        assetHome.selectJsonExportButton();
-        assetHome.selectassetimportbutton();
-        assetHome.selectCsvExportButton();
+        assetHome.selectImportOption();
+        assetHome.selectImportFacility(facilityName);
+        assetHome.importAssetFile();
+        assetHome.selectImportLocation(assetLocation);
+        assetHome.clickImportAsset();
+        cy.verifyNotification("Assets imported successfully");
+        cy.closeNotification();
+        assetHome.navigateToAssetsPage();
+        assetHome.typeAssetSearch(newImportAssetName);
+        assetHome.verifyAssetIsPresent(newImportAssetName);
       });
+
+      if (role === "districtAdmin") {
+        it("Export the list of assets in CSV & Json", () => {
+          assetHome.selectassetimportbutton();
+          cy.wait(2000);
+          assetHome.selectJsonExportButton();
+          assetHome.selectassetimportbutton();
+          assetHome.selectCsvExportButton();
+        });
+      }
     }
 
     afterEach(() => {
