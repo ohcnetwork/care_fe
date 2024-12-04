@@ -63,7 +63,7 @@ function runTests(
 
     it("User-level Based Permission for File Modification", () => {
       // Login as Nurse 1
-      loginPage.login("dummynurse1", "Coronasafe@123");
+      loginPage.loginByRole("nurse");
       cy.reload();
       // Visit the patient details page
       patientPage.visitPatient(patientNameThree);
@@ -85,7 +85,7 @@ function runTests(
       cy.closeNotification();
       patientFileUpload.verifyUploadFilePresence(newFileName);
       // Login as Nurse 2
-      loginPage.login("dummynurse2", "Coronasafe@123");
+      loginPage.loginByRole("nurse2");
       cy.reload();
       // Verify the file edit option is not available
       patientFileUpload.verifyUploadFilePresence(newFileName);

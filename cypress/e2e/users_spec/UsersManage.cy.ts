@@ -72,7 +72,7 @@ describe("Manage User", () => {
     // verifying the doctor connect
     facilityHome.navigateToFacilityHomepage();
     facilityHome.typeFacilitySearch(facilitytolinkskill);
-    manageUserPage.assertFacilityInCard(facilitytolinkskill);
+    facilityHome.assertFacilityInCard(facilitytolinkskill);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertSkillIndoctorconnect(linkedskill);
@@ -138,7 +138,7 @@ describe("Manage User", () => {
     // Path will be facility page to patient page then doctor connect button
     facilityHome.navigateToFacilityHomepage();
     facilityHome.typeFacilitySearch(facilitytolinkusername);
-    manageUserPage.assertFacilityInCard(facilitytolinkusername);
+    facilityHome.assertFacilityInCard(facilitytolinkusername);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertDoctorConnectVisibility(usernamerealname);
