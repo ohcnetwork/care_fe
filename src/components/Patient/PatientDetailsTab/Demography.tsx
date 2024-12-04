@@ -364,11 +364,15 @@ export const Demography = (props: PatientProps) => {
                   size="medium"
                   variant="custom"
                   className={
-                    patientData.is_active
+                    !patientData.last_consultation?.discharge_date
                       ? "bg-blue-100 text-blue-800"
                       : "bg-red-100 text-red-800"
                   }
-                  text={patientData.is_active ? "LIVE" : "DISCHARGED"}
+                  text={
+                    !patientData.last_consultation?.discharge_date
+                      ? "LIVE"
+                      : "DISCHARGED"
+                  }
                 />
               </div>
             </div>
