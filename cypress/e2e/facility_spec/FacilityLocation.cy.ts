@@ -1,3 +1,4 @@
+import LoginPage from "pageobject/Login/LoginPage";
 import { pageNavigation } from "pageobject/utils/paginationHelpers";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,6 +14,7 @@ describe("Location Management Section", () => {
   const facilityPage = new FacilityPage();
   const facilityLocation = new FacilityLocation();
   const facilityHome = new FacilityHome();
+  const loginPage = new LoginPage();
 
   const EXPECTED_LOCATION_ERROR_MESSAGES = [
     "Name is required",
@@ -46,7 +48,7 @@ describe("Location Management Section", () => {
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

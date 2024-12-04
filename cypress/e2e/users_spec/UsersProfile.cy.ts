@@ -1,3 +1,5 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import UserProfilePage from "../../pageobject/Users/UserProfilePage";
@@ -6,6 +8,7 @@ describe("Manage User Profile", () => {
   const loginPage = new LoginPage();
   const userProfilePage = new UserProfilePage();
   const manageUserPage = new ManageUserPage();
+  const facilityHome = new FacilityHome();
 
   const date_of_birth = "01011999";
   const gender = "Male";
@@ -19,7 +22,7 @@ describe("Manage User Profile", () => {
   const facilitySearch = "Dummy Facility 40";
 
   before(() => {
-    loginPage.loginAsDevDoctor();
+    loginPage.loginByRole("devDoctor");
     cy.saveLocalStorage();
   });
 
@@ -65,9 +68,9 @@ describe("Manage User Profile", () => {
     userProfilePage.clickUpdateButton();
     userProfilePage.assertVideoConnectLink("https://www.test.com");
     //  Go to particular facility doctor connect and verify the video connect link is present
-    manageUserPage.navigateToFacility();
-    manageUserPage.typeFacilitySearch(facilitySearch);
-    manageUserPage.assertFacilityInCard(facilitySearch);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilitySearch);
+    facilityHome.assertFacilityInCard(facilitySearch);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertVideoConnectLink("Dev Doctor", "https://www.test.com");

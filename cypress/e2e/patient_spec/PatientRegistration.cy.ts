@@ -103,7 +103,7 @@ describe("Patient Creation with consultation", () => {
   };
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

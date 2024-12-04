@@ -1,16 +1,12 @@
-// LoginPage.ts
+import { users } from "../utils/userConfig";
 
 class LoginPage {
-  loginAsDistrictAdmin(): void {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
-  }
-
-  loginAsDevDoctor(): void {
-    cy.loginByApi("devdoctor", "Coronasafe@123");
-  }
-
-  loginAsStaff(): void {
-    cy.loginByApi("staffdev", "Coronasafe@123");
+  loginByRole(role: keyof typeof users): void {
+    const user = users[role];
+    if (!user) {
+      throw new Error(`Role "${role}" is not defined in userConfig`);
+    }
+    cy.loginByApi(user.username, user.password);
   }
 
   loginManuallyAsDistrictAdmin(isCorrectCredentials: boolean = true): void {
@@ -27,10 +23,6 @@ class LoginPage {
     cy.get("input[id='username']").click().type("dummynurse1");
     cy.get("input[id='password']").click().type("Coronasafe@123");
     cy.clickSubmitButton("Login");
-  }
-
-  login(username: string, password: string): void {
-    cy.loginByApi(username, password);
   }
 
   ensureLoggedIn(): void {

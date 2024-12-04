@@ -377,6 +377,7 @@ const AssetsList = () => {
         />
         <div className="flex-1">
           <SearchInput
+            id="asset-search"
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}

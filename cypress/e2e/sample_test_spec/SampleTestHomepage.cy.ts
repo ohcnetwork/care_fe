@@ -1,6 +1,10 @@
+import LoginPage from "pageobject/Login/LoginPage";
+
+const loginPage = new LoginPage();
+
 describe("Sample List", () => {
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
