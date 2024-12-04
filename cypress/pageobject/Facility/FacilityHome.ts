@@ -26,7 +26,7 @@ class FacilityHome {
   }
 
   typeFacilitySearch(facilityName: string) {
-    cy.get("#search").click().clear();
+    cy.get("#search-by-facility").click().clear();
     cy.get("#search-by-facility").click().type(facilityName);
   }
 
