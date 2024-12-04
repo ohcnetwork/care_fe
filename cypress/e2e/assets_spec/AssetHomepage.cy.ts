@@ -92,8 +92,8 @@ rolesToTest.forEach((role) => {
       pageNavigation.verifyCurrentPageNumber(1);
     });
 
-    if (role === "districtAdmin") {
-      it("Import new asset and verify its presence", () => {
+    it("Import new asset and verify its presence", () => {
+      if (role === "districtAdmin") {
         assetHome.selectassetimportbutton();
         assetHome.selectImportOption();
         assetHome.selectImportFacility(facilityName);
@@ -105,18 +105,22 @@ rolesToTest.forEach((role) => {
         assetHome.navigateToAssetsPage();
         assetHome.typeAssetSearch(newImportAssetName);
         assetHome.verifyAssetIsPresent(newImportAssetName);
-      });
-
-      if (role === "districtAdmin") {
-        it("Export the list of assets in CSV & Json", () => {
-          assetHome.selectassetimportbutton();
-          cy.wait(2000);
-          assetHome.selectJsonExportButton();
-          assetHome.selectassetimportbutton();
-          assetHome.selectCsvExportButton();
-        });
+      } else {
+        cy.get("button[data-testid='import-asset-button']").should("not.exist");
       }
-    }
+    });
+
+    it("Export the list of assets in CSV & Json", () => {
+      if (role === "districtAdmin") {
+        assetHome.selectassetimportbutton();
+        cy.wait(2000);
+        assetHome.selectJsonExportButton();
+        assetHome.selectassetimportbutton();
+        assetHome.selectCsvExportButton();
+      } else {
+        cy.get("button[data-testid='import-asset-button']").should("not.exist");
+      }
+    });
 
     afterEach(() => {
       cy.saveLocalStorage();
