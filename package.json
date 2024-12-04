@@ -93,7 +93,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-pdf": "^9.1.1",
     "react-webcam": "^7.2.0",
-    "tailwind-merge": "^2.5.4",
+    "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "use-keyboard-shortcut": "^1.1.6",
     "xlsx": "^0.18.5"
