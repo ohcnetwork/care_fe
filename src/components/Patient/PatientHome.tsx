@@ -65,6 +65,12 @@ export const PatientHome = (props: {
     AssignedToObjectModel | undefined
   >(patientData.assigned_to_object);
 
+  const [isPatientHomeMounted, setIsPatientHomeMounted] = useState(false);
+
+  useEffect(() => {
+    setIsPatientHomeMounted(true);
+  }, []);
+
   useEffect(() => {
     setAssignedVolunteer(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
@@ -163,7 +169,7 @@ export const PatientHome = (props: {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || !isPatientHomeMounted) {
     return <Loading />;
   }
 
@@ -468,6 +474,7 @@ export const PatientHome = (props: {
                 facilityId={facilityId || ""}
                 id={id}
                 patientData={patientData}
+                refetch={refetch}
               />
             )}
           </div>

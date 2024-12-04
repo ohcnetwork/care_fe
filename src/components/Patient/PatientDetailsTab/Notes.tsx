@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -22,15 +22,11 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { classNames, keysOf } from "@/Utils/utils";
 
+import { PatientProps } from ".";
 import * as Notification from "../../../Utils/Notifications";
 
-interface PatientNotesProps {
-  id: string;
-  facilityId: string;
-}
-
-const PatientNotes = (props: PatientNotesProps) => {
-  const { id: patientId, facilityId } = props;
+const PatientNotes = (props: PatientProps) => {
+  const { patientData, id: patientId, facilityId } = props;
 
   const authUser = useAuthUser();
   const [thread, setThread] = useState(
@@ -39,7 +35,6 @@ const PatientNotes = (props: PatientNotesProps) => {
       : PATIENT_NOTES_THREADS.Doctors,
   );
 
-  const [patientActive, setPatientActive] = useState(true);
   const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
   const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
@@ -83,26 +78,6 @@ const PatientNotes = (props: PatientNotesProps) => {
       });
     }
   };
-
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        try {
-          const { data } = await request(routes.getPatient, {
-            pathParams: { id: patientId },
-          });
-          if (data) {
-            setPatientActive(data.is_active ?? true);
-          }
-        } catch (error) {
-          Notification.Error({
-            msg: "Failed to fetch patient status",
-          });
-        }
-      }
-    }
-    fetchPatientName();
-  }, [patientId]);
 
   useMessageListener((data) => {
     const message = data?.message;
@@ -161,7 +136,7 @@ const PatientNotes = (props: PatientNotesProps) => {
               errorClassName="hidden"
               innerClassName="pr-10"
               placeholder={t("notes_placeholder")}
-              disabled={!patientActive}
+              disabled={!patientData.is_active}
             />
             <ButtonV2
               onClick={onAddNote}
@@ -169,7 +144,7 @@ const PatientNotes = (props: PatientNotesProps) => {
               className="absolute right-2"
               ghost
               size="small"
-              disabled={!patientActive}
+              disabled={!patientData.is_active}
               authorizeFor={NonReadOnlyUsers}
             >
               <CareIcon icon="l-message" className="text-lg" />

@@ -11,6 +11,7 @@ export interface PatientProps {
   facilityId: string;
   id: string;
   patientData: PatientModel;
+  refetch: () => void;
 }
 
 export const patientTabs = [
