@@ -6,7 +6,19 @@ class PatientDischarge {
   }
 
   selectDischargeReason(reason: string) {
-    cy.clickAndSelectOption("#discharge_reason", reason);
+    if (reason == "Recoverd") {
+      cy.intercept("GET", "**/api/v1/consultation/*/prescriptions/*").as(
+        "getPrecriptions",
+      );
+      cy.clickAndSelectOption("#discharge_reason", reason);
+      cy.wait("getPrecriptions").its("response.statusCode").should("eq", 200);
+    } else if (reason == "Referred") {
+      cy.intercept("GET", "**/api/v1/getallfacilities/**").as("getFacilities");
+      cy.clickAndSelectOption("#discharge_reason", reason);
+      cy.wait("getFacilities").its("response.statusCode").should("eq", 200);
+    } else {
+      cy.clickAndSelectOption("#discharge_reason", reason);
+    }
   }
 
   typeDischargeNote(note: string) {
