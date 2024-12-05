@@ -376,10 +376,22 @@ export const PatientHome = (props: {
                             .treating_physician_object,
                         )}
                       </p>
-                      <p className="flex items-end text-xs font-normal leading-tight">
+                      <span className="tooltip text-xs text-secondary-800 flex items-end  font-normal leading-tight">
                         {!!skillsQuery.data?.results?.length &&
                           formatSkills(skillsQuery.data?.results)}
-                      </p>
+                        {(skillsQuery.data?.results?.length || 0) > 3 && (
+                          <ul
+                            className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium"
+                            role="tooltip"
+                          >
+                            {skillsQuery.data?.results.map((skill) => (
+                              <li key={skill.skill_object.id}>
+                                {skill.skill_object.name}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </span>
                     </div>
                   </div>
                 )}
