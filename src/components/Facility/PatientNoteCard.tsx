@@ -164,6 +164,7 @@ const PatientNoteCard = ({
                         setIsEditing(true);
                       }}
                       className="bg-secondary-100 p-2"
+                      aria-label={t("edit")}
                     >
                       <CareIcon icon="l-pen" className="h-4 w-4" />
                     </ButtonV2>
@@ -175,6 +176,7 @@ const PatientNoteCard = ({
                       setReplyTo && setReplyTo(note);
                     }}
                     className="bg-secondary-100 p-2"
+                    aria-label={t("reply")}
                   >
                     <CareIcon icon="l-corner-up-left-alt" className="h-4 w-4" />
                   </ButtonV2>

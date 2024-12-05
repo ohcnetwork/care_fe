@@ -82,7 +82,7 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
         setState((prevState) => ({
           ...prevState,
           notes:
-            state.cPage === 1
+            prevState.cPage === 1
               ? data.results
               : [...prevState.notes, ...data.results],
           totalPages: Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT),
@@ -121,6 +121,8 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
       setState({ ...state, cPage: 1 });
       setNoteField("");
       setReplyTo(undefined);
+    } else {
+      Notification.Error({ msg: "Failed to add note. Please try again." });
     }
 
     return data?.id;

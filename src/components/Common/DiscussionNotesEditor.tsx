@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { t } from "i18next";
+import React, { useEffect, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+
 import { FilePreviewCard } from "@/components/Common/FilePreviewCard";
 import MentionsDropdown from "@/components/Common/MentionDropdown";
 import NotePreview from "@/components/Common/NotePreview";
@@ -65,7 +68,6 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
       "xls",
       "xlsx",
       "ods",
-      "pdf",
     ],
   });
 
@@ -167,17 +169,34 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
               <NotePreview initialNote={text} />
             </div>
           ) : (
-            <AutoExpandingTextarea
+            <Textarea
               id="discussion_notes_textarea"
               ref={editorRef}
-              placeholder="Type your message here..."
+              placeholder={t("type_your_message")}
               className={classNames(
-                "w-full resize-none border-none p-3 align-middle text-sm outline-none focus:outline-none focus:ring-0",
+                "w-full resize-none border-0 p-3 text-sm",
                 maxRows ? "overflow-y-auto" : "overflow-hidden",
               )}
               value={text}
-              onInput={handleInput}
-              maxRows={maxRows}
+              onChange={handleInput}
+              onInput={(e) => {
+                // auto expand textarea
+                const textarea = e.currentTarget;
+                textarea.style.height = "auto";
+                textarea.style.height = `${textarea.scrollHeight}px`;
+                if (maxRows) {
+                  const lineHeight = parseInt(
+                    window.getComputedStyle(textarea).lineHeight,
+                  );
+                  const maxHeight = lineHeight * maxRows;
+                  if (textarea.scrollHeight > maxHeight) {
+                    textarea.style.height = `${maxHeight}px`;
+                    textarea.style.overflowY = "auto";
+                  } else {
+                    textarea.style.overflowY = "hidden";
+                  }
+                }
+              }}
             />
           )}
           {fileUpload.files.length > 0 && (
@@ -196,46 +215,52 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
 
         {/* toolbar*/}
         <div className="flex items-center space-x-1 rounded-b-md border border-secondary-300 bg-secondary-100 pl-2 sm:space-x-2">
-          <label className="tooltip cursor-pointer rounded bg-secondary-200/50 p-1 text-secondary-700">
+          <label className="tooltip cursor-pointer rounded bg-secondary-200/50 px-1 text-secondary-800">
             <CareIcon icon="l-paperclip" className="text-lg" />
             <span className="tooltip-text tooltip-top -translate-x-4">
-              Attach File
+              {t("attach_file")}
             </span>
             <fileUpload.Input multiple />
           </label>
           <div className="mx-2 h-6 border-l border-secondary-400"></div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => fileUpload.handleCameraCapture()}
-            className="tooltip rounded bg-secondary-200/50 p-1"
+            className="tooltip rounded bg-secondary-200/50 px-1"
           >
             <CareIcon icon="l-camera" className="text-lg" />
             <span className="tooltip-text tooltip-top -translate-x-1/2">
-              Camera
+              {t("camera")}
             </span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => fileUpload.handleAudioCapture()}
-            className="tooltip rounded bg-secondary-200/50 p-1"
+            className="tooltip rounded bg-secondary-200/50 px-1"
           >
             <CareIcon icon="l-microphone" className="text-lg" />
             <span className="tooltip-text tooltip-top -translate-x-1/2">
-              Audio
+              {t("audio__record")}
             </span>
-          </button>
+          </Button>
           <div className="mx-2 h-6 border-l border-secondary-400"></div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleMentionButtonClick}
-            className="tooltip rounded bg-secondary-200/50 p-1"
+            className="tooltip rounded bg-secondary-200/50 px-1"
           >
             <CareIcon icon="l-at" className="text-lg" />
             <span className="tooltip-text tooltip-top -translate-x-1/2">
-              Mention
+              {t("mention")}
             </span>
-          </button>
+          </Button>
 
           <div className="grow"></div>
 
-          <Submit
+          <Button
             id="add_doctor_note_button"
             onClick={async () => {
               if (!editorRef.current) return;
@@ -249,9 +274,10 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
             }}
             className="max-w-12"
             disabled={!isAuthorized || isPreviewMode}
+            variant="primary"
           >
             <CareIcon icon="l-message" className="text-lg" />
-          </Submit>
+          </Button>
         </div>
       </div>
 
@@ -259,7 +285,6 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
         <MentionsDropdown
           onSelect={insertMention}
           position={mentionPosition}
-          editorRef={editorRef}
           filter={mentionFilter}
           containerRef={editorRef}
         />
@@ -269,50 +294,5 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
     </div>
   );
 };
-
-interface AutoExpandingTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  maxRows?: number;
-}
-
-const AutoExpandingTextarea = React.forwardRef<
-  HTMLTextAreaElement,
-  AutoExpandingTextareaProps
->(({ maxRows, ...props }, ref) => {
-  const adjustHeight = useCallback(
-    (textarea: HTMLTextAreaElement) => {
-      textarea.style.height = "auto";
-
-      const style = window.getComputedStyle(textarea);
-      const borderHeight =
-        parseInt(style.borderTopWidth) + parseInt(style.borderBottomWidth);
-      const paddingHeight =
-        parseInt(style.paddingTop) + parseInt(style.paddingBottom);
-
-      const lineHeight = parseInt(style.lineHeight);
-      const maxHeight = maxRows
-        ? lineHeight * maxRows + borderHeight + paddingHeight
-        : Infinity;
-
-      const newHeight = Math.min(
-        textarea.scrollHeight + borderHeight,
-        maxHeight,
-      );
-      textarea.style.height = `${newHeight}px`;
-    },
-    [maxRows],
-  );
-
-  useEffect(() => {
-    const textarea = (ref as React.RefObject<HTMLTextAreaElement>).current;
-    if (textarea) {
-      adjustHeight(textarea);
-    }
-  }, [props.value, adjustHeight]);
-
-  return <textarea ref={ref} {...props} />;
-});
-
-AutoExpandingTextarea.displayName = "AutoExpandingTextarea";
 
 export default DiscussionNotesEditor;

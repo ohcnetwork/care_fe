@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
 import { FileUploadModel } from "@/components/Patient/models";
@@ -54,6 +56,8 @@ export function FilePreviewCard({
         onClick && "cursor-pointer",
       )}
       onClick={onClick}
+      role="button"
+      aria-label={t("file_preview")}
     >
       {!readonly && onRemove && typeof index === "number" && (
         <button

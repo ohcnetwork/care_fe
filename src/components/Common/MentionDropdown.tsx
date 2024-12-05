@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -11,7 +12,6 @@ import { formatDisplayName } from "@/Utils/utils";
 interface MentionsDropdownProps {
   onSelect: (user: { id: string; username: string }) => void;
   position: { top: number; left: number };
-  editorRef: React.RefObject<HTMLTextAreaElement>;
   filter: string;
   containerRef: React.RefObject<HTMLTextAreaElement>;
 }
@@ -26,7 +26,6 @@ const KEYS = {
 const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
   onSelect,
   position,
-  editorRef,
   filter,
   containerRef,
 }) => {
@@ -58,10 +57,6 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (document.activeElement !== editorRef.current) {
-        return;
-      }
-
       if (event.key === KEYS.ENTER && filteredUsers.length > 0) {
         const selectedUser =
           selectedIndex !== null
@@ -86,15 +81,18 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
         });
       }
     },
-    [filteredUsers, selectedIndex, onSelect, editorRef],
+    [filteredUsers, selectedIndex, onSelect],
   );
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      container.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleKeyDown]);
+  }, [handleKeyDown, containerRef]);
 
   return (
     <div
@@ -104,7 +102,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
         left: `${dropdownPosition.left}px`,
       }}
       role="listbox"
-      aria-label="User mentions"
+      aria-label={t("user_mentions")}
     >
       {loading ? (
         <div
@@ -112,7 +110,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
           role="status"
           aria-live="polite"
         >
-          <span className="inline-block animate-spin">⌛</span> Loading users...
+          <span className="inline-block animate-spin">⌛</span> {t("loading")}
         </div>
       ) : filteredUsers.length > 0 ? (
         filteredUsers.map((user, index) => (
@@ -148,7 +146,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
           role="status"
           aria-live="polite"
         >
-          {filter ? "No matching users found" : "Type to search users"}
+          {filter ? t("no_matching_users") : t("type_to_search")}
         </div>
       )}
     </div>

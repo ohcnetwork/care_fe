@@ -66,6 +66,7 @@ const PatientNotesList = (props: PatientNotesListProps) => {
           {notes.map((note) => {
             const noteCard = (
               <PatientNoteCard
+                key={note.id}
                 note={note}
                 refetch={refetch}
                 disableEdit={disableEdit}

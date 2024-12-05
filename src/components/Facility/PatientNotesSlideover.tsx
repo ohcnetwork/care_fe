@@ -121,6 +121,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setNoteField("");
       setState({ ...state, cPage: 1 });
       setReplyTo(undefined);
+    } else {
+      Notification.Error({ msg: "Failed to add note. Please try again." });
     }
     return data?.id;
   };

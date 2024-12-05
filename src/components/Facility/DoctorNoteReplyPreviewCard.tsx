@@ -2,6 +2,8 @@ import React from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+
 import { Avatar } from "@/components/Common/Avatar";
 import NotePreview from "@/components/Common/NotePreview";
 import { PatientNotesReplyModel } from "@/components/Facility/models";
@@ -57,18 +59,19 @@ const DoctorNoteReplyPreviewCard = ({
             </div>
           </div>
           {cancelReply && (
-            <button
-              type="button"
-              className="mr-2 cursor-pointer p-1 text-2xl"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={cancelReply}
+              className="mr-2 h-8 w-8 hover:bg-transparent"
               aria-label="Cancel reply"
               title="Cancel reply"
             >
               <CareIcon
                 icon="l-times"
-                className="m-1 rounded-full bg-secondary-400 p-1 text-white hover:bg-secondary-500"
+                className="h-5 w-5 rounded-full p-1 bg-secondary-400 text-white transition-colors duration-200 hover:bg-secondary-500"
               />
-            </button>
+            </Button>
           )}
         </div>
         <div className="max-h-14 overflow-hidden pb-2 pl-14 text-sm text-secondary-700">

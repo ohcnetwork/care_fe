@@ -1,6 +1,9 @@
+import { t } from "i18next";
 import { useEffect, useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import DiscussionNotesEditor from "@/components/Common/DiscussionNotesEditor";
@@ -112,14 +115,16 @@ const PatientNotesDetailedView = (props: Props) => {
         <div className="flex h-full flex-col">
           <div className="flex-shrink-0 border-b border-secondary-300 px-3 pt-2 pb-2">
             <div className="mb-2 flex items-center justify-between">
-              <h4 className="text-lg">Note</h4>
-              <button
+              <h4 className="text-lg">{t("note")}</h4>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setThreadViewNote?.("")}
-                className="btn btn-default"
+                className="gap-2"
               >
-                <CareIcon icon="l-times" className="mr-1 text-lg" />
-                Close
-              </button>
+                <CareIcon icon="l-times" className="text-lg" />
+                {t("close")}
+              </Button>
             </div>
             <PatientNoteCard
               note={state}
@@ -130,11 +135,11 @@ const PatientNotesDetailedView = (props: Props) => {
 
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <div className="flex-shrink-0 border-b border-secondary-300 flex items-center justify-between px-4 py-2">
-              <h4 className="text-lg text-slate-600">Replies</h4>
+              <h4 className="text-lg text-slate-600">{t("replies")}</h4>
               {state.child_notes.length > 0 && (
                 <div className="text-sm text-secondary-500">
                   {state.child_notes.length}{" "}
-                  {state.child_notes.length > 1 ? "replies" : "reply"}
+                  {state.child_notes.length > 1 ? t("replies") : t("reply")}
                 </div>
               )}
             </div>

@@ -40,6 +40,12 @@ const NotePreview = ({
     position: { x: number; y: number };
   } | null>(null);
 
+  const SANITIZE_CONFIG = {
+    ALLOWED_TAGS: ["span", "br"],
+    ALLOWED_ATTR: ["class", "data-username"],
+    ALLOW_DATA_ATTR: false,
+  };
+
   const processText = (content: string) => {
     const withLineBreaks = content.replace(/\n/g, "<br />");
     // valid usernames : devdoctor, dev-doctor and dev_doctor
@@ -52,9 +58,7 @@ const NotePreview = ({
       return `<span class="cursor-pointer font-medium text-primary hover:underline" data-username="${username}">@${username}</span>`;
     });
 
-    return DOMPurify.sanitize(withMentions, {
-      ADD_ATTR: ["data-username"],
-    });
+    return DOMPurify.sanitize(withMentions, SANITIZE_CONFIG);
   };
 
   useEffect(() => {

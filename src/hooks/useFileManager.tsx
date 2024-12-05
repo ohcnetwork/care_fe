@@ -224,7 +224,6 @@ export default function useFileManager(
 
   const urlCache = new Map<string, { url: string; timestamp: number }>();
   const CACHE_DURATION = 5 * 60 * 1000; // 5 min
-
   const cleanExpiredCache = () => {
     const now = Date.now();
     for (const [key, value] of urlCache.entries()) {
@@ -235,6 +234,10 @@ export default function useFileManager(
   };
 
   const getSignedUrl = async (file: FileUploadModel) => {
+    if (!file.id || !file.associating_id) {
+      throw new Error("Invalid file: missing id or associating_id");
+    }
+
     const cacheKey = `${file.id}-${file.associating_id}`;
     const cached = urlCache.get(cacheKey);
 
@@ -244,14 +247,23 @@ export default function useFileManager(
       return cached.url;
     }
 
-    const { data } = await request(routes.retrieveUpload, {
-      query: { file_type: fileType, associating_id: file.associating_id },
-      pathParams: { id: file.id || "" },
-    });
-    const url = data?.read_signed_url || "";
+    try {
+      const { data } = await request(routes.retrieveUpload, {
+        query: { file_type: fileType, associating_id: file.associating_id },
+        pathParams: { id: file.id },
+      });
 
-    urlCache.set(cacheKey, { url, timestamp: Date.now() });
-    return url;
+      if (!data?.read_signed_url) {
+        throw new Error("Failed to retrieve signed URL");
+      }
+
+      const url = data.read_signed_url;
+      urlCache.set(cacheKey, { url, timestamp: Date.now() });
+      return url;
+    } catch (error) {
+      Notification.Error({ msg: "Failed to get file URL" });
+      throw error;
+    }
   };
 
   const Dialogues = (
