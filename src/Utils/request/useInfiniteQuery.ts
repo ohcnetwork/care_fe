@@ -21,7 +21,6 @@ export function useInfiniteQuery<TData extends PaginatedResponse<TItem>, TItem>(
   const [items, setItems] = useState<TItem[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(true);
 
   const { refetch, loading, ...queryResponse } = useQuery(route, {
     ...options,
@@ -49,7 +48,7 @@ export function useInfiniteQuery<TData extends PaginatedResponse<TItem>, TItem>(
   );
 
   const fetchNextPage = useCallback(async () => {
-    if (!hasNextPage || loading) return;
+    if (loading) return;
 
     const nextPageParam = currentPage * RESULTS_PER_PAGE_LIMIT;
 
@@ -73,20 +72,11 @@ export function useInfiniteQuery<TData extends PaginatedResponse<TItem>, TItem>(
         : [...items, ...newItems];
 
       setItems(deduplicatedItems);
+
       const total = Math.ceil(response.data.count / RESULTS_PER_PAGE_LIMIT);
       setTotalPages(total);
-      setHasNextPage(currentPage < total);
     }
-  }, [
-    currentPage,
-    hasNextPage,
-    loading,
-    options,
-    refetch,
-    totalPages,
-    updateItems,
-    items,
-  ]);
+  }, [currentPage, loading, options, refetch, items]);
 
   useEffect(() => {
     if (options?.prefetch ?? true) {
@@ -95,11 +85,12 @@ export function useInfiniteQuery<TData extends PaginatedResponse<TItem>, TItem>(
           updateItems(response);
           const total = Math.ceil(response.data.count / RESULTS_PER_PAGE_LIMIT);
           setTotalPages(total);
-          setHasNextPage(currentPage < total);
         }
       });
     }
   }, [refetch, options?.prefetch, totalPages]);
+
+  const hasNextPage = currentPage < totalPages;
 
   return {
     items,
