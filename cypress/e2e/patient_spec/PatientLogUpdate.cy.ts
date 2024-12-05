@@ -82,8 +82,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(patientOne);
     patientLogupdate.clickLogupdate();
     cy.verifyNotification("Please assign a bed to the patient");
-    patientLogupdate.selectBed(bedOne);
     cy.closeNotification();
+    patientLogupdate.selectBed(bedOne);
     patientLogupdate.clickLogupdate();
     // Only will be using random non-unique progress note fields
     patientLogupdate.selectRoundType("Progress Note");
@@ -112,18 +112,22 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     // Submit the doctors log update
-    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds").as(
+    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
       "getDailyRounds",
     );
     cy.clickSubmitButton("Save and Continue");
-    cy.wait("@getDailyRounds").its("response.statusCode").should("eq", 201);
+    cy.wait("@getDailyRounds").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Progress Note created successfully");
     cy.closeNotification();
     // modify the relevant critical care log update
     patientLogupdate.selectCriticalCareSection("Neurological Monitoring");
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.get("#left_pupil_light_reaction-option-FIXED").click();
+    cy.intercept("PATCH", "**/api/v1/consultation/*/daily_rounds/*/").as(
+      "patchDailyRounds",
+    );
     cy.clickSubmitButton("Update Details");
+    cy.wait("@patchDailyRounds").its("response.statusCode").should("eq", 200);
     cy.verifyNotification(
       "Neurological Monitoring details succesfully updated.",
     );
@@ -154,8 +158,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(patientTwo);
     patientLogupdate.clickLogupdate();
     cy.verifyNotification("Please assign a bed to the patient");
-    patientLogupdate.selectBed(bedTwo);
     cy.closeNotification();
+    patientLogupdate.selectBed(bedTwo);
     patientLogupdate.clickLogupdate();
     patientLogupdate.selectRoundType("Detailed Update");
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -236,8 +240,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(patientThree);
     patientLogupdate.clickLogupdate();
     cy.verifyNotification("Please assign a bed to the patient");
-    patientLogupdate.selectBed(bedThree);
     cy.closeNotification();
+    patientLogupdate.selectBed(bedThree);
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectPatientCategory(patientCategory);
