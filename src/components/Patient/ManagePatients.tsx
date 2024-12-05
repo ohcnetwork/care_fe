@@ -1,38 +1,16 @@
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import Chip from "@/CAREUI/display/Chip";
-import CountBlock from "@/CAREUI/display/Count";
-import FilterBadge from "@/CAREUI/display/FilterBadge";
-import RecordMeta from "@/CAREUI/display/RecordMeta";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
 import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import { ExportMenu } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import SortDropdownMenu from "@/components/Common/SortDropdown";
 import Tabs from "@/components/Common/Tabs";
-import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
-import { getDiagnosesByIds } from "@/components/Diagnosis/utils";
-import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
-import DoctorVideoSlideover from "@/components/Facility/DoctorVideoSlideover";
-import { FacilityModel, PatientCategory } from "@/components/Facility/models";
-import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
-import SearchInput from "@/components/Form/SearchInput";
-import {
-  DIAGNOSES_FILTER_LABELS,
-  DiagnosesFilterKey,
-  FILTER_BY_DIAGNOSES_KEYS,
-} from "@/components/Patient/DiagnosesFilter";
-import PatientFilter from "@/components/Patient/PatientFilter";
-import { isPatientMandatoryDataFilled } from "@/components/Patient/Utils";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
@@ -49,17 +27,36 @@ import {
 } from "@/common/constants";
 import { parseOptionId } from "@/common/utils";
 
-import { triggerGoal } from "@/Integrations/Plausible";
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+
+import Chip from "../../CAREUI/display/Chip";
+import CountBlock from "../../CAREUI/display/Count";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import { triggerGoal } from "../../Integrations/Plausible";
+import * as Notification from "../../Utils/Notifications";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
 import {
   formatPatientAge,
   humanizeStrings,
   isAntenatal,
   parsePhoneNumber,
-} from "@/Utils/utils";
+} from "../../Utils/utils";
+import { ICD11DiagnosisModel } from "../Diagnosis/types";
+import { getDiagnosesByIds } from "../Diagnosis/utils";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import { FacilityModel, PatientCategory } from "../Facility/models";
+import {
+  DIAGNOSES_FILTER_LABELS,
+  DiagnosesFilterKey,
+  FILTER_BY_DIAGNOSES_KEYS,
+} from "./DiagnosesFilter";
+import PatientFilter from "./PatientFilter";
+import { isPatientMandatoryDataFilled } from "./Utils";
 
 interface TabPanelProps {
   children?: ReactNode;
@@ -93,6 +90,7 @@ export const PatientManager = () => {
     Pagination,
     FilterBadges,
     resultsPerPage,
+    clearSearch,
   } = useFilters({
     limit: 12,
     cacheBlacklist: [
@@ -109,30 +107,6 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [phoneNumber, _setPhoneNumber] = useState("");
-  const [emergencyPhoneNumber, _setEmergencyPhoneNumber] = useState("");
-
-  const setPhoneNumber = (value: string) => {
-    _setPhoneNumber(value);
-    const error = PhoneNumberValidator()(value);
-    if (!error) {
-      updateQuery({ phone_number: value });
-    }
-    if ((value === "+91" || value === "") && qParams.phone_number) {
-      updateQuery({ phone_number: null });
-    }
-  };
-
-  const setEmergencyPhoneNumber = (value: string) => {
-    _setEmergencyPhoneNumber(value);
-    const error = PhoneNumberValidator()(value);
-    if (!error) {
-      updateQuery({ emergency_phone_number: value });
-    }
-    if ((value === "+91" || value === "") && qParams.emergency_phone_number) {
-      updateQuery({ emergency_phone_number: null });
-    }
-  };
 
   const tabValue =
     qParams.last_consultation__new_discharge_reason ||
@@ -319,14 +293,6 @@ export const PatientManager = () => {
 
   const { loading: isLoading, data } = useQuery(routes.patientList, {
     query: params,
-    onResponse: () => {
-      if (!params.phone_number) {
-        _setPhoneNumber("+91");
-      }
-      if (!params.emergency_phone_number) {
-        _setEmergencyPhoneNumber("+91");
-      }
-    },
   });
 
   const getTheCategoryFromId = () => {
@@ -779,22 +745,74 @@ export const PatientManager = () => {
     );
   }
 
-  const queryField = <T,>(name: string, defaultValue?: T) => {
-    return {
-      name,
-      value: qParams[name] || defaultValue,
-      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-    };
-  };
-
   const onlyAccessibleFacility =
     permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
+  const searchOptions = [
+    {
+      key: "phone_number",
+      label: "Phone Number",
+      type: "phone" as const,
+      placeholder: "Search_by_phone_number",
+      value: qParams.phone_number || "",
+      shortcutKey: "p",
+    },
+    {
+      key: "name",
+      label: "Name",
+      type: "text" as const,
+      placeholder: "search_by_patient_name",
+      value: qParams.name || "",
+      shortcutKey: "n",
+    },
+    {
+      key: "patient_no",
+      label: "IP/OP No",
+      type: "text" as const,
+      placeholder: "search_by_patient_no",
+      value: qParams.patient_no || "",
+      shortcutKey: "u",
+    },
+    {
+      key: "emergency_contact_number",
+      label: "Emergency Contact Phone Number",
+      type: "phone" as const,
+      placeholder: "search_by_emergency_phone_number",
+      value: qParams.emergency_phone_number || "",
+      shortcutKey: "e",
+    },
+  ];
+
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      const updatedQuery = {
+        phone_number:
+          key === "phone_number"
+            ? value.length >= 13 || value === ""
+              ? value
+              : undefined
+            : undefined,
+        name: key === "name" ? value : undefined,
+        patient_no: key === "patient_no" ? value : undefined,
+        emergency_phone_number:
+          key === "emergency_contact_number"
+            ? value.length >= 13 || value === ""
+              ? value
+              : undefined
+            : undefined,
+      };
+
+      updateQuery(updatedQuery);
+    },
+    [updateQuery],
+  );
 
   return (
     <Page
       title={t("patients")}
       hideBack={true}
       breadcrumbs={false}
+      className="px-4 md:px-6"
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
           <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
@@ -973,59 +991,23 @@ export const PatientManager = () => {
         }}
       />
 
-      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
-        <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1" id="total-patientcount">
-            <CountBlock
-              text="Total Patients"
-              count={data?.count || 0}
-              loading={isLoading}
-              icon="l-user-injured"
-              className="pb-12"
-            />
-          </div>
+      <div className="mt-4 gap-4 lg:gap-16 flex flex-col lg:flex-row lg:items-center">
+        <div id="total-patientcount">
+          <CountBlock
+            text={t("total_patients")}
+            count={data?.count || 0}
+            loading={isLoading}
+            icon="d-patient"
+          />
         </div>
-        <div className="col-span-3 w-full">
-          <div className="mt-2">
-            <div className="mb-4 mt-1 md:flex md:gap-4">
-              <SearchInput
-                label="Search by Patient"
-                placeholder="Enter patient name"
-                {...queryField("name")}
-                className="w-full grow"
-              />
-              <SearchInput
-                label="Search by IP/OP Number"
-                placeholder="Enter IP/OP Number"
-                secondary
-                {...queryField("patient_no")}
-                className="w-full grow"
-              />
-            </div>
-            <div className="mb-4 md:flex md:gap-4">
-              <PhoneNumberFormField
-                label="Search by Primary Number"
-                {...queryField("phone_number", "+91")}
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.value)}
-                types={["mobile", "landline"]}
-                className="w-full grow"
-                error={((phoneNumber || "+91") === "+91" && "") || undefined}
-              />
-              <PhoneNumberFormField
-                label="Search by Emergency Number"
-                {...queryField("emergency_phone_number", "+91")}
-                value={emergencyPhoneNumber}
-                onChange={(e) => setEmergencyPhoneNumber(e.value)}
-                types={["mobile", "landline"]}
-                className="w-full"
-                error={
-                  ((emergencyPhoneNumber || "+91") === "+91" && "") || undefined
-                }
-              />
-            </div>
-          </div>
-        </div>
+
+        <SearchByMultipleFields
+          id="patient-search"
+          options={searchOptions}
+          onSearch={handleSearch}
+          clearSearch={clearSearch}
+          className="w-full"
+        />
       </div>
       <div className="col-span-3 flex flex-wrap">
         <FilterBadges

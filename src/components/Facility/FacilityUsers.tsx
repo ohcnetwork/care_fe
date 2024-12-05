@@ -278,7 +278,7 @@ export default function FacilityUsers(props: any) {
             text={t("total_users")}
             count={facilityUserData.count}
             loading={isLoading}
-            icon="l-user-injured"
+            icon="d-people"
             className="flex-1"
           />
         )}
