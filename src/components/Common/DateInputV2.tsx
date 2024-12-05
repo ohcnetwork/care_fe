@@ -273,13 +273,16 @@ const DateInputV2: React.FC<Props> = ({
 
   const setYearValue = (year: number) => () => {
     if (isYearWithinConstraints(year)) {
-      setDatePickerHeaderDate(
-        new Date(
-          year,
-          datePickerHeaderDate.getMonth(),
-          datePickerHeaderDate.getDate(),
-        ),
+      const newDate = new Date(
+        year,
+        datePickerHeaderDate.getMonth(),
+        datePickerHeaderDate.getDate(),
       );
+      if (min && year === min.getFullYear() && newDate < min) {
+        setDatePickerHeaderDate(new Date(min.getFullYear(), min.getMonth(), 1));
+      } else {
+        setDatePickerHeaderDate(newDate);
+      }
       setType("date");
     } else {
       Notification.Error({
