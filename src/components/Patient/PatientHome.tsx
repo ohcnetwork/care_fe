@@ -537,7 +537,7 @@ export const PatientHome = (props: {
                       </Button>
                     </div>
 
-                    {NonReadOnlyUsers && (
+                    {NonReadOnlyUsers(authUser.user_type) && (
                       <div>
                         <AuthorizedButton
                           id="assign-volunteer"
