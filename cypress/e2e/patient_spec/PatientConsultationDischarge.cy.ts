@@ -20,7 +20,7 @@ describe("Patient Discharge based on multiple reason", () => {
   const doctorName = "Custom Doctor";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

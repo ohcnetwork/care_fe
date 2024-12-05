@@ -23,7 +23,28 @@ export const advanceFilters = {
     cy.clickAndSelectOption("#facility_type", facilityType);
   },
 
+  typeFacilityName(facilityName: string) {
+    cy.typeAndSelectOption("input[name='Facilities']", facilityName);
+  },
+
+  clickslideoverbackbutton() {
+    cy.get("#close-slide-over").click();
+  },
+
   clickClearAdvanceFilters() {
     cy.verifyAndClickElement("#clear-filter", "Clear");
+  },
+
+  verifyFilterBadgePresence(
+    badgeTestId: string,
+    text: string,
+    visible: boolean = true,
+  ) {
+    const badgeElement = cy.get(`[data-testid="${badgeTestId}"]`);
+    if (visible) {
+      badgeElement.contains(text).should("be.visible");
+    } else {
+      badgeElement.should("not.be.visible");
+    }
   },
 };
