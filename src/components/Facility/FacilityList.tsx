@@ -184,7 +184,7 @@ export const FacilityList = () => {
           text="Total Facilities"
           count={permittedData ? permittedData.count : 0}
           loading={isLoading}
-          icon="l-hospital"
+          icon="d-hospital"
           className="flex-1"
         />
         <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
