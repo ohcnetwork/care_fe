@@ -23,6 +23,7 @@ import useQuery from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 export default function ListView() {
+  localStorage.setItem("defaultResourceView", "list");
   const {
     qParams,
     Pagination,

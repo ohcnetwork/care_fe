@@ -35,6 +35,7 @@ const KanbanBoard = lazy(
 ) as KanbanBoardType;
 
 export default function BoardView() {
+  localStorage.setItem("defaultShiftView", "board");
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
     cacheBlacklist: ["patient_name"],

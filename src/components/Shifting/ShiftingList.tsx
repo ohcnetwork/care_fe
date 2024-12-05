@@ -22,6 +22,7 @@ import useQuery from "@/Utils/request/useQuery";
 import ShiftingTable from "./ShiftingTable";
 
 export default function ListView() {
+  localStorage.setItem("defaultShiftView", "list");
   const {
     qParams,
     updateQuery,
