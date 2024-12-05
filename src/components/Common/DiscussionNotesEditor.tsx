@@ -174,7 +174,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
               ref={editorRef}
               placeholder={t("type_your_message")}
               className={classNames(
-                "w-full resize-none border-0 p-3 text-sm",
+                "w-full resize-none border-0 p-3 text-sm ring-0 focus-visible:ring-offset-0 focus-visible:ring-0",
                 maxRows ? "overflow-y-auto" : "overflow-hidden",
               )}
               value={text}

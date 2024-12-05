@@ -57,6 +57,7 @@ const PatientNoteCard = ({
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistory, setEditHistory] = useState<PatientNotesEditModel[]>([]);
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const authUser = useAuthUser();
   const patientId = useSlug("patient");
@@ -107,6 +108,7 @@ const PatientNoteCard = ({
       setIsPlaying(null);
     } else {
       if (audioRef.current) {
+        setIsLoading(file.id!);
         fileManager
           .getSignedUrl(file)
           .then((url) => {
@@ -117,7 +119,11 @@ const PatientNoteCard = ({
             }
           })
           .catch(() => {
+            Error({ msg: "Failed to play audio file" });
             setIsPlaying(null);
+          })
+          .finally(() => {
+            setIsLoading(null);
           });
       }
     }
@@ -129,7 +135,15 @@ const PatientNoteCard = ({
 
   return (
     <>
-      <audio ref={audioRef} onEnded={() => setIsPlaying(null)} />
+      <audio
+        ref={audioRef}
+        onEnded={() => setIsPlaying(null)}
+        onError={() => {
+          Error({ msg: "Failed to play audio file" });
+          setIsPlaying(null);
+          setIsLoading(null);
+        }}
+      />
       <div
         className={classNames(
           "group flex flex-col rounded-lg border border-secondary-300 bg-white px-3 py-1 text-secondary-800",
@@ -273,6 +287,7 @@ const PatientNoteCard = ({
                     file={file}
                     readonly
                     isPlaying={isPlaying === file.id}
+                    isLoading={isLoading === file.id}
                     onPlay={
                       isAudioFile(file)
                         ? () => handleAudioPlay(file)
@@ -286,7 +301,7 @@ const PatientNoteCard = ({
                 <div className="mt-2 flex items-center text-xs text-secondary-500">
                   <CareIcon icon="l-corner-down-right" className="h-3 w-3" />
                   {note.child_notes.length}{" "}
-                  {note.child_notes.length === 1 ? "Reply" : "Replies"}
+                  {note.child_notes.length === 1 ? t("reply") : t("replies")}
                 </div>
               )}
             </div>

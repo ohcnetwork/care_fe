@@ -2,6 +2,8 @@ import { t } from "i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+
 import { FileUploadModel } from "@/components/Patient/models";
 
 import { FILE_EXTENSIONS } from "@/common/constants";
@@ -14,6 +16,7 @@ interface FilePreviewCardProps {
   onRemove?: (index: number) => void;
   readonly?: boolean;
   isPlaying?: boolean;
+  isLoading?: boolean;
   onPlay?: () => void;
   onClick?: () => void;
 }
@@ -33,6 +36,7 @@ export function FilePreviewCard({
   onRemove,
   readonly = false,
   isPlaying,
+  isLoading,
   onPlay,
   onClick,
 }: FilePreviewCardProps) {
@@ -52,7 +56,7 @@ export function FilePreviewCard({
   return (
     <div
       className={classNames(
-        "relative mt-1 h-20 w-20 cursor-pointer overflow-hidden rounded-lg bg-secondary-100 shadow-sm transition-all duration-200 hover:bg-secondary-200/50",
+        "group relative mt-1 h-16 w-16 overflow-hidden rounded-lg bg-secondary-300/40 shadow-sm",
         onClick && "cursor-pointer",
       )}
       onClick={onClick}
@@ -60,25 +64,26 @@ export function FilePreviewCard({
       aria-label={t("file_preview")}
     >
       {!readonly && onRemove && typeof index === "number" && (
-        <button
+        <Button
           onClick={(e) => {
             e.stopPropagation();
             onRemove(index);
           }}
-          className="absolute right-0 top-0 z-10 h-5 w-5 rounded-full bg-secondary-300 text-secondary-800 transition-colors duration-200 hover:bg-secondary-400 hover:text-white"
+          size="icon"
+          variant="ghost"
+          className="absolute right-0 top-0 z-10 h-4 w-4 rounded-full bg-secondary-400 p-0 text-secondary-800 hover:bg-secondary-500"
         >
           <CareIcon
             icon="l-times-circle"
             className="text-md absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           />
-        </button>
+        </Button>
       )}
 
       {fileType === "AUDIO" && onPlay ? (
-        <div
+        <Button
+          variant="ghost"
           className="flex h-full w-full flex-col items-center justify-center p-2"
-          role="button"
-          tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
@@ -91,24 +96,34 @@ export function FilePreviewCard({
             onPlay();
           }}
         >
-          <CareIcon
-            icon={isPlaying ? "l-pause" : "l-play"}
-            className="h-6 w-6 text-primary-600"
-          />
+          {isLoading ? (
+            <CareIcon
+              icon="l-spinner"
+              className="h-6 w-6 animate-spin text-primary-600"
+            />
+          ) : (
+            <CareIcon
+              icon={isPlaying ? "l-pause" : "l-play"}
+              className="h-6 w-6 text-primary-600"
+            />
+          )}
           <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-secondary-600">
             {fileName}
           </span>
-        </div>
+        </Button>
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center p-2">
+        <Button
+          variant="ghost"
+          className="flex h-full w-full flex-col items-center justify-center p-2"
+        >
           <CareIcon
             icon={icons[fileType]}
             className="shrink-0 text-2xl text-secondary-600"
           />
-          <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-secondary-600">
+          <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-[10px] text-secondary-600">
             {fileName}
           </span>
-        </div>
+        </Button>
       )}
     </div>
   );
