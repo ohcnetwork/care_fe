@@ -1,10 +1,16 @@
+import FacilityPage from "./FacilityCreation";
+import FacilityHome from "./FacilityHome";
+
+const facilityHome = new FacilityHome();
+const facilityPage = new FacilityPage();
+
 class FacilityLocation {
-  closeNotification() {
-    cy.get(".pnotify")
-      .should("exist")
-      .each(($div) => {
-        cy.wrap($div).click();
-      });
+  navigateToFacilityLocationManagement(facilityName: string) {
+    facilityHome.typeFacilitySearch(facilityName);
+    facilityHome.assertFacilityInCard(facilityName);
+    facilityHome.clickViewFacilityDetails();
+    facilityPage.clickManageFacilityDropdown();
+    this.clickFacilityLocationManagement();
   }
 
   clickAddNewLocationButton() {
@@ -27,8 +33,13 @@ class FacilityLocation {
     cy.get("#edit-location-button").click();
   }
 
-  clickEditBedButton() {
-    cy.get("#edit-bed-button").click();
+  clickEditBedButton(cardText: string) {
+    cy.get("#bed-cards")
+      .contains(cardText)
+      .parents("#bed-cards")
+      .within(() => {
+        cy.get("#edit-bed-button").click();
+      });
   }
 
   fillDescription(description: string) {
@@ -68,8 +79,13 @@ class FacilityLocation {
     cy.get("#view-location-middleware").contains(middleware);
   }
 
-  clickManageBedButton() {
-    cy.verifyAndClickElement("#manage-bed-button", "Manage Beds");
+  clickManageBedButton(cardText: string) {
+    cy.get("#location-cards")
+      .contains(cardText)
+      .parents("#location-cards")
+      .within(() => {
+        cy.verifyAndClickElement("#manage-bed-button", "Manage Beds");
+      });
   }
 
   clickAddBedButton() {
@@ -165,8 +181,13 @@ class FacilityLocation {
     cy.verifyAndClickElement("#delete-location-button", "Delete");
   }
 
-  deleteFirstBed() {
-    cy.get("#delete-bed-button").first().click();
+  deleteBedWithName(text: string) {
+    cy.get("#bed-card")
+      .contains(text)
+      .parents("#bed-card")
+      .within(() => {
+        cy.get("#delete-bed-button").click();
+      });
   }
 
   deleteBedRequest() {

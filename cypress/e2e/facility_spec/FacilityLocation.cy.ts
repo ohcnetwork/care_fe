@@ -59,11 +59,7 @@ describe("Location Management Section", () => {
     const multipleBedName = `Multi-${uuidv4().substring(0, 2)}}`;
     const numberOfBeds = 25;
     // Select a new facility
-    facilityHome.typeFacilitySearch(facilityName);
-    facilityHome.assertFacilityInCard(facilityName);
-    facilityHome.clickViewFacilityDetails();
-    facilityPage.clickManageFacilityDropdown();
-    facilityLocation.clickFacilityLocationManagement();
+    facilityLocation.navigateToFacilityLocationManagement(facilityName);
     // Create a new location and Bed into it
     facilityLocation.clickAddNewLocationButton();
     facilityLocation.typeLocationName(locationName);
@@ -71,7 +67,7 @@ describe("Location Management Section", () => {
     facilityLocation.clickAddLocationButton();
     facilityLocation.verifyAddLocationSuccessfulMesssage();
     // Verify the error message of beds creation form
-    facilityLocation.clickManageBedButton();
+    facilityLocation.clickManageBedButton(locationName);
     facilityLocation.clickAddBedButton();
     facilityLocation.clickSubmitBedsButton();
     cy.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
@@ -96,7 +92,7 @@ describe("Location Management Section", () => {
     cy.closeNotification();
     facilityLocation.closeAddLocationForm();
     // edit the newly created existing bed
-    facilityLocation.clickEditBedButton();
+    facilityLocation.clickEditBedButton(bedName);
     facilityLocation.enterBedName(duplicateBedName);
     facilityLocation.enterBedDescription(bedModifiedDescrption);
     facilityLocation.selectBedType(bedModifiedType);
@@ -198,7 +194,7 @@ describe("Location Management Section", () => {
 
     // delete bed
     facilityLocation.clickManageBedButton();
-    facilityLocation.deleteFirstBed();
+    facilityLocation.deleteBedWithName(bedName);
     cy.clickSubmitButton("Delete");
     cy.verifyNotification("Bed deleted successfully");
     cy.closeNotification();
