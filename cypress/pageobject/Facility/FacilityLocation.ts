@@ -124,7 +124,7 @@ class FacilityLocation {
   }
 
   clickAddBedButton() {
-    cy.verifyAndClickElement("#add-new-bed", "Add New Bed(s)");
+    cy.get("button[id='add-new-bed']").filter(":visible").first().click();
   }
 
   clickSubmitBedsButton() {
@@ -153,21 +153,6 @@ class FacilityLocation {
   verifyAddSingleBedSuccessfulMesssage() {
     cy.verifyNotification("1 Bed created successfully");
     cy.closeNotification();
-  }
-
-  addBed(
-    bedName: string,
-    bedDescrption: string,
-    bedType: string,
-    multipleBeds?: number,
-  ) {
-    this.enterBedName(bedName);
-    this.enterBedDescription(bedDescrption);
-    this.selectBedType(bedType);
-    if (multipleBeds) {
-      this.setMultipleBeds(multipleBeds);
-    }
-    cy.get("#submit").click();
   }
 
   enterBedName(name: string) {

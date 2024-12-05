@@ -1,5 +1,4 @@
 // FacilityCreation
-import { AssetPage } from "pageobject/Asset/AssetCreation";
 import FacilityLocation from "pageobject/Facility/FacilityLocation";
 import { PatientPage } from "pageobject/Patient/PatientCreation";
 import PatientPredefined from "pageobject/Patient/PatientPredefined";
@@ -21,7 +20,6 @@ describe("Facility Homepage Function", () => {
   const patientPredefined = new PatientPredefined();
   const patientPage = new PatientPage();
   const facilityLocation = new FacilityLocation();
-  const assetPage = new AssetPage();
   const facilitiesAlias = "downloadFacilitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
@@ -236,22 +234,24 @@ describe("Facility Homepage Function", () => {
       facilityHome.assertFacilityBadgeContent("1", "0");
       facilityHome.assertFacilityBadgeBackgroundColor("rgb(239, 68, 68)");
       // create a new location and add a bed to the facility
-      facilityLocation.loadLocationManagementPage(facilityWithNoAvailableBeds);
+      facilityLocation.navigateToFacilityLocationManagement(
+        facilityWithNoAvailableBeds,
+      );
       // create new location and add a bed to the facility
-      cy.get("body").then(($body) => {
-        if ($body.find("#manage-bed-button").length > 0) {
-          facilityLocation.clickManageBedButton();
-        } else {
-          facilityLocation.clickAddNewLocationButton();
-          facilityPage.fillFacilityName(locationName);
-          facilityLocation.selectLocationType(locationType);
-          assetPage.clickassetupdatebutton();
-          facilityLocation.clickNotification();
-          facilityLocation.clickManageBedButton();
-        }
-      });
+      facilityLocation.clickAddNewLocationButton();
+      facilityLocation.fillLocationDetails(
+        locationName,
+        undefined,
+        locationType,
+        undefined,
+      );
+      facilityLocation.clickAddLocationButton();
+      facilityLocation.verifyAddLocationSuccessfulMesssage();
+      facilityLocation.clickManageBedButton(locationName);
       facilityLocation.clickAddBedButton();
-      facilityLocation.addBed("Bed 1", "Test Description", "Regular", 2);
+      facilityLocation.fillBedForm("Bed 1", "Test Description", "Regular", 2);
+      facilityLocation.clickSubmitBedsButton();
+
       // verify the occupancy badge reflection
       cy.visit(facilityUrl);
       facilityHome.verifyOccupancyBadgeVisibility();
