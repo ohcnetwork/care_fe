@@ -11,7 +11,8 @@ export class PatientPage {
   }
 
   visitPatient(patientName: string) {
-    cy.get("#name").click().type(patientName);
+    cy.get('[data-test-id="patient-search__name"]').click();
+    cy.get("#patient-search").click().type(patientName); // Type the patient name
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
@@ -65,7 +66,8 @@ export class PatientPage {
   }
 
   typePatientNameList(patientName: string) {
-    cy.get("#name").click().type(patientName);
+    cy.get('[data-test-id="patient-search__name"]').click();
+    cy.get("#patient-search").click().type(patientName);
   }
 
   typePatientAddress(address: string) {
