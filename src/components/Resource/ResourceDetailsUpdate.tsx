@@ -113,34 +113,33 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     const errors = { ...initError };
     let isInvalidForm = false;
 
+    const validators = {
+      facilityValidator: (field: string) =>
+        !state.form[field] || !state.form[field]?.name,
+      quantityValidator: (field: string) => {
+        const value = state.form[field];
+        const minVal = field === "assigned_quantity" ? 0 : 1;
+        return !value || parseFloat(value) < minVal;
+      },
+      textValidator: (field: string) =>
+        !state.form[field] || state.form[field].trim().length === 0,
+    };
+
+    const fieldTypes = {
+      facility: ["approving_facility_object", "assigned_facility_object"],
+      quantity: ["requested_quantity", "assigned_quantity"],
+    };
+
     Object.keys(requiredFields).forEach((field) => {
-      switch (field) {
-        case "approving_facility_object":
-        case "assigned_facility_object":
-          if (!state.form[field] || !state.form[field]?.name) {
-            errors[field] = requiredFields[field].errorText;
-            isInvalidForm = true;
-          }
-          break;
+      const validator = fieldTypes.facility.includes(field)
+        ? validators.facilityValidator
+        : fieldTypes.quantity.includes(field)
+          ? validators.quantityValidator
+          : validators.textValidator;
 
-        case "requested_quantity":
-        case "assigned_quantity":
-          if (state.form[field]) {
-            const value = state.form[field];
-            const minVal = field === "assigned_quantity" ? 0 : 1;
-            if (!value || parseFloat(value) < minVal) {
-              errors[field] = `Value Can't be Smaller than ${minVal}`;
-              isInvalidForm = true;
-            }
-          }
-          break;
-
-        default:
-          if (!state.form[field] || state.form[field].trim().length === 0) {
-            errors[field] = requiredFields[field].errorText;
-            isInvalidForm = true;
-          }
-          break;
+      if (validator(field)) {
+        errors[field] = requiredFields[field].errorText;
+        isInvalidForm = true;
       }
     });
 
@@ -182,7 +181,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   const handleSubmit = async () => {
     const validForm = validateForm();
-    console.log(validForm);
+
     if (validForm) {
       setIsLoading(true);
 
