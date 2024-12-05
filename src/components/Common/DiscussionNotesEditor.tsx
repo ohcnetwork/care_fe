@@ -221,7 +221,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
               await fileUpload.handleFileUpload(id);
               onRefetch?.();
               fileUpload.clearFiles();
-              editorRef.current.innerHTML = "";
+              setText("");
               setIsPreviewMode(false);
             }}
             className="max-w-12"
