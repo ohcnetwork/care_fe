@@ -43,21 +43,21 @@ describe("Asset", () => {
 
     const qr_id_1 = uuidv4();
 
-    assetPage.enterAssetDetails(
-      "New Test Asset 1",
-      "Test Description",
-      "Working",
-      qr_id_1,
-      "Manufacturer's Name",
-      "2025-12-25",
-      "Customer Support's Name",
-      phone_number,
-      "email@support.com",
-      "Vendor's Name",
-      serialNumber,
-      "25122021",
-      "Test note for asset creation!",
-    );
+    assetPage.enterAssetDetails({
+      name: "New Test Asset 1",
+      description: "Test Description",
+      workingStatus: "Working",
+      qrId: qr_id_1,
+      manufacturer: "Manufacturer's Name",
+      warranty: "2025-12-25",
+      supportName: "Customer Support's Name",
+      supportPhone: phone_number,
+      supportEmail: "email@support.com",
+      vendorName: "Vendor's Name",
+      serialNumber: serialNumber,
+      lastServicedOn: "25122021",
+      notes: "Test note for asset creation!",
+    });
 
     assetPage.clickCreateAddMore();
     assetPage.verifySuccessNotification("Asset created successfully");
@@ -66,21 +66,21 @@ describe("Asset", () => {
 
     assetPage.selectLocation("Camera Loc");
     assetPage.selectAssetClass("ONVIF Camera");
-    assetPage.enterAssetDetails(
-      "New Test Asset 2",
-      "Test Description",
-      "Working",
-      qr_id_2,
-      "Manufacturer's Name",
-      "2025-12-25",
-      "Customer Support's Name",
-      phone_number,
-      "email@support.com",
-      "Vendor's Name",
-      serialNumber,
-      "25122021",
-      "Test note for asset creation!",
-    );
+    assetPage.enterAssetDetails({
+      name: "New Test Asset 2",
+      description: "Test Description",
+      workingStatus: "Working",
+      qrId: qr_id_2,
+      manufacturer: "Manufacturer's Name",
+      warranty: "2025-12-25",
+      supportName: "Customer Support's Name",
+      supportPhone: phone_number,
+      supportEmail: "email@support.com",
+      vendorName: "Vendor's Name",
+      serialNumber: serialNumber,
+      lastServicedOn: "25122021",
+      notes: "Test note for asset creation!",
+    });
 
     assetPage.interceptAssetCreation();
     assetPage.clickCreateAsset();
@@ -139,21 +139,22 @@ describe("Asset", () => {
 
     const qr_id_1 = uuidv4();
 
-    assetPage.enterAssetDetails(
-      "New Test Asset Vital",
-      "Test Description",
-      "Working",
-      qr_id_1,
-      "Manufacturer's Name",
-      "2025-12-25",
-      "Customer Support's Name",
-      phone_number,
-      "email@support.com",
-      "Vendor's Name",
-      serialNumber,
-      "25122021",
-      "Test note for asset creation!",
-    );
+    assetPage.enterAssetDetails({
+      name: "New Test Asset Vital",
+      description: "Test Description",
+      workingStatus: "Working",
+      qrId: qr_id_1,
+      manufacturer: "Manufacturer's Name",
+      warranty: "2025-12-25",
+      supportName: "Customer Support's Name",
+      supportPhone: phone_number,
+      supportEmail: "email@support.com",
+      vendorName: "Vendor's Name",
+      serialNumber: serialNumber,
+      lastServicedOn: "25122021",
+      notes: "Test note for asset creation!",
+    });
+
     assetPage.interceptAssetCreation();
     assetPage.clickCreateAsset();
     assetPage.verifyAssetCreation();
