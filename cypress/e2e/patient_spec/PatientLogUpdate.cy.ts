@@ -158,8 +158,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(patientTwo);
     patientLogupdate.clickLogupdate();
     cy.verifyNotification("Please assign a bed to the patient");
-    cy.closeNotification();
     patientLogupdate.selectBed(bedTwo);
+    cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.selectRoundType("Detailed Update");
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -240,8 +240,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(patientThree);
     patientLogupdate.clickLogupdate();
     cy.verifyNotification("Please assign a bed to the patient");
-    cy.closeNotification();
     patientLogupdate.selectBed(bedThree);
+    cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectPatientCategory(patientCategory);
