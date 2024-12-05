@@ -628,17 +628,6 @@ export const PatientManager = () => {
                       )}
                     </>
                   )}
-                  {/* {patient.review_time &&
-                    !patient.last_consultation?.discharge_date &&
-                    Number(patient.last_consultation?.review_interval) > 0 &&
-                    dayjs().isAfter(patient.review_time) && (
-                      <Chip
-                        size="small"
-                        variant="danger"
-                        startIcon="l-clock"
-                        text="Review Missed"
-                      />
-                    )} */}
                   {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
                     Number(patient.last_consultation?.review_interval) > 0 && (
