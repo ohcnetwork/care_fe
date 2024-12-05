@@ -30,7 +30,7 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { parsePhoneNumber, sanitizeNumberInput } from "@/Utils/utils";
+import { parsePhoneNumber } from "@/Utils/utils";
 
 interface resourceProps {
   facilityId: number;
@@ -73,6 +73,9 @@ const requiredFields: any = {
   reason: {
     errorText: "Description of resource request is mandatory",
     invalidText: "Please enter Description of resource request",
+  },
+  requested_quantity: {
+    errorText: "Requested Quantity Can't be Less than 1",
   },
 };
 
@@ -138,6 +141,15 @@ export default function ResourceCreate(props: resourceProps) {
           }
           return;
         }
+        case "requested_quantity":
+          if (state.form[field]) {
+            const value = state.form[field];
+            if (!value || parseFloat(value) < 1) {
+              errors[field] = `Value Can't be Smaller than 1`;
+              isInvalidForm = true;
+            }
+          }
+          break;
         default:
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
@@ -172,6 +184,8 @@ export default function ResourceCreate(props: resourceProps) {
 
   const handleSubmit = async () => {
     const validForm = validateForm();
+
+    console.log(validForm);
 
     if (validForm) {
       setIsLoading(true);
@@ -302,9 +316,9 @@ export default function ResourceCreate(props: resourceProps) {
           name="requested_quantity"
           type="number"
           min={1}
-          value={state.form.requested_quantity}
+          value={state.form.requested_quantity ?? 1}
           onChange={handleChange}
-          onInput={sanitizeNumberInput}
+          error={state.errors.requested_quantity}
         />
 
         <div className="md:col-span-2">

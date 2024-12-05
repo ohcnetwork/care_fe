@@ -544,16 +544,3 @@ export const fahrenheitToCelsius = (fahrenheit: number) => {
 export const keysOf = <T extends object>(obj: T) => {
   return Object.keys(obj) as (keyof T)[];
 };
-
-export const sanitizeNumberInput = (
-  event: React.FormEvent<HTMLInputElement>,
-): void => {
-  const input = event.currentTarget;
-  input.value = input.value.replace(/[^0-9]/g, "");
-  if (
-    input.value &&
-    parseFloat(input.value || "0") < parseFloat(input?.min || "1")
-  ) {
-    input.value = input?.min || "0";
-  }
-};

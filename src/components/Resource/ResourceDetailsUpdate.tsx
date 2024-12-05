@@ -25,7 +25,6 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { sanitizeNumberInput } from "@/Utils/utils";
 
 interface resourceProps {
   id: string;
@@ -57,6 +56,12 @@ const requiredFields: any = {
   },
   reason: {
     errorText: "Description is required.",
+  },
+  requested_quantity: {
+    errorText: "Requested Quantity Can't be Less than 1",
+  },
+  assigned_quantity: {
+    errorText: "Approving Quantity Can't be Less than 0",
   },
 };
 
@@ -107,23 +112,40 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   const validateForm = () => {
     const errors = { ...initError };
     let isInvalidForm = false;
+
     Object.keys(requiredFields).forEach((field) => {
-      if (
-        field === "approving_facility_object" ||
-        field === "assigned_facility_object"
-      ) {
-        if (!state.form[field] || !state.form[field]?.name) {
-          errors[field] = requiredFields[field].errorText;
-          isInvalidForm = true;
-        }
-      } else if (!state.form[field] || state.form[field].trim().length === 0) {
-        errors[field] = requiredFields[field].errorText;
-        isInvalidForm = true;
+      switch (field) {
+        case "approving_facility_object":
+        case "assigned_facility_object":
+          if (!state.form[field] || !state.form[field]?.name) {
+            errors[field] = requiredFields[field].errorText;
+            isInvalidForm = true;
+          }
+          break;
+
+        case "requested_quantity":
+        case "assigned_quantity":
+          if (state.form[field]) {
+            const value = state.form[field];
+            const minVal = field === "assigned_quantity" ? 0 : 1;
+            if (!value || parseFloat(value) < minVal) {
+              errors[field] = `Value Can't be Smaller than ${minVal}`;
+              isInvalidForm = true;
+            }
+          }
+          break;
+
+        default:
+          if (!state.form[field] || state.form[field].trim().length === 0) {
+            errors[field] = requiredFields[field].errorText;
+            isInvalidForm = true;
+          }
+          break;
       }
     });
 
     dispatch({ type: "set_error", errors });
-    return isInvalidForm;
+    return !isInvalidForm;
   };
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
@@ -159,8 +181,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   });
 
   const handleSubmit = async () => {
-    const validForm = !validateForm();
-
+    const validForm = validateForm();
+    console.log(validForm);
     if (validForm) {
       setIsLoading(true);
 
@@ -275,7 +297,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 min={1}
                 value={state.form.requested_quantity ?? 1}
                 onChange={handleChange}
-                onInput={sanitizeNumberInput}
+                error={state.errors.requested_quantity}
               />
             </div>
             <div>
@@ -287,7 +309,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 value={state.form.assigned_quantity ?? 0}
                 onChange={handleChange}
                 disabled={state.form.status !== "PENDING"}
-                onInput={sanitizeNumberInput}
+                error={state.errors.assigned_quantity}
               />
             </div>
 
