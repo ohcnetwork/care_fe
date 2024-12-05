@@ -14,7 +14,7 @@ describe("Patient Discussion notes in the consultation page", () => {
   const discussionNotesSuccessMessage = "Note added successfully";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
