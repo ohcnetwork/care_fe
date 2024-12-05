@@ -18,6 +18,9 @@ jobs:
         containers: [1, 2, 3, 4]
     env:
       REACT_CARE_API_URL: http://localhost:9000
+      REACT_ENABLED_APPS: "ohcnetwork/care_hcx_fe@main,ohcnetwork/care_abdm_fe@main"
+      REACT_ENABLE_HCX: true
+      REACT_ENABLE_ABDM: true
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
@@ -114,7 +117,6 @@ jobs:
           group: "UI-Chrome"
         env:
           CYPRESS_SPLIT_TESTS: "true"
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
           COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
@@ -131,7 +133,7 @@ jobs:
 
       - name: Upload cypress videos 📹
         uses: actions/upload-artifact@v3
-        if: steps.pr_origin.outputs.is_forked == 'true'
+        if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
         with:
           name: cypress-videos
           path: cypress/videos

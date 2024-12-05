@@ -1,4 +1,4 @@
-// FacilityPage.ts
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 class FacilityPage {
   visitCreateFacilityPage() {
@@ -9,9 +9,12 @@ class FacilityPage {
       .should("eq", 200);
   }
 
-  typeFacilitySearch(facilityName: string) {
-    cy.get("#search").click().clear();
-    cy.get("#search").click().type(facilityName);
+  selectFacilityType(facility: string) {
+    advanceFilters.selectFacilityType(facility);
+  }
+
+  selectLocalBody(localBody: string) {
+    advanceFilters.selectLocalBody(localBody);
   }
 
   visitUpdateFacilityPage(url: string) {
@@ -21,35 +24,12 @@ class FacilityPage {
     cy.get("#manage-facility-dropdown button").should("be.visible");
   }
 
-  clickUpdateFacilityType(facilityType: string) {
-    cy.get("#facility_type")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(facilityType).click();
-      });
-  }
-
   fillFacilityName(name: string) {
     cy.get("#name").click().clear().click().type(name);
   }
 
   fillPincode(pincode: string) {
     cy.get("#pincode").click().type(pincode);
-  }
-
-  selectState(state: string) {
-    cy.get("div#state button").click();
-    cy.get("[role='option']").contains(state).click();
-  }
-
-  selectDistrict(district: string) {
-    cy.get("div#district button").click();
-    cy.get("[role='option']").contains(district).click();
-  }
-
-  selectLocalBody(localBody: string) {
-    cy.get("div#local_body button").click();
-    cy.get("[role='option']").contains(localBody).click();
   }
 
   selectWard(ward: string) {
@@ -291,7 +271,7 @@ class FacilityPage {
   }
 
   confirmDeleteFacility() {
-    cy.submitButton("Delete");
+    cy.clickSubmitButton("Delete");
   }
 
   selectLocation(location: string) {
@@ -317,34 +297,15 @@ class FacilityPage {
     cy.verifyNotification(message);
   }
 
+  verifyErrorNotification(message: string) {
+    cy.verifyNotification(message);
+  }
+
   visitAlreadyCreatedFacility() {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
     cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
-  }
-
-  verifyFacilityBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Facility/District Name']").should(
-      "contain",
-      expectedText,
-    );
-  }
-
-  verifyStateBadgeContent(expectedText: string) {
-    cy.get("[data-testid='State']").should("contain", expectedText);
-  }
-
-  verifyDistrictBadgeContent(expectedText: string) {
-    cy.get("[data-testid='District']").should("contain", expectedText);
-  }
-
-  verifyLocalBodyBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Local Body']").should("contain", expectedText);
-  }
-
-  verifyFacilityTypeBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Facility type']").should("contain", expectedText);
   }
 
   verifyfacilitycreateassetredirection() {

@@ -250,7 +250,7 @@ export default function ManageUsers() {
                 </div>
                 <div
                   id="name"
-                  className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
+                  className="mt-2 flex gap-3 text-2xl font-bold capitalize"
                 >
                   <div className="max-w-full break-words">
                     {formatName(user)}
@@ -554,7 +554,7 @@ export default function ManageUsers() {
           text="Total Users"
           count={userListData?.count || 0}
           loading={userListLoading || districtDataLoading}
-          icon="l-user-injured"
+          icon="d-people"
           className="flex-1"
         />
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">

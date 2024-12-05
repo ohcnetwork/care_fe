@@ -90,19 +90,6 @@ export class ManageUserPage {
     );
   }
 
-  navigateToFacility() {
-    cy.visit("/facility");
-  }
-
-  typeFacilitySearch(facilityName: string) {
-    cy.get("#search").click().clear();
-    cy.get("#search").click().type(facilityName);
-  }
-
-  assertFacilityInCard(facilityName: string) {
-    cy.get("#facility-name-card").should("contain", facilityName);
-  }
-
   clickFacilityPatients() {
     cy.get("#facility-patients").should("be.visible");
     cy.get("#facility-patients").click();

@@ -1,10 +1,14 @@
+import LoginPage from "pageobject/Login/LoginPage";
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import ShiftingPage from "../../pageobject/Shift/ShiftFilters";
 
 describe("Shifting section filter", () => {
   const shiftingPage = new ShiftingPage();
+  const loginPage = new LoginPage();
 
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -12,7 +16,7 @@ describe("Shifting section filter", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/shifting");
-    shiftingPage.advancedFilterButton().click();
+    advanceFilters.clickAdvancedFiltersButton();
   });
 
   it("filter by facility", () => {

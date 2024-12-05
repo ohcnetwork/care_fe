@@ -1,17 +1,21 @@
+import FacilityHome from "pageobject/Facility/FacilityHome";
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
-import { UserPage } from "../../pageobject/Users/UserSearch";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
-import { UserCreationPage } from "../../pageobject/Users/UserCreation";
+import { UserPage } from "../../pageobject/Users/UserSearch";
 
 describe("Manage User", () => {
   const loginPage = new LoginPage();
   const userPage = new UserPage();
   const manageUserPage = new ManageUserPage();
-  const usernametolinkfacilitydoc1 = "dummydoctor4";
-  const usernametolinkfacilitydoc2 = "dummydoctor5";
-  const usernametolinkfacilitydoc3 = "dummydoctor6";
-  const usernametolinkskill = "devdoctor";
-  const userCreationPage = new UserCreationPage();
+  const facilityHome = new FacilityHome();
+  const usernameToLinkFacilitydoc1 = "dummydoctor4";
+  const usernameToLinkFacilitydoc2 = "dummydoctor5";
+  const usernameToLinkFacilitydoc3 = "dummydoctor6";
+  const usernameToLinkSkill = "devdoctor";
+  const firstNameUserSkill = "Dev";
+  const lastNameUserSkill = "Doctor";
   const usernameforworkinghour = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
@@ -20,7 +24,7 @@ describe("Manage User", () => {
   const linkedskill = "General Medicine";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -44,33 +48,31 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000);
     manageUserPage.navigateToProfile();
-    userCreationPage.verifyElementContainsText(
-      "username-profile-details",
+    cy.verifyContentPresence("#username-profile-details", [
       usernameforworkinghour,
-    );
+    ]);
     manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
   });
 
   it("linking skills for a doctor users and verify its reflection in doctor connect", () => {
     // select a doctor user and link and unlink same skill twice and verify the badge is only shown once in doctor connect
-    userPage.typeInSearchInput(usernametolinkskill);
-    userPage.checkUsernameText(usernametolinkskill);
+    advanceFilters.clickAdvancedFiltersButton();
+    userPage.typeInFirstName(firstNameUserSkill);
+    userPage.typeInLastName(lastNameUserSkill);
+    userPage.selectHomeFacility(facilitytolinkskill);
+    advanceFilters.applySelectedFilter();
+    userPage.checkUsernameText(usernameToLinkSkill);
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
-    manageUserPage.clickCloseSlideOver();
-    cy.wait(5000); // temporary hack to fix the failure
-    manageUserPage.clicklinkedskillbutton();
+    cy.verifyNotification("Skill added successfully");
+    cy.closeNotification();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
-    manageUserPage.clickUnlinkSkill();
-    manageUserPage.clickSubmit();
-    manageUserPage.selectSkillFromDropdown(linkedskill);
-    manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
-    manageUserPage.navigateToFacility();
-    manageUserPage.typeFacilitySearch(facilitytolinkskill);
-    manageUserPage.assertFacilityInCard(facilitytolinkskill);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilitytolinkskill);
+    facilityHome.assertFacilityInCard(facilitytolinkskill);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertSkillIndoctorconnect(linkedskill);
@@ -94,8 +96,8 @@ describe("Manage User", () => {
 
   it("linking and unlinking facility for multiple users, and confirm reflection in user cards and doctor connect", () => {
     // verify the user doesn't have any home facility
-    userPage.typeInSearchInput(usernametolinkfacilitydoc1);
-    userPage.checkUsernameText(usernametolinkfacilitydoc1);
+    userPage.typeInSearchInput(usernameToLinkFacilitydoc1);
+    userPage.checkUsernameText(usernameToLinkFacilitydoc1);
     manageUserPage.assertHomeFacility("No Home Facility");
     //  Link a new facility and ensure it is under linked facility - doctor username (1)
     manageUserPage.clickFacilitiesTab();
@@ -107,8 +109,8 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     //  Link a new facility and ensure it is under home facility - doctor username (2)
     userPage.clearSearchInput();
-    userPage.typeInSearchInput(usernametolinkfacilitydoc2);
-    userPage.checkUsernameText(usernametolinkfacilitydoc2);
+    userPage.typeInSearchInput(usernameToLinkFacilitydoc2);
+    userPage.checkUsernameText(usernameToLinkFacilitydoc2);
     manageUserPage.clickFacilitiesTab();
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
@@ -118,13 +120,13 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     //  verify the home facility doctor id have reflection in user card
     userPage.clearSearchInput();
-    userPage.typeInSearchInput(usernametolinkfacilitydoc2);
-    userPage.checkUsernameText(usernametolinkfacilitydoc2);
+    userPage.typeInSearchInput(usernameToLinkFacilitydoc2);
+    userPage.checkUsernameText(usernameToLinkFacilitydoc2);
     manageUserPage.assertHomeFacility(facilitytolinkusername);
     // Link a new facility and unlink the facility from the doctor username (3)
     userPage.clearSearchInput();
-    userPage.typeInSearchInput(usernametolinkfacilitydoc3);
-    userPage.checkUsernameText(usernametolinkfacilitydoc3);
+    userPage.typeInSearchInput(usernameToLinkFacilitydoc3);
+    userPage.checkUsernameText(usernameToLinkFacilitydoc3);
     manageUserPage.clickFacilitiesTab();
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
@@ -134,9 +136,9 @@ describe("Manage User", () => {
     manageUserPage.clickCloseSlideOver();
     //  Go to particular facility doctor connect and all user-id are reflected based on there access
     // Path will be facility page to patient page then doctor connect button
-    manageUserPage.navigateToFacility();
-    manageUserPage.typeFacilitySearch(facilitytolinkusername);
-    manageUserPage.assertFacilityInCard(facilitytolinkusername);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilitytolinkusername);
+    facilityHome.assertFacilityInCard(facilitytolinkusername);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertDoctorConnectVisibility(usernamerealname);

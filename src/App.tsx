@@ -11,23 +11,27 @@ import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { FeatureFlagsProvider } from "@/Utils/featureFlags";
 
+import { PubSubProvider } from "./Utils/pubsubContext";
+
 const App = () => {
   return (
     <Suspense fallback={<Loading />}>
-      <PluginEngine>
-        <HistoryAPIProvider>
-          <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
-            <FeatureFlagsProvider>
-              <Routers.AppRouter />
-            </FeatureFlagsProvider>
-          </AuthUserProvider>
+      <PubSubProvider>
+        <PluginEngine>
+          <HistoryAPIProvider>
+            <AuthUserProvider unauthorized={<Routers.SessionRouter />}>
+              <FeatureFlagsProvider>
+                <Routers.AppRouter />
+              </FeatureFlagsProvider>
+            </AuthUserProvider>
 
-          {/* Integrations */}
-          <Integrations.Sentry disabled={!import.meta.env.PROD} />
-          <Integrations.Plausible />
-        </HistoryAPIProvider>
-        <Toaster />
-      </PluginEngine>
+            {/* Integrations */}
+            <Integrations.Sentry disabled={!import.meta.env.PROD} />
+            <Integrations.Plausible />
+          </HistoryAPIProvider>
+          <Toaster />
+        </PluginEngine>
+      </PubSubProvider>
     </Suspense>
   );
 };

@@ -121,9 +121,14 @@ Cypress.Commands.add("clearAllFilters", () => {
   return cy.get("#clear-all-filters").click();
 });
 
-Cypress.Commands.add("submitButton", (buttonText = "Submit") => {
+Cypress.Commands.add("clickSubmitButton", (buttonText = "Submit") => {
   cy.get("button[type='submit']").contains(buttonText).scrollIntoView();
   cy.get("button[type='submit']").contains(buttonText).click();
+});
+
+Cypress.Commands.add("clickCancelButton", (buttonText = "Cancel") => {
+  cy.get("#cancel").contains(buttonText).scrollIntoView();
+  cy.get("#cancel").contains(buttonText).click();
 });
 
 Cypress.Commands.add(
@@ -221,6 +226,18 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
   cy.get(selector).then(($el) => {
     texts.forEach((text) => {
       cy.wrap($el).should("contain", text);
+    });
+  });
+});
+
+Cypress.Commands.add("verifyErrorMessages", (errorMessages: string[]) => {
+  const selector = ".error-text"; // Static selector
+  cy.get(selector).then(($errors) => {
+    const displayedErrorMessages = $errors
+      .map((_, el) => Cypress.$(el).text())
+      .get();
+    errorMessages.forEach((errorMessage) => {
+      expect(displayedErrorMessages).to.include(errorMessage);
     });
   });
 });

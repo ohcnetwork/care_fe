@@ -14,7 +14,8 @@ declare global {
       ): Chainable<Subject>;
       getAttached(selector: string): Chainable<Subject>;
       clearAllFilters(): Chainable<Subject>;
-      submitButton(buttonText?: string): Chainable<Element>;
+      clickSubmitButton(buttonText?: string): Chainable<Element>;
+      clickCancelButton(buttonText?: string): Chainable<Element>;
       typeAndSelectOption(
         element: string,
         referance: string,
@@ -44,6 +45,7 @@ declare global {
         selector: string,
         texts: string[],
       ): Chainable<Element>;
+      verifyErrorMessages(errorMessages: string[]): Chainable<Subject>;
     }
   }
 }

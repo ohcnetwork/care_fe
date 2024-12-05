@@ -1,19 +1,19 @@
 // FacilityCreation
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
 
-import LoginPage from "../../pageobject/Login/LoginPage";
-import FacilityHome from "../../pageobject/Facility/FacilityHome";
-import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import { UserPage } from "../../pageobject/Users/UserSearch";
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
+import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import FacilityNotify from "../../pageobject/Facility/FacilityNotify";
+import LoginPage from "../../pageobject/Login/LoginPage";
+import ManageUserPage from "../../pageobject/Users/ManageUserPage";
+import { advanceFilters } from "../../pageobject/utils/advanceFilterHelpers";
 
 describe("Facility Homepage Function", () => {
   const loginPage = new LoginPage();
   const facilityHome = new FacilityHome();
+  const facilityNotify = new FacilityNotify();
   const facilityPage = new FacilityPage();
   const manageUserPage = new ManageUserPage();
-  const userPage = new UserPage();
-  const assetPagination = new AssetPagination();
   const facilitiesAlias = "downloadFacilitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
@@ -23,28 +23,32 @@ describe("Facility Homepage Function", () => {
   const district = "Ernakulam";
   const localBody = "Aikaranad";
   const facilityType = "Private Hospital";
+  const notificationErrorMsg = "Message cannot be empty";
+  const notificationMessage = "Test Notification";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/facility");
   });
 
   it("Verify the Facility card button redirection", () => {
     // view cns button
-    manageUserPage.typeFacilitySearch(facilityName);
-    facilityPage.verifyFacilityBadgeContent(facilityName);
-    manageUserPage.assertFacilityInCard(facilityName);
+    facilityHome.typeFacilitySearch(facilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      facilityName,
+      true,
+    );
+    facilityHome.assertFacilityInCard(facilityName);
     facilityHome.clickViewCnsButton();
     facilityHome.verifyCnsUrl();
     facilityHome.navigateBack();
-    // view notify button
-    facilityHome.clickFacilityNotifyButton();
-    facilityHome.verifyAndCloseNotifyModal();
     // view facility button
     facilityHome.clickViewFacilityDetails();
     facilityPage.getFacilityName().should("be.visible");
@@ -60,34 +64,43 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify the functionality of advance filter", () => {
-    userPage.clickAdvancedFilters();
-    facilityPage.selectState(stateName);
-    facilityPage.selectDistrict(district);
-    facilityPage.selectLocalBody(localBody);
-    facilityPage.clickUpdateFacilityType(facilityType);
-    userPage.applyFilter();
-    facilityPage.verifyStateBadgeContent(stateName);
-    facilityPage.verifyDistrictBadgeContent(district);
-    facilityPage.verifyLocalBodyBadgeContent(localBody);
-    facilityPage.verifyFacilityTypeBadgeContent(facilityType);
-    manageUserPage.assertFacilityInCard(facilityName);
-    userPage.clearFilters();
-    userPage.verifyDataTestIdNotVisible("State");
-    userPage.verifyDataTestIdNotVisible("District");
-    userPage.verifyDataTestIdNotVisible("Facility type");
-    userPage.verifyDataTestIdNotVisible("Local Body");
+    advanceFilters.clickAdvancedFiltersButton();
+    advanceFilters.selectState(stateName);
+    advanceFilters.selectDistrict(district);
+    advanceFilters.selectLocalBody(localBody);
+    advanceFilters.selectFacilityType(facilityType);
+    advanceFilters.applySelectedFilter();
+    advanceFilters.verifyFilterBadgePresence("State", stateName, true);
+    advanceFilters.verifyFilterBadgePresence("District", district, true);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility type",
+      facilityType,
+      true,
+    );
+    advanceFilters.verifyFilterBadgePresence("Local Body", localBody, true);
+    facilityHome.assertFacilityInCard(facilityName);
+    advanceFilters.clickAdvancedFiltersButton();
+    advanceFilters.clickClearAdvanceFilters();
+    advanceFilters.verifyFilterBadgePresence("State", "", false);
+    advanceFilters.verifyFilterBadgePresence("District", "", false);
+    advanceFilters.verifyFilterBadgePresence("Facility type", "", false);
+    advanceFilters.verifyFilterBadgePresence("Local Body", "", false);
   });
 
   it("Search a facility in homepage and pagination", () => {
     // pagination of the facility page
-    assetPagination.navigateToNextPage();
-    assetPagination.verifyNextUrl();
-    assetPagination.navigateToPreviousPage();
-    assetPagination.verifyPreviousUrl();
+    pageNavigation.navigateToNextPage();
+    pageNavigation.verifyCurrentPageNumber(2);
+    pageNavigation.navigateToPreviousPage();
+    pageNavigation.verifyCurrentPageNumber(1);
     // search for a facility
-    manageUserPage.typeFacilitySearch(facilityName);
-    facilityPage.verifyFacilityBadgeContent(facilityName);
-    manageUserPage.assertFacilityInCard(facilityName);
+    facilityHome.typeFacilitySearch(facilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      facilityName,
+      true,
+    );
+    facilityHome.assertFacilityInCard(facilityName);
     facilityHome.verifyURLContains(facilityName);
   });
 
@@ -115,15 +128,19 @@ describe("Facility Homepage Function", () => {
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
-    userPage.clickAdvancedFilters();
-    facilityPage.selectState(stateName);
-    facilityPage.selectDistrict(district);
-    facilityPage.selectLocalBody(localBody);
-    userPage.applyFilter();
+    advanceFilters.clickAdvancedFiltersButton();
+    advanceFilters.selectState(stateName);
+    advanceFilters.selectDistrict(district);
+    advanceFilters.selectLocalBody(localBody);
+    advanceFilters.applySelectedFilter();
     // go to cns page in the facility details page
-    manageUserPage.typeFacilitySearch(facilityName);
-    facilityPage.verifyFacilityBadgeContent(facilityName);
-    manageUserPage.assertFacilityInCard(facilityName);
+    facilityHome.typeFacilitySearch(facilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      facilityName,
+      true,
+    );
+    facilityHome.assertFacilityInCard(facilityName);
     facilityHome.clickViewFacilityDetails();
     facilityHome.clickFacilityCnsButton();
     facilityHome.verifyCnsUrl();
@@ -133,6 +150,55 @@ describe("Facility Homepage Function", () => {
     facilityHome.selectLocation(facilityLocaion);
     facilityHome.clickLiveMonitorButton();
     facilityHome.verifyLiveMonitorUrl();
+  });
+
+  it("Verify Notice Board Functionality", () => {
+    // search facility and verify it's loaded or not
+    facilityHome.interceptFacilitySearchReq();
+    facilityHome.typeFacilitySearch(facilityName);
+    facilityHome.verifyFacilitySearchReq();
+    // verify facility name and card reflection
+    facilityNotify.verifyUrlContains("Dummy+Facility+40");
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      facilityName,
+      true,
+    );
+    facilityHome.assertFacilityInCard(facilityName);
+    // send notification to a facility
+    facilityHome.clickFacilityNotifyButton();
+    facilityNotify.verifyFacilityName(facilityName);
+    facilityNotify.fillNotifyText(notificationMessage);
+    facilityNotify.interceptPostNotificationReq();
+    cy.clickSubmitButton("Notify");
+    facilityNotify.verifyPostNotificationReq();
+    cy.verifyNotification("Facility Notified");
+    cy.closeNotification();
+    cy.wait(2000);
+    // Verify the frontend error on empty message
+    facilityHome.clickFacilityNotifyButton();
+    facilityNotify.verifyFacilityName(facilityName);
+    cy.clickSubmitButton("Notify");
+    facilityNotify.verifyErrorMessage(notificationErrorMsg);
+    // close pop-up and verify
+    cy.clickCancelButton("Cancel");
+    // signout as district admin and login as a Nurse
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsNurse();
+    // Verify Notice Board Reflection
+    facilityNotify.interceptGetNotificationReq("MESSAGE");
+    facilityNotify.visitNoticeBoard();
+    facilityNotify.verifyGetNotificationReq();
+    facilityNotify.verifyFacilityNoticeBoardMessage(notificationMessage);
+    facilityNotify.interceptGetNotificationReq();
+    // Verify Sidebar Notification Reflection
+    facilityNotify.openNotificationSlide();
+    facilityNotify.verifyGetNotificationReq();
+    cy.verifyContentPresence("#notification-slide-msg", [notificationMessage]);
+    facilityNotify.closeNotificationSlide();
+    loginPage.ensureLoggedIn();
+    loginPage.clickSignOutBtn();
   });
 
   afterEach(() => {

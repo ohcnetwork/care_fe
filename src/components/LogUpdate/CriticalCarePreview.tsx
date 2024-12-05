@@ -1,10 +1,13 @@
+import { Link } from "raviger";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 
 import { meanArterialPressure } from "@/components/Common/BloodPressureFormField";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import { ABGAnalysisFields } from "@/components/LogUpdate/Sections/ABGAnalysis";
 import { IOBalanceSections } from "@/components/LogUpdate/Sections/IOBalance";
@@ -49,19 +52,32 @@ export default function CriticalCarePreview(props: Props) {
 
   return (
     <div className="w-full transition-all duration-200 ease-in-out md:mx-auto md:max-w-5xl md:pt-8">
-      <div className="py-4">
-        <ButtonV2
-          id="back-to-consultation"
-          variant="secondary"
-          href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`}
+      <div className="py-4 flex items-center justify-between max-md:flex-col max-md:items-start">
+        <Button id="back-to-consultation" variant="outline" asChild>
+          <Link
+            href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`}
+          >
+            {t("back_to_consultation")}
+          </Link>
+        </Button>
+        <Button
+          asChild
+          id="update-log"
+          variant="outline_primary"
+          aria-label={t("update_log")}
         >
-          {t("back_to_consultation")}
-        </ButtonV2>
+          <Link
+            href={`/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/log_updates/${props.id}/update`}
+          >
+            <CareIcon icon="l-edit-alt" className="mr-2 text-lg" />
+            {t("update_log")}
+          </Link>
+        </Button>
       </div>
 
       <Card className="md:rounded-xl lg:p-8">
         <h2 className="mb-3 flex flex-col gap-4 text-black md:flex-row md:items-center">
-          <span>Consultation Updates</span>
+          <span>{t("log_updates")}</span>
           <div className="max-w-min whitespace-nowrap rounded-full border border-primary-300 bg-primary-100 px-2.5 py-1.5 text-sm font-semibold text-primary-500">
             <span>{t(`ROUNDS_TYPE__${data.rounds_type}`)}</span>
           </div>

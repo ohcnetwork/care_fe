@@ -1,9 +1,7 @@
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import ABDMRecordsTab from "@/components/ABDM/ABDMRecordsTab";
-import { AbhaNumberModel } from "@/components/ABDM/types/abha";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import RelativeDateUserMention from "@/components/Common/RelativeDateUserMention";
@@ -29,6 +27,7 @@ import PatientInfoCard from "@/components/Patient/PatientInfoCard";
 import { PatientModel } from "@/components/Patient/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
+import { useCareAppConsultationTabs } from "@/hooks/useCareApps";
 
 import { GENDER_TYPES } from "@/common/constants";
 
@@ -44,6 +43,8 @@ import {
   relativeTime,
 } from "@/Utils/utils";
 
+import { ConsultationProvider } from "./ConsultationContext";
+
 export interface ConsultationTabProps {
   consultationId: string;
   facilityId: string;
@@ -52,7 +53,7 @@ export interface ConsultationTabProps {
   patientData: PatientModel;
 }
 
-const TABS = {
+const defaultTabs = {
   UPDATES: ConsultationUpdatesTab,
   FEED: ConsultationFeedTab,
   SUMMARY: ConsultationSummaryTab,
@@ -66,20 +67,24 @@ const TABS = {
   NUTRITION: ConsultationNutritionTab,
   PRESSURE_SORE: ConsultationPressureSoreTab,
   DIALYSIS: ConsultationDialysisTab,
-  ABDM: ABDMRecordsTab,
-};
+} as Record<string, React.FC<ConsultationTabProps>>;
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
   const { t } = useTranslation();
+  const pluginTabs = useCareAppConsultationTabs();
+
+  const tabs: Record<string, React.FC<ConsultationTabProps>> = {
+    ...defaultTabs,
+    ...pluginTabs,
+  };
+
   let tab = undefined;
-  if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
-    tab = props.tab.toUpperCase() as keyof typeof TABS;
+  if (Object.keys(tabs).includes(props.tab.toUpperCase())) {
+    tab = props.tab.toUpperCase();
   }
   const [showDoctors, setShowDoctors] = useState(false);
-  const [qParams, _] = useQueryParams();
   const [patientData, setPatientData] = useState<PatientModel>();
-  const [abhaNumberData, setAbhaNumberData] = useState<AbhaNumberModel>();
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
 
   const getPatientGender = (patientData: any) =>
@@ -144,16 +149,6 @@ export const ConsultationDetails = (props: any) => {
 
   const fetchData = useCallback(
     async (id: string) => {
-      // Get abha number data
-      const { data: abhaNumberData } = await request(
-        routes.abdm.abhaNumber.get,
-        {
-          pathParams: { abhaNumberId: id ?? "" },
-          silent: true,
-        },
-      );
-      setAbhaNumberData(abhaNumberData);
-
       // Get shifting data
       const shiftRequestsQuery = await request(routes.listShiftRequests, {
         query: { patient: id },
@@ -194,7 +189,7 @@ export const ConsultationDetails = (props: any) => {
     return <Error404 />;
   }
 
-  const SelectedTab = TABS[tab];
+  const SelectedTab = tabs[tab];
 
   const tabButtonClasses = (selected: boolean) =>
     `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${
@@ -204,7 +199,12 @@ export const ConsultationDetails = (props: any) => {
     }`;
 
   return (
-    <div>
+    <ConsultationProvider
+      initialContext={{
+        consultation: consultationData,
+        patient: patientData,
+      }}
+    >
       <div>
         <nav className="relative flex flex-wrap items-start justify-between">
           <PageTitle
@@ -213,6 +213,10 @@ export const ConsultationDetails = (props: any) => {
             crumbsReplacements={{
               [facilityId]: { name: patientData?.facility_object?.name },
               [patientId]: { name: patientData?.name },
+              consultation: {
+                name: "Consultation",
+                uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`,
+              },
               [consultationId]: {
                 name:
                   consultationData.suggestion === "A"
@@ -280,125 +284,123 @@ export const ConsultationDetails = (props: any) => {
             </a>
           </div>
         </nav>
-        <div className="mt-2 flex w-full flex-col md:flex-row">
-          <div className="size-full rounded-lg border bg-white text-black shadow">
-            <PatientInfoCard
-              patient={patientData}
-              abhaNumber={abhaNumberData}
-              consultation={consultationData}
-              fetchPatientData={() => {
-                consultationQuery.refetch();
-                patientDataQuery.refetch();
-              }}
-              consultationId={consultationId}
-              activeShiftingData={activeShiftingData}
-              showAbhaProfile={qParams["show-abha-profile"] === "true"}
-            />
-
-            <div className="flex flex-col justify-between px-4 md:flex-row">
-              {consultationData.admitted_to && (
-                <div className="mt-2 rounded-lg border bg-secondary-100 p-2 md:mt-0">
-                  <div className="border-b-2 py-1">
-                    Patient
-                    {consultationData.discharge_date
-                      ? " Discharged from"
-                      : " Admitted to"}
-                    <span className="badge badge-pill badge-warning ml-2 font-bold">
-                      {consultationData.admitted_to}
-                    </span>
-                  </div>
-                  {(consultationData.discharge_date ??
-                    consultationData.encounter_date) && (
-                    <div className="text-3xl font-bold">
-                      {relativeTime(
-                        consultationData.discharge_date
-                          ? consultationData.discharge_date
-                          : consultationData.encounter_date,
-                      )}
-                    </div>
-                  )}
-                  <div className="-mt-2 text-xs">
-                    {consultationData.encounter_date &&
-                      formatDateTime(consultationData.encounter_date)}
-                    {consultationData.discharge_date &&
-                      ` - ${formatDateTime(consultationData.discharge_date)}`}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
-              <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
-                <div className="flex">
-                  <span className="text-secondary-900">Created: </span>&nbsp;
-                  <RelativeDateUserMention
-                    actionDate={consultationData.created_date}
-                    user={consultationData.created_by}
-                    tooltipPosition="right"
-                    withoutSuffix={true}
-                  />
-                </div>
-              </div>
-              <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
-                <div className="flex">
-                  <span className="text-secondary-900">Last Modified: </span>
-                  &nbsp;
-                  <RelativeDateUserMention
-                    actionDate={consultationData.modified_date}
-                    user={consultationData.last_edited_by}
-                    tooltipPosition="left"
-                    withoutSuffix={true}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {!!consultationData.diagnoses?.length && (
-          <div className="col-span-1 mt-2 overflow-hidden rounded-lg bg-white shadow">
-            <div className="px-4 py-2">
-              <DiagnosesListAccordion
-                diagnoses={consultationData.diagnoses ?? []}
-              />
-            </div>
-          </div>
-        )}
         <div className="mt-4 w-full border-b-2 border-secondary-200">
-          <div className="overflow-x-auto sm:flex sm:items-baseline">
-            <div className="mt-4 sm:mt-0">
-              <nav
-                className="flex space-x-6 overflow-x-auto pb-2 pl-2"
-                id="consultation_tab_nav"
-              >
-                {keysOf(TABS).map((p) => {
-                  if (p === "FEED") {
-                    if (
-                      isCameraAttached === false || // No camera attached
-                      consultationData?.discharge_date || // Discharged
-                      !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
-                      !CameraFeedPermittedUserTypes.includes(authUser.user_type)
-                    )
-                      return null; // Hide feed tab
-                  }
+          <div className="mt-2 flex w-full flex-col md:flex-row">
+            <div className="size-full rounded-lg border bg-white text-black shadow">
+              <PatientInfoCard
+                patient={patientData}
+                consultation={consultationData}
+                fetchPatientData={() => {
+                  consultationQuery.refetch();
+                  patientDataQuery.refetch();
+                }}
+                consultationId={consultationId}
+                activeShiftingData={activeShiftingData}
+              />
 
-                  if (p === "ABDM" && !abhaNumberData?.abha_number) {
-                    return null;
-                  }
-
-                  return (
-                    <Link
-                      key={p}
-                      className={tabButtonClasses(tab === p)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
-                    >
-                      {t(`CONSULTATION_TAB__${p}`)}
-                    </Link>
-                  );
-                })}
-              </nav>
+              <div className="flex flex-col justify-between px-4 md:flex-row">
+                {consultationData.admitted_to && (
+                  <div className="mt-2 rounded-lg border bg-secondary-100 p-2 md:mt-0">
+                    <div className="border-b-2 py-1">
+                      Patient
+                      {consultationData.discharge_date
+                        ? " Discharged from"
+                        : " Admitted to"}
+                      <span className="badge badge-pill badge-warning ml-2 font-bold">
+                        {consultationData.admitted_to}
+                      </span>
+                    </div>
+                    {(consultationData.discharge_date ??
+                      consultationData.encounter_date) && (
+                      <div className="text-3xl font-bold">
+                        {relativeTime(
+                          consultationData.discharge_date
+                            ? consultationData.discharge_date
+                            : consultationData.encounter_date,
+                        )}
+                      </div>
+                    )}
+                    <div className="-mt-2 text-xs">
+                      {consultationData.encounter_date &&
+                        formatDateTime(consultationData.encounter_date)}
+                      {consultationData.discharge_date &&
+                        ` - ${formatDateTime(consultationData.discharge_date)}`}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
+                <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
+                  <div className="flex">
+                    <span className="text-secondary-900">Created: </span>&nbsp;
+                    <RelativeDateUserMention
+                      actionDate={consultationData.created_date}
+                      user={consultationData.created_by}
+                      tooltipPosition="right"
+                      withoutSuffix={true}
+                    />
+                  </div>
+                </div>
+                <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
+                  <div className="flex">
+                    <span className="text-secondary-900">Last Modified: </span>
+                    &nbsp;
+                    <RelativeDateUserMention
+                      actionDate={consultationData.modified_date}
+                      user={consultationData.last_edited_by}
+                      tooltipPosition="left"
+                      withoutSuffix={true}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+          {!!consultationData.diagnoses?.length && (
+            <div className="col-span-1 mt-2 overflow-hidden rounded-lg bg-white shadow">
+              <div className="px-4 py-2">
+                <DiagnosesListAccordion
+                  diagnoses={consultationData.diagnoses ?? []}
+                />
+              </div>
+            </div>
+          )}
+          <div className="mt-4 w-full border-b-2 border-secondary-200">
+            <div className="overflow-x-auto sm:flex sm:items-baseline">
+              <div className="mt-4 sm:mt-0">
+                <nav
+                  className="flex space-x-6 overflow-x-auto pb-2 pl-2"
+                  id="consultation_tab_nav"
+                >
+                  {keysOf(tabs).map((p) => {
+                    if (p === "FEED") {
+                      if (
+                        isCameraAttached === false || // No camera attached
+                        consultationData?.discharge_date || // Discharged
+                        !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
+                        !CameraFeedPermittedUserTypes.includes(
+                          authUser.user_type,
+                        )
+                      )
+                        return null; // Hide feed tab
+                    }
+
+                    return (
+                      <Link
+                        key={p}
+                        className={tabButtonClasses(tab === p)}
+                        href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.toLocaleLowerCase()}`}
+                      >
+                        {t(`CONSULTATION_TAB__${p}`)}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+            </div>
+          </div>
+          <SelectedTab {...consultationTabProps} />
         </div>
-        <SelectedTab {...consultationTabProps} />
       </div>
 
       <DoctorVideoSlideover
@@ -415,6 +417,6 @@ export const ConsultationDetails = (props: any) => {
           setShowPatientNotesPopup={setShowPatientNotesPopup}
         />
       )}
-    </div>
+    </ConsultationProvider>
   );
 };

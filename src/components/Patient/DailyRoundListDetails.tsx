@@ -1,7 +1,11 @@
+import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
+
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { DailyRoundsModel } from "@/components/Patient/models";
@@ -31,8 +35,8 @@ export const DailyRoundListDetails = (props: any) => {
 
   return (
     <Page
-      title={`Consultation Update #${id}`}
-      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
+      title={t("log_update") + ` #${id}`}
+      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates`}
     >
       <div
         className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500"
@@ -50,11 +54,14 @@ export const DailyRoundListDetails = (props: any) => {
 
           <div>
             <div className="mt-2">
-              <ButtonV2
-                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}
-              >
-                Update Details
-              </ButtonV2>
+              <Button asChild variant="outline_primary">
+                <Link
+                  href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${id}/update`}
+                >
+                  <CareIcon icon="l-edit-alt" className="mr-2 text-lg" />
+                  {t("update_log")}
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

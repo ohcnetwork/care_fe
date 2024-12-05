@@ -1,3 +1,6 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+import { pageNavigation } from "pageobject/utils/paginationHelpers";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 
@@ -14,10 +17,10 @@ describe("User Homepage", () => {
   const altPhoneNumber = "8878825662";
   const homeFacility = "Dummy Facility 40";
   const nurseUserName = "dummynurse1";
-  const doctorUserName = "devdoctor1";
+  const doctorUserName = "dev-doctor2";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -28,7 +31,7 @@ describe("User Homepage", () => {
   });
 
   it("User advance filter functionality", () => {
-    userPage.clickAdvancedFilters();
+    advanceFilters.clickAdvancedFiltersButton();
     userPage.typeInFirstName(firstName);
     userPage.typeInLastName(lastName);
     userPage.selectRole(role);
@@ -37,32 +40,31 @@ describe("User Homepage", () => {
     userPage.typeInPhoneNumber(phoneNumber);
     userPage.typeInAltPhoneNumber(altPhoneNumber);
     userPage.selectHomeFacility(homeFacility);
-    userPage.applyFilter();
+    advanceFilters.applySelectedFilter();
     userPage.checkUsernameText(nurseUserName);
     // Verify the badges related to the data
-    userPage.verifyDataTestIdText("First Name", `First Name: ${firstName}`);
-    userPage.verifyDataTestIdText("Last Name", `Last Name: ${lastName}`);
-    userPage.verifyDataTestIdText(
-      "Phone Number",
-      `Phone Number: +91${phoneNumber}`,
-    );
-    userPage.verifyDataTestIdText(
+    advanceFilters.verifyFilterBadgePresence("First Name", firstName, true);
+    advanceFilters.verifyFilterBadgePresence("Last Name", lastName, true);
+    advanceFilters.verifyFilterBadgePresence("Phone Number", phoneNumber, true);
+    advanceFilters.verifyFilterBadgePresence(
       "WhatsApp no.",
-      `WhatsApp no.: +91${altPhoneNumber}`,
+      altPhoneNumber,
+      true,
     );
-    userPage.verifyDataTestIdText("Role", `Role: ${role}`);
-    userPage.verifyDataTestIdText(
+    advanceFilters.verifyFilterBadgePresence("Role", role, true);
+    advanceFilters.verifyFilterBadgePresence(
       "Home Facility",
-      `Home Facility: ${homeFacility}`,
+      homeFacility,
+      true,
     );
-    userPage.clearFilters();
-    userPage.verifyDataTestIdNotVisible("First Name");
-    userPage.verifyDataTestIdNotVisible("Last Name");
-    userPage.verifyDataTestIdNotVisible("Phone Number");
-    userPage.verifyDataTestIdNotVisible("WhatsApp no.");
-    userPage.verifyDataTestIdNotVisible("Role");
-    userPage.verifyDataTestIdNotVisible("Home Facility");
-    userPage.verifyDataTestIdNotVisible("District");
+    advanceFilters.clickAdvancedFiltersButton();
+    advanceFilters.clickClearAdvanceFilters();
+    advanceFilters.verifyFilterBadgePresence("First Name", "", false);
+    advanceFilters.verifyFilterBadgePresence("Last Name", "", false);
+    advanceFilters.verifyFilterBadgePresence("Phone Number", "", false);
+    advanceFilters.verifyFilterBadgePresence("WhatsApp no.", "", false);
+    advanceFilters.verifyFilterBadgePresence("Role", "", false);
+    advanceFilters.verifyFilterBadgePresence("Home Facility", "", false);
   });
 
   it("Search by username", () => {
@@ -81,10 +83,10 @@ describe("User Homepage", () => {
   });
 
   it("Next/Previous Page Navigation", () => {
-    userPage.navigateToNextPage();
-    userPage.verifyCurrentPageNumber(2);
-    userPage.navigateToPreviousPage();
-    userPage.verifyCurrentPageNumber(1);
+    pageNavigation.navigateToNextPage();
+    pageNavigation.verifyCurrentPageNumber(2);
+    pageNavigation.navigateToPreviousPage();
+    pageNavigation.verifyCurrentPageNumber(1);
   });
 
   afterEach(() => {
