@@ -177,8 +177,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         requested_quantity: state.form.requested_quantity || 1,
         assigned_quantity:
           state.form.status === "PENDING"
-            ? state.form.assigned_quantity || 1
-            : resourceDetails?.assigned_quantity || 1,
+            ? state.form.assigned_quantity || 0
+            : resourceDetails?.assigned_quantity || 0,
       };
 
       const { res, data } = await request(routes.updateResource, {
@@ -282,9 +282,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               <TextFormField
                 name="assigned_quantity"
                 type="number"
-                min={1}
+                min={0}
                 label="Approved Quantity"
-                value={state.form.assigned_quantity ?? 1}
+                value={state.form.assigned_quantity ?? 0}
                 onChange={handleChange}
                 disabled={state.form.status !== "PENDING"}
                 onInput={sanitizeNumberInput}

@@ -192,7 +192,6 @@ export default function ResourceCreate(props: resourceProps) {
           state.form.refering_facility_contact_number,
         ),
         requested_quantity: state.form.requested_quantity || 1,
-        assigned_quantity: 1,
       };
 
       const { res, data } = await request(routes.createResource, {
