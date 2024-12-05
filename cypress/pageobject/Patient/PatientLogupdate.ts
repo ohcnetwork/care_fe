@@ -1,7 +1,9 @@
 class PatientLogupdate {
   clickLogupdate() {
+    cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
     cy.get("#log-update").scrollIntoView();
     cy.verifyAndClickElement("#log-update", "Log Update");
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 201);
   }
 
   clickSwitchBed() {
@@ -14,7 +16,13 @@ class PatientLogupdate {
 
   selectBed(bed: string) {
     cy.typeAndSelectOption("input[name='bed']", bed);
+    cy.intercept("POST", "**/api/v1/consultationbed/").as(
+      "postConsultationBed",
+    );
     cy.get("#update-switchbed").click();
+    cy.wait("@postConsultationBed")
+      .its("response.statusCode")
+      .should("eq", 201);
   }
 
   selectPatientCategory(category: string) {
@@ -75,18 +83,35 @@ class PatientLogupdate {
   clickLogUpdateViewDetails(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
+    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
+      "getLogUpdateViewDetails",
+    );
     cy.get(element).first().contains("View Details").click();
+    cy.wait("@getLogUpdateViewDetails")
+      .its("response.statusCode")
+      .should("eq", 200);
   }
 
   clickLogUpdateUpdateLog(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
+    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
+      "getLogUpdateViewDetails",
+    );
     cy.get(element).first().contains("Update Log").click();
+    cy.wait("@getLogUpdateViewDetails")
+      .its("response.statusCode")
+      .should("eq", 200);
   }
 
   clickUpdateDetail() {
+    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
+      "getLogUpdateViewDetails",
+    );
     cy.verifyAndClickElement("#consultation-preview", "Update Log");
-    cy.wait(3000);
+    cy.wait("@getLogUpdateViewDetails")
+      .its("response.statusCode")
+      .should("eq", 200);
   }
 
   clearIntoElementById(elementId) {
