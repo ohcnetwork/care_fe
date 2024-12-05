@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { ExportButton } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -77,10 +78,14 @@ export default function ListView() {
           </div>
 
           <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-            <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
-              <CareIcon icon="l-list-ul" className="rotate-90" />
+            <Button
+              className="h-[45px]"
+              variant={"primary"}
+              onClick={onBoardViewBtnClick}
+            >
+              <CareIcon icon="l-list-ul" className="rotate-90 mr-2" />
               {t("board_view")}
-            </ButtonV2>
+            </Button>
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
