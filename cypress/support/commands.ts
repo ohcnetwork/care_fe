@@ -229,3 +229,15 @@ Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
     });
   });
 });
+
+Cypress.Commands.add("verifyErrorMessages", (errorMessages: string[]) => {
+  const selector = ".error-text"; // Static selector
+  cy.get(selector).then(($errors) => {
+    const displayedErrorMessages = $errors
+      .map((_, el) => Cypress.$(el).text())
+      .get();
+    errorMessages.forEach((errorMessage) => {
+      expect(displayedErrorMessages).to.include(errorMessage);
+    });
+  });
+});
