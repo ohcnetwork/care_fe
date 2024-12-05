@@ -4,6 +4,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
+
+import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
+
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-gray-300",
   {
@@ -16,7 +20,7 @@ const buttonVariants = cva(
         outline:
           "border border-gray-200 bg-white shadow-sm hover:bg-gray-100 hover:text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50",
         primary:
-          "bg-primary-700 text-white shadow hover:bg-primary-700/90 dark:bg-primary-100 dark:text-primary-900 dark:hover:bg-primary-100/90",
+          "bg-primary-500 text-white shadow hover:bg-primary-500/90 dark:bg-primary-100 dark:text-primary-900 dark:hover:bg-primary-100/90",
         secondary:
           "bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-100/80 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80",
         ghost:
@@ -60,4 +64,22 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+const AuthorizedButton: React.FC<AuthorizedElementProps & ButtonProps> = ({
+  authorizeFor = () => true,
+  ...props
+}) => {
+  return (
+    <AuthorizedChild authorizeFor={authorizeFor}>
+      {({ isAuthorized }) => (
+        <Button
+          {...props}
+          disabled={props.disabled || !isAuthorized} // Disable if unauthorized or loading
+        >
+          {props.children}
+        </Button>
+      )}
+    </AuthorizedChild>
+  );
+};
+
+export { Button, buttonVariants, AuthorizedButton };
