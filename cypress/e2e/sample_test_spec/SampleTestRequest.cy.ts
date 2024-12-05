@@ -24,7 +24,7 @@ describe("Sample Test", () => {
   const sampleTestResult = "Awaiting";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
