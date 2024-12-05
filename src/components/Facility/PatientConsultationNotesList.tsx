@@ -41,6 +41,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     fetchNextPage,
     hasMore,
   } = useInfiniteQuery<PatientNotesModel>(routes.getPatientNotes, {
+    deduplicateBy: (note) => note.id,
     pathParams: {
       patientId: props.state.patientId || "",
     },

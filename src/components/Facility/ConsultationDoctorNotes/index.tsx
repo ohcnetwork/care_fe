@@ -81,7 +81,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
-      setState({ ...state });
       setNoteField("");
       setReload(true);
       setReplyTo(undefined);
