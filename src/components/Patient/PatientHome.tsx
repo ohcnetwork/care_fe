@@ -2,6 +2,8 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
+
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 
@@ -262,12 +264,12 @@ export const PatientHome = (props: {
                         </div>
                       ) : (
                         <div>
-                          <ButtonV2
+                          <Button
                             className="w-full"
                             size="default"
                             onClick={() =>
                               navigate(
-                                `/facility/${patientData.facility}/patient/${id}/consultation/${patientData.last_consultation?.id}/consent-records`,
+                                `/facility/${patientData.facility}/patient/${id}/consultation/${patientData.last_consultation?.id}`,
                               )
                             }
                           >
@@ -278,7 +280,7 @@ export const PatientHome = (props: {
                               />
                               {t("view_consultation")}
                             </span>
-                          </ButtonV2>
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -488,9 +490,8 @@ export const PatientHome = (props: {
                 <div className="mt-2 h-full space-y-2">
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
-                      <ButtonV2
+                      <Button
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        size="large"
                         onClick={() =>
                           navigate(`/patient/${id}/investigation_reports`)
                         }
@@ -502,13 +503,12 @@ export const PatientHome = (props: {
                           />
                           {t("investigations_summary")}
                         </span>
-                      </ButtonV2>
+                      </Button>
                     </div>
                     <div>
-                      <ButtonV2
+                      <Button
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                         id="upload-patient-files"
-                        size="large"
                         onClick={() =>
                           navigate(
                             `/facility/${patientData?.facility}/patient/${id}/files`,
@@ -519,7 +519,7 @@ export const PatientHome = (props: {
                           <CareIcon icon="l-file-upload" className="text-xl" />
                           {t("view_update_patient_files")}
                         </span>
-                      </ButtonV2>
+                      </Button>
                     </div>
 
                     {NonReadOnlyUsers && (
@@ -530,7 +530,6 @@ export const PatientHome = (props: {
                           disabled={false}
                           authorizeFor={NonReadOnlyUsers}
                           className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                          size="large"
                         >
                           <span className="flex w-full items-center justify-start gap-2">
                             <CareIcon icon="l-users-alt" className="text-lg" />{" "}
@@ -544,7 +543,6 @@ export const PatientHome = (props: {
                       <ButtonV2
                         id="patient-allow-transfer"
                         className="flex w-full flex-row bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        size="large"
                         disabled={
                           !patientData.last_consultation?.id ||
                           !patientData.is_active
@@ -684,7 +682,7 @@ export const PatientHome = (props: {
                 {patientData.last_consultation?.new_discharge_reason ===
                   DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
-                    <ButtonV2
+                    <Button
                       id="death-report"
                       className="my-2 w-full"
                       name="death_report"
@@ -692,7 +690,7 @@ export const PatientHome = (props: {
                     >
                       <CareIcon icon="l-file-download" className="text-lg" />
                       {t("death_report")}
-                    </ButtonV2>
+                    </Button>
                   </div>
                 )}
               </div>
