@@ -52,7 +52,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
         text={t("total_users")}
         count={userListData?.count ?? 0}
         loading={userListLoading}
-        icon="l-user-injured"
+        icon="d-people"
         className="my-3 flex flex-col items-center sm:items-start"
       />
 

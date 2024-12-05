@@ -136,7 +136,7 @@ describe("User Creation", () => {
     userProfilePage.clearAltPhoneNumber();
     userProfilePage.clearWorkingHours();
     userProfilePage.clickUpdateButton();
-    userCreationPage.verifyErrorMessages(EXPECTED_PROFILE_ERROR_MESSAGES);
+    cy.verifyErrorMessages(EXPECTED_PROFILE_ERROR_MESSAGES);
   });
 
   it("create new user and verify reflection", () => {
@@ -177,7 +177,7 @@ describe("User Creation", () => {
     userCreationPage.clickAddUserButton();
     userCreationPage.clickSaveUserButton();
     cy.get(".error-text", { timeout: 10000 }).should("be.visible");
-    userCreationPage.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
+    cy.verifyErrorMessages(EXPECTED_ERROR_MESSAGES);
   });
 
   it("view user redirection from facility page", () => {

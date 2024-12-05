@@ -181,7 +181,7 @@ describe("Facility Homepage Function", () => {
     cy.clickSubmitButton("Notify");
     facilityNotify.verifyErrorMessage(notificationErrorMsg);
     // close pop-up and verify
-    facilityHome.verifyAndCloseNotifyModal();
+    cy.clickCancelButton("Cancel");
     // signout as district admin and login as a Nurse
     loginPage.ensureLoggedIn();
     loginPage.clickSignOutBtn();
