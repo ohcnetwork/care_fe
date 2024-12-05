@@ -35,7 +35,6 @@ const COMPLETED = ["COMPLETED", "REJECTED"];
 const ACTIVE = resourceStatusOptions.filter((o) => !COMPLETED.includes(o));
 
 export default function BoardView() {
-  localStorage.setItem("defaultResourceView", "board");
   const { qParams, FilterBadges, advancedFilter, updateQuery } = useFilters({
     limit: -1,
     cacheBlacklist: ["title"],

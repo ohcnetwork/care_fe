@@ -23,7 +23,6 @@ import useQuery from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 export default function ListView() {
-  localStorage.setItem("defaultResourceView", "list");
   const {
     qParams,
     Pagination,
@@ -35,8 +34,10 @@ export default function ListView() {
 
   const { t } = useTranslation();
 
-  const onBoardViewBtnClick = () =>
+  const onBoardViewBtnClick = () => {
     navigate("/resource/board", { query: qParams });
+    localStorage.setItem("defaultResourceView", "board");
+  };
   const appliedFilters = formatFilter(qParams);
 
   const { loading, data, refetch } = useQuery(routes.listResourceRequests, {

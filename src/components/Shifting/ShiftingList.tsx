@@ -22,7 +22,6 @@ import useQuery from "@/Utils/request/useQuery";
 import ShiftingTable from "./ShiftingTable";
 
 export default function ListView() {
-  localStorage.setItem("defaultShiftView", "list");
   const {
     qParams,
     updateQuery,
@@ -33,6 +32,10 @@ export default function ListView() {
   } = useFilters({ cacheBlacklist: ["patient_name"] });
 
   const { t } = useTranslation();
+  const onBoardViewBtnClick = () => {
+    navigate("/shifting/board", { query: qParams });
+    localStorage.setItem("defaultShiftView", "board");
+  };
   const {
     data: shiftData,
     loading,
@@ -74,10 +77,7 @@ export default function ListView() {
           </div>
 
           <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-            <ButtonV2
-              className="py-[11px]"
-              onClick={() => navigate("/shifting/board", { query: qParams })}
-            >
+            <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
               <CareIcon icon="l-list-ul" className="rotate-90" />
               {t("board_view")}
             </ButtonV2>
