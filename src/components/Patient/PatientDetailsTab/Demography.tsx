@@ -329,6 +329,14 @@ export const Demography = (props: PatientProps) => {
     },
   ];
 
+  const isPatientDischarged = () => {
+    if (!patientData.is_active) return true;
+    if (facilityId !== patientData.facility_object?.id.toString()) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <div>
       <section
@@ -364,15 +372,11 @@ export const Demography = (props: PatientProps) => {
                   size="medium"
                   variant="custom"
                   className={
-                    !patientData.last_consultation?.discharge_date
+                    !isPatientDischarged()
                       ? "bg-blue-100 text-blue-800"
                       : "bg-red-100 text-red-800"
                   }
-                  text={
-                    !patientData.last_consultation?.discharge_date
-                      ? "LIVE"
-                      : "DISCHARGED"
-                  }
+                  text={!isPatientDischarged() ? "LIVE" : "DISCHARGED"}
                 />
               </div>
             </div>
