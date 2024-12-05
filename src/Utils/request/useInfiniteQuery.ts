@@ -5,7 +5,8 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
 import useQuery, { QueryOptions } from "@/Utils/request/useQuery";
 
-export interface InfiniteQueryOptions<TItem> extends QueryOptions<TItem> {
+export interface InfiniteQueryOptions<TItem>
+  extends QueryOptions<PaginatedResponse<TItem>> {
   deduplicateBy?: (item: TItem) => string | number;
 }
 
@@ -27,6 +28,7 @@ export function useInfiniteQuery<TItem>(
     onResponse: ({ data }) => {
       if (!data) return;
       const allItems = items.concat(data.results);
+
       const deduplicatedItems = options?.deduplicateBy
         ? Array.from(
             allItems
@@ -55,10 +57,9 @@ export function useInfiniteQuery<TItem>(
     loading,
     fetchNextPage,
     refetch,
+    setCurrentPage,
     currentPage,
     totalCount,
-    setCurrentPage,
-    setTotalCount,
     hasMore: totalCount / RESULTS_PER_PAGE_LIMIT > offset,
     ...queryResponse,
   };
