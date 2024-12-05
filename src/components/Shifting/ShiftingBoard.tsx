@@ -124,11 +124,7 @@ export default function BoardView() {
           />
 
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
-            <Button
-              variant={"primary"}
-              onClick={onListViewBtnClick}
-              className="h-[45px]"
-            >
+            <Button variant={"primary"} onClick={onListViewBtnClick}>
               <CareIcon icon="l-list-ul" className="mr-2" />
               {t("list_view")}
             </Button>

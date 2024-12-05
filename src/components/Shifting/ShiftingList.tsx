@@ -78,11 +78,7 @@ export default function ListView() {
           </div>
 
           <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-            <Button
-              className="h-[45px]"
-              variant={"primary"}
-              onClick={onBoardViewBtnClick}
-            >
+            <Button variant={"primary"} onClick={onBoardViewBtnClick}>
               <CareIcon icon="l-list-ul" className="rotate-90 mr-2" />
               {t("board_view")}
             </Button>

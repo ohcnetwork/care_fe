@@ -93,11 +93,7 @@ export default function BoardView() {
             currentTab={boardFilter !== ACTIVE ? 1 : 0}
           />
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
-            <Button
-              className="h-[45px]"
-              variant={"primary"}
-              onClick={onListViewBtnClick}
-            >
+            <Button variant={"primary"} onClick={onListViewBtnClick}>
               <CareIcon icon="l-list-ul" />
               {t("list_view")}
             </Button>
