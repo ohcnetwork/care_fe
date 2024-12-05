@@ -9,14 +9,14 @@ import {
 } from "@/Utils/request/types";
 import useQuery, { QueryOptions } from "@/Utils/request/useQuery";
 
-export interface InfiniteQueryOptions<TData, TItem>
-  extends QueryOptions<TData> {
+export interface InfiniteQueryOptions<TItem>
+  extends QueryOptions<PaginatedResponse<TItem>> {
   deduplicateBy?: (item: TItem) => string | number;
 }
 
-export function useInfiniteQuery<TData extends PaginatedResponse<TItem>, TItem>(
-  route: QueryRoute<TData>,
-  options?: InfiniteQueryOptions<TData, TItem>,
+export function useInfiniteQuery<TItem>(
+  route: QueryRoute<PaginatedResponse<TItem>>,
+  options?: InfiniteQueryOptions<TItem>,
 ) {
   const [items, setItems] = useState<TItem[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -29,7 +29,7 @@ export function useInfiniteQuery<TData extends PaginatedResponse<TItem>, TItem>(
   });
 
   const updateItems = useCallback(
-    (response: RequestResult<TData>) => {
+    (response: RequestResult<PaginatedResponse<TItem>>) => {
       if (!response?.data) return;
       const allItems = response.data.results || [];
       const deduplicatedItems = options?.deduplicateBy
@@ -45,7 +45,7 @@ export function useInfiniteQuery<TData extends PaginatedResponse<TItem>, TItem>(
 
       setItems(deduplicatedItems);
     },
-    [options],
+    [options?.deduplicateBy],
   );
 
   const fetchNextPage = useCallback(async () => {

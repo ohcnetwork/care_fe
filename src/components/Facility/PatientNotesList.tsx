@@ -8,7 +8,6 @@ import {
 } from "@/components/Facility/models";
 
 import routes from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { useInfiniteQuery } from "@/Utils/request/useInfiniteQuery";
 
 interface PatientNotesProps {
@@ -32,19 +31,16 @@ const PatientNotesList = (props: PatientNotesProps) => {
     currentPage,
     totalPages,
     setCurrentPage,
-  } = useInfiniteQuery<PaginatedResponse<PatientNotesModel>, PatientNotesModel>(
-    routes.getPatientNotes,
-    {
-      key: `patient-notes-${props.patientId}-${thread}`,
-      deduplicateBy: (note) => note.id,
-      query: {
-        thread,
-      },
-      pathParams: {
-        patientId: props.patientId,
-      },
+  } = useInfiniteQuery<PatientNotesModel>(routes.getPatientNotes, {
+    key: `patient-notes-${props.patientId}-${thread}`,
+    deduplicateBy: (note) => note.id,
+    query: {
+      thread,
     },
-  );
+    pathParams: {
+      patientId: props.patientId,
+    },
+  });
 
   useEffect(() => {
     setState((prevState: any) => ({
