@@ -85,7 +85,8 @@ class PatientLogupdate {
   }
 
   clickUpdateDetail() {
-    cy.verifyAndClickElement("#consultation-preview", "Update Details");
+    cy.verifyAndClickElement("#consultation-preview", "Update Log");
+    cy.wait(3000);
   }
 
   clearIntoElementById(elementId) {
