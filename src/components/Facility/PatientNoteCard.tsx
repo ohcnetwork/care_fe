@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 import { FilePreviewCard } from "@/components/Common/FilePreviewCard";
@@ -31,8 +32,6 @@ import {
   formatName,
   relativeDate,
 } from "@/Utils/utils";
-
-import { Avatar } from "../Common/Avatar";
 
 const PatientNoteCard = ({
   note,

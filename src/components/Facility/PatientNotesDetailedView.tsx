@@ -5,13 +5,15 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import CircularProgress from "@/components/Common/CircularProgress";
 import DiscussionNotesEditor from "@/components/Common/DiscussionNotesEditor";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
+import PatientNoteCard from "@/components/Facility/PatientNoteCard";
+import {
+  PatientNotesModel,
+  PatientNotesReplyModel,
+} from "@/components/Facility/models";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-
-import PatientNoteCard from "./PatientNoteCard";
-import { PatientNotesModel, PatientNotesReplyModel } from "./models";
 
 interface Props {
   patientId: string;

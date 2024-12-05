@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
+import { Avatar } from "@/components/Common/Avatar";
+
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { formatDisplayName } from "@/Utils/utils";
-
-import { Avatar } from "./Avatar";
 
 interface MentionsDropdownProps {
   onSelect: (user: { id: string; username: string }) => void;

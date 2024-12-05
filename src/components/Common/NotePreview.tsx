@@ -1,11 +1,10 @@
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 
+import { Avatar } from "@/components/Common/Avatar";
 import { UserBareMinimum } from "@/components/Users/models";
 
 import { formatDisplayName } from "@/Utils/utils";
-
-import { Avatar } from "./Avatar";
 
 const UserCard = ({ user }: { user: UserBareMinimum }) => (
   <div className="z-10 flex w-56 items-center space-x-3 rounded-lg bg-gray-200 px-3 pb-3 shadow-lg">

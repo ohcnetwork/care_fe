@@ -1,14 +1,14 @@
 import React from "react";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Avatar } from "@/components/Common/Avatar";
+import NotePreview from "@/components/Common/NotePreview";
 import { PatientNotesReplyModel } from "@/components/Facility/models";
 
 import { USER_TYPES_MAP } from "@/common/constants";
 
 import { formatDateTime, formatDisplayName, relativeDate } from "@/Utils/utils";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Avatar } from "../Common/Avatar";
-import NotePreview from "../Common/NotePreview";
 
 interface Props {
   parentNote: PatientNotesReplyModel | undefined;

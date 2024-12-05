@@ -3,15 +3,14 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Submit } from "@/components/Common/ButtonV2";
+import { FilePreviewCard } from "@/components/Common/FilePreviewCard";
+import MentionsDropdown from "@/components/Common/MentionDropdown";
+import NotePreview from "@/components/Common/NotePreview";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
 import { getCaretCoordinates, getCaretInfo } from "@/Utils/textEditor";
 import { classNames } from "@/Utils/utils";
-
-import { FilePreviewCard } from "./FilePreviewCard";
-import MentionsDropdown from "./MentionDropdown";
-import NotePreview from "./NotePreview";
 
 interface DiscussionNotesEditorProps {
   initialNote?: string;
