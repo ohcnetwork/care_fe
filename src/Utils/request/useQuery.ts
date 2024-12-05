@@ -62,5 +62,5 @@ export default function useQuery<TData>(
     }
   }, [runQuery, options?.refetchOnWindowFocus]);
 
-  return { ...response, loading, refetch: runQuery, setLoading };
+  return { ...response, loading, refetch: runQuery };
 }

@@ -76,7 +76,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setState((prevState) => ({
-        ...state,
+        ...prevState,
         notes: [data, ...prevState.notes],
         cPage: 1,
       }));
