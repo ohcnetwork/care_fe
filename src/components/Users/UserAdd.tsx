@@ -7,6 +7,38 @@ import Page from "@/components/Common/Page";
 import UserAddEditForm from "@/components/Users/UserAddEditForm";
 import { newUserFields } from "@/components/Users/UserFormValidations";
 
+import { classNames } from "@/Utils/utils";
+
+//Temporary: ABDM plug imports from UserAdd instead of UserAddEditForm
+export const validateRule = (
+  condition: boolean,
+  content: JSX.Element | string,
+  isInitialState: boolean = false,
+) => {
+  return (
+    <div>
+      {isInitialState ? (
+        <CareIcon icon="l-circle" className="text-xl text-gray-500" />
+      ) : condition ? (
+        <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
+      ) : (
+        <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
+      )}{" "}
+      <span
+        className={classNames(
+          isInitialState
+            ? "text-black"
+            : condition
+              ? "text-primary-500"
+              : "text-red-500",
+        )}
+      >
+        {content}
+      </span>
+    </div>
+  );
+};
+
 const UserAdd = () => {
   const { t } = useTranslation();
 
