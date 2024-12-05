@@ -124,7 +124,7 @@ class FacilityLocation {
   }
 
   clickAddBedButton() {
-    cy.get("button[id='add-new-bed']").filter(":visible").first().click();
+    cy.verifyAndClickElement("#add-new-bed", "Add New Bed(s)");
   }
 
   clickSubmitBedsButton() {
