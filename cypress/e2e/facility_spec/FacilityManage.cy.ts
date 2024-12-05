@@ -120,6 +120,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
     // edit a existing doctor
     facilityManage.clickEditFacilityDoctorCapacity();
+    cy.get('button[type="submit"]').should("be.disabled");
     facilityPage.fillDoctorCount(doctorModifiedCapacity);
     facilityPage.saveAndExitDoctorForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
@@ -149,6 +150,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.verifyFacilityBedCapacity(currentOccupied);
     // edit a existing bed
     facilityManage.clickEditFacilityBedCapacity();
+    cy.get('button[type="submit"]').should("be.disabled");
     facilityPage.fillTotalCapacity(totalUpdatedCapacity);
     facilityPage.fillCurrentlyOccupied(currentUpdatedOccupied);
     facilityPage.saveAndExitBedCapacityForm();
