@@ -31,21 +31,35 @@ export class AssetPage {
       });
   }
 
-  enterAssetDetails(
-    name?: string,
-    description?: string,
-    workingStatus?: string,
-    qrId?: string,
-    manufacturer?: string,
-    warranty?: string,
-    supportName?: string,
-    supportPhone?: string,
-    supportEmail?: string,
-    vendorName?: string,
-    serialNumber?: string,
-    lastServicedOn?: string,
-    notes?: string,
-  ) {
+  enterAssetDetails({
+    name,
+    description,
+    workingStatus,
+    qrId,
+    manufacturer,
+    warranty,
+    supportName,
+    supportPhone,
+    supportEmail,
+    vendorName,
+    serialNumber,
+    lastServicedOn,
+    notes,
+  }: {
+    name?: string;
+    description?: string;
+    workingStatus?: string;
+    qrId?: string;
+    manufacturer?: string;
+    warranty?: string;
+    supportName?: string;
+    supportPhone?: string;
+    supportEmail?: string;
+    vendorName?: string;
+    serialNumber?: string;
+    lastServicedOn?: string;
+    notes?: string;
+  }) {
     if (name) cy.get("[data-testid=asset-name-input] input").type(name);
     if (description)
       cy.get("[data-testid=asset-description-input] textarea").type(

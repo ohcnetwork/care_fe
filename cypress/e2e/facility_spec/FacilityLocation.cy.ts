@@ -69,21 +69,11 @@ describe("Location Management Section", () => {
     assetPage.createAsset();
     assetPage.selectFacility(facilityName);
     assetPage.selectLocation(locationName);
-    assetPage.enterAssetDetails(
-      assetName, // name
-      undefined, // description (skip)
-      "Working", // workingStatus
-      undefined, // qrId (skip)
-      undefined, // manufacturer (skip)
-      undefined, // warranty (skip)
-      undefined, // supportName (skip)
-      phone_number, // supportPhone
-      undefined, // supportEmail (skip)
-      undefined, // vendorName (skip)
-      undefined, // serialNumber (skip)
-      undefined, // lastServicedOn (skip)
-      undefined, // notes (skip)
-    );
+    assetPage.enterAssetDetails({
+      name: assetName,
+      workingStatus: "Working",
+      supportPhone: phone_number,
+    });
     assetPage.clickassetupdatebutton();
     cy.verifyNotification("Asset created successfully");
     cy.closeNotification();
