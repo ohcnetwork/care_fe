@@ -54,8 +54,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   const initialData: PatientNoteStateType = {
     notes: [],
-    cPage: 1,
-    totalPages: 1,
     facilityId: facilityId,
     patientId: patientId,
   };
@@ -83,7 +81,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
-      setState({ ...state, cPage: 1 });
+      setState({ ...state });
       setNoteField("");
       setReload(true);
       setReplyTo(undefined);
@@ -157,6 +155,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           ))}
         </div>
         <PatientConsultationNotesList
+          key={`patient-notes-${patientId}-${thread}`}
           state={state}
           setState={setState}
           reload={reload}

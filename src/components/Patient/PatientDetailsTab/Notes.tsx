@@ -48,8 +48,6 @@ const PatientNotes = (props: PatientNotesProps) => {
 
   const initialData: PatientNoteStateType = {
     notes: [],
-    cPage: 1,
-    totalPages: 1,
   };
   const [state, setState] = useState(initialData);
 
@@ -75,7 +73,6 @@ const PatientNotes = (props: PatientNotesProps) => {
         setState((prevState) => ({
           ...prevState,
           notes: [data, ...prevState.notes],
-          cPage: 1,
         }));
         setReplyTo(undefined);
         Notification.Success({ msg: "Note added successfully" });

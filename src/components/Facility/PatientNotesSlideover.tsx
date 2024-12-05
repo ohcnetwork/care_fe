@@ -63,8 +63,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const initialData: PatientNoteStateType = {
     notes: [],
-    cPage: 1,
-    totalPages: 1,
     patientId: props.patientId,
     facilityId: props.facilityId,
   };
@@ -97,7 +95,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
-      setState({ ...state, cPage: 1 });
+      setState({ ...state });
       setReload(true);
       setReplyTo(undefined);
     }

@@ -15,8 +15,7 @@ export function useInfiniteQuery<TItem>(
   options?: InfiniteQueryOptions<TItem>,
 ) {
   const [items, setItems] = useState<TItem[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalCount, setTotalCount] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>();
   const [offset, setOffset] = useState(0);
 
   const { refetch, loading, ...queryResponse } = useQuery(route, {
@@ -48,19 +47,16 @@ export function useInfiniteQuery<TItem>(
   const fetchNextPage = useCallback(async () => {
     if (loading) return;
 
-    const nextPageParam = currentPage * RESULTS_PER_PAGE_LIMIT;
-    setOffset(nextPageParam);
-  }, [currentPage, loading]);
+    setOffset((prevOffset) => prevOffset + RESULTS_PER_PAGE_LIMIT);
+  }, [offset, loading]);
 
   return {
     items,
     loading,
     fetchNextPage,
     refetch,
-    setCurrentPage,
-    currentPage,
     totalCount,
-    hasMore: totalCount / RESULTS_PER_PAGE_LIMIT > offset,
+    hasMore: items.length < (totalCount ?? 0),
     ...queryResponse,
   };
 }

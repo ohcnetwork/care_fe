@@ -39,7 +39,6 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     items: notes,
     loading,
     fetchNextPage,
-    currentPage,
     hasMore,
   } = useInfiniteQuery<PatientNotesModel>(routes.getPatientNotes, {
     pathParams: {
@@ -56,7 +55,6 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     setState((prevState: any) => ({
       ...prevState,
       notes,
-      cPage: currentPage,
     }));
   }, [notes, setState]);
 

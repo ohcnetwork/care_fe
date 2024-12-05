@@ -50,8 +50,6 @@ const PatientNotes = (props: PatientNotesProps) => {
 
   const initialData: PatientNoteStateType = {
     notes: [],
-    cPage: 1,
-    totalPages: 1,
   };
   const [state, setState] = useState(initialData);
 
@@ -78,7 +76,6 @@ const PatientNotes = (props: PatientNotesProps) => {
       setState((prevState) => ({
         ...prevState,
         notes: [data, ...prevState.notes],
-        cPage: 1,
       }));
       setReload(true);
       setReplyTo(undefined);
@@ -135,13 +132,17 @@ const PatientNotes = (props: PatientNotesProps) => {
                   ? "border-primary-500 font-bold text-secondary-800"
                   : "border-secondary-300 text-secondary-800",
               )}
-              onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
+              onClick={() => {
+                setThread(PATIENT_NOTES_THREADS[current]);
+                setState(initialData);
+              }}
             >
               {t(`patient_notes_thread__${current}`)}
             </button>
           ))}
         </div>
         <PatientNotesList
+          key={`patient-notes-${patientId}-${thread}`}
           state={state}
           setState={setState}
           patientId={patientId}

@@ -28,7 +28,6 @@ const PatientNotesList = (props: PatientNotesProps) => {
     loading,
     fetchNextPage,
     refetch,
-    currentPage,
     hasMore,
   } = useInfiniteQuery<PatientNotesModel>(routes.getPatientNotes, {
     deduplicateBy: (note) => note.id,
@@ -45,7 +44,6 @@ const PatientNotesList = (props: PatientNotesProps) => {
     setState((prevState: any) => ({
       ...prevState,
       notes,
-      cPage: currentPage,
     }));
   }, [notes, setState]);
 
