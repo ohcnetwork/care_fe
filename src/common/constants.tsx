@@ -672,7 +672,7 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
     icon: "l-notes",
   },
   {
-    id: "PATIENT_NOTE_MENTIONED",
+    id: "MENTIONED_IN_PATIENT_NOTE",
     text: "Patient Note Mentioned",
     icon: "l-at",
   },

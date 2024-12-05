@@ -78,7 +78,7 @@ const NotificationTile = ({
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
       case "PATIENT_NOTE_ADDED":
-      case "PATIENT_NOTE_MENTIONED":
+      case "MENTIONED_IN_PATIENT_NOTE":
         if (data.consultation) {
           return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/notes`;
         }
