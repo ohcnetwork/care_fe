@@ -56,14 +56,14 @@ const StatelessSidebar = ({
 }: StatelessSidebarProps) => {
   const { t } = useTranslation();
   const BaseNavItems: INavItem[] = [
-    { text: t("facilities"), to: "/facility", icon: "l-hospital" },
-    { text: t("patients"), to: "/patients", icon: "l-user-injured" },
-    { text: t("assets"), to: "/assets", icon: "l-shopping-cart-alt" },
-    { text: t("sample_test"), to: "/sample", icon: "l-medkit" },
-    { text: t("shifting"), to: "/shifting", icon: "l-ambulance" },
-    { text: t("resource"), to: "/resource", icon: "l-heart-medical" },
-    { text: t("users"), to: "/users", icon: "l-users-alt" },
-    { text: t("notice_board"), to: "/notice_board", icon: "l-meeting-board" },
+    { text: t("facilities"), to: "/facility", icon: "d-hospital" },
+    { text: t("patients"), to: "/patients", icon: "d-patient" },
+    { text: t("assets"), to: "/assets", icon: "d-folder" },
+    { text: t("sample_test"), to: "/sample", icon: "d-microscope" },
+    { text: t("shifting"), to: "/shifting", icon: "d-ambulance" },
+    { text: t("resource"), to: "/resource", icon: "d-book-open" },
+    { text: t("users"), to: "/users", icon: "d-people" },
+    { text: t("notice_board"), to: "/notice_board", icon: "d-notice-board" },
   ];
 
   const PluginNavItems = useCareAppNavItems();
