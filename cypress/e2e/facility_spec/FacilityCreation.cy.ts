@@ -1,8 +1,11 @@
+import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
+
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
+import { nonAdminRoles } from "../../pageobject/utils/userConfig";
 
 describe("Facility Creation", () => {
   let facilityUrl1: string;
@@ -60,7 +63,7 @@ describe("Facility Creation", () => {
   const facilityType = "Primary Health Centres";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -72,9 +75,13 @@ describe("Facility Creation", () => {
 
   it("Verify Facility Triage Function", () => {
     // mandatory field error throw
-    manageUserPage.typeFacilitySearch(facilityName2);
-    facilityPage.verifyFacilityBadgeContent(facilityName2);
-    manageUserPage.assertFacilityInCard(facilityName2);
+    facilityHome.typeFacilitySearch(facilityName2);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      facilityName2,
+      true,
+    );
+    facilityHome.assertFacilityInCard(facilityName2);
     facilityHome.verifyURLContains(facilityName2);
     facilityPage.visitAlreadyCreatedFacility();
     facilityPage.scrollToFacilityTriage();
@@ -237,10 +244,14 @@ describe("Facility Creation", () => {
       .contains(facilityNumber)
       .should("be.visible");
     // verify the facility homepage
-    cy.visit("/facility");
-    manageUserPage.typeFacilitySearch(facilityName);
-    facilityPage.verifyFacilityBadgeContent(facilityName);
-    manageUserPage.assertFacilityInCard(facilityName);
+    facilityHome.navigateToFacilityHomepage();
+    facilityHome.typeFacilitySearch(facilityName);
+    advanceFilters.verifyFilterBadgePresence(
+      "Facility/District Name",
+      facilityName,
+      true,
+    );
+    facilityHome.assertFacilityInCard(facilityName);
     facilityHome.verifyURLContains(facilityName);
   });
 
@@ -335,13 +346,8 @@ describe("Facility Creation", () => {
   });
 
   it("Access Restriction for Non-Admin Users to facility creation page", () => {
-    const nonAdminLoginMethods = [
-      loginPage.loginAsDevDoctor.bind(loginPage),
-      loginPage.loginAsStaff.bind(loginPage),
-    ];
-
-    nonAdminLoginMethods.forEach((loginMethod) => {
-      loginMethod();
+    nonAdminRoles.forEach((role) => {
+      loginPage.loginByRole(role);
       cy.visit("/facility/create");
       facilityPage.verifyErrorNotification(
         "You don't have permission to perform this action. Contact the admin",

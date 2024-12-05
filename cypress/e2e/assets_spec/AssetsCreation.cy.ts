@@ -1,18 +1,18 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import { AssetHome } from "../../pageobject/Asset/AssetHome";
 import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Asset", () => {
   const assetPage = new AssetPage();
-  const assetSearchPage = new AssetSearchPage();
+  const assetHome = new AssetHome();
   const loginPage = new LoginPage();
   const phone_number = "9999999999";
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -87,9 +87,8 @@ describe("Asset", () => {
     assetPage.verifyAssetCreation();
     assetPage.verifySuccessNotification("Asset created successfully");
 
-    assetSearchPage.typeSearchKeyword("New Test Asset 2");
-    assetSearchPage.pressEnter();
-    assetSearchPage.verifyAssetIsPresent("New Test Asset 2");
+    assetHome.typeAssetSearch("New Test Asset 2");
+    assetHome.verifyAssetIsPresent("New Test Asset 2");
   });
 
   it("Edit an Asset", () => {
@@ -114,9 +113,8 @@ describe("Asset", () => {
   });
 
   it("Verify Editted Asset", () => {
-    assetSearchPage.typeSearchKeyword("New Test Asset Edited");
-    assetSearchPage.pressEnter();
-    assetSearchPage.verifyAssetIsPresent("New Test Asset Edited");
+    assetHome.typeAssetSearch("New Test Asset Edited");
+    assetHome.verifyAssetIsPresent("New Test Asset Edited");
   });
 
   it("Configure an asset", () => {
@@ -159,8 +157,7 @@ describe("Asset", () => {
     assetPage.interceptAssetCreation();
     assetPage.clickCreateAsset();
     assetPage.verifyAssetCreation();
-    assetSearchPage.typeSearchKeyword("New Test Asset Vital");
-    assetSearchPage.pressEnter();
+    assetHome.typeAssetSearch("New Test Asset Vital");
     assetPage.openCreatedAsset();
     assetPage.configureVitalAsset("Host name", "192.168.1.20");
     assetPage.clickConfigureVital();

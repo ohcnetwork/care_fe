@@ -72,7 +72,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cross-env": "^7.0.3",
-    "cypress": "^13.15.2",
+    "cypress": "^13.16.0",
     "dayjs": "^1.11.13",
     "echarts": "^5.5.1",
     "echarts-for-react": "^3.0.2",
@@ -93,7 +93,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-pdf": "^9.1.1",
     "react-webcam": "^7.2.0",
-    "tailwind-merge": "^2.5.4",
+    "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "use-keyboard-shortcut": "^1.1.6",
     "xlsx": "^0.18.5"
