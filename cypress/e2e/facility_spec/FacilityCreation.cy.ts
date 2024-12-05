@@ -6,7 +6,6 @@ import FacilityPage, {
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
-import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import { nonAdminRoles } from "../../pageobject/utils/userConfig";
 
 describe("Facility Creation", () => {
@@ -15,7 +14,6 @@ describe("Facility Creation", () => {
   const loginPage = new LoginPage();
   const facilityHome = new FacilityHome();
   const manageUserPage = new ManageUserPage();
-  const userCreationPage = new UserCreationPage();
   const facilityFeature = [
     "CT Scan",
     "X-Ray",
@@ -144,7 +142,7 @@ describe("Facility Creation", () => {
     facilityPage.scrollToFacilityTriage();
     facilityPage.clickAddFacilityTriage();
     manageUserPage.clickSubmit();
-    userCreationPage.verifyErrorMessages(triageErrorMessage);
+    cy.verifyErrorMessages(triageErrorMessage);
     // create a entry and verify reflection
     facilityPage.fillEntryDate(triageDate);
     facilityPage.fillTriageEntryFields(
@@ -180,8 +178,7 @@ describe("Facility Creation", () => {
     // create facility with multiple capacity and verify form error message for facility form
     facilityPage.visitCreateFacilityPage();
     facilityPage.submitForm();
-    userCreationPage.verifyErrorMessages(facilityErrorMessage);
-    facilityPage.visitCreateFacilityPage();
+    cy.verifyErrorMessages(facilityErrorMessage);
     facilityPage.fillBasicDetails(testFacilityData.basic);
     facilityPage.fillLocationDetails(testFacilityData.location);
     facilityPage.fillOxygenDetails(testFacilityData.oxygen);
@@ -317,12 +314,12 @@ describe("Facility Creation", () => {
     // add no bed capacity and verify form error message
     facilityPage.isVisibleselectBedType();
     facilityPage.saveAndExitBedCapacityForm();
-    userCreationPage.verifyErrorMessages(bedErrorMessage);
+    cy.verifyErrorMessages(bedErrorMessage);
     facilityPage.clickcancelbutton();
     // add no doctor capacity and verify form error message
     facilityPage.isVisibleAreaOfSpecialization();
     facilityPage.clickdoctorcapacityaddmore();
-    userCreationPage.verifyErrorMessages(doctorErrorMessage);
+    cy.verifyErrorMessages(doctorErrorMessage);
     facilityPage.clickcancelbutton();
     cy.url().then((newUrl) => {
       facilityUrl1 = newUrl;

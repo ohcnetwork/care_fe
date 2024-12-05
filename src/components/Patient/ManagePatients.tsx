@@ -980,7 +980,7 @@ export const PatientManager = () => {
               text="Total Patients"
               count={data?.count || 0}
               loading={isLoading}
-              icon="l-user-injured"
+              icon="d-patient"
               className="pb-12"
             />
           </div>

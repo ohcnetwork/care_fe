@@ -93,11 +93,6 @@ class FacilityHome {
     cy.get('[data-test-id="occupancy-badge"]').should("be.visible");
   }
 
-  verifyAndCloseNotifyModal() {
-    cy.get("#cancel").should("be.visible");
-    cy.get("#cancel").click();
-  }
-
   navigateBack() {
     cy.go(-1);
   }
