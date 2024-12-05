@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import DoctorNote from "@/components/Facility/DoctorNote";
@@ -9,10 +9,12 @@ import {
 
 import useSlug from "@/hooks/useSlug";
 
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-
+// Assuming this is the correct import path
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { useInfiniteQuery } from "@/Utils/request/useInfiniteQuery";
+
+// Adjust if necessary
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
@@ -24,80 +26,60 @@ interface PatientNotesProps {
   setReplyTo?: (value: PatientNotesModel | undefined) => void;
 }
 
-const pageSize = RESULTS_PER_PAGE_LIMIT;
-
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
   const {
     state,
     setState,
-    reload,
     setReload,
+    reload,
     disableEdit,
     thread,
     setReplyTo,
   } = props;
+
   const consultationId = useSlug("consultation") ?? "";
 
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchNotes = async () => {
-    const { data } = await request(routes.getPatientNotes, {
+  const {
+    items: notes,
+    loading,
+    fetchNextPage,
+    currentPage,
+    totalPages,
+    setCurrentPage,
+  } = useInfiniteQuery<PaginatedResponse<PatientNotesModel>, PatientNotesModel>(
+    routes.getPatientNotes,
+    {
       pathParams: {
         patientId: props.state.patientId || "",
       },
       query: {
         consultation: consultationId,
         thread,
-        offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
       },
-    });
+      prefetch: true,
+    },
+  );
 
-    if (data) {
-      if (state.cPage === 1) {
-        setState((prevState) => ({
-          ...prevState,
-          notes: data.results,
-          totalPages: Math.ceil(data.count / pageSize),
-        }));
-      } else {
-        setState((prevState) => ({
-          ...prevState,
-          notes: [...prevState.notes, ...data.results],
-          totalPages: Math.ceil(data.count / pageSize),
-        }));
-      }
-    }
-  };
+  useEffect(() => {
+    setState((prevState: any) => ({
+      ...prevState,
+      notes,
+      cPage: currentPage,
+      totalPages: totalPages,
+    }));
+  }, [notes, setState]);
 
   useEffect(() => {
     if (reload) {
-      fetchNotes().then(() => {
-        setIsLoading(false);
-        setReload?.(false);
-      });
+      fetchNextPage().then(() => setReload?.(false));
     }
   }, [reload]);
 
   useEffect(() => {
-    setIsLoading(true);
-    setReload?.(true);
+    setCurrentPage(1);
   }, [thread]);
 
-  useEffect(() => {
-    setReload?.(true);
-  }, []);
-
-  const handleNext = () => {
-    if (state.cPage < state.totalPages) {
-      setState((prevState) => ({
-        ...prevState,
-        cPage: prevState.cPage + 1,
-      }));
-      setReload?.(true);
-    }
-  };
-
-  if (isLoading) {
+  if (loading && !state.notes.length) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
@@ -108,7 +90,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   return (
     <DoctorNote
       state={state}
-      handleNext={handleNext}
+      handleNext={fetchNextPage}
       setReload={setReload}
       disableEdit={disableEdit}
       setReplyTo={setReplyTo}

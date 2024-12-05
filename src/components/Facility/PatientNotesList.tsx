@@ -7,8 +7,6 @@ import {
   PatientNotesModel,
 } from "@/components/Facility/models";
 
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-
 import routes from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useInfiniteQuery } from "@/Utils/request/useInfiniteQuery";
@@ -38,13 +36,6 @@ const PatientNotesList = (props: PatientNotesProps) => {
     routes.getPatientNotes,
     {
       key: `patient-notes-${props.patientId}-${thread}`,
-      getNextPageParam: (cPage: number): number =>
-        (cPage - 1) * RESULTS_PER_PAGE_LIMIT,
-      getTotalPages: ({ data }) =>
-        data ? Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT) : 0,
-      itemsFromResponse: ({ data }) => {
-        return data ? data.results : [];
-      },
       deduplicateBy: (note) => note.id,
       query: {
         thread,
@@ -59,8 +50,8 @@ const PatientNotesList = (props: PatientNotesProps) => {
     setState((prevState: any) => ({
       ...prevState,
       notes,
-      totalPages: totalPages,
       cPage: currentPage,
+      totalPages: totalPages,
     }));
   }, [notes, setState]);
 

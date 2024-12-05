@@ -147,7 +147,10 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
                   ? "border-primary-500 font-bold text-secondary-800"
                   : "border-secondary-300 text-secondary-800",
               )}
-              onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
+              onClick={() => {
+                setThread(PATIENT_NOTES_THREADS[current]);
+                setState(initialData);
+              }}
             >
               {t(`patient_notes_thread__${current}`)}
             </button>
