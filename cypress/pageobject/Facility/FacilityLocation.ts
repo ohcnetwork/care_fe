@@ -13,6 +13,42 @@ class FacilityLocation {
     this.clickFacilityLocationManagement();
   }
 
+  fillLocationDetails(
+    name?: string,
+    description?: string,
+    type?: string,
+    middleware?: string,
+  ) {
+    if (name) this.typeLocationName(name);
+    if (description) this.fillDescription(description);
+    if (type) this.selectLocationType(type);
+    if (middleware) this.fillMiddlewareAddress(middleware);
+  }
+
+  fetchAndNavigateToLocationPage() {
+    cy.url().then((currentUrl) => {
+      const baseUrl = currentUrl.split("/location/")[0];
+      const locationUrl = `${baseUrl}/location/`;
+      cy.visit(locationUrl);
+    });
+  }
+
+  fillBedForm(
+    bedName?: string,
+    bedDescription?: string,
+    bedType?: string,
+    numberOfBeds?: number,
+  ) {
+    if (bedName) this.enterBedName(bedName);
+    if (bedDescription) {
+      this.enterBedDescription(bedDescription);
+    }
+    if (bedType) this.selectBedType(bedType);
+    if (numberOfBeds && numberOfBeds > 1) {
+      this.setMultipleBeds(numberOfBeds);
+    }
+  }
+
   clickAddNewLocationButton() {
     cy.get("#add-new-location").click();
   }
@@ -50,13 +86,8 @@ class FacilityLocation {
     cy.get("div").contains(name).click();
   }
 
-  enterLocationName(name: string) {
-    cy.get("input[id=name]").type(name);
-  }
-
   selectLocationType(type: string) {
-    cy.get("#location-type").click();
-    cy.get("li[role=option]").contains(type).click();
+    cy.clickAndSelectOption("#location-type", type);
   }
 
   fillMiddlewareAddress(address: string) {
@@ -84,8 +115,12 @@ class FacilityLocation {
       .contains(cardText)
       .parents("#location-cards")
       .within(() => {
-        cy.verifyAndClickElement("#manage-bed-button", "Manage Beds");
+        cy.get("#manage-bed-button").click();
       });
+  }
+
+  clickManageBedPopup() {
+    cy.get("#manage-beds").click();
   }
 
   clickAddBedButton() {
@@ -177,14 +212,19 @@ class FacilityLocation {
     cy.get("#manage-assets").click();
   }
 
-  clickDeleteLocation() {
-    cy.verifyAndClickElement("#delete-location-button", "Delete");
+  clickDeleteLocation(cardText: string) {
+    cy.get("#location-cards")
+      .contains(cardText)
+      .parents("#location-cards")
+      .within(() => {
+        cy.verifyAndClickElement("#delete-location-button", "Delete");
+      });
   }
 
   deleteBedWithName(text: string) {
-    cy.get("#bed-card")
+    cy.get("#bed-cards")
       .contains(text)
-      .parents("#bed-card")
+      .parents("#bed-cards")
       .within(() => {
         cy.get("#delete-bed-button").click();
       });
