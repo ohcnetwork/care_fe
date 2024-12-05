@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { Link, navigate } from "raviger";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -291,8 +291,34 @@ export const PatientManager = () => {
     return cleanedData;
   };
 
+  // solving the issue Unnecessary API Calls and Re-Renders on Patient Page #9308
+  const [paramValue, setParamValue] = useState(params);
+  const previousValueRef = useRef(params);
+
+  function compareObjects(obj1: object, obj2: object) {
+    const entries1 = Object.entries(obj1).map(([key, value]) => [
+      key,
+      String(value),
+    ]);
+    const entries2 = Object.entries(obj2).map(([key, value]) => [
+      key,
+      String(value),
+    ]);
+    entries1.sort(([key1], [key2]) => key1.localeCompare(key2));
+    entries2.sort(([key1], [key2]) => key1.localeCompare(key2));
+    return JSON.stringify(entries1) === JSON.stringify(entries2);
+  }
+
+  useEffect(() => {
+    if (compareObjects(previousValueRef.current, params)) {
+      return;
+    }
+    setParamValue(params);
+    previousValueRef.current = params;
+  }, [params]);
+
   const { loading: isLoading, data } = useQuery(routes.patientList, {
-    query: params,
+    query: paramValue,
   });
 
   const getTheCategoryFromId = () => {
