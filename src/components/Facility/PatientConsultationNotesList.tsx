@@ -9,12 +9,9 @@ import {
 
 import useSlug from "@/hooks/useSlug";
 
-// Assuming this is the correct import path
 import routes from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useInfiniteQuery } from "@/Utils/request/useInfiniteQuery";
-
-// Adjust if necessary
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
