@@ -130,104 +130,106 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
   };
 
   return (
-    <div className="relative mx-2 mb-2">
-      <div
-        className={classNames(
-          "rounded-t-lg border border-x-gray-300 bg-white shadow-sm transition-all duration-200",
-          isPreviewMode && "bg-gray-50",
-          className,
-        )}
-      >
-        {isPreviewMode ? (
-          <div className="max-h-[400px] min-h-[70px] overflow-y-auto p-4">
-            <NotePreview initialNote={text} />
-          </div>
-        ) : (
-          <AutoExpandingTextarea
-            id="discussion_notes_textarea"
-            ref={editorRef}
-            placeholder="Type your message here..."
-            className={classNames(
-              "w-full resize-none border-none p-3 align-middle text-sm outline-none focus:outline-none focus:ring-0",
-              maxRows ? "overflow-y-auto" : "overflow-hidden",
-            )}
-            value={text}
-            onInput={handleInput}
-            maxRows={maxRows}
-          />
-        )}
-        {fileUpload.files.length > 0 && (
-          <div className="flex flex-wrap gap-3 border-t border-gray-200 bg-gray-50/50 px-3 py-1">
-            {fileUpload.files.map((file, index) => (
-              <FilePreviewCard
-                key={index}
-                file={file}
-                index={index}
-                onRemove={fileUpload.removeFile}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="mx-2 mb-2">
+      <div className="relative">
+        <div
+          className={classNames(
+            "rounded-t-lg border border-x-gray-300 bg-white shadow-sm transition-all duration-200",
+            isPreviewMode && "bg-gray-50",
+            className,
+          )}
+        >
+          {isPreviewMode ? (
+            <div className="max-h-[400px] min-h-[70px] overflow-y-auto p-4">
+              <NotePreview initialNote={text} />
+            </div>
+          ) : (
+            <AutoExpandingTextarea
+              id="discussion_notes_textarea"
+              ref={editorRef}
+              placeholder="Type your message here..."
+              className={classNames(
+                "w-full resize-none border-none p-3 align-middle text-sm outline-none focus:outline-none focus:ring-0",
+                maxRows ? "overflow-y-auto" : "overflow-hidden",
+              )}
+              value={text}
+              onInput={handleInput}
+              maxRows={maxRows}
+            />
+          )}
+          {fileUpload.files.length > 0 && (
+            <div className="flex flex-wrap gap-3 border-t border-gray-200 bg-gray-50/50 px-3 py-1">
+              {fileUpload.files.map((file, index) => (
+                <FilePreviewCard
+                  key={index}
+                  file={file}
+                  index={index}
+                  onRemove={fileUpload.removeFile}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* toolbar*/}
-      <div className="flex items-center space-x-1 rounded-b-md border border-gray-300 bg-gray-100 pl-2 sm:space-x-2">
-        <label className="tooltip cursor-pointer rounded bg-gray-200/50 p-1 text-gray-700">
-          <CareIcon icon="l-paperclip" className="text-lg" />
-          <span className="tooltip-text tooltip-top -translate-x-4">
-            Attach File
-          </span>
-          <fileUpload.Input multiple />
-        </label>
-        <div className="mx-2 h-6 border-l border-gray-400"></div>
-        <button
-          onClick={() => fileUpload.handleCameraCapture()}
-          className="tooltip rounded bg-gray-200/50 p-1"
-        >
-          <CareIcon icon="l-camera" className="text-lg" />
-          <span className="tooltip-text tooltip-top -translate-x-1/2">
-            Camera
-          </span>
-        </button>
-        <button
-          onClick={() => fileUpload.handleAudioCapture()}
-          className="tooltip rounded bg-gray-200/50 p-1"
-        >
-          <CareIcon icon="l-microphone" className="text-lg" />
-          <span className="tooltip-text tooltip-top -translate-x-1/2">
-            Audio
-          </span>
-        </button>
-        <div className="mx-2 h-6 border-l border-gray-400"></div>
-        <button
-          onClick={handleMentionButtonClick}
-          className="tooltip rounded bg-gray-200/50 p-1"
-        >
-          <CareIcon icon="l-at" className="text-lg" />
-          <span className="tooltip-text tooltip-top -translate-x-1/2">
-            Mention
-          </span>
-        </button>
+        {/* toolbar*/}
+        <div className="flex items-center space-x-1 rounded-b-md border border-gray-300 bg-gray-100 pl-2 sm:space-x-2">
+          <label className="tooltip cursor-pointer rounded bg-gray-200/50 p-1 text-gray-700">
+            <CareIcon icon="l-paperclip" className="text-lg" />
+            <span className="tooltip-text tooltip-top -translate-x-4">
+              Attach File
+            </span>
+            <fileUpload.Input multiple />
+          </label>
+          <div className="mx-2 h-6 border-l border-gray-400"></div>
+          <button
+            onClick={() => fileUpload.handleCameraCapture()}
+            className="tooltip rounded bg-gray-200/50 p-1"
+          >
+            <CareIcon icon="l-camera" className="text-lg" />
+            <span className="tooltip-text tooltip-top -translate-x-1/2">
+              Camera
+            </span>
+          </button>
+          <button
+            onClick={() => fileUpload.handleAudioCapture()}
+            className="tooltip rounded bg-gray-200/50 p-1"
+          >
+            <CareIcon icon="l-microphone" className="text-lg" />
+            <span className="tooltip-text tooltip-top -translate-x-1/2">
+              Audio
+            </span>
+          </button>
+          <div className="mx-2 h-6 border-l border-gray-400"></div>
+          <button
+            onClick={handleMentionButtonClick}
+            className="tooltip rounded bg-gray-200/50 p-1"
+          >
+            <CareIcon icon="l-at" className="text-lg" />
+            <span className="tooltip-text tooltip-top -translate-x-1/2">
+              Mention
+            </span>
+          </button>
 
-        <div className="grow"></div>
+          <div className="grow"></div>
 
-        <Submit
-          id="add_doctor_note_button"
-          onClick={async () => {
-            if (!editorRef.current) return;
-            const id = await onAddNote();
-            if (!id) return;
-            await fileUpload.handleFileUpload(id);
-            onRefetch?.();
-            fileUpload.clearFiles();
-            editorRef.current.innerHTML = "";
-            setIsPreviewMode(false);
-          }}
-          className="max-w-12"
-          disabled={!isAuthorized || isPreviewMode}
-        >
-          <CareIcon icon="l-message" className="text-lg" />
-        </Submit>
+          <Submit
+            id="add_doctor_note_button"
+            onClick={async () => {
+              if (!editorRef.current) return;
+              const id = await onAddNote();
+              if (!id) return;
+              await fileUpload.handleFileUpload(id);
+              onRefetch?.();
+              fileUpload.clearFiles();
+              editorRef.current.innerHTML = "";
+              setIsPreviewMode(false);
+            }}
+            className="max-w-12"
+            disabled={!isAuthorized || isPreviewMode}
+          >
+            <CareIcon icon="l-message" className="text-lg" />
+          </Submit>
+        </div>
       </div>
 
       {showMentions && (
@@ -236,6 +238,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
           position={mentionPosition}
           editorRef={editorRef}
           filter={mentionFilter}
+          containerRef={editorRef}
         />
       )}
 

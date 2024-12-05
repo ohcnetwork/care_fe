@@ -78,7 +78,9 @@ const DoctorNote = (props: DoctorNoteProps) => {
                   key={note.id}
                   parentNote={note.reply_to_object}
                 >
-                  <div className="mt-3">{noteCard}</div>
+                  <div className={!note.reply_to_object ? "mt-3" : ""}>
+                    {noteCard}
+                  </div>
                 </DoctorNoteReplyPreviewCard>
               );
             }

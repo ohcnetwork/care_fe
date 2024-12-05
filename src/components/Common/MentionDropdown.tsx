@@ -4,12 +4,16 @@ import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
+import { formatDisplayName } from "@/Utils/utils";
+
+import { Avatar } from "./Avatar";
 
 interface MentionsDropdownProps {
   onSelect: (user: { id: string; username: string }) => void;
   position: { top: number; left: number };
   editorRef: React.RefObject<HTMLTextAreaElement>;
   filter: string;
+  containerRef: React.RefObject<HTMLTextAreaElement>;
 }
 
 const KEYS = {
@@ -24,6 +28,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
   position,
   editorRef,
   filter,
+  containerRef,
 }) => {
   const facilityId = useSlug("facility");
   const { data, loading } = useQuery(routes.getFacilityUsers, {
@@ -36,13 +41,14 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    if (editorRef.current) {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: position.top,
-        left: position.left,
+        top: rect.top + position.top,
+        left: rect.left + position.left,
       });
     }
-  }, [position, editorRef]);
+  }, [position, containerRef]);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) =>
@@ -97,8 +103,11 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
 
   return (
     <div
-      className="absolute z-10 max-h-36 w-64 overflow-y-auto rounded-md bg-white text-sm shadow-lg"
-      style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
+      className="fixed z-[9999] max-h-36 w-64 overflow-y-auto rounded-md bg-white text-sm shadow-lg"
+      style={{
+        top: `${dropdownPosition.top}px`,
+        left: `${dropdownPosition.left}px`,
+      }}
       role="listbox"
       aria-label="User mentions"
     >
@@ -123,9 +132,11 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
               })
             }
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
-              {user.first_name[0]}
-            </span>
+            <Avatar
+              name={formatDisplayName(user)}
+              imageUrl={user.read_profile_picture_url}
+              className="h-6 w-6 rounded-full text-black/50"
+            />
             <span className="truncate" title={user.username}>
               {user.username}
             </span>
