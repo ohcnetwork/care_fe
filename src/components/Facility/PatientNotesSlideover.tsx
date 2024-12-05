@@ -7,7 +7,7 @@ import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
 import DiscussionNotesEditor from "@/components/Common/DiscussionNotesEditor";
 import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
-import PatientConsultationNotesList from "@/components/Facility/PatientConsultationNotesList";
+import PatientNotesList from "@/components/Facility/PatientNotesList";
 import {
   PatientNoteStateType,
   PatientNotesReplyModel,
@@ -17,12 +17,16 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
 import useNotificationSubscriptionState from "@/hooks/useNotificationSubscriptionState";
 
-import { PATIENT_NOTES_THREADS } from "@/common/constants";
+import {
+  PATIENT_NOTES_THREADS,
+  RESULTS_PER_PAGE_LIMIT,
+} from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 import { classNames, keysOf } from "@/Utils/utils";
 
 interface PatientNotesProps {
@@ -43,7 +47,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   );
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
-  const [reload, setReload] = useState(false);
   const [reply_to, setReplyTo] = useState<PatientNotesReplyModel | undefined>(
     undefined,
   );
@@ -76,6 +79,26 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [noteField, setNoteField] = useState(
     localStorage.getItem(localStorageKey) || "",
   );
+
+  const { refetch, loading } = useQuery(routes.getPatientNotes, {
+    pathParams: { patientId },
+    query: {
+      offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
+      thread,
+    },
+    onResponse: ({ data }) => {
+      if (data) {
+        setState((prevState) => ({
+          ...prevState,
+          notes:
+            state.cPage === 1
+              ? data.results
+              : [...prevState.notes, ...data.results],
+          totalPages: Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT),
+        }));
+      }
+    },
+  });
 
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
@@ -110,7 +133,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       message?.facility_id == facilityId &&
       message?.patient_id == patientId
     ) {
-      setReload(true);
+      refetch();
     }
   });
 
@@ -228,14 +251,20 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               </button>
             ))}
           </div>
-          <PatientConsultationNotesList
+          <PatientNotesList
             state={state}
-            setState={setState}
-            reload={reload}
-            setReload={setReload}
+            handleNext={() => {
+              if (state.cPage < state.totalPages) {
+                setState((prevState) => ({
+                  ...prevState,
+                  cPage: prevState.cPage + 1,
+                }));
+              }
+            }}
+            refetch={refetch}
             disableEdit={!patientActive}
-            thread={thread}
             setReplyTo={setReplyTo}
+            isLoading={loading}
           />
           {patientActive && (
             <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
@@ -249,7 +278,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                     onChange={setNoteField}
                     onAddNote={onAddNote}
                     isAuthorized={isAuthorized}
-                    onRefetch={() => setReload(true)}
+                    onRefetch={refetch}
                     maxRows={10}
                     className="mt-2"
                   />

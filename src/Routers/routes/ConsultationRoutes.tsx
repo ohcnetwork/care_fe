@@ -1,5 +1,4 @@
 import { ConsultationDetails } from "@/components/Facility/ConsultationDetails";
-import ConsultationDoctorNotes from "@/components/Facility/ConsultationDoctorNotes";
 import { ConsultationForm } from "@/components/Facility/ConsultationForm";
 import Investigation from "@/components/Facility/Investigations";
 import InvestigationPrintPreview from "@/components/Facility/Investigations/InvestigationsPrintPreview";
@@ -13,6 +12,7 @@ import { DailyRoundListDetails } from "@/components/Patient/DailyRoundListDetail
 import { DailyRounds } from "@/components/Patient/DailyRounds";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
 import PatientConsentRecords from "@/components/Patient/PatientConsentRecords";
+import PatientNotes from "@/components/Patient/PatientNotes";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 
@@ -153,7 +153,7 @@ const consultationRoutes: AppRoutes = {
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/notes":
     ({ facilityId, patientId, consultationId }) => (
-      <ConsultationDoctorNotes
+      <PatientNotes
         facilityId={facilityId}
         patientId={patientId}
         consultationId={consultationId}

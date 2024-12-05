@@ -35,7 +35,7 @@ import {
 
 const PatientNoteCard = ({
   note,
-  setReload,
+  refetch,
   disableEdit,
   allowReply = true,
   allowThreadView = false,
@@ -44,7 +44,7 @@ const PatientNoteCard = ({
   setThreadViewNote,
 }: {
   note: PatientNotesModel;
-  setReload: any;
+  refetch?: () => void;
   disableEdit?: boolean;
   allowReply?: boolean;
   allowThreadView?: boolean;
@@ -92,7 +92,7 @@ const PatientNoteCard = ({
     if (res?.status === 200) {
       Success({ msg: "Note updated successfully" });
       setIsEditing(false);
-      setReload(true);
+      refetch?.();
     }
   };
 

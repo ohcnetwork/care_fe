@@ -1,176 +1,49 @@
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
-import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
-
-import DiscussionNotesEditor from "@/components/Common/DiscussionNotesEditor";
 import Page from "@/components/Common/Page";
-import DoctorNoteReplyPreviewCard from "@/components/Facility/DoctorNoteReplyPreviewCard";
-import PatientNotesList from "@/components/Facility/PatientNotesList";
-import {
-  PatientNoteStateType,
-  PatientNotesModel,
-} from "@/components/Facility/models";
+import PatientNotesListComponent from "@/components/Facility/PatientNotesListComponent";
 
-import useAuthUser from "@/hooks/useAuthUser";
-import { useMessageListener } from "@/hooks/useMessageListener";
-
-import { PATIENT_NOTES_THREADS } from "@/common/constants";
-
-import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
-import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import { classNames, keysOf } from "@/Utils/utils";
+import useQuery from "@/Utils/request/useQuery";
 
 interface PatientNotesProps {
   patientId: string;
   facilityId: string;
+  consultationId?: string;
 }
 
 const PatientNotes = (props: PatientNotesProps) => {
-  const { patientId, facilityId } = props;
-  const { t } = useTranslation();
-  const authUser = useAuthUser();
-  const [thread, setThread] = useState(
-    authUser.user_type === "Nurse"
-      ? PATIENT_NOTES_THREADS.Nurses
-      : PATIENT_NOTES_THREADS.Doctors,
-  );
+  const { patientId, facilityId, consultationId } = props;
 
-  const [patientActive, setPatientActive] = useState(true);
-  const [noteField, setNoteField] = useState("");
-  const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [reply_to, setReplyTo] = useState<PatientNotesModel>();
 
-  const initialData: PatientNoteStateType = {
-    notes: [],
-    cPage: 1,
-    totalPages: 1,
-  };
-  const [state, setState] = useState(initialData);
-
-  const onAddNote = async () => {
-    if (!/\S+/.test(noteField)) {
-      Notification.Error({
-        msg: "Note Should Contain At Least 1 Character",
-      });
-      return;
-    }
-
-    try {
-      const { res, data } = await request(routes.addPatientNote, {
-        pathParams: { patientId: patientId },
-        body: {
-          note: noteField,
-          thread,
-          reply_to: reply_to?.id,
-        },
-      });
-      if (res?.status === 201) {
-        Notification.Success({ msg: "Note added successfully" });
-        setNoteField("");
-        setReload(!reload);
-        setState({ ...state, cPage: 1 });
-        setReplyTo(undefined);
-        return data?.id;
-      } else {
-        throw new Error("Failed to add note");
+  useQuery(routes.getPatient, {
+    pathParams: { id: patientId },
+    onResponse: ({ data }) => {
+      if (data) {
+        setPatientName(data.name ?? "");
+        setFacilityName(data.facility_object?.name ?? "");
       }
-    } catch (error) {
-      Notification.Error({
-        msg: "Failed to add note. Please try again.",
-      });
-      return undefined;
-    }
-  };
-
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const { data } = await request(routes.getPatient, {
-          pathParams: { id: patientId },
-        });
-        if (data) {
-          setPatientActive(data.is_active ?? true);
-          setPatientName(data.name ?? "");
-          setFacilityName(data.facility_object?.name ?? "");
-        }
-      }
-    }
-    fetchPatientName();
-  }, [patientId]);
-
-  useMessageListener((data) => {
-    const message = data?.message;
-    if (
-      (message?.from == "patient/doctor_notes/create" ||
-        message?.from == "patient/doctor_notes/edit") &&
-      message?.facility_id == facilityId &&
-      message?.patient_id == patientId
-    ) {
-      setReload(true);
-    }
+    },
   });
 
   return (
     <Page
-      title="Patient Notes"
-      className="flex h-screen flex-col"
+      title="Discussion Notes"
+      className="relative flex min-h-[calc(100vh-3rem)] flex-col"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
         [patientId]: { name: patientName },
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="relative mx-3 my-2 flex grow flex-col rounded-lg border border-secondary-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <div className="absolute inset-x-0 top-0 z-10 flex bg-secondary-200 text-sm shadow-md">
-          {keysOf(PATIENT_NOTES_THREADS).map((current) => (
-            <button
-              id={`patient-note-tab-${current}`}
-              key={current}
-              className={classNames(
-                "flex flex-1 justify-center border-b-2 py-2",
-                thread === PATIENT_NOTES_THREADS[current]
-                  ? "border-primary-500 font-bold text-secondary-800"
-                  : "border-secondary-300 text-secondary-800",
-              )}
-              onClick={() => setThread(PATIENT_NOTES_THREADS[current])}
-            >
-              {t(`patient_notes_thread__${current}`)}
-            </button>
-          ))}
-        </div>
-        <PatientNotesList
-          state={state}
-          setState={setState}
+      <div className="flex-1 overflow-hidden">
+        <PatientNotesListComponent
           patientId={patientId}
           facilityId={facilityId}
-          reload={reload}
-          setReload={setReload}
-          thread={thread}
-          setReplyTo={setReplyTo}
+          consultationId={consultationId}
         />
-        <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
-          {({ isAuthorized }) => (
-            <DoctorNoteReplyPreviewCard
-              parentNote={reply_to}
-              cancelReply={() => setReplyTo(undefined)}
-            >
-              <DiscussionNotesEditor
-                initialNote={noteField}
-                onChange={setNoteField}
-                onAddNote={onAddNote}
-                isAuthorized={isAuthorized && patientActive}
-                onRefetch={() => setReload(true)}
-                maxRows={10}
-                className="mt-2"
-              />
-            </DoctorNoteReplyPreviewCard>
-          )}
-        </AuthorizedChild>
       </div>
     </Page>
   );

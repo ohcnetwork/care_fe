@@ -14,10 +14,11 @@ import {
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   patientId: string;
-  consultationId: string;
+  consultationId?: string;
   noteId: string;
   thread: PatientNotesModel["thread"];
   setThreadViewNote?: (note: string) => void;
@@ -26,20 +27,39 @@ interface Props {
 const PatientNotesDetailedView = (props: Props) => {
   const { patientId, consultationId, noteId, thread, setThreadViewNote } =
     props;
-  const [isLoading, setIsLoading] = useState(true);
-  const [reload, setReload] = useState(false);
-  const [state, setState] = useState<PatientNotesModel>();
   const [noteField, setNoteField] = useState("");
   const [reply_to, setReplyTo] = useState<PatientNotesReplyModel | undefined>(
     undefined,
   );
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const {
+    data: state,
+    loading,
+    refetch,
+  } = useQuery(routes.getPatientNote, {
+    pathParams: {
+      patientId: patientId,
+      noteId,
+    },
+    query: {
+      consultation: consultationId,
+      thread,
+    },
+  });
+
   const scrollToBottom = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   };
+
+  useEffect(() => {
+    if (state) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [state]);
+
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -77,58 +97,20 @@ const PatientNotesDetailedView = (props: Props) => {
       return undefined;
     }
   };
-  const fetchNotes = async () => {
-    setIsLoading(true);
 
-    const { data } = await request(routes.getPatientNote, {
-      pathParams: {
-        patientId: patientId,
-        noteId,
-      },
-      query: {
-        consultation: consultationId,
-        thread,
-      },
-    });
-
-    if (data) {
-      setState(data);
-      setTimeout(scrollToBottom, 100);
-    }
-    setIsLoading(false);
-    setReload(false);
-  };
-
-  // Fetch notes when reload is triggered
-  useEffect(() => {
-    if (reload) {
-      fetchNotes();
-    }
-  }, [reload]);
-
-  // Fetch notes when thread or noteId changes
-  useEffect(() => {
-    fetchNotes();
-  }, [thread, noteId]);
-
-  // Set reload to true on component mount
-  useEffect(() => {
-    setReload(true);
-  }, []);
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center bg-white">
+      <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
       </div>
     );
   }
 
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white sm:w-[500px]">
+    <div className="flex w-full flex-col overflow-hidden bg-white">
       {state && (
         <div className="flex h-full flex-col">
-          <div className="px-3 pt-2">
+          <div className="flex-shrink-0 border-b border-secondary-300 px-3 pt-2 pb-2">
             <div className="mb-2 flex items-center justify-between">
               <h4 className="text-lg">Note</h4>
               <button
@@ -141,13 +123,13 @@ const PatientNotesDetailedView = (props: Props) => {
             </div>
             <PatientNoteCard
               note={state}
-              setReload={setReload}
-              allowReply={false}
+              refetch={refetch}
+              setReplyTo={setReplyTo}
             />
           </div>
 
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div className="flex-shrink-0 border-b border-secondary-300 flex items-center justify-between px-4 py-2">
               <h4 className="text-lg text-slate-600">Replies</h4>
               {state.child_notes.length > 0 && (
                 <div className="text-sm text-secondary-500">
@@ -157,31 +139,36 @@ const PatientNotesDetailedView = (props: Props) => {
               )}
             </div>
 
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-3">
+            <div
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto px-3 sm:max-h-[350px]"
+            >
               {state.child_notes.length > 0 ? (
-                state.child_notes.map((note) => {
-                  const parentNote = state.child_notes.find(
-                    (n) => n.id === note.reply_to,
-                  );
-                  return (
-                    <DoctorNoteReplyPreviewCard
-                      key={note.id}
-                      parentNote={
-                        note.reply_to !== state.id ? parentNote : undefined
-                      }
-                    >
-                      <div className="mt-3">
-                        <PatientNoteCard
-                          note={note as PatientNotesModel}
-                          setReload={setReload}
-                          setReplyTo={setReplyTo}
-                        />
-                      </div>
-                    </DoctorNoteReplyPreviewCard>
-                  );
-                })
+                <div className="flex flex-col">
+                  {state.child_notes.map((note) => {
+                    const parentNote = state.child_notes.find(
+                      (n) => n.id === note.reply_to,
+                    );
+                    return (
+                      <DoctorNoteReplyPreviewCard
+                        key={note.id}
+                        parentNote={
+                          note.reply_to !== state.id ? parentNote : undefined
+                        }
+                      >
+                        <div className="mt-2">
+                          <PatientNoteCard
+                            note={note as PatientNotesModel}
+                            refetch={refetch}
+                            setReplyTo={setReplyTo}
+                          />
+                        </div>
+                      </DoctorNoteReplyPreviewCard>
+                    );
+                  })}
+                </div>
               ) : (
-                <div className="flex h-full flex-1 items-center justify-center text-center">
+                <div className="flex h-full items-center justify-center text-center">
                   <div className="flex flex-col items-center gap-2">
                     <CareIcon
                       icon="l-comment-alt"
@@ -194,21 +181,21 @@ const PatientNotesDetailedView = (props: Props) => {
                 </div>
               )}
             </div>
-          </div>
 
-          <div className="m-1 max-sm:mr-3">
-            <DoctorNoteReplyPreviewCard
-              parentNote={reply_to}
-              cancelReply={() => setReplyTo(undefined)}
-            >
-              <DiscussionNotesEditor
-                onAddNote={onAddNote}
-                onChange={setNoteField}
-                initialNote={noteField}
-                onRefetch={() => setReload(true)}
-                maxRows={10}
-              />
-            </DoctorNoteReplyPreviewCard>
+            <div className="flex-shrink-0 border-secondary-300 mt-2">
+              <DoctorNoteReplyPreviewCard
+                parentNote={reply_to}
+                cancelReply={() => setReplyTo(undefined)}
+              >
+                <DiscussionNotesEditor
+                  onAddNote={onAddNote}
+                  onChange={setNoteField}
+                  initialNote={noteField}
+                  onRefetch={() => refetch()}
+                  maxRows={10}
+                />
+              </DoctorNoteReplyPreviewCard>
+            </div>
           </div>
         </div>
       )}
