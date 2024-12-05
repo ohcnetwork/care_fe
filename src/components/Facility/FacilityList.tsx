@@ -189,7 +189,7 @@ export const FacilityList = () => {
           text="Total Facilities"
           count={permittedData ? permittedData.count : 0}
           loading={isLoading}
-          icon="l-hospital"
+          icon="d-hospital"
           className=""
         />
         <SearchByMultipleFields

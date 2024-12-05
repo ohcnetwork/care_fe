@@ -997,7 +997,7 @@ export const PatientManager = () => {
             text={t("total_patients")}
             count={data?.count || 0}
             loading={isLoading}
-            icon="l-user-injured"
+            icon="d-patient"
           />
         </div>
 

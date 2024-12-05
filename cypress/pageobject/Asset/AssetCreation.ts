@@ -31,39 +31,68 @@ export class AssetPage {
       });
   }
 
-  enterAssetDetails(
-    name: string,
-    description: string,
-    workingStatus: string,
-    qrId: string,
-    manufacturer: string,
-    warranty: string,
-    supportName: string,
-    supportPhone: string,
-    supportEmail: string,
-    vendorName: string,
-    serialNumber: string,
-    lastServicedOn: string,
-    notes: string,
-  ) {
-    cy.get("[data-testid=asset-name-input] input").type(name);
-    cy.get("[data-testid=asset-description-input] textarea").type(description);
-    cy.get("[data-testid=asset-working-status-input] li")
-      .contains(workingStatus)
-      .click();
-    cy.get("[data-testid=asset-qr-id-input] input").type(qrId);
-    cy.get("[data-testid=asset-manufacturer-input] input").type(manufacturer);
-    cy.get("[data-testid=asset-warranty-input] input").type(warranty);
-    cy.get("[data-testid=asset-support-name-input] input").type(supportName);
-    cy.get("#customer-support-phone-div").type(supportPhone);
-    cy.get("[data-testid=asset-support-email-input] input").type(supportEmail);
-    cy.get("[data-testid=asset-vendor-name-input] input").type(vendorName);
-    cy.get("[data-testid=asset-serial-number-input] input").type(serialNumber);
-    cy.clickAndTypeDate(
-      "[data-testid=asset-last-serviced-on-input]",
-      lastServicedOn,
-    );
-    cy.get("[data-testid=asset-notes-input] textarea").type(notes);
+  enterAssetDetails({
+    name,
+    description,
+    workingStatus,
+    qrId,
+    manufacturer,
+    warranty,
+    supportName,
+    supportPhone,
+    supportEmail,
+    vendorName,
+    serialNumber,
+    lastServicedOn,
+    notes,
+  }: {
+    name?: string;
+    description?: string;
+    workingStatus?: string;
+    qrId?: string;
+    manufacturer?: string;
+    warranty?: string;
+    supportName?: string;
+    supportPhone?: string;
+    supportEmail?: string;
+    vendorName?: string;
+    serialNumber?: string;
+    lastServicedOn?: string;
+    notes?: string;
+  }) {
+    if (name) cy.get("[data-testid=asset-name-input] input").type(name);
+    if (description)
+      cy.get("[data-testid=asset-description-input] textarea").type(
+        description,
+      );
+    if (workingStatus)
+      cy.get("[data-testid=asset-working-status-input] li")
+        .contains(workingStatus)
+        .click();
+    if (qrId) cy.get("[data-testid=asset-qr-id-input] input").type(qrId);
+    if (manufacturer)
+      cy.get("[data-testid=asset-manufacturer-input] input").type(manufacturer);
+    if (warranty)
+      cy.get("[data-testid=asset-warranty-input] input").type(warranty);
+    if (supportName)
+      cy.get("[data-testid=asset-support-name-input] input").type(supportName);
+    if (supportPhone) cy.get("#customer-support-phone-div").type(supportPhone);
+    if (supportEmail)
+      cy.get("[data-testid=asset-support-email-input] input").type(
+        supportEmail,
+      );
+    if (vendorName)
+      cy.get("[data-testid=asset-vendor-name-input] input").type(vendorName);
+    if (serialNumber)
+      cy.get("[data-testid=asset-serial-number-input] input").type(
+        serialNumber,
+      );
+    if (lastServicedOn)
+      cy.clickAndTypeDate(
+        "[data-testid=asset-last-serviced-on-input]",
+        lastServicedOn,
+      );
+    if (notes) cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 
   interceptAssetCreation() {
