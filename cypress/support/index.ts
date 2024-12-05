@@ -45,6 +45,7 @@ declare global {
         selector: string,
         texts: string[],
       ): Chainable<Element>;
+      verifyErrorMessages(errorMessages: string[]): Chainable<Subject>;
     }
   }
 }
