@@ -61,30 +61,25 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
       if (document.activeElement !== editorRef.current) {
         return;
       }
+
       if (event.key === KEYS.ENTER && filteredUsers.length > 0) {
-        event.preventDefault();
-        if (selectedIndex !== null) {
-          onSelect({
-            id: filteredUsers[selectedIndex].id.toString(),
-            username: filteredUsers[selectedIndex].username + " ",
-          });
-        } else {
-          onSelect({
-            id: filteredUsers[0].id.toString(),
-            username: filteredUsers[0].username + " ",
-          });
-        }
+        const selectedUser =
+          selectedIndex !== null
+            ? filteredUsers[selectedIndex]
+            : filteredUsers[0];
+
+        onSelect({
+          id: selectedUser.id.toString(),
+          username: selectedUser.username + " ",
+        });
       } else if (event.key === KEYS.ESCAPE) {
-        event.preventDefault();
         onSelect({ id: "", username: "" });
       } else if (event.key === KEYS.ARROW_DOWN) {
-        event.preventDefault();
         setSelectedIndex((prevIndex) => {
           if (prevIndex === null) return 0;
           return Math.min(filteredUsers.length - 1, prevIndex + 1);
         });
       } else if (event.key === KEYS.ARROW_UP) {
-        event.preventDefault();
         setSelectedIndex((prevIndex) => {
           if (prevIndex === null) return filteredUsers.length - 1;
           return Math.max(0, prevIndex - 1);
@@ -111,17 +106,22 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
       role="listbox"
       aria-label="User mentions"
     >
-      {loading && (
-        <div className="p-2 text-gray-500" role="status" aria-live="polite">
+      {loading ? (
+        <div
+          className="p-2 text-secondary-500"
+          role="status"
+          aria-live="polite"
+        >
           <span className="inline-block animate-spin">⌛</span> Loading users...
         </div>
-      )}
-      {filteredUsers.length > 0 && !loading ? (
+      ) : filteredUsers.length > 0 ? (
         filteredUsers.map((user, index) => (
           <div
             key={user.id}
             className={`flex cursor-pointer items-center gap-2 p-2 ${
-              index === selectedIndex ? "bg-gray-100" : "hover:bg-gray-100"
+              index === selectedIndex
+                ? "bg-secondary-100"
+                : "hover:bg-secondary-100"
             }`}
             role="option"
             aria-selected={index === selectedIndex}
@@ -143,8 +143,12 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
           </div>
         ))
       ) : (
-        <div className="p-2 text-gray-500" role="status" aria-live="polite">
-          No users found
+        <div
+          className="p-2 text-secondary-500"
+          role="status"
+          aria-live="polite"
+        >
+          {filter ? "No matching users found" : "Type to search users"}
         </div>
       )}
     </div>

@@ -132,7 +132,7 @@ const PatientNoteCard = ({
       <audio ref={audioRef} onEnded={() => setIsPlaying(null)} />
       <div
         className={classNames(
-          "group flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800",
+          "group flex flex-col rounded-lg border border-secondary-300 bg-white px-3 py-1 text-secondary-800",
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
@@ -163,7 +163,7 @@ const PatientNoteCard = ({
                       onClick={() => {
                         setIsEditing(true);
                       }}
-                      className="bg-gray-100 p-2"
+                      className="bg-secondary-100 p-2"
                     >
                       <CareIcon icon="l-pen" className="h-4 w-4" />
                     </ButtonV2>
@@ -174,7 +174,7 @@ const PatientNoteCard = ({
                     onClick={() => {
                       setReplyTo && setReplyTo(note);
                     }}
-                    className="bg-gray-100 p-2"
+                    className="bg-secondary-100 p-2"
                   >
                     <CareIcon icon="l-corner-up-left-alt" className="h-4 w-4" />
                   </ButtonV2>
@@ -207,7 +207,7 @@ const PatientNoteCard = ({
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-secondary-600">
                 <div className="tooltip inline">
                   <span className="tooltip-text tooltip-bottom">
                     {formatDateTime(note.created_date)}
@@ -258,7 +258,7 @@ const PatientNoteCard = ({
                 if (allowThreadView && setThreadViewNote)
                   setThreadViewNote(note.id);
               }}
-              className={`pl-11 text-sm text-gray-700 ${allowThreadView ? "cursor-pointer" : ""}`}
+              className={`pl-11 text-sm text-secondary-700 ${allowThreadView ? "cursor-pointer" : ""}`}
             >
               <NotePreview
                 initialNote={noteField}
@@ -280,8 +280,8 @@ const PatientNoteCard = ({
                   />
                 ))}
               </div>
-              {mode == "thread-view" && note.replies.length > 0 && (
-                <div className="mt-2 flex items-center text-xs text-gray-500">
+              {mode == "thread-view" && note.child_notes.length > 0 && (
+                <div className="mt-2 flex items-center text-xs text-secondary-500">
                   <CareIcon icon="l-corner-down-right" className="h-3 w-3" />
                   {note.child_notes.length}{" "}
                   {note.child_notes.length === 1 ? "Reply" : "Replies"}

@@ -7,18 +7,18 @@ import { UserBareMinimum } from "@/components/Users/models";
 import { formatDisplayName } from "@/Utils/utils";
 
 const UserCard = ({ user }: { user: UserBareMinimum }) => (
-  <div className="z-10 flex w-56 items-center space-x-3 rounded-lg bg-gray-200 px-3 pb-3 shadow-lg">
+  <div className="z-10 flex w-56 items-center space-x-3 rounded-lg bg-secondary-200 px-3 pb-3 shadow-lg">
     <Avatar
       name={formatDisplayName(user)}
       imageUrl={user.read_profile_picture_url}
       className="h-12 w-12 rounded-full text-black/50"
     />
     <div className="space-y-0">
-      <h3 className="text-sm font-semibold text-gray-800">
+      <h3 className="text-sm font-semibold text-secondary-800">
         {user.first_name} {user.last_name}
       </h3>
-      <p className="text-xs text-gray-500">@{user.username}</p>
-      <p className="text-xs text-gray-500">{user.user_type}</p>
+      <p className="text-xs text-secondary-500">@{user.username}</p>
+      <p className="text-xs text-secondary-500">{user.user_type}</p>
     </div>
   </div>
 );
@@ -99,7 +99,7 @@ const NotePreview = ({
           }}
         >
           <UserCard user={mentionedUsersMap[hoveredUserData.username]} />
-          <div className="absolute left-2 -bottom-1 h-4 w-4 rotate-45 transform bg-gray-200"></div>
+          <div className="absolute left-2 -bottom-1 h-4 w-4 rotate-45 transform bg-secondary-200"></div>
         </div>
       )}
     </div>

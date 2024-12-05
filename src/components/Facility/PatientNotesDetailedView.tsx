@@ -125,7 +125,7 @@ const PatientNotesDetailedView = (props: Props) => {
   }
 
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-lg border border-gray-300 bg-white sm:w-[500px]">
+    <div className="flex w-full flex-col overflow-hidden rounded-lg border border-secondary-300 bg-white sm:w-[500px]">
       {state && (
         <div className="flex h-full flex-col">
           <div className="px-3 pt-2">
@@ -150,7 +150,7 @@ const PatientNotesDetailedView = (props: Props) => {
             <div className="flex items-center justify-between px-4 py-2">
               <h4 className="text-lg text-slate-600">Replies</h4>
               {state.child_notes.length > 0 && (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-secondary-500">
                   {state.child_notes.length}{" "}
                   {state.child_notes.length > 1 ? "replies" : "reply"}
                 </div>
@@ -185,9 +185,11 @@ const PatientNotesDetailedView = (props: Props) => {
                   <div className="flex flex-col items-center gap-2">
                     <CareIcon
                       icon="l-comment-alt"
-                      className="text-4xl text-gray-400"
+                      className="text-4xl text-secondary-400"
                     />
-                    <h4 className="text-lg text-gray-500">No replies yet</h4>
+                    <h4 className="text-lg text-secondary-500">
+                      No replies yet
+                    </h4>
                   </div>
                 </div>
               )}

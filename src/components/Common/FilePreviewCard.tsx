@@ -50,7 +50,7 @@ export function FilePreviewCard({
   return (
     <div
       className={classNames(
-        "relative mt-1 h-20 w-20 cursor-pointer overflow-hidden rounded-lg bg-gray-100 shadow-sm transition-all duration-200 hover:bg-gray-200/50",
+        "relative mt-1 h-20 w-20 cursor-pointer overflow-hidden rounded-lg bg-secondary-100 shadow-sm transition-all duration-200 hover:bg-secondary-200/50",
         onClick && "cursor-pointer",
       )}
       onClick={onClick}
@@ -61,7 +61,7 @@ export function FilePreviewCard({
             e.stopPropagation();
             onRemove(index);
           }}
-          className="absolute right-0 top-0 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 transition-colors duration-200 hover:bg-gray-400 hover:text-white"
+          className="absolute right-0 top-0 z-10 h-5 w-5 rounded-full bg-secondary-300 text-secondary-800 transition-colors duration-200 hover:bg-secondary-400 hover:text-white"
         >
           <CareIcon
             icon="l-times-circle"
@@ -91,7 +91,7 @@ export function FilePreviewCard({
             icon={isPlaying ? "l-pause" : "l-play"}
             className="h-6 w-6 text-primary-600"
           />
-          <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
+          <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-secondary-600">
             {fileName}
           </span>
         </div>
@@ -99,9 +99,9 @@ export function FilePreviewCard({
         <div className="flex h-full w-full flex-col items-center justify-center p-2">
           <CareIcon
             icon={icons[fileType]}
-            className="shrink-0 text-2xl text-gray-600"
+            className="shrink-0 text-2xl text-secondary-600"
           />
-          <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
+          <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-secondary-600">
             {fileName}
           </span>
         </div>

@@ -157,8 +157,8 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
       <div className="relative">
         <div
           className={classNames(
-            "rounded-t-lg border border-x-gray-300 bg-white shadow-sm transition-all duration-200",
-            isPreviewMode && "bg-gray-50",
+            "rounded-t-lg border border-x-secondary-300 bg-white shadow-sm transition-all duration-200",
+            isPreviewMode && "bg-secondary-50",
             className,
           )}
         >
@@ -181,7 +181,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
             />
           )}
           {fileUpload.files.length > 0 && (
-            <div className="flex flex-wrap gap-3 border-t border-gray-200 bg-gray-50/50 px-3 py-1">
+            <div className="flex flex-wrap gap-3 border-t border-secondary-200 bg-secondary-50/50 px-3 py-1">
               {fileUpload.files.map((file, index) => (
                 <FilePreviewCard
                   key={index}
@@ -195,18 +195,18 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
         </div>
 
         {/* toolbar*/}
-        <div className="flex items-center space-x-1 rounded-b-md border border-gray-300 bg-gray-100 pl-2 sm:space-x-2">
-          <label className="tooltip cursor-pointer rounded bg-gray-200/50 p-1 text-gray-700">
+        <div className="flex items-center space-x-1 rounded-b-md border border-secondary-300 bg-secondary-100 pl-2 sm:space-x-2">
+          <label className="tooltip cursor-pointer rounded bg-secondary-200/50 p-1 text-secondary-700">
             <CareIcon icon="l-paperclip" className="text-lg" />
             <span className="tooltip-text tooltip-top -translate-x-4">
               Attach File
             </span>
             <fileUpload.Input multiple />
           </label>
-          <div className="mx-2 h-6 border-l border-gray-400"></div>
+          <div className="mx-2 h-6 border-l border-secondary-400"></div>
           <button
             onClick={() => fileUpload.handleCameraCapture()}
-            className="tooltip rounded bg-gray-200/50 p-1"
+            className="tooltip rounded bg-secondary-200/50 p-1"
           >
             <CareIcon icon="l-camera" className="text-lg" />
             <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -215,17 +215,17 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
           </button>
           <button
             onClick={() => fileUpload.handleAudioCapture()}
-            className="tooltip rounded bg-gray-200/50 p-1"
+            className="tooltip rounded bg-secondary-200/50 p-1"
           >
             <CareIcon icon="l-microphone" className="text-lg" />
             <span className="tooltip-text tooltip-top -translate-x-1/2">
               Audio
             </span>
           </button>
-          <div className="mx-2 h-6 border-l border-gray-400"></div>
+          <div className="mx-2 h-6 border-l border-secondary-400"></div>
           <button
             onClick={handleMentionButtonClick}
-            className="tooltip rounded bg-gray-200/50 p-1"
+            className="tooltip rounded bg-secondary-200/50 p-1"
           >
             <CareIcon icon="l-at" className="text-lg" />
             <span className="tooltip-text tooltip-top -translate-x-1/2">

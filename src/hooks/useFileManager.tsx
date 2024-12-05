@@ -225,9 +225,20 @@ export default function useFileManager(
   const urlCache = new Map<string, { url: string; timestamp: number }>();
   const CACHE_DURATION = 5 * 60 * 1000; // 5 min
 
+  const cleanExpiredCache = () => {
+    const now = Date.now();
+    for (const [key, value] of urlCache.entries()) {
+      if (now - value.timestamp >= CACHE_DURATION) {
+        urlCache.delete(key);
+      }
+    }
+  };
+
   const getSignedUrl = async (file: FileUploadModel) => {
     const cacheKey = `${file.id}-${file.associating_id}`;
     const cached = urlCache.get(cacheKey);
+
+    cleanExpiredCache();
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return cached.url;
