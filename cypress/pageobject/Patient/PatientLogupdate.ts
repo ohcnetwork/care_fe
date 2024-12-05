@@ -3,7 +3,7 @@ class PatientLogupdate {
     cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
     cy.get("#log-update").scrollIntoView();
     cy.verifyAndClickElement("#log-update", "Log Update");
-    cy.wait("@getPatient").its("response.statusCode").should("eq", 201);
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
   }
 
   clickSwitchBed() {
