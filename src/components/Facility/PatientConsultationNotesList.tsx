@@ -10,7 +10,6 @@ import {
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { useInfiniteQuery } from "@/Utils/request/useInfiniteQuery";
 
 interface PatientNotesProps {
@@ -41,28 +40,24 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     loading,
     fetchNextPage,
     currentPage,
-    totalPages,
     setCurrentPage,
-  } = useInfiniteQuery<PaginatedResponse<PatientNotesModel>, PatientNotesModel>(
-    routes.getPatientNotes,
-    {
-      pathParams: {
-        patientId: props.state.patientId || "",
-      },
-      query: {
-        consultation: consultationId,
-        thread,
-      },
-      prefetch: true,
+    hasMore,
+  } = useInfiniteQuery<PatientNotesModel>(routes.getPatientNotes, {
+    pathParams: {
+      patientId: props.state.patientId || "",
     },
-  );
+    query: {
+      consultation: consultationId,
+      thread,
+    },
+    prefetch: true,
+  });
 
   useEffect(() => {
     setState((prevState: any) => ({
       ...prevState,
       notes,
       cPage: currentPage,
-      totalPages: totalPages,
     }));
   }, [notes, setState]);
 
@@ -91,6 +86,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
       setReload={setReload}
       disableEdit={disableEdit}
       setReplyTo={setReplyTo}
+      hasMore={hasMore}
     />
   );
 };

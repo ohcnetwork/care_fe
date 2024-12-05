@@ -143,6 +143,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           ))}
         </div>
         <PatientNotesList
+          key={`patient-notes-${patientId}-${thread}`}
           state={state}
           setState={setState}
           patientId={patientId}
