@@ -26,8 +26,7 @@ class FacilityHome {
   }
 
   typeFacilitySearch(facilityName: string) {
-    cy.get("#search-by-facility").click().clear();
-    cy.get("#search-by-facility").click().type(facilityName);
+    cy.get("#facility-search").click().clear().type(facilityName);
   }
 
   clickMenuItem(itemName: string) {
@@ -90,11 +89,6 @@ class FacilityHome {
 
   verifyOccupancyBadgeVisibility() {
     cy.get('[data-test-id="occupancy-badge"]').should("be.visible");
-  }
-
-  verifyAndCloseNotifyModal() {
-    cy.get("#cancel").should("be.visible");
-    cy.get("#cancel").click();
   }
 
   navigateBack() {
