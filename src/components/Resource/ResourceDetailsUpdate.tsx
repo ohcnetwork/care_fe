@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
 
@@ -46,22 +47,22 @@ const initForm: any = {
 
 const requiredFields: any = {
   approving_facility_object: {
-    errorText: "Resource approving facility can not be empty.",
+    errorText: t("empty_resource_error"),
   },
   assigned_facility_object: {
-    errorText: "Please Select Facility Type",
+    errorText: t("select_facility_type_error"),
   },
   title: {
-    errorText: "Title is required.",
+    errorText: t("empty_title_err"),
   },
   reason: {
-    errorText: "Description is required.",
+    errorText: t("empty_description_error"),
   },
   requested_quantity: {
-    errorText: "Requested Quantity Can't be Less than 1",
+    errorText: t("requested_quantity_error"),
   },
   assigned_quantity: {
-    errorText: "Approving Quantity Can't be Less than 0",
+    errorText: t("assigned_quantity_error"),
   },
 };
 
@@ -113,33 +114,34 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     const errors = { ...initError };
     let isInvalidForm = false;
 
-    const validators = {
-      facilityValidator: (field: string) =>
-        !state.form[field] || !state.form[field]?.name,
-      quantityValidator: (field: string) => {
-        const value = state.form[field];
-        const minVal = field === "assigned_quantity" ? 0 : 1;
-        return !value || parseFloat(value) < minVal;
-      },
-      textValidator: (field: string) =>
-        !state.form[field] || state.form[field].trim().length === 0,
-    };
-
-    const fieldTypes = {
-      facility: ["approving_facility_object", "assigned_facility_object"],
-      quantity: ["requested_quantity", "assigned_quantity"],
-    };
-
     Object.keys(requiredFields).forEach((field) => {
-      const validator = fieldTypes.facility.includes(field)
-        ? validators.facilityValidator
-        : fieldTypes.quantity.includes(field)
-          ? validators.quantityValidator
-          : validators.textValidator;
+      switch (field) {
+        case "approving_facility_object":
+        case "assigned_facility_object":
+          if (!state.form[field] || !state.form[field]?.name) {
+            errors[field] = requiredFields[field].errorText;
+            isInvalidForm = true;
+          }
+          break;
 
-      if (validator(field)) {
-        errors[field] = requiredFields[field].errorText;
-        isInvalidForm = true;
+        case "requested_quantity":
+        case "assigned_quantity":
+          if (state.form[field]) {
+            const value = state.form[field];
+            const minVal = field === "assigned_quantity" ? 0 : 1;
+            if (!value || parseFloat(value) < minVal) {
+              errors[field] = requiredFields[field].errorText;
+              isInvalidForm = true;
+            }
+          }
+          break;
+
+        default:
+          if (!state.form[field] || state.form[field].trim().length === 0) {
+            errors[field] = requiredFields[field].errorText;
+            isInvalidForm = true;
+          }
+          break;
       }
     });
 

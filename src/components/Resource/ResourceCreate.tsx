@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { navigate } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -51,31 +52,31 @@ const initForm: any = {
 
 const requiredFields: any = {
   category: {
-    errorText: "Category",
+    errorText: t("category"),
   },
   sub_category: {
-    errorText: "Subcategory",
+    errorText: t("sub_category"),
   },
   approving_facility: {
-    errorText: "Name of the referring facility",
+    errorText: t("approving_facility_error"),
   },
   refering_facility_contact_name: {
-    errorText: "Name of contact of the referring facility",
+    errorText: t("referring_facility_contact_name_error"),
   },
   refering_facility_contact_number: {
-    errorText: "Phone number of contact of the referring facility",
-    invalidText: "Please enter valid phone number",
+    errorText: t("referring_facility_contact_number_error"),
+    invalidText: t("referring_facility_contact_number_invalid"),
   },
   title: {
-    errorText: "Title for resource request is mandatory",
-    invalidText: "Please enter title for resource request",
+    errorText: t("title_error"),
+    invalidText: t("title_invalid"),
   },
   reason: {
-    errorText: "Description of resource request is mandatory",
-    invalidText: "Please enter Description of resource request",
+    errorText: t("reason_error"),
+    invalidText: t("reason_invalid"),
   },
   requested_quantity: {
-    errorText: "Requested Quantity Can't be Less than 1",
+    errorText: t("requested_quantity_error"),
   },
 };
 
@@ -145,7 +146,7 @@ export default function ResourceCreate(props: resourceProps) {
           if (state.form[field]) {
             const value = state.form[field];
             if (!value || parseFloat(value) < 1) {
-              errors[field] = `Value Can't be Smaller than 1`;
+              errors[field] = requiredFields[field].text;
               isInvalidForm = true;
             }
           }
@@ -184,8 +185,6 @@ export default function ResourceCreate(props: resourceProps) {
 
   const handleSubmit = async () => {
     const validForm = validateForm();
-
-    console.log(validForm);
 
     if (validForm) {
       setIsLoading(true);
