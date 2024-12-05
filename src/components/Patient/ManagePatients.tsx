@@ -102,9 +102,8 @@ export const PatientManager = () => {
       "emergency_phone_number",
     ],
   });
-  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
-    name: "",
-  });
+  const [selectedFacility, setSelectedFacility] =
+    useState<FacilityModel | null>(null);
   const authUser = useAuthUser();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
@@ -958,18 +957,25 @@ export const PatientManager = () => {
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
         handleOk={() => {
-          switch (showDialog) {
-            case "create":
-              navigate(`facility/${selectedFacility.id}/patient`);
-              break;
-            case "list-discharged":
-              navigate(`facility/${selectedFacility.id}/discharged-patients`);
-              break;
+          if (selectedFacility) {
+            switch (showDialog) {
+              case "create":
+                navigate(`facility/${selectedFacility.id}/patient`);
+                break;
+              case "list-discharged":
+                navigate(`facility/${selectedFacility.id}/discharged-patients`);
+                break;
+              default:
+                console.error("Unknown dialog state");
+                break;
+            }
+          } else {
+            console.error("No facility selected");
           }
         }}
         handleCancel={() => {
           setShowDialog(undefined);
-          setSelectedFacility({ name: "" });
+          setSelectedFacility(null);
         }}
       />
 

@@ -46,15 +46,14 @@ const AssetsList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [facility, setFacility] = useState<FacilityModel>();
+  const [facility, setFacility] = useState<FacilityModel | null>(null);
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const [showFacilityDialog, setShowFacilityDialog] = useState(false);
-  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
-    name: "",
-  });
+  const [selectedFacility, setSelectedFacility] =
+    useState<FacilityModel | null>(null);
   const params = {
     limit: resultsPerPage,
     page: qParams.page,
@@ -459,7 +458,7 @@ const AssetsList = () => {
           </div>
         </>
       )}
-      {typeof facility === "undefined" && (
+      {facility === null && (
         <FacilitiesSelectDialogue
           show={importAssetModalOpen}
           setSelected={(e) => setFacility(e)}
@@ -478,12 +477,12 @@ const AssetsList = () => {
       )}
       {facility && (
         <AssetImportModal
-          open={importAssetModalOpen}
+          open={importAssetModalOpen} // Reset selected facility to null on cancel
           onClose={() => {
             setImportAssetModalOpen(false);
             setFacility((f) => {
               if (!qParams.facility) {
-                return undefined;
+                return null;
               }
               return f;
             });
@@ -496,10 +495,18 @@ const AssetsList = () => {
         show={showFacilityDialog}
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
-        handleOk={() => navigate(`facility/${selectedFacility.id}/assets/new`)}
+        handleOk={() => {
+          if (selectedFacility) {
+            // Proceed with navigation if selectedFacility is not null
+            navigate(`facility/${selectedFacility.id}/assets/new`);
+          } else {
+            // Handle case when selectedFacility is null (e.g., show an error message)
+            console.error("No facility selected");
+          }
+        }}
         handleCancel={() => {
           setShowFacilityDialog(false);
-          setSelectedFacility({ name: "" });
+          setSelectedFacility(null);
         }}
       />
     </Page>
