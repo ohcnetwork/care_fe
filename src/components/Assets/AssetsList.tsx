@@ -462,11 +462,7 @@ const AssetsList = () => {
         <FacilitiesSelectDialogue
           show={importAssetModalOpen}
           setSelected={(e) => setFacility(e)}
-          selectedFacility={
-            facility ?? {
-              name: "",
-            }
-          }
+          selectedFacility={selectedFacility}
           handleOk={() => {
             return undefined;
           }}
@@ -477,7 +473,7 @@ const AssetsList = () => {
       )}
       {facility && (
         <AssetImportModal
-          open={importAssetModalOpen} // Reset selected facility to null on cancel
+          open={importAssetModalOpen}
           onClose={() => {
             setImportAssetModalOpen(false);
             setFacility((f) => {
@@ -497,11 +493,9 @@ const AssetsList = () => {
         selectedFacility={selectedFacility}
         handleOk={() => {
           if (selectedFacility) {
-            // Proceed with navigation if selectedFacility is not null
             navigate(`facility/${selectedFacility.id}/assets/new`);
           } else {
-            // Handle case when selectedFacility is null (e.g., show an error message)
-            console.error("No facility selected");
+            Notification.Warn({ msg: "No facility selected" });
           }
         }}
         handleCancel={() => {

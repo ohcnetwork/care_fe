@@ -966,11 +966,11 @@ export const PatientManager = () => {
                 navigate(`facility/${selectedFacility.id}/discharged-patients`);
                 break;
               default:
-                console.error("Unknown dialog state");
+                Notification.Error({ msg: "Unknown dialog state" });
                 break;
             }
           } else {
-            console.error("No facility selected");
+            Notification.Error({ msg: "No facility selected" });
           }
         }}
         handleCancel={() => {
