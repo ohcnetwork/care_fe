@@ -490,7 +490,7 @@ export default function NotificationsList({
         text={t("Notifications")}
         id="notification-slide-btn"
         do={() => setOpen(!open)}
-        icon={<CareIcon icon="l-bell" className="h-5" />}
+        icon={<CareIcon icon="d-bell" className="h-5" />}
         badgeCount={unreadCount}
         handleOverflow={handleOverflow}
       />
