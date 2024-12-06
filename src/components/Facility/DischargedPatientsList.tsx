@@ -170,7 +170,7 @@ const DischargedPatientsList = ({
     },
   );
 
-  const _params = {
+  const params = {
     page: qParams.page || 1,
     limit: resultsPerPage,
     name: qParams.name || undefined,
@@ -247,12 +247,10 @@ const DischargedPatientsList = ({
   const { loading: isLoading, data } = useQuery(
     routes.listFacilityDischargedPatients,
     {
-      // query: params,
+      query: params,
       pathParams: { facility_external_id: facility_external_id },
     },
   );
-
-  console.log(isLoading, data);
 
   const getTheCategoryFromId = () => {
     let category_name;
@@ -395,7 +393,7 @@ const DischargedPatientsList = ({
           <CountBlock
             text={t("total_patients")}
             count={count || 0}
-            loading={isLoading}
+            loading={isLoading || !data}
             icon="d-patient"
           />
         </div>
