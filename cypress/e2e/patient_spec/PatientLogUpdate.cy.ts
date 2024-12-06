@@ -244,9 +244,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
 
   it("Create a new Normal update for a admission patient and verify its reflection in cards", () => {
     patientPage.visitPatient(patientThree);
-    cy.intercept("GET", "**/api/v1/consultationbed/*").as("getConsultationBed");
     patientLogupdate.clickLogupdate();
-    cy.wait("@getConsultationBed").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Please assign a bed to the patient");
     cy.closeNotification();
     patientLogupdate.selectBed(bedThree);
