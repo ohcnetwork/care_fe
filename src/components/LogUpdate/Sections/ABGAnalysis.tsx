@@ -23,16 +23,18 @@ export const ABGAnalysisFields = [
         PO<sub>2</sub>
       </span>
     ),
-    min: 0,
-    max: 20,
+    min: 10,
+    max: 400,
     step: 0.01,
-    valueDescription: rangeValueDescription({ low: 10.5, high: 13.5 }),
+    valueDescription: rangeValueDescription({ low: 49, high: 200 }),
     units: [
-      { label: "kPa" },
       {
         label: "mmHg",
-        conversionFn: kPaToMmHg,
-        inversionFn: mmHgToKPa,
+      },
+      {
+        label: "kPa",
+        conversionFn: mmHgToKPa,
+        inversionFn: kPaToMmHg,
       },
     ],
   },
@@ -43,16 +45,18 @@ export const ABGAnalysisFields = [
         PCO<sub>2</sub>
       </span>
     ),
-    min: 0,
-    max: 20,
+    min: 10,
+    max: 200,
     step: 0.01,
-    valueDescription: rangeValueDescription({ low: 5.1, high: 5.6 }),
+    valueDescription: rangeValueDescription({ low: 34, high: 45 }),
     units: [
-      { label: "kPa" },
       {
         label: "mmHg",
-        conversionFn: kPaToMmHg,
-        inversionFn: mmHgToKPa,
+      },
+      {
+        label: "kPa",
+        conversionFn: mmHgToKPa,
+        inversionFn: kPaToMmHg,
       },
     ],
   },
