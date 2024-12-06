@@ -244,15 +244,17 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
 
   it("Create a new Normal update for a admission patient and verify its reflection in cards", () => {
     patientPage.visitPatient(patientThree);
-    cy.intercept("GET", "**/api/v1/consultationbed/*").as("getBed");
+    cy.intercept("GET", "**/api/v1/consultationbed/*").as("getConsultationBed");
     patientLogupdate.clickLogupdate();
-    cy.wait("@getBed").its("response.statusCode").should("eq", 200);
+    cy.wait("@getConsultationBed").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Please assign a bed to the patient");
     cy.closeNotification();
     patientLogupdate.selectBed(bedThree);
-    cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
+    cy.intercept("GET", "**/api/v1/patient/*").as("getAdmissionPatient");
     patientLogupdate.clickLogupdate();
-    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+    cy.wait("@getAdmissionPatient")
+      .its("response.statusCode")
+      .should("eq", 200);
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeOtherDetails(otherExamination);
