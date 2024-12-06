@@ -89,6 +89,13 @@ export const PatientHome = (props: {
       });
     },
   });
+  const isPatientDischarged = () => {
+    if (!patientData.is_active) return true;
+    if (facilityId !== patientData.facility_object?.id.toString()) {
+      return true;
+    }
+    return false;
+  };
 
   const handleAssignedVolunteer = async () => {
     const { res, data } = await request(routes.patchPatient, {
@@ -501,7 +508,7 @@ export const PatientHome = (props: {
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                         id="upload-patient-files"
                         size="large"
-                        disabled={!patientData.is_active}
+                        disabled={isPatientDischarged()}
                         onClick={() =>
                           navigate(
                             `/facility/${patientData?.facility}/patient/${id}/files`,
@@ -520,7 +527,7 @@ export const PatientHome = (props: {
                         <ButtonV2
                           id="assign-volunteer"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
-                          disabled={!patientData.is_active}
+                          disabled={isPatientDischarged()}
                           authorizeFor={NonReadOnlyUsers}
                           className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                           size="large"
