@@ -86,8 +86,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickLogupdate();
     cy.wait("@getBed").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Please assign a bed to the patient");
-    cy.closeNotification();
     patientLogupdate.selectBed(bedOne);
+    cy.closeNotification();
     cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
     patientLogupdate.clickLogupdate();
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
@@ -250,8 +250,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.visitPatient(patientThree);
     patientLogupdate.clickLogupdate();
     cy.verifyNotification("Please assign a bed to the patient");
-    cy.closeNotification();
     patientLogupdate.selectBed(bedThree);
+    cy.closeNotification();
     cy.intercept("GET", "**/api/v1/patient/*").as("getAdmissionPatient");
     patientLogupdate.clickLogupdate();
     cy.wait("@getAdmissionPatient")
