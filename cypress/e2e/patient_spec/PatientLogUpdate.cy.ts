@@ -58,7 +58,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.clickSubmitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
+    cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
     patientLogupdate.clickLogupdate();
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectRoundType("Tele-medicine Log");
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -80,11 +82,15 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
 
   it("Create a new Progress log update for a admitted patient and edit it", () => {
     patientPage.visitPatient(patientOne);
+    cy.intercept("GET", "**/api/v1/consultationbed/*").as("getBed");
     patientLogupdate.clickLogupdate();
+    cy.wait("@getBed").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Please assign a bed to the patient");
     cy.closeNotification();
     patientLogupdate.selectBed(bedOne);
+    cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
     patientLogupdate.clickLogupdate();
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
     // Only will be using random non-unique progress note fields
     patientLogupdate.selectRoundType("Progress Note");
     patientLogupdate.selectPatientCategory(patientCategory);
