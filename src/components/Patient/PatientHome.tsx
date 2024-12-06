@@ -39,6 +39,7 @@ import Loading from "../Common/Loading";
 import Page from "../Common/Page";
 import { SkillModel, UserBareMinimum } from "../Users/models";
 import { patientTabs } from "./PatientDetailsTab";
+import { isPatientDischarged } from "./Utils";
 import { isPatientMandatoryDataFilled } from "./Utils";
 import { AssignedToObjectModel, PatientModel, SampleTestModel } from "./models";
 
@@ -89,13 +90,6 @@ export const PatientHome = (props: {
       });
     },
   });
-  const isPatientDischarged = () => {
-    if (!patientData.is_active) return true;
-    if (facilityId !== patientData.facility_object?.id.toString()) {
-      return true;
-    }
-    return false;
-  };
 
   const handleAssignedVolunteer = async () => {
     const { res, data } = await request(routes.patchPatient, {
@@ -508,7 +502,7 @@ export const PatientHome = (props: {
                         className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                         id="upload-patient-files"
                         size="large"
-                        disabled={isPatientDischarged()}
+                        disabled={isPatientDischarged(patientData, facilityId)}
                         onClick={() =>
                           navigate(
                             `/facility/${patientData?.facility}/patient/${id}/files`,
@@ -527,7 +521,10 @@ export const PatientHome = (props: {
                         <ButtonV2
                           id="assign-volunteer"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
-                          disabled={isPatientDischarged()}
+                          disabled={isPatientDischarged(
+                            patientData,
+                            facilityId,
+                          )}
                           authorizeFor={NonReadOnlyUsers}
                           className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
                           size="large"
