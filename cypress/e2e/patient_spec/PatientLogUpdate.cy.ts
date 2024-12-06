@@ -169,7 +169,11 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickLogupdate();
     patientLogupdate.selectRoundType("Detailed Update");
     patientLogupdate.selectPatientCategory(patientCategory);
+    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
+      "getDailyRounds",
+    );
     cy.clickSubmitButton("Save and Continue");
+    cy.wait("@getDailyRounds").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Detailed Update created successfully");
     cy.closeNotification();
     // Select two Section - First One is Respiratory Support
@@ -268,7 +272,11 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
+    cy.intercept("POST", "**/api/v1/consultation/*/daily_rounds/").as(
+      "postDailyRounds",
+    );
     cy.clickSubmitButton("Save");
+    cy.wait("@postDailyRounds").its("response.statusCode").should("eq", 201);
     cy.verifyNotification("Brief Update created successfully");
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
