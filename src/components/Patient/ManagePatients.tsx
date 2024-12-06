@@ -983,9 +983,6 @@ export const PatientManager = () => {
               case "list-discharged":
                 navigate(`facility/${selectedFacility.id}/discharged-patients`);
                 break;
-              default:
-                Notification.Error({ msg: "Unknown dialog state" });
-                break;
             }
           } else {
             Notification.Error({ msg: "No facility selected" });
