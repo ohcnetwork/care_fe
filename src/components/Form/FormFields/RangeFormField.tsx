@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import FormField from "@/components/Form/FormFields/FormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
@@ -44,6 +44,8 @@ const unity = (v: number) => v;
 export default function RangeFormField(props: Props) {
   const field = useFormFieldPropsResolver(props);
   const [unit, setUnit] = useState(getInitialUnit(props));
+  const [displayValue, setDisplayValue] = useState<string>("");
+  const prevUnit = useRef(unit.label);
 
   // Value in current unit
   const value = (() => {
@@ -57,8 +59,29 @@ export default function RangeFormField(props: Props) {
     return unit.conversionFn(props.value);
   })();
 
+  const getDisplayValue = (currentValue: number, forceTwoDecimals: boolean) => {
+    if (props.step === 1) {
+      return Math.round(currentValue).toString();
+    }
+    return forceTwoDecimals ? currentValue.toFixed(2) : currentValue.toString();
+  };
+
+  useEffect(() => {
+    let newDisplayValue = "";
+    if (prevUnit.current === unit.label) {
+      newDisplayValue = value ? getDisplayValue(value, false) : "";
+    } else {
+      newDisplayValue = value ? getDisplayValue(value, true) : "";
+      prevUnit.current = unit.label;
+    }
+    setDisplayValue(newDisplayValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, unit]);
+
   // Min and max in current unit
-  const [min, max] = [props.min, props.max].map(unit.conversionFn);
+  const [min, max] = [props.min, props.max].map((v) =>
+    Math.round(unit.conversionFn(v)),
+  );
 
   const error = (() => {
     if (value == null) {
@@ -74,9 +97,14 @@ export default function RangeFormField(props: Props) {
     }
   })();
 
+  const descriptions = props.valueDescriptions?.map((vd) => ({
+    ...vd,
+    till: vd.till ? unit.conversionFn(vd.till) : undefined,
+  }));
+
   const valueDescription =
     value != null
-      ? props.valueDescriptions?.find((vd) => (vd.till || props.max) >= value)
+      ? descriptions?.find((vd) => (vd.till || max) >= value)
       : undefined;
 
   const allValueColors = props.valueDescriptions?.every((vd) => vd.color);
@@ -84,7 +112,7 @@ export default function RangeFormField(props: Props) {
   const [sliderMin, sliderMax] = [
     props.sliderMin ?? props.min,
     props.sliderMax ?? props.max,
-  ].map(unit.conversionFn);
+  ].map((v) => Math.round(unit.conversionFn(v)));
 
   const sliderDelta = sliderMax - sliderMin;
 
@@ -94,10 +122,9 @@ export default function RangeFormField(props: Props) {
       sliderDelta) *
     100;
 
-  const handleChange = (v: number) =>
+  const handleChange = (v: number) => {
     field.handleChange(unit.inversionFn(props.step === 1 ? Math.round(v) : v));
-
-  const displayValue = value != null ? properRoundOf(value) : "";
+  };
 
   return (
     <FormField
@@ -123,25 +150,33 @@ export default function RangeFormField(props: Props) {
               {valueDescription?.text}
             </div>
             {!props.hideInput && (
-              <>
+              <div className="flex flex-row items-center gap-2">
                 <TextFormField
                   name={`${props.name}-range-input`}
                   type="number"
                   value={displayValue}
                   placeholder="--.--"
-                  onChange={(e) => handleChange(parseFloat(e.value))}
+                  onChange={(e) => {
+                    handleChange(parseFloat(e.value));
+                  }}
                   min={min}
                   max={max}
                   errorClassName="hidden"
                   inputClassName="py-1.5 mr-4"
                   disabled={props.disabled}
+                  onBlur={() =>
+                    setDisplayValue(
+                      props.step === 1
+                        ? (value?.toString() ?? "")
+                        : (value?.toFixed(2) ?? ""),
+                    )
+                  }
                 />
                 {props.units?.length ? (
                   <SelectFormField
                     id={field.name + "_units"}
                     name={field.name + "_units"}
-                    inputClassName="py-1.5"
-                    className="-ml-1"
+                    inputClassName="py-1.5 mt-2"
                     value={unit.label}
                     options={props.units}
                     optionLabel={(o) => o.label}
@@ -166,7 +201,7 @@ export default function RangeFormField(props: Props) {
                     {unit.label}
                   </p>
                 )}
-              </>
+              </div>
             )}
           </div>
         ),
