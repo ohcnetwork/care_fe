@@ -288,7 +288,7 @@ const DischargedPatientsList = ({
               text="Discharged Patients"
               count={count}
               loading={facilityQuery.loading}
-              icon="l-user-injured"
+              icon="d-patient"
               className="pb-12"
             />
           </div>

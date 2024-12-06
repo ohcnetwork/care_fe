@@ -12,7 +12,6 @@ import Page from "@/components/Common/Page";
 import { FacilityCard } from "@/components/Facility/FacilityCard";
 import FacilityFilter from "@/components/Facility/FacilityFilter";
 import { FacilityModel } from "@/components/Facility/models";
-import SearchInput from "@/components/Form/SearchInput";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
@@ -22,6 +21,8 @@ import { FACILITY_TYPES } from "@/common/constants";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 
+import SearchByMultipleFields from "../Common/SearchByMultipleFields";
+
 export const FacilityList = () => {
   const {
     qParams,
@@ -30,6 +31,7 @@ export const FacilityList = () => {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
+    clearSearch,
   } = useFilters({
     limit: 14,
     cacheBlacklist: ["search"],
@@ -153,50 +155,59 @@ export const FacilityList = () => {
       breadcrumbs={false}
       hideBack
       options={
-        <ExportMenu
-          exportItems={[
-            {
-              label: "Facilities",
-              route: routes.downloadFacility,
-              filePrefix: "facilities",
-            },
-            {
-              label: "Capacities",
-              route: routes.downloadFacilityCapacity,
-              filePrefix: "capacities",
-            },
-            {
-              label: "Doctors",
-              route: routes.downloadFacilityDoctors,
-              filePrefix: "doctors",
-            },
-            {
-              label: "Triages",
-              route: routes.downloadFacilityTriage,
-              filePrefix: "triages",
-            },
-          ]}
-        />
+        <div className="flex items-center gap-2 ">
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
+          <ExportMenu
+            exportItems={[
+              {
+                label: "Facilities",
+                route: routes.downloadFacility,
+                filePrefix: "facilities",
+              },
+              {
+                label: "Capacities",
+                route: routes.downloadFacilityCapacity,
+                filePrefix: "capacities",
+              },
+              {
+                label: "Doctors",
+                route: routes.downloadFacilityDoctors,
+                filePrefix: "doctors",
+              },
+              {
+                label: "Triages",
+                route: routes.downloadFacilityTriage,
+                filePrefix: "triages",
+              },
+            ]}
+          />
+        </div>
       }
     >
-      <div className="mt-4 gap-2 lg:flex">
+      <div className="mt-4 gap-4 lg:gap-16 flex flex-col lg:flex-row lg:items-center">
         <CountBlock
           text="Total Facilities"
           count={permittedData ? permittedData.count : 0}
           loading={isLoading}
-          icon="l-hospital"
-          className="flex-1"
+          icon="d-hospital"
+          className=""
         />
-        <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
-          <SearchInput
-            id="search-by-facility"
-            name="search"
-            value={qParams.search}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder={t("facility_search_placeholder")}
-          />
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-        </div>
+        <SearchByMultipleFields
+          id="facility-search"
+          options={[
+            {
+              key: "facility_district_name",
+              label: "Facility or District Name",
+              type: "text" as const,
+              placeholder: "facility_search_placeholder",
+              value: qParams.search || "",
+              shortcutKey: "f",
+            },
+          ]}
+          className="w-full"
+          onSearch={(key, value) => updateQuery({ search: value })}
+          clearSearch={clearSearch}
+        />
       </div>
 
       <FacilityFilter {...advancedFilter} key={window.location.search} />
