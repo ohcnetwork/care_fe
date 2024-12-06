@@ -1,5 +1,5 @@
 import { Link, navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CountBlock from "@/CAREUI/display/Count";
@@ -15,9 +15,6 @@ import SortDropdownMenu from "@/components/Common/SortDropdown";
 import Tabs from "@/components/Common/Tabs";
 import { getDiagnosesByIds } from "@/components/Diagnosis/utils";
 import { ICD11DiagnosisModel } from "@/components/Facility/models";
-import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
-import SearchInput from "@/components/Form/SearchInput";
 import {
   DIAGNOSES_FILTER_LABELS,
   DiagnosesFilterKey,
@@ -42,6 +39,8 @@ import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { formatPatientAge, humanizeStrings } from "@/Utils/utils";
 
+import SearchByMultipleFields from "../Common/SearchByMultipleFields";
+
 const DischargedPatientsList = ({
   facility_external_id,
 }: {
@@ -52,16 +51,81 @@ const DischargedPatientsList = ({
     pathParams: { id: facility_external_id },
   });
 
-  const { qParams, updateQuery, advancedFilter, FilterBadges, updatePage } =
-    useFilters({
-      limit: 12,
-      cacheBlacklist: [
-        "name",
-        "patient_no",
-        "phone_number",
-        "emergency_phone_number",
-      ],
-    });
+  const {
+    qParams,
+    updateQuery,
+    advancedFilter,
+    FilterBadges,
+    updatePage,
+    clearSearch,
+  } = useFilters({
+    limit: 12,
+    cacheBlacklist: [
+      "name",
+      "patient_no",
+      "phone_number",
+      "emergency_phone_number",
+    ],
+  });
+
+  const searchOptions = [
+    {
+      key: "phone_number",
+      label: "Phone Number",
+      type: "phone" as const,
+      placeholder: "Search_by_phone_number",
+      value: qParams.phone_number || "",
+      shortcutKey: "p",
+    },
+    {
+      key: "name",
+      label: "Name",
+      type: "text" as const,
+      placeholder: "search_by_patient_name",
+      value: qParams.name || "",
+      shortcutKey: "n",
+    },
+    {
+      key: "patient_no",
+      label: "IP/OP No",
+      type: "text" as const,
+      placeholder: "search_by_patient_no",
+      value: qParams.patient_no || "",
+      shortcutKey: "u",
+    },
+    {
+      key: "emergency_contact_number",
+      label: "Emergency Contact Phone Number",
+      type: "phone" as const,
+      placeholder: "search_by_emergency_phone_number",
+      value: qParams.emergency_phone_number || "",
+      shortcutKey: "e",
+    },
+  ];
+
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      const updatedQuery = {
+        phone_number:
+          key === "phone_number"
+            ? value.length >= 13 || value === ""
+              ? value
+              : undefined
+            : undefined,
+        name: key === "name" ? value : undefined,
+        patient_no: key === "patient_no" ? value : undefined,
+        emergency_phone_number:
+          key === "emergency_contact_number"
+            ? value.length >= 13 || value === ""
+              ? value
+              : undefined
+            : undefined,
+      };
+
+      updateQuery(updatedQuery);
+    },
+    [updateQuery],
+  );
 
   useEffect(() => {
     if (!qParams.phone_number && phone_number.length >= 13) {
@@ -97,6 +161,13 @@ const DischargedPatientsList = ({
         external_id: qParams.last_consultation_current_bed__location,
       },
       prefetch: !!qParams.last_consultation_current_bed__location,
+    },
+  );
+
+  const { loading: isLoading, data } = useQuery(
+    routes.listFacilityDischargedPatients,
+    {
+      pathParams: { facility_external_id: facility_external_id },
     },
   );
 
@@ -200,56 +271,11 @@ const DischargedPatientsList = ({
       });
   };
 
-  const queryField = <T,>(name: string, defaultValue?: T) => {
-    return {
-      name,
-      value: qParams[name] || defaultValue,
-      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-      className: "grow w-full mb-2",
-    };
-  };
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [phone_number, setPhoneNumber] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
-  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
-    useState("");
+  useState("");
   const [count, setCount] = useState(0);
-
-  const setPhoneNum = (phone_number: string) => {
-    setPhoneNumber(phone_number);
-    if (phone_number.length >= 13) {
-      setPhoneNumberError("");
-      updateQuery({ phone_number });
-      return;
-    }
-
-    if (phone_number === "+91" || phone_number === "") {
-      setPhoneNumberError("");
-      qParams.phone_number && updateQuery({ phone_number: null });
-      return;
-    }
-
-    setPhoneNumberError("Enter a valid number");
-  };
-
-  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
-    setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length >= 13) {
-      setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number });
-      return;
-    }
-
-    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
-      setEmergencyPhoneNumberError("");
-      qParams.emergency_phone_number &&
-        updateQuery({ emergency_phone_number: null });
-      return;
-    }
-
-    setEmergencyPhoneNumberError("Enter a valid number");
-  };
 
   return (
     <Page
@@ -281,53 +307,22 @@ const DischargedPatientsList = ({
         </>
       }
     >
-      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
-        <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1">
-            <CountBlock
-              text="Discharged Patients"
-              count={count}
-              loading={facilityQuery.loading}
-              icon="d-patient"
-              className="pb-12"
-            />
-          </div>
+      <div className="mt-4 gap-4 lg:gap-16 flex flex-col lg:flex-row lg:items-center">
+        <div id="total-patientcount">
+          <CountBlock
+            text={t("total_patients")}
+            count={count || 0}
+            loading={isLoading || !data}
+            icon="d-patient"
+          />
         </div>
-        <div className="col-span-3 w-full">
-          <div className="col-span-2 mt-2">
-            <div className="mt-1 md:flex md:gap-4">
-              <SearchInput
-                label="Search by Patient"
-                placeholder="Enter patient name"
-                {...queryField("name")}
-              />
-              <SearchInput
-                label="Search by IP/OP Number"
-                placeholder="Enter IP/OP Number"
-                secondary
-                {...queryField("patient_no")}
-              />
-            </div>
-            <div className="md:flex md:gap-4">
-              <PhoneNumberFormField
-                label="Search by Primary Number"
-                {...queryField("phone_number", "+91")}
-                value={phone_number}
-                onChange={(e) => setPhoneNum(e.value)}
-                error={phoneNumberError}
-                types={["mobile", "landline"]}
-              />
-              <PhoneNumberFormField
-                label="Search by Emergency Number"
-                {...queryField("emergency_phone_number", "+91")}
-                value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNum(e.value)}
-                error={emergencyPhoneNumberError}
-                types={["mobile", "landline"]}
-              />
-            </div>
-          </div>
-        </div>
+        <SearchByMultipleFields
+          id="patient-search"
+          options={searchOptions}
+          onSearch={handleSearch}
+          clearSearch={clearSearch}
+          className="w-full"
+        />
       </div>
       <div className="col-span-3 mt-6 flex flex-wrap">
         <FilterBadges
