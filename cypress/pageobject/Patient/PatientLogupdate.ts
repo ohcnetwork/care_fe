@@ -14,9 +14,13 @@ class PatientLogupdate {
 
   selectBed(bed: string) {
     cy.typeAndSelectOption("input[name='bed']", bed);
-    cy.intercept("GET", "**/api/v1/assetbed/*").as("getAssetBed");
+    cy.intercept("POST", "**/api/v1/consultationbed/").as(
+      "postConsultationBed",
+    );
     cy.get("#update-switchbed").click();
-    cy.wait("@getAssetBed").its("response.statusCode").should("eq", 200);
+    cy.wait("@postConsultationBed")
+      .its("response.statusCode")
+      .should("eq", 201);
   }
 
   selectPatientCategory(category: string) {
