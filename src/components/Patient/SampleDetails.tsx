@@ -2,11 +2,9 @@ import { camelCase, capitalize, startCase } from "lodash-es";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import Card from "@/CAREUI/display/Card";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
