@@ -127,6 +127,7 @@ export interface DoctorModal {
   id?: number;
   area?: number;
   count?: number;
+  total_doctors?: number;
 }
 
 export interface OptionsType {

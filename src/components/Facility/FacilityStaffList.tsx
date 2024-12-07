@@ -32,8 +32,8 @@ export const FacilityStaffList = (props: any) => {
       offset: (qParams.page - 1) * resultsPerPage,
     },
     onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setTotalDoctors(data?.total_doctors ?? 0);
+      if (res?.ok && data?.results.length) {
+        setTotalDoctors(data.results[0]?.total_doctors ?? 0);
       }
     },
   });
