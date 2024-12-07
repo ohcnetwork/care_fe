@@ -664,8 +664,8 @@ export const PatientHome = (props: {
                             ? formatDateTime(patientData.created_date)
                             : "--:--"}
                         </span>
-                        {patientData.modified_date
-                          ? relativeDate(patientData.modified_date)
+                        {patientData.created_date
+                          ? relativeDate(patientData.created_date)
                           : "--:--"}
                       </div>
                     </div>
