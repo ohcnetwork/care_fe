@@ -7,7 +7,7 @@ import useQuery, { QueryOptions } from "@/Utils/request/useQuery";
 
 export interface InfiniteQueryOptions<TItem>
   extends QueryOptions<PaginatedResponse<TItem>> {
-  deduplicateBy?: (item: TItem) => string | number;
+  deduplicateBy: (item: TItem) => string | number;
 }
 
 export function useInfiniteQuery<TItem>(
