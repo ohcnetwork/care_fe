@@ -4,8 +4,6 @@ import { useState } from "react";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
-import { Button } from "@/components/ui/button";
-
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -198,15 +196,6 @@ export default function ResourceDetails(props: { id: string }) {
     >
       {isPrintMode ? (
         <div className="my-4">
-          <div className="my-4 flex justify-end gap-2">
-            <Button variant="primary" onClick={() => window.print()}>
-              <CareIcon icon="l-print" className="mr-2 text-lg" /> Print
-              Approval Letter
-            </Button>
-            <ButtonV2 onClick={() => setIsPrintMode(false)} variant="secondary">
-              <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
-            </ButtonV2>
-          </div>
           <PrintPreview title="Approval Letter" hideControls>
             {ApprovalLetter(data)}
           </PrintPreview>

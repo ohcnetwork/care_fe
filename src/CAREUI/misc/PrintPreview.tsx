@@ -30,14 +30,13 @@ export default function PrintPreview(props: Props) {
 
   const content = (
     <div className="mx-auto my-8 w-[50rem]">
-      {!props.hideControls && (
-        <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
-          <Button variant="primary" disabled={props.disabled} onClick={print}>
-            <CareIcon icon="l-print" className="text-lg" />
-            {t("print")}
-          </Button>
-        </div>
-      )}
+      <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
+        <Button variant="primary" disabled={props.disabled} onClick={print}>
+          <CareIcon icon="l-print" className="text-lg" />
+          {t("print")}
+        </Button>
+      </div>
+
       <ZoomProvider initialScale={normalScale}>
         <ZoomTransform className="origin-top-left bg-white p-10 text-sm shadow-2xl transition-all duration-200 ease-in-out lg:origin-top print:transform-none">
           <div
