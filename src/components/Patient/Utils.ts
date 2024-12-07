@@ -21,9 +21,12 @@ export const isPatientDischarged = (
   patientData: PatientModel,
   facilityId: string | undefined,
 ) => {
-  if (!patientData.is_active) return true;
-  if (facilityId !== patientData.facility_object?.id.toString()) {
+  if (!patientData.is_active) {
     return true;
   }
-  return false;
+  const patientFacilityId = patientData.facility_object?.id;
+  if (!patientFacilityId || !facilityId) {
+    return false;
+  }
+  return patientFacilityId.toString() !== facilityId;
 };
