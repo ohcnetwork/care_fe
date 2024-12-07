@@ -1,7 +1,8 @@
+import duoToneIconData from "@/CAREUI/icons/DuoTonePaths.json";
 import iconData from "@/CAREUI/icons/UniconPaths.json";
 import "@/CAREUI/icons/icon.css";
 
-export type IconName = keyof typeof iconData;
+export type IconName = keyof typeof iconData | keyof typeof duoToneIconData;
 
 export interface CareIconProps {
   icon: IconName;
@@ -26,11 +27,16 @@ export default function CareIcon({
 }: CareIconProps) {
   // TODO: fill & strokeWidth are defined for only one icon
   // Rethink Implementation
-  const [viewBox, path, fill, strokeWidth] = iconData[icon] as [
+
+  const [viewBox, path, fill, strokeWidth, secondaryPath] = (
+    (icon.startsWith("d-") ? duoToneIconData : iconData) as typeof iconData &
+      typeof duoToneIconData
+  )[icon] as [
     number,
     string,
     boolean | undefined,
     number | undefined,
+    string | undefined,
   ];
 
   const svgClassName = `care-svg-icon__baseline ${className || ""}`.trim();
@@ -50,6 +56,15 @@ export default function CareIcon({
         stroke={fill === false ? "currentColor" : undefined}
         strokeWidth={fill === false ? strokeWidth : undefined}
       />
+      {secondaryPath && (
+        <path
+          d={secondaryPath}
+          fill={fill === false ? "none" : "currentColor"}
+          stroke={fill === false ? "currentColor" : undefined}
+          strokeWidth={fill === false ? strokeWidth : undefined}
+          opacity={0.32}
+        />
+      )}
     </svg>
   );
 }
