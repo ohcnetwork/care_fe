@@ -105,23 +105,21 @@ const DischargedPatientsList = ({
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
+      const isValidPhoneNumber = (val: string) =>
+        val.length >= 13 || val === "";
+
       const updatedQuery = {
         phone_number:
-          key === "phone_number"
-            ? value.length >= 13 || value === ""
-              ? value
-              : undefined
+          key === "phone_number" && isValidPhoneNumber(value)
+            ? value
             : undefined,
         name: key === "name" ? value : undefined,
         patient_no: key === "patient_no" ? value : undefined,
         emergency_phone_number:
-          key === "emergency_contact_number"
-            ? value.length >= 13 || value === ""
-              ? value
-              : undefined
+          key === "emergency_contact_number" && isValidPhoneNumber(value)
+            ? value
             : undefined,
       };
-
       updateQuery(updatedQuery);
     },
     [updateQuery],
