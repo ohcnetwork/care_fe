@@ -272,11 +272,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.intercept("POST", "**/api/v1/consultation/*/daily_rounds/").as(
-      "postRounds",
-    );
+    cy.intercept("GET", "**/api/v1/consultation/*/").as("getConsultation");
     cy.clickSubmitButton("Save");
-    cy.wait("@postRounds").its("response.statusCode").should("eq", 201);
+    cy.wait("@getConsultation").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Brief Update created successfully");
     cy.closeNotification();
     // Verify the card content
