@@ -35,7 +35,11 @@ export class PatientFileUpload {
   }
 
   verifyUploadFilePresence(fileName: string) {
+    cy.intercept("GET", "**/api/v1/files/?file_type=CONSULTATION*").as(
+      "getFiles",
+    );
     cy.get("#file-div").should("be.visible").scrollIntoView();
+    cy.wait("@getFiles").its("response.statusCode").should("eq", 200);
     cy.verifyContentPresence("#file-div", [fileName]);
   }
 

@@ -166,7 +166,7 @@ describe("Patient Homepage present functionalities", () => {
         firstPatientPageOne = patientOne.trim();
         cy.intercept(
           "GET",
-          "/api/v1/patient/?page=1&limit=12&is_active=True&offset=0",
+          "/api/v1/patient/?page=2&limit=12&is_active=True&offset=0",
         ).as("getPatientPage");
         pageNavigation.navigateToNextPage();
         cy.wait("@getPatientPage").its("response.statusCode").should("eq", 200);
