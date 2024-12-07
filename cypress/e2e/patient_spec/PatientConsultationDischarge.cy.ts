@@ -107,7 +107,11 @@ describe("Patient Discharge based on multiple reason", () => {
     cy.closeNotification();
     // submit the discharge pop-up
     cy.clickSubmitButton("Confirm Discharge");
+    cy.intercept("POST", "**/api/v1/consultation/*/discharge_patient/").as(
+      "postDischarge",
+    );
     cy.clickSubmitButton("Acknowledge & Submit");
+    cy.wait("@postDischarge").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
