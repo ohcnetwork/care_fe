@@ -22,6 +22,7 @@ import { PatientProps } from ".";
 import * as Notification from "../../../Utils/Notifications";
 import { InsuranceDetailsCard } from "../InsuranceDetailsCard";
 import { parseOccupation } from "../PatientHome";
+import { isPatientDischarged } from "../Utils";
 import { AssignedToObjectModel } from "../models";
 
 export const Demography = (props: PatientProps) => {
@@ -329,14 +330,6 @@ export const Demography = (props: PatientProps) => {
     },
   ];
 
-  const isPatientDischarged = () => {
-    if (!patientData.is_active) return true;
-    if (facilityId !== patientData.facility_object?.id.toString()) {
-      return true;
-    }
-    return false;
-  };
-
   return (
     <div>
       <section
@@ -372,11 +365,15 @@ export const Demography = (props: PatientProps) => {
                   size="medium"
                   variant="custom"
                   className={
-                    !isPatientDischarged()
+                    !isPatientDischarged(patientData, facilityId)
                       ? "bg-blue-100 text-blue-800"
                       : "bg-red-100 text-red-800"
                   }
-                  text={!isPatientDischarged() ? "LIVE" : "DISCHARGED"}
+                  text={
+                    !isPatientDischarged(patientData, facilityId)
+                      ? "LIVE"
+                      : "DISCHARGED"
+                  }
                 />
               </div>
             </div>
