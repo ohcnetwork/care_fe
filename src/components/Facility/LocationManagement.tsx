@@ -239,7 +239,10 @@ const Location = ({
   const totalBeds = bedsQuery.data?.count;
 
   return (
-    <div className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
+    <div
+      className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400"
+      id="location-cards"
+    >
       <div className="flex-1">
         <div className="flex w-full items-start justify-between gap-2">
           <div className="flex items-end gap-3">
