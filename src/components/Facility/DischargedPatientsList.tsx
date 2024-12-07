@@ -265,7 +265,6 @@ const DischargedPatientsList = ({
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [phone_number, setPhoneNumber] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
-  useState("");
   const [count, setCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
