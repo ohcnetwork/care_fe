@@ -348,7 +348,9 @@ export const PatientHome = (props: {
                     <Chip
                       variant="danger"
                       size="small"
-                      text={`${t("allergies")} ${patientData.allergies.length}`}
+                      text={`${t("allergies")} ${
+                        patientData.allergies.split(",").filter(Boolean).length
+                      }`}
                     />
                   )}
                 </div>
