@@ -35,11 +35,7 @@ export class PatientFileUpload {
   }
 
   verifyUploadFilePresence(fileName: string) {
-    cy.intercept("GET", "**/api/v1/files/?file_type=CONSULTATION*").as(
-      "getFiles",
-    );
     cy.get("#file-div").should("be.visible").scrollIntoView();
-    cy.wait("@getFiles").its("response.statusCode").should("eq", 200);
     cy.verifyContentPresence("#file-div", [fileName]);
   }
 
@@ -52,8 +48,10 @@ export class PatientFileUpload {
 
   clickUploadFile() {
     cy.intercept("POST", "**/api/v1/files/").as("uploadFile");
+    cy.intercept("GET", "**/api/v1/files/**").as("getFiles");
     cy.get("#upload_file_button").click();
     cy.wait("@uploadFile").its("response.statusCode").should("eq", 201);
+    cy.wait("@getFiles").its("response.statusCode").should("eq", 200);
   }
 
   archiveFile() {

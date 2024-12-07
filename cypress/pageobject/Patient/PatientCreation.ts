@@ -182,26 +182,29 @@ export class PatientPage {
     isPostPartum = false,
   ) {
     cy.url().should("include", "/facility/");
-    cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
-      expect($dashboard).to.contain(gender);
-      expect($dashboard).to.contain(age);
-      expect($dashboard).to.contain(patientName);
-      expect($dashboard).to.contain(phoneNumber);
-      expect($dashboard).to.contain(emergencyPhoneNumber);
-      //expect($dashboard).to.contain(yearOfBirth); //Commented out because new proposed UI does not have DOB. Can change later.
-      expect($dashboard).to.contain(bloodGroup);
-      expect($dashboard).to.contain(occupation);
-      socioeconomicStatus && expect($dashboard).to.contain(socioeconomicStatus);
-      domesticHealthcareSupport &&
-        expect($dashboard).to.contain(domesticHealthcareSupport);
+    cy.get("[data-testid=patient-dashboard]")
+      .should("be.visible")
+      .then(($dashboard) => {
+        expect($dashboard).to.contain(gender);
+        expect($dashboard).to.contain(age);
+        expect($dashboard).to.contain(patientName);
+        expect($dashboard).to.contain(phoneNumber);
+        expect($dashboard).to.contain(emergencyPhoneNumber);
+        //expect($dashboard).to.contain(yearOfBirth); //Commented out because new proposed UI does not have DOB. Can change later.
+        expect($dashboard).to.contain(bloodGroup);
+        expect($dashboard).to.contain(occupation);
+        socioeconomicStatus &&
+          expect($dashboard).to.contain(socioeconomicStatus);
+        domesticHealthcareSupport &&
+          expect($dashboard).to.contain(domesticHealthcareSupport);
 
-      if (isAntenatal) {
-        expect($dashboard).to.contain("Antenatal");
-      }
-      if (isPostPartum) {
-        expect($dashboard).to.contain("Post-partum");
-      }
-    });
+        if (isAntenatal) {
+          expect($dashboard).to.contain("Antenatal");
+        }
+        if (isPostPartum) {
+          expect($dashboard).to.contain("Post-partum");
+        }
+      });
   }
 
   verifyPatientLocationDetails(
