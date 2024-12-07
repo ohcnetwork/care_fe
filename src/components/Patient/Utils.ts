@@ -24,11 +24,9 @@ export const isPatientDischarged = (
   if (!patientData.is_active) {
     return true;
   }
-
   const patientFacilityId = patientData.facility_object?.id;
   if (!patientFacilityId || !facilityId) {
     return false;
   }
-
   return patientFacilityId.toString() !== facilityId;
 };
