@@ -164,8 +164,12 @@ describe("Patient Homepage present functionalities", () => {
       .invoke("text")
       .then((patientOne: string) => {
         firstPatientPageOne = patientOne.trim();
+        cy.intercept(
+          "GET",
+          "/api/v1/patient/?page=1&limit=12&is_active=True&offset=0",
+        ).as("getPatientPage");
         pageNavigation.navigateToNextPage();
-        cy.wait(2000);
+        cy.wait("@getPatientPage").its("response.statusCode").should("eq", 200);
         pageNavigation.verifyCurrentPageNumber(2);
         cy.get('[data-cy="patient"]')
           .first()
