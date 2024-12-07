@@ -35,14 +35,9 @@ import {
 } from "@/common/constants";
 import { parseOptionId } from "@/common/utils";
 
-import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
-import {
-  formatPatientAge,
-  humanizeStrings,
-  parsePhoneNumber,
-} from "@/Utils/utils";
+import { formatPatientAge, humanizeStrings } from "@/Utils/utils";
 
 import SearchByMultipleFields from "../Common/SearchByMultipleFields";
 
@@ -63,7 +58,6 @@ const DischargedPatientsList = ({
     FilterBadges,
     updatePage,
     clearSearch,
-    resultsPerPage,
   } = useFilters({
     limit: 12,
     cacheBlacklist: [
@@ -167,88 +161,6 @@ const DischargedPatientsList = ({
         external_id: qParams.last_consultation_current_bed__location,
       },
       prefetch: !!qParams.last_consultation_current_bed__location,
-    },
-  );
-
-  const params = {
-    page: qParams.page || 1,
-    limit: resultsPerPage,
-    name: qParams.name || undefined,
-    patient_no: qParams.patient_no || undefined,
-    is_active:
-      !qParams.last_consultation__new_discharge_reason &&
-      (qParams.is_active || "True"),
-    phone_number: qParams.phone_number
-      ? parsePhoneNumber(qParams.phone_number)
-      : undefined,
-    emergency_phone_number: qParams.emergency_phone_number
-      ? parsePhoneNumber(qParams.emergency_phone_number)
-      : undefined,
-    local_body: qParams.lsgBody || undefined,
-    facility: qParams.facility,
-    facility_type: qParams.facility_type || undefined,
-    district: qParams.district || undefined,
-    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-    created_date_before: qParams.created_date_before || undefined,
-    created_date_after: qParams.created_date_after || undefined,
-    modified_date_before: qParams.modified_date_before || undefined,
-    modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || undefined,
-    category: qParams.category || undefined,
-    gender: qParams.gender || undefined,
-    age_min: qParams.age_min || undefined,
-    age_max: qParams.age_max || undefined,
-    date_declared_positive_before:
-      qParams.date_declared_positive_before || undefined,
-    date_declared_positive_after:
-      qParams.date_declared_positive_after || undefined,
-    ration_card_category: qParams.ration_card_category || undefined,
-    last_consultation_medico_legal_case:
-      qParams.last_consultation_medico_legal_case || undefined,
-    last_consultation_encounter_date_before:
-      qParams.last_consultation_encounter_date_before || undefined,
-    last_consultation_encounter_date_after:
-      qParams.last_consultation_encounter_date_after || undefined,
-    last_consultation_discharge_date_before:
-      qParams.last_consultation_discharge_date_before || undefined,
-    last_consultation_discharge_date_after:
-      qParams.last_consultation_discharge_date_after || undefined,
-    last_consultation_admitted_bed_type_list:
-      qParams.last_consultation_admitted_bed_type_list || undefined,
-    last_consultation__consent_types:
-      qParams.last_consultation__consent_types || undefined,
-    last_consultation__new_discharge_reason:
-      qParams.last_consultation__new_discharge_reason || undefined,
-    last_consultation_current_bed__location:
-      qParams.last_consultation_current_bed__location || undefined,
-    number_of_doses: qParams.number_of_doses || undefined,
-    covin_id: qParams.covin_id || undefined,
-    is_kasp: qParams.is_kasp || undefined,
-    is_declared_positive: qParams.is_declared_positive || undefined,
-    last_vaccinated_date_before:
-      qParams.last_vaccinated_date_before || undefined,
-    last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
-    last_consultation_is_telemedicine:
-      qParams.last_consultation_is_telemedicine || undefined,
-    is_antenatal: qParams.is_antenatal || undefined,
-    last_menstruation_start_date_after:
-      (qParams.is_antenatal === "true" &&
-        dayjs().subtract(9, "month").format("YYYY-MM-DD")) ||
-      undefined,
-    ventilator_interface: qParams.ventilator_interface || undefined,
-    diagnoses: qParams.diagnoses || undefined,
-    diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
-    diagnoses_provisional: qParams.diagnoses_provisional || undefined,
-    diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
-    diagnoses_differential: qParams.diagnoses_differential || undefined,
-    review_missed: qParams.review_missed || undefined,
-  };
-
-  const { loading: isLoading, data } = useQuery(
-    routes.listFacilityDischargedPatients,
-    {
-      query: params,
-      pathParams: { facility_external_id: facility_external_id },
     },
   );
 
@@ -357,6 +269,7 @@ const DischargedPatientsList = ({
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
   useState("");
   const [count, setCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <Page
@@ -393,7 +306,7 @@ const DischargedPatientsList = ({
           <CountBlock
             text={t("total_patients")}
             count={count || 0}
-            loading={isLoading || !data}
+            loading={isLoading}
             icon="d-patient"
           />
         </div>
@@ -516,7 +429,10 @@ const DischargedPatientsList = ({
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
         query={{ ordering: "-modified_date", ...qParams }}
-        queryCB={(query) => setCount(query.data?.count || 0)}
+        queryCB={(query) => {
+          setCount(query.data?.count || 0);
+          setIsLoading(query.loading);
+        }}
         initialPage={qParams.page}
         onPageChange={updatePage}
       >
