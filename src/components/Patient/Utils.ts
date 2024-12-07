@@ -17,3 +17,13 @@ export function isPatientMandatoryDataFilled(patient: PatientModel) {
     patient.blood_group
   );
 }
+export const isPatientDischarged = (
+  patientData: PatientModel,
+  facilityId: string | undefined,
+) => {
+  if (!patientData.is_active) return true;
+  if (facilityId !== patientData.facility_object?.id.toString()) {
+    return true;
+  }
+  return false;
+};
