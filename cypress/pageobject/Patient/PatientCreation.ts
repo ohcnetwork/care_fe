@@ -91,15 +91,11 @@ export class PatientPage {
   }
 
   clickPatientAntenatalStatusYes() {
-    cy.get("#is_antenatal-option-true", { timeout: 10000 })
-      .should("be.visible")
-      .click();
+    cy.get("#is_antenatal-option-true").click();
   }
 
   clickPatientPostPartumStatusYes() {
-    cy.get("#is_postpartum-option-true", { timeout: 10000 })
-      .should("be.visible")
-      .click();
+    cy.get("#is_postpartum-option-true").click();
   }
 
   clickCancelButton() {
