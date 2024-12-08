@@ -92,7 +92,9 @@ export class PatientFileUpload {
 
   clickSaveFileName() {
     cy.intercept("PATCH", "**/api/v1/files/**").as("saveFileName");
+    cy.intercept("GET", "**/api/v1/files/**").as("getFiles");
     cy.clickSubmitButton("Proceed");
     cy.wait("@saveFileName").its("response.statusCode").should("eq", 200);
+    cy.wait("@getFiles").its("response.statusCode").should("eq", 200);
   }
 }
