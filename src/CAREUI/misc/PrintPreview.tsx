@@ -21,14 +21,23 @@ type Props = {
   disabled?: boolean;
   className?: string;
   title: string;
+  backUrl?: string;
+  crumbsReplacements?: Record<
+    string,
+    { name?: string; uri?: string; style?: string }
+  >;
 };
 
-export default function PrintPreview(props: Props) {
+const PrintPreview: React.FC<Props> = (props) => {
   const normalScale = useBreakpoints({ default: 0.44, md: 1 });
   const { t } = useTranslation();
 
   return (
-    <Page title={props.title}>
+    <Page
+      title={props.title}
+      backUrl={props.backUrl}
+      crumbsReplacements={props.crumbsReplacements}
+    >
       <div className="mx-auto my-8 w-[50rem]">
         <div className="top-0 z-20 flex gap-2 bg-secondary-100 px-2 py-4 xl:absolute xl:right-6 xl:top-8 xl:justify-end">
           <Button variant="primary" disabled={props.disabled} onClick={print}>
@@ -52,4 +61,6 @@ export default function PrintPreview(props: Props) {
       </div>
     </Page>
   );
-}
+};
+
+export default PrintPreview;
