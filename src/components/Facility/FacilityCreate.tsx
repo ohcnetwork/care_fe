@@ -68,6 +68,11 @@ import {
   parsePhoneNumber,
 } from "@/Utils/utils";
 
+import AvatarEditable from "@/components/Common/AvatarEditable";
+import AvatarEditModal from "@/components/Common/AvatarEditModal";
+import uploadFile from "@/Utils/request/uploadFile";
+import { LocalStorageKeys } from "@/common/constants";
+
 interface FacilityProps {
   facilityId?: string;
 }
@@ -94,6 +99,7 @@ type FacilityForm = {
   expected_type_b_cylinders?: number;
   expected_type_c_cylinders?: number;
   expected_type_d_cylinders?: number;
+  cover_image?: File;
 };
 
 const initForm: FacilityForm = {
@@ -118,6 +124,7 @@ const initForm: FacilityForm = {
   expected_type_b_cylinders: undefined,
   expected_type_c_cylinders: undefined,
   expected_type_d_cylinders: undefined,
+  cover_image: undefined,
 };
 
 const initError: Record<keyof FacilityForm, string> = Object.assign(
@@ -286,6 +293,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             expected_type_d_cylinders: data.expected_type_d_cylinders,
             expected_oxygen_requirement: data.expected_oxygen_requirement,
             oxygen_capacity: data.oxygen_capacity,
+            cover_image: undefined,
           };
           dispatch({ type: "set_form", form: formData });
           setStateId(data.state);
@@ -524,6 +532,33 @@ export const FacilityCreate = (props: FacilityProps) => {
             msg: "Facility updated successfully",
           });
           navigate(`/facility/${facilityId}`);
+        }
+
+        if (state.form.cover_image) {
+          const formData = new FormData();
+          formData.append("cover_image", state.form.cover_image);
+          const url = `${careConfig.apiUrl}/api/v1/facility/${id}/cover_image/`;
+
+          uploadFile(
+            url,
+            formData,
+            "POST",
+            {
+              Authorization:
+                "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
+            },
+            async (xhr: XMLHttpRequest) => {
+              if (xhr.status === 200) {
+                Notification.Success({ msg: "Cover image uploaded." });
+              } else {
+                Notification.Error({ msg: "Failed to upload cover image." });
+              }
+            },
+            null,
+            () => {
+              Notification.Error({ msg: "Failed to upload cover image." });
+            },
+          );
         }
       }
       setIsLoading(false);
@@ -999,6 +1034,35 @@ export const FacilityCreate = (props: FacilityProps) => {
                     placeholder="Longitude"
                   />
                 </div>
+
+                <div className="mt-4">
+                  <AvatarEditable
+                    name={state.form.name}
+                    imageUrl={state.form.cover_image ? URL.createObjectURL(state.form.cover_image) : undefined}
+                    onClick={() => setEditCoverImage(true)}
+                  />
+                  <AvatarEditModal
+                    title="Edit Cover Photo"
+                    open={editCoverImage}
+                    imageUrl={state.form.cover_image ? URL.createObjectURL(state.form.cover_image) : undefined}
+                    handleUpload={(file) => {
+                      dispatch({
+                        type: "set_form",
+                        form: { ...state.form, cover_image: file },
+                      });
+                      setEditCoverImage(false);
+                    }}
+                    handleDelete={() => {
+                      dispatch({
+                        type: "set_form",
+                        form: { ...state.form, cover_image: undefined },
+                      });
+                      setEditCoverImage(false);
+                    }}
+                    onClose={() => setEditCoverImage(false)}
+                  />
+                </div>
+
                 <div className="mt-12 flex flex-col-reverse justify-end gap-3 sm:flex-row">
                   <Cancel onClick={() => goBack()} />
                   <Submit
