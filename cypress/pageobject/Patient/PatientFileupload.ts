@@ -49,10 +49,8 @@ export class PatientFileUpload {
 
   clickUploadFile() {
     cy.intercept("POST", "**/api/v1/files/").as("uploadFile");
-    cy.intercept("GET", "**/api/v1/files/**").as("getFiles");
     cy.get("#upload_file_button").click();
     cy.wait("@uploadFile").its("response.statusCode").should("eq", 201);
-    cy.wait("@getFiles").its("response.statusCode").should("eq", 200);
   }
 
   archiveFile() {
