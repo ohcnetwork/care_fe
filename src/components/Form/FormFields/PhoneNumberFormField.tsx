@@ -111,18 +111,14 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
         }
         const countryCode = getCountryCode(field.value);
         const newCountry = countryCode ? phoneCodes[countryCode] : null;
-
-        // Allow users to continue editing even with undefined country
         if (newCountry) {
           setCountry((prev) =>
             prev.code === newCountry.code ? prev : newCountry,
           );
         } else {
-          // Reset to default when no matching country code is found
           setCountry({ flag: "❓", name: "Unknown", code: "" });
         }
       } else {
-        // Handle empty or removed country code
         setCountry({ flag: "🌍", name: "Other", code: "" });
       }
     }, [field.value]);
