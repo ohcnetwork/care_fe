@@ -96,16 +96,36 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
     useEffect(() => {
       if (field.value && field.value.length > 0) {
         if (field.value.startsWith("1800")) {
-          setCountry({ flag: "📞", name: "Support", code: "1800" });
+          setCountry((prev) =>
+            prev.code === "1800"
+              ? prev
+              : { flag: "📞", name: "Support", code: "1800" },
+          );
           return;
         }
         if (field.value === "+") {
-          setCountry({ flag: "🌍", name: "Other", code: "+" });
+          setCountry((prev) =>
+            prev.code === "+" ? prev : { flag: "🌍", name: "Other", code: "+" },
+          );
           return;
         }
-        setCountry(phoneCodes[getCountryCode(field.value)!]);
+        const countryCode = getCountryCode(field.value);
+        const newCountry = countryCode ? phoneCodes[countryCode] : null;
+
+        // Allow users to continue editing even with undefined country
+        if (newCountry) {
+          setCountry((prev) =>
+            prev.code === newCountry.code ? prev : newCountry,
+          );
+        } else {
+          // Reset to default when no matching country code is found
+          setCountry({ flag: "❓", name: "Unknown", code: "" });
+        }
+      } else {
+        // Handle empty or removed country code
+        setCountry({ flag: "🌍", name: "Other", code: "" });
       }
-    }, [setValue]);
+    }, [field.value]);
 
     return (
       <FormField
