@@ -7,7 +7,11 @@ import { cn } from "@/lib/utils";
  * Badge component for displaying status indicators.
  * @param variant - The visual style variant of the badge
  * @param className - Additional CSS classes to apply
+ * // Usage for review status
+ * <Badge variant="purple">Review Missed</Badge>
+ * <Badge variant="success">Review Due in 2 days</Badge>
  */
+
 
 const badgeVariants = cva(
   "inline-flex items-center rounded-md border border-gray-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 dark:border-gray-800 dark:focus:ring-gray-300",
