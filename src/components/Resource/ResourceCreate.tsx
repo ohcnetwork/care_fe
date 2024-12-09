@@ -72,8 +72,8 @@ const initForm: ResourceData = {
   refering_facility_contact_name: "",
   refering_facility_contact_number: "+91",
   assigned_to_object: null,
-  requested_quantity: null,
-  assigned_quantity: null,
+  requested_quantity: "",
+  assigned_quantity: "",
 };
 
 const initError = Object.assign(
@@ -202,7 +202,7 @@ export default function ResourceCreate(props: resourceProps) {
             errors[field as keyof ResourceData] = errorText;
           } else if (
             !phoneNumber ||
-            !PhoneNumberValidator()(phoneNumber) ||
+            !PhoneNumberValidator()(phoneNumber) === undefined ||
             !phonePreg(String(phoneNumber))
           ) {
             errors[field as keyof ResourceData] = invalidText;
@@ -211,6 +211,7 @@ export default function ResourceCreate(props: resourceProps) {
         }
         case "requested_quantity":
         case "assigned_quantity": {
+          if (!resourceId && field === "assigned_quantity") break;
           const value = form[field as keyof ResourceData];
           const minVal = field === "assigned_quantity" ? 0 : 1;
           if (!value || parseFloat(String(value)) < minVal) {
@@ -231,7 +232,6 @@ export default function ResourceCreate(props: resourceProps) {
       }
     });
     dispatch({ type: "set_error", errors });
-    console.log(errors);
     return errors;
   };
 
@@ -255,7 +255,7 @@ export default function ResourceCreate(props: resourceProps) {
       ),
       requested_quantity: parseFloat(form.requested_quantity || "1"),
       assigned_quantity: parseFloat(form.assigned_quantity || "0"),
-      assigned_to_object: form.assigned_to_object ?? null,
+      assigned_to_object: form.assigned_to_object,
       assigned_to: form.assigned_to_object?.id.toString() ?? undefined,
     };
 
@@ -274,22 +274,21 @@ export default function ResourceCreate(props: resourceProps) {
         navigate(`/resource/${resourceId}`);
       }
       setIsLoading(false);
-    } // } else {
-    //   // const { res, data } = await request(routes.createResource, {
-    //   //   body: resourceData,
-    //   // });
-    //   // setIsLoading(false);
+    } else {
+      const { res, data } = await request(routes.createResource, {
+        body: resourceData,
+      });
+      setIsLoading(false);
 
-    //   // if (res?.ok && data) {
-    //   //   await dispatch({ type: "set_form", form: initForm });
-    //   //   Notification.Success({
-    //   //     msg: "Resource request created successfully",
-    //   //   });
+      if (res?.ok && data) {
+        await dispatch({ type: "set_form", form: initForm });
+        Notification.Success({
+          msg: "Resource request created successfully",
+        });
 
-    //   //   navigate(`/resource/${data.id}`);
-    console.log("created");
-    //   }
-    // }
+        navigate(`/resource/${data.id}`);
+      }
+    }
   };
 
   if (isLoading || resourceQuery.loading) {

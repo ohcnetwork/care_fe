@@ -364,14 +364,14 @@ class FacilityPage {
   ) {
     cy.get("#refering_facility_contact_name").type(name);
     cy.get("#refering_facility_contact_number").type(phone_number);
-    cy.get("[name='approving_facility']")
+    cy.get("[name='approving_facility_object']")
       .type(facility)
       .then(() => {
         cy.get("[role='option']").first().click();
       });
-    cy.get("#title").type(title);
+    cy.get("#request_title").type(title);
     cy.get("#requested_quantity").type(quantity);
-    cy.get("#reason").type(description);
+    cy.get("#request_description").type(description);
   }
 
   clickSubmitRequestButton() {
