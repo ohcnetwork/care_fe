@@ -3,6 +3,12 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Badge component for displaying status indicators.
+ * @param variant - The visual style variant of the badge
+ * @param className - Additional CSS classes to apply
+ */
+
 const badgeVariants = cva(
   "inline-flex items-center rounded-md border border-gray-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 dark:border-gray-800 dark:focus:ring-gray-300",
   {
@@ -16,7 +22,9 @@ const badgeVariants = cva(
           "border-transparent bg-red-500 text-gray-50 shadow hover:bg-red-500/80 dark:bg-red-900 dark:text-gray-50 dark:hover:bg-red-900/80",
         outline: "text-gray-950 dark:text-gray-50",
         purple:
-          "border-transparent bg-purple-200 text-purple-800 shadow hover:bg-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:hover:bg-purple-800",
+          "border-transparent bg-purple-200 text-purple-800 shadow hover:bg-purple-300 dark:bg-purple-900 dark:text-purple-100 dark:hover:bg-purple-900",
+        success:
+          "border-transparent bg-green-500 text-gray-50 shadow hover:bg-green-500/80 dark:bg-green-900 dark:text-gray-50 dark:hover:bg-green-900/80",
       },
     },
     defaultVariants: {
@@ -31,8 +39,14 @@ export interface BadgeProps
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div
+      role="status"
+      aria-label={props["aria-label"] || props.children?.toString()}
+      className={cn(badgeVariants({ variant }), className)}
+      {...props}
+    />
   );
 }
 
 export { Badge, badgeVariants };
+
