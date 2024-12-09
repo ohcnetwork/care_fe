@@ -538,11 +538,11 @@ export const fahrenheitToCelsius = (fahrenheit: number) => {
   return ((fahrenheit - 32) * 5) / 9;
 };
 export const mmHgToKPa = (mmHg: number) => {
-  return mmHg * 0.133322;
+  return Math.round(mmHg * 0.133322 * 100) / 100;
 };
 
 export const kPaToMmHg = (kPa: number) => {
-  return kPa / 0.133322;
+  return Math.round((kPa / 0.133322) * 100) / 100;
 };
 
 /**

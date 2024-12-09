@@ -47,6 +47,14 @@ export default function RangeFormField(props: Props) {
   const [displayValue, setDisplayValue] = useState<string>("");
   const prevUnit = useRef(unit.label);
 
+  function getRoundingPrecision(step: number = 1): number {
+    const parts = step.toString().split(".");
+    return parts.length > 1 ? parts[1].length : 0;
+  }
+
+  const precision = getRoundingPrecision(props.step);
+  const factor = Math.pow(10, precision);
+
   // Value in current unit
   const value = (() => {
     if (props.value == null) {
@@ -123,7 +131,8 @@ export default function RangeFormField(props: Props) {
     100;
 
   const handleChange = (v: number) => {
-    field.handleChange(unit.inversionFn(props.step === 1 ? Math.round(v) : v));
+    const rounded = Math.round(v * factor) / factor;
+    field.handleChange(unit.inversionFn(rounded));
   };
 
   return (
