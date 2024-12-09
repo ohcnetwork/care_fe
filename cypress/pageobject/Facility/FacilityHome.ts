@@ -1,7 +1,6 @@
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";
-  searchButton = "#search";
   menuItem = "[role='menuitem']";
 
   // Operations
@@ -10,8 +9,24 @@ class FacilityHome {
     cy.get(this.exportButton).click();
   }
 
-  clickSearchButton() {
-    cy.get(this.searchButton).click();
+  navigateToFacilityHomepage() {
+    cy.visit("/facility");
+  }
+
+  assertFacilityInCard(facilityName: string) {
+    cy.get("#facility-name-card").should("contain", facilityName);
+  }
+
+  interceptFacilitySearchReq() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("searchFacility");
+  }
+
+  verifyFacilitySearchReq() {
+    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
+  }
+
+  typeFacilitySearch(facilityName: string) {
+    cy.get("#facility-search").click().clear().type(facilityName);
   }
 
   clickMenuItem(itemName: string) {
@@ -74,11 +89,6 @@ class FacilityHome {
 
   verifyOccupancyBadgeVisibility() {
     cy.get('[data-test-id="occupancy-badge"]').should("be.visible");
-  }
-
-  verifyAndCloseNotifyModal() {
-    cy.get("#cancel").should("be.visible");
-    cy.get("#cancel").click();
   }
 
   navigateBack() {

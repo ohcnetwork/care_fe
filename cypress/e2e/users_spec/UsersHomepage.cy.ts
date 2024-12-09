@@ -20,7 +20,7 @@ describe("User Homepage", () => {
   const doctorUserName = "dev-doctor2";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -43,30 +43,28 @@ describe("User Homepage", () => {
     advanceFilters.applySelectedFilter();
     userPage.checkUsernameText(nurseUserName);
     // Verify the badges related to the data
-    userPage.verifyDataTestIdText("First Name", `First Name: ${firstName}`);
-    userPage.verifyDataTestIdText("Last Name", `Last Name: ${lastName}`);
-    userPage.verifyDataTestIdText(
-      "Phone Number",
-      `Phone Number: +91${phoneNumber}`,
-    );
-    userPage.verifyDataTestIdText(
+    advanceFilters.verifyFilterBadgePresence("First Name", firstName, true);
+    advanceFilters.verifyFilterBadgePresence("Last Name", lastName, true);
+    advanceFilters.verifyFilterBadgePresence("Phone Number", phoneNumber, true);
+    advanceFilters.verifyFilterBadgePresence(
       "WhatsApp no.",
-      `WhatsApp no.: +91${altPhoneNumber}`,
+      altPhoneNumber,
+      true,
     );
-    userPage.verifyDataTestIdText("Role", `Role: ${role}`);
-    userPage.verifyDataTestIdText(
+    advanceFilters.verifyFilterBadgePresence("Role", role, true);
+    advanceFilters.verifyFilterBadgePresence(
       "Home Facility",
-      `Home Facility: ${homeFacility}`,
+      homeFacility,
+      true,
     );
     advanceFilters.clickAdvancedFiltersButton();
     advanceFilters.clickClearAdvanceFilters();
-    userPage.verifyDataTestIdNotVisible("First Name");
-    userPage.verifyDataTestIdNotVisible("Last Name");
-    userPage.verifyDataTestIdNotVisible("Phone Number");
-    userPage.verifyDataTestIdNotVisible("WhatsApp no.");
-    userPage.verifyDataTestIdNotVisible("Role");
-    userPage.verifyDataTestIdNotVisible("Home Facility");
-    userPage.verifyDataTestIdNotVisible("District");
+    advanceFilters.verifyFilterBadgePresence("First Name", "", false);
+    advanceFilters.verifyFilterBadgePresence("Last Name", "", false);
+    advanceFilters.verifyFilterBadgePresence("Phone Number", "", false);
+    advanceFilters.verifyFilterBadgePresence("WhatsApp no.", "", false);
+    advanceFilters.verifyFilterBadgePresence("Role", "", false);
+    advanceFilters.verifyFilterBadgePresence("Home Facility", "", false);
   });
 
   it("Search by username", () => {
