@@ -194,6 +194,7 @@ export const EncounterSymptomsBuilder = (props: {
           id="symptoms_onset_date"
           placeholder="Date of onset"
           disableFuture
+          disabled={processing}
           value={onsetDate}
           onChange={({ value }) => {
             if (!dayjs(onsetDate).isSame(dayjs(value), "second")) {

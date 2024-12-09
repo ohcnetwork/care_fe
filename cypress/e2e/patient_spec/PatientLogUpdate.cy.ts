@@ -88,6 +88,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     // Only will be using random non-unique progress note fields
     patientLogupdate.selectRoundType("Progress Note");
     patientLogupdate.selectPatientCategory(patientCategory);
+    cy.wait(2000);
     patientLogupdate.selectSymptomsDate("01012024");
     patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
     patientLogupdate.typeTemperature(patientTemperature);
