@@ -477,7 +477,7 @@ export default function ResourceCreate(props: resourceProps) {
                         value: selected,
                       });
                     }}
-                    errors={state.errors.approving_facility_object}
+                    errors={state.errors.assigned_facility_object}
                   />
                 </div>
 
