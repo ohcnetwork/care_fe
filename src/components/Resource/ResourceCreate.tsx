@@ -1,28 +1,27 @@
-import { t } from "i18next";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Card from "@/CAREUI/display/Card";
-
-import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
+import {
+  PhoneNumberValidator,
+  RequiredFieldValidator,
+} from "@/components/Form/FieldValidators";
 import { FieldLabel } from "@/components/Form/FormFields/FormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "@/components/Form/FormFields/RadioFormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import {
   OptionsType,
   RESOURCE_CATEGORY_CHOICES,
+  RESOURCE_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "@/common/constants";
 import { phonePreg } from "@/common/validation";
@@ -33,51 +32,48 @@ import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
+import CircularProgress from "../Common/CircularProgress";
+import UserAutocomplete from "../Common/UserAutocompleteFormField";
+import { FacilityModel } from "../Facility/models";
+import Form from "../Form/Form";
+import { UserBareMinimum } from "../Users/models";
+
 interface resourceProps {
   facilityId: number;
+  resourceId?: string;
 }
 
-const initForm: any = {
+interface ResourceData {
+  status?: OptionsType["text"];
+  category?: string;
+  sub_category?: number;
+  approving_facility_object: FacilityModel | null;
+  assigned_facility_object?: FacilityModel | null;
+  emergency: string;
+  request_title: string;
+  request_description: string;
+  refering_facility_contact_name?: string;
+  refering_facility_contact_number: string;
+  requested_quantity: string | null;
+  assigned_quantity?: string | null;
+  assigned_to_object: UserBareMinimum | null;
+  origin_facility_object?: FacilityModel | null;
+}
+
+const initForm: ResourceData = {
+  status: "PENDING",
   category: "OXYGEN",
   sub_category: 1000,
-  approving_facility: null,
-  assigned_facility: null,
+  approving_facility_object: null,
+  assigned_facility_object: null,
   emergency: "false",
-  title: "",
-  reason: "",
+  request_title: "",
+  request_description: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "+91",
+  assigned_to_object: null,
   requested_quantity: null,
-};
-
-const requiredFields: any = {
-  category: {
-    errorText: t("category"),
-  },
-  sub_category: {
-    errorText: t("sub_category"),
-  },
-  approving_facility: {
-    errorText: t("approving_facility_error"),
-  },
-  refering_facility_contact_name: {
-    errorText: t("referring_facility_contact_name_error"),
-  },
-  refering_facility_contact_number: {
-    errorText: t("referring_facility_contact_number_error"),
-    invalidText: t("referring_facility_contact_number_invalid"),
-  },
-  title: {
-    errorText: t("title_error"),
-    invalidText: t("title_invalid"),
-  },
-  reason: {
-    errorText: t("reason_error"),
-    invalidText: t("reason_invalid"),
-  },
-  requested_quantity: {
-    errorText: t("requested_quantity_error"),
-  },
+  assigned_quantity: null,
 };
 
 const initError = Object.assign(
@@ -92,9 +88,46 @@ const initialState = {
 
 export default function ResourceCreate(props: resourceProps) {
   const { goBack } = useAppHistory();
-  const { facilityId } = props;
+  const { facilityId, resourceId } = props;
   const { t } = useTranslation();
+  const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [initialResourceData, setInitialResouceData] =
+    useState<ResourceData>(initForm);
+  const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
+
+  const requiredFields: any = {
+    category: {
+      errorText: t("category"),
+    },
+    sub_category: {
+      errorText: t("sub_category"),
+    },
+    approving_facility_object: {
+      errorText: t("approving_facility_error"),
+    },
+    refering_facility_contact_name: {
+      errorText: t("referring_facility_contact_name_error"),
+    },
+    refering_facility_contact_number: {
+      errorText: t("referring_facility_contact_number_error"),
+      invalidText: t("referring_facility_contact_number_invalid"),
+    },
+    request_title: {
+      errorText: t("title_error"),
+      invalidText: t("title_invalid"),
+    },
+    request_description: {
+      errorText: t("reason_error"),
+      invalidText: t("reason_invalid"),
+    },
+    requested_quantity: {
+      errorText: t("requested_quantity_error"),
+    },
+    assigned_quantity: {
+      errorText: t("assigned_quantity_error"),
+    },
+  };
 
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -118,226 +151,390 @@ export default function ResourceCreate(props: resourceProps) {
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
   const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    prefetch: facilityId !== undefined,
+    prefetch: !!facilityId,
     pathParams: { id: String(facilityId) },
   });
 
-  const validateForm = () => {
-    const errors = { ...initError };
-    let isInvalidForm = false;
-    Object.keys(requiredFields).forEach((field) => {
+  const resourceQuery = useQuery(routes.getResourceDetails, {
+    pathParams: {
+      id: resourceId!,
+    },
+    prefetch: !!resourceId,
+    onResponse: ({ data: resource }) => {
+      if (!resource) return;
+
+      setInitialResouceData({
+        ...resource,
+        request_title: resource.title,
+        request_description: resource.reason,
+        sub_category:
+          Number(
+            RESOURCE_SUBCATEGORIES.find(
+              (item) => item.text === resource.sub_category,
+            )?.id,
+          ) ?? 1000,
+        emergency: resource.emergency ? "true" : "false",
+        requested_quantity: resource.requested_quantity.toString(),
+        assigned_quantity: resource.assigned_quantity.toString(),
+        status: qParams.status || resource.status,
+      });
+      dispatch({ type: "set_form", form: resource });
+
+      setIsLoading(false);
+    },
+  });
+
+  const { loading: assignedUserLoading } = useQuery(routes.userList);
+
+  const ResourceFormValidator = (
+    form: ResourceData,
+  ): Partial<Record<keyof ResourceData, string>> => {
+    const errors: Partial<Record<keyof ResourceData, string>> = {};
+
+    Object.entries(requiredFields).forEach(([field, config]) => {
+      const { errorText, invalidText }: any = config;
+
       switch (field) {
         case "refering_facility_contact_number": {
-          const phoneNumber = parsePhoneNumber(state.form[field]);
-          if (!state.form[field]) {
-            errors[field] = requiredFields[field].errorText;
-            isInvalidForm = true;
+          if (resourceId) break;
+          const phoneNumber = parsePhoneNumber(form[field]);
+          if (!form[field as keyof ResourceData]) {
+            errors[field as keyof ResourceData] = errorText;
           } else if (
             !phoneNumber ||
-            !PhoneNumberValidator()(phoneNumber) === undefined ||
+            !PhoneNumberValidator()(phoneNumber) ||
             !phonePreg(String(phoneNumber))
           ) {
-            errors[field] = requiredFields[field].invalidText;
-            isInvalidForm = true;
+            errors[field as keyof ResourceData] = invalidText;
           }
-          return;
+          break;
         }
         case "requested_quantity":
-          if (state.form[field]) {
-            const value = state.form[field];
-            if (!value || parseFloat(value) < 1) {
-              errors[field] = requiredFields[field].text;
-              isInvalidForm = true;
-            }
+        case "assigned_quantity": {
+          const value = form[field as keyof ResourceData];
+          const minVal = field === "assigned_quantity" ? 0 : 1;
+          if (!value || parseFloat(String(value)) < minVal) {
+            errors[field as keyof ResourceData] = errorText;
+          }
+          break;
+        }
+        case "approving_facility_object":
+          if (!form[field]?.name) {
+            errors[field as keyof ResourceData] = errorText;
           }
           break;
         default:
-          if (!state.form[field]) {
-            errors[field] = requiredFields[field].errorText;
-            isInvalidForm = true;
+          if (!form[field as keyof ResourceData]) {
+            errors[field as keyof ResourceData] = errorText;
           }
+          break;
       }
     });
-
     dispatch({ type: "set_error", errors });
-    return !isInvalidForm;
+    console.log(errors);
+    return errors;
   };
 
-  const handleChange = (e: FieldChangeEvent<string | null>) => {
-    const form = { ...state.form };
-    const { name, value } = e;
-    form[name] = value;
-    dispatch({ type: "set_form", form });
-  };
+  const handleSubmit = async (form: ResourceData) => {
+    setIsLoading(true);
 
-  const handleValueChange = (value: any, name: string) => {
-    const form = { ...state.form };
-    form[name] = value;
-    dispatch({ type: "set_form", form });
-  };
+    const resourceData = {
+      status: "PENDING",
+      category: form.category,
+      sub_category: form.sub_category?.toString(),
+      origin_facility:
+        form.origin_facility_object?.id || String(props.facilityId),
+      approving_facility: (form.approving_facility_object || {}).id,
+      assigned_facility: (form.assigned_facility_object || {}).id,
+      emergency: form.emergency === "true",
+      title: form.request_title,
+      reason: form.request_description,
+      refering_facility_contact_name: form.refering_facility_contact_name,
+      refering_facility_contact_number: parsePhoneNumber(
+        form.refering_facility_contact_number,
+      ),
+      requested_quantity: parseFloat(form.requested_quantity || "1"),
+      assigned_quantity: parseFloat(form.assigned_quantity || "0"),
+      assigned_to_object: form.assigned_to_object ?? null,
+      assigned_to: form.assigned_to_object?.id.toString() ?? undefined,
+    };
 
-  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
-    dispatch({
-      type: "set_form",
-      form: { ...state.form, [event.name]: event.value },
-    });
-  };
-
-  const handleSubmit = async () => {
-    const validForm = validateForm();
-
-    if (validForm) {
-      setIsLoading(true);
-
-      const resourceData = {
-        status: "PENDING",
-        category: state.form.category,
-        sub_category: state.form.sub_category,
-        origin_facility: String(props.facilityId),
-        approving_facility: (state.form.approving_facility || {}).id,
-        assigned_facility: (state.form.assigned_facility || {}).id,
-        emergency: state.form.emergency === "true",
-        title: state.form.title,
-        reason: state.form.reason,
-        refering_facility_contact_name:
-          state.form.refering_facility_contact_name,
-        refering_facility_contact_number: parsePhoneNumber(
-          state.form.refering_facility_contact_number,
-        ),
-        requested_quantity: state.form.requested_quantity || 1,
-      };
-
-      const { res, data } = await request(routes.createResource, {
+    if (resourceId) {
+      const { res, data } = await request(routes.updateResource, {
+        pathParams: { id: resourceId },
         body: resourceData,
       });
-      setIsLoading(false);
 
-      if (res?.ok && data) {
-        await dispatch({ type: "set_form", form: initForm });
+      if (res && res.status == 200 && data) {
+        dispatch({ type: "set_form", form: data });
         Notification.Success({
-          msg: "Resource request created successfully",
+          msg: "Resource request updated successfully",
         });
 
-        navigate(`/resource/${data.id}`);
+        navigate(`/resource/${resourceId}`);
       }
-    }
+      setIsLoading(false);
+    } // } else {
+    //   // const { res, data } = await request(routes.createResource, {
+    //   //   body: resourceData,
+    //   // });
+    //   // setIsLoading(false);
+
+    //   // if (res?.ok && data) {
+    //   //   await dispatch({ type: "set_form", form: initForm });
+    //   //   Notification.Success({
+    //   //     msg: "Resource request created successfully",
+    //   //   });
+
+    //   //   navigate(`/resource/${data.id}`);
+    console.log("created");
+    //   }
+    // }
   };
 
-  if (isLoading) {
+  if (isLoading || resourceQuery.loading) {
     return <Loading />;
   }
 
   return (
     <Page
-      title={t("create_resource_request")}
+      title={
+        resourceId ? t("update_resource_request") : t("create_resource_request")
+      }
       crumbsReplacements={{
         [facilityId]: { name: facilityData?.name || "" },
         resource: { style: "pointer-events-none" },
       }}
-      backUrl={`/facility/${facilityId}`}
+      backUrl={
+        resourceId ? `/resource/${resourceId}` : `/facility/${facilityId}`
+      }
     >
-      <Card className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <TextFormField
-          required
-          label={t("contact_person")}
-          name="refering_facility_contact_name"
-          value={state.form.refering_facility_contact_name}
-          onChange={handleChange}
-          error={state.errors.refering_facility_contact_name}
-        />
-        <PhoneNumberFormField
-          label={t("contact_phone")}
-          name="refering_facility_contact_number"
-          required
-          value={state.form.refering_facility_contact_number}
-          onChange={handleFormFieldChange}
-          error={state.errors.refering_facility_contact_number}
-          types={["mobile", "landline"]}
-        />
+      <Form<ResourceData>
+        disabled={isLoading}
+        defaults={initialResourceData}
+        onCancel={goBack}
+        className="rounded transition-all sm:rounded-xl bg-white mt-2"
+        onSubmit={handleSubmit}
+        validate={ResourceFormValidator}
+      >
+        {(field) => (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Create Flow */}
+            {!resourceId && (
+              <>
+                <TextFormField
+                  {...field(
+                    "refering_facility_contact_name",
+                    RequiredFieldValidator(
+                      t("referring_facility_contact_name_error"),
+                    ),
+                  )}
+                  label={t("contact_person")}
+                  required
+                />
+                <PhoneNumberFormField
+                  {...field(
+                    "refering_facility_contact_number",
+                    RequiredFieldValidator(
+                      t("referring_facility_contact_number_error"),
+                    ),
+                  )}
+                  label={t("contact_phone")}
+                  types={["mobile", "landline"]}
+                  required
+                />
 
-        <div>
-          <FieldLabel required>{t("approving_facility")}</FieldLabel>
-          <FacilitySelect
-            multiple={false}
-            facilityType={1500}
-            name="approving_facility"
-            selected={state.form.approving_facility}
-            setSelected={(value: any) =>
-              handleValueChange(value, "approving_facility")
-            }
-            errors={state.errors.approving_facility}
-          />
-        </div>
+                <div>
+                  <FieldLabel required>{t("approving_facility")}</FieldLabel>
+                  <FacilitySelect
+                    multiple={false}
+                    facilityType={1500}
+                    selected={field("approving_facility_object").value}
+                    setSelected={(selected: any) => {
+                      field("approving_facility_object").onChange({
+                        name: "approving_facility_object",
+                        value: selected,
+                      });
+                    }}
+                    {...field(
+                      "approving_facility_object",
+                      RequiredFieldValidator(t("approving_facility_error")),
+                    )}
+                    errors={state.errors.approving_facility_object}
+                  />
+                </div>
+                <RadioFormField
+                  label={t("is_this_an_emergency")}
+                  options={[true, false]}
+                  optionLabel={(o) => (o ? t("yes") : t("no"))}
+                  optionValue={(o) => String(o)}
+                  {...field("emergency")}
+                />
 
-        <RadioFormField
-          label={t("is_this_an_emergency")}
-          name="emergency"
-          options={[true, false]}
-          optionLabel={(o) => (o ? t("yes") : t("no"))}
-          optionValue={(o) => String(o)}
-          value={state.form.emergency}
-          onChange={handleChange}
-        />
+                <SelectFormField
+                  {...field("category", RequiredFieldValidator(t("category")))}
+                  label={t("category")}
+                  value={field("category").value}
+                  options={RESOURCE_CATEGORY_CHOICES}
+                  optionLabel={(option: string) => option}
+                  optionValue={(option: string) => option}
+                  required
+                />
+                <SelectFormField
+                  {...field(
+                    "sub_category",
+                    RequiredFieldValidator(t("sub_category")),
+                  )}
+                  label={t("sub_category")}
+                  required
+                  value={field("sub_category").value}
+                  options={RESOURCE_SUBCATEGORIES}
+                  optionLabel={(option: OptionsType) => option.text}
+                  optionValue={(option: OptionsType) => option.id}
+                />
 
-        <SelectFormField
-          label={t("category")}
-          name="category"
-          required
-          value={state.form.category}
-          options={RESOURCE_CATEGORY_CHOICES}
-          optionLabel={(option: string) => option}
-          optionValue={(option: string) => option}
-          onChange={({ value }) => handleValueChange(value, "category")}
-        />
-        <SelectFormField
-          label={t("sub_category")}
-          name="sub_category"
-          required
-          value={state.form.sub_category}
-          options={RESOURCE_SUBCATEGORIES}
-          optionLabel={(option: OptionsType) => option.text}
-          optionValue={(option: OptionsType) => option.id}
-          onChange={({ value }) => handleValueChange(value, "sub_category")}
-        />
+                <TextFormField
+                  {...field(
+                    "request_title",
+                    RequiredFieldValidator(t("title_error")),
+                  )}
+                  label={t("request_title")}
+                  placeholder={t("request_title_placeholder")}
+                  required
+                />
+                <TextFormField
+                  {...field(
+                    "requested_quantity",
+                    RequiredFieldValidator(t("requested_quantity_error")),
+                  )}
+                  label={t("required_quantity")}
+                  type="number"
+                  min={1}
+                />
+                <div className="md:col-span-2">
+                  <TextAreaFormField
+                    {...field(
+                      "request_description",
+                      RequiredFieldValidator(t("reason_error")),
+                    )}
+                    label={t("request_description")}
+                    rows={5}
+                    placeholder={t("request_description_placeholder")}
+                    required
+                  />
+                </div>
+              </>
+            )}
 
-        <TextFormField
-          label={t("request_title")}
-          name="title"
-          placeholder={t("request_title_placeholder")}
-          value={state.form.title}
-          onChange={handleChange}
-          error={state.errors.title}
-          required
-        />
+            {/* Update Flow */}
+            {resourceId && (
+              <>
+                <SelectFormField
+                  label="Status"
+                  options={resourceStatusOptions}
+                  optionLabel={(option) => option}
+                  {...field("status")}
+                />
+                {assignedUserLoading ? (
+                  <CircularProgress />
+                ) : (
+                  <UserAutocomplete
+                    label="Assigned To"
+                    {...field("assigned_to_object")}
+                  />
+                )}
 
-        <TextFormField
-          label={t("required_quantity")}
-          name="requested_quantity"
-          type="number"
-          min={1}
-          value={state.form.requested_quantity ?? 1}
-          onChange={handleChange}
-          error={state.errors.requested_quantity}
-        />
+                <div>
+                  <FieldLabel required>{t("approving_facility")}</FieldLabel>
+                  <FacilitySelect
+                    multiple={false}
+                    facilityType={1500}
+                    selected={field("approving_facility_object").value}
+                    setSelected={(selected: any) => {
+                      field("approving_facility_object").onChange({
+                        name: "approving_facility_object",
+                        value: selected,
+                      });
+                    }}
+                    {...field(
+                      "approving_facility_object",
+                      RequiredFieldValidator(t("approving_facility_error")),
+                    )}
+                    errors={state.errors.approving_facility_object}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>
+                    What facility would you like to assign the request to
+                  </FieldLabel>
+                  <FacilitySelect
+                    multiple={false}
+                    facilityType={1510}
+                    {...field("assigned_facility_object")}
+                    selected={field("assigned_facility_object").value}
+                    setSelected={(selected: any) => {
+                      field("assigned_facility_object").onChange({
+                        name: "assigned_facility_object",
+                        value: selected,
+                      });
+                    }}
+                    errors={state.errors.approving_facility_object}
+                  />
+                </div>
 
-        <div className="md:col-span-2">
-          <TextAreaFormField
-            label={t("request_description")}
-            name="reason"
-            rows={5}
-            required
-            placeholder={t("request_description_placeholder")}
-            value={state.form.reason}
-            onChange={handleChange}
-            error={state.errors.reason}
-          />
-        </div>
+                <TextFormField
+                  {...field(
+                    "requested_quantity",
+                    RequiredFieldValidator(t("requested_quantity_error")),
+                  )}
+                  label={t("required_quantity")}
+                  type="number"
+                  min={1}
+                />
+                <TextFormField
+                  {...field(
+                    "assigned_quantity",
+                    RequiredFieldValidator(t("assigned_quantity_error")),
+                  )}
+                  type="number"
+                  min={0}
+                  label="Approved Quantity"
+                  disabled={field("status").value !== "PENDING"}
+                />
 
-        <div className="mt-4 flex flex-col justify-end gap-2 md:col-span-2 md:flex-row">
-          <Cancel onClick={() => goBack()} />
-          <Submit onClick={handleSubmit} />
-        </div>
-      </Card>
+                <TextFormField
+                  {...field(
+                    "request_title",
+                    RequiredFieldValidator(t("title_error")),
+                  )}
+                  label={t("request_title")}
+                  placeholder={t("request_title_placeholder")}
+                  required
+                />
+                <RadioFormField
+                  label={t("is_this_an_emergency")}
+                  options={[true, false]}
+                  optionLabel={(o) => (o ? t("yes") : t("no"))}
+                  optionValue={(o) => String(o)}
+                  {...field("emergency")}
+                />
+                <div className="md:col-span-2">
+                  <TextAreaFormField
+                    {...field(
+                      "request_description",
+                      RequiredFieldValidator(t("reason_error")),
+                    )}
+                    label={t("request_description")}
+                    rows={5}
+                    placeholder={t("request_description_placeholder")}
+                    required
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </Form>
     </Page>
   );
 }
