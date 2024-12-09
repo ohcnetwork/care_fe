@@ -94,6 +94,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
     };
 
     useEffect(() => {
+      console.log(field.value);
       if (field.value && field.value.length > 0) {
         if (field.value.startsWith("1800")) {
           setCountry({ flag: "📞", name: "Support", code: "1800" });
@@ -105,7 +106,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
         }
         setCountry(phoneCodes[getCountryCode(field.value)!]);
       }
-    }, [setValue]);
+    }, [field.value]);
 
     return (
       <FormField
