@@ -637,7 +637,7 @@ export const PatientManager = () => {
                         variant={
                           dayjs().isAfter(patient.review_time)
                             ? "purple"
-                            : "destructive"
+                            : "success"
                         }
                         className="flex items-center gap-1"
                       >
