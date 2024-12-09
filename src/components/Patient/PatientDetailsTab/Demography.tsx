@@ -10,6 +10,7 @@ import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 import { Button } from "@/components/ui/button";
 
 import { InsuranceDetailsCard } from "@/components/Patient/InsuranceDetailsCard";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import { parseOccupation } from "@/components/Patient/PatientHome";
 import { AssignedToObjectModel } from "@/components/Patient/models";
 
@@ -22,8 +23,6 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-
-import { PatientProps } from ".";
 
 export const Demography = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
