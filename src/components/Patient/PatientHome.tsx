@@ -2,6 +2,9 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 
@@ -14,16 +17,14 @@ import {
   SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
+import { triggerGoal } from "@/Integrations/Plausible";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { triggerGoal } from "../../Integrations/Plausible";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
