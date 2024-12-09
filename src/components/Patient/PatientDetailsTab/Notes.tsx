@@ -11,6 +11,7 @@ import {
   PatientNotesModel,
 } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -22,8 +23,6 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { classNames, keysOf } from "@/Utils/utils";
-
-import { PatientProps } from ".";
 
 const PatientNotes = (props: PatientProps) => {
   const { patientData, id: patientId, facilityId } = props;

@@ -6,11 +6,10 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 import CircularProgress from "@/components/Common/CircularProgress";
 import { ConsultationCard } from "@/components/Facility/ConsultationCard";
 import { ConsultationModel } from "@/components/Facility/models";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { PatientModel } from "@/components/Patient/models";
 
 import routes from "@/Utils/request/api";
-
-import { PatientProps } from ".";
-import { PatientModel } from "../models";
 
 const EncounterHistory = (props: PatientProps) => {
   const { patientData: initialPatientData, id, refetch } = props;

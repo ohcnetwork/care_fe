@@ -14,12 +14,12 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { GENDER_TYPES } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
 import { PatientProps } from ".";
-import * as Notification from "../../../Utils/Notifications";
 import { InsuranceDetailsCard } from "../InsuranceDetailsCard";
 import { parseOccupation } from "../PatientHome";
 import { AssignedToObjectModel } from "../models";
@@ -61,19 +61,10 @@ export const Demography = (props: PatientProps) => {
     };
   }, [patientData.assigned_to_object]);
 
-  const { data: insuranceDetials, refetch } = useQuery(
-    routes.hcx.policies.list,
-    {
-      query: { patient: id },
-      prefetch: false, // Don't prefetch by default
-    },
-  );
-
-  useEffect(() => {
-    if (patientData.id) {
-      refetch();
-    }
-  }, [patientData.id, refetch]);
+  const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
+    query: { patient: id },
+    prefetch: !!patientData.id,
+  });
 
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,

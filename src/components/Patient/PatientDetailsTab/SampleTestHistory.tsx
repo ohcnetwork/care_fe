@@ -7,13 +7,12 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import CircularProgress from "@/components/Common/CircularProgress";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab/";
+import { SampleTestCard } from "@/components/Patient/SampleTestCard";
+import { PatientModel, SampleTestModel } from "@/components/Patient/models";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-
-import { PatientProps } from ".";
-import { SampleTestCard } from "../SampleTestCard";
-import { PatientModel, SampleTestModel } from "../models";
 
 export const SampleTestHistory = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
