@@ -134,7 +134,7 @@ export default function DateTextInput(props: {
           e.target === e.currentTarget &&
           (value ? goToInput(allowTime ? 4 : 2) : goToInput(0))
         }
-        data-test-id="date-input"
+        id="date-input"
       >
         {Object.entries(editingText)
           .slice(0, allowTime ? 5 : 3)
