@@ -9,6 +9,10 @@ import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
 import { Button } from "@/components/ui/button";
 
+import { InsuranceDetailsCard } from "@/components/Patient/InsuranceDetailsCard";
+import { parseOccupation } from "@/components/Patient/PatientHome";
+import { AssignedToObjectModel } from "@/components/Patient/models";
+
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { GENDER_TYPES } from "@/common/constants";
@@ -20,9 +24,6 @@ import useQuery from "@/Utils/request/useQuery";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
 import { PatientProps } from ".";
-import { InsuranceDetailsCard } from "../InsuranceDetailsCard";
-import { parseOccupation } from "../PatientHome";
-import { AssignedToObjectModel } from "../models";
 
 export const Demography = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
