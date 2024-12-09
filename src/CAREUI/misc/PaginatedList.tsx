@@ -5,7 +5,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import ButtonV2, { CommonButtonProps } from "@/components/Common/ButtonV2";
 import Pagination from "@/components/Common/Pagination";
 
-import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
+import { PaginatedResponse, Route } from "@/Utils/request/types";
 import useQuery, { QueryOptions } from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
@@ -32,7 +32,7 @@ function useContextualized<TItem>() {
 }
 
 interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
-  route: QueryRoute<PaginatedResponse<TItem>>;
+  route: Route<PaginatedResponse<TItem>>;
   perPage?: number;
   initialPage?: number;
   onPageChange?: (page: number) => void;

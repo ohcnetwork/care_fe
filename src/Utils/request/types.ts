@@ -2,24 +2,13 @@ type QueryParamValue = string | number | boolean | null | undefined;
 
 export type QueryParams = Record<string, QueryParamValue>;
 
-interface RouteBase<TData> {
+export interface Route<TData, TBody = unknown> {
   path: string;
   TRes: TData;
   noAuth?: boolean;
-}
-
-export interface QueryRoute<TData> extends RouteBase<TData> {
-  method?: "GET";
-}
-
-export interface MutationRoute<TData, TBody> extends RouteBase<TData> {
-  method: "POST" | "PUT" | "PATCH" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   TBody?: TBody;
 }
-
-export type Route<TData, TBody> =
-  | QueryRoute<TData>
-  | MutationRoute<TData, TBody>;
 
 export interface RequestResult<TData> {
   res: Response | undefined;

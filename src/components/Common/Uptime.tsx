@@ -7,7 +7,7 @@ import {
 } from "@/components/Assets/AssetTypes";
 
 import dayjs from "@/Utils/dayjs";
-import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
+import { PaginatedResponse, Route } from "@/Utils/request/types";
 import useQuery from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
@@ -172,7 +172,7 @@ function UptimeInfoPopover({
 
 export default function Uptime(
   props: Readonly<{
-    route: QueryRoute<PaginatedResponse<AvailabilityRecord>>;
+    route: Route<PaginatedResponse<AvailabilityRecord>>;
     params?: Record<string, string | number>;
     header?: React.ReactNode;
     parentClassNames?: string;

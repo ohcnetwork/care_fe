@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import request from "@/Utils/request/request";
-import {
-  QueryRoute,
-  RequestOptions,
-  RequestResult,
-} from "@/Utils/request/types";
+import { RequestOptions, RequestResult, Route } from "@/Utils/request/types";
 import { mergeRequestOptions } from "@/Utils/request/utils";
 
 export interface QueryOptions<TData> extends RequestOptions<TData> {
@@ -14,8 +10,11 @@ export interface QueryOptions<TData> extends RequestOptions<TData> {
   key?: string;
 }
 
+/**
+ * Deprecated: use `useQuery` from `@tanstack/react-query` instead.
+ */
 export default function useQuery<TData>(
-  route: QueryRoute<TData>,
+  route: Route<TData>,
   options?: QueryOptions<TData>,
 ) {
   const [response, setResponse] = useState<RequestResult<TData>>();

@@ -1,15 +1,14 @@
 import React from "react";
 
 import request from "@/Utils/request/request";
-import {
-  MutationRoute,
-  RequestOptions,
-  RequestResult,
-} from "@/Utils/request/types";
+import { RequestOptions, RequestResult, Route } from "@/Utils/request/types";
 import { mergeRequestOptions } from "@/Utils/request/utils";
 
+/**
+ * Deprecated: use `useMutation` from `@tanstack/react-query` instead.
+ */
 export default function useMutation<TData, TBody>(
-  route: MutationRoute<TData, TBody>,
+  route: Route<TData, TBody>,
   options: RequestOptions<TData, TBody>,
 ) {
   const [response, setResponse] = React.useState<RequestResult<TData>>();

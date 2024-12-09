@@ -17,6 +17,9 @@ type ControllerXORControllerRef =
 type Options<TData, TBody> = RequestOptions<TData, TBody> &
   ControllerXORControllerRef;
 
+/**
+ * Deprecated: use `@tanstack/react-query` instead.
+ */
 export default async function request<TData, TBody>(
   { path, method, noAuth }: Route<TData, TBody>,
   {
@@ -83,7 +86,7 @@ export default async function request<TData, TBody>(
   return result;
 }
 
-async function getResponseBody<TData>(res: Response): Promise<TData> {
+export async function getResponseBody<TData>(res: Response): Promise<TData> {
   if (!(res.headers.get("content-length") !== "0")) {
     return null as TData;
   }

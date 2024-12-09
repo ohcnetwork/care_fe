@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import request from "@/Utils/request/request";
-import { QueryRoute } from "@/Utils/request/types";
+import { Route } from "@/Utils/request/types";
 import { QueryOptions } from "@/Utils/request/useQuery";
 
 interface KanbanBoardProps<T extends { id: string }> {
@@ -23,7 +23,7 @@ interface KanbanBoardProps<T extends { id: string }> {
       id: string,
       ...args: unknown[]
     ) => {
-      route: QueryRoute<unknown>;
+      route: Route<unknown>;
       options?: QueryOptions<unknown>;
     };
   }[];
