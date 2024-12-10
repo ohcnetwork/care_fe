@@ -194,13 +194,7 @@ export default function UserSummaryTab({
         {passwordResetPermitted && (
           <UserColumns
             heading={t("reset_password")}
-            note={
-              authUser.username === userData.username
-                ? t("reset_password_note_self")
-                : editPermissions
-                  ? t("reset_password_note")
-                  : t("reset_password_note_view")
-            }
+            note={t("reset_password_note_self")}
             Child={UserResetPassword}
             childProps={userColumnsData}
           />

@@ -1266,7 +1266,6 @@
   "resend_otp": "Resend OTP",
   "reset": "Reset",
   "reset_password": "Reset Password",
-  "reset_password_note": "Enter user's current password, then create and confirm the new password",
   "reset_password_note_self": "Enter your current password, then create and confirm your new password",
   "resource": "Resource",
   "resource_approving_facility": "Resource approving facility",

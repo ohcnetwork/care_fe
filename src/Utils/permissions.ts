@@ -40,7 +40,7 @@ export const showUserPasswordReset = (
   authUser: UserModel,
   targetUser: UserModel,
 ) => {
-  return authUser.username === targetUser.username || authUser.is_superuser;
+  return authUser.username === targetUser.username;
 };
 
 export const showAvatarEdit = (authUser: UserModel, targetUser: UserModel) => {
