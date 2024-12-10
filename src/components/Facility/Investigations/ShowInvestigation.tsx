@@ -1,5 +1,3 @@
-import _ from "lodash";
-import { set } from "lodash-es";
 import { useCallback, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,6 +9,8 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
+
+// import { setNestedValueSafely } from "@/Utils/utils";
 
 const initialState = {
   changedFields: {},
@@ -92,8 +92,25 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
   });
 
   const handleValueChange = (value: any, name: string) => {
+    const keys = name.split(".");
+    // Validate keys to prevent prototype pollution - coderabbit suggested
+    if (
+      keys.some((key) =>
+        ["__proto__", "constructor", "prototype"].includes(key),
+      )
+    ) {
+      return;
+    }
+
     const changedFields = { ...state.changedFields };
-    set(changedFields, name, value);
+    let current = changedFields;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!current[key]) current[key] = {};
+      current = current[key];
+    }
+
+    current[keys[keys.length - 1]] = value;
     dispatch({ type: "set_changed_fields", changedFields });
   };
 
@@ -151,15 +168,19 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
   };
 
   const handleUpdateCancel = useCallback(() => {
-    const changedValues = _.chain(state.initialValues)
-      .map((val: any, _key: string) => ({
-        id: val?.id,
-        initialValue: val?.notes || val?.value || null,
-        value: val?.value || null,
-        notes: val?.notes || null,
-      }))
-      .reduce((acc: any, cur: any) => ({ ...acc, [cur.id]: cur }), {})
-      .value();
+    const changedValues = Object.keys(state.initialValues).reduce(
+      (acc: any, key: any) => {
+        const val = state.initialValues[key];
+        acc[key] = {
+          id: val?.id,
+          initialValue: val?.notes || val?.value || null,
+          value: val?.value || null,
+          notes: val?.notes || null,
+        };
+        return acc;
+      },
+      {},
+    );
     dispatch({ type: "set_changed_fields", changedFields: changedValues });
   }, [state.initialValues]);
 

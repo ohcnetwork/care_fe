@@ -33,7 +33,7 @@ export default function Page(props: PageProps) {
 
   let padding = "";
   if (!props.noImplicitPadding) {
-    if (!props.hideBack || props.componentRight) padding = "py-3 md:p-6";
+    if (!props.hideBack || props.componentRight) padding = "py-3 md:px-6";
     else padding = "px-6 py-5";
   }
 
