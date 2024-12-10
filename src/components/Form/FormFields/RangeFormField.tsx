@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import FormField from "@/components/Form/FormFields/FormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
@@ -54,6 +54,10 @@ export default function RangeFormField(props: Props) {
 
   const precision = getRoundingPrecision(props.step);
   const factor = Math.pow(10, precision);
+  const roundToPrecision = useCallback(
+    (v: number) => Math.round(v * factor) / factor,
+    [factor],
+  );
 
   // Value in current unit
   const value = (() => {
@@ -67,14 +71,17 @@ export default function RangeFormField(props: Props) {
     return unit.conversionFn(props.value);
   })();
 
-  const getDisplayValue = (currentValue: number, forceTwoDecimals: boolean) => {
-    if (props.step === 1) {
-      return Math.round(currentValue).toString();
-    }
-    return forceTwoDecimals ? currentValue.toFixed(2) : currentValue.toString();
-  };
-
   useEffect(() => {
+    const getDisplayValue = (
+      currentValue: number,
+      forceTwoDecimals: boolean,
+    ) => {
+      const rounded = roundToPrecision(currentValue);
+      return forceTwoDecimals && precision > 0
+        ? rounded.toFixed(precision)
+        : rounded.toString();
+    };
+
     let newDisplayValue = "";
     if (prevUnit.current === unit.label) {
       newDisplayValue = value ? getDisplayValue(value, false) : "";
@@ -83,8 +90,7 @@ export default function RangeFormField(props: Props) {
       prevUnit.current = unit.label;
     }
     setDisplayValue(newDisplayValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, unit]);
+  }, [value, unit, roundToPrecision, precision]);
 
   // Min and max in current unit
   const [min, max] = [props.min, props.max].map((v) =>
@@ -131,7 +137,7 @@ export default function RangeFormField(props: Props) {
     100;
 
   const handleChange = (v: number) => {
-    const rounded = Math.round(v * factor) / factor;
+    const rounded = roundToPrecision(v);
     field.handleChange(unit.inversionFn(rounded));
   };
 
