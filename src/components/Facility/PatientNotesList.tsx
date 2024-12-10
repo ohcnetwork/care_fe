@@ -21,13 +21,12 @@ interface PatientNotesProps {
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
 }
 const PatientNotesList = (props: PatientNotesProps) => {
-  const { state, setState, thread, setReplyTo, reload, setReload } = props;
+  const { state, setState, thread, setReplyTo, setReload } = props;
 
   const {
     items: notes,
     loading,
     fetchNextPage,
-    refetch,
     hasMore,
   } = useInfiniteQuery<PatientNotesModel>(routes.getPatientNotes, {
     deduplicateBy: (note) => note.id,
@@ -47,13 +46,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
     }));
   }, [notes, setState]);
 
-  useEffect(() => {
-    if (reload) {
-      refetch().then(() => setReload?.(false));
-    }
-  }, [reload]);
-
-  if ((loading && reload) || !state.notes.length) {
+  if (loading && !state.notes.length) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
@@ -65,7 +58,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
     <DoctorNote
       state={state}
       handleNext={fetchNextPage}
-      setReload={refetch}
+      setReload={setReload}
       setReplyTo={setReplyTo}
       hasMore={hasMore}
     />

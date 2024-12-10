@@ -23,21 +23,12 @@ interface PatientNotesProps {
 }
 
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
-  const {
-    state,
-    setState,
-    setReload,
-    reload,
-    disableEdit,
-    thread,
-    setReplyTo,
-  } = props;
+  const { state, setState, setReload, disableEdit, thread, setReplyTo } = props;
 
   const consultationId = useSlug("consultation") ?? "";
 
   const {
     items: notes,
-    refetch,
     loading,
     fetchNextPage,
     hasMore,
@@ -60,13 +51,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     }));
   }, [notes, setState]);
 
-  useEffect(() => {
-    if (reload) {
-      refetch().then(() => setReload?.(false));
-    }
-  }, [reload]);
-
-  if ((loading && reload) || !state.notes.length) {
+  if (loading && !state.notes.length) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
