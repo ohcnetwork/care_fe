@@ -1,10 +1,11 @@
-import { debounce } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
 import { getDiagnosesByIds } from "@/components/Diagnosis/utils";
 import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
+
+import useDebounce from "@/hooks/useDebounce";
 
 import { Error } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
@@ -34,6 +35,7 @@ interface Props {
   value?: string;
   onChange: (event: { name: DiagnosesFilterKey; value: string }) => void;
 }
+
 export default function DiagnosesFilter(props: Props) {
   const { t } = useTranslation();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
@@ -41,6 +43,11 @@ export default function DiagnosesFilter(props: Props) {
     silent: true,
     prefetch: false,
   });
+
+  const handleQuery = useDebounce(
+    (query: string) => refetch({ query: { query } }),
+    300,
+  );
 
   useEffect(() => {
     if (res?.status === 500) {
@@ -88,7 +95,7 @@ export default function DiagnosesFilter(props: Props) {
       options={mergeQueryOptions(diagnoses, data ?? [], (obj) => obj.id)}
       optionLabel={(option) => option.label}
       optionValue={(option) => option}
-      onQuery={debounce((query: string) => refetch({ query: { query } }), 300)}
+      onQuery={handleQuery}
       isLoading={loading}
     />
   );
