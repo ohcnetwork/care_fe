@@ -989,7 +989,7 @@ export const PatientManager = () => {
         }}
         handleCancel={() => {
           setShowDialog(undefined);
-          setSelectedFacility(null);
+          setSelectedFacility(undefined);
         }}
       />
 
