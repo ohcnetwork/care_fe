@@ -93,13 +93,13 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       },
     });
     if (res?.status === 201 && data) {
-      Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setState((prevState) => ({
         ...prevState,
         notes: [data, ...prevState.notes],
       }));
       setReplyTo(undefined);
+      Notification.Success({ msg: "Note added successfully" });
     }
   };
 
