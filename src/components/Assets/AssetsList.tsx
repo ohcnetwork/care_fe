@@ -458,7 +458,7 @@ const AssetsList = () => {
           </div>
         </>
       )}
-      {facility === null && (
+      {facility == null && (
         <FacilitiesSelectDialogue
           show={importAssetModalOpen}
           setSelected={(e) => setFacility(e)}
