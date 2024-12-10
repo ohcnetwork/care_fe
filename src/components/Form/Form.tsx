@@ -1,4 +1,3 @@
-import { isEmpty, omitBy } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
@@ -17,7 +16,7 @@ import {
 
 import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
 import * as Notification from "@/Utils/Notifications";
-import { classNames } from "@/Utils/utils";
+import { classNames, isEmpty, omitBy } from "@/Utils/utils";
 
 type Props<T extends FormDetails> = {
   className?: string;
@@ -59,6 +58,7 @@ const Form = <T extends FormDetails>({
 
     if (validate) {
       const errors = omitBy(validate(state.form), isEmpty) as FormErrors<T>;
+
       if (Object.keys(errors).length) {
         dispatch({ type: "set_errors", errors });
 
