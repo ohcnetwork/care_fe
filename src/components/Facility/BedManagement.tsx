@@ -87,7 +87,10 @@ const BedCard = ({
         handleCancel={handleDeleteCancel}
         handleOk={handleDeleteConfirm}
       />
-      <div className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
+      <div
+        className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400"
+        id="bed-cards"
+      >
         <div className="flex-1">
           <div className="flex w-full flex-col items-start justify-between gap-2">
             <div>

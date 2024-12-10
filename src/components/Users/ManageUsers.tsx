@@ -554,7 +554,7 @@ export default function ManageUsers() {
           text="Total Users"
           count={userListData?.count || 0}
           loading={userListLoading || districtDataLoading}
-          icon="l-user-injured"
+          icon="d-people"
           className="flex-1"
         />
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">

@@ -27,7 +27,7 @@ describe("Patient Homepage present functionalities", () => {
   const patientToDateBadge = "2023-12-07";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 
@@ -157,7 +157,7 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.verifyPatientExportRequest();
   });
 
-  it("Verify the functionality of the patient tab pagination", () => {
+  it("Test Pagination on Patient List Page", () => {
     let firstPatientPageOne: string;
     cy.get('[data-cy="patient"]')
       .first()
@@ -165,6 +165,7 @@ describe("Patient Homepage present functionalities", () => {
       .then((patientOne: string) => {
         firstPatientPageOne = patientOne.trim();
         pageNavigation.navigateToNextPage();
+        cy.wait(2000);
         pageNavigation.verifyCurrentPageNumber(2);
         cy.get('[data-cy="patient"]')
           .first()
