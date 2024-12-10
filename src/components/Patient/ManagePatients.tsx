@@ -100,8 +100,7 @@ export const PatientManager = () => {
       "emergency_phone_number",
     ],
   });
-  const [selectedFacility, setSelectedFacility] =
-    useState<FacilityModel | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>();
   const authUser = useAuthUser();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
