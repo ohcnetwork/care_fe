@@ -369,9 +369,9 @@ class FacilityPage {
       .then(() => {
         cy.get("[role='option']").first().click();
       });
-    cy.get("#request_title").type(title);
+    cy.get("#title").type(title);
     cy.get("#requested_quantity").type(quantity);
-    cy.get("#request_description").type(description);
+    cy.get("#reason").type(description);
   }
 
   clickSubmitRequestButton() {

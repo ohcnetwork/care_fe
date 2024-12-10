@@ -34,31 +34,30 @@ import { parsePhoneNumber } from "@/Utils/utils";
 
 import CircularProgress from "../Common/CircularProgress";
 import UserAutocomplete from "../Common/UserAutocompleteFormField";
-import { FacilityModel } from "../Facility/models";
+import { ResourceModel } from "../Facility/models";
 import Form from "../Form/Form";
-import { UserBareMinimum } from "../Users/models";
 
 interface resourceProps {
-  facilityId: number;
+  facilityId?: number;
   resourceId?: string;
 }
 
-interface ResourceData {
-  status?: OptionsType["text"];
-  category?: string;
-  sub_category?: number;
-  approving_facility_object: FacilityModel | null;
-  assigned_facility_object?: FacilityModel | null;
+type ResourceData = Partial<
+  Omit<
+    ResourceModel,
+    | "status"
+    | "requested_quantity"
+    | "assigned_quantity"
+    | "emergency"
+    | "sub_category"
+  >
+> & {
+  sub_category: number;
+  status: string;
+  requested_quantity: string;
+  assigned_quantity: string;
   emergency: string;
-  request_title: string;
-  request_description: string;
-  refering_facility_contact_name?: string;
-  refering_facility_contact_number: string;
-  requested_quantity: string | null;
-  assigned_quantity?: string | null;
-  assigned_to_object: UserBareMinimum | null;
-  origin_facility_object?: FacilityModel | null;
-}
+};
 
 const initForm: ResourceData = {
   status: "PENDING",
@@ -67,8 +66,8 @@ const initForm: ResourceData = {
   approving_facility_object: null,
   assigned_facility_object: null,
   emergency: "false",
-  request_title: "",
-  request_description: "",
+  title: "",
+  reason: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "+91",
   assigned_to_object: null,
@@ -113,11 +112,11 @@ export default function ResourceCreate(props: resourceProps) {
       errorText: t("referring_facility_contact_number_error"),
       invalidText: t("referring_facility_contact_number_invalid"),
     },
-    request_title: {
+    title: {
       errorText: t("title_error"),
       invalidText: t("title_invalid"),
     },
-    request_description: {
+    reason: {
       errorText: t("reason_error"),
       invalidText: t("reason_invalid"),
     },
@@ -151,8 +150,8 @@ export default function ResourceCreate(props: resourceProps) {
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
   const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    prefetch: !!facilityId,
     pathParams: { id: String(facilityId) },
+    prefetch: !!facilityId,
   });
 
   const resourceQuery = useQuery(routes.getResourceDetails, {
@@ -165,8 +164,6 @@ export default function ResourceCreate(props: resourceProps) {
 
       setInitialResouceData({
         ...resource,
-        request_title: resource.title,
-        request_description: resource.reason,
         sub_category:
           Number(
             RESOURCE_SUBCATEGORIES.find(
@@ -184,7 +181,9 @@ export default function ResourceCreate(props: resourceProps) {
     },
   });
 
-  const { loading: assignedUserLoading } = useQuery(routes.userList);
+  const { loading: assignedUserLoading } = useQuery(routes.userList, {
+    prefetch: !!resourceId,
+  });
 
   const ResourceFormValidator = (
     form: ResourceData,
@@ -197,7 +196,7 @@ export default function ResourceCreate(props: resourceProps) {
       switch (field) {
         case "refering_facility_contact_number": {
           if (resourceId) break;
-          const phoneNumber = parsePhoneNumber(form[field]);
+          const phoneNumber = parsePhoneNumber(form[field] ?? "");
           if (!form[field as keyof ResourceData]) {
             errors[field as keyof ResourceData] = errorText;
           } else if (
@@ -239,7 +238,7 @@ export default function ResourceCreate(props: resourceProps) {
     setIsLoading(true);
 
     const resourceData = {
-      status: "PENDING",
+      status: form.status || "PENDING",
       category: form.category,
       sub_category: form.sub_category?.toString(),
       origin_facility:
@@ -247,11 +246,11 @@ export default function ResourceCreate(props: resourceProps) {
       approving_facility: (form.approving_facility_object || {}).id,
       assigned_facility: (form.assigned_facility_object || {}).id,
       emergency: form.emergency === "true",
-      title: form.request_title,
-      reason: form.request_description,
+      title: form.title,
+      reason: form.reason,
       refering_facility_contact_name: form.refering_facility_contact_name,
       refering_facility_contact_number: parsePhoneNumber(
-        form.refering_facility_contact_number,
+        form.refering_facility_contact_number ?? "",
       ),
       requested_quantity: parseFloat(form.requested_quantity || "1"),
       assigned_quantity: parseFloat(form.assigned_quantity || "0"),
@@ -301,7 +300,9 @@ export default function ResourceCreate(props: resourceProps) {
         resourceId ? t("update_resource_request") : t("create_resource_request")
       }
       crumbsReplacements={{
-        [facilityId]: { name: facilityData?.name || "" },
+        ...(resourceId
+          ? { [resourceId]: { name: initialResourceData?.title } }
+          : { [String(facilityId)]: { name: facilityData?.name || "" } }),
         resource: { style: "pointer-events-none" },
       }}
       backUrl={
@@ -393,10 +394,7 @@ export default function ResourceCreate(props: resourceProps) {
                 />
 
                 <TextFormField
-                  {...field(
-                    "request_title",
-                    RequiredFieldValidator(t("title_error")),
-                  )}
+                  {...field("title", RequiredFieldValidator(t("title_error")))}
                   label={t("request_title")}
                   placeholder={t("request_title_placeholder")}
                   required
@@ -413,7 +411,7 @@ export default function ResourceCreate(props: resourceProps) {
                 <div className="md:col-span-2">
                   <TextAreaFormField
                     {...field(
-                      "request_description",
+                      "reason",
                       RequiredFieldValidator(t("reason_error")),
                     )}
                     label={t("request_description")}
@@ -502,12 +500,9 @@ export default function ResourceCreate(props: resourceProps) {
                 />
 
                 <TextFormField
-                  {...field(
-                    "request_title",
-                    RequiredFieldValidator(t("title_error")),
-                  )}
+                  {...field("title", RequiredFieldValidator(t("title_error")))}
                   label={t("request_title")}
-                  placeholder={t("request_title_placeholder")}
+                  placeholder={t("title_placeholder")}
                   required
                 />
                 <RadioFormField
@@ -520,12 +515,12 @@ export default function ResourceCreate(props: resourceProps) {
                 <div className="md:col-span-2">
                   <TextAreaFormField
                     {...field(
-                      "request_description",
+                      "reason",
                       RequiredFieldValidator(t("reason_error")),
                     )}
                     label={t("request_description")}
                     rows={5}
-                    placeholder={t("request_description_placeholder")}
+                    placeholder={t("reason_placeholder")}
                     required
                   />
                 </div>

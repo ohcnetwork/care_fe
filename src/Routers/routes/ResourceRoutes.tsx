@@ -3,7 +3,6 @@ import { Redirect } from "raviger";
 import BoardView from "@/components/Resource/ResourceBoard";
 import ResourceCreate from "@/components/Resource/ResourceCreate";
 import ResourceDetails from "@/components/Resource/ResourceDetails";
-// import { ResourceDetailsUpdate } from "@/components/Resource/ResourceDetailsUpdate";
 import ListView from "@/components/Resource/ResourceList";
 
 import { AppRoutes } from "@/Routers/AppRouter";
@@ -16,9 +15,7 @@ const ResourceRoutes: AppRoutes = {
   "/resource/board": () => <BoardView />,
   "/resource/list": () => <ListView />,
   "/resource/:id": ({ id }) => <ResourceDetails id={id} />,
-  "/resource/:id/update": ({ id }) => (
-    <ResourceCreate resourceId={id} facilityId={0} />
-  ),
+  "/resource/:id/update": ({ id }) => <ResourceCreate resourceId={id} />,
 };
 
 export default ResourceRoutes;
