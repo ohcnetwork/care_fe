@@ -287,7 +287,7 @@ export const Demography = (props: PatientProps) => {
       hidden: !patientData.assigned_to_object,
       details: [
         <EmergencyContact
-          number={patientData.assigned_to_object?.alt_phone_number}
+          number={patientData.assigned_to_object?.phone_number}
           name={
             patientData.assigned_to_object
               ? formatName(patientData.assigned_to_object)
