@@ -67,7 +67,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       return;
     }
 
-    const { res } = await request(routes.addPatientNote, {
+    const { res, data } = await request(routes.addPatientNote, {
       pathParams: {
         patientId: patientId,
       },
@@ -79,9 +79,13 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       },
     });
 
-    if (res?.status === 201) {
+    if (res?.status === 201 && data) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
+      setState((prevState) => ({
+        ...prevState,
+        notes: [data, ...prevState.notes],
+      }));
       setReload(true);
       setReplyTo(undefined);
     }

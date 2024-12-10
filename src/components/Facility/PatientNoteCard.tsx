@@ -29,7 +29,6 @@ import {
 
 const PatientNoteCard = ({
   note,
-  setReload,
   disableEdit,
   setReplyTo,
 }: {
@@ -76,7 +75,6 @@ const PatientNoteCard = ({
     if (res?.status === 200) {
       Success({ msg: "Note updated successfully" });
       setIsEditing(false);
-      setReload(true);
     }
   };
 
