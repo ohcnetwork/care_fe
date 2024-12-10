@@ -133,14 +133,16 @@ const AutoCompleteAsync = (props: Props) => {
                 <div className="absolute right-0 mr-2 flex items-center text-lg text-secondary-900">
                   {hasSelection && !loading && !required && (
                     <div className="tooltip" id="clear-button">
-                      <CareIcon
-                        icon="l-times-circle"
-                        className="h-4 w-4 text-secondary-800 transition-colors duration-200 ease-in-out hover:text-secondary-500"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          onChange(null);
-                        }}
-                      />
+                      {selected.name && (
+                        <CareIcon
+                          icon="l-times-circle"
+                          className="h-4 w-4 text-secondary-800 transition-colors duration-200 ease-in-out hover:text-secondary-500"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onChange(null);
+                          }}
+                        />
+                      )}
                       <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
                         {t("clear_selection")}
                       </span>
