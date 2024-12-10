@@ -242,8 +242,10 @@ export const PatientHome = (props: {
                       {facilityId ===
                         patientData.facility_object?.id.toString() &&
                         patientData?.is_active &&
-                        (!patientData?.last_consultation ||
-                        patientData?.last_consultation?.discharge_date ? (
+                        (!(
+                          patientData?.last_consultation ||
+                          patientData?.last_consultation?.discharge_date
+                        ) ? (
                           <div>
                             <Button
                               variant="primary"
