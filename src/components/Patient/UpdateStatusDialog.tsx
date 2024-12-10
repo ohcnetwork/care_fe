@@ -1,31 +1,28 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Submit } from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { LinearProgressWithLabel } from "@/components/Files/FileUpload";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
-import {
-  CreateFileResponse,
-  SampleTestModel,
-} from "@/components/Patient/models";
+
+import useFileUpload from "@/hooks/useFileUpload";
 
 import {
-  HEADER_CONTENT_TYPES,
   SAMPLE_FLOW_RULES,
   SAMPLE_TEST_RESULT,
   SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
-import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import uploadFile from "@/Utils/request/uploadFile";
+
+import { SampleTestModel } from "./models";
 
 interface Props {
   sample: SampleTestModel;
@@ -34,7 +31,6 @@ interface Props {
 }
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
-
 const statusFlow = { ...SAMPLE_FLOW_RULES };
 
 const initForm: any = {
@@ -60,17 +56,16 @@ const updateStatusReducer = (state = initialState, action: any) => {
       return state;
   }
 };
-
 const UpdateStatusDialog = (props: Props) => {
   const { t } = useTranslation();
   const { sample, handleOk, handleCancel } = props;
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
-  const [file, setfile] = useState<File>();
-  const [contentType, setcontentType] = useState<string>("");
-  const [uploadPercent, setUploadPercent] = useState(0);
-  const [uploadStarted, setUploadStarted] = useState<boolean>(false);
-  const [uploadDone, setUploadDone] = useState<boolean>(false);
 
+  const fileUpload = useFileUpload({
+    type: "SAMPLE_MANAGEMENT",
+    allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
+    allowNameFallback: true,
+  });
   const currentStatus = SAMPLE_TEST_STATUS.find(
     (i) => i.text === sample.status,
   );
@@ -104,79 +99,26 @@ const UpdateStatusDialog = (props: Props) => {
     dispatch({ type: "set_form", form });
   };
 
-  const uploadfile = (data: CreateFileResponse) => {
-    const url = data.signed_url;
-    const internal_name = data.internal_name;
-
-    const f = file;
-    if (f === undefined) return;
-    const newFile = new File([f], `${internal_name}`);
-
-    uploadFile(
-      url,
-      newFile,
-      "PUT",
-      {
-        "Content-Type": contentType,
-        "Content-disposition": "inline",
-      },
-      (xhr: XMLHttpRequest) => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setUploadStarted(false);
-          setUploadDone(true);
-          request(routes.editUpload, {
-            pathParams: {
-              id: data.id,
-              fileType: "SAMPLE_MANAGEMENT",
-              associatingId: sample.id?.toString() ?? "",
-            },
-            body: { upload_completed: true },
-          });
-          Notification.Success({ msg: "File Uploaded Successfully" });
-        } else {
-          setUploadStarted(false);
-        }
-      },
-      setUploadPercent,
-      () => {
-        setUploadStarted(false);
-      },
-    );
-  };
-
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files == null) {
-      throw new Error("Error finding e.target.files");
-    }
-    setfile(e.target.files[0]);
-    const fileName = e.target.files[0].name;
-    const ext: string = fileName.split(".")[1];
-    setcontentType(
-      HEADER_CONTENT_TYPES[ext as keyof typeof HEADER_CONTENT_TYPES],
-    );
-    return e.target.files[0];
-  };
   const handleUpload = async () => {
-    const f = file;
-    if (f === undefined) return;
-    const category = "UNSPECIFIED";
-    const name = f.name;
-    setUploadStarted(true);
-    setUploadDone(false);
-
-    const { data } = await request(routes.createUpload, {
-      body: {
-        original_name: name,
-        file_type: "SAMPLE_MANAGEMENT",
-        name: `${sample.patient_name} Sample Report`,
-        associating_id: sample.id ?? "",
-        file_category: category,
-        mime_type: contentType,
-      },
-    });
-
-    if (data) {
-      uploadfile(data);
+    if (fileUpload.files.length > 0) {
+      if (!fileUpload.fileNames[0]) {
+        Notification.Error({
+          msg: "Please enter a file name before uploading",
+        });
+        return;
+      }
+      if (sample.id) {
+        await fileUpload.handleFileUpload(sample.id);
+        if (!fileUpload.error) {
+          return;
+        } else {
+          Notification.Error({ msg: `Upload failed: ${fileUpload.error}` });
+        }
+      } else {
+        Notification.Error({ msg: "Sample ID is missing" });
+      }
+    } else {
+      Notification.Error({ msg: "No file selected for upload" });
     }
   };
 
@@ -218,32 +160,58 @@ const UpdateStatusDialog = (props: Props) => {
               onChange={handleChange}
             />
             <span className="font-semibold leading-relaxed">
-              Upload Report :
+              {t("upload_report")}:
             </span>
-            {uploadStarted ? (
-              <LinearProgressWithLabel value={uploadPercent} />
-            ) : (
-              <div className="mb-4 mt-3 flex flex-wrap justify-between gap-2">
-                <label className="button-size-default button-shape-square button-primary-default inline-flex h-min max-w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500">
-                  <CareIcon icon="l-file-upload-alt" className="text-lg" />
-                  <span className="max-w-full truncate">
-                    {file ? file.name : t("choose_file")}
+            {fileUpload.files[0] ? (
+              <div className="mb-8 rounded-lg border border-secondary-300 bg-white p-4">
+                <div className="mb-4 flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+                  <span>
+                    <CareIcon icon="l-paperclip" className="mr-2" />
+                    {fileUpload.files[0].name}
                   </span>
-                  <input
-                    title="changeFile"
-                    onChange={onFileChange}
-                    type="file"
-                    hidden
-                  />
+                </div>
+                <TextFormField
+                  name="sample_file_name"
+                  type="text"
+                  label={t("enter_file_name")}
+                  id="upload-file-name"
+                  value={fileUpload.fileNames[0] || ""}
+                  disabled={fileUpload.uploading}
+                  onChange={(e) => fileUpload.setFileName(e.value)}
+                  error={fileUpload.error || undefined}
+                  required
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleUpload}
+                    disabled={fileUpload.uploading}
+                    className="w-full"
+                    id="upload_file_button"
+                    variant={"primary"}
+                  >
+                    <CareIcon icon="l-check" className="mr-2" />
+                    {t("upload")}
+                  </Button>
+                  <Button
+                    variant={"destructive"}
+                    onClick={fileUpload.clearFiles}
+                    disabled={fileUpload.uploading}
+                  >
+                    <CareIcon icon="l-trash-alt" className="mr-2" />
+                    {t("discard")}
+                  </Button>
+                </div>
+                {!!fileUpload.progress && (
+                  <LinearProgressWithLabel value={fileUpload.progress} />
+                )}
+              </div>
+            ) : (
+              <div className="mt-5 mb-8 flex w-full flex-col items-center gap-4 md:flex-row">
+                <label className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary-500/20 bg-primary-500/10 p-3 text-primary-700 transition-all hover:bg-primary-500/20 md:p-6">
+                  <CareIcon icon={"l-file-upload-alt"} className="text-2xl" />
+                  <div className="text-lg">{t("choose_file")}</div>
+                  <fileUpload.Input />
                 </label>
-                <Submit
-                  type="submit"
-                  onClick={handleUpload}
-                  disabled={uploadDone}
-                >
-                  <CareIcon icon="l-cloud-upload" className="text-lg" />
-                  <span>Upload</span>
-                </Submit>
               </div>
             )}
           </>

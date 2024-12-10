@@ -1,12 +1,14 @@
+import LoginPage from "pageobject/Login/LoginPage";
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 import ShiftingPage from "../../pageobject/Shift/ShiftFilters";
 
 describe("Shifting section filter", () => {
   const shiftingPage = new ShiftingPage();
+  const loginPage = new LoginPage();
 
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

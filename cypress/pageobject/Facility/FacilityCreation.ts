@@ -9,11 +9,6 @@ class FacilityPage {
       .should("eq", 200);
   }
 
-  typeFacilitySearch(facilityName: string) {
-    cy.get("#search").click().clear();
-    cy.get("#search").click().type(facilityName);
-  }
-
   selectFacilityType(facility: string) {
     advanceFilters.selectFacilityType(facility);
   }
@@ -311,29 +306,6 @@ class FacilityPage {
     cy.get("[id='facility-details']").first().click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
     cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
-  }
-
-  verifyFacilityBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Facility/District Name']").should(
-      "contain",
-      expectedText,
-    );
-  }
-
-  verifyStateBadgeContent(expectedText: string) {
-    cy.get("[data-testid='State']").should("contain", expectedText);
-  }
-
-  verifyDistrictBadgeContent(expectedText: string) {
-    cy.get("[data-testid='District']").should("contain", expectedText);
-  }
-
-  verifyLocalBodyBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Local Body']").should("contain", expectedText);
-  }
-
-  verifyFacilityTypeBadgeContent(expectedText: string) {
-    cy.get("[data-testid='Facility type']").should("contain", expectedText);
   }
 
   verifyfacilitycreateassetredirection() {
