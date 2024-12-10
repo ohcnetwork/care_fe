@@ -1,4 +1,3 @@
-import { set } from "lodash-es";
 import { useState } from "react";
 
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
@@ -60,7 +59,24 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
 
   const handleValueChange = (value: any, name: string) => {
     const form = { ...state };
-    set(form, name, value);
+    const keys = name.split(".");
+
+    // Validate keys to prevent prototype pollution - coderabbit suggested
+    if (
+      keys.some((key) =>
+        ["__proto__", "constructor", "prototype"].includes(key),
+      )
+    ) {
+      return;
+    }
+
+    let current = form;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!current[key]) current[key] = {};
+      current = current[key];
+    }
+    current[keys[keys.length - 1]] = value;
     dispatch({ type: "set_form", form });
   };
 
