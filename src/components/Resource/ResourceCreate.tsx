@@ -461,9 +461,7 @@ export default function ResourceCreate(props: resourceProps) {
                   />
                 </div>
                 <div>
-                  <FieldLabel>
-                    What facility would you like to assign the request to
-                  </FieldLabel>
+                  <FieldLabel>{t("assign_facility_label")}</FieldLabel>
                   <FacilitySelect
                     multiple={false}
                     facilityType={1510}
@@ -502,7 +500,7 @@ export default function ResourceCreate(props: resourceProps) {
                 <TextFormField
                   {...field("title", RequiredFieldValidator(t("title_error")))}
                   label={t("request_title")}
-                  placeholder={t("title_placeholder")}
+                  placeholder={t("request_title_placeholder")}
                   required
                 />
                 <RadioFormField
@@ -520,7 +518,7 @@ export default function ResourceCreate(props: resourceProps) {
                     )}
                     label={t("request_description")}
                     rows={5}
-                    placeholder={t("reason_placeholder")}
+                    placeholder={t("request_description_placeholder")}
                     required
                   />
                 </div>

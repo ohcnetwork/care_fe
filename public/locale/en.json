@@ -344,6 +344,7 @@
   "assign": "Assign",
   "assign_a_volunteer_to": "Assign a volunteer to {{name}}",
   "assign_bed": "Assign Bed",
+  "assign_facility_label": "What facility would you like to assign the request to",
   "assign_to_volunteer": "Assign to a Volunteer",
   "assigned_doctor": "Assigned Doctor",
   "assigned_facility": "Facility assigned",
