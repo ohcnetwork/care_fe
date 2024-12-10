@@ -284,7 +284,7 @@ export const FileUpload = (props: FileUploadProps) => {
       {fileManager.Dialogues}
       {dischargeSummaryFileManager.Dialogues}
       {patientNotesFileManager.Dialogues}
-      {!hideUpload && tab !== "PATIENT_NOTES" && (
+      {!hideUpload && (
         <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
           {({ isAuthorized }) =>
             isAuthorized ? (
@@ -396,7 +396,7 @@ export const FileUpload = (props: FileUploadProps) => {
               authUser.user_type === "DistrictAdmin" ||
               authUser.user_type === "StateAdmin"
             }
-            archivable={!["PATIENT_NOTES", "DISCHARGE_SUMMARY"].includes(tab)}
+            archivable={tab !== "DISCHARGE_SUMMARY"}
           />
         ))}
         {!(fileQuery?.data?.results || []).length && (
