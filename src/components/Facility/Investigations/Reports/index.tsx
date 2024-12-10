@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { useCallback, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -179,16 +178,16 @@ const InvestigationReports = ({ id }: any) => {
       ),
     );
 
-    const investigationList = _.chain(data)
-      .flatMap((i) => i?.data?.results)
-      .compact()
-      .flatten()
-      .map((i) => ({
-        ...i,
-        name: `${i.name} ${i.groups[0].name && " | " + i.groups[0].name} `,
-      }))
-      .unionBy("external_id")
-      .value();
+    const investigationList = Array.from(
+      data
+        .flatMap((i) => i?.data?.results || [])
+        .map((i) => ({
+          ...i,
+          name: `${i.name} ${i.groups[0].name ? " | " + i.groups[0].name : ""}`,
+        }))
+        .reduce((map, item) => map.set(item.external_id, item), new Map())
+        .values(),
+    );
 
     dispatch({ type: "set_investigations", payload: investigationList });
     dispatch({
