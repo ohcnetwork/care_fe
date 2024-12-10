@@ -1,4 +1,3 @@
-import { forIn } from "lodash-es";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as XLSX from "xlsx";
@@ -68,9 +67,9 @@ export default function ExcelFileDragAndDrop({
         const data = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
         //converts the date to string
         data.forEach((row: any) => {
-          forIn(row, (value: any, key: string) => {
-            if (value instanceof Date) {
-              row[key] = value.toISOString().split("T")[0];
+          Object.keys(row).forEach((key) => {
+            if (row[key] instanceof Date) {
+              row[key] = row[key].toISOString().split("T")[0];
             }
           });
         });
