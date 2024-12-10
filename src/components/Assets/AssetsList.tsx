@@ -52,8 +52,7 @@ const AssetsList = () => {
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const [showFacilityDialog, setShowFacilityDialog] = useState(false);
-  const [selectedFacility, setSelectedFacility] =
-    useState<FacilityModel | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>();
   const params = {
     limit: resultsPerPage,
     page: qParams.page,
