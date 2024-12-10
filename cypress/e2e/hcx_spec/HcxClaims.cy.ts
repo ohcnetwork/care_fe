@@ -18,7 +18,7 @@ describe("HCX Claims configuration and approval workflow", () => {
   const patientInsurerName = "Demo Payor";
 
   before(() => {
-    loginPage.loginAsDistrictAdmin();
+    loginPage.loginByRole("districtAdmin");
     cy.saveLocalStorage();
   });
 

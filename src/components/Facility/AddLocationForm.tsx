@@ -162,6 +162,7 @@ export const AddLocationForm = ({ facilityId, locationId }: Props) => {
             <div className="mt-2 grid grid-cols-1 gap-4">
               <div>
                 <TextFormField
+                  id="location-name"
                   name="name"
                   type="text"
                   label="Name"

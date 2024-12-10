@@ -372,11 +372,12 @@ const AssetsList = () => {
           text="Total Assets"
           count={totalCount}
           loading={loading}
-          icon="l-monitor-heart-rate"
+          icon="d-folder"
           className="flex-1"
         />
         <div className="flex-1">
           <SearchInput
+            id="asset-search"
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}

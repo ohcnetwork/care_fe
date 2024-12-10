@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
+
 import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -56,12 +58,12 @@ export const HealthProfileSummary = (props: PatientProps) => {
       <div className="group my-2 w-full rounded bg-white p-4 shadow">
         <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
         <div className="h-full space-y-2">
-          <div className="flex flex-row">
+          <div className="flex flex-row items-center justify-between">
             <div className="mr-4 text-xl font-bold text-secondary-900">
               {t("medical")}
             </div>
-            <button
-              className="flex rounded border border-secondary-400 bg-white px-1 py-1 text-sm font-semibold text-green-800 hover:bg-secondary-200"
+            <Button
+              variant="outline"
               disabled={!patientData.is_active}
               aria-label="Edit medical history"
               onClick={() => {
@@ -74,9 +76,9 @@ export const HealthProfileSummary = (props: PatientProps) => {
                 }
               }}
             >
-              <CareIcon icon="l-edit-alt" className="text-md mr-1 mt-1" />
+              <CareIcon icon="l-edit-alt" className="text-md pr-1" />
               {t("edit")}
-            </button>
+            </Button>
           </div>
 
           <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 md:gap-y-8">
