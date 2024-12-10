@@ -544,3 +544,18 @@ export const fahrenheitToCelsius = (fahrenheit: number) => {
 export const keysOf = <T extends object>(obj: T) => {
   return Object.keys(obj) as (keyof T)[];
 };
+
+// Utility to check if a value is "empty"
+export const isEmpty = (value: unknown) => {
+  return value === "" || value == undefined;
+};
+
+// equivalent to lodash omitBy
+export function omitBy<T extends Record<string, unknown>>(
+  obj: T,
+  predicate: (value: unknown) => boolean,
+): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, value]) => !predicate(value)),
+  ) as Partial<T>;
+}
