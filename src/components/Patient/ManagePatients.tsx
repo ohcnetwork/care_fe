@@ -748,14 +748,6 @@ export const PatientManager = () => {
 
   const searchOptions = [
     {
-      key: "phone_number",
-      label: "Phone Number",
-      type: "phone" as const,
-      placeholder: "Search_by_phone_number",
-      value: qParams.phone_number || "",
-      shortcutKey: "p",
-    },
-    {
       key: "name",
       label: "Name",
       type: "text" as const,
@@ -770,6 +762,14 @@ export const PatientManager = () => {
       placeholder: "search_by_patient_no",
       value: qParams.patient_no || "",
       shortcutKey: "u",
+    },
+    {
+      key: "phone_number",
+      label: "Phone Number",
+      type: "phone" as const,
+      placeholder: "Search_by_phone_number",
+      value: qParams.phone_number || "",
+      shortcutKey: "p",
     },
     {
       key: "emergency_contact_number",
