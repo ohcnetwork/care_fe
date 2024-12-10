@@ -478,7 +478,7 @@ const AssetsList = () => {
             setImportAssetModalOpen(false);
             setFacility((f) => {
               if (!qParams.facility) {
-                return null;
+                return undefined;
               }
               return f;
             });
@@ -500,7 +500,7 @@ const AssetsList = () => {
         }}
         handleCancel={() => {
           setShowFacilityDialog(false);
-          setSelectedFacility(null);
+          setSelectedFacility(undefined);
         }}
       />
     </Page>
