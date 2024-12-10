@@ -77,7 +77,6 @@ const PatientNotes = (props: PatientNotesProps) => {
         ...prevState,
         notes: [data, ...prevState.notes],
       }));
-      setReload(true);
       setReplyTo(undefined);
     }
   };
