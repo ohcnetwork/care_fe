@@ -179,13 +179,6 @@ export default function RangeFormField(props: Props) {
                   errorClassName="hidden"
                   inputClassName="py-1.5 mr-4"
                   disabled={props.disabled}
-                  onBlur={() =>
-                    setDisplayValue(
-                      props.step === 1
-                        ? (value?.toString() ?? "")
-                        : (value?.toFixed(2) ?? ""),
-                    )
-                  }
                 />
                 {props.units?.length ? (
                   <SelectFormField
