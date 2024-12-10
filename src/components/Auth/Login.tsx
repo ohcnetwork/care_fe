@@ -213,7 +213,7 @@ const Login = (props: { forgot?: boolean }) => {
           <div className="max-w-lg text-xs md:text-sm">
             <div className="mb-2 ml-1 flex items-center gap-4">
               <a
-                href="https://digitalpublicgoods.net/registry/coronasafe-care.html"
+                href="https://www.digitalpublicgoods.net/r/care"
                 rel="noopener noreferrer"
                 target="_blank"
               >
