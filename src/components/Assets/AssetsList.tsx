@@ -46,7 +46,7 @@ const AssetsList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [facility, setFacility] = useState<FacilityModel | null>(null);
+  const [facility, setFacility] = useState<FacilityModel>();
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
