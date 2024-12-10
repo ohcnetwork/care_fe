@@ -150,10 +150,21 @@ export const FileUpload = (props: FileUploadProps) => {
     silent: true,
   });
 
+  const discussionNotesQuery = useQuery(routes.viewUpload, {
+    query: {
+      file_type: "PATIENT_NOTES",
+      consultation_id: consultationId,
+      is_archived: false,
+      limit: RESULTS_PER_PAGE_LIMIT,
+      offset: offset,
+    },
+  });
+
   const queries = {
     UNARCHIVED: activeFilesQuery,
     ARCHIVED: archivedFilesQuery,
     DISCHARGE_SUMMARY: dischargeSummaryQuery,
+    PATIENT_NOTES: discussionNotesQuery,
   };
 
   const refetchAll = async () =>
@@ -170,6 +181,14 @@ export const FileUpload = (props: FileUploadProps) => {
           {
             text: "Discharge Summary",
             value: "DISCHARGE_SUMMARY",
+          },
+        ]
+      : []),
+    ...(discussionNotesQuery.data?.results?.length
+      ? [
+          {
+            text: "Patient Notes",
+            value: "PATIENT_NOTES",
           },
         ]
       : []),
@@ -225,6 +244,12 @@ export const FileUpload = (props: FileUploadProps) => {
     onEdit: refetchAll,
   });
 
+  const patientNotesFileManager = useFileManager({
+    type: "PATIENT_NOTES",
+    onArchive: refetchAll,
+    onEdit: refetchAll,
+  });
+
   const uploadButtons: {
     name: string;
     icon: IconName;
@@ -258,7 +283,8 @@ export const FileUpload = (props: FileUploadProps) => {
       {fileUpload.Dialogues}
       {fileManager.Dialogues}
       {dischargeSummaryFileManager.Dialogues}
-      {!hideUpload && (
+      {patientNotesFileManager.Dialogues}
+      {!hideUpload && tab !== "PATIENT_NOTES" && (
         <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
           {({ isAuthorized }) =>
             isAuthorized ? (
@@ -357,17 +383,20 @@ export const FileUpload = (props: FileUploadProps) => {
             file={item}
             key={item.id}
             fileManager={
-              tab !== "DISCHARGE_SUMMARY"
-                ? fileManager
-                : dischargeSummaryFileManager
+              {
+                DISCHARGE_SUMMARY: dischargeSummaryFileManager,
+                PATIENT_NOTES: patientNotesFileManager,
+              }[tab] || fileManager
             }
-            associating_id={associatedId}
+            associating_id={
+              tab === "PATIENT_NOTES" ? item.associating_id! : associatedId
+            }
             editable={
               item?.uploaded_by?.username === authUser.username ||
               authUser.user_type === "DistrictAdmin" ||
               authUser.user_type === "StateAdmin"
             }
-            archivable={tab !== "DISCHARGE_SUMMARY"}
+            archivable={!["PATIENT_NOTES", "DISCHARGE_SUMMARY"].includes(tab)}
           />
         ))}
         {!(fileQuery?.data?.results || []).length && (

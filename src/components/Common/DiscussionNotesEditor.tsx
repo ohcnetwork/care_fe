@@ -1,5 +1,6 @@
 import { t } from "i18next";
 import React, { useEffect, useRef, useState } from "react";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -13,7 +14,7 @@ import NotePreview from "@/components/Common/NotePreview";
 import useFileUpload from "@/hooks/useFileUpload";
 
 import { getCaretCoordinates, getCaretInfo } from "@/Utils/textEditor";
-import { classNames } from "@/Utils/utils";
+import { classNames, isAppleDevice } from "@/Utils/utils";
 
 interface DiscussionNotesEditorProps {
   initialNote?: string;
@@ -23,6 +24,7 @@ interface DiscussionNotesEditorProps {
   onRefetch?: () => void;
   maxRows?: number;
   className?: string;
+  parentRef?: React.RefObject<HTMLElement>;
 }
 
 const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
@@ -33,6 +35,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
   onRefetch,
   maxRows,
   className,
+  parentRef,
 }) => {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const [showMentions, setShowMentions] = useState(false);
@@ -153,6 +156,20 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
       setShowMentions(true);
     });
   };
+
+  useKeyboardShortcut(
+    [isAppleDevice ? "Meta" : "Shift", "Enter"],
+    async () => {
+      if (editorRef.current && text.trim()) {
+        await onAddNote();
+        setText("");
+        onRefetch?.();
+      }
+    },
+    {
+      ignoreInputFields: false,
+    },
+  );
 
   return (
     <div className="mx-2 mb-2">
@@ -287,6 +304,7 @@ const DiscussionNotesEditor: React.FC<DiscussionNotesEditorProps> = ({
           position={mentionPosition}
           filter={mentionFilter}
           containerRef={editorRef}
+          parentRef={parentRef}
         />
       )}
 

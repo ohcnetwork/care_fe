@@ -14,6 +14,7 @@ interface MentionsDropdownProps {
   position: { top: number; left: number };
   filter: string;
   containerRef: React.RefObject<HTMLTextAreaElement>;
+  parentRef?: React.RefObject<HTMLElement>;
 }
 
 const KEYS = {
@@ -28,6 +29,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
   position,
   filter,
   containerRef,
+  parentRef,
 }) => {
   const facilityId = useSlug("facility");
   const { data, loading } = useQuery(routes.getFacilityUsers, {
@@ -38,16 +40,24 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
 
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-
   useEffect(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.top + position.top,
-        left: rect.left + position.left,
-      });
+      const parentRect = parentRef?.current?.getBoundingClientRect();
+
+      if (parentRef?.current && parentRect) {
+        setDropdownPosition({
+          top: rect.top - parentRect.top + position.top,
+          left: rect.left - parentRect.left + position.left,
+        });
+      } else {
+        setDropdownPosition({
+          top: rect.top + position.top,
+          left: rect.left + position.left,
+        });
+      }
     }
-  }, [position, containerRef]);
+  }, [position, containerRef, parentRef]);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) =>

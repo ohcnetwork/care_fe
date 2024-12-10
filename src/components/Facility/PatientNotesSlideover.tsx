@@ -1,5 +1,5 @@
 import { Link } from "raviger";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -50,6 +50,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [reply_to, setReplyTo] = useState<PatientNotesReplyModel | undefined>(
     undefined,
   );
+
+  const slideoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (notificationSubscriptionState === "unsubscribed") {
@@ -215,6 +217,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   return (
     <div
+      ref={slideoverRef}
       className={classNames(
         "fixed bottom-0 z-20 sm:right-8",
         show
@@ -283,6 +286,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                     onRefetch={refetch}
                     maxRows={10}
                     className="mt-2"
+                    parentRef={slideoverRef}
                   />
                 </DoctorNoteReplyPreviewCard>
               )}
