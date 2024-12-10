@@ -37,6 +37,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
 
   const {
     items: notes,
+    refetch,
     loading,
     fetchNextPage,
     hasMore,
@@ -61,11 +62,11 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
 
   useEffect(() => {
     if (reload) {
-      fetchNextPage().then(() => setReload?.(false));
+      refetch().then(() => setReload?.(false));
     }
   }, [reload]);
 
-  if (loading && !state.notes.length) {
+  if ((loading && reload) || !state.notes.length) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />

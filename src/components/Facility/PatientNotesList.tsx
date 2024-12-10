@@ -21,7 +21,7 @@ interface PatientNotesProps {
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
 }
 const PatientNotesList = (props: PatientNotesProps) => {
-  const { state, setState, thread, setReplyTo } = props;
+  const { state, setState, thread, setReplyTo, reload, setReload } = props;
 
   const {
     items: notes,
@@ -47,7 +47,13 @@ const PatientNotesList = (props: PatientNotesProps) => {
     }));
   }, [notes, setState]);
 
-  if (loading && !state.notes.length) {
+  useEffect(() => {
+    if (reload) {
+      refetch().then(() => setReload?.(false));
+    }
+  }, [reload]);
+
+  if ((loading && reload) || !state.notes.length) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
