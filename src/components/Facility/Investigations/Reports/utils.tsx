@@ -1,31 +1,70 @@
-import _ from "lodash";
-import { findIndex, memoize } from "lodash-es";
+import {
+  Investigation,
+  InvestigationResponse,
+} from "@/components/Facility/Investigations/Reports/types";
 
-import { InvestigationResponse } from "@/components/Facility/Investigations/Reports/types";
+const memoize = <T extends (...args: any[]) => any>(fn: T): T => {
+  const cache = new Map<string, ReturnType<T>>();
+  const MAX_CACHE_SIZE = 1000;
+  return ((...args: Parameters<T>): ReturnType<T> => {
+    const key = args
+      .map((arg) =>
+        typeof arg === "object"
+          ? arg instanceof Date
+            ? arg.getTime().toString()
+            : JSON.stringify(Object.entries(arg).sort())
+          : String(arg),
+      )
+      .join("|");
+    if (!cache.has(key)) {
+      if (cache.size >= MAX_CACHE_SIZE) {
+        const firstKey: any = cache.keys().next().value;
+        cache.delete(firstKey);
+      }
+      cache.set(key, fn(...args));
+    }
+    return cache.get(key)!;
+  }) as T;
+};
 
 export const transformData = memoize((data: InvestigationResponse) => {
-  const sessions = _.chain(data)
-    .map((value: any) => {
-      return {
-        ...value.session_object,
-        facility_name: value.consultation_object?.facility_name,
-        facility_id: value.consultation_object?.facility,
-      };
-    })
-    .uniqBy("session_external_id")
-    .orderBy("session_created_date", "desc")
-    .value();
-  const groupByInvestigation = _.chain(data)
-    .groupBy("investigation_object.external_id")
-    .values()
-    .value();
+  const sessions = Array.from(
+    new Map(
+      data.map((value: any) => [
+        value.session_object.session_external_id,
+        {
+          ...value.session_object,
+          facility_name: value.consultation_object?.facility_name,
+          facility_id: value.consultation_object?.facility,
+        },
+      ]),
+    ).values(),
+  ).sort(
+    (a, b) =>
+      new Date(b.session_created_date).getTime() -
+      new Date(a.session_created_date).getTime(),
+  );
+
+  const groupByInvestigation = Object.values(
+    data.reduce(
+      (acc, value: Investigation) => {
+        const key = value.investigation_object.external_id;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(value);
+        return acc;
+      },
+      {} as { [key: string]: Investigation[] },
+    ),
+  );
+
+  const sessionMap = new Map(
+    sessions.map((session, index) => [session.session_external_id, index]),
+  );
   const reqData = groupByInvestigation.map((value: any) => {
     const sessionValues = Array.from({ length: sessions.length });
     value.forEach((val: any) => {
-      const sessionIndex = findIndex(sessions, [
-        "session_external_id",
-        val.session_object.session_external_id,
-      ]);
+      const sessionIndex =
+        sessionMap.get(val.session_object.session_external_id) ?? -1;
       if (sessionIndex > -1) {
         sessionValues[sessionIndex] = {
           min: val.investigation_object.min_value,
@@ -58,6 +97,7 @@ export const transformData = memoize((data: InvestigationResponse) => {
       sessionValues,
     };
   });
+
   return { sessions, data: reqData };
 });
 
