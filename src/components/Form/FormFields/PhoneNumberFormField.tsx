@@ -105,7 +105,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
         }
         setCountry(phoneCodes[getCountryCode(field.value)!]);
       }
-    }, [setValue]);
+    }, [field.value]);
 
     return (
       <FormField
