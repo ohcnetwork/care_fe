@@ -34,7 +34,7 @@ export default function useTanStackQueryInstead<TData>(
     },
     enabled: options?.prefetch ?? true,
     refetchOnWindowFocus: false,
-    gcTime: 0,
+    refetchOnMount: "always",
   });
 
   return {
