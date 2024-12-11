@@ -214,7 +214,6 @@ const options = {
   body: { name: "foo" }, // 👈 The body to be sent with the request.
   headers: { "X-Foo": "bar" }, // 👈 Additional headers to be sent with the request.
   silent: true, // 👈 Whether to suppress notifications for this request.
-  reattempts: 3, // 👈 The number of times to retry the request if it fails.
 
   onResponse: (res) => {
     if (res.status === 403) {

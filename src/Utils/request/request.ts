@@ -16,7 +16,6 @@ export default async function request<TData, TBody>(
     pathParams,
     onResponse,
     silent,
-    reattempts = 3,
     signal,
   }: Options<TData, TBody> = {},
 ): Promise<RequestResult<TData>> {
@@ -34,7 +33,6 @@ export default async function request<TData, TBody>(
     error: undefined,
   };
 
-  for (let i = 0; i < reattempts + 1; i++) {
     options.headers = makeHeaders(noAuth ?? false);
 
     try {
@@ -58,12 +56,8 @@ export default async function request<TData, TBody>(
         return result;
       }
     }
-  }
 
-  console.error(
-    `Request failed after ${reattempts + 1} attempts`,
-    result.error,
-  );
+  console.error( `Request failed `, result.error);
   return result;
 }
 
