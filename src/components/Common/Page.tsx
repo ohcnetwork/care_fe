@@ -17,6 +17,7 @@ interface PageProps extends PageTitleProps {
    * @default false
    **/
   collapseSidebar?: boolean;
+  hideTitleOnPage?: boolean;
 }
 
 export default function Page(props: PageProps) {
@@ -51,6 +52,7 @@ export default function Page(props: PageProps) {
           focusOnLoad={props.focusOnLoad}
           onBackClick={props.onBackClick}
           isInsidePage={true}
+          hideTitleOnPage={props.hideTitleOnPage}
         />
         {props.options}
       </div>
