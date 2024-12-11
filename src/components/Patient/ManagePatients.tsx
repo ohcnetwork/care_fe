@@ -100,9 +100,7 @@ export const PatientManager = () => {
       "emergency_phone_number",
     ],
   });
-  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
-    name: "",
-  });
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>();
   const authUser = useAuthUser();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
@@ -776,14 +774,6 @@ export const PatientManager = () => {
 
   const searchOptions = [
     {
-      key: "phone_number",
-      label: "Phone Number",
-      type: "phone" as const,
-      placeholder: "Search_by_phone_number",
-      value: qParams.phone_number || "",
-      shortcutKey: "p",
-    },
-    {
       key: "name",
       label: "Name",
       type: "text" as const,
@@ -798,6 +788,14 @@ export const PatientManager = () => {
       placeholder: "search_by_patient_no",
       value: qParams.patient_no || "",
       shortcutKey: "u",
+    },
+    {
+      key: "phone_number",
+      label: "Phone Number",
+      type: "phone" as const,
+      placeholder: "Search_by_phone_number",
+      value: qParams.phone_number || "",
+      shortcutKey: "p",
     },
     {
       key: "emergency_contact_number",
@@ -1002,18 +1000,22 @@ export const PatientManager = () => {
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
         handleOk={() => {
-          switch (showDialog) {
-            case "create":
-              navigate(`facility/${selectedFacility.id}/patient`);
-              break;
-            case "list-discharged":
-              navigate(`facility/${selectedFacility.id}/discharged-patients`);
-              break;
+          if (selectedFacility) {
+            switch (showDialog) {
+              case "create":
+                navigate(`facility/${selectedFacility.id}/patient`);
+                break;
+              case "list-discharged":
+                navigate(`facility/${selectedFacility.id}/discharged-patients`);
+                break;
+            }
+          } else {
+            Notification.Error({ msg: "No facility selected" });
           }
         }}
         handleCancel={() => {
           setShowDialog(undefined);
-          setSelectedFacility({ name: "" });
+          setSelectedFacility(undefined);
         }}
       />
 
