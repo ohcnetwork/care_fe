@@ -293,6 +293,7 @@ describe("Manage User", () => {
     manageUserPage.clickProfessionalInfoViewButton();
     manageUserPage.verifyQualificationDoesntExist();
     manageUserPage.verifyYoeAndCouncilRegistrationDoesntExist();
+    //Adding working hours
     manageUserPage.clickProfessionalInfoEditButton();
     manageUserPage.clearProfessionalInfo();
     manageUserPage.typeInWeeklyWorkingHours("200");
