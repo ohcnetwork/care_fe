@@ -116,7 +116,7 @@ export default function DateTextInput(props: {
       date: `${value ? formatUnfocused(value.getDate(), 0) : ""}`,
       month: `${value ? formatUnfocused(value.getMonth() + 1, 1) : ""}`,
       year: `${value ? formatUnfocused(value.getFullYear(), 2, 4) : ""}`,
-      hour: `${value ? formatUnfocused(value.getHours(), 3) : ""}`,
+      hour: `${value ? formatUnfocused(value.getHours() % 12, 3) : ""}`,
       minute: `${value ? formatUnfocused(value.getMinutes(), 4) : ""}`,
     });
   }, [value]);
@@ -156,13 +156,12 @@ export default function DateTextInput(props: {
                 onChange={(e) => {
                   const value = e.target.value;
                   if (
-                    (value.endsWith("/") ||
-                      value.endsWith(" ") ||
-                      value.endsWith(":") ||
-                      value.length > (key === "year" ? 3 : 1)) &&
-                    i < 4
+                    value.endsWith("/") ||
+                    value.endsWith(" ") ||
+                    value.endsWith(":") ||
+                    value.length > (key === "year" ? 3 : 1)
                   ) {
-                    goToInput(i + 1);
+                    goToInput((i + 1) % 5);
                   } else {
                     setEditingText({
                       ...editingText,
