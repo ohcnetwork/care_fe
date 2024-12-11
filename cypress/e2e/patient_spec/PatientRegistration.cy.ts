@@ -198,9 +198,9 @@ describe("Patient Creation with consultation", () => {
     );
     patientPage.clickUpdatePatient();
     patientPage.verifyPatientUpdated();
-    patientPage.interceptgetPatient();
+    patientPage.interceptGetPatient();
     patientPage.visitPatientUrl();
-    patientPage.verifygetPatientResponse();
+    patientPage.verifyGetPatientResponse();
     // Verify Female Gender change reflection, No Medical History and Insurance Details
     patientPage.verifyPatientDashboardDetails(
       patientOneUpdatedGender,

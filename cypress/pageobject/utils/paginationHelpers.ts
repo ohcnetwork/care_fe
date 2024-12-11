@@ -14,7 +14,7 @@ export const pageNavigation = {
   interceptPatientNavigation() {
     cy.intercept(
       "GET",
-      "/api/v1/patient/?page=2&limit=12&is_active=True&offset=12",
+      "/api/v1/patient/?page=*&limit=*&is_active=True&offset=*",
     ).as("getPatientPage");
   },
 

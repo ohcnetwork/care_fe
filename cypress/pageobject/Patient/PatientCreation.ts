@@ -155,11 +155,11 @@ export class PatientPage {
     cy.wait("@updatePatient").its("response.statusCode").should("eq", 200);
   }
 
-  interceptgetPatient() {
+  interceptGetPatient() {
     cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
   }
 
-  verifygetPatientResponse() {
+  verifyGetPatientResponse() {
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
   }
 

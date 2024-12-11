@@ -58,9 +58,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.clickSubmitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
-    patientPage.interceptgetPatient();
+    patientPage.interceptGetPatient();
     patientLogupdate.clickLogupdate();
-    patientPage.verifygetPatientResponse();
+    patientPage.verifyGetPatientResponse();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectRoundType("Tele-medicine Log");
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -88,9 +88,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Please assign a bed to the patient");
     patientLogupdate.selectBed(bedOne);
     cy.closeNotification();
-    patientPage.interceptgetPatient();
+    patientPage.interceptGetPatient();
     patientLogupdate.clickLogupdate();
-    patientPage.verifygetPatientResponse();
+    patientPage.verifyGetPatientResponse();
     // Only will be using random non-unique progress note fields
     patientLogupdate.selectRoundType("Progress Note");
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -246,9 +246,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Please assign a bed to the patient");
     patientLogupdate.selectBed(bedThree);
     cy.closeNotification();
-    patientPage.interceptgetPatient();
+    patientPage.interceptGetPatient();
     patientLogupdate.clickLogupdate();
-    patientPage.verifygetPatientResponse();
+    patientPage.verifyGetPatientResponse();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeOtherDetails(otherExamination);
