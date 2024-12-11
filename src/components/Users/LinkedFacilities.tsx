@@ -199,7 +199,11 @@ export default function LinkedFacilities({
       <div id={`facility_${facility.id}`} key={`facility_${facility.id}`}>
         <DropdownMenu>
           <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-            <div className="rounded p-1 text-sm">{facility.name}</div>
+            <div className="rounded p-1 text-sm">
+              {facility.name}
+              {facility.district_object?.name &&
+                `, ${facility.district_object.name}`}
+            </div>
             <DropdownMenuTrigger id="linked-facility-settings">
               <div className="rounded-r bg-secondary-300 px-2 py-1">
                 <CareIcon icon="l-setting" className="text-sm" />
@@ -242,8 +246,10 @@ export default function LinkedFacilities({
         key={`facility_${homeFacility.id}`}
       >
         <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-          <div id="home-facility" className="rounded p-1 text-sm">
+          <div className="rounded p-1 text-sm">
             {homeFacility.name}
+            {homeFacility.district_object &&
+              `, ${homeFacility.district_object.name}`}
           </div>
           {(authorizeForHomeFacility || isCurrentUser) && (
             <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
