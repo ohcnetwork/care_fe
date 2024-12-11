@@ -22,8 +22,8 @@ export default function useTanStackQueryInstead<TData>(
   const [overrides, setOverrides] = useState<QueryOptions<TData>>();
   const {
     data: response,
-    isLoading,
     refetch,
+    isFetching: isLoading,
   } = useQuery({
     queryKey: [route.path, options?.pathParams, options?.query],
     queryFn: async ({ signal }) => {
@@ -35,6 +35,7 @@ export default function useTanStackQueryInstead<TData>(
     },
     enabled: options?.prefetch ?? true,
     refetchOnWindowFocus: options?.refetchOnWindowFocus,
+    staleTime: 0,
   });
 
   return {
