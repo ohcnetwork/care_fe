@@ -52,9 +52,7 @@ const AssetsList = () => {
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const [showFacilityDialog, setShowFacilityDialog] = useState(false);
-  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
-    name: "",
-  });
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>();
   const params = {
     limit: resultsPerPage,
     page: qParams.page,
@@ -460,15 +458,11 @@ const AssetsList = () => {
           </div>
         </>
       )}
-      {typeof facility === "undefined" && (
+      {facility == null && (
         <FacilitiesSelectDialogue
           show={importAssetModalOpen}
           setSelected={(e) => setFacility(e)}
-          selectedFacility={
-            facility ?? {
-              name: "",
-            }
-          }
+          selectedFacility={selectedFacility}
           handleOk={() => {
             return undefined;
           }}
@@ -497,10 +491,16 @@ const AssetsList = () => {
         show={showFacilityDialog}
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
-        handleOk={() => navigate(`facility/${selectedFacility.id}/assets/new`)}
+        handleOk={() => {
+          if (selectedFacility) {
+            navigate(`facility/${selectedFacility.id}/assets/new`);
+          } else {
+            Notification.Warn({ msg: "No facility selected" });
+          }
+        }}
         handleCancel={() => {
           setShowFacilityDialog(false);
-          setSelectedFacility({ name: "" });
+          setSelectedFacility(undefined);
         }}
       />
     </Page>
