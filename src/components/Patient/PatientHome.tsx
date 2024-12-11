@@ -365,20 +365,6 @@ export const PatientHome = (props: {
                         text={t("vaccinated")}
                       />
                     )}
-                    {patientData.allow_transfer ? (
-                      <Chip
-                        size="small"
-                        startIcon="l-unlock"
-                        text={t("transfer_allowed")}
-                      />
-                    ) : (
-                      <Chip
-                        variant="warning"
-                        startIcon="l-lock"
-                        size="small"
-                        text={t("transfer_blocked")}
-                      />
-                    )}
 
                     {patientData.gender === 2 && (
                       <>
@@ -561,7 +547,21 @@ export const PatientHome = (props: {
                 </div>
               </div>
             </section>
-            <hr />
+            <hr className="mb-2" />
+            {patientData.allow_transfer ? (
+              <Chip
+                size="small"
+                startIcon="l-unlock"
+                text={t("transfer_allowed")}
+              />
+            ) : (
+              <Chip
+                variant="warning"
+                startIcon="l-lock"
+                size="small"
+                text={t("transfer_blocked")}
+              />
+            )}
             <div
               id="actions"
               className="my-2 flex h-full flex-col justify-between space-y-2"
