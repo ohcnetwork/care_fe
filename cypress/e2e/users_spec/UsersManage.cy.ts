@@ -305,6 +305,7 @@ describe("Manage User", () => {
     manageUserPage.clickSubmit();
     // verify the data is reflected in the page
     manageUserPage.verifyWorkingHours(workinghour);
+    manageUserPage.navigateToProfile();
     manageUserPage.verifyProfileWorkingHours(workinghour);
   });
 
