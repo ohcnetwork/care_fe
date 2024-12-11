@@ -359,8 +359,8 @@ export class ManageUserPage {
     cy.get("[data-testid='user-delete-button']").click();
   }
 
-  clickAddSkillButton() {
-    cy.intercept("GET", "**/api/v1/skill/**").as("getSkills");
+  clickAddSkillButton(username: string) {
+    cy.intercept("GET", `**/api/v1/users/${username}/skill/**`).as("getSkills");
     cy.get("#add-skill-button").click();
     cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
   }
