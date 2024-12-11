@@ -1,4 +1,3 @@
-import { camelCase, capitalize, startCase } from "lodash-es";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -271,11 +270,11 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             <span className="font-semibold leading-relaxed">
               {t("status")}:{" "}
             </span>{" "}
-            {startCase(camelCase(flow.status))}
+            <span>{t(`SAMPLE_TEST_HISTORY__${flow.status}`) || "Unknown"}</span>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">{t("label")}:</span>{" "}
-            {capitalize(flow.notes)}
+            <span className="capitalize">{flow.notes}</span>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
@@ -385,8 +384,8 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <div className="text-sm text-muted-foreground">
                 {t("doctors_name")}:
               </div>
-              <div id="doctor_name" className="font-medium">
-                {startCase(camelCase(sampleDetails.doctor_name))}
+              <div id="doctor_name" className="capitalize font-medium">
+                {sampleDetails.doctor_name}
               </div>
             </div>
           )}
@@ -514,9 +513,9 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <div className="text-sm text-muted-foreground">
                 {t("sample_type")}:{" "}
               </div>
-              <div className="font-medium">
-                {startCase(camelCase(sampleDetails.sample_type))}
-              </div>
+              <span id="sample_type" className="font-medium capitalize">
+                {sampleDetails.sample_type}
+              </span>
             </div>
           )}
           {sampleDetails?.sample_type === "OTHER TYPE" && (
