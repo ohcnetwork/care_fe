@@ -6,7 +6,8 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import { ExportButton } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
@@ -75,6 +76,10 @@ export default function BoardView() {
 
   const [boardFilter, setBoardFilter] = useState(activeBoards);
   const { t } = useTranslation();
+  const onListViewBtnClick = () => {
+    navigate("/shifting/list", { query: qParams });
+    localStorage.setItem("defaultShiftView", "list");
+  };
 
   return (
     <div className="flex-col px-2 pb-2">
@@ -119,13 +124,10 @@ export default function BoardView() {
           />
 
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
-            <ButtonV2
-              className="py-[11px]"
-              onClick={() => navigate("/shifting/list", { query: qParams })}
-            >
-              <CareIcon icon="l-list-ul" />
+            <Button variant={"primary"} onClick={onListViewBtnClick}>
+              <CareIcon icon="l-list-ul" className="mr-2" />
               {t("list_view")}
-            </ButtonV2>
+            </Button>
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
