@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { validateRule } from "@/components/Users/UserAdd";
+import { validateRule } from "@/components/Users/UserAddEditForm";
 
 import { LocalStorageKeys } from "@/common/constants";
 import { validatePassword } from "@/common/validation";
@@ -134,22 +134,22 @@ const ResetPassword = (props: ResetPasswordProps) => {
                 <div className="text-small mb-2 pl-2 text-secondary-500">
                   {validateRule(
                     form.password?.length >= 8,
-                    "Password should be atleast 8 characters long",
+                    t("password_length_validation"),
                     !form.password,
                   )}
                   {validateRule(
                     form.password !== form.password.toUpperCase(),
-                    "Password should contain at least 1 lowercase letter",
+                    t("password_lowercase_validation"),
                     !form.password,
                   )}
                   {validateRule(
                     form.password !== form.password.toLowerCase(),
-                    "Password should contain at least 1 uppercase letter",
+                    t("password_uppercase_validation"),
                     !form.password,
                   )}
                   {validateRule(
                     /\d/.test(form.password),
-                    "Password should contain at least 1 number",
+                    t("password_number_validation"),
                     !form.password,
                   )}
                 </div>
@@ -168,7 +168,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
                 form.password.length > 0 &&
                 validateRule(
                   form.confirm === form.password,
-                  "Confirm password should match the entered password",
+                  t("password_mismatch"),
                   !form.password && form.password.length > 0,
                 )}
             </div>

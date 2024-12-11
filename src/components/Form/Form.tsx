@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FieldValidator } from "@/components/Form/FieldValidators";
@@ -32,16 +32,21 @@ type Props<T extends FormDetails> = {
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
   hideRestoreDraft?: boolean;
+  resetFormValsOnCancel?: boolean;
+  resetFormValsOnSubmit?: boolean;
+  hideCancelButton?: boolean;
 };
 
 const Form = <T extends FormDetails>({
   asyncGetDefaults,
   validate,
+  hideCancelButton = false,
   ...props
 }: Props<T>) => {
   const initial = { form: props.defaults, errors: {} };
   const [isLoading, setIsLoading] = useState(!!asyncGetDefaults);
   const [state, dispatch] = useAutoSaveReducer<T>(formReducer, initial);
+  const formVals = useRef(props.defaults);
 
   useEffect(() => {
     if (!asyncGetDefaults) return;
@@ -75,7 +80,16 @@ const Form = <T extends FormDetails>({
         type: "set_errors",
         errors: { ...state.errors, ...errors },
       });
+    } else if (props.resetFormValsOnSubmit) {
+      dispatch({ type: "set_form", form: formVals.current });
     }
+  };
+
+  const handleCancel = () => {
+    if (props.resetFormValsOnCancel) {
+      dispatch({ type: "set_form", form: formVals.current });
+    }
+    props.onCancel?.();
   };
 
   const { Provider, Consumer } = useMemo(() => createFormContext<T>(), []);
@@ -121,10 +135,12 @@ const Form = <T extends FormDetails>({
             <Consumer>{props.children}</Consumer>
           </div>
           <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
-            <Cancel
-              onClick={props.onCancel}
-              label={props.cancelLabel ?? "Cancel"}
-            />
+            {!hideCancelButton && (
+              <Cancel
+                onClick={handleCancel}
+                label={props.cancelLabel ?? "Cancel"}
+              />
+            )}
             <Submit
               data-testid="submit-button"
               type="submit"
