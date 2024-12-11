@@ -199,10 +199,9 @@ export class ManageUserPage {
   }
 
   verifyProfileWorkingHours(expectedHours: string) {
-    cy.get("#view-average_weekly_working_hours").should(
-      "contain.text",
+    cy.verifyContentPresence("#averageworkinghour-profile-details", [
       expectedHours,
-    );
+    ] as string[]);
   }
 
   navigateToManageUser() {
