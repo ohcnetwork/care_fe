@@ -29,13 +29,16 @@ export const NoticeBoard = () => {
               className="text-justify text-lg flex mx-2 py-3 px-3"
               id="notification-message"
             >
-              <CareIcon icon="l-envelope" className="text-xl mr-2 mt-1" />
+              <CareIcon
+                icon="l-facebook-messenger"
+                className="text-xl mr-2 mt-1"
+              />
               <span className="font-mono text-md">{item.message} </span>
             </div>
 
             <div className="bg-gray-200 py-2">
               <div className="text-md my-1 text-secondary-700 mx-2 px-3">
-                <CareIcon icon="l-facebook-messenger" className="mr-2" />
+                <CareIcon icon="l-user" className="mr-2" />
                 {formatName(item.caused_by)} -{" "}
                 <span className="font-bold text-primary-700">
                   {item.caused_by.user_type}
