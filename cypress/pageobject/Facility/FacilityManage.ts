@@ -18,6 +18,14 @@ class FacilityManage {
     cy.get("#save-cover-image").click();
   }
 
+  clickCancelCoverImage() {
+    cy.verifyAndClickElement("#cancel", "Cancel");
+  }
+
+  clickDeleteCoverImage() {
+    cy.verifyAndClickElement("#delete-cover-image", "Delete");
+  }
+
   verifyTotalDoctorCapacity(expectedCapacity: string) {
     cy.get("#facility-doctor-totalcapacity").contains(expectedCapacity);
   }
@@ -98,6 +106,26 @@ class FacilityManage {
   clickFacilityAddBedTypeButton() {
     cy.get("#facility-add-bedtype").scrollIntoView();
     cy.get("#facility-add-bedtype").click();
+  }
+
+  interceptImageUploadRequest() {
+    cy.intercept("POST", "**/api/v1/facility/*/cover_image/").as(
+      "imageUploadReq",
+    );
+  }
+
+  verifyImageUploadRequest() {
+    cy.wait("@imageUploadReq").its("response.statusCode").should("eq", 200);
+  }
+
+  interceptImageDeleteRequest() {
+    cy.intercept("DELETE", "**/api/v1/facility/*/cover_image/").as(
+      "imageDeleteReq",
+    );
+  }
+
+  verifyImageDeleteRequest() {
+    cy.wait("@imageDeleteReq").its("response.statusCode").should("eq", 204);
   }
 }
 export default FacilityManage;

@@ -282,6 +282,7 @@ const AvatarEditModal = ({
                 />
                 {imageUrl && (
                   <ButtonV2
+                    id="delete-cover-image"
                     variant="danger"
                     onClick={deleteAvatar}
                     disabled={isProcessing}
