@@ -39,7 +39,7 @@ const DateFormField = (props: Props) => {
       <DateInputV2
         className={classNames(
           field.error && "border-red-500",
-          "mr-9 text-ellipsis	",
+          "mr-9 text-ellipsis",
         )}
         containerClassName={props.containerClassName}
         id={field.id}

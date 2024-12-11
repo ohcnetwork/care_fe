@@ -100,7 +100,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
     }, [item]);
 
     return (
-      <div className="flex w-full flex-col gap-4 md:flex-row">
+      <div className="flex w-full flex-col items-center gap-4 md:flex-row">
         {children(item, setItem, processing, errors)}
         {props.type === "creating" && (
           <ButtonV2
