@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef } from "react";
 
 import request from "@/Utils/request/request";
 import { QueryRoute, RequestOptions } from "@/Utils/request/types";
@@ -19,7 +19,7 @@ export default function useTanStackQueryInstead<TData>(
   route: QueryRoute<TData>,
   options?: QueryOptions<TData>,
 ) {
-  const [overrides, setOverrides] = useState<QueryOptions<TData>>();
+  const overridesRef = useRef<QueryOptions<TData>>();
   const {
     data: response,
     refetch,
@@ -27,8 +27,8 @@ export default function useTanStackQueryInstead<TData>(
   } = useQuery({
     queryKey: [route.path, options?.pathParams, options?.query],
     queryFn: async ({ signal }) => {
-      const resolvedOptions = overrides
-        ? mergeRequestOptions(options || {}, overrides)
+      const resolvedOptions = overridesRef.current
+        ? mergeRequestOptions(options || {}, overridesRef.current)
         : options;
 
       return await request(route, { ...resolvedOptions, signal });
@@ -47,7 +47,7 @@ export default function useTanStackQueryInstead<TData>(
      * Refetch function that applies new options and fetches fresh data.
      */
     refetch: async (overrides?: QueryOptions<TData>) => {
-      setOverrides(overrides);
+      overridesRef.current = overrides;
       await refetch();
       return response!;
     },
