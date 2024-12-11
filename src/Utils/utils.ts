@@ -217,7 +217,9 @@ export const formatCurrency = (price: number) =>
   });
 
 export const isUserOnline = (user: { last_login: DateLike }) => {
-  return dayjs().subtract(5, "minutes").isBefore(user.last_login);
+  return user.last_login
+    ? dayjs().subtract(5, "minutes").isBefore(user.last_login)
+    : false;
 };
 
 export interface CountryData {

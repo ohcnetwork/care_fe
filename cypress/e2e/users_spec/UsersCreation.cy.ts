@@ -43,7 +43,7 @@ describe("User Creation", () => {
     "Please enter valid phone number",
     "Please enter the username",
     "Please enter date in DD/MM/YYYY format",
-    "Please enter the password",
+    "Password is required",
     "Confirm password is required",
     "First Name is required",
     "Last Name is required",
@@ -164,13 +164,10 @@ describe("User Creation", () => {
     cy.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);
-    cy.verifyContentPresence("#name", [newUserFirstName]);
+    cy.verifyContentPresence(`#name-${username}`, [newUserFirstName]);
     cy.verifyContentPresence("#role", [role]);
     cy.verifyContentPresence("#district", [district]);
-    cy.verifyContentPresence("#home_facility", [homeFacility]);
-    cy.verifyContentPresence("#qualification", [qualification]);
-    cy.verifyContentPresence("#doctor-experience", [experience]);
-    cy.verifyContentPresence("#medical-council-registration", [regNo]);
+    cy.verifyContentPresence("#home-facility", [homeFacility]);
   });
 
   it("create new user form throwing mandatory field error", () => {

@@ -46,7 +46,7 @@ export class UserCreationPage {
   }
 
   clickSaveUserButton() {
-    cy.clickSubmitButton("Save User");
+    cy.clickSubmitButton("Submit");
   }
 
   interceptCreateUser() {
