@@ -39,7 +39,6 @@ import Loading from "../Common/Loading";
 import Page from "../Common/Page";
 import { SkillModel, UserBareMinimum } from "../Users/models";
 import { patientTabs } from "./PatientDetailsTab";
-import { isPatientMandatoryDataFilled } from "./Utils";
 import { AssignedToObjectModel, PatientModel, SampleTestModel } from "./models";
 
 export const parseOccupation = (occupation: string | undefined) => {
@@ -266,172 +265,171 @@ export const PatientHome = (props: {
                 </div>
               </div>
 
-              <div>
-                <div className="ml-auto mt-4 flex flex-wrap gap-3">
-                  {isPatientMandatoryDataFilled(patientData) &&
-                    (!patientData.last_consultation ||
-                      patientData.last_consultation?.facility !==
-                        patientData.facility ||
-                      (patientData.last_consultation?.discharge_date &&
-                        patientData.is_active)) && (
-                      <span className="relative inline-flex">
-                        <Chip
-                          size="small"
-                          variant="danger"
-                          startIcon="l-notes"
-                          text={t("no_consultation_filed")}
-                        />
-                        <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
-                          <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
-                          <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+              <div className=" flex gap-4 justify-between flex-wrap">
+                <div className="mt-4 flex gap-4">
+                  <div>
+                    <p className="text-xs font-normal leading-tight text-gray-600">
+                      {t("facility")}:
+                    </p>
+                    <p className="mt-1 flex text-sm font-semibold leading-tight text-gray-900">
+                      {patientData.facility_object?.name || "-"}
+                    </p>
+                  </div>
+
+                  {patientData?.last_consultation
+                    ?.treating_physician_object && (
+                    <div>
+                      <h4 className="text-xs font-normal leading-tight text-gray-600">
+                        {t("treating_doctor")}:
+                      </h4>
+                      <div className="mt-1 flex space-x-2">
+                        <p className="flex text-sm font-semibold leading-tight text-gray-900">
+                          {formatName(
+                            patientData.last_consultation
+                              .treating_physician_object,
+                          )}
+                        </p>
+                        <span className="tooltip text-xs text-secondary-800 flex items-end  font-normal leading-tight">
+                          {!!skillsQuery.data?.results?.length &&
+                            formatSkills(skillsQuery.data?.results)}
+                          {(skillsQuery.data?.results?.length || 0) > 3 && (
+                            <ul
+                              className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium"
+                              role="tooltip"
+                            >
+                              {skillsQuery.data?.results.map((skill) => (
+                                <li key={skill.skill_object.id}>
+                                  {skill.skill_object.name}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </span>
-                      </span>
-                    )}
-                  {patientData.is_vaccinated && (
-                    <Chip
-                      variant="custom"
-                      size="small"
-                      className="bg-blue-100 text-blue-800"
-                      startIcon="l-syringe"
-                      text={t("vaccinated")}
-                    />
+                      </div>
+                    </div>
                   )}
-                  {patientData.allow_transfer ? (
-                    <Chip
-                      variant="warning"
-                      size="small"
-                      startIcon="l-unlock"
-                      text={t("transfer_allowed")}
-                    />
-                  ) : (
-                    <Chip
-                      startIcon="l-lock"
-                      size="small"
-                      text={t("transfer_blocked")}
-                    />
+                  {patientData?.last_consultation?.assigned_to_object && (
+                    <div>
+                      <p className="text-xs font-normal leading-tight text-gray-600">
+                        {t("assigned_doctor")}:
+                      </p>
+                      <div className="mt-1 flex space-x-2 text-sm font-semibold leading-tight text-gray-900">
+                        <p>
+                          {formatName(
+                            patientData.last_consultation.assigned_to_object,
+                          )}
+                        </p>
+                        {patientData?.last_consultation?.assigned_to_object
+                          .alt_phone_number && (
+                          <a
+                            href={`https://wa.me/${patientData.last_consultation.assigned_to_object.alt_phone_number.replace(/\D+/g, "")}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center space-x-1 text-xs text-green-500"
+                          >
+                            <CareIcon icon="l-whatsapp" />{" "}
+                            <span>{t("video_call")}</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   )}
 
-                  {patientData.gender === 2 && (
-                    <>
-                      {patientData.is_antenatal &&
-                        isAntenatal(
-                          patientData.last_menstruation_start_date,
-                        ) && (
+                  {patientData.assigned_to_object && (
+                    <div>
+                      <p className="text-xs font-normal leading-tight text-gray-600">
+                        {t("assigned_volunteer")}:
+                      </p>
+                      <p className="mt-1 text-sm font-semibold leading-tight text-gray-900">
+                        {formatName(patientData.assigned_to_object)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="ml-auto mt-4  flex flex-wrap gap-3">
+                    {!patientData?.last_consultation && (
+                      <Chip
+                        size="small"
+                        className="bg-blue-100 text-blue-800"
+                        text={t("Initial visit")}
+                      />
+                    )}
+                    {patientData.is_vaccinated && (
+                      <Chip
+                        variant="custom"
+                        size="small"
+                        className="bg-blue-100 text-blue-800"
+                        startIcon="l-syringe"
+                        text={t("vaccinated")}
+                      />
+                    )}
+                    {patientData.allow_transfer ? (
+                      <Chip
+                        size="small"
+                        startIcon="l-unlock"
+                        text={t("transfer_allowed")}
+                      />
+                    ) : (
+                      <Chip
+                        variant="warning"
+                        startIcon="l-lock"
+                        size="small"
+                        text={t("transfer_blocked")}
+                      />
+                    )}
+
+                    {patientData.gender === 2 && (
+                      <>
+                        {patientData.is_antenatal &&
+                          isAntenatal(
+                            patientData.last_menstruation_start_date,
+                          ) && (
+                            <Chip
+                              variant="custom"
+                              size="small"
+                              className="border-pink-300 bg-pink-100 text-pink-600"
+                              startIcon="l-baby-carriage"
+                              text={t("antenatal")}
+                            />
+                          )}
+                        {isPostPartum(patientData.date_of_delivery) && (
                           <Chip
                             variant="custom"
                             size="small"
                             className="border-pink-300 bg-pink-100 text-pink-600"
                             startIcon="l-baby-carriage"
-                            text={t("antenatal")}
+                            text={t("post_partum")}
                           />
                         )}
-                      {isPostPartum(patientData.date_of_delivery) && (
+                      </>
+                    )}
+                    {patientData.last_consultation?.is_telemedicine && (
+                      <Chip
+                        variant="alert"
+                        size="small"
+                        startIcon="l-phone"
+                        text={t("TELEMEDICINE")}
+                      />
+                    )}
+                    {patientData.allergies && (
+                      <Chip
+                        variant="danger"
+                        size="small"
+                        text={`${t("allergies")} ${patientData.allergies.length}`}
+                      />
+                    )}
+                    {patientData.state_object &&
+                      patientData.district_object && (
                         <Chip
-                          variant="custom"
+                          variant="secondary"
                           size="small"
-                          className="border-pink-300 bg-pink-100 text-pink-600"
-                          startIcon="l-baby-carriage"
-                          text={t("post_partum")}
+                          text={`${t("Location: ")} ${patientData?.district_object?.name}, ${patientData?.state_object?.name}`}
                         />
                       )}
-                    </>
-                  )}
-                  {patientData.last_consultation?.is_telemedicine && (
-                    <Chip
-                      variant="alert"
-                      size="small"
-                      startIcon="l-phone"
-                      text={t("TELEMEDICINE")}
-                    />
-                  )}
-                  {patientData.allergies && (
-                    <Chip
-                      variant="danger"
-                      size="small"
-                      text={`${t("allergies")} ${patientData.allergies.length}`}
-                    />
-                  )}
+                  </div>
                 </div>
-              </div>
-
-              <div className="mt-4 flex gap-4">
-                <div>
-                  <p className="text-xs font-normal leading-tight text-gray-600">
-                    {t("facility")}:
-                  </p>
-                  <p className="mt-1 flex text-sm font-semibold leading-tight text-gray-900">
-                    {patientData.facility_object?.name || "-"}
-                  </p>
-                </div>
-
-                {patientData?.last_consultation?.treating_physician_object && (
-                  <div>
-                    <h4 className="text-xs font-normal leading-tight text-gray-600">
-                      {t("treating_doctor")}:
-                    </h4>
-                    <div className="mt-1 flex space-x-2">
-                      <p className="flex text-sm font-semibold leading-tight text-gray-900">
-                        {formatName(
-                          patientData.last_consultation
-                            .treating_physician_object,
-                        )}
-                      </p>
-                      <span className="tooltip text-xs text-secondary-800 flex items-end  font-normal leading-tight">
-                        {!!skillsQuery.data?.results?.length &&
-                          formatSkills(skillsQuery.data?.results)}
-                        {(skillsQuery.data?.results?.length || 0) > 3 && (
-                          <ul
-                            className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium"
-                            role="tooltip"
-                          >
-                            {skillsQuery.data?.results.map((skill) => (
-                              <li key={skill.skill_object.id}>
-                                {skill.skill_object.name}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {patientData?.last_consultation?.assigned_to_object && (
-                  <div>
-                    <p className="text-xs font-normal leading-tight text-gray-600">
-                      {t("assigned_doctor")}:
-                    </p>
-                    <div className="mt-1 flex space-x-2 text-sm font-semibold leading-tight text-gray-900">
-                      <p>
-                        {formatName(
-                          patientData.last_consultation.assigned_to_object,
-                        )}
-                      </p>
-                      {patientData?.last_consultation?.assigned_to_object
-                        .alt_phone_number && (
-                        <a
-                          href={`https://wa.me/${patientData.last_consultation.assigned_to_object.alt_phone_number.replace(/\D+/g, "")}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center space-x-1 text-xs text-green-500"
-                        >
-                          <CareIcon icon="l-whatsapp" />{" "}
-                          <span>{t("video_call")}</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {patientData.assigned_to_object && (
-                  <div>
-                    <p className="text-xs font-normal leading-tight text-gray-600">
-                      {t("assigned_volunteer")}:
-                    </p>
-                    <p className="mt-1 text-sm font-semibold leading-tight text-gray-900">
-                      {formatName(patientData.assigned_to_object)}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>

@@ -226,7 +226,7 @@ export const Demography = (props: PatientProps) => {
         },
         {
           label: t("state"),
-          value: patientData.state,
+          value: patientData?.state_object?.name,
         },
         {
           label: t("district"),
