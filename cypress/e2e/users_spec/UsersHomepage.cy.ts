@@ -89,6 +89,18 @@ describe("User Homepage", () => {
     pageNavigation.verifyCurrentPageNumber(1);
   });
 
+  it("Switch to list view, search by username and verify the results", () => {
+    userPage.switchToListView();
+    userPage.verifyListView();
+    userPage.checkSearchInputVisibility();
+    userPage.typeInSearchInput(doctorUserName);
+    userPage.checkUrlForUsername(doctorUserName);
+    userPage.checkUsernameText(doctorUserName);
+    userPage.checkUsernameBadgeVisibility(true);
+    userPage.clearSearchInput();
+    userPage.verifyListView();
+  });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
