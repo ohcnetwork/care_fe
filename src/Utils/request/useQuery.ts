@@ -8,7 +8,6 @@ import { mergeRequestOptions } from "./utils";
 
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
-  refetchOnWindowFocus?: boolean;
   key?: string;
 }
 
@@ -34,7 +33,7 @@ export default function useTanStackQueryInstead<TData>(
       return await request(route, { ...resolvedOptions, signal });
     },
     enabled: options?.prefetch ?? true,
-    refetchOnWindowFocus: options?.refetchOnWindowFocus,
+    refetchOnWindowFocus: false,
     staleTime: 0,
   });
 
