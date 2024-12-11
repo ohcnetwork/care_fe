@@ -11,7 +11,7 @@ import { mergeRequestOptions } from "@/Utils/request/utils";
 /**
  * @deprecated use `useMutation` from `@tanstack/react-query` instead.
  */
-export default function useMutation<TData, TBody>(
+export default function useDeprecatedMutation<TData, TBody>(
   route: MutationRoute<TData, TBody>,
   options: RequestOptions<TData, TBody>,
 ) {
