@@ -1,4 +1,7 @@
 // FacilityCreation
+import FacilityLocation from "pageobject/Facility/FacilityLocation";
+import { PatientPage } from "pageobject/Patient/PatientCreation";
+import PatientPredefined from "pageobject/Patient/PatientPredefined";
 import { pageNavigation } from "pageobject/utils/paginationHelpers";
 
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
@@ -14,6 +17,9 @@ describe("Facility Homepage Function", () => {
   const facilityNotify = new FacilityNotify();
   const facilityPage = new FacilityPage();
   const manageUserPage = new ManageUserPage();
+  const patientPredefined = new PatientPredefined();
+  const patientPage = new PatientPage();
+  const facilityLocation = new FacilityLocation();
   const facilitiesAlias = "downloadFacilitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
@@ -25,6 +31,9 @@ describe("Facility Homepage Function", () => {
   const facilityType = "Private Hospital";
   const notificationErrorMsg = "Message cannot be empty";
   const notificationMessage = "Test Notification";
+  const facilityWithNoAvailableBeds = "Dummy Facility 12";
+  const locationName = "Test-location";
+  const locationType = "WARD";
 
   before(() => {
     loginPage.loginByRole("districtAdmin");
@@ -32,6 +41,7 @@ describe("Facility Homepage Function", () => {
   });
 
   beforeEach(() => {
+    cy.viewport(1280, 720);
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/facility");
@@ -199,6 +209,55 @@ describe("Facility Homepage Function", () => {
     facilityNotify.closeNotificationSlide();
     loginPage.ensureLoggedIn();
     loginPage.clickSignOutBtn();
+    loginPage.loginManuallyAsDistrictAdmin();
+    loginPage.ensureLoggedIn();
+  });
+
+  it("Verify the bed capacity badge reflection", () => {
+    facilityHome.typeFacilitySearch(facilityWithNoAvailableBeds);
+    facilityHome.assertFacilityInCard(facilityWithNoAvailableBeds);
+    cy.url().then((url) => {
+      const facilityUrl = url.toString();
+      facilityHome.verifyOccupancyBadgeVisibility();
+      facilityHome.assertFacilityBadgeContent("0", "0");
+
+      // create a new patient in the facility
+      cy.visit("/patients");
+      patientPage.createPatient();
+      patientPage.selectFacility(facilityWithNoAvailableBeds);
+      patientPredefined.createPatient();
+      patientPage.patientformvisibility();
+      patientPage.clickCreatePatient();
+      patientPage.verifyPatientIsCreated();
+      // navigate to facility page and verify the occupancy badge
+      cy.visit(facilityUrl);
+      facilityHome.verifyOccupancyBadgeVisibility();
+      facilityHome.assertFacilityBadgeContent("1", "0");
+      facilityHome.assertFacilityBadgeBackgroundColor("rgb(239, 68, 68)");
+      // create a new location and add a bed to the facility
+      facilityLocation.navigateToFacilityLocationManagement(
+        facilityWithNoAvailableBeds,
+      );
+      // create new location and add a bed to the facility
+      facilityLocation.clickAddNewLocationButton();
+      facilityLocation.fillLocationDetails(
+        locationName,
+        undefined,
+        locationType,
+        undefined,
+      );
+      facilityLocation.clickAddLocationButton();
+      facilityLocation.verifyAddLocationSuccessfulMesssage();
+      facilityLocation.clickManageBedButton(locationName);
+      facilityLocation.clickAddBedButton();
+      facilityLocation.fillBedForm("Bed 1", "Test Description", "Regular", 2);
+      facilityLocation.clickSubmitBedsButton();
+
+      // verify the occupancy badge reflection
+      cy.visit(facilityUrl);
+      facilityHome.verifyOccupancyBadgeVisibility();
+      facilityHome.assertFacilityBadgeContent("1", "2");
+    });
   });
 
   afterEach(() => {

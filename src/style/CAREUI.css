@@ -178,3 +178,8 @@ button.button-alert-ghost { @apply enabled:hover:bg-alert-100 }
 hr {
     @apply border border-secondary-300
 }
+.plain-audio::-webkit-media-controls-enclosure {
+    border-radius: 0;
+    background: transparent;
+    padding: 0px;
+}
