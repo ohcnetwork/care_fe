@@ -11,6 +11,7 @@ import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import SortDropdownMenu from "@/components/Common/SortDropdown";
 import Tabs from "@/components/Common/Tabs";
 import { getDiagnosesByIds } from "@/components/Diagnosis/utils";
@@ -38,8 +39,6 @@ import { parseOptionId } from "@/common/utils";
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { formatPatientAge, humanizeStrings } from "@/Utils/utils";
-
-import SearchByMultipleFields from "../Common/SearchByMultipleFields";
 
 const DischargedPatientsList = ({
   facility_external_id,
