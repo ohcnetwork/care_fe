@@ -150,6 +150,17 @@ export class ManageUserPage {
     }
   }
 
+  editHoursAndVideoConnectLink(
+    weeklyWorkingHours: string,
+    videoConnectLink: string,
+  ) {
+    cy.get("input[name='weekly_working_hours']").scrollIntoView();
+    cy.get("input[name='weekly_working_hours']")
+      .click()
+      .type(weeklyWorkingHours);
+    cy.get("input[name='video_connect_link']").click().type(videoConnectLink);
+  }
+
   verifyEditUserProfessionalInfo(
     qualification: string,
     yearsOfExperience?: string,
@@ -168,6 +179,21 @@ export class ManageUserPage {
         medicalCouncilRegistration,
       );
     }
+  }
+
+  verifyHoursAndVideoConnectLink(
+    weeklyWorkingHours: string,
+    videoConnectLink: string,
+  ) {
+    cy.get("#view-average_weekly_working_hours").scrollIntoView();
+    cy.get("#view-average_weekly_working_hours").should(
+      "contain.text",
+      weeklyWorkingHours,
+    );
+    cy.get("#view-video_conference_link").should(
+      "contain.text",
+      videoConnectLink,
+    );
   }
 
   verifyPasswordEditButtonNotExist() {
@@ -193,15 +219,8 @@ export class ManageUserPage {
   }
 
   verifyWorkingHours(expectedHours: string) {
-    cy.get("input[name='weekly_working_hours']").scrollIntoView();
-    cy.get("input[name='weekly_working_hours']").should("be.visible");
-    cy.get("input[name='weekly_working_hours']").should(
-      "have.value",
-      expectedHours,
-    );
-  }
-
-  verifyProfileWorkingHours(expectedHours: string) {
+    cy.get("#view-average_weekly_working_hours").scrollIntoView();
+    cy.get("#view-average_weekly_working_hours").should("be.visible");
     cy.get("#view-average_weekly_working_hours").should(
       "contain.text",
       expectedHours,

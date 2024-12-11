@@ -238,19 +238,6 @@ describe("Manage User", () => {
     cy.wait(500);
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     cy.wait(500);
-    manageUserPage.navigateToProfile();
-    cy.verifyContentPresence("#username-profile-details", [
-      usernameforworkinghour,
-    ]);
-    manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
-    // unlink the skill
-    manageUserPage.navigateToManageUser();
-    userPage.typeInSearchInput(usernameforworkinghour);
-    userPage.checkUsernameText(usernameforworkinghour);
-    manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
-    manageUserPage.verifyMoreDetailsPage();
-    manageUserPage.clickLinkedSkillTab();
-    manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();
     manageUserPage.verifyUnlinkSkillModal();
     manageUserPage.clickConfirmUnlinkSkill();
@@ -305,7 +292,6 @@ describe("Manage User", () => {
     manageUserPage.clickSubmit();
     // verify the data is reflected in the page
     manageUserPage.verifyWorkingHours(workinghour);
-    manageUserPage.verifyProfileWorkingHours(workinghour);
   });
 
   it("linking and unlinking facility for multiple users, and confirm reflection in user cards and doctor connect", () => {

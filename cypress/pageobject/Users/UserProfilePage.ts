@@ -15,6 +15,9 @@ export default class UserProfilePage {
     cy.clickSubmitButton("Update");
   }
 
+  clickSubmit() {
+    cy.get("#submit").click();
+  }
   typeDateOfBirth(dob: string) {
     cy.clickAndTypeDate("#date_of_birth", dob);
   }

@@ -4,6 +4,8 @@ import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import UserProfilePage from "../../pageobject/Users/UserProfilePage";
 
+import dayjs = require("dayjs");
+
 describe("Manage User Profile", () => {
   const loginPage = new LoginPage();
   const userProfilePage = new UserProfilePage();
@@ -32,48 +34,70 @@ describe("Manage User Profile", () => {
     cy.awaitUrl("/user/profile");
   });
 
-  it("Set Dob, Gender, Email, Phone and Working Hours for a user and verify its reflection in user profile", () => {
-    userProfilePage.clickEditProfileButton();
-
-    userProfilePage.typeDateOfBirth(date_of_birth);
-    userProfilePage.selectGender(gender);
-    userProfilePage.typeEmail(email);
-    userProfilePage.typePhoneNumber(phone);
-    userProfilePage.typeWhatsappNumber(phone);
-    userProfilePage.typeWorkingHours(workinghours);
-    userProfilePage.typeQualification(qualification);
-    userProfilePage.typeDoctorYoE(doctorYoE);
-    userProfilePage.typeMedicalCouncilRegistration(medicalCouncilRegistration);
-    userProfilePage.clickUpdateButton();
-    cy.verifyNotification("Details updated successfully");
-    userProfilePage.assertDateOfBirth("01/01/1999");
-    userProfilePage.assertGender(gender);
-    userProfilePage.assertEmail(email);
-    userProfilePage.assertPhoneNumber(phone);
-    userProfilePage.assertAltPhoneNumber(phone);
-    userProfilePage.assertWorkingHours(workinghours);
+  it("Set Dob and Gender for a user and verify its reflection in user profile", () => {
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickBasicInfoEditButton();
+    manageUserPage.clearUserBasicInfo();
+    manageUserPage.editUserBasicInfo("Devo", "Doctoro", date_of_birth, gender);
+    userProfilePage.clickSubmit();
+    manageUserPage.verifyEditUserDetails("Devo", "Doctoro", "1/1/1999", "Male");
   });
 
-  it("Adding video connect link for a user and verify its reflection in user profile and doctor connect", () => {
-    // verify the user doesn't have any video connect link
-    userProfilePage.assertVideoConnectLink("-");
-    //  Link a new video connect link and ensure it is under video connect link
-    userProfilePage.clickEditProfileButton();
-    userProfilePage.typeVideoConnectLink("https://www.example.com");
-    userProfilePage.clickUpdateButton();
-    userProfilePage.assertVideoConnectLink("https://www.example.com");
-    // Edit the video connect link and ensure it is updated
-    userProfilePage.clickEditProfileButton();
-    userProfilePage.typeVideoConnectLink("https://www.test.com");
-    userProfilePage.clickUpdateButton();
-    userProfilePage.assertVideoConnectLink("https://www.test.com");
-    //  Go to particular facility doctor connect and verify the video connect link is present
+  it("Set Email and Phone for a user and verify its reflection in user profile", () => {
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickContactInfoEditButton();
+    manageUserPage.clearUserContactInfo();
+    manageUserPage.editUserContactInfo(email, phone);
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyEditUserContactInfo(email, phone);
+  });
+
+  it("Set Qualification, YoE, Medical Council Registration, Weekly Working Hours and Video Connect Link for a user and verify its reflection in user profile", () => {
+    manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.clickProfessionalInfoEditButton();
+    manageUserPage.clearProfessionalInfo();
+    manageUserPage.clearDoctorOrNurseProfessionalInfo(true);
+    manageUserPage.editUserProfessionalInfo(
+      qualification,
+      doctorYoE,
+      medicalCouncilRegistration,
+    );
+    manageUserPage.editHoursAndVideoConnectLink(
+      workinghours,
+      "https://www.example.com",
+    );
+    manageUserPage.clickSubmit();
+    const experienceCommencedOn = dayjs().subtract(parseInt(doctorYoE), "year");
+    const formattedDate = dayjs(experienceCommencedOn).format("YYYY-MM-DD");
+    manageUserPage.verifyEditUserProfessionalInfo(
+      qualification,
+      formattedDate,
+      medicalCouncilRegistration,
+    );
+    manageUserPage.verifyHoursAndVideoConnectLink(
+      workinghours,
+      "https://www.example.com",
+    );
+    manageUserPage.clickProfessionalInfoEditButton();
+    manageUserPage.clearProfessionalInfo();
+    manageUserPage.editHoursAndVideoConnectLink(
+      workinghours,
+      "https://www.test.com",
+    );
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyHoursAndVideoConnectLink(
+      workinghours,
+      "https://www.test.com",
+    );
     facilityHome.navigateToFacilityHomepage();
     facilityHome.typeFacilitySearch(facilitySearch);
     facilityHome.assertFacilityInCard(facilitySearch);
     manageUserPage.clickFacilityPatients();
     manageUserPage.clickDoctorConnectButton();
-    manageUserPage.assertVideoConnectLink("Dev Doctor", "https://www.test.com");
+    manageUserPage.assertVideoConnectLink(
+      "Devo Doctoro",
+      "https://www.test.com",
+    );
   });
 
   afterEach(() => {
