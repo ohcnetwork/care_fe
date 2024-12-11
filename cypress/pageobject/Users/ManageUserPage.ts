@@ -219,14 +219,10 @@ export class ManageUserPage {
   }
 
   verifyWorkingHours(expectedHours: string) {
-    cy.get("#view-average_weekly_working_hours").scrollIntoView();
-    cy.get("#view-average_weekly_working_hours").should("be.visible");
-    cy.get("#view-average_weekly_working_hours").should(
-      "contain.text",
+    cy.verifyContentPresence("#view-average_weekly_working_hours", [
       expectedHours,
-    );
+    ] as string[]);
   }
-
   navigateToManageUser() {
     cy.visit("/users");
   }

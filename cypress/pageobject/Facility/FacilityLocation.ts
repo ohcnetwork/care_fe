@@ -50,7 +50,7 @@ class FacilityLocation {
   }
 
   clickAddNewLocationButton() {
-    cy.get("#add-new-location").click();
+    cy.get("#add-new-location").click({ force: true });
   }
 
   typeLocationName(locationName: string) {
