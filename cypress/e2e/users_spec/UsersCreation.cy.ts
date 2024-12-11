@@ -108,9 +108,9 @@ describe("User Creation", () => {
     userProfilePage.clearWorkingHours();
     userProfilePage.typeWorkingHours(weeklyWorkingHrs);
     userProfilePage.typeDateOfBirth(dob);
-    cy.intercept("PATCH", "/api/v1/users/*").as("updateUser");
+    userProfilePage.interceptUpdateUsers();
     userProfilePage.clickUpdateButton();
-    cy.wait("@updateUser").its("response.statusCode").should("eq", 200);
+    userProfilePage.verifyUpdateUsersResponse();
     cy.verifyContentPresence("#contactno-profile-details", [
       "+91" + phoneNumber,
     ]);
@@ -158,9 +158,9 @@ describe("User Creation", () => {
     userCreationPage.selectGender(gender);
     userCreationPage.selectState(state);
     userCreationPage.selectDistrict(district);
-    cy.intercept("POST", "/api/v1/users/add_user/").as("createUser");
+    userCreationPage.interceptCreateUser();
     userCreationPage.clickSaveUserButton();
-    cy.wait("@createUser").its("response.statusCode").should("eq", 201);
+    userCreationPage.verifyCreateUser();
     cy.verifyNotification("User added successfully");
     userPage.typeInSearchInput(username);
     userPage.checkUsernameText(username);

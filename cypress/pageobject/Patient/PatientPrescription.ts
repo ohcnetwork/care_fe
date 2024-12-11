@@ -80,6 +80,16 @@ export class PatientPrescription {
     cy.clickAndSelectOption("#frequency", frequency);
   }
 
+  interceptPrescriptions() {
+    cy.intercept("GET", "**/api/v1/consultation/*/prescriptions/*").as(
+      "getPrescriptions",
+    );
+  }
+
+  verifyPrescription() {
+    cy.wait("@getPrescriptions").its("response.statusCode").should("eq", 200);
+  }
+
   clickReturnToDashboard() {
     cy.verifyAndClickElement(
       "[data-testid='return-to-patient-dashboard']",

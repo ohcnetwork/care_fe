@@ -11,6 +11,14 @@ export default class UserProfilePage {
     cy.get("#video_connect_link").click().clear().type(link);
   }
 
+  interceptUpdateUsers() {
+    cy.intercept("PATCH", "/api/v1/users/*").as("updateUser");
+  }
+
+  verifyUpdateUsersResponse() {
+    cy.wait("@updateUser").its("response.statusCode").should("eq", 200);
+  }
+
   clickUpdateButton() {
     cy.clickSubmitButton("Update");
   }

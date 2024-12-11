@@ -58,9 +58,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.clickSubmitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
-    cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
+    patientPage.interceptgetPatient();
     patientLogupdate.clickLogupdate();
-    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+    patientPage.verifygetPatientResponse();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectRoundType("Tele-medicine Log");
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -82,15 +82,15 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
 
   it("Create a new Progress log update for a admitted patient and edit it", () => {
     patientPage.visitPatient(patientOne);
-    cy.intercept("GET", "**/api/v1/consultationbed/*").as("getBed");
+    patientLogupdate.interceptConsultationBed();
     patientLogupdate.clickLogupdate();
-    cy.wait("@getBed").its("response.statusCode").should("eq", 200);
+    patientLogupdate.verifyConsultationBed();
     cy.verifyNotification("Please assign a bed to the patient");
     patientLogupdate.selectBed(bedOne);
     cy.closeNotification();
-    cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
+    patientPage.interceptgetPatient();
     patientLogupdate.clickLogupdate();
-    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+    patientPage.verifygetPatientResponse();
     // Only will be using random non-unique progress note fields
     patientLogupdate.selectRoundType("Progress Note");
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -118,22 +118,18 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Medicine prescribed");
     cy.closeNotification();
     // Submit the doctors log update
-    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
-      "getDailyRounds",
-    );
+    patientLogupdate.interceptDailyRounds();
     cy.clickSubmitButton("Save and Continue");
-    cy.wait("@getDailyRounds").its("response.statusCode").should("eq", 200);
+    patientLogupdate.verifyDailyRounds();
     cy.verifyNotification("Progress Note created successfully");
     cy.closeNotification();
     // modify the relevant critical care log update
     patientLogupdate.selectCriticalCareSection("Neurological Monitoring");
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
     cy.get("#left_pupil_light_reaction-option-FIXED").click();
-    cy.intercept("PATCH", "**/api/v1/consultation/*/daily_rounds/*/").as(
-      "patchDailyRounds",
-    );
+    patientLogupdate.interceptpatchDailyRounds();
     cy.clickSubmitButton("Update Details");
-    cy.wait("@patchDailyRounds").its("response.statusCode").should("eq", 200);
+    patientLogupdate.verifypatchDailyRounds();
     cy.verifyNotification(
       "Neurological Monitoring details succesfully updated.",
     );
@@ -169,11 +165,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickLogupdate();
     patientLogupdate.selectRoundType("Detailed Update");
     patientLogupdate.selectPatientCategory(patientCategory);
-    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
-      "getDailyRounds",
-    );
+    patientLogupdate.interceptDailyRounds();
     cy.clickSubmitButton("Save and Continue");
-    cy.wait("@getDailyRounds").its("response.statusCode").should("eq", 200);
+    patientLogupdate.verifyDailyRounds();
     cy.verifyNotification("Detailed Update created successfully");
     cy.closeNotification();
     // Select two Section - First One is Respiratory Support
@@ -252,11 +246,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Please assign a bed to the patient");
     patientLogupdate.selectBed(bedThree);
     cy.closeNotification();
-    cy.intercept("GET", "**/api/v1/patient/*").as("getAdmissionPatient");
+    patientPage.interceptgetPatient();
     patientLogupdate.clickLogupdate();
-    cy.wait("@getAdmissionPatient")
-      .its("response.statusCode")
-      .should("eq", 200);
+    patientPage.verifygetPatientResponse();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeOtherDetails(otherExamination);
@@ -272,9 +264,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.selectRhythm(patientRhythmType);
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-option-RESPONDS_TO_PAIN").click();
-    cy.intercept("GET", "**/api/v1/consultation/*/").as("getConsultation");
+    patientConsultationPage.interceptConsultation();
     cy.clickSubmitButton("Save");
-    cy.wait("@getConsultation").its("response.statusCode").should("eq", 200);
+    patientConsultationPage.verifyConsultation();
     cy.verifyNotification("Brief Update created successfully");
     cy.closeNotification();
     // Verify the card content

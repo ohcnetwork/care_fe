@@ -4,6 +4,14 @@ class PatientLogupdate {
     cy.verifyAndClickElement("#log-update", "Log Update");
   }
 
+  interceptConsultationBed() {
+    cy.intercept("GET", "**/api/v1/consultationbed/*").as("getBed");
+  }
+
+  verifyConsultationBed() {
+    cy.wait("@getBed").its("response.statusCode").should("eq", 200);
+  }
+
   clickSwitchBed() {
     cy.get("#switch-bed").click();
   }
@@ -78,38 +86,46 @@ class PatientLogupdate {
     cy.get("#rhythm_detail").click().type(rhythm);
   }
 
+  interceptDailyRounds() {
+    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
+      "getDailyRounds",
+    );
+  }
+
+  verifyDailyRounds() {
+    cy.wait("@getDailyRounds").its("response.statusCode").should("eq", 200);
+  }
+
+  interceptpatchDailyRounds() {
+    cy.intercept("PATCH", "**/api/v1/consultation/*/daily_rounds/*/").as(
+      "patchDailyRounds",
+    );
+  }
+
+  verifypatchDailyRounds() {
+    cy.wait("@patchDailyRounds").its("response.statusCode").should("eq", 200);
+  }
+
   clickLogUpdateViewDetails(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
-    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
-      "getLogUpdateViewDetails",
-    );
+    this.interceptDailyRounds();
     cy.get(element).first().contains("View Details").click();
-    cy.wait("@getLogUpdateViewDetails")
-      .its("response.statusCode")
-      .should("eq", 200);
+    this.verifyDailyRounds();
   }
 
   clickLogUpdateUpdateLog(element: string, patientCategory: string) {
     cy.get(element).scrollIntoView();
     cy.verifyContentPresence(element, [patientCategory]);
-    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
-      "getLogUpdateViewDetails",
-    );
+    this.interceptDailyRounds();
     cy.get(element).first().contains("Update Log").click();
-    cy.wait("@getLogUpdateViewDetails")
-      .its("response.statusCode")
-      .should("eq", 200);
+    this.verifyDailyRounds();
   }
 
   clickUpdateDetail() {
-    cy.intercept("GET", "**/api/v1/consultation/*/daily_rounds/*/").as(
-      "getLogUpdateViewDetails",
-    );
+    this.interceptDailyRounds();
     cy.verifyAndClickElement("#consultation-preview", "Update Log");
-    cy.wait("@getLogUpdateViewDetails")
-      .its("response.statusCode")
-      .should("eq", 200);
+    this.verifyDailyRounds();
   }
 
   clearIntoElementById(elementId) {

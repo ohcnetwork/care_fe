@@ -35,7 +35,9 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason4);
     cy.clickSubmitButton("Confirm Discharge");
+    patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
+    patientDischarge.verifyDischargePatient();
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -53,7 +55,9 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.typeDischargeNote(patientDeathCause);
     patientDischarge.typeDoctorName(doctorName);
     cy.clickSubmitButton("Confirm Discharge");
+    patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
+    patientDischarge.verifyDischargePatient();
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -77,7 +81,9 @@ describe("Patient Discharge based on multiple reason", () => {
     // select a non-registered facility and perform the discharge
     patientDischarge.typeReferringFacility(referringFreetextFacility);
     cy.clickSubmitButton("Confirm Discharge");
+    patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
+    patientDischarge.verifyDischargePatient();
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -107,12 +113,10 @@ describe("Patient Discharge based on multiple reason", () => {
     cy.closeNotification();
     // submit the discharge pop-up
     cy.clickSubmitButton("Confirm Discharge");
-    cy.intercept("POST", "**/api/v1/consultation/*/discharge_patient/").as(
-      "postDischarge",
-    );
+    patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
-    cy.wait("@postDischarge").its("response.statusCode").should("eq", 200);
     cy.verifyNotification("Patient Discharged Successfully");
+    patientDischarge.verifyDischargePatient();
     cy.closeNotification();
     // Verify the consultation dashboard reflection
     cy.verifyContentPresence("#consultation-buttons", ["Recovered"]);

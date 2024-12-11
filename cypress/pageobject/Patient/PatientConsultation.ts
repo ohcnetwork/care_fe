@@ -111,6 +111,14 @@ export class PatientConsultationPage {
     );
   }
 
+  interceptConsultation() {
+    cy.intercept("GET", "**/api/v1/consultation/*").as("getConsultation");
+  }
+
+  verifyConsultation() {
+    cy.wait("@getConsultation").its("response.statusCode").should("eq", 200);
+  }
+
   interceptPatientDetailsAPI(): void {
     cy.intercept("GET", "**/api/v1/patient/**").as("patientDetails");
   }

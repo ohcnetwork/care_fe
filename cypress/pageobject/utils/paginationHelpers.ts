@@ -10,4 +10,15 @@ export const pageNavigation = {
   navigateToPreviousPage() {
     cy.get("button#prev-pages").click();
   },
+
+  interceptPatientNavigation() {
+    cy.intercept(
+      "GET",
+      "/api/v1/patient/?page=2&limit=12&is_active=True&offset=12",
+    ).as("getPatientPage");
+  },
+
+  verifyPatientNavigation() {
+    cy.wait("@getPatientPage").its("response.statusCode").should("eq", 200);
+  },
 };

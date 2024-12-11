@@ -198,9 +198,9 @@ describe("Patient Creation with consultation", () => {
     );
     patientPage.clickUpdatePatient();
     patientPage.verifyPatientUpdated();
-    cy.intercept("GET", "**/api/v1/patient/*/").as("getPatient");
+    patientPage.interceptgetPatient();
     patientPage.visitPatientUrl();
-    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+    patientPage.verifygetPatientResponse();
     // Verify Female Gender change reflection, No Medical History and Insurance Details
     patientPage.verifyPatientDashboardDetails(
       patientOneUpdatedGender,

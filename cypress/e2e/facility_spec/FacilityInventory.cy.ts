@@ -25,9 +25,9 @@ describe("Inventory Management Section", () => {
 
   it("Add New Inventory | Modify data and delete last entry ", () => {
     // add a new item
-    cy.intercept("GET", "/api/v1/items/**").as("getItems");
+    facilityPage.interceptManageInventoryItem();
     facilityPage.clickManageInventory();
-    cy.wait("@getItems").its("response.statusCode").should("eq", 200);
+    facilityPage.verifyManageInventoryItem();
     facilityPage.fillInventoryDetails("PPE", "Add Stock", "10");
     facilityPage.clickAddInventory();
     facilityPage.verifySuccessNotification("Inventory created successfully");
@@ -61,12 +61,10 @@ describe("Inventory Management Section", () => {
     cy.closeNotification();
     // Verify Backend minimum badge
     facilityPage.verifyBadgeWithText(".badge-danger", "Low Stock");
-    cy.intercept("GET", "**/api/v1/facility/*/min_quantity/**").as(
-      "getMinQuantity",
-    );
+    facilityPage.interceptMinimumQuantity();
     // modify with manual minimum badge
-    facilityPage.clickAddMinimumQuanitity();
-    cy.wait("@getMinQuantity").its("response.statusCode").should("eq", 200);
+    facilityPage.clickAddMinimumQuantity();
+    facilityPage.verifyMinimumQuantity();
     cy.get("body").then(($body) => {
       if ($body.find("#update-minimum-quantity").is(":visible")) {
         // If the 'update-minimum-quantity' element is visible, click it

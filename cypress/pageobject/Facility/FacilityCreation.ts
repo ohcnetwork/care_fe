@@ -321,8 +321,16 @@ class FacilityPage {
     cy.url().should("include", "/assets?facility=");
   }
 
+  interceptManageInventoryItem() {
+    cy.intercept("GET", "/api/v1/items/**").as("getItems");
+  }
+
   clickManageInventory() {
     cy.contains("Manage Inventory").click();
+  }
+
+  verifyManageInventoryItem() {
+    cy.wait("@getItems").its("response.statusCode").should("eq", 200);
   }
 
   fillInventoryDetails(name: string, status: string, quantity: string) {
@@ -435,8 +443,18 @@ class FacilityPage {
     cy.get(badgeClass).contains(text).should("exist");
   }
 
-  clickAddMinimumQuanitity() {
+  interceptMinimumQuantity() {
+    cy.intercept("GET", "**/api/v1/facility/*/min_quantity/**").as(
+      "getMinQuantity",
+    );
+  }
+
+  clickAddMinimumQuantity() {
     cy.get("#add-minimum-quantity").click();
+  }
+
+  verifyMinimumQuantity() {
+    cy.wait("@getMinQuantity").its("response.statusCode").should("eq", 200);
   }
 
   clickUpdateMinimumQuantity() {

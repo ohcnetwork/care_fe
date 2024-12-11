@@ -36,6 +36,16 @@ class PatientDischarge {
   typeDoctorName(doctorName: string) {
     cy.get("#death_confirmed_by").type(doctorName);
   }
+
+  interceptDischargePatient() {
+    cy.intercept("POST", "**/api/v1/consultation/*/discharge_patient/").as(
+      "postDischarge",
+    );
+  }
+
+  verifyDischargePatient() {
+    cy.wait("@postDischarge").its("response.statusCode").should("eq", 200);
+  }
 }
 
 export default PatientDischarge;

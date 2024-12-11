@@ -104,11 +104,9 @@ describe("Patient Consultation in multiple combination", () => {
     patientPrescription.selectMedicine(medicineOne);
     patientPrescription.enterDosage("3");
     patientPrescription.selectDosageFrequency("Twice daily");
-    cy.intercept("GET", "**/api/v1/consultation/*/prescriptions/*").as(
-      "getPrescriptions",
-    );
+    patientPrescription.interceptPrescriptions();
     cy.clickSubmitButton("Submit");
-    cy.wait("@getPrescriptions").its("response.statusCode").should("eq", 200);
+    patientPrescription.verifyPrescription();
     cy.verifyNotification("Medicine prescribed");
     patientPrescription.clickReturnToDashboard();
     // Verify the data's across the dashboard
@@ -379,9 +377,9 @@ describe("Patient Consultation in multiple combination", () => {
 
   it("Edit created consultation to existing patient", () => {
     patientPage.visitPatient("Dummy Patient Thirteen");
-    cy.intercept("GET", "**/api/v1/consultation/*").as("getConsultation");
+    patientConsultationPage.interceptConsultation();
     patientConsultationPage.clickEditConsultationButton();
-    cy.wait("@getConsultation").its("response.statusCode").should("eq", 200);
+    patientConsultationPage.verifyConsultation();
     patientConsultationPage.typePatientIllnessHistory("editted");
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis5,
