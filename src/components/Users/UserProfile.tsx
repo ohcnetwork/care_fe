@@ -17,7 +17,7 @@ import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormFi
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
-import { validateRule } from "@/components/Users/UserAdd";
+import { validateRule } from "@/components/Users/UserAddEditForm";
 import {
   GenderType,
   SkillModel,
