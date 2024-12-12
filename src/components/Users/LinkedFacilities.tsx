@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,8 +24,6 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-
-import ButtonV2 from "../Common/ButtonV2";
 
 const initModalProps: {
   selectedFacility?: FacilityModel;
@@ -201,11 +200,11 @@ export default function LinkedFacilities({
     return (
       <div id={`facility_${facility.id}`} key={`facility_${facility.id}`}>
         <DropdownMenu>
-          <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-            <div className="text-sm text-black p-2 font-bold">
+          <div className="flex flex-row items-center rounded-sm border bg-secondary-100 w-full md:w-full">
+            <div className="text-sm text-black p-2 font-bold flex-1">
               {facility.name}
               {facility.district_object?.name && (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 font-medium">
                   {facility.district_object?.name}
                   {facility.district_object?.name &&
                     facility.state_object?.name &&
@@ -215,7 +214,7 @@ export default function LinkedFacilities({
               )}
             </div>
             <DropdownMenuTrigger id="linked-facility-settings">
-              <div className="flex items-center justify-center rounded-r bg-secondary-300 px-2 py-4 h-14">
+              <div className="flex items-center justify-center rounded-r bg-secondary-300 px-2 min-h-16">
                 <CareIcon icon="l-setting" className="text-xl" />
               </div>
             </DropdownMenuTrigger>
@@ -255,11 +254,11 @@ export default function LinkedFacilities({
         id={`facility_${homeFacility.id}`}
         key={`facility_${homeFacility.id}`}
       >
-        <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-          <div className="text-sm text-black p-2 font-bold">
+        <div className="flex flex-row items-center rounded-sm border bg-secondary-100 w-full">
+          <div className="text-sm text-black p-2 font-bold flex-1">
             {homeFacility.name}
             {homeFacility.district_object?.name && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 font-medium">
                 {homeFacility.district_object?.name}
                 {homeFacility.district_object?.name &&
                   homeFacility.state_object?.name &&
@@ -300,7 +299,7 @@ export default function LinkedFacilities({
         />
       )}
       <div className="flex flex-col gap-y-6 rounded bg-white p-4 shadow">
-        <div className="flex flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <FacilitySelect
             id="select-facility"
             multiple={false}
@@ -314,37 +313,35 @@ export default function LinkedFacilities({
             className="z-10 w-full"
             disabled={!authorizeForHomeFacility}
           />
-          <ButtonV2
-            id="link-facility"
+          <Button
+            variant="primary"
+            size="lg"
             name="Add"
-            className="mt-1 rounded-lg px-6 py-[11px] text-base"
+            id="link-facility"
+            className="mt-1 rounded-lg px-6 py-[23px] text-base"
             onClick={() => linkFacility(userData.username, facility)}
             disabled={!authorizeForHomeFacility}
-            tooltip={
-              !authorizeForHomeFacility
-                ? t("contact_your_admin_to_add_facilities")
-                : undefined
-            }
           >
             {t("add_facility")}
-          </ButtonV2>
+          </Button>
         </div>
 
         {homeFacility && (
           <div className="flex flex-col gap-2">
             <p className="text-xs">{t("home_facility")}</p>
-            <div className="flex flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               {renderHomeFacilityButton(homeFacility)}
             </div>
           </div>
         )}
+
         {userFacilities && userFacilities.length > 0 && (
           <div className="flex flex-col gap-2">
             <p className="text-xs">{t("linked_facilities")}</p>
 
             <div
               id="linked-facility-list"
-              className="flex flex-row flex-wrap gap-3"
+              className="flex flex-col sm:flex-row flex-wrap gap-3"
             >
               {userFacilities.map((facility: FacilityModel) => {
                 if (homeFacility?.id === facility.id) {
