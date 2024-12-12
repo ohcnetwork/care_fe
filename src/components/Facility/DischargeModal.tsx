@@ -29,7 +29,7 @@ import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -92,7 +92,7 @@ const DischargeModal = ({
     setFacility(referred_to);
   }, [referred_to]);
 
-  const initialDiagnoses = useQuery(routes.getConsultation, {
+  const initialDiagnoses = useTanStackQueryInstead(routes.getConsultation, {
     pathParams: { id: consultationData.id ?? "" },
     prefetch: !!consultationData.id,
   }).data?.diagnoses;

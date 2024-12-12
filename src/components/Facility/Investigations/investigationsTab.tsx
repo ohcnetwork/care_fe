@@ -3,7 +3,7 @@ import ViewInvestigations from "@/components/Facility/Investigations/ViewInvesti
 import { PatientModel } from "@/components/Patient/models";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export interface InvestigationSessionType {
   session_external_id: string;
@@ -17,17 +17,15 @@ export default function InvestigationTab(props: {
   patientData: PatientModel;
 }) {
   const { consultationId, patientId, facilityId, patientData } = props;
-  const { data: investigations, loading: investigationLoading } = useQuery(
-    routes.getInvestigation,
-    {
+  const { data: investigations, loading: investigationLoading } =
+    useTanStackQueryInstead(routes.getInvestigation, {
       pathParams: {
         consultation_external_id: consultationId,
       },
-    },
-  );
+    });
 
   const { data: investigationSessions, loading: investigationSessionLoading } =
-    useQuery(routes.getInvestigationSessions, {
+    useTanStackQueryInstead(routes.getInvestigationSessions, {
       pathParams: {
         consultation_external_id: consultationId,
       },

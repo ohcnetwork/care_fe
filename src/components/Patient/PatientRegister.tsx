@@ -1,6 +1,6 @@
 import careConfig from "@careConfig";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -76,7 +76,7 @@ import * as Notification from "@/Utils/Notifications";
 import { usePubSub } from "@/Utils/pubsubContext";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   compareBy,
   dateQueryString,
@@ -188,7 +188,6 @@ export const parseOccupationFromExt = (occupation: Occupation) => {
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
-  const submitController = useRef<AbortController>();
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
@@ -394,7 +393,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [id],
   );
 
-  useQuery(routes.hcx.policies.list, {
+  useTanStackQueryInstead(routes.hcx.policies.list, {
     query: {
       patient: id,
     },
@@ -408,7 +407,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     },
   });
 
-  const { data: stateData, loading: isStateLoading } = useQuery(
+  const { data: stateData, loading: isStateLoading } = useTanStackQueryInstead(
     routes.statesList,
   );
 
@@ -421,10 +420,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [dispatch, fetchData],
   );
 
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: facilityId },
-    prefetch: !!facilityId,
-  });
+  const { data: facilityObject } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: { id: facilityId },
+      prefetch: !!facilityId,
+    },
+  );
 
   const validateForm = (form: any) => {
     const errors: Partial<Record<keyof any, FieldError>> = {};
@@ -706,11 +708,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       ? await request(routes.updatePatient, {
           pathParams: { id },
           body: data,
-          controllerRef: submitController,
         })
       : await request(routes.addPatient, {
           body: { ...data, facility: facilityId },
-          controllerRef: submitController,
         });
     if (res?.ok && requestData) {
       publish("patient:upsert", requestData);

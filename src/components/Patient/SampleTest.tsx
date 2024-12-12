@@ -20,7 +20,7 @@ import { ICMR_CATEGORY, SAMPLE_TYPE_CHOICES } from "@/common/constants";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const initForm: SampleTestModel = {
   isFastTrack: false,
@@ -78,7 +78,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
   const headerText = "Request Sample";
   const buttonText = "Confirm your request to send sample for testing";
 
-  const { data } = useQuery(routes.getPatient, {
+  const { data } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: {
       id: patientId,
     },

@@ -6,12 +6,12 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
-  const { data, loading } = useQuery(routes.getNotifications, {
+  const { data, loading } = useTanStackQueryInstead(routes.getNotifications, {
     query: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
   });
 

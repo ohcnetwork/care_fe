@@ -10,7 +10,7 @@ import MedicineRoutes from "@/components/Medicine/routes";
 import { useSlugs } from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   classNames,
   formatDate,
@@ -23,18 +23,21 @@ export default function PrescriptionsPrintPreview() {
   const { t } = useTranslation();
   const [patientId, consultationId] = useSlugs("patient", "consultation");
 
-  const patientQuery = useQuery(routes.getPatient, {
+  const patientQuery = useTanStackQueryInstead(routes.getPatient, {
     pathParams: { id: patientId },
   });
 
-  const encounterQuery = useQuery(routes.getConsultation, {
+  const encounterQuery = useTanStackQueryInstead(routes.getConsultation, {
     pathParams: { id: consultationId },
   });
 
-  const prescriptionsQuery = useQuery(MedicineRoutes.listPrescriptions, {
-    pathParams: { consultation: consultationId },
-    query: { discontinued: false, limit: 100 },
-  });
+  const prescriptionsQuery = useTanStackQueryInstead(
+    MedicineRoutes.listPrescriptions,
+    {
+      pathParams: { consultation: consultationId },
+      query: { discontinued: false, limit: 100 },
+    },
+  );
 
   const patient = patientQuery.data;
   const encounter = encounterQuery.data;

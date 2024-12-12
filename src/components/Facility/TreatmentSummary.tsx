@@ -16,7 +16,7 @@ import { PatientModel } from "@/components/Patient/models";
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDate, formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 export interface ITreatmentSummaryProps {
@@ -32,15 +32,18 @@ export default function TreatmentSummary({
   const { t } = useTranslation();
   const date = new Date();
 
-  const { data: patientData } = useQuery(routes.getPatient, {
+  const { data: patientData } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: { id: patientId },
     prefetch: patientId !== undefined,
   });
 
-  const { data: consultationData } = useQuery(routes.getConsultation, {
-    pathParams: { id: consultationId },
-    prefetch: consultationId !== undefined,
-  });
+  const { data: consultationData } = useTanStackQueryInstead(
+    routes.getConsultation,
+    {
+      pathParams: { id: consultationId },
+      prefetch: consultationId !== undefined,
+    },
+  );
 
   return (
     <div>
@@ -286,10 +289,13 @@ interface IInvestigationsSection {
 function InvestigationsSection({ consultationId }: IInvestigationsSection) {
   const { t } = useTranslation();
 
-  const { data: investigations } = useQuery(routes.getInvestigation, {
-    pathParams: { consultation_external_id: consultationId },
-    prefetch: consultationId !== undefined,
-  });
+  const { data: investigations } = useTanStackQueryInstead(
+    routes.getInvestigation,
+    {
+      pathParams: { consultation_external_id: consultationId },
+      prefetch: consultationId !== undefined,
+    },
+  );
 
   return investigations?.results.length ? (
     <div className="border-b-2 border-gray-800 px-5 py-2">
@@ -426,10 +432,13 @@ interface IPrescriptionsSection {
 function PrescriptionsSection({ consultationId }: IPrescriptionsSection) {
   const { t } = useTranslation();
 
-  const { data: prescriptions } = useQuery(MedicineRoutes.listPrescriptions, {
-    pathParams: { consultation: consultationId },
-    query: { discontinued: false },
-  });
+  const { data: prescriptions } = useTanStackQueryInstead(
+    MedicineRoutes.listPrescriptions,
+    {
+      pathParams: { consultation: consultationId },
+      query: { discontinued: false },
+    },
+  );
 
   return prescriptions?.results.length ? (
     <div className="border-b-2 border-gray-800 px-5 py-2">
