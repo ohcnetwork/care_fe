@@ -29,7 +29,7 @@ import { phonePreg } from "@/common/validation";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 interface resourceProps {
@@ -113,10 +113,13 @@ export default function ResourceCreate(props: resourceProps) {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    prefetch: facilityId !== undefined,
-    pathParams: { id: String(facilityId) },
-  });
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      prefetch: facilityId !== undefined,
+      pathParams: { id: String(facilityId) },
+    },
+  );
 
   const validateForm = () => {
     const errors = { ...initError };

@@ -25,7 +25,7 @@ import {
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 export default function SampleViewAdmin() {
@@ -46,18 +46,21 @@ export default function SampleViewAdmin() {
     sample: SampleTestModel;
   }>({ show: false, sample: {} });
 
-  const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    pathParams: {
-      id: qParams.facility,
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: {
+        id: qParams.facility,
+      },
+      prefetch: !!qParams.facility,
     },
-    prefetch: !!qParams.facility,
-  });
+  );
 
   const {
     loading: isLoading,
     data: sampeleData,
     refetch,
-  } = useQuery(routes.getTestSampleList, {
+  } = useTanStackQueryInstead(routes.getTestSampleList, {
     query: {
       limit: resultsPerPage,
       offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,

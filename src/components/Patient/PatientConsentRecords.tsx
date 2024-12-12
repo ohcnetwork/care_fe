@@ -22,7 +22,7 @@ import {
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 export default function PatientConsentRecords(props: {
@@ -56,21 +56,24 @@ export default function PatientConsentRecords(props: {
     },
   });
 
-  const { data: patient } = useQuery(routes.getPatient, {
+  const { data: patient } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: {
       id: patientId,
     },
   });
 
-  const { data: consentRecordsData, refetch } = useQuery(routes.listConsents, {
-    pathParams: {
-      consultationId,
+  const { data: consentRecordsData, refetch } = useTanStackQueryInstead(
+    routes.listConsents,
+    {
+      pathParams: {
+        consultationId,
+      },
+      query: {
+        limit: 1000,
+        offset: 0,
+      },
     },
-    query: {
-      limit: 1000,
-      offset: 0,
-    },
-  });
+  );
 
   const consentRecords = consentRecordsData?.results;
 
