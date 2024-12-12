@@ -344,18 +344,7 @@ export const PatientManager = () => {
       prefetch: !!qParams.last_consultation_current_bed__location,
     },
   );
-  /*
-  const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
-    query: {
-      ...qParams,
-      limit: 1,
-      last_consultation__consent_types: "None",
-      is_active: "True",
-    },
-  });
 
-  const patientsWithNoConsents = patientsWithNoConsentsData?.count;
-  */
   const { data: permittedFacilities } = useTanStackQueryInstead(
     routes.getPermittedFacilities,
     {
