@@ -116,7 +116,7 @@ export default function DateTextInput(props: {
       date: `${value ? formatUnfocused(value.getDate(), 0) : ""}`,
       month: `${value ? formatUnfocused(value.getMonth() + 1, 1) : ""}`,
       year: `${value ? formatUnfocused(value.getFullYear(), 2, 4) : ""}`,
-      hour: `${value ? formatUnfocused(value.getHours() % 12 || 12, 3) : ""}`,
+      hour: `${value ? formatUnfocused(value.getHours() % 12, 3) : ""}`,
       minute: `${value ? formatUnfocused(value.getMinutes(), 4) : ""}`,
     });
   }, [value]);
