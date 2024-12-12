@@ -4,18 +4,9 @@ import handleResponse from "@/Utils/request/handleResponse";
 import { RequestOptions, RequestResult, Route } from "@/Utils/request/types";
 import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 
-type ControllerXORControllerRef =
-  | {
-      controller?: AbortController;
-      controllerRef?: undefined;
-    }
-  | {
-      controller?: undefined;
-      controllerRef: React.MutableRefObject<AbortController | undefined>;
-    };
-
-type Options<TData, TBody> = RequestOptions<TData, TBody> &
-  ControllerXORControllerRef;
+type Options<TData, TBody> = RequestOptions<TData, TBody> & {
+  signal?: AbortSignal;
+};
 
 export default async function request<TData, TBody>(
   { path, method, noAuth }: Route<TData, TBody>,
@@ -23,19 +14,11 @@ export default async function request<TData, TBody>(
     query,
     body,
     pathParams,
-    controller,
-    controllerRef,
     onResponse,
     silent,
-    reattempts = 3,
+    signal,
   }: Options<TData, TBody> = {},
 ): Promise<RequestResult<TData>> {
-  if (controllerRef) {
-    controllerRef.current?.abort();
-    controllerRef.current = new AbortController();
-  }
-
-  const signal = controller?.signal ?? controllerRef?.current?.signal;
   const url = `${careConfig.apiUrl}${makeUrl(path, query, pathParams)}`;
 
   const options: RequestInit = { method, signal };
@@ -50,36 +33,31 @@ export default async function request<TData, TBody>(
     error: undefined,
   };
 
-  for (let i = 0; i < reattempts + 1; i++) {
-    options.headers = makeHeaders(noAuth ?? false);
+  options.headers = makeHeaders(noAuth ?? false);
 
-    try {
-      const res = await fetch(url, options);
+  try {
+    const res = await fetch(url, options);
 
-      const data = await getResponseBody<TData>(res);
+    const data = await getResponseBody<TData>(res);
 
-      result = {
-        res,
-        data: res.ok ? data : undefined,
-        error: res.ok ? undefined : (data as Record<string, unknown>),
-      };
+    result = {
+      res,
+      data: res.ok ? data : undefined,
+      error: res.ok ? undefined : (data as Record<string, unknown>),
+    };
 
-      onResponse?.(result);
-      handleResponse(result, silent);
+    onResponse?.(result);
+    handleResponse(result, silent);
 
+    return result;
+  } catch (error: any) {
+    result = { error, res: undefined, data: undefined };
+    if (error.name === "AbortError") {
       return result;
-    } catch (error: any) {
-      result = { error, res: undefined, data: undefined };
-      if (error.name === "AbortError") {
-        return result;
-      }
     }
   }
 
-  console.error(
-    `Request failed after ${reattempts + 1} attempts`,
-    result.error,
-  );
+  console.error(`Request failed `, result.error);
   return result;
 }
 

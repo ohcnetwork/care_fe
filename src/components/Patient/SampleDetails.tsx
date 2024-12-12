@@ -14,12 +14,12 @@ import { GENDER_TYPES, TEST_TYPE_CHOICES } from "@/common/constants";
 
 import { DetailRoute } from "@/Routers/types";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 export const SampleDetails = ({ id }: DetailRoute) => {
   const { t } = useTranslation();
-  const { loading: isLoading, data: sampleDetails } = useQuery(
+  const { loading: isLoading, data: sampleDetails } = useTanStackQueryInstead(
     routes.getTestSample,
     {
       pathParams: {

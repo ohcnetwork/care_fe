@@ -24,7 +24,7 @@ import { RESOURCE_CHOICES } from "@/common/constants";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface resourceProps {
   id: string;
@@ -89,13 +89,16 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  const { loading: assignedUserLoading } = useQuery(routes.userList, {
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data && data.count) {
-        SetAssignedUser(data.results[0]);
-      }
+  const { loading: assignedUserLoading } = useTanStackQueryInstead(
+    routes.userList,
+    {
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data && data.count) {
+          SetAssignedUser(data.results[0]);
+        }
+      },
     },
-  });
+  );
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -131,17 +134,20 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const { data: resourceDetails } = useQuery(routes.getResourceDetails, {
-    pathParams: { id: props.id },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        const d = data;
-        d["status"] = qParams.status || data.status;
-        dispatch({ type: "set_form", form: d });
-      }
-      setIsLoading(false);
+  const { data: resourceDetails } = useTanStackQueryInstead(
+    routes.getResourceDetails,
+    {
+      pathParams: { id: props.id },
+      onResponse: ({ res, data }) => {
+        if (res && data) {
+          const d = data;
+          d["status"] = qParams.status || data.status;
+          dispatch({ type: "set_form", form: d });
+        }
+        setIsLoading(false);
+      },
     },
-  });
+  );
 
   const handleSubmit = async () => {
     const validForm = validateForm();
