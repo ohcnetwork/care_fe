@@ -202,14 +202,21 @@ export default function LinkedFacilities({
       <div id={`facility_${facility.id}`} key={`facility_${facility.id}`}>
         <DropdownMenu>
           <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-            <div className="rounded p-1 text-sm">
+            <div className="text-sm text-black p-2 font-bold">
               {facility.name}
-              {facility.district_object?.name &&
-                `, ${facility.district_object.name}`}
+              {facility.district_object?.name && (
+                <div className="text-sm text-gray-500">
+                  {facility.district_object?.name}
+                  {facility.district_object?.name &&
+                    facility.state_object?.name &&
+                    ", "}
+                  {facility.state_object?.name}
+                </div>
+              )}
             </div>
             <DropdownMenuTrigger id="linked-facility-settings">
-              <div className="rounded-r bg-secondary-300 px-2 py-1">
-                <CareIcon icon="l-setting" className="text-sm" />
+              <div className="flex items-center justify-center rounded-r bg-secondary-300 px-2 py-4 h-14">
+                <CareIcon icon="l-setting" className="text-xl" />
               </div>
             </DropdownMenuTrigger>
           </div>
@@ -249,13 +256,20 @@ export default function LinkedFacilities({
         key={`facility_${homeFacility.id}`}
       >
         <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-          <div className="rounded p-1 text-sm">
+          <div className="text-sm text-black p-2 font-bold">
             {homeFacility.name}
-            {homeFacility.district_object &&
-              `, ${homeFacility.district_object.name}`}
+            {homeFacility.district_object?.name && (
+              <div className="text-sm text-gray-500">
+                {homeFacility.district_object?.name}
+                {homeFacility.district_object?.name &&
+                  homeFacility.state_object?.name &&
+                  ", "}
+                {homeFacility.state_object?.name}
+              </div>
+            )}
           </div>
           {(authorizeForHomeFacility || isCurrentUser) && (
-            <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
+            <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-4 h-14">
               <button
                 id="clear-home-facility"
                 onClick={() =>
@@ -264,7 +278,7 @@ export default function LinkedFacilities({
                 title={t("clear_home_facility")}
                 aria-label={t("clear_home_facility")}
               >
-                <CareIcon icon="l-multiply" className="text-sm" />
+                <CareIcon icon="l-multiply" className="text-xl" />
               </button>
             </div>
           )}
