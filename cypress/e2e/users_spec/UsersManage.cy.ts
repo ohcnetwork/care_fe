@@ -236,7 +236,7 @@ describe("Manage User", () => {
     manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.interceptAddSkill();
-    manageUserPage.clickAddSkillButton();
+    manageUserPage.clickAddSkillButton(usernameforworkinghour);
     manageUserPage.verifyAddSkillResponse();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.navigateToProfile();
