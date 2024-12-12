@@ -36,7 +36,7 @@ import { EVENTS_SORT_OPTIONS } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import { QueryParams } from "@/Utils/request/types";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   formatDate,
   formatDateTime,
@@ -65,7 +65,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
     "3xl": 23 / 11,
   });
 
-  useQuery(routes.listAssetBeds, {
+  useTanStackQueryInstead(routes.listAssetBeds, {
     prefetch: !!(
       props.consultationData.facility &&
       props.consultationData.current_bed?.bed_object.id

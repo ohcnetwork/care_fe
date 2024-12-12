@@ -3,7 +3,7 @@ class PatientTreatmentPlan {
     cy.get("#consultation_notes").type(instruction);
   }
 
-  fillTreatingPhysican(doctor: string) {
+  fillTreatingPhysician(doctor: string) {
     cy.typeAndSelectOption("#treating_physician", doctor);
   }
 

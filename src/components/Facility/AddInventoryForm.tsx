@@ -14,7 +14,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const initForm = {
   id: "",
@@ -63,28 +63,34 @@ export const AddInventoryForm = (props: any) => {
 
   const limit = 14;
 
-  const { data } = useQuery(routes.getItems, {
+  const { data } = useTanStackQueryInstead(routes.getItems, {
     query: {
       limit,
       offset,
     },
   });
 
-  const { data: inventory } = useQuery(routes.getInventorySummary, {
-    pathParams: {
-      facility_external_id: facilityId,
+  const { data: inventory } = useTanStackQueryInstead(
+    routes.getInventorySummary,
+    {
+      pathParams: {
+        facility_external_id: facilityId,
+      },
+      query: {
+        limit,
+        offset,
+      },
+      prefetch: facilityId !== undefined,
     },
-    query: {
-      limit,
-      offset,
-    },
-    prefetch: facilityId !== undefined,
-  });
+  );
 
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: facilityId },
-    prefetch: !!facilityId,
-  });
+  const { data: facilityObject } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: { id: facilityId },
+      prefetch: !!facilityId,
+    },
+  );
 
   useEffect(() => {
     // set the default units according to the item

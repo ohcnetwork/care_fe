@@ -32,7 +32,7 @@ import { phonePreg } from "@/common/validation";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 interface patientShiftProps {
@@ -108,7 +108,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const { data: patientData } = useQuery(routes.getPatient, {
+  const { data: patientData } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: {
       id: patientId,
     },

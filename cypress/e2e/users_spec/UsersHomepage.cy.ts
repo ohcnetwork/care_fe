@@ -8,15 +8,15 @@ describe("User Homepage", () => {
   const userPage = new UserPage();
   const loginPage = new LoginPage();
   const currentuser = "devdistrictadmin";
-  const firstName = "Dummy";
-  const lastName = "Nurse";
+  const firstName = "Dev";
+  const lastName = "Staff";
   const role = "Nurse";
   const state = "Kerala";
   const district = "Ernakulam";
-  const phoneNumber = "8878825662";
-  const altPhoneNumber = "8878825662";
+  const phoneNumber = "9876543219";
+  const altPhoneNumber = "9876543219";
   const homeFacility = "Dummy Facility 40";
-  const nurseUserName = "dummynurse1";
+  const nurseUserName = "devstaff2";
   const doctorUserName = "dev-doctor2";
 
   before(() => {
@@ -87,6 +87,18 @@ describe("User Homepage", () => {
     pageNavigation.verifyCurrentPageNumber(2);
     pageNavigation.navigateToPreviousPage();
     pageNavigation.verifyCurrentPageNumber(1);
+  });
+
+  it("Switch to list view, search by username and verify the results", () => {
+    userPage.switchToListView();
+    userPage.verifyListView();
+    userPage.checkSearchInputVisibility();
+    userPage.typeInSearchInput(doctorUserName);
+    userPage.checkUrlForUsername(doctorUserName);
+    userPage.checkUsernameText(doctorUserName);
+    userPage.checkUsernameBadgeVisibility(true);
+    userPage.clearSearchInput();
+    userPage.verifyListView();
   });
 
   afterEach(() => {

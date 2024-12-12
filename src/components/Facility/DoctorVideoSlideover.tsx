@@ -14,7 +14,7 @@ import { triggerGoal } from "@/Integrations/Plausible";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { Warn } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   classNames,
   formatName,
@@ -55,7 +55,7 @@ export default function DoctorVideoSlideover(props: {
   const { show, facilityId, setShow } = props;
   const [filter, setFilter] = useState<UserGroup>("ALL");
 
-  const { data } = useQuery(routes.getFacilityUsers, {
+  const { data } = useTanStackQueryInstead(routes.getFacilityUsers, {
     prefetch: show,
     pathParams: { facility_id: facilityId },
     query: { limit: 50 },

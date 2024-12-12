@@ -27,6 +27,7 @@ interface FacilitySelectProps {
   allowNone?: boolean;
   placeholder?: string;
   filter?: (facilities: FacilityModel) => boolean;
+  id?: string;
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
@@ -50,6 +51,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     errors = "",
     placeholder,
     filter,
+    id,
   } = props;
 
   const facilitySearch = useCallback(
@@ -88,6 +90,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
   return (
     <AutoCompleteAsync
+      id={id}
       placeholder={placeholder}
       name={name}
       required={required}

@@ -9,7 +9,7 @@ import useDebounce from "@/hooks/useDebounce";
 
 import { Error } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { mergeQueryOptions } from "@/Utils/utils";
 
 export const FILTER_BY_DIAGNOSES_KEYS = [
@@ -39,10 +39,13 @@ interface Props {
 export default function DiagnosesFilter(props: Props) {
   const { t } = useTranslation();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
-  const { res, data, loading, refetch } = useQuery(routes.listICD11Diagnosis, {
-    silent: true,
-    prefetch: false,
-  });
+  const { res, data, loading, refetch } = useTanStackQueryInstead(
+    routes.listICD11Diagnosis,
+    {
+      silent: true,
+      prefetch: false,
+    },
+  );
 
   const handleQuery = useDebounce(
     (query: string) => refetch({ query: { query } }),
