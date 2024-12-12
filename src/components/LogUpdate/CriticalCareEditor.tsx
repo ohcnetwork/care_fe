@@ -17,7 +17,7 @@ import { useSlugs } from "@/hooks/useSlug";
 import { Success } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
 type Props = {
@@ -32,7 +32,7 @@ type SectionKey = keyof typeof LogUpdateSections;
 export default function CriticalCareEditor(props: Props) {
   const { t } = useTranslation();
 
-  const query = useQuery(routes.getDailyReport, {
+  const query = useTanStackQueryInstead(routes.getDailyReport, {
     pathParams: { consultationId: props.consultationId, id: props.id },
   });
 

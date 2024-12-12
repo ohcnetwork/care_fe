@@ -16,7 +16,7 @@ import { DOCTOR_SPECIALIZATION } from "@/common/constants";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;
@@ -70,14 +70,14 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
   const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
 
-  const specializationsQuery = useQuery(routes.listDoctor, {
+  const specializationsQuery = useTanStackQueryInstead(routes.listDoctor, {
     pathParams: { facilityId },
     query: {
       limit: DOCTOR_SPECIALIZATION.length - 1,
     },
   });
 
-  const { loading } = useQuery(routes.getDoctor, {
+  const { loading } = useTanStackQueryInstead(routes.getDoctor, {
     pathParams: { facilityId, id: `${id}` },
     prefetch: !!id,
     onResponse: ({ data }) => {

@@ -18,7 +18,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 import ShiftingTable from "./ShiftingTable";
 
@@ -41,7 +41,7 @@ export default function ListView() {
     data: shiftData,
     loading,
     refetch: fetchData,
-  } = useQuery(routes.listShiftRequests, {
+  } = useTanStackQueryInstead(routes.listShiftRequests, {
     query: formatFilter({
       ...qParams,
       offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,

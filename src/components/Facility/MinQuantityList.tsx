@@ -8,7 +8,7 @@ import { MinQuantityRequiredModal } from "@/components/Facility/MinQuantityRequi
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
@@ -20,9 +20,8 @@ export default function MinQuantityList(props: any) {
   const [selectedItem, setSelectedItem] = useState({ id: 0, item_id: 0 });
   const limit = 14;
 
-  const { data: minimumQuantityData, refetch: minimumQuantityfetch } = useQuery(
-    routes.getMinQuantity,
-    {
+  const { data: minimumQuantityData, refetch: minimumQuantityfetch } =
+    useTanStackQueryInstead(routes.getMinQuantity, {
       pathParams: {
         facilityId,
       },
@@ -31,13 +30,15 @@ export default function MinQuantityList(props: any) {
         offset,
       },
       prefetch: !!facilityId,
+    });
+
+  const { data: facilityObject } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: { id: facilityId },
+      prefetch: !!facilityId,
     },
   );
-
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: facilityId },
-    prefetch: !!facilityId,
-  });
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;

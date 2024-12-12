@@ -5,7 +5,7 @@ import { useFacilityQuery } from "@/components/Resource/ResourceBadges";
 import { SHIFTING_FILTER_ORDER } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatName } from "@/Utils/utils";
 
 export default function BadgesList(props: any) {
@@ -18,7 +18,7 @@ export default function BadgesList(props: any) {
     falseValue: t("no"),
   };
 
-  const { data: assignedUser } = useQuery(routes.userList, {
+  const { data: assignedUser } = useTanStackQueryInstead(routes.userList, {
     query: { id: qParams.assigned_to },
     prefetch: !!qParams.assigned_to,
   });

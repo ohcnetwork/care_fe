@@ -15,7 +15,7 @@ import { GENDER_TYPES } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
 import { PatientProps } from ".";
@@ -61,11 +61,14 @@ export const Demography = (props: PatientProps) => {
     };
   }, [patientData.assigned_to_object]);
 
-  const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
-    query: {
-      patient: id,
+  const { data: insuranceDetials } = useTanStackQueryInstead(
+    routes.hcx.policies.list,
+    {
+      query: {
+        patient: id,
+      },
     },
-  });
+  );
 
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,

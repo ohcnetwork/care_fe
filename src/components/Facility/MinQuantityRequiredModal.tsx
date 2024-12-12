@@ -7,7 +7,7 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const initForm = {
   id: "",
@@ -42,7 +42,7 @@ export const MinQuantityRequiredModal = (props: any) => {
     props;
   const [isLoading, setIsLoading] = useState(true);
 
-  const { data: minimumQuantityItemData } = useQuery(
+  const { data: minimumQuantityItemData } = useTanStackQueryInstead(
     routes.getMinQuantityItem,
     {
       pathParams: {
@@ -61,10 +61,13 @@ export const MinQuantityRequiredModal = (props: any) => {
     },
   );
 
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: facilityId },
-    prefetch: !!facilityId,
-  });
+  const { data: facilityObject } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: { id: facilityId },
+      prefetch: !!facilityId,
+    },
+  );
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();

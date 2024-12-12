@@ -5,7 +5,7 @@ import { FacilityModel } from "@/components/Facility/models";
 import useAuthUser from "@/hooks/useAuthUser";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export type FeatureFlag = "SCRIBE_ENABLED"; // "HCX_ENABLED" | "ABDM_ENABLED" |
 
@@ -60,7 +60,7 @@ export const useFeatureFlags = (facility?: FacilityModel | string) => {
     );
   }
 
-  const facilityQuery = useQuery(routes.getPermittedFacility, {
+  const facilityQuery = useTanStackQueryInstead(routes.getPermittedFacility, {
     pathParams: {
       id: typeof facility === "string" ? facility : "",
     },

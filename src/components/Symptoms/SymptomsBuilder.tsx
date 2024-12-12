@@ -19,7 +19,7 @@ import useSlug from "@/hooks/useSlug";
 
 import { Success } from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { Writable } from "@/Utils/types";
 import { classNames, dateQueryString } from "@/Utils/utils";
 
@@ -79,7 +79,7 @@ export const EncounterSymptomsBuilder = (props: {
   const consultationId = useSlug("consultation");
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const { data, loading, refetch } = useQuery(SymptomsApi.list, {
+  const { data, loading, refetch } = useTanStackQueryInstead(SymptomsApi.list, {
     pathParams: { consultationId },
     query: { limit: 100 },
   });

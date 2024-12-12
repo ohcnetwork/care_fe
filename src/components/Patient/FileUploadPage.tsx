@@ -2,7 +2,7 @@ import Page from "@/components/Common/Page";
 import { FileUpload } from "@/components/Files/FileUpload";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export default function FileUploadPage(props: {
   facilityId: string;
@@ -11,7 +11,7 @@ export default function FileUploadPage(props: {
   type: "CONSULTATION" | "PATIENT";
 }) {
   const { facilityId, patientId, consultationId, type } = props;
-  const { data: patient } = useQuery(routes.getPatient, {
+  const { data: patient } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: { id: patientId },
     prefetch: !!patientId,
   });

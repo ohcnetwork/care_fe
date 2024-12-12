@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { FormEvent, useReducer, useState } from "react";
+import { FormEvent, useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -34,7 +34,7 @@ import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   dateQueryString,
   formatDate,
@@ -159,47 +159,38 @@ export default function UserProfile() {
   });
 
   const [showEdit, setShowEdit] = useState<boolean>(false);
-  const {
-    data: userData,
-    loading: isUserLoading,
-    refetch: refetchUserData,
-  } = useQuery(routes.currentUser, {
-    onResponse: (result) => {
-      if (!result || !result.res || !result.data) return;
 
-      const formData: EditForm = {
-        firstName: result.data.first_name,
-        lastName: result.data.last_name,
-        date_of_birth: result.data.date_of_birth || null,
-        gender: result.data.gender || "Male",
-        email: result.data.email,
-        video_connect_link: result.data.video_connect_link,
-        phoneNumber: result.data.phone_number?.toString() || "",
-        altPhoneNumber: result.data.alt_phone_number?.toString() || "",
-        user_type: result.data.user_type,
-        qualification: result.data.qualification,
-        doctor_experience_commenced_on: dayjs().diff(
-          dayjs(result.data.doctor_experience_commenced_on),
-          "years",
-        ),
-        doctor_medical_council_registration:
-          result.data.doctor_medical_council_registration,
-        weekly_working_hours: result.data.weekly_working_hours,
-      };
-      dispatch({
-        type: "set_form",
-        form: formData,
-      });
-      setDirty(false);
-    },
-  });
+  useEffect(() => {
+    const formData: EditForm = {
+      firstName: authUser.first_name,
+      lastName: authUser.last_name,
+      date_of_birth: authUser.date_of_birth || null,
+      gender: authUser.gender || "Male",
+      email: authUser.email,
+      video_connect_link: authUser.video_connect_link,
+      phoneNumber: authUser.phone_number?.toString() || "",
+      altPhoneNumber: authUser.alt_phone_number?.toString() || "",
+      user_type: authUser.user_type,
+      qualification: authUser.qualification,
+      doctor_experience_commenced_on: dayjs().diff(
+        dayjs(authUser.doctor_experience_commenced_on),
+        "years",
+      ),
+      doctor_medical_council_registration:
+        authUser.doctor_medical_council_registration,
+      weekly_working_hours: authUser.weekly_working_hours,
+    };
+    dispatch({
+      type: "set_form",
+      form: formData,
+    });
+    setDirty(false);
+  }, [authUser]);
 
-  const { data: skillsView, loading: isSkillsLoading } = useQuery(
-    routes.userListSkill,
-    {
+  const { data: skillsView, loading: isSkillsLoading } =
+    useTanStackQueryInstead(routes.userListSkill, {
       pathParams: { username: authUser.username },
-    },
-  );
+    });
 
   const validatePassword = (password: string) => {
     const rules = [
@@ -432,13 +423,13 @@ export default function UserProfile() {
         Notification.Success({
           msg: "Details updated successfully",
         });
-        await refetchUserData();
+        await refetchUser();
         setShowEdit(false);
       }
     }
   };
 
-  const isLoading = isUserLoading || isSkillsLoading;
+  const isLoading = isSkillsLoading;
 
   if (isLoading) {
     return <Loading />;
@@ -559,7 +550,7 @@ export default function UserProfile() {
       <AvatarEditModal
         title={t("edit_avatar")}
         open={editAvatar}
-        imageUrl={authUser?.read_profile_picture_url}
+        imageUrl={authUser.read_profile_picture_url}
         handleUpload={handleAvatarUpload}
         handleDelete={handleAvatarDelete}
         onClose={() => setEditAvatar(false)}
@@ -573,17 +564,17 @@ export default function UserProfile() {
           <div className="my-4 flex items-center">
             <AvatarEditable
               id="user-profile-picture"
-              imageUrl={authUser?.read_profile_picture_url}
+              imageUrl={authUser.read_profile_picture_url}
               name={formatDisplayName(authUser)}
               onClick={() => setEditAvatar(!editAvatar)}
               className="h-20 w-20"
             />
             <div className="my-4 ml-4">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
-                {authUser?.first_name} {authUser?.last_name}
+                {authUser.first_name} {authUser.last_name}
               </h3>
               <p className="text-sm leading-5 text-gray-500">
-                @{authUser?.username}
+                @{authUser.username}
               </p>
             </div>
           </div>
@@ -613,7 +604,7 @@ export default function UserProfile() {
                     {t("username")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.username || "-"}
+                    {authUser.username || "-"}
                   </dd>
                 </div>
                 <div
@@ -624,7 +615,7 @@ export default function UserProfile() {
                     {t("phone_number")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.phone_number || "-"}
+                    {authUser.phone_number || "-"}
                   </dd>
                 </div>
 
@@ -636,7 +627,7 @@ export default function UserProfile() {
                     {t("whatsapp_number")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.alt_phone_number || "-"}
+                    {authUser.alt_phone_number || "-"}
                   </dd>
                 </div>
                 <div
@@ -647,7 +638,7 @@ export default function UserProfile() {
                     {t("email")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.email || "-"}
+                    {authUser.email || "-"}
                   </dd>
                 </div>
                 <div
@@ -658,7 +649,7 @@ export default function UserProfile() {
                     {t("first_name")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.first_name || "-"}
+                    {authUser.first_name || "-"}
                   </dd>
                 </div>
                 <div
@@ -669,7 +660,7 @@ export default function UserProfile() {
                     {t("last_name")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.last_name || "-"}
+                    {authUser.last_name || "-"}
                   </dd>
                 </div>
                 <div
@@ -680,8 +671,8 @@ export default function UserProfile() {
                     {t("date_of_birth")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.date_of_birth
-                      ? formatDate(userData?.date_of_birth)
+                    {authUser.date_of_birth
+                      ? formatDate(authUser.date_of_birth)
                       : "-"}
                   </dd>
                 </div>
@@ -691,7 +682,7 @@ export default function UserProfile() {
                   </dt>
                   <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                     <CareIcon icon="l-user-check" className="mr-2 text-lg" />
-                    {userData?.user_type || "-"}
+                    {authUser.user_type || "-"}
                   </dd>
                 </div>
                 <div className="my-2 sm:col-span-1" id="gender-profile-details">
@@ -699,7 +690,7 @@ export default function UserProfile() {
                     {t("gender")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.gender || "-"}
+                    {authUser.gender || "-"}
                   </dd>
                 </div>
                 <div className="my-2 sm:col-span-1">
@@ -707,7 +698,7 @@ export default function UserProfile() {
                     {t("local_body")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.local_body_object?.name || "-"}
+                    {authUser.local_body_object?.name || "-"}
                   </dd>
                 </div>
                 <div className="my-2 sm:col-span-1">
@@ -715,7 +706,7 @@ export default function UserProfile() {
                     {t("district")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.district_object?.name || "-"}
+                    {authUser.district_object?.name || "-"}
                   </dd>
                 </div>
                 <div className="my-2 sm:col-span-1">
@@ -723,7 +714,7 @@ export default function UserProfile() {
                     {t("state")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.state_object?.name || "-"}
+                    {authUser.state_object?.name || "-"}
                   </dd>
                 </div>
                 <div className="my-2 sm:col-span-1">
@@ -757,7 +748,7 @@ export default function UserProfile() {
                     {t("average_weekly_working_hours")}
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-secondary-900">
-                    {userData?.weekly_working_hours ?? "-"}
+                    {authUser.weekly_working_hours ?? "-"}
                   </dd>
                 </div>
                 <div
@@ -768,14 +759,14 @@ export default function UserProfile() {
                     {t("video_conference_link")}
                   </dt>
                   <dd className="mt-1 break-words text-sm leading-5 text-secondary-900">
-                    {userData?.video_connect_link ? (
+                    {authUser.video_connect_link ? (
                       <a
                         className="text-blue-500"
-                        href={userData?.video_connect_link}
+                        href={authUser.video_connect_link}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {userData?.video_connect_link}
+                        {authUser.video_connect_link}
                       </a>
                     ) : (
                       "-"
