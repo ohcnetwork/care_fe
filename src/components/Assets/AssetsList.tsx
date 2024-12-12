@@ -27,7 +27,7 @@ import * as Notification from "@/Utils/Notifications";
 import { parseQueryParams } from "@/Utils/primitives";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const AssetsList = () => {
   const { t } = useTranslation();
@@ -68,26 +68,32 @@ const AssetsList = () => {
       qParams.warranty_amc_end_of_validity_after || "",
   };
 
-  const { refetch: assetsFetch, loading } = useQuery(routes.listAssets, {
-    query: params,
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setAssets(data.results);
-        setTotalCount(data.count);
-      }
+  const { refetch: assetsFetch, loading } = useTanStackQueryInstead(
+    routes.listAssets,
+    {
+      query: params,
+      onResponse: ({ res, data }) => {
+        if (res?.status === 200 && data) {
+          setAssets(data.results);
+          setTotalCount(data.count);
+        }
+      },
     },
-  });
+  );
 
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: qParams.facility },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setFacility(data);
-        setSelectedFacility(data);
-      }
+  const { data: facilityObject } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: { id: qParams.facility },
+      onResponse: ({ res, data }) => {
+        if (res?.status === 200 && data) {
+          setFacility(data);
+          setSelectedFacility(data);
+        }
+      },
+      prefetch: !!qParams.facility,
     },
-    prefetch: !!qParams.facility,
-  });
+  );
 
   useEffect(() => {
     setStatus(qParams.status);
@@ -97,13 +103,16 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facility_external_id: String(qParams.facility),
-      external_id: String(qParams.location),
+  const { data: locationObject } = useTanStackQueryInstead(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: String(qParams.facility),
+        external_id: String(qParams.location),
+      },
+      prefetch: !!(qParams.facility && qParams.location),
     },
-    prefetch: !!(qParams.facility && qParams.location),
-  });
+  );
 
   function isValidURL(url: string) {
     try {

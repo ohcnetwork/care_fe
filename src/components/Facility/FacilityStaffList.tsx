@@ -17,7 +17,7 @@ import { DOCTOR_SPECIALIZATION } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export const FacilityStaffList = (props: any) => {
   const { t } = useTranslation();
@@ -25,24 +25,27 @@ export const FacilityStaffList = (props: any) => {
   const { qParams, resultsPerPage, updatePage } = useFilters({ limit: 15 });
   const [totalDoctors, setTotalDoctors] = useState(0);
 
-  const { data: doctorsList, refetch } = useQuery(routes.listDoctor, {
-    pathParams: { facilityId: props.facilityId },
-    query: {
-      limit: resultsPerPage,
-      offset: (qParams.page - 1) * resultsPerPage,
+  const { data: doctorsList, refetch } = useTanStackQueryInstead(
+    routes.listDoctor,
+    {
+      pathParams: { facilityId: props.facilityId },
+      query: {
+        limit: resultsPerPage,
+        offset: (qParams.page - 1) * resultsPerPage,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data) {
+          let totalCount = 0;
+          data.results.map((doctor: DoctorModal) => {
+            if (doctor.count) {
+              totalCount += doctor.count;
+            }
+          });
+          setTotalDoctors(totalCount);
+        }
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        let totalCount = 0;
-        data.results.map((doctor: DoctorModal) => {
-          if (doctor.count) {
-            totalCount += doctor.count;
-          }
-        });
-        setTotalDoctors(totalCount);
-      }
-    },
-  });
+  );
 
   let doctorList: any = null;
   if (!doctorsList || !doctorsList.results.length) {

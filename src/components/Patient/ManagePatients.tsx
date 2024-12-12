@@ -38,7 +38,7 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import { triggerGoal } from "../../Integrations/Plausible";
 import * as Notification from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
+import useTanStackQueryInstead from "../../Utils/request/useQuery";
 import {
   formatPatientAge,
   humanizeStrings,
@@ -289,9 +289,12 @@ export const PatientManager = () => {
     return cleanedData;
   };
 
-  const { loading: isLoading, data } = useQuery(routes.patientList, {
-    query: params,
-  });
+  const { loading: isLoading, data } = useTanStackQueryInstead(
+    routes.patientList,
+    {
+      query: params,
+    },
+  );
 
   const getTheCategoryFromId = () => {
     let category_name;
@@ -306,27 +309,30 @@ export const PatientManager = () => {
     }
   };
 
-  const { data: districtData } = useQuery(routes.getDistrict, {
+  const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
     pathParams: {
       id: qParams.district,
     },
     prefetch: !!Number(qParams.district),
   });
 
-  const { data: LocalBodyData } = useQuery(routes.getLocalBody, {
+  const { data: LocalBodyData } = useTanStackQueryInstead(routes.getLocalBody, {
     pathParams: {
       id: qParams.lsgBody,
     },
     prefetch: !!Number(qParams.lsgBody),
   });
 
-  const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    pathParams: {
-      id: qParams.facility,
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: {
+        id: qParams.facility,
+      },
+      prefetch: !!qParams.facility,
     },
-    prefetch: !!qParams.facility,
-  });
-  const { data: facilityAssetLocationData } = useQuery(
+  );
+  const { data: facilityAssetLocationData } = useTanStackQueryInstead(
     routes.getFacilityAssetLocation,
     {
       pathParams: {
@@ -336,19 +342,8 @@ export const PatientManager = () => {
       prefetch: !!qParams.last_consultation_current_bed__location,
     },
   );
-  /*
-  const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
-    query: {
-      ...qParams,
-      limit: 1,
-      last_consultation__consent_types: "None",
-      is_active: "True",
-    },
-  });
 
-  const patientsWithNoConsents = patientsWithNoConsentsData?.count;
-  */
-  const { data: permittedFacilities } = useQuery(
+  const { data: permittedFacilities } = useTanStackQueryInstead(
     routes.getPermittedFacilities,
     {
       query: { limit: 1 },
