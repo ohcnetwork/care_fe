@@ -34,6 +34,7 @@ describe("Manage User", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.viewport(1280, 720);
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/users");
   });
@@ -269,7 +270,7 @@ describe("Manage User", () => {
     manageUserPage.clickLinkedSkillTab();
     manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
-    manageUserPage.clickAddSkillButton();
+    manageUserPage.clickAddSkillButton(usernameToLinkSkill);
     cy.verifyNotification("Skill added successfully");
     cy.closeNotification();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
@@ -305,6 +306,7 @@ describe("Manage User", () => {
     manageUserPage.clickSubmit();
     // verify the data is reflected in the page
     manageUserPage.verifyWorkingHours(workinghour);
+    manageUserPage.navigateToProfile();
     manageUserPage.verifyProfileWorkingHours(workinghour);
   });
 

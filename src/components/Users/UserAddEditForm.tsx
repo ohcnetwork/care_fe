@@ -48,7 +48,7 @@ import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, dateQueryString, parsePhoneNumber } from "@/Utils/utils";
 
 interface StateObj {
@@ -169,7 +169,7 @@ const UserAddEditForm = (props: UserProps) => {
     loading: userDataLoading,
     data: userData,
     refetch: refetchUserData,
-  } = useQuery(routes.getUserDetails, {
+  } = useTanStackQueryInstead(routes.getUserDetails, {
     pathParams: {
       username: username ?? "",
     },
@@ -362,20 +362,23 @@ const UserAddEditForm = (props: UserProps) => {
     ...STAFF_OR_NURSE_USER,
   ].includes(state.form.user_type ?? "");
 
-  const { loading: isDistrictLoading } = useQuery(routes.getDistrictByState, {
-    prefetch: !!(selectedStateId > 0),
-    pathParams: { id: selectedStateId.toString() },
-    onResponse: (result) => {
-      if (!result || !result.res || !result.data) return;
-      if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
-        setDistricts([authUser.district_object!]);
-      } else {
-        setDistricts(result.data);
-      }
+  const { loading: isDistrictLoading } = useTanStackQueryInstead(
+    routes.getDistrictByState,
+    {
+      prefetch: !!(selectedStateId > 0),
+      pathParams: { id: selectedStateId.toString() },
+      onResponse: (result) => {
+        if (!result || !result.res || !result.data) return;
+        if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
+          setDistricts([authUser.district_object!]);
+        } else {
+          setDistricts(result.data);
+        }
+      },
     },
-  });
+  );
 
-  const { loading: isLocalbodyLoading } = useQuery(
+  const { loading: isLocalbodyLoading } = useTanStackQueryInstead(
     routes.getAllLocalBodyByDistrict,
     {
       prefetch: !!(selectedDistrictId > 0),
@@ -391,16 +394,19 @@ const UserAddEditForm = (props: UserProps) => {
     },
   );
 
-  const { loading: isStateLoading } = useQuery(routes.statesList, {
-    onResponse: (result) => {
-      if (!result || !result.res || !result.data) return;
-      if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
-        setStates([authUser.state_object!]);
-      } else {
-        setStates(result.data.results);
-      }
+  const { loading: isStateLoading } = useTanStackQueryInstead(
+    routes.statesList,
+    {
+      onResponse: (result) => {
+        if (!result || !result.res || !result.data) return;
+        if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
+          setStates([authUser.state_object!]);
+        } else {
+          setStates(result.data.results);
+        }
+      },
     },
-  });
+  );
 
   const handleDateChange = (
     event: FieldChangeEvent<Date>,

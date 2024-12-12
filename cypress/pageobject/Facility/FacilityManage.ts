@@ -99,5 +99,13 @@ class FacilityManage {
     cy.get("#facility-add-bedtype").scrollIntoView();
     cy.get("#facility-add-bedtype").click();
   }
+
+  visitViewPatients() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilityPatients");
+    cy.get("#view-patient-facility-list").scrollIntoView().click();
+    cy.wait("@getFacilityPatients")
+      .its("response.statusCode")
+      .should("eq", 200);
+  }
 }
 export default FacilityManage;

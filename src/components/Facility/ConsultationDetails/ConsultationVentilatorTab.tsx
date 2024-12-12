@@ -7,19 +7,22 @@ import VentilatorTable from "@/components/Facility/Consultations/VentilatorTable
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export const ConsultationVentilatorTab = (props: ConsultationTabProps) => {
   const { consultationId } = props;
   const { qParams, Pagination, resultsPerPage } = useFilters({ limit: 36 });
 
-  const { loading: isLoading, data } = useQuery(routes.getDailyReports, {
-    pathParams: { consultationId },
-    query: {
-      limit: resultsPerPage,
-      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+  const { loading: isLoading, data } = useTanStackQueryInstead(
+    routes.getDailyReports,
+    {
+      pathParams: { consultationId },
+      query: {
+        limit: resultsPerPage,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+      },
     },
-  });
+  );
 
   if (isLoading) {
     return <Loading />;
