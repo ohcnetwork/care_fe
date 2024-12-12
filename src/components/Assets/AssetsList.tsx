@@ -11,13 +11,13 @@ import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import AssetFilter from "@/components/Assets/AssetFilter";
 import AssetImportModal from "@/components/Assets/AssetImportModal";
 import { AssetData, assetClassProps } from "@/components/Assets/AssetTypes";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
 import { FacilityModel } from "@/components/Facility/models";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
@@ -29,6 +29,7 @@ import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 import SearchByMultipleFields from "../Common/SearchByMultipleFields";
+import { Button } from "../ui/button";
 
 const AssetsList = () => {
   const { t } = useTranslation();
@@ -44,6 +45,7 @@ const AssetsList = () => {
     limit: 18,
     cacheBlacklist: ["name", "qr_code_id", "serial_number"],
   });
+  const authUser = useAuthUser();
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
@@ -118,6 +120,8 @@ const AssetsList = () => {
       prefetch: !!(qParams.facility && qParams.location),
     },
   );
+
+  const isDisabled = !NonReadOnlyUsers(authUser.user_type);
 
   function isValidURL(url: string) {
     try {
@@ -351,9 +355,11 @@ const AssetsList = () => {
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
           <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
-            <ButtonV2
-              authorizeFor={NonReadOnlyUsers}
-              className="inline-flex w-full items-center justify-center py-[11px]"
+            <Button
+              disabled={isDisabled}
+              variant={"primary"}
+              size={"lg"}
+              className="gap-2"
               onClick={() => {
                 if (qParams.facility) {
                   navigate(`/facility/${qParams.facility}/assets/new`);
@@ -364,7 +370,7 @@ const AssetsList = () => {
             >
               <CareIcon icon="l-plus-circle" className="text-lg" />
               <span>{t("create_asset")}</span>
-            </ButtonV2>
+            </Button>
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
             <div className="w-full">
@@ -372,13 +378,15 @@ const AssetsList = () => {
                 onClick={() => advancedFilter.setShow(true)}
               />
             </div>
-            <ButtonV2
-              className="w-full py-[11px]"
+            <Button
+              variant={"primary"}
+              size={"lg"}
               onClick={() => setIsScannerActive(true)}
+              className="gap-2"
             >
               <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
               QR
-            </ButtonV2>
+            </Button>
 
             {authorizedForImportExport && (
               <div

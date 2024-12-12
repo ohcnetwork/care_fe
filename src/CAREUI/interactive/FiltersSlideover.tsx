@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
+import { Button } from "@/components/ui/button";
+
 import ButtonV2 from "@/components/Common/ButtonV2";
 
 import useFilters from "@/hooks/useFilters";
@@ -58,15 +60,15 @@ export default function FiltersSlideover({
 export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
   const { t } = useTranslation();
   return (
-    <ButtonV2
-      ghost
-      border
-      className="w-full bg-white md:w-auto"
+    <Button
+      variant={"outline_primary"}
+      size={"lg"}
+      className="w-full bg-white md:w-auto gap-2"
       onClick={onClick}
       id="advanced-filter"
     >
       <CareIcon icon="l-filter" />
       <span className="py-0.5">{t("advanced_filters")}</span>
-    </ButtonV2>
+    </Button>
   );
 };

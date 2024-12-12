@@ -1,6 +1,5 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
 import DropdownMenu, {
   DropdownItem,
   DropdownItemProps,
@@ -10,6 +9,8 @@ import useExport from "@/hooks/useExport";
 
 import request from "@/Utils/request/request";
 import { Route } from "@/Utils/request/types";
+
+import { Button } from "../ui/button";
 
 interface ExportItem {
   options?: DropdownItemProps;
@@ -49,7 +50,8 @@ export const ExportMenu = ({
     const item = exportItems[0];
 
     return (
-      <ButtonV2
+      <Button
+        variant={"outline_primary"}
         disabled={isExporting || disabled}
         onClick={() => {
           let action = item.action;
@@ -63,13 +65,11 @@ export const ExportMenu = ({
             exportFile(action, item.filePrefix, item.type, item.parse);
           }
         }}
-        border
-        ghost
         className="py-2.5"
       >
         <CareIcon icon="l-export" />
         {isExporting ? "Exporting..." : label}
-      </ButtonV2>
+      </Button>
     );
   }
 
@@ -79,7 +79,7 @@ export const ExportMenu = ({
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
         icon={<CareIcon icon="l-export" />}
-        className="tooltip border-primary-500 bg-white text-primary-500 hover:bg-primary-100 enabled:border"
+        className="tooltip border-primary-700 bg-white text-primary-700 hover:bg-primary-100 enabled:border"
       >
         {exportItems.map((item) => (
           <DropdownItem
@@ -116,7 +116,7 @@ export const ExportButton = ({
 
   return (
     <>
-      <ButtonV2
+      <Button
         disabled={isExporting || props.disabled}
         onClick={() => {
           let action = props.action;
@@ -132,8 +132,6 @@ export const ExportButton = ({
         }}
         className="tooltip mx-2 p-4 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
         variant="secondary"
-        ghost
-        circle
       >
         {isExporting ? (
           <CareIcon icon="l-spinner-alt" className="animate-spin" />
@@ -143,7 +141,7 @@ export const ExportButton = ({
         <span className={`tooltip-text ${tooltipClassName}`}>
           {props.tooltip || "Export"}
         </span>
-      </ButtonV2>
+      </Button>
     </>
   );
 };
