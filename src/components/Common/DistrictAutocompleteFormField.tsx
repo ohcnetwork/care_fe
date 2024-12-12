@@ -3,7 +3,7 @@ import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
 import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 type Props = FormFieldBaseProps<DistrictModel["id"]> & {
   placeholder?: string;
@@ -11,7 +11,7 @@ type Props = FormFieldBaseProps<DistrictModel["id"]> & {
 };
 
 export default function DistrictAutocompleteFormField(props: Props) {
-  const { data, loading } = useQuery(routes.getDistrictByState, {
+  const { data, loading } = useTanStackQueryInstead(routes.getDistrictByState, {
     pathParams: { id: props.state! },
     prefetch: !!props.state,
   });

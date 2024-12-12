@@ -21,7 +21,7 @@ import { GENDER_TYPES } from "@/common/constants";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatName, formatPatientAge } from "@/Utils/utils";
 
 export const Demography = (props: PatientProps) => {
@@ -61,10 +61,13 @@ export const Demography = (props: PatientProps) => {
     };
   }, [patientData.assigned_to_object]);
 
-  const { data: insuranceDetials } = useQuery(routes.hcx.policies.list, {
-    query: { patient: id },
-    prefetch: !!patientData.id,
-  });
+  const { data: insuranceDetials } = useTanStackQueryInstead(
+    routes.hcx.policies.list,
+    {
+      query: { patient: id },
+      prefetch: !!patientData.id,
+    },
+  );
 
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,

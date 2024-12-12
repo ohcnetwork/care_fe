@@ -2,9 +2,6 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Chip from "@/CAREUI/display/Chip";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
@@ -29,13 +26,8 @@ import {
   SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
-import { triggerGoal } from "@/Integrations/Plausible";
-import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
-import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
@@ -45,6 +37,14 @@ import {
   isPostPartum,
   relativeDate,
 } from "@/Utils/utils";
+
+import Chip from "../../CAREUI/display/Chip";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { triggerGoal } from "../../Integrations/Plausible";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import * as Notification from "../../Utils/Notifications";
+import request from "../../Utils/request/request";
+import useTanStackQueryInstead from "../../Utils/request/useQuery";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
@@ -79,20 +79,23 @@ export const PatientHome = (props: {
 
   const initErr: any = {};
   const errors = initErr;
-  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
-    pathParams: {
-      id,
+  const { loading: isLoading, refetch } = useTanStackQueryInstead(
+    routes.getPatient,
+    {
+      pathParams: {
+        id,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data) {
+          setPatientData(data);
+        }
+        triggerGoal("Patient Profile Viewed", {
+          facilityId: facilityId,
+          userId: authUser.id,
+        });
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setPatientData(data);
-      }
-      triggerGoal("Patient Profile Viewed", {
-        facilityId: facilityId,
-        userId: authUser.id,
-      });
-    },
-  });
+  );
 
   const handleAssignedVolunteer = async () => {
     const previousVolunteerId = patientData?.assigned_to;
@@ -132,7 +135,7 @@ export const PatientHome = (props: {
   };
 
   const consultation = patientData?.last_consultation;
-  const skillsQuery = useQuery(routes.userListSkill, {
+  const skillsQuery = useTanStackQueryInstead(routes.userListSkill, {
     pathParams: {
       username: consultation?.treating_physician_object?.username ?? "",
     },
@@ -363,13 +366,14 @@ export const PatientHome = (props: {
                       text={t("TELEMEDICINE")}
                     />
                   )}
-                  {patientData.allergies && (
-                    <Chip
-                      variant="danger"
-                      size="small"
-                      text={`${t("allergies")} ${patientData.allergies.length}`}
-                    />
-                  )}
+                  {patientData.allergies &&
+                    patientData.allergies.trim().length > 0 && (
+                      <Chip
+                        variant="danger"
+                        size="small"
+                        text={t("has_allergies")}
+                      />
+                    )}
                 </div>
               </div>
 

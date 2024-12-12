@@ -24,7 +24,7 @@ import { checkIfValidIP } from "@/common/validation";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -191,7 +191,7 @@ const updateLink = async (
 function MonitorConfigure({ asset }: { asset: AssetData }) {
   const [bed, setBed] = useState<BedModel>({});
   const [shouldUpdateLink, setShouldUpdateLink] = useState(false);
-  const { data: assetBed } = useQuery(routes.listAssetBeds, {
+  const { data: assetBed } = useTanStackQueryInstead(routes.listAssetBeds, {
     query: { asset: asset.id },
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data && data.results.length > 0) {

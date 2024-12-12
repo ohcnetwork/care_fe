@@ -8,7 +8,7 @@ import { InvestigationResponse } from "@/components/Facility/Investigations/Repo
 
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export default function ViewInvestigationSuggestions(props: {
   consultationId: string;
@@ -22,11 +22,14 @@ export default function ViewInvestigationSuggestions(props: {
     investigations: previousInvestigations,
   } = props;
 
-  const { data: investigations, loading } = useQuery(routes.getConsultation, {
-    pathParams: {
-      id: consultationId,
+  const { data: investigations, loading } = useTanStackQueryInstead(
+    routes.getConsultation,
+    {
+      pathParams: {
+        id: consultationId,
+      },
     },
-  });
+  );
 
   if (loading) {
     return <Loading />;

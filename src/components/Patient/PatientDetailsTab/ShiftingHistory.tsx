@@ -13,7 +13,7 @@ import useFilters from "@/hooks/useFilters";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const ShiftingHistory = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
@@ -29,16 +29,19 @@ const ShiftingHistory = (props: PatientProps) => {
     );
   };
 
-  const { data: shiftData, loading } = useQuery(routes.listShiftRequests, {
-    query: {
-      ...formatFilter({
-        ...qParams,
-        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-      }),
-      patient: id,
+  const { data: shiftData, loading } = useTanStackQueryInstead(
+    routes.listShiftRequests,
+    {
+      query: {
+        ...formatFilter({
+          ...qParams,
+          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+        }),
+        patient: id,
+      },
+      prefetch: !!id,
     },
-    prefetch: !!id,
-  });
+  );
 
   return (
     <section className="mt-4">
