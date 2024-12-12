@@ -6,12 +6,7 @@ import { useTranslation } from "react-i18next";
 import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent, TooltipProvider } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2, { Cancel, Submit } from "@/components/Common/ButtonV2";
@@ -36,7 +31,6 @@ export const FacilityCard = (props: {
   const [notifyModalFor, setNotifyModalFor] = useState<string>();
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
-  const [open, setOpen] = useState(false);
 
   const handleNotifySubmit = async (id: any) => {
     if (notifyMessage.trim().length >= 1) {
@@ -107,36 +101,25 @@ export const FacilityCard = (props: {
                           {facility.name}
                         </Link>
                         <TooltipProvider>
-                          <Tooltip
-                            delayDuration={0}
-                            open={open}
-                            onOpenChange={setOpen}
+                          <TooltipComponent
+                            content={t("live_patients_total_beds")}
                           >
-                            <TooltipTrigger
-                              asChild
-                              onClick={() => setOpen(!open)}
+                            <div
+                              className={`relative flex items-center gap-1 text-sm ${
+                                (facility.patient_count || 0) /
+                                  (facility.bed_count || 0) >
+                                0.85
+                                  ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white"
+                                  : "text-secondary-700"
+                              }`}
                             >
-                              <div
-                                data-test-id="occupancy-badge"
-                                className={`relative flex items-center gap-1 text-sm ${
-                                  (facility.patient_count || 0) /
-                                    (facility.bed_count || 0) >
-                                  0.85
-                                    ? "justify-center rounded-md border border-red-600 bg-red-500 p-1 font-bold text-white"
-                                    : "text-secondary-700"
-                                }`}
-                              >
-                                <CareIcon icon="l-bed" />
-                                <dt>
-                                  {t("occupancy")}: {facility.patient_count} /{" "}
-                                  {facility.bed_count}
-                                </dt>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" sideOffset={8}>
-                              {t("live_patients_total_beds")}
-                            </TooltipContent>
-                          </Tooltip>
+                              <CareIcon icon="l-bed" />
+                              <dt>
+                                {t("occupancy")}: {facility.patient_count} /{" "}
+                                {facility.bed_count}
+                              </dt>
+                            </div>
+                          </TooltipComponent>
                         </TooltipProvider>
                       </div>
                       <ButtonV2
