@@ -65,7 +65,6 @@ export const Demography = (props: PatientProps) => {
     routes.hcx.policies.list,
     {
       query: { patient: id },
-      prefetch: !!patientData.id,
     },
   );
 
