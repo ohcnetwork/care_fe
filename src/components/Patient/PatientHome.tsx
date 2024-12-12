@@ -2,6 +2,9 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
@@ -26,8 +29,13 @@ import {
   SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
+import { triggerGoal } from "@/Integrations/Plausible";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
@@ -37,14 +45,6 @@ import {
   isPostPartum,
   relativeDate,
 } from "@/Utils/utils";
-
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { triggerGoal } from "../../Integrations/Plausible";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useTanStackQueryInstead from "../../Utils/request/useQuery";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
