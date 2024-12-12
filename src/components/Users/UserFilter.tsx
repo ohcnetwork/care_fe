@@ -20,7 +20,7 @@ import {
 
 import * as Notify from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
@@ -46,7 +46,7 @@ export default function UserFilter(props: any) {
     last_active_days: filter.last_active_days || "",
   });
 
-  useQuery(routes.getAnyFacility, {
+  useTanStackQueryInstead(routes.getAnyFacility, {
     pathParams: { id: filter.home_facility },
     prefetch: !!filter.home_facility && filter.home_facility !== "NONE",
     onResponse: ({ data }) => setFilterState({ home_facility_ref: data }),

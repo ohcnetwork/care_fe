@@ -8,7 +8,7 @@ import {
 
 import dayjs from "@/Utils/dayjs";
 import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
 const STATUS_COLORS = {
@@ -182,7 +182,7 @@ export default function Uptime(
   const [summary, setSummary] = useState<{
     [key: number]: AvailabilityRecord[];
   }>([]);
-  const { data, loading } = useQuery(props.route, {
+  const { data, loading } = useTanStackQueryInstead(props.route, {
     pathParams: props.params,
     onResponse: ({ data }) => setUptimeRecord(data?.results.reverse() ?? []),
   });

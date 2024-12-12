@@ -7,7 +7,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Investigation } from "@/components/Facility/Investigations/Reports/types";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const Loading = lazy(() => import("@/components/Common/Loading"));
 
@@ -94,29 +94,30 @@ export default function InvestigationPrintPreview(
 ) {
   const { consultationId, patientId, sessionId } = props;
   const { t } = useTranslation();
-  const { loading: investigationLoading, data: investigations } = useQuery(
-    routes.getInvestigation,
-    {
+  const { loading: investigationLoading, data: investigations } =
+    useTanStackQueryInstead(routes.getInvestigation, {
       pathParams: {
         consultation_external_id: consultationId,
       },
       query: {
         session: sessionId,
       },
-    },
-  );
+    });
 
-  const { data: patient, loading: patientLoading } = useQuery(
+  const { data: patient, loading: patientLoading } = useTanStackQueryInstead(
     routes.getPatient,
     {
       pathParams: { id: patientId },
     },
   );
 
-  const { data: consultation } = useQuery(routes.getConsultation, {
-    pathParams: { id: consultationId },
-    prefetch: !!consultationId,
-  });
+  const { data: consultation } = useTanStackQueryInstead(
+    routes.getConsultation,
+    {
+      pathParams: { id: consultationId },
+      prefetch: !!consultationId,
+    },
+  );
 
   if (patientLoading || investigationLoading) {
     return <Loading />;

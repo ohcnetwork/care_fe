@@ -22,7 +22,7 @@ import AuthorizeFor from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 import ButtonV2 from "../Common/ButtonV2";
 
@@ -58,25 +58,28 @@ export default function LinkedFacilities({
 
   const isCurrentUser = userData.username === authUser.username;
 
-  const { refetch: refetchUserFacilities } = useQuery(routes.userListFacility, {
-    pathParams: { username: userData.username },
-    query: { limit: 36 },
-    onResponse({ res, data }) {
-      if (res?.status === 200 && data) {
-        let userFacilities = data?.results;
-        if (userData.home_facility_object) {
-          const homeFacility = data?.results.find(
-            (facility) => facility.id === userData.home_facility_object?.id,
-          );
-          userFacilities = userFacilities.filter(
-            (facility) => facility.id !== homeFacility?.id,
-          );
-          setHomeFacility(homeFacility);
+  const { refetch: refetchUserFacilities } = useTanStackQueryInstead(
+    routes.userListFacility,
+    {
+      pathParams: { username: userData.username },
+      query: { limit: 36 },
+      onResponse({ res, data }) {
+        if (res?.status === 200 && data) {
+          let userFacilities = data?.results;
+          if (userData.home_facility_object) {
+            const homeFacility = data?.results.find(
+              (facility) => facility.id === userData.home_facility_object?.id,
+            );
+            userFacilities = userFacilities.filter(
+              (facility) => facility.id !== homeFacility?.id,
+            );
+            setHomeFacility(homeFacility);
+          }
+          setUserFacilities(userFacilities);
         }
-        setUserFacilities(userFacilities);
-      }
+      },
     },
-  });
+  );
 
   const handleOnClick = (type: string, selectedFacility: FacilityModel) => {
     switch (type) {

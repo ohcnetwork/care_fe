@@ -15,7 +15,7 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   formatPatientAge,
@@ -103,7 +103,7 @@ export default function PrintDeathReport(props: { id: string }) {
     }
   };
 
-  const { loading: _isLoading } = useQuery(routes.getPatient, {
+  const { loading: _isLoading } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: { id },
     onResponse(res) {
       if (res.res?.ok && res) {

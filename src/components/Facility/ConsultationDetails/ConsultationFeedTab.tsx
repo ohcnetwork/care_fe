@@ -25,7 +25,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { triggerGoal } from "@/Integrations/Plausible";
 import { Warn } from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, isIOS } from "@/Utils/utils";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
@@ -59,7 +59,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
   const { key, operate } = useOperateCamera(asset?.id ?? "");
 
-  const presetsQuery = useQuery(FeedRoutes.listBedPresets, {
+  const presetsQuery = useTanStackQueryInstead(FeedRoutes.listBedPresets, {
     pathParams: { bed_id: bed?.id ?? "" },
     query: { limit: 100 },
     prefetch: !!bed,

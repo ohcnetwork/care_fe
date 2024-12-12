@@ -12,7 +12,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const initForm = {
   name: "",
@@ -56,7 +56,7 @@ export const FacilityConfigure = (props: IProps) => {
   const { facilityId } = props;
   const [isLoading, setIsLoading] = useState(false);
 
-  const { loading } = useQuery(routes.getPermittedFacility, {
+  const { loading } = useTanStackQueryInstead(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
     onResponse: (res) => {
       if (res.data) {

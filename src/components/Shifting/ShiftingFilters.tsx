@@ -26,7 +26,7 @@ import {
 } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { dateQueryString, parsePhoneNumber } from "@/Utils/utils";
 
 const getDate = (value: any) =>
@@ -67,45 +67,54 @@ export default function ListFilter(props: any) {
     breathlessness_level: filter.breathlessness_level || "",
   });
 
-  const { loading: isOriginLoading } = useQuery(routes.getAnyFacility, {
-    prefetch: filter.origin_facility ? true : false,
-    pathParams: { id: filter.origin_facility },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          origin_facility_ref: filter.origin_facility ? "" : data,
-        });
-      }
+  const { loading: isOriginLoading } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      prefetch: filter.origin_facility ? true : false,
+      pathParams: { id: filter.origin_facility },
+      onResponse: ({ res, data }) => {
+        if (res && data) {
+          setFilterState({
+            origin_facility_ref: filter.origin_facility ? "" : data,
+          });
+        }
+      },
     },
-  });
+  );
 
-  const { loading: isShiftingLoading } = useQuery(routes.getAnyFacility, {
-    prefetch: filter.shifting_approving_facility ? true : false,
-    pathParams: { id: filter.shifting_approving_facility },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          shifting_approving_facility_ref: filter.shifting_approving_facility
-            ? ""
-            : data,
-        });
-      }
+  const { loading: isShiftingLoading } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      prefetch: filter.shifting_approving_facility ? true : false,
+      pathParams: { id: filter.shifting_approving_facility },
+      onResponse: ({ res, data }) => {
+        if (res && data) {
+          setFilterState({
+            shifting_approving_facility_ref: filter.shifting_approving_facility
+              ? ""
+              : data,
+          });
+        }
+      },
     },
-  });
+  );
 
-  const { loading: isAssignedLoading } = useQuery(routes.getAnyFacility, {
-    prefetch: filter.assigned_facility ? true : false,
-    pathParams: { id: filter.assigned_facility },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setFilterState({
-          assigned_facility_ref: filter.assigned_facility ? "" : data,
-        });
-      }
+  const { loading: isAssignedLoading } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      prefetch: filter.assigned_facility ? true : false,
+      pathParams: { id: filter.assigned_facility },
+      onResponse: ({ res, data }) => {
+        if (res && data) {
+          setFilterState({
+            assigned_facility_ref: filter.assigned_facility ? "" : data,
+          });
+        }
+      },
     },
-  });
+  );
 
-  useQuery(routes.userList, {
+  useTanStackQueryInstead(routes.userList, {
     query: { id: filter.assigned_to },
     prefetch: filter.assigned_to ? true : false,
     onResponse: ({ res, data }) => {

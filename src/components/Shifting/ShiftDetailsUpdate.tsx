@@ -41,7 +41,7 @@ import {
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 interface patientShiftProps {
@@ -152,13 +152,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     };
   }
 
-  const { loading: assignedUserLoading } = useQuery(routes.userList, {
-    query: { id: state.form.assigned_to },
-    prefetch: state.form.assigned_to ? true : false,
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data?.count) SetAssignedUser(data.results[0]);
+  const { loading: assignedUserLoading } = useTanStackQueryInstead(
+    routes.userList,
+    {
+      query: { id: state.form.assigned_to },
+      prefetch: state.form.assigned_to ? true : false,
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data?.count) SetAssignedUser(data.results[0]);
+      },
     },
-  });
+  );
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -281,7 +284,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     }
   };
 
-  useQuery(routes.getShiftDetails, {
+  useTanStackQueryInstead(routes.getShiftDetails, {
     pathParams: { id: props.id },
     onResponse: ({ res, data }) => {
       if (res?.ok && data) {

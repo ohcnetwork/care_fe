@@ -3,7 +3,7 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatDateTime, humanizeStrings } from "@/Utils/utils";
 
 interface ISamplePreviewProps {
@@ -56,7 +56,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
   let report: JSX.Element = <></>;
   let reportData: JSX.Element = <></>;
 
-  const { loading: isLoading, data: sampleData } = useQuery(
+  const { loading: isLoading, data: sampleData } = useTanStackQueryInstead(
     routes.sampleReport,
     {
       pathParams: {
