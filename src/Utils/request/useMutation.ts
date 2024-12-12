@@ -8,7 +8,10 @@ import {
 } from "@/Utils/request/types";
 import { mergeRequestOptions } from "@/Utils/request/utils";
 
-export default function useMutation<TData, TBody>(
+/**
+ * @deprecated use `useMutation` from `@tanstack/react-query` instead.
+ */
+export default function useDeprecatedMutation<TData, TBody>(
   route: MutationRoute<TData, TBody>,
   options: RequestOptions<TData, TBody>,
 ) {
@@ -30,7 +33,10 @@ export default function useMutation<TData, TBody>(
           : (overrides ?? options);
 
       setIsProcessing(true);
-      const response = await request(route, { ...resolvedOptions, controller });
+      const response = await request(route, {
+        ...resolvedOptions,
+        signal: controller.signal,
+      });
       if (response.error?.name !== "AbortError") {
         setResponse(response);
         setIsProcessing(false);

@@ -39,7 +39,7 @@ import {
 import { parseOptionId } from "@/common/utils";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatPatientAge, humanizeStrings } from "@/Utils/utils";
 
 const DischargedPatientsList = ({
@@ -48,7 +48,7 @@ const DischargedPatientsList = ({
   facility_external_id: string;
 }) => {
   const { t } = useTranslation();
-  const facilityQuery = useQuery(routes.getAnyFacility, {
+  const facilityQuery = useTanStackQueryInstead(routes.getAnyFacility, {
     pathParams: { id: facility_external_id },
   });
 
@@ -75,21 +75,21 @@ const DischargedPatientsList = ({
     }
   }, [qParams]);
 
-  const { data: districtData } = useQuery(routes.getDistrict, {
+  const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
     pathParams: {
       id: qParams.district,
     },
     prefetch: !!Number(qParams.district),
   });
 
-  const { data: LocalBodyData } = useQuery(routes.getLocalBody, {
+  const { data: LocalBodyData } = useTanStackQueryInstead(routes.getLocalBody, {
     pathParams: {
       id: qParams.lsgBody,
     },
     prefetch: !!Number(qParams.lsgBody),
   });
 
-  const { data: facilityAssetLocationData } = useQuery(
+  const { data: facilityAssetLocationData } = useTanStackQueryInstead(
     routes.getFacilityAssetLocation,
     {
       pathParams: {

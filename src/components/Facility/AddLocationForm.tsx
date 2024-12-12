@@ -12,7 +12,7 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface Props {
   facilityId: string;
@@ -36,7 +36,7 @@ export const AddLocationForm = ({ facilityId, locationId }: Props) => {
   const headerText = !locationId ? "Add Location" : "Update Location";
   const buttonText = !locationId ? "Add Location" : "Update Location";
 
-  const facilityQuery = useQuery(routes.getAnyFacility, {
+  const facilityQuery = useTanStackQueryInstead(routes.getAnyFacility, {
     pathParams: { id: facilityId },
     prefetch: !locationId,
     onResponse: ({ data }) => {
@@ -44,22 +44,25 @@ export const AddLocationForm = ({ facilityId, locationId }: Props) => {
     },
   });
 
-  const locationQuery = useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facility_external_id: facilityId,
-      external_id: locationId!,
+  const locationQuery = useTanStackQueryInstead(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: facilityId,
+        external_id: locationId!,
+      },
+      prefetch: !!locationId,
+      onResponse: ({ data }) => {
+        if (!data) return;
+        setFacilityName(data.facility?.name ?? "");
+        setName(data.name);
+        setLocationName(data.name);
+        setDescription(data.description);
+        setLocationType(data.location_type);
+        setMiddlewareAddress(data.middleware_address ?? "");
+      },
     },
-    prefetch: !!locationId,
-    onResponse: ({ data }) => {
-      if (!data) return;
-      setFacilityName(data.facility?.name ?? "");
-      setName(data.name);
-      setLocationName(data.name);
-      setDescription(data.description);
-      setLocationType(data.location_type);
-      setMiddlewareAddress(data.middleware_address ?? "");
-    },
-  });
+  );
 
   const validateForm = () => {
     let formValid = true;

@@ -19,13 +19,13 @@ import { RESPIRATORY_SUPPORT } from "@/common/constants";
 
 import { Warn } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { rangeValueDescription } from "@/Utils/utils";
 
 const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
   const { t } = useTranslation();
   const [facilityId, consultationId] = useSlugs("facility", "consultation");
-  const consultationQuery = useQuery(routes.getConsultation, {
+  const consultationQuery = useTanStackQueryInstead(routes.getConsultation, {
     pathParams: { id: consultationId },
   });
 
