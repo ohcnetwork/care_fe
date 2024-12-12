@@ -359,7 +359,7 @@ const AssetsList = () => {
               disabled={isDisabled}
               variant={"primary"}
               size={"lg"}
-              className="gap-2"
+              className="gap-2 w-full"
               onClick={() => {
                 if (qParams.facility) {
                   navigate(`/facility/${qParams.facility}/assets/new`);
@@ -382,7 +382,7 @@ const AssetsList = () => {
               variant={"primary"}
               size={"lg"}
               onClick={() => setIsScannerActive(true)}
-              className="gap-2"
+              className="gap-2 w-full"
             >
               <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
               QR
