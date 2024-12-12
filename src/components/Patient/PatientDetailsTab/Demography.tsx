@@ -104,7 +104,7 @@ export const Demography = (props: PatientProps) => {
   const EmergencyContact = (props: { number?: string; name?: string }) => (
     <div className="sm:col-span-2">
       <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-orange-300 bg-orange-50 p-4 sm:flex-row">
-        {/* Emergency Contact Section */}
+        {/* Emergency contact Section */}
         <div className="flex-1">
           <div className="text-sm font-normal leading-5 text-gray-600">
             {t("emergency_contact")}
