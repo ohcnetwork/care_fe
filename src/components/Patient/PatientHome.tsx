@@ -283,8 +283,8 @@ export const PatientHome = (props: {
                 </div>
               </div>
 
-              <div className=" flex gap-4 justify-between flex-wrap">
-                <div className="mt-4 flex gap-4">
+              <div className="mt-4 flex gap-4 justify-between flex-wrap">
+                <div className="flex gap-4">
                   <div>
                     <p className="text-xs font-normal leading-tight text-gray-600">
                       {t("facility")}:
@@ -366,7 +366,7 @@ export const PatientHome = (props: {
                 </div>
 
                 <div>
-                  <div className="ml-auto mt-4  flex flex-wrap gap-3">
+                  <div className="ml-auto mt-2 flex flex-wrap gap-3">
                     {!patientData?.last_consultation && (
                       <Chip
                         size="small"
