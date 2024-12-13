@@ -11,7 +11,7 @@ interface Props {
   show: boolean;
   handleOk: () => void;
   handleCancel: () => void;
-  selectedFacility: FacilityModel;
+  selectedFacility: FacilityModel | null | undefined;
   setSelected: (e: any) => void;
 }
 

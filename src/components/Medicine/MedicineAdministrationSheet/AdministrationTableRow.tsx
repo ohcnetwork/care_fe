@@ -17,7 +17,7 @@ import MedicineRoutes from "@/components/Medicine/routes";
 
 import useSlug from "@/hooks/useSlug";
 
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface Props {
@@ -40,7 +40,7 @@ export default function MedicineAdministrationTableRow({
   const [showAdminister, setShowAdminister] = useState(false);
   const [showDiscontinue, setShowDiscontinue] = useState(false);
 
-  const { data, loading, refetch } = useQuery(
+  const { data, loading, refetch } = useTanStackQueryInstead(
     MedicineRoutes.listAdministrations,
     {
       pathParams: { consultation },

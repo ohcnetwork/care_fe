@@ -12,7 +12,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { triggerGoal } from "@/Integrations/Plausible";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 import { PatientProps } from ".";
 import { PatientModel } from "../models";
@@ -29,20 +29,23 @@ const EncounterHistory = (props: PatientProps) => {
 
   const { t } = useTranslation();
 
-  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
-    pathParams: {
-      id,
+  const { loading: isLoading, refetch } = useTanStackQueryInstead(
+    routes.getPatient,
+    {
+      pathParams: {
+        id,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data) {
+          setPatientData(data);
+        }
+        triggerGoal("Patient Profile Viewed", {
+          facilityId: facilityId,
+          userId: authUser.id,
+        });
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setPatientData(data);
-      }
-      triggerGoal("Patient Profile Viewed", {
-        facilityId: facilityId,
-        userId: authUser.id,
-      });
-    },
-  });
+  );
 
   if (isLoading) {
     return <Loading />;

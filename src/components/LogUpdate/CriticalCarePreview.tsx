@@ -17,7 +17,7 @@ import PainChart from "@/components/LogUpdate/components/PainChart";
 import { DailyRoundsModel } from "@/components/Patient/models";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   ValueDescription,
   classNames,
@@ -34,7 +34,7 @@ type Props = {
 
 export default function CriticalCarePreview(props: Props) {
   const { t } = useTranslation();
-  const { data } = useQuery(routes.getDailyReport, {
+  const { data } = useTanStackQueryInstead(routes.getDailyReport, {
     pathParams: {
       consultationId: props.consultationId,
       id: props.id,

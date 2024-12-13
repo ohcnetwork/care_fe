@@ -8,7 +8,7 @@ import Pagination from "@/components/Common/Pagination";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
 export default function InventoryList(props: any) {
@@ -18,21 +18,27 @@ export default function InventoryList(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 14;
 
-  const { data: inventoryData } = useQuery(routes.getInventorySummary, {
-    pathParams: {
-      facility_external_id: facilityId,
+  const { data: inventoryData } = useTanStackQueryInstead(
+    routes.getInventorySummary,
+    {
+      pathParams: {
+        facility_external_id: facilityId,
+      },
+      query: {
+        limit,
+        offset,
+      },
+      prefetch: facilityId !== undefined,
     },
-    query: {
-      limit,
-      offset,
-    },
-    prefetch: facilityId !== undefined,
-  });
+  );
 
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: facilityId },
-    prefetch: !!facilityId,
-  });
+  const { data: facilityObject } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: { id: facilityId },
+      prefetch: !!facilityId,
+    },
+  );
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;

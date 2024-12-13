@@ -39,7 +39,7 @@ import dayjs from "@/Utils/dayjs";
 import { parseQueryParams } from "@/Utils/primitives";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { dateQueryString, parsePhoneNumber } from "@/Utils/utils";
 
 const formErrorKeys = [
@@ -171,12 +171,15 @@ const AssetCreate = (props: AssetProps) => {
     });
   }, [generalDetailsVisible, warrantyDetailsVisible, serviceDetailsVisible]);
 
-  const locationsQuery = useQuery(routes.listFacilityAssetLocation, {
-    pathParams: { facility_external_id: facilityId },
-    query: { limit: 1 },
-  });
+  const locationsQuery = useTanStackQueryInstead(
+    routes.listFacilityAssetLocation,
+    {
+      pathParams: { facility_external_id: facilityId },
+      query: { limit: 1 },
+    },
+  );
 
-  const assetQuery = useQuery(routes.getAsset, {
+  const assetQuery = useTanStackQueryInstead(routes.getAsset, {
     pathParams: { external_id: assetId! },
     prefetch: !!assetId,
     onResponse: ({ data: asset }) => {

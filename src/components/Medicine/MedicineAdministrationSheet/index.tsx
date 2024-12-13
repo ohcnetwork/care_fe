@@ -17,7 +17,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import useRangePagination from "@/hooks/useRangePagination";
 import useSlug from "@/hooks/useSlug";
 
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface Props {
   readonly?: boolean;
@@ -38,7 +38,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
     limit: 100,
   };
 
-  const { data, loading, refetch } = useQuery(
+  const { data, loading, refetch } = useTanStackQueryInstead(
     MedicineRoutes.listPrescriptions,
     {
       pathParams: { consultation },
@@ -46,15 +46,18 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
     },
   );
 
-  const discontinuedPrescriptions = useQuery(MedicineRoutes.listPrescriptions, {
-    pathParams: { consultation },
-    query: {
-      ...filters,
-      limit: 100,
-      discontinued: true,
+  const discontinuedPrescriptions = useTanStackQueryInstead(
+    MedicineRoutes.listPrescriptions,
+    {
+      pathParams: { consultation },
+      query: {
+        ...filters,
+        limit: 100,
+        discontinued: true,
+      },
+      prefetch: !showDiscontinued,
     },
-    prefetch: !showDiscontinued,
-  });
+  );
 
   const discontinuedCount = discontinuedPrescriptions.data?.count;
 

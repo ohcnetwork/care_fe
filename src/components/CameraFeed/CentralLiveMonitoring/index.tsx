@@ -12,7 +12,7 @@ import Page from "@/components/Common/Page";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export default function CentralLiveMonitoring(props: { facilityId: string }) {
   const [isFullscreen, setFullscreen] = useState(false);
@@ -20,11 +20,11 @@ export default function CentralLiveMonitoring(props: { facilityId: string }) {
 
   const [qParams] = useQueryParams();
 
-  const facilityQuery = useQuery(routes.getPermittedFacility, {
+  const facilityQuery = useTanStackQueryInstead(routes.getPermittedFacility, {
     pathParams: { id: props.facilityId },
   });
 
-  const { data, loading } = useQuery(routes.listAssets, {
+  const { data, loading } = useTanStackQueryInstead(routes.listAssets, {
     query: {
       ...qParams,
       limit,
