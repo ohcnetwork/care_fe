@@ -1,62 +1,82 @@
-import { useCallback, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo, useRef } from "react";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
+import request from "@/Utils/request/request";
 import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
-import useQuery, { QueryOptions } from "@/Utils/request/useQuery";
 
-export interface InfiniteQueryOptions<TItem>
-  extends QueryOptions<PaginatedResponse<TItem>> {
-  deduplicateBy: (item: TItem) => string | number;
-}
+import { QueryOptions } from "./useQuery";
+import { mergeRequestOptions } from "./utils";
 
-export function useInfiniteQuery<TItem>(
+/**
+ * @deprecated Use `useInfiniteQuery` from `@tanstack/react-query` instead.
+ */
+export function useTanStackInfiniteQueryInstead<TItem>(
   route: QueryRoute<PaginatedResponse<TItem>>,
-  options?: InfiniteQueryOptions<TItem>,
+  options?: QueryOptions<PaginatedResponse<TItem>>,
 ) {
-  const [items, setItems] = useState<TItem[]>([]);
-  const [totalCount, setTotalCount] = useState<number>();
-  const [offset, setOffset] = useState(0);
+  const overridesRef = useRef<QueryOptions<PaginatedResponse<TItem>>>();
 
-  const { refetch, loading, ...queryResponse } = useQuery(route, {
-    ...options,
-    query: {
-      ...(options?.query ?? {}),
-      offset,
+  // Ensure a unique key for the query
+  const key = useMemo(() => options?.key ?? Math.random(), [options?.key]);
+
+  const {
+    data: response,
+    fetchNextPage,
+    hasNextPage,
+    isFetching: isLoading,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: [route.path, options?.pathParams, options?.query, key],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const resolvedOptions = overridesRef.current
+        ? mergeRequestOptions(options || {}, overridesRef.current)
+        : options;
+
+      const response = await request(route, {
+        ...resolvedOptions,
+        query: {
+          ...resolvedOptions?.query,
+          offset: pageParam,
+        },
+        signal,
+      });
+
+      return {
+        data: response?.data ?? {
+          results: [],
+          next: null,
+          previous: null,
+          count: 0,
+        },
+      };
     },
-    onResponse: ({ data }) => {
-      if (!data) return;
-      const allItems = items.concat(data.results);
+    enabled: options?.prefetch ?? true,
+    refetchOnWindowFocus: false,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _, lastPageParam) => {
+      const totalResults = lastPage.data.count;
+      const currentResults = lastPage.data.results.length + lastPageParam;
+      if (currentResults < totalResults) {
+        return lastPageParam + RESULTS_PER_PAGE_LIMIT;
+      }
 
-      const deduplicatedItems = options?.deduplicateBy
-        ? Array.from(
-            allItems
-              .reduce(
-                (map, item) => map.set(options.deduplicateBy!(item), item),
-                new Map<string | number, TItem>(),
-              )
-              .values(),
-          )
-        : allItems;
-
-      setItems(deduplicatedItems);
-      setTotalCount(data.count);
+      return undefined;
     },
   });
 
-  const fetchNextPage = useCallback(async () => {
-    if (loading) return;
-
-    setOffset((prevOffset) => prevOffset + RESULTS_PER_PAGE_LIMIT);
-  }, [offset, loading]);
-
   return {
-    items,
-    loading,
+    data: response?.pages.flatMap((page) => page.data.results) || [],
+    loading: isLoading,
+    hasNextPage,
     fetchNextPage,
-    refetch,
-    totalCount,
-    hasMore: items.length < (totalCount ?? 0),
-    ...queryResponse,
+    isFetchingNextPage,
+    refetch: async (overrides?: QueryOptions<PaginatedResponse<TItem>>) => {
+      overridesRef.current = overrides;
+      await refetch();
+      return response!;
+    },
   };
 }

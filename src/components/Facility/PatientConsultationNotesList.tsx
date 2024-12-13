@@ -10,7 +10,7 @@ import {
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
-import { useInfiniteQuery } from "@/Utils/request/useInfiniteQuery";
+import { useTanStackInfiniteQueryInstead } from "@/Utils/request/useInfiniteQuery";
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
@@ -28,28 +28,29 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   const consultationId = useSlug("consultation") ?? "";
 
   const {
-    items: notes,
+    data: notes,
     loading,
     fetchNextPage,
-    hasMore,
-  } = useInfiniteQuery<PatientNotesModel>(routes.getPatientNotes, {
-    deduplicateBy: (note) => note.id,
-    pathParams: {
-      patientId: props.state.patientId || "",
+    hasNextPage,
+  } = useTanStackInfiniteQueryInstead<PatientNotesModel>(
+    routes.getPatientNotes,
+    {
+      pathParams: {
+        patientId: props.state.patientId || "",
+      },
+      query: {
+        consultation: consultationId,
+        thread,
+      },
     },
-    query: {
-      consultation: consultationId,
-      thread,
-    },
-    prefetch: true,
-  });
+  );
 
   useEffect(() => {
     setState((prevState: any) => ({
       ...prevState,
       notes,
     }));
-  }, [notes, setState]);
+  }, [loading]);
 
   if (loading && !state.notes.length) {
     return (
@@ -66,7 +67,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
       setReload={setReload}
       disableEdit={disableEdit}
       setReplyTo={setReplyTo}
-      hasMore={hasMore}
+      hasMore={hasNextPage}
     />
   );
 };
