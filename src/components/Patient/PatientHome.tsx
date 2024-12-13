@@ -2,8 +2,23 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Badge } from "@/components/ui/badge";
+
+import { Avatar } from "@/components/Common/Avatar";
+import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import { patientTabs } from "@/components/Patient/PatientDetailsTab";
+import {
+  AssignedToObjectModel,
+  PatientModel,
+  SampleTestModel,
+} from "@/components/Patient/models";
+import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -14,16 +29,13 @@ import {
   SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
+import { triggerGoal } from "@/Integrations/Plausible";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
-
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { triggerGoal } from "../../Integrations/Plausible";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useTanStackQueryInstead from "../../Utils/request/useQuery";
+import request from "@/Utils/request/request";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
@@ -32,14 +44,7 @@ import {
   isAntenatal,
   isPostPartum,
   relativeDate,
-} from "../../Utils/utils";
-import { Avatar } from "../Common/Avatar";
-import ButtonV2 from "../Common/ButtonV2";
-import Loading from "../Common/Loading";
-import Page from "../Common/Page";
-import { SkillModel, UserBareMinimum } from "../Users/models";
-import { patientTabs } from "./PatientDetailsTab";
-import { AssignedToObjectModel, PatientModel, SampleTestModel } from "./models";
+} from "@/Utils/utils";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
@@ -368,20 +373,21 @@ export const PatientHome = (props: {
                 <div>
                   <div className="ml-auto mt-2 flex flex-wrap gap-3">
                     {!patientData?.last_consultation && (
-                      <Chip
-                        size="small"
+                      <Badge
+                        variant="custom"
                         className="bg-blue-100 text-blue-800"
-                        text={t("Initial visit")}
-                      />
+                      >
+                        {t("Initial visit")}
+                      </Badge>
                     )}
                     {patientData.is_vaccinated && (
-                      <Chip
+                      <Badge
                         variant="custom"
-                        size="small"
                         className="bg-blue-100 text-blue-800"
                         startIcon="l-syringe"
-                        text={t("vaccinated")}
-                      />
+                      >
+                        {t("vaccinated")}
+                      </Badge>
                     )}
 
                     {patientData.gender === 2 && (
@@ -390,48 +396,39 @@ export const PatientHome = (props: {
                           isAntenatal(
                             patientData.last_menstruation_start_date,
                           ) && (
-                            <Chip
+                            <Badge
                               variant="custom"
-                              size="small"
                               className="border-pink-300 bg-pink-100 text-pink-600"
                               startIcon="l-baby-carriage"
-                              text={t("antenatal")}
-                            />
+                            >
+                              {t("antenatal")}
+                            </Badge>
                           )}
                         {isPostPartum(patientData.date_of_delivery) && (
-                          <Chip
+                          <Badge
                             variant="custom"
-                            size="small"
                             className="border-pink-300 bg-pink-100 text-pink-600"
                             startIcon="l-baby-carriage"
-                            text={t("post_partum")}
-                          />
+                          >
+                            {t("post_partum")}
+                          </Badge>
                         )}
                       </>
                     )}
                     {patientData.last_consultation?.is_telemedicine && (
-                      <Chip
-                        variant="alert"
-                        size="small"
-                        startIcon="l-phone"
-                        text={t("TELEMEDICINE")}
-                      />
+                      <Badge variant="alert" startIcon="l-phone">
+                        {t("TELEMEDICINE")}
+                      </Badge>
                     )}
                     {patientData.allergies &&
                       patientData.allergies.trim().length > 0 && (
-                        <Chip
-                          variant="danger"
-                          size="small"
-                          text={t("has_allergies")}
-                        />
+                        <Badge variant="danger">{t("has_allergies")}</Badge>
                       )}
                     {patientData.state_object &&
                       patientData.district_object && (
-                        <Chip
-                          variant="secondary"
-                          size="small"
-                          text={`${t("Location: ")} ${patientData?.district_object?.name}, ${patientData?.state_object?.name}`}
-                        />
+                        <Badge variant="secondary">
+                          {`${t("Location: ")} ${patientData?.district_object?.name}, ${patientData?.state_object?.name}`}
+                        </Badge>
                       )}
                   </div>
                 </div>
@@ -570,19 +567,15 @@ export const PatientHome = (props: {
             </section>
             <hr className="mb-2" />
             {patientData.allow_transfer ? (
-              <Chip
-                size="small"
-                startIcon="l-unlock"
-                text={t("transfer_allowed")}
-              />
+              <Badge variant="success" startIcon="l-unlock">
+                {t("transfer_allowed")}
+              </Badge>
             ) : (
-              <Chip
-                variant="warning"
-                startIcon="l-lock"
-                size="small"
-                text={t("transfer_blocked")}
-              />
+              <Badge variant="warning" startIcon="l-lock">
+                {t("transfer_blocked")}
+              </Badge>
             )}
+
             <div
               id="actions"
               className="my-2 flex h-full flex-col justify-between space-y-2"
