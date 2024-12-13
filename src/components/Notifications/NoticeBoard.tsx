@@ -28,12 +28,12 @@ export const NoticeBoard = () => {
             className="overflow-hidden rounded shadow-md my-1"
           >
             <div
-              className="text-justify text-lg flex mx-2 py-3 px-3"
+              className="text-justify text-lg flex mx-2 py-3 px-5"
               id="notification-message"
             >
               <CareIcon
                 icon="l-facebook-messenger"
-                className="text-xl mr-2 mt-1"
+                className="text-xl mr-6 mt-1"
               />
               <span className="font-mono text-md">{item.message} </span>
             </div>
