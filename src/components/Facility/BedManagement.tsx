@@ -19,7 +19,7 @@ import AuthorizeFor, { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface BedManagementProps {
   facilityId: string;
@@ -176,12 +176,15 @@ export const BedManagement = (props: BedManagementProps) => {
   const { qParams, resultsPerPage } = useFilters({ limit: 16 });
   const { t } = useTranslation();
 
-  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facility_external_id: facilityId,
-      external_id: locationId,
+  const { data: location } = useTanStackQueryInstead(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: facilityId,
+        external_id: locationId,
+      },
     },
-  });
+  );
 
   return (
     <PaginatedList

@@ -1,6 +1,8 @@
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import FacilityPage, {
+  FacilityData,
+} from "../../pageobject/Facility/FacilityCreation";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
@@ -59,6 +61,61 @@ describe("Facility Creation", () => {
   ];
   const triageErrorMessage = ["This field is required"];
   const facilityType = "Primary Health Centres";
+  const testFacilityData: FacilityData = {
+    basic: {
+      name: facilityName,
+      type: facilityType,
+      features: facilityFeature,
+      address: facilityAddress,
+      phoneNumber: facilityNumber,
+      location: "Kochi, Kerala",
+    },
+    location: {
+      pincode: "682001",
+      state: "Kerala",
+      district: "Ernakulam",
+      localBody: "Aluva",
+      ward: "4",
+    },
+    oxygen: {
+      capacity: oxygenCapacity,
+      expected: oxygenExpected,
+      bType: {
+        capacity: oxygenCapacity,
+        expected: oxygenExpected,
+      },
+      cType: {
+        capacity: oxygenCapacity,
+        expected: oxygenExpected,
+      },
+      dType: {
+        capacity: oxygenCapacity,
+        expected: oxygenExpected,
+      },
+    },
+    beds: [
+      {
+        type: "Oxygen Supported Bed",
+        totalCapacity: bedCapacity,
+        occupied: bedOccupancy,
+      },
+      {
+        type: "Ordinary Bed",
+        totalCapacity: bedCapacity,
+        occupied: bedOccupancy,
+      },
+    ],
+    doctors: [
+      {
+        specialization: "General Medicine",
+        count: doctorCapacity,
+      },
+      {
+        specialization: "Pulmonology",
+        count: doctorCapacity,
+      },
+    ],
+  };
 
   before(() => {
     loginPage.loginByRole("districtAdmin");
@@ -122,32 +179,12 @@ describe("Facility Creation", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.submitForm();
     cy.verifyErrorMessages(facilityErrorMessage);
-    facilityPage.fillFacilityName(facilityName);
-    facilityPage.selectFacilityType(facilityType);
-    facilityPage.clickfacilityfeatureoption();
-    facilityFeature.forEach((featureText) => {
-      cy.get("[role='option']").contains(featureText).click();
-    });
-    facilityPage.clickfacilityfeatureoption();
-    facilityPage.fillPincode("682001");
-    facilityPage.selectStateOnPincode("Kerala");
-    facilityPage.selectDistrictOnPincode("Ernakulam");
-    facilityPage.selectLocalBody("Aluva");
-    facilityPage.selectWard("4");
-    facilityPage.fillAddress(facilityAddress);
-    facilityPage.fillPhoneNumber(facilityNumber);
-    facilityPage.fillOxygenCapacity(oxygenCapacity);
-    facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
-    facilityPage.fillBTypeCylinderCapacity(oxygenCapacity);
-    facilityPage.fillExpectedBTypeCylinderRequirement(oxygenExpected);
-    facilityPage.fillCTypeCylinderCapacity(oxygenCapacity);
-    facilityPage.fillExpectedCTypeCylinderRequirement(oxygenExpected);
-    facilityPage.fillDTypeCylinderCapacity(oxygenCapacity);
-    facilityPage.fillExpectedDTypeCylinderRequirement(oxygenExpected);
-    facilityPage.selectLocation("Kochi, Kerala");
+    facilityPage.fillBasicDetails(testFacilityData.basic);
+    facilityPage.fillLocationDetails(testFacilityData.location);
+    facilityPage.fillOxygenDetails(testFacilityData.oxygen);
     facilityPage.submitForm();
     cy.closeNotification();
-    // create multiple bed capacity and verify card reflection
+    // add the bed capacity
     facilityPage.selectBedType("Oxygen Supported Bed");
     facilityPage.fillTotalCapacity(bedCapacity);
     facilityPage.fillCurrentlyOccupied(bedOccupancy);
@@ -210,27 +247,32 @@ describe("Facility Creation", () => {
   });
 
   it("Create a new facility with single bed and doctor capacity", () => {
-    facilityPage.visitCreateFacilityPage();
-    facilityPage.fillFacilityName(facilityName);
-    facilityPage.selectFacilityType(facilityType);
-    facilityPage.fillPincode("682001");
-    facilityPage.selectStateOnPincode("Kerala");
-    facilityPage.selectDistrictOnPincode("Ernakulam");
-    facilityPage.selectLocalBody("Aluva");
-    facilityPage.selectWard("4");
-    facilityPage.fillAddress(facilityAddress);
-    facilityPage.fillPhoneNumber(facilityNumber);
-    facilityPage.submitForm();
-    // add the bed capacity
-    facilityPage.selectBedType("Oxygen Supported Bed");
-    facilityPage.fillTotalCapacity(oxygenCapacity);
-    facilityPage.fillCurrentlyOccupied(oxygenExpected);
-    facilityPage.saveAndExitBedCapacityForm();
-    // add the doctor capacity
-    facilityPage.selectAreaOfSpecialization("General Medicine");
-    facilityPage.fillDoctorCount(doctorCapacity);
-    facilityPage.saveAndExitDoctorForm();
-    facilityPage.verifyfacilitynewurl();
+    const singleCapacityData = {
+      ...testFacilityData,
+      // Remove features, location, and oxygen that aren't used in this test
+      basic: {
+        ...testFacilityData.basic,
+        features: undefined,
+        location: undefined,
+      },
+      oxygen: undefined,
+      // Override with single bed capacity
+      beds: [
+        {
+          type: "Oxygen Supported Bed",
+          totalCapacity: oxygenCapacity,
+          occupied: oxygenExpected,
+        },
+      ],
+      // Override with single doctor capacity
+      doctors: [
+        {
+          specialization: "General Medicine",
+          count: doctorCapacity,
+        },
+      ],
+    };
+    facilityPage.createNewFacility(singleCapacityData);
     // verify the created facility details
     facilityPage.getFacilityName().contains(facilityName).should("be.visible");
     facilityPage
@@ -254,16 +296,20 @@ describe("Facility Creation", () => {
   });
 
   it("Create a new facility with no bed and doctor capacity", () => {
+    const noCapacityData = {
+      ...testFacilityData,
+      basic: {
+        ...testFacilityData.basic,
+        features: undefined,
+        location: undefined,
+      },
+      oxygen: undefined,
+      beds: [],
+      doctors: [],
+    };
     facilityPage.visitCreateFacilityPage();
-    facilityPage.fillFacilityName(facilityName);
-    facilityPage.selectFacilityType(facilityType);
-    facilityPage.fillPincode("682001");
-    facilityPage.selectStateOnPincode("Kerala");
-    facilityPage.selectDistrictOnPincode("Ernakulam");
-    facilityPage.selectLocalBody("Aluva");
-    facilityPage.selectWard("4");
-    facilityPage.fillAddress(facilityAddress);
-    facilityPage.fillPhoneNumber(facilityNumber);
+    facilityPage.fillBasicDetails(noCapacityData.basic);
+    facilityPage.fillLocationDetails(noCapacityData.location);
     facilityPage.submitForm();
     // add no bed capacity and verify form error message
     facilityPage.isVisibleselectBedType();

@@ -1,5 +1,4 @@
-import { isEmpty, omitBy } from "lodash-es";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FieldValidator } from "@/components/Form/FieldValidators";
@@ -17,7 +16,7 @@ import {
 
 import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
 import * as Notification from "@/Utils/Notifications";
-import { classNames } from "@/Utils/utils";
+import { classNames, isEmpty, omitBy } from "@/Utils/utils";
 
 type Props<T extends FormDetails> = {
   className?: string;
@@ -34,6 +33,9 @@ type Props<T extends FormDetails> = {
   onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
   hideRestoreDraft?: boolean;
+  resetFormValsOnCancel?: boolean;
+  resetFormValsOnSubmit?: boolean;
+  hideCancelButton?: boolean;
   additionalButtons?: {
     type: "submit" | "button";
     label: string;
@@ -44,11 +46,13 @@ type Props<T extends FormDetails> = {
 const Form = <T extends FormDetails>({
   asyncGetDefaults,
   validate,
+  hideCancelButton = false,
   ...props
 }: Props<T>) => {
   const initial = { form: props.defaults, errors: {} };
   const [isLoading, setIsLoading] = useState(!!asyncGetDefaults);
   const [state, dispatch] = useAutoSaveReducer<T>(formReducer, initial);
+  const formVals = useRef(props.defaults);
 
   const [isDirty, setIsDirty] = useState(false);
 
@@ -68,6 +72,7 @@ const Form = <T extends FormDetails>({
 
     if (validate) {
       const errors = omitBy(validate(state.form), isEmpty) as FormErrors<T>;
+
       if (Object.keys(errors).length) {
         dispatch({ type: "set_errors", errors });
 
@@ -85,7 +90,16 @@ const Form = <T extends FormDetails>({
         type: "set_errors",
         errors: { ...state.errors, ...errors },
       });
+    } else if (props.resetFormValsOnSubmit) {
+      dispatch({ type: "set_form", form: formVals.current });
     }
+  };
+
+  const handleCancel = () => {
+    if (props.resetFormValsOnCancel) {
+      dispatch({ type: "set_form", form: formVals.current });
+    }
+    props.onCancel?.();
   };
 
   const handleFieldChange = (
@@ -134,6 +148,11 @@ const Form = <T extends FormDetails>({
   return (
     <form
       onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          handleSubmit(e);
+        }
+      }}
       className={classNames(
         "mx-auto w-full",
         !props.noPadding && "px-8 py-5 md:px-16 md:py-11",
@@ -167,10 +186,12 @@ const Form = <T extends FormDetails>({
             <Consumer>{props.children}</Consumer>
           </div>
           <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
-            <Cancel
-              onClick={props.onCancel}
-              label={props.cancelLabel ?? "Cancel"}
-            />
+            {!hideCancelButton && (
+              <Cancel
+                onClick={handleCancel}
+                label={props.cancelLabel ?? "Cancel"}
+              />
+            )}
             <Submit
               id={props.submitBtnId ?? "submit"}
               data-testid="submit-button"

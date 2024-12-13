@@ -13,7 +13,7 @@ import MedicineRoutes from "@/components/Medicine/routes";
 
 import useSlug from "@/hooks/useSlug";
 
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 interface Props {
@@ -29,7 +29,7 @@ export default function PrescriptionsTable({
   const { t } = useTranslation();
   const [detailedViewFor, setDetailedViewFor] = useState<Prescription>();
 
-  const { data } = useQuery(MedicineRoutes.listPrescriptions, {
+  const { data } = useTanStackQueryInstead(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
     query: {
       dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",

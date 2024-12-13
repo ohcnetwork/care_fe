@@ -36,7 +36,7 @@ import {
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 import DischargeModal from "../Facility/DischargeModal";
@@ -245,7 +245,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     }
   };
 
-  useQuery(routes.getShiftDetails, {
+  useTanStackQueryInstead(routes.getShiftDetails, {
     pathParams: { id: props.id },
     onResponse: ({ res, data }) => {
       if (res?.ok && data) {

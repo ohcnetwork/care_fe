@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { t } from "i18next";
 import { navigate } from "raviger";
-import { LegacyRef, createRef, useEffect, useRef, useState } from "react";
+import { LegacyRef, createRef, useEffect, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -71,7 +71,7 @@ import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { Writable } from "@/Utils/types";
 import { classNames } from "@/Utils/utils";
 
@@ -235,7 +235,6 @@ type Props = {
 
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
-  const submitController = useRef<AbortController>();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState,
@@ -298,21 +297,24 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     bedStatusVisible,
   ]);
 
-  const { loading: loadingPatient } = useQuery(routes.getPatient, {
-    pathParams: { id: patientId },
-    onResponse: ({ data }) => {
-      if (!data) return;
-      if (isUpdate) {
-        dispatch({
-          type: "set_form",
-          form: { ...state.form, action: data.action },
-        });
-      }
-      setPatientName(data.name ?? "");
-      setFacilityName(data.facility_object?.name ?? "");
+  const { loading: loadingPatient } = useTanStackQueryInstead(
+    routes.getPatient,
+    {
+      pathParams: { id: patientId },
+      onResponse: ({ data }) => {
+        if (!data) return;
+        if (isUpdate) {
+          dispatch({
+            type: "set_form",
+            form: { ...state.form, action: data.action },
+          });
+        }
+        setPatientName(data.name ?? "");
+        setFacilityName(data.facility_object?.name ?? "");
+      },
+      prefetch: !!patientId,
     },
-    prefetch: !!patientId,
-  });
+  );
 
   useEffect(() => {
     dispatch({
@@ -348,7 +350,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     });
   };
 
-  const { loading: consultationLoading, refetch } = useQuery(
+  const { loading: consultationLoading, refetch } = useTanStackQueryInstead(
     routes.getConsultation,
     {
       pathParams: { id: id! },
@@ -741,7 +743,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         {
           pathParams: id ? { id } : undefined,
           body: data,
-          controllerRef: submitController,
         },
       );
 

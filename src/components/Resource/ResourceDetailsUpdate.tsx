@@ -7,6 +7,7 @@ import CircularProgress from "@/components/Common/CircularProgress";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 import Form from "@/components/Form/Form";
 import { FieldLabel } from "@/components/Form/FormFields/FormField";
 import RadioFormField from "@/components/Form/FormFields/RadioFormField";
@@ -21,9 +22,7 @@ import { RESOURCE_CHOICES } from "@/common/constants";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
-
-import UserAutocomplete from "../Common/UserAutocompleteFormField";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface resourceProps {
   id: string;
@@ -88,7 +87,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  const { loading: assignedUserLoading } = useQuery(routes.userList);
+  const { loading: assignedUserLoading } = useTanStackQueryInstead(
+    routes.userList,
+  );
 
   const validateForm = (form: typeof initForm) => {
     const errors = { ...initError };
@@ -114,17 +115,20 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     return validForm;
   };
 
-  const { data: resourceDetails } = useQuery(routes.getResourceDetails, {
-    pathParams: { id: props.id },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        const d = data;
-        d["status"] = qParams.status || data.status;
-        dispatch({ type: "set_form", form: d });
-      }
-      setIsLoading(false);
+  const { data: resourceDetails } = useTanStackQueryInstead(
+    routes.getResourceDetails,
+    {
+      pathParams: { id: props.id },
+      onResponse: ({ res, data }) => {
+        if (res && data) {
+          const d = data;
+          d["status"] = qParams.status || data.status;
+          dispatch({ type: "set_form", form: d });
+        }
+        setIsLoading(false);
+      },
     },
-  });
+  );
 
   const handleSubmit = async (form: typeof initForm) => {
     const validForm = validateForm(form);
