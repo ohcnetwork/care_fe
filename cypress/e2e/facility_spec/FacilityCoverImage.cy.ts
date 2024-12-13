@@ -20,7 +20,7 @@ const rolesAndFacility: IRoleAndFacility[] = [
   },
 ];
 
-describe("Facility Image Upload Functionality", () => {
+describe("Facility Cover Image Upload Functionality", () => {
   const loginPage = new LoginPage();
   const facilityPage = new FacilityPage();
   const facilityHome = new FacilityHome();
@@ -42,18 +42,12 @@ describe("Facility Image Upload Functionality", () => {
       facilityPage.visitAlreadyCreatedFacility();
     });
 
-    it(`Upload and Verify Image Upload Functionality as ${role}`, () => {
+    it(`Upload and Verify Cover Image Upload Functionality as ${role}`, () => {
+      // Test Visibility of Pop-up
       facilityManage.clickCoverImage();
       facilityManage.verifyUploadButtonVisible();
       facilityManage.clickCancelCoverImage();
-      facilityManage.interceptImageUploadRequest();
-      facilityManage.clickCoverImage();
-      facilityManage.uploadCoverImage("facility-cover-image.jpg");
-      facilityManage.clickSaveCoverImage();
-      facilityManage.verifySuccessMessageVisibilityAndContent(
-        successUploadNotificationText,
-      );
-      facilityManage.verifyImageUploadRequest();
+      // Test Functionality of Upload Cover Image
       facilityManage.interceptImageUploadRequest();
       facilityManage.clickCoverImage();
       facilityManage.uploadCoverImage("facility-cover-image.jpg");
@@ -62,6 +56,16 @@ describe("Facility Image Upload Functionality", () => {
       facilityManage.verifySuccessMessageVisibilityAndContent(
         successUploadNotificationText,
       );
+      // Test Edit Cover Image Functionality
+      facilityManage.interceptImageUploadRequest();
+      facilityManage.clickCoverImage();
+      facilityManage.uploadCoverImage("facility-cover-image.jpg");
+      facilityManage.clickSaveCoverImage();
+      facilityManage.verifyImageUploadRequest();
+      facilityManage.verifySuccessMessageVisibilityAndContent(
+        successUploadNotificationText,
+      );
+      // Test Delete Cover Image Functionality
       facilityManage.clickCoverImage();
       facilityManage.interceptImageDeleteRequest();
       facilityManage.clickDeleteCoverImage();
