@@ -42,7 +42,7 @@ describe("Facility Cover Image Upload Functionality", () => {
       facilityPage.visitAlreadyCreatedFacility();
     });
 
-    it(`Upload and Verify Cover Image Upload Functionality as ${role}`, () => {
+    it(`Upload and Verify Cover Image Upload Functionality Role:${role}`, () => {
       // Test Visibility of Pop-up
       facilityManage.clickCoverImage();
       facilityManage.verifyUploadButtonVisible();
