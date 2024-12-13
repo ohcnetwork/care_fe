@@ -10,7 +10,7 @@ import HCXPolicyValidator from "@/components/HCX/validators";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface Props {
   patient: string;
@@ -31,7 +31,7 @@ export default function PatientInsuranceDetailsEditor({
   const [insuranceDetailsError, setInsuranceDetailsError] = useState<string>();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  useQuery(routes.hcx.policies.list, {
+  useTanStackQueryInstead(routes.hcx.policies.list, {
     query: { patient },
     onResponse(res) {
       if (res?.res?.ok && res.data) {

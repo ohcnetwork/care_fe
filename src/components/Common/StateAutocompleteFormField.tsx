@@ -3,14 +3,14 @@ import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
 import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 type Props = FormFieldBaseProps<StateModel["id"]> & {
   placeholder?: string;
 };
 
 export default function StateAutocompleteFormField(props: Props) {
-  const { data, loading } = useQuery(routes.statesList);
+  const { data, loading } = useTanStackQueryInstead(routes.statesList);
 
   return (
     <AutocompleteFormField

@@ -19,7 +19,7 @@ import { PrescriptionFormValidator } from "@/components/Medicine/validators";
 import useSlug from "@/hooks/useSlug";
 
 import { Success } from "@/Utils/Notifications";
-import useMutation from "@/Utils/request/useMutation";
+import useDeprecatedMutation from "@/Utils/request/useMutation";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
@@ -27,7 +27,7 @@ export default function CreatePrescriptionForm(props: {
 }) {
   const { t } = useTranslation();
   const consultation = useSlug("consultation");
-  const mutation = useMutation(MedicineRoutes.createPrescription, {
+  const mutation = useDeprecatedMutation(MedicineRoutes.createPrescription, {
     pathParams: { consultation },
   });
 

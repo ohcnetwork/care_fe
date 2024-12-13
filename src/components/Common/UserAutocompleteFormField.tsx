@@ -11,7 +11,7 @@ import { UserBareMinimum } from "@/components/Users/models";
 import { UserRole } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   classNames,
   formatName,
@@ -42,7 +42,7 @@ export default function UserAutocomplete(props: UserSearchProps) {
   const [query, setQuery] = useState("");
   const [disabled, setDisabled] = useState(false);
 
-  const { data, loading } = useQuery(routes.userList, {
+  const { data, loading } = useTanStackQueryInstead(routes.userList, {
     query: {
       home_facility: props.homeFacility,
       user_type: props.userType,
@@ -112,7 +112,7 @@ export const LinkedFacilityUsers = (props: LinkedFacilitySearchProps) => {
 
   const [query, setQuery] = useState("");
 
-  const { data, loading } = useQuery(routes.getFacilityUsers, {
+  const { data, loading } = useTanStackQueryInstead(routes.getFacilityUsers, {
     pathParams: { facility_id: props.facilityId },
     query: {
       user_type: props.userType,

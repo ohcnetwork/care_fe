@@ -14,12 +14,12 @@ import { GENDER_TYPES, TEST_TYPE_CHOICES } from "@/common/constants";
 
 import { DetailRoute } from "@/Routers/types";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 export const SampleDetails = ({ id }: DetailRoute) => {
   const { t } = useTranslation();
-  const { loading: isLoading, data: sampleDetails } = useQuery(
+  const { loading: isLoading, data: sampleDetails } = useTanStackQueryInstead(
     routes.getTestSample,
     {
       pathParams: {
@@ -265,7 +265,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
   const renderFlow = (flow: FlowModel) => {
     return (
       <Card key={flow.id}>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="mr-3 p-4 text-black md:mr-8 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">
               {t("status")}:{" "}
@@ -323,16 +323,16 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <div className="text-sm text-muted-foreground">
                 {t("status")}:{" "}
               </div>
-              <Badge variant="outline" className="font-semibold">
-                {sampleDetails?.status}
+              <Badge variant="outline" className="font-semibold uppercase">
+                {t(`SAMPLE_TEST_HISTORY__${sampleDetails?.status}`)}
               </Badge>
             </div>
             <div className="space-y-1 sm:text-right flex gap-2 items-center ">
               <div className="text-sm text-muted-foreground">
                 {t("result")}:{" "}
               </div>
-              <Badge variant="secondary" className="font-semibold">
-                {sampleDetails?.result}
+              <Badge variant="secondary" className="font-semibold uppercase">
+                {t(`SAMPLE_TEST_RESULT__${sampleDetails?.result}`)}
               </Badge>
             </div>
           </div>
@@ -540,7 +540,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <h4 className="mt-8">{t("sample_test_history")}</h4>
         {sampleDetails?.flow &&
           sampleDetails.flow.map((flow: FlowModel) => (
-            <div key={flow.id} className="mb-2">
+            <div key={flow.id} className="mb-2 py-2">
               {renderFlow(flow)}
             </div>
           ))}

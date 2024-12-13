@@ -45,7 +45,7 @@ import { CameraFeedPermittedUserTypes } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { sleep } from "@/Utils/utils";
 
 import { patientRegisterAuth } from "../Patient/PatientRegister";
@@ -73,7 +73,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
     data: facilityData,
     loading: isLoading,
     refetch: facilityFetch,
-  } = useQuery(routes.getPermittedFacility, {
+  } = useTanStackQueryInstead(routes.getPermittedFacility, {
     pathParams: {
       id: facilityId,
     },
@@ -84,14 +84,14 @@ export const FacilityHome = ({ facilityId }: Props) => {
     },
   });
 
-  const spokesQuery = useQuery(routes.getFacilitySpokes, {
+  const spokesQuery = useTanStackQueryInstead(routes.getFacilitySpokes, {
     pathParams: {
       id: facilityId,
     },
     silent: true,
   });
 
-  const hubsQuery = useQuery(routes.getFacilityHubs, {
+  const hubsQuery = useTanStackQueryInstead(routes.getFacilityHubs, {
     pathParams: {
       id: facilityId,
     },
@@ -525,10 +525,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
         </div>
       </div>
 
-      <FacilityHomeTriage
-        facilityId={facilityId}
-        NonReadOnlyUsers={NonReadOnlyUsers}
-      />
+      <FacilityHomeTriage facilityId={facilityId} />
     </Page>
   );
 };

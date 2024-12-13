@@ -6,13 +6,15 @@ import ButtonV2, { CommonButtonProps } from "@/components/Common/ButtonV2";
 import Pagination from "@/components/Common/Pagination";
 
 import { PaginatedResponse, QueryRoute } from "@/Utils/request/types";
-import useQuery, { QueryOptions } from "@/Utils/request/useQuery";
+import useTanStackQueryInstead, {
+  QueryOptions,
+} from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
 const DEFAULT_PER_PAGE_LIMIT = 14;
 
 interface PaginatedListContext<TItem>
-  extends ReturnType<typeof useQuery<PaginatedResponse<TItem>>> {
+  extends ReturnType<typeof useTanStackQueryInstead<PaginatedResponse<TItem>>> {
   items: TItem[];
   perPage: number;
   currentPage: number;
@@ -37,11 +39,11 @@ interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   initialPage?: number;
   onPageChange?: (page: number) => void;
   queryCB?: (
-    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
+    query: ReturnType<typeof useTanStackQueryInstead<PaginatedResponse<TItem>>>,
   ) => void;
   children: (
     ctx: PaginatedListContext<TItem>,
-    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
+    query: ReturnType<typeof useTanStackQueryInstead<PaginatedResponse<TItem>>>,
   ) => JSX.Element | JSX.Element[];
 }
 
@@ -59,7 +61,7 @@ export default function PaginatedList<TItem extends object>({
     queryOptions.onPageChange?.(page);
   };
 
-  const query = useQuery(route, {
+  const query = useTanStackQueryInstead(route, {
     ...queryOptions,
     query: {
       ...queryOptions.query,
