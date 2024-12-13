@@ -9,6 +9,8 @@ import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
+import { Avatar } from "../Common/Avatar";
+
 export const NoticeBoard = () => {
   const { t } = useTranslation();
   const { data, loading } = useTanStackQueryInstead(routes.getNotifications, {
@@ -36,16 +38,21 @@ export const NoticeBoard = () => {
               <span className="font-mono text-md">{item.message} </span>
             </div>
 
-            <div className="bg-gray-200 py-2">
-              <div className="text-md my-1 text-secondary-700 mx-2 px-3">
-                <CareIcon icon="l-user" className="mr-2" />
-                {formatName(item.caused_by)} -{" "}
-                <span className="font-bold text-primary-700">
-                  {item.caused_by.user_type}
-                </span>
-              </div>
-              <div className="text-xs text-secondary-900 mx-2 px-3 font-medium">
-                {t("on")}: {formatDateTime(item.created_date)}
+            <div className="bg-gray-200 py-2 flex items-center ">
+              <Avatar
+                name={item.caused_by.user_type || ""}
+                className="border-0 border-b border-b-secondary-300 rounded-full h-10 w-10 ml-5"
+              />
+              <div className="text-md my-1 text-secondary-700  px-3">
+                <div className="flex items-center">
+                  {formatName(item.caused_by)} -{" "}
+                  <span className="font-bold text-primary-700 ml-1">
+                    {item.caused_by.user_type}
+                  </span>
+                </div>
+                <div className="text-xs text-secondary-900 font-medium ">
+                  {t("on")}: {formatDateTime(item.created_date)}
+                </div>
               </div>
             </div>
           </div>
