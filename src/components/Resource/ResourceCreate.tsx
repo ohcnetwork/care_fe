@@ -29,7 +29,7 @@ import { phonePreg } from "@/common/validation";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 import CircularProgress from "../Common/CircularProgress";
@@ -149,12 +149,15 @@ export default function ResourceCreate(props: resourceProps) {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: String(facilityId) },
-    prefetch: !!facilityId,
-  });
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      prefetch: facilityId !== undefined,
+      pathParams: { id: String(facilityId) },
+    },
+  );
 
-  const resourceQuery = useQuery(routes.getResourceDetails, {
+  const resourceQuery = useTanStackQueryInstead(routes.getResourceDetails, {
     pathParams: {
       id: resourceId!,
     },
@@ -181,9 +184,12 @@ export default function ResourceCreate(props: resourceProps) {
     },
   });
 
-  const { loading: assignedUserLoading } = useQuery(routes.userList, {
-    prefetch: !!resourceId,
-  });
+  const { loading: assignedUserLoading } = useTanStackQueryInstead(
+    routes.userList,
+    {
+      prefetch: !!resourceId,
+    },
+  );
 
   const ResourceFormValidator = (
     form: ResourceData,

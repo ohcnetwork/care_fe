@@ -12,7 +12,7 @@ import { useMessageListener } from "@/hooks/useMessageListener";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface Props {
   className?: string;
@@ -34,7 +34,9 @@ export default function HCXPolicyEligibilityCheck({
     refetch,
     data: policiesResponse,
     loading,
-  } = useQuery(routes.hcx.policies.list, { query: { patient } });
+  } = useTanStackQueryInstead(routes.hcx.policies.list, {
+    query: { patient },
+  });
 
   useMessageListener((data) => {
     if (

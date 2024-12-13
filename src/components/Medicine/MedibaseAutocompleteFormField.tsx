@@ -11,7 +11,7 @@ import {
 import { MedibaseMedicine } from "@/components/Medicine/models";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { mergeQueryOptions } from "@/Utils/utils";
 
 export default function MedibaseAutocompleteFormField(
@@ -22,9 +22,12 @@ export default function MedibaseAutocompleteFormField(
   const [query, setQuery] = useState("");
   const [type, setType] = useState<MedibaseMedicine["type"]>();
 
-  const { data, loading } = useQuery(routes.listMedibaseMedicines, {
-    query: { query, type },
-  });
+  const { data, loading } = useTanStackQueryInstead(
+    routes.listMedibaseMedicines,
+    {
+      query: { query, type },
+    },
+  );
 
   return (
     <FormField

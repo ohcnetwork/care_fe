@@ -17,7 +17,7 @@ import { SPOKE_RELATION_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export interface SpokeFacilityEditorProps {
   facility: Omit<FacilityModel, "id"> & { id: string };
@@ -28,7 +28,7 @@ export default function SpokeFacilityEditor(props: SpokeFacilityEditorProps) {
 
   const { t } = useTranslation();
 
-  const spokesQuery = useQuery(routes.getFacilitySpokes, {
+  const spokesQuery = useTanStackQueryInstead(routes.getFacilitySpokes, {
     pathParams: {
       id: facility.id,
     },
