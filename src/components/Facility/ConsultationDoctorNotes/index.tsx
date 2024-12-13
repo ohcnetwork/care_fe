@@ -23,7 +23,7 @@ import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, isAppleDevice, keysOf } from "@/Utils/utils";
 
 interface ConsultationDoctorNotesProps {
@@ -90,7 +90,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     }
   };
 
-  useQuery(routes.getPatient, {
+  useTanStackQueryInstead(routes.getPatient, {
     pathParams: { id: patientId },
     onResponse: ({ data }) => {
       if (data) {

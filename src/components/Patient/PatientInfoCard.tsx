@@ -36,7 +36,7 @@ import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   classNames,
   formatDate,
@@ -123,7 +123,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
 
     return false;
   };
-  const skillsQuery = useQuery(routes.userListSkill, {
+  const skillsQuery = useTanStackQueryInstead(routes.userListSkill, {
     pathParams: {
       username: consultation?.treating_physician_object?.username ?? "",
     },

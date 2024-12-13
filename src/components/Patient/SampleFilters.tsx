@@ -16,7 +16,7 @@ import {
 } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
@@ -44,15 +44,18 @@ export default function UserFilter(props: any) {
     onChange(data);
   };
 
-  const { loading: isFacilityLoading } = useQuery(routes.getAnyFacility, {
-    pathParams: {
-      id: filter.facility,
+  const { loading: isFacilityLoading } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: {
+        id: filter.facility,
+      },
+      prefetch: !!filter.facility,
+      onResponse: ({ data }) => {
+        setFilterState({ ...filterState, facility_ref: data });
+      },
     },
-    prefetch: !!filter.facility,
-    onResponse: ({ data }) => {
-      setFilterState({ ...filterState, facility_ref: data });
-    },
-  });
+  );
 
   return (
     <FiltersSlideover

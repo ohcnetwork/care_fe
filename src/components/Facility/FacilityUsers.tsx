@@ -9,7 +9,7 @@ import UserListView from "@/components/Users/UserListAndCard";
 import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export default function FacilityUsers(props: { facilityId: number }) {
   const { t } = useTranslation();
@@ -20,16 +20,18 @@ export default function FacilityUsers(props: { facilityId: number }) {
   const [activeTab, setActiveTab] = useState(0);
   const { facilityId } = props;
 
-  const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    pathParams: {
-      id: facilityId,
-    },
-    prefetch: facilityId !== undefined,
-  });
-
-  const { data: userListData, loading: userListLoading } = useQuery(
-    routes.getFacilityUsers,
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
     {
+      pathParams: {
+        id: facilityId,
+      },
+      prefetch: facilityId !== undefined,
+    },
+  );
+
+  const { data: userListData, loading: userListLoading } =
+    useTanStackQueryInstead(routes.getFacilityUsers, {
       query: {
         limit: resultsPerPage,
         offset: (
@@ -39,8 +41,7 @@ export default function FacilityUsers(props: { facilityId: number }) {
       },
       pathParams: { facility_id: facilityId },
       prefetch: facilityId !== undefined,
-    },
-  );
+    });
 
   return (
     <Page
