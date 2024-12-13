@@ -50,8 +50,6 @@ export const newUserFields: Array<keyof UserForm> = [
   "qualification",
   "doctor_experience_commenced_on",
   "doctor_medical_council_registration",
-  "weekly_working_hours",
-  "video_connect_link",
 ];
 
 export const editUserFields: Array<keyof UserForm> = [
