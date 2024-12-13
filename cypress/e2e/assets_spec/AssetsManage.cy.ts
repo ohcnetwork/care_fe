@@ -105,7 +105,7 @@ describe("Asset", () => {
   });
 
   it("Verify Facility Asset Page Redirection", () => {
-    facilityHome.navigateToFacilityHomepage(); //Facility page
+    facilityHome.navigateToFacilityHomepage();
     facilityHome.typeFacilitySearch(fillFacilityName);
     advanceFilters.verifyFilterBadgePresence(
       "Facility/District Name",
