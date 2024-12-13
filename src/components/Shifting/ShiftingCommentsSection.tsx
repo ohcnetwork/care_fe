@@ -47,6 +47,17 @@ const CommentSection = (props: CommentSectionProps) => {
     >
       {(_, query) => (
         <div className="flex w-full flex-col">
+          <div className="w-full">
+            <PaginatedList.WhenLoading>
+              <CircularProgress />
+            </PaginatedList.WhenLoading>
+            <PaginatedList.Items<CommentModel>>
+              {(item) => <Comment {...item} />}
+            </PaginatedList.Items>
+            <div className="flex w-full items-center justify-center">
+              <PaginatedList.Paginator hideIfSinglePage />
+            </div>
+          </div>
           <textarea
             rows={3}
             value={commentBox}
@@ -65,17 +76,6 @@ const CommentSection = (props: CommentSectionProps) => {
             >
               {t("post_your_comment")}
             </ButtonV2>
-          </div>
-          <div className="w-full">
-            <PaginatedList.WhenLoading>
-              <CircularProgress />
-            </PaginatedList.WhenLoading>
-            <PaginatedList.Items<CommentModel>>
-              {(item) => <Comment {...item} />}
-            </PaginatedList.Items>
-            <div className="flex w-full items-center justify-center">
-              <PaginatedList.Paginator hideIfSinglePage />
-            </div>
           </div>
         </div>
       )}

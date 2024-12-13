@@ -7,6 +7,7 @@ import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientNotes from "@/components/Patient/PatientNotes";
 import { PatientRegister } from "@/components/Patient/PatientRegister";
+import ShiftDetails from "@/components/Shifting/ShiftDetails";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 
@@ -39,6 +40,9 @@ const PatientRoutes: AppRoutes = {
     facilityId,
     patientId,
   }) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
+  "/facility/:facilityId/patient/:patientId/shift/:shiftId": ({ shiftId }) => (
+    <ShiftDetails id={shiftId} />
+  ),
   "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,
