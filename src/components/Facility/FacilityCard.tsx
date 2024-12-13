@@ -106,7 +106,7 @@ export const FacilityCard = (props: {
                             {t("live_patients_total_beds")}
                           </span>{" "}
                           <CareIcon icon="l-bed" />
-                          <dt>
+                          <dt data-test-id="occupancy-badge-text">
                             {t("occupancy")}: {facility.patient_count} /{" "}
                             {facility.bed_count}{" "}
                           </dt>

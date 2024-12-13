@@ -9,12 +9,12 @@ import Page from "@/components/Common/Page";
 import CommentSection from "@/components/Resource/ResourceCommentSection";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatDateTime, formatName } from "@/Utils/utils";
 
 export default function ResourceDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
-  const { data, loading } = useQuery(routes.getResourceDetails, {
+  const { data, loading } = useTanStackQueryInstead(routes.getResourceDetails, {
     pathParams: { id: props.id },
     onResponse: ({ res, data }) => {
       if (!res && !data) {

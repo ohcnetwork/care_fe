@@ -18,6 +18,10 @@ class PatientHome {
     cy.wait("@getPatients").its("response.statusCode").should("eq", 200);
   }
 
+  typePatientName(patientName: string) {
+    cy.typeAndSelectOption("input[name='name']", patientName);
+  }
+
   typePatientCreatedBeforeDate(startDate: string) {
     cy.clickAndTypeDate("input[name='created_date_start']", startDate);
   }

@@ -23,7 +23,7 @@ import { triggerGoal } from "../../Integrations/Plausible";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import * as Notification from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
+import useTanStackQueryInstead from "../../Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
@@ -75,22 +75,27 @@ export const PatientHome = (props: {
 
   const initErr: any = {};
   const errors = initErr;
-  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
-    pathParams: {
-      id,
+  const { loading: isLoading, refetch } = useTanStackQueryInstead(
+    routes.getPatient,
+    {
+      pathParams: {
+        id,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data) {
+          setPatientData(data);
+        }
+        triggerGoal("Patient Profile Viewed", {
+          facilityId: facilityId,
+          userId: authUser.id,
+        });
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setPatientData(data);
-      }
-      triggerGoal("Patient Profile Viewed", {
-        facilityId: facilityId,
-        userId: authUser.id,
-      });
-    },
-  });
+  );
 
   const handleAssignedVolunteer = async () => {
+    const previousVolunteerId = patientData?.assigned_to;
+
     const { res, data } = await request(routes.patchPatient, {
       pathParams: {
         id: patientData.id as string,
@@ -99,25 +104,34 @@ export const PatientHome = (props: {
         assigned_to: (assignedVolunteer as UserBareMinimum)?.id || null,
       },
     });
+
     if (res?.ok && data) {
       setPatientData(data);
-      if (!assignedVolunteer) {
+
+      if (!previousVolunteerId && assignedVolunteer) {
         Notification.Success({
           msg: t("volunteer_assigned"),
         });
-      } else {
+      } else if (previousVolunteerId && assignedVolunteer) {
+        Notification.Success({
+          msg: t("volunteer_update"),
+        });
+      } else if (!assignedVolunteer) {
         Notification.Success({
           msg: t("volunteer_unassigned"),
         });
       }
+
       refetch();
     }
+
     setOpenAssignVolunteerDialog(false);
+
     if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
   };
 
   const consultation = patientData?.last_consultation;
-  const skillsQuery = useQuery(routes.userListSkill, {
+  const skillsQuery = useTanStackQueryInstead(routes.userListSkill, {
     pathParams: {
       username: consultation?.treating_physician_object?.username ?? "",
     },
@@ -225,7 +239,10 @@ export const PatientHome = (props: {
                       />
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold capitalize text-gray-950">
+                      <h1
+                        id="patient-name"
+                        className="text-xl font-bold capitalize text-gray-950"
+                      >
                         {patientData.name}
                       </h1>
                       <h3 className="text-sm font-medium text-gray-600">
@@ -243,6 +260,7 @@ export const PatientHome = (props: {
                           patientData?.last_consultation?.discharge_date) && (
                           <div>
                             <ButtonV2
+                              id="create-consultation"
                               className="w-full"
                               size="default"
                               onClick={() =>
@@ -344,13 +362,14 @@ export const PatientHome = (props: {
                       text={t("TELEMEDICINE")}
                     />
                   )}
-                  {patientData.allergies && (
-                    <Chip
-                      variant="danger"
-                      size="small"
-                      text={`${t("allergies")} ${patientData.allergies.length}`}
-                    />
-                  )}
+                  {patientData.allergies &&
+                    patientData.allergies.trim().length > 0 && (
+                      <Chip
+                        variant="danger"
+                        size="small"
+                        text={t("has_allergies")}
+                      />
+                    )}
                 </div>
               </div>
 
@@ -526,7 +545,9 @@ export const PatientHome = (props: {
                         >
                           <span className="flex w-full items-center justify-start gap-2">
                             <CareIcon icon="l-users-alt" className="text-lg" />{" "}
-                            {t("assign_to_volunteer")}
+                            {patientData.assigned_to
+                              ? t("update_volunteer")
+                              : t("assign_to_volunteer")}
                           </span>
                         </ButtonV2>
                       </div>
@@ -709,7 +730,11 @@ export const PatientHome = (props: {
             />
           </div>
         }
-        action={t("assign")}
+        action={
+          assignedVolunteer || !patientData.assigned_to
+            ? t("assign")
+            : t("unassign")
+        }
         onConfirm={handleAssignedVolunteer}
       />
     </Page>

@@ -1,10 +1,10 @@
-import { camelCase, capitalize, startCase } from "lodash-es";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import Card from "@/CAREUI/display/Card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { FileUpload } from "@/components/Files/FileUpload";
@@ -14,12 +14,12 @@ import { GENDER_TYPES, TEST_TYPE_CHOICES } from "@/common/constants";
 
 import { DetailRoute } from "@/Routers/types";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 export const SampleDetails = ({ id }: DetailRoute) => {
   const { t } = useTranslation();
-  const { loading: isLoading, data: sampleDetails } = useQuery(
+  const { loading: isLoading, data: sampleDetails } = useTanStackQueryInstead(
     routes.getTestSample,
     {
       pathParams: {
@@ -265,16 +265,16 @@ export const SampleDetails = ({ id }: DetailRoute) => {
   const renderFlow = (flow: FlowModel) => {
     return (
       <Card key={flow.id}>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="mr-3 p-4 text-black md:mr-8 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">
               {t("status")}:{" "}
             </span>{" "}
-            {startCase(camelCase(flow.status))}
+            <span>{t(`SAMPLE_TEST_HISTORY__${flow.status}`) || "Unknown"}</span>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">{t("label")}:</span>{" "}
-            {capitalize(flow.notes)}
+            <span className="capitalize">{flow.notes}</span>
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
@@ -305,169 +305,230 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       options={
         sampleDetails?.patient && (
           <div className="my-2 flex justify-center md:justify-end">
-            <ButtonV2
-              href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
-            >
-              {t("icmr_specimen_referral_form")}
-            </ButtonV2>
+            <Button asChild variant={"primary"}>
+              <Link
+                href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
+              >
+                {t("icmr_specimen_referral_form")}
+              </Link>
+            </Button>
           </div>
         )
       }
     >
-      <Card>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <span className="font-semibold capitalize leading-relaxed">
-              {t("status")}:{" "}
-            </span>
-            {sampleDetails?.status}
-          </div>
-          <div>
-            <span className="font-semibold capitalize leading-relaxed">
-              {t("result")}:{" "}
-            </span>
-            {sampleDetails?.result}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("patient")}:{" "}
-            </span>
-            <span id="patient_name">{sampleDetails?.patient_name}</span>
-          </div>
-          {sampleDetails?.facility_object && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("facility")}:{" "}
-              </span>
-              {sampleDetails?.facility_object.name}
+      <Card className="my-2">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="space-y-1 flex gap-2 items-center">
+              <div className="text-sm text-muted-foreground">
+                {t("status")}:{" "}
+              </div>
+              <Badge variant="outline" className="font-semibold uppercase">
+                {t(`SAMPLE_TEST_HISTORY__${sampleDetails?.status}`)}
+              </Badge>
             </div>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("tested_on")}:{" "}
-            </span>
-            {sampleDetails?.date_of_result
-              ? formatDateTime(sampleDetails.date_of_result)
-              : "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("result_on")}:{" "}
-            </span>
-            {sampleDetails?.date_of_result
-              ? formatDateTime(sampleDetails.date_of_result)
-              : "-"}
-          </div>
-          {sampleDetails?.fast_track && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                {t("fast_track_testing_reason")}:{" "}
-              </span>
-              <span id="fast_track_reason">{sampleDetails.fast_track}</span>
+            <div className="space-y-1 sm:text-right flex gap-2 items-center ">
+              <div className="text-sm text-muted-foreground">
+                {t("result")}:{" "}
+              </div>
+              <Badge variant="secondary" className="font-semibold uppercase">
+                {t(`SAMPLE_TEST_RESULT__${sampleDetails?.result}`)}
+              </Badge>
             </div>
-          )}
-          {sampleDetails?.doctor_name && (
-            <div className="capitalize md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                {t("doctors_name")}:{" "}
-              </span>
-              <span id="doctor_name">
-                {startCase(camelCase(sampleDetails.doctor_name))}
-              </span>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
+                {t("patient")}:
+              </div>
+              <div id="patient_name" className="font-medium">
+                {sampleDetails?.patient_name || "-"}
+              </div>
             </div>
-          )}
-          {sampleDetails?.diagnosis && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                {t("diagnosis")}:{" "}
-              </span>
-              <span id="diagnosis">{sampleDetails.diagnosis}</span>
-            </div>
-          )}
-          {sampleDetails?.diff_diagnosis && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                {t("differential_diagnosis")}:{" "}
-              </span>
-              <span id="diff_diagnosis">{sampleDetails?.diff_diagnosis}</span>
-            </div>
-          )}
-          {sampleDetails?.etiology_identified && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                {t("etiology_identified")}:{" "}
-              </span>
-              <span id="etiology_identified">
-                {sampleDetails.etiology_identified}
-              </span>
-            </div>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("is_atypical_presentation")}{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.is_atypical_presentation)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("is_unusual_course")}{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.is_unusual_course)}
-          </div>
-          {sampleDetails?.atypical_presentation && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                {t("atypical_presentation_details")}:{" "}
-              </span>
-              {sampleDetails.atypical_presentation}
-            </div>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">{t("sari")} </span>
-            {yesOrNoBadge(sampleDetails?.has_sari)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">{t("ari")} </span>
-            {yesOrNoBadge(sampleDetails?.has_ari)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("contact_with_confirmed_carrier")}{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.patient_has_confirmed_contact)}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("contact_with_suspected_carrier")}{" "}
-            </span>
-            {yesOrNoBadge(sampleDetails?.patient_has_suspected_contact)}
-          </div>
-          {sampleDetails?.patient_travel_history &&
-            sampleDetails.patient_travel_history.length !== 0 && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  {t("countries_travelled")}:{" "}
-                </span>
-                {sampleDetails.patient_travel_history}
+            {sampleDetails?.facility_object && (
+              <div className="space-y-1">
+                <div className="text-sm text-muted-foreground">
+                  {t("facility")}:{" "}
+                </div>
+                <div className="font-medium">
+                  {sampleDetails?.facility_object.name}
+                </div>
               </div>
             )}
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
+                {t("tested_on")}:{" "}
+              </div>
+              <div className="font-medium">
+                {sampleDetails?.date_of_result
+                  ? formatDateTime(sampleDetails.date_of_result)
+                  : "-"}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
+                {t("result_on")}:{" "}
+              </div>
+              <div className="font-medium">
+                {sampleDetails?.date_of_result
+                  ? formatDateTime(sampleDetails.date_of_result)
+                  : "-"}
+              </div>
+            </div>
+          </div>
+
+          {sampleDetails?.doctor_name && (
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
+                {t("doctors_name")}:
+              </div>
+              <div id="doctor_name" className="capitalize font-medium">
+                {sampleDetails.doctor_name}
+              </div>
+            </div>
+          )}
+          <div className="border-t border-gray-300 my-4"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sampleDetails?.fast_track && (
+              <div
+                id="fast_track_reason"
+                className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg"
+              >
+                <div className="font-medium text-sm">
+                  {t("fast_track_testing_reason")}:{" "}
+                </div>
+                <Badge variant={"secondary"}>{sampleDetails.fast_track}</Badge>
+              </div>
+            )}
+            {sampleDetails?.diagnosis && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">{t("diagnosis")}: </div>
+                <Badge id="diagnosis" variant={"secondary"}>
+                  {" "}
+                  {sampleDetails.diagnosis}
+                </Badge>
+              </div>
+            )}
+            {sampleDetails?.diff_diagnosis && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">
+                  {t("differential_diagnosis")}:{" "}
+                </div>
+                <Badge id="diff_diagnosis" variant={"secondary"}>
+                  {" "}
+                  {sampleDetails?.diff_diagnosis}
+                </Badge>
+              </div>
+            )}
+            {sampleDetails?.etiology_identified && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">
+                  {t("etiology_identified")}:{" "}
+                </div>
+                <Badge id="etiology_identified" variant={"secondary"}>
+                  {" "}
+                  {sampleDetails.etiology_identified}
+                </Badge>
+              </div>
+            )}
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                {t("is_atypical_presentation")}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.is_atypical_presentation)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                {t("is_unusual_course")}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.is_unusual_course)}
+              </Badge>
+            </div>
+            {sampleDetails?.atypical_presentation && (
+              <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                <div className="font-medium text-sm">
+                  {t("atypical_presentation_details")}:{" "}
+                </div>
+                <Badge variant={"secondary"}>
+                  {" "}
+                  {sampleDetails.atypical_presentation}
+                </Badge>
+              </div>
+            )}
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">{t("sari")} </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.has_sari)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">{t("ari")} </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.has_ari)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                {t("contact_with_confirmed_carrier")}{" "}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.patient_has_confirmed_contact)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+              <div className="font-medium text-sm">
+                {t("contact_with_suspected_carrier")}{" "}
+              </div>
+              <Badge variant={"secondary"}>
+                {" "}
+                {yesOrNoBadge(sampleDetails?.patient_has_suspected_contact)}
+              </Badge>
+            </div>
+            {sampleDetails?.patient_travel_history &&
+              sampleDetails.patient_travel_history.length !== 0 && (
+                <div className="flex justify-between items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                  <div className="font-medium text-sm">
+                    {t("countries_travelled")}:{" "}
+                  </div>
+                  <Badge variant={"secondary"}>
+                    {" "}
+                    {sampleDetails.patient_travel_history}
+                  </Badge>
+                </div>
+              )}
+          </div>
+          <div className="border-t border-gray-300 my-4"></div>
           {sampleDetails?.sample_type && (
-            <div>
-              <span className="font-semibold capitalize leading-relaxed">
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
                 {t("sample_type")}:{" "}
+              </div>
+              <span id="sample_type" className="font-medium capitalize">
+                {sampleDetails.sample_type}
               </span>
-              {startCase(camelCase(sampleDetails.sample_type))}
             </div>
           )}
           {sampleDetails?.sample_type === "OTHER TYPE" && (
-            <div>
-              <span className="font-semibold capitalize leading-relaxed">
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">
                 {t("sample_type_description")}:{" "}
-              </span>
-              {sampleDetails?.sample_type_other}
+              </div>
+              <div className="font-medium">
+                {sampleDetails?.sample_type_other}
+              </div>
             </div>
           )}
-        </div>
+        </CardContent>
       </Card>
 
       <div>
@@ -479,7 +540,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <h4 className="mt-8">{t("sample_test_history")}</h4>
         {sampleDetails?.flow &&
           sampleDetails.flow.map((flow: FlowModel) => (
-            <div key={flow.id} className="mb-2">
+            <div key={flow.id} className="mb-2 py-2">
               {renderFlow(flow)}
             </div>
           ))}

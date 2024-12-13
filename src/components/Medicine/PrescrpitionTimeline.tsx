@@ -21,7 +21,7 @@ import useSlug from "@/hooks/useSlug";
 
 import dayjs from "@/Utils/dayjs";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatDateTime, formatTime } from "@/Utils/utils";
 
 interface MedicineAdministeredEvent extends TimelineEvent<"administered"> {
@@ -47,7 +47,7 @@ export default function PrescrpitionTimeline({
   readonly,
 }: Props) {
   const consultation = useSlug("consultation");
-  const { data, refetch, loading } = useQuery(
+  const { data, refetch, loading } = useTanStackQueryInstead(
     MedicineRoutes.listAdministrations,
     {
       pathParams: { consultation },

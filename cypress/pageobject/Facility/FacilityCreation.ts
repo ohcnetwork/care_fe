@@ -1,5 +1,48 @@
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
+export interface FacilityData {
+  basic: {
+    name: string;
+    type: string;
+    features?: string[];
+    address: string;
+    phoneNumber: string;
+    location?: string;
+  };
+  location: {
+    pincode: string;
+    state: string;
+    district: string;
+    localBody: string;
+    ward: string;
+  };
+  oxygen?: {
+    capacity: string;
+    expected: string;
+    bType?: {
+      capacity: string;
+      expected: string;
+    };
+    cType?: {
+      capacity: string;
+      expected: string;
+    };
+    dType?: {
+      capacity: string;
+      expected: string;
+    };
+  };
+  beds?: Array<{
+    type: string;
+    totalCapacity: string;
+    occupied: string;
+  }>;
+  doctors?: Array<{
+    specialization: string;
+    count: string;
+  }>;
+}
+
 class FacilityPage {
   visitCreateFacilityPage() {
     cy.intercept("GET", "**/facility/create").as("getCreateFacilities");
@@ -405,9 +448,8 @@ class FacilityPage {
   }
 
   selectDistrictOnPincode(districtName: string) {
-    this.getDistrictElement()
-      .scrollIntoView()
-      .wait(2000)
+    this.getDistrictElement().as("district").scrollIntoView().wait(2000);
+    cy.get("@district")
       .should("be.visible")
       .then(($element) => {
         const text = $element.text();
@@ -456,6 +498,106 @@ class FacilityPage {
 
   clickSetMinimumQuantity() {
     cy.get("#set-minimum-quantity").click();
+  }
+
+  createNewFacility(data: FacilityData) {
+    this.visitCreateFacilityPage();
+
+    // Fill basic details
+    this.fillBasicDetails(data.basic);
+
+    // Fill location details
+    this.fillLocationDetails(data.location);
+
+    // Fill oxygen details if provided
+    if (data.oxygen) {
+      this.fillOxygenDetails(data.oxygen);
+    }
+
+    this.submitForm();
+    cy.closeNotification();
+
+    // Add bed capacity if provided
+    if (data.beds) {
+      this.addBedCapacities(data.beds);
+    }
+
+    // Add doctor capacity if provided
+    if (data.doctors) {
+      this.addDoctorCapacities(data.doctors);
+    }
+
+    this.verifyfacilitynewurl();
+    return this;
+  }
+
+  fillBasicDetails(basic: FacilityData["basic"]) {
+    this.fillFacilityName(basic.name);
+    this.selectFacilityType(basic.type);
+
+    if (basic.features?.length) {
+      this.clickfacilityfeatureoption();
+      basic.features.forEach((feature) => {
+        cy.get("[role='option']").contains(feature).click();
+      });
+      this.clickfacilityfeatureoption();
+    }
+
+    this.fillAddress(basic.address);
+    this.fillPhoneNumber(basic.phoneNumber);
+
+    if (basic.location) {
+      this.selectLocation(basic.location);
+    }
+  }
+
+  fillLocationDetails(location: FacilityData["location"]) {
+    this.fillPincode(location.pincode);
+    this.selectStateOnPincode(location.state);
+    this.selectDistrictOnPincode(location.district);
+    this.selectLocalBody(location.localBody);
+    this.selectWard(location.ward);
+  }
+
+  fillOxygenDetails(oxygen: NonNullable<FacilityData["oxygen"]>) {
+    this.fillOxygenCapacity(oxygen.capacity);
+    this.fillExpectedOxygenRequirement(oxygen.expected);
+
+    if (oxygen.bType) {
+      this.fillBTypeCylinderCapacity(oxygen.bType.capacity);
+      this.fillExpectedBTypeCylinderRequirement(oxygen.bType.expected);
+    }
+
+    if (oxygen.cType) {
+      this.fillCTypeCylinderCapacity(oxygen.cType.capacity);
+      this.fillExpectedCTypeCylinderRequirement(oxygen.cType.expected);
+    }
+
+    if (oxygen.dType) {
+      this.fillDTypeCylinderCapacity(oxygen.dType.capacity);
+      this.fillExpectedDTypeCylinderRequirement(oxygen.dType.expected);
+    }
+  }
+
+  addBedCapacities(beds: NonNullable<FacilityData["beds"]>) {
+    beds.forEach((bed) => {
+      this.selectBedType(bed.type);
+      this.fillTotalCapacity(bed.totalCapacity);
+      this.fillCurrentlyOccupied(bed.occupied);
+      this.clickbedcapcityaddmore();
+      cy.closeNotification();
+    });
+    this.clickcancelbutton();
+  }
+
+  addDoctorCapacities(doctors: NonNullable<FacilityData["doctors"]>) {
+    doctors.forEach((doctor) => {
+      this.selectAreaOfSpecialization(doctor.specialization);
+      this.fillDoctorCount(doctor.count);
+      this.clickdoctorcapacityaddmore();
+      cy.closeNotification();
+    });
+    this.clickcancelbutton();
   }
 }
 

@@ -1,5 +1,3 @@
-import _ from "lodash";
-import { set } from "lodash-es";
 import { useCallback, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,7 +8,9 @@ import InvestigationTable from "@/components/Facility/Investigations/Investigati
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
+
+// import { setNestedValueSafely } from "@/Utils/utils";
 
 const initialState = {
   changedFields: {},
@@ -46,54 +46,78 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
   const { consultationId, patientId, sessionId, facilityId } = props;
   const { t } = useTranslation();
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
-  const { loading: investigationLoading } = useQuery(routes.getInvestigation, {
-    pathParams: {
-      consultation_external_id: consultationId,
-    },
-    query: {
-      session: sessionId,
-    },
-    onResponse: (res) => {
-      if (res && res.data) {
-        const valueMap = res.data.results.reduce(
-          (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
-          {},
-        );
-
-        const changedValues = res.data.results.reduce(
-          (acc: any, cur: any) => ({
-            ...acc,
-            [cur.id]: {
-              id: cur?.id,
-              initialValue: cur?.notes || cur?.value || null,
-              value: cur?.value || null,
-              notes: cur?.notes || null,
-            },
-          }),
-          {},
-        );
-
-        dispatch({ type: "set_initial_values", initialValues: valueMap });
-        dispatch({ type: "set_changed_fields", changedFields: changedValues });
-      }
-    },
-  });
-
-  const { data: patientData, loading: patientLoading } = useQuery(
-    routes.getPatient,
+  const { loading: investigationLoading } = useTanStackQueryInstead(
+    routes.getInvestigation,
     {
-      pathParams: { id: patientId },
+      pathParams: {
+        consultation_external_id: consultationId,
+      },
+      query: {
+        session: sessionId,
+      },
+      onResponse: (res) => {
+        if (res && res.data) {
+          const valueMap = res.data.results.reduce(
+            (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
+            {},
+          );
+
+          const changedValues = res.data.results.reduce(
+            (acc: any, cur: any) => ({
+              ...acc,
+              [cur.id]: {
+                id: cur?.id,
+                initialValue: cur?.notes || cur?.value || null,
+                value: cur?.value || null,
+                notes: cur?.notes || null,
+              },
+            }),
+            {},
+          );
+
+          dispatch({ type: "set_initial_values", initialValues: valueMap });
+          dispatch({
+            type: "set_changed_fields",
+            changedFields: changedValues,
+          });
+        }
+      },
     },
   );
 
-  const { data: consultation } = useQuery(routes.getConsultation, {
-    pathParams: { id: consultationId },
-    prefetch: !!consultationId,
-  });
+  const { data: patientData, loading: patientLoading } =
+    useTanStackQueryInstead(routes.getPatient, {
+      pathParams: { id: patientId },
+    });
+
+  const { data: consultation } = useTanStackQueryInstead(
+    routes.getConsultation,
+    {
+      pathParams: { id: consultationId },
+      prefetch: !!consultationId,
+    },
+  );
 
   const handleValueChange = (value: any, name: string) => {
+    const keys = name.split(".");
+    // Validate keys to prevent prototype pollution - coderabbit suggested
+    if (
+      keys.some((key) =>
+        ["__proto__", "constructor", "prototype"].includes(key),
+      )
+    ) {
+      return;
+    }
+
     const changedFields = { ...state.changedFields };
-    set(changedFields, name, value);
+    let current = changedFields;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!current[key]) current[key] = {};
+      current = current[key];
+    }
+
+    current[keys[keys.length - 1]] = value;
     dispatch({ type: "set_changed_fields", changedFields });
   };
 
@@ -151,15 +175,19 @@ export default function ShowInvestigation(props: ShowInvestigationProps) {
   };
 
   const handleUpdateCancel = useCallback(() => {
-    const changedValues = _.chain(state.initialValues)
-      .map((val: any, _key: string) => ({
-        id: val?.id,
-        initialValue: val?.notes || val?.value || null,
-        value: val?.value || null,
-        notes: val?.notes || null,
-      }))
-      .reduce((acc: any, cur: any) => ({ ...acc, [cur.id]: cur }), {})
-      .value();
+    const changedValues = Object.keys(state.initialValues).reduce(
+      (acc: any, key: any) => {
+        const val = state.initialValues[key];
+        acc[key] = {
+          id: val?.id,
+          initialValue: val?.notes || val?.value || null,
+          value: val?.value || null,
+          notes: val?.notes || null,
+        };
+        return acc;
+      },
+      {},
+    );
     dispatch({ type: "set_changed_fields", changedFields: changedValues });
   }, [state.initialValues]);
 

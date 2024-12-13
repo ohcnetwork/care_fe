@@ -60,7 +60,7 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { RequestResult } from "@/Utils/request/types";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   compareBy,
   getPincodeDetails,
@@ -185,22 +185,20 @@ export const FacilityCreate = (props: FacilityProps) => {
     data: districtData,
     refetch: districtFetch,
     loading: isDistrictLoading,
-  } = useQuery(routes.getDistrictByState, {
+  } = useTanStackQueryInstead(routes.getDistrictByState, {
     pathParams: {
       id: String(stateId),
     },
     prefetch: !!stateId,
   });
 
-  const { data: localbodyData, loading: isLocalbodyLoading } = useQuery(
-    routes.getLocalbodyByDistrict,
-    {
+  const { data: localbodyData, loading: isLocalbodyLoading } =
+    useTanStackQueryInstead(routes.getLocalbodyByDistrict, {
       pathParams: {
         id: String(districtId),
       },
       prefetch: !!districtId,
-    },
-  );
+    });
 
   const getSteps = (): Step[] => {
     return [
@@ -239,7 +237,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     ];
   };
 
-  const { data: wardData, loading: isWardLoading } = useQuery(
+  const { data: wardData, loading: isWardLoading } = useTanStackQueryInstead(
     routes.getWardByLocalBody,
     {
       pathParams: {
@@ -249,7 +247,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
   );
 
-  const facilityQuery = useQuery(routes.getPermittedFacility, {
+  const facilityQuery = useTanStackQueryInstead(routes.getPermittedFacility, {
     pathParams: {
       id: facilityId!,
     },
@@ -299,7 +297,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
   });
 
-  const { data: stateData, loading: isStateLoading } = useQuery(
+  const { data: stateData, loading: isStateLoading } = useTanStackQueryInstead(
     routes.statesList,
   );
 

@@ -11,7 +11,7 @@ import Page from "@/components/Common/Page";
 import { DailyRoundsModel } from "@/components/Patient/models";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 export const DailyRoundListDetails = (props: any) => {
@@ -20,14 +20,17 @@ export const DailyRoundListDetails = (props: any) => {
   const [dailyRoundListDetailsData, setDailyRoundListDetails] =
     useState<DailyRoundsModel>({});
 
-  const { loading: isLoading } = useQuery(routes.getDailyReport, {
-    pathParams: { consultationId, id },
-    onResponse: ({ data }) => {
-      if (data) {
-        setDailyRoundListDetails(data);
-      }
+  const { loading: isLoading } = useTanStackQueryInstead(
+    routes.getDailyReport,
+    {
+      pathParams: { consultationId, id },
+      onResponse: ({ data }) => {
+        if (data) {
+          setDailyRoundListDetails(data);
+        }
+      },
     },
-  });
+  );
 
   if (isLoading) {
     return <Loading />;
