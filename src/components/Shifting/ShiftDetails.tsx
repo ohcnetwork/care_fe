@@ -25,7 +25,7 @@ import {
 } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
 export default function ShiftDetails(props: { id: string }) {
@@ -37,7 +37,7 @@ export default function ShiftDetails(props: { id: string }) {
     ? SHIFTING_CHOICES_WARTIME
     : SHIFTING_CHOICES_PEACETIME;
 
-  const { data, loading } = useQuery(routes.getShiftDetails, {
+  const { data, loading } = useTanStackQueryInstead(routes.getShiftDetails, {
     pathParams: { id: props.id },
   });
   const showCopyToclipBoard = (data: any) => {

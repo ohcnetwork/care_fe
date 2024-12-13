@@ -26,7 +26,7 @@ import useFilters from "@/hooks/useFilters";
 import useFullscreen from "@/hooks/useFullscreen";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const SORT_OPTIONS: SortOption[] = [
   { isAscending: true, value: "bed__name" },
@@ -50,7 +50,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: perPageLimit,
   });
-  const query = useQuery(routes.listPatientAssetBeds, {
+  const query = useTanStackQueryInstead(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
       ...qParams,

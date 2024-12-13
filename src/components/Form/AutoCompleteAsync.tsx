@@ -92,7 +92,7 @@ const AutoCompleteAsync = (props: Props) => {
 
   useEffect(() => {
     fetchDataDebounced(query);
-  }, [query, fetchDataDebounced]);
+  }, [query]);
 
   return (
     <div className={className}>

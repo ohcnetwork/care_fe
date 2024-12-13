@@ -13,7 +13,7 @@ import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/Autoc
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const initialState = {
   form: {},
@@ -109,24 +109,22 @@ const Investigation = (props: {
   const [selectedItems, selectItems] = useState<SearchItem[]>([]);
 
   const { data: investigations, loading: listInvestigationDataLoading } =
-    useQuery(routes.listInvestigations, {});
+    useTanStackQueryInstead(routes.listInvestigations, {});
 
   const {
     data: investigationGroups,
     loading: listInvestigationGroupDataLoading,
-  } = useQuery(routes.listInvestigationGroups, {});
+  } = useTanStackQueryInstead(routes.listInvestigationGroups, {});
 
-  const { data: patientData, loading: patientLoading } = useQuery(
-    routes.getPatient,
-    {
+  const { data: patientData, loading: patientLoading } =
+    useTanStackQueryInstead(routes.getPatient, {
       pathParams: { id: patientId },
       onResponse: (res) => {
         if (res.data) {
           setSession(new Date().toString());
         }
       },
-    },
-  );
+    });
 
   useEffect(() => {
     if (

@@ -2,7 +2,7 @@ import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
 import AutocompleteMultiSelectFormField from "@/components/Form/FormFields/AutocompleteMultiselect";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface LocationSelectProps {
   name: string;
@@ -22,7 +22,7 @@ interface LocationSelectProps {
 }
 
 export const LocationSelect = (props: LocationSelectProps) => {
-  const { data, loading, refetch } = useQuery(
+  const { data, loading, refetch } = useTanStackQueryInstead(
     routes.listFacilityAssetLocation,
     {
       query: {

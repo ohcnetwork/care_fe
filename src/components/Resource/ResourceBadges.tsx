@@ -1,10 +1,10 @@
 import { SHIFTING_FILTER_ORDER } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export function useFacilityQuery(facilityId: string | undefined) {
-  return useQuery(routes.getAnyFacility, {
+  return useTanStackQueryInstead(routes.getAnyFacility, {
     pathParams: { id: facilityId as string },
     prefetch: !!facilityId,
   });
