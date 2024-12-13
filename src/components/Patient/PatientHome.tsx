@@ -362,13 +362,14 @@ export const PatientHome = (props: {
                       text={t("TELEMEDICINE")}
                     />
                   )}
-                  {patientData.allergies && (
-                    <Chip
-                      variant="danger"
-                      size="small"
-                      text={`${t("allergies")} ${patientData.allergies.length}`}
-                    />
-                  )}
+                  {patientData.allergies &&
+                    patientData.allergies.trim().length > 0 && (
+                      <Chip
+                        variant="danger"
+                        size="small"
+                        text={t("has_allergies")}
+                      />
+                    )}
                 </div>
               </div>
 
