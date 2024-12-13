@@ -43,9 +43,8 @@ const AssetsList = () => {
     clearSearch,
   } = useFilters({
     limit: 18,
-    cacheBlacklist: ["name", "qr_code_id", "serial_number"],
+    cacheBlacklist: ["name", "serial_number", "qr_code_id"],
   });
-  const authUser = useAuthUser();
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
@@ -60,9 +59,9 @@ const AssetsList = () => {
   const params = {
     limit: resultsPerPage,
     page: qParams.page,
-    qr_code_id: qParams.qr_code_id || undefined,
-    name: qParams.name || undefined,
-    serial_number: qParams.serial_number || undefined,
+    name: qParams.name || "",
+    serial_number: qParams.serial_number || "",
+    qr_code_id: qParams.qr_code_id || "",
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     search_text: qParams.search || "",
     facility: qParams.facility || "",
@@ -121,6 +120,7 @@ const AssetsList = () => {
     },
   );
 
+  const authUser = useAuthUser();
   const isDisabled = !NonReadOnlyUsers(authUser.user_type);
 
   function isValidURL(url: string) {
@@ -190,33 +190,6 @@ const AssetsList = () => {
   const authorizedForImportExport = useIsAuthorized(
     AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
   );
-
-  const searchOptions = [
-    {
-      key: "name",
-      label: "Name",
-      type: "text" as const,
-      placeholder: "Search by Name",
-      value: qParams.name || undefined,
-      shortcutKey: "n",
-    },
-    {
-      key: "serial_number",
-      label: "Serial Number",
-      type: "text" as const,
-      placeholder: "Search by Serial Number",
-      value: qParams.serial_number || undefined,
-      shortcutKey: "p",
-    },
-    {
-      key: "asset_qr_id",
-      label: "QR Code ID",
-      type: "text" as const,
-      placeholder: "Search by QR Code ID",
-      value: qParams.qr_code_id || undefined,
-      shortcutKey: "u",
-    },
-  ];
 
   if (isScannerActive)
     return (
@@ -347,19 +320,50 @@ const AssetsList = () => {
     );
   }
 
+  const searchOptions = [
+    {
+      key: "name",
+      label: "Name",
+      type: "text" as const,
+      placeholder: "Search by Name",
+      value: qParams.name || "",
+      shortcutKey: "n",
+    },
+    {
+      key: "serial_number",
+      label: "Serial No.",
+      type: "text" as const,
+      placeholder: "Search by Serial No.",
+      value: qParams.serial_number || "",
+      shortcutKey: "u",
+    },
+    {
+      key: "asset_qr_id",
+      label: "QR Code ID",
+      type: "text" as const,
+      placeholder: "Search by QR Code ID",
+      value: qParams.qr_code_id || "",
+      shortcutKey: "p",
+    },
+  ];
+
   return (
     <Page
       title="Assets"
       breadcrumbs={false}
+      className="px-4 md:px-6"
       hideBack
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-          <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
+          <div
+            className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5"
+            data-testid="create-asset-buttom"
+          >
             <Button
               disabled={isDisabled}
               variant={"primary"}
               size={"lg"}
-              className="gap-2 w-full"
+              className="gap-2 w-full lg:w-fit"
               onClick={() => {
                 if (qParams.facility) {
                   navigate(`/facility/${qParams.facility}/assets/new`);
@@ -373,26 +377,25 @@ const AssetsList = () => {
             </Button>
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-            <div className="w-full">
-              <AdvancedFilterButton
-                onClick={() => advancedFilter.setShow(true)}
-              />
-            </div>
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+
             <Button
               variant={"primary"}
               size={"lg"}
-              onClick={() => setIsScannerActive(true)}
               className="gap-2 w-full"
+              onClick={() => setIsScannerActive(true)}
             >
-              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
-              QR
+              <CareIcon icon="l-search" className="mr-1 text-base" />
+              Scan Asset QR
             </Button>
 
-            {authorizedForImportExport && (
-              <div
-                className="tooltip  w-full md:w-auto"
-                data-testid="import-asset-button"
-              >
+            <div
+              className="tooltip w-full md:w-auto"
+              data-testid="import-asset-button"
+            >
+              {authorizedForImportExport && (
                 <ExportMenu
                   label={
                     importAssetModalOpen ? "Importing..." : "Import/Export"
@@ -404,7 +407,7 @@ const AssetsList = () => {
                         icon: (
                           <CareIcon
                             icon="l-import"
-                            className="import-assets-button"
+                            className="import-assets-button mr-5 w-full lg:w-fit"
                           />
                         ),
                         onClick: () => setImportAssetModalOpen(true),
@@ -446,8 +449,8 @@ const AssetsList = () => {
                     },
                   ]}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       }
@@ -462,7 +465,7 @@ const AssetsList = () => {
         />
 
         <SearchByMultipleFields
-          id="patient-search"
+          id="asset-search"
           options={searchOptions}
           onSearch={(key, value) => updateQuery({ search: value })}
           clearSearch={clearSearch}
