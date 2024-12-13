@@ -18,7 +18,7 @@ import { LOCATION_BED_TYPES } from "@/common/constants";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface Props {
   facilityId: string;
@@ -46,14 +46,17 @@ export const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
     numberOfBeds: "",
   });
 
-  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facility_external_id: facilityId,
-      external_id: locationId,
+  const { data: location } = useTanStackQueryInstead(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: facilityId,
+        external_id: locationId,
+      },
     },
-  });
+  );
 
-  const { data, loading } = useQuery(routes.getFacilityBed, {
+  const { data, loading } = useTanStackQueryInstead(routes.getFacilityBed, {
     pathParams: { external_id: bedId ?? "" },
     prefetch: !!bedId,
     onResponse: ({ data }) => {

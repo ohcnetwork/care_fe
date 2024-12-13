@@ -12,14 +12,14 @@ import { BED_TYPES } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export const FacilityBedCapacity = (props: any) => {
   const { t } = useTranslation();
 
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
 
-  const capacityQuery = useQuery(routes.getCapacity, {
+  const capacityQuery = useTanStackQueryInstead(routes.getCapacity, {
     pathParams: { facilityId: props.facilityId },
   });
 

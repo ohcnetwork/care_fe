@@ -3,7 +3,7 @@ import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
 import { FormFieldBaseProps } from "@/components/Form/FormFields/Utils";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 type Props = FormFieldBaseProps<LocalBodyModel["id"]> & {
   placeholder?: string;
@@ -11,10 +11,13 @@ type Props = FormFieldBaseProps<LocalBodyModel["id"]> & {
 };
 
 export default function LocalBodyAutocompleteFormField(props: Props) {
-  const { data, loading } = useQuery(routes.getLocalbodyByDistrict, {
-    pathParams: { id: props.district! },
-    prefetch: !!props.district,
-  });
+  const { data, loading } = useTanStackQueryInstead(
+    routes.getLocalbodyByDistrict,
+    {
+      pathParams: { id: props.district! },
+      prefetch: !!props.district,
+    },
+  );
 
   return (
     <AutocompleteFormField

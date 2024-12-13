@@ -13,7 +13,7 @@ import { AssetImportSchema } from "@/common/constants";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { sleep } from "@/Utils/utils";
 
 const ExcelFileDragAndDrop = lazy(
@@ -38,9 +38,12 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
   const closeModal = () => {
     onClose && onClose();
   };
-  const { data, loading } = useQuery(routes.listFacilityAssetLocation, {
-    pathParams: { facility_external_id: `${facility.id}` },
-  });
+  const { data, loading } = useTanStackQueryInstead(
+    routes.listFacilityAssetLocation,
+    {
+      pathParams: { facility_external_id: `${facility.id}` },
+    },
+  );
 
   const locations = data?.results || [];
 

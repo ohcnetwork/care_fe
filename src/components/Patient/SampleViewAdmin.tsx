@@ -25,7 +25,7 @@ import {
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 export default function SampleViewAdmin() {
@@ -46,18 +46,21 @@ export default function SampleViewAdmin() {
     sample: SampleTestModel;
   }>({ show: false, sample: {} });
 
-  const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    pathParams: {
-      id: qParams.facility,
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: {
+        id: qParams.facility,
+      },
+      prefetch: !!qParams.facility,
     },
-    prefetch: !!qParams.facility,
-  });
+  );
 
   const {
     loading: isLoading,
     data: sampeleData,
     refetch,
-  } = useQuery(routes.getTestSampleList, {
+  } = useTanStackQueryInstead(routes.getTestSampleList, {
     query: {
       limit: resultsPerPage,
       offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -117,22 +120,31 @@ export default function SampleViewAdmin() {
     });
   };
 
-  const parseExportData = (data: string) =>
-    data
-      .trim()
-      .split("\n")
-      .map((row: string) =>
-        row
-          .trim()
-          .split(",")
-          .map((field: string) =>
-            new Date(field).toString() === "Invalid Date"
-              ? field
-              : formatDateTime(field),
-          )
-          .join(","),
-      )
-      .join("\n");
+  const parseExportData = (data: string) => {
+    const [header, ...rows] = data.trim().split("\n");
+    const headerColumns = header.split(",").map((col) => col.trim());
+
+    return [
+      header,
+      ...rows.map((row) => {
+        const columns = row.split(",").map((field, index) => {
+          const header = headerColumns[index];
+
+          if (header === "Patient Age") {
+            return field.trim();
+          }
+
+          if (["Date of Sample", "Date of Result"].includes(header)) {
+            const formattedDate = formatDateTime(field.trim());
+            return formattedDate === "Invalid Date" ? "" : formattedDate;
+          }
+          return field.includes(",") ? `"${field.trim()}"` : field.trim();
+        });
+
+        return columns.join(",");
+      }),
+    ].join("\n");
+  };
 
   let sampleList: any[] = [];
   if (sampeleData?.count) {
