@@ -4,7 +4,7 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface AssetConfigureProps {
   assetId: string;
@@ -12,7 +12,7 @@ interface AssetConfigureProps {
 }
 
 const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
-  const { data: asset, refetch } = useQuery(routes.getAsset, {
+  const { data: asset, refetch } = useTanStackQueryInstead(routes.getAsset, {
     pathParams: { external_id: assetId },
   });
 

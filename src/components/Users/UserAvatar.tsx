@@ -16,7 +16,7 @@ import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDisplayName, sleep } from "@/Utils/utils";
 
 export default function UserAvatar({ username }: { username: string }) {
@@ -28,7 +28,7 @@ export default function UserAvatar({ username }: { username: string }) {
     data: userData,
     loading: isLoading,
     refetch: refetchUserData,
-  } = useQuery(routes.getUserDetails, {
+  } = useTanStackQueryInstead(routes.getUserDetails, {
     pathParams: {
       username: username,
     },

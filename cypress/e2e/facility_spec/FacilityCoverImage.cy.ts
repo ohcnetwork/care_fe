@@ -59,7 +59,7 @@ describe("Facility Cover Image Upload Functionality", () => {
       // Test Edit Cover Image Functionality
       facilityManage.interceptImageUploadRequest();
       facilityManage.clickCoverImage();
-      facilityManage.uploadCoverImage("facility-cover-image.jpg");
+      facilityManage.uploadCoverImage("facility-cover-image-1.jpg");
       facilityManage.clickSaveCoverImage();
       facilityManage.verifyImageUploadRequest();
       facilityManage.verifySuccessMessageVisibilityAndContent(

@@ -10,7 +10,7 @@ import Pagination from "@/components/Common/Pagination";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 export default function InventoryLog(props: any) {
@@ -22,7 +22,7 @@ export default function InventoryLog(props: any) {
   const limit = 14;
   const item = inventoryId;
 
-  const { data, refetch } = useQuery(routes.getInventoryLog, {
+  const { data, refetch } = useTanStackQueryInstead(routes.getInventoryLog, {
     pathParams: {
       facilityId: facilityId,
     },
@@ -34,10 +34,13 @@ export default function InventoryLog(props: any) {
     prefetch: facilityId !== undefined,
   });
 
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: facilityId },
-    prefetch: !!facilityId,
-  });
+  const { data: facilityObject } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: { id: facilityId },
+      prefetch: !!facilityId,
+    },
+  );
 
   const flagFacility = async (id: string) => {
     setSaving(true);

@@ -10,7 +10,7 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface Props {
   children: React.ReactNode;
@@ -23,7 +23,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     data: user,
     loading,
     refetch,
-  } = useQuery(routes.currentUser, { silent: true });
+  } = useTanStackQueryInstead(routes.currentUser, { silent: true });
 
   useEffect(() => {
     if (!user) {

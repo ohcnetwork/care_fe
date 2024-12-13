@@ -24,7 +24,7 @@ import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface BedsProps {
   facilityId: string;
@@ -47,7 +47,7 @@ const Beds = (props: BedsProps) => {
   const [key, setKey] = useState(0);
   const [showBedDetails, setShowBedDetails] = useState<CurrentBed | null>(null);
 
-  const { loading } = useQuery(routes.listConsultationBeds, {
+  const { loading } = useTanStackQueryInstead(routes.listConsultationBeds, {
     query: { consultation: consultationId },
     onResponse: ({ res, data }) => {
       if (res && res.status === 200 && data?.results) {

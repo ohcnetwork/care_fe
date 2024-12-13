@@ -127,5 +127,13 @@ class FacilityManage {
   verifyImageDeleteRequest() {
     cy.wait("@imageDeleteReq").its("response.statusCode").should("eq", 204);
   }
+
+  visitViewPatients() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilityPatients");
+    cy.get("#view-patient-facility-list").scrollIntoView().click();
+    cy.wait("@getFacilityPatients")
+      .its("response.statusCode")
+      .should("eq", 200);
+  }
 }
 export default FacilityManage;

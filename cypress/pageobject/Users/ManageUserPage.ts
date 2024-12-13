@@ -127,6 +127,7 @@ export class ManageUserPage {
   }
 
   clearProfessionalInfo() {
+    cy.get("input[name='weekly_working_hours']").scrollIntoView();
     cy.get("input[name='weekly_working_hours']").click().clear();
     cy.get("input[name='video_connect_link']").click().clear();
   }
@@ -180,6 +181,7 @@ export class ManageUserPage {
   }
 
   typeInWeeklyWorkingHours(hours: string) {
+    cy.get("input[name='weekly_working_hours']").scrollIntoView();
     cy.get("input[name='weekly_working_hours']").click().type(hours);
   }
 
@@ -191,18 +193,15 @@ export class ManageUserPage {
   }
 
   verifyWorkingHours(expectedHours: string) {
-    cy.get("input[name='weekly_working_hours']").should("be.visible");
-    cy.get("input[name='weekly_working_hours']").should(
-      "have.value",
+    cy.verifyContentPresence("#view-average_weekly_working_hours", [
       expectedHours,
-    );
+    ] as string[]);
   }
 
   verifyProfileWorkingHours(expectedHours: string) {
-    cy.get("#view-average_weekly_working_hours").should(
-      "contain.text",
+    cy.verifyContentPresence("#averageworkinghour-profile-details", [
       expectedHours,
-    );
+    ] as string[]);
   }
 
   navigateToManageUser() {
@@ -359,8 +358,8 @@ export class ManageUserPage {
     cy.get("[data-testid='user-delete-button']").click();
   }
 
-  clickAddSkillButton() {
-    cy.intercept("GET", "**/api/v1/skill/**").as("getSkills");
+  clickAddSkillButton(username: string) {
+    cy.intercept("GET", `**/api/v1/users/${username}/skill/**`).as("getSkills");
     cy.get("#add-skill-button").click();
     cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
   }
