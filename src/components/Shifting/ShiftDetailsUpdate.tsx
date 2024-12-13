@@ -3,9 +3,21 @@ import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Card from "@/CAREUI/display/Card";
+
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
-import { LinkedFacilityUsers } from "@/components/Common/UserAutocompleteFormField";
+import Page from "@/components/Common/Page";
+import { ConsultationModel, ShiftingModel } from "@/components/Facility/models";
+import Form from "@/components/Form/Form";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import PatientCategorySelect from "@/components/Patient/PatientCategorySelect";
+import { PatientModel } from "@/components/Patient/models";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
@@ -23,24 +35,11 @@ import {
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
 
-import Card from "../../CAREUI/display/Card";
-import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
-import { parsePhoneNumber } from "../../Utils/utils";
-import CircularProgress from "../Common/CircularProgress";
-import Page from "../Common/Page";
 import DischargeModal from "../Facility/DischargeModal";
-import { ConsultationModel, ShiftingModel } from "../Facility/models";
-import Form from "../Form/Form";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import { PatientModel } from "../Patient/models";
 
 interface patientShiftProps {
   id: string;
@@ -73,7 +72,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     preferred_vehicle_choice: null,
     assigned_to: "",
     initial_status: "",
+    status: "",
     patient_category: "",
+    breathlessness_level: "",
     ambulance_driver_name: "",
     ambulance_phone_number: "",
     ambulance_number: "",
@@ -148,11 +149,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       },
     };
   }
-
-  const { loading: assignedUserLoading } = useQuery(routes.userList, {
-    query: { id: state.form.assigned_to },
-    prefetch: state.form.assigned_to ? true : false,
-  });
 
   const validateForm = (form: typeof initForm) => {
     const errors = { ...initError };
@@ -328,46 +324,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 onChange={(e) => field("status").onChange(e)}
                 className="w-full bg-white md:col-span-1 md:leading-5"
               />
-
-              {careConfig.wartimeShifting &&
-                (assignedUserLoading ? (
-                  <CircularProgress />
-                ) : (
-                  <LinkedFacilityUsers
-                    name="assigned_to"
-                    label={t("assigned_to")}
-                    value={field("assigned_to").value}
-                    onChange={(e) => field("assigned_to").onChange(e)}
-                    facilityId={
-                      state.form?.shifting_approving_facility_object?.id
-                    }
-                    error={field("assigned_to").error}
-                  />
-                ))}
-              {careConfig.wartimeShifting && (
-                <div>
-                  <FieldLabel>
-                    {t("name_of_shifting_approving_facility")}
-                  </FieldLabel>
-                  <FacilitySelect
-                    multiple={false}
-                    name="shifting_approving_facility"
-                    facilityType={1300}
-                    selected={field("shifting_approving_facility").value}
-                    setSelected={(obj: any) => {
-                      field("shifting_approving_facility_object").onChange({
-                        name: "shifting_approving_facility",
-                        value: obj,
-                      });
-                      field("approving_facility").onChange({
-                        name: "approving_facility",
-                        value: obj.id,
-                      });
-                    }}
-                    errors={field("shifting_approving_facility_object").error}
-                  />
-                </div>
-              )}
 
               <div>
                 <FieldLabel

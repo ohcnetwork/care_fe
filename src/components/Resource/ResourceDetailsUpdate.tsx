@@ -7,6 +7,8 @@ import CircularProgress from "@/components/Common/CircularProgress";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import Form from "@/components/Form/Form";
+import { FieldLabel } from "@/components/Form/FormFields/FormField";
 import RadioFormField from "@/components/Form/FormFields/RadioFormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
@@ -22,8 +24,6 @@ import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 
 import UserAutocomplete from "../Common/UserAutocompleteFormField";
-import Form from "../Form/Form";
-import { FieldLabel } from "../Form/FormFields/FormField";
 
 interface resourceProps {
   id: string;
@@ -101,11 +101,11 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       }
     });
 
-    if (form.requested_quantity < 0) {
+    if (Number(form.requested_quantity) < 0) {
       validForm = false;
       errors.requested_quantity = "Requested quantity can not be negative";
     }
-    if (form.assigned_quantity < 0) {
+    if (Number(form.assigned_quantity) < 0) {
       validForm = false;
       errors.assigned_quantity = "Assigned quantity can not be negative";
     }

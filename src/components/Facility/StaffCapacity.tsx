@@ -1,17 +1,21 @@
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Form from "@/components/Form/Form";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/components/Form/FormFields/FormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import SelectMenuV2 from "@/components/Form/SelectMenuV2";
+
 import { DOCTOR_SPECIALIZATION } from "@/common/constants";
 
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 
-import * as Notification from "../../Utils/Notifications";
-import Form from "../Form/Form";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import SelectMenuV2 from "../Form/SelectMenuV2";
 import { DoctorModal } from "./models";
 
 interface DoctorCapacityProps extends DoctorModal {
@@ -62,7 +66,6 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
-
   const specializationsQuery = useQuery(routes.listDoctor, {
     pathParams: { facilityId },
     query: {
@@ -82,7 +85,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
     },
   });
 
-  const doctorTypes = getAllowedDoctorTypes(specializationsQuery.data?.results);
+  let doctorTypes = getAllowedDoctorTypes(specializationsQuery.data?.results);
 
   const validateData = (form: typeof initForm, fieldName?: string) => {
     const errors = { ...initForm };
@@ -92,9 +95,14 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
       if (!form[field]) {
         errors[field] = t("field_required");
         validForm = false;
-      } else if (field === "count" && form[field] < 0) {
-        errors[field] = "Staff count cannot be negative";
-        validForm = false;
+      } else if (field === "count" && Number(form[field]) < 0) {
+        if (Number(form[field]) < 0) {
+          errors[field] = "Staff count cannot be negative";
+          validForm = false;
+        } else if (isNaN(form[field])) {
+          errors[field] = "Only numbers are allowed";
+          validForm = false;
+        }
       }
     });
     dispatch({ type: "set_error", errors });
@@ -119,7 +127,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
       area: Number(form.area),
       count: Number(form.count),
     };
-
+    let updatedStaffTypes;
     try {
       const { res } = await (id
         ? request(routes.updateDoctor, {
@@ -132,6 +140,14 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
           }));
       setIsLoading(false);
       if (res?.ok) {
+        updatedStaffTypes = doctorTypes.map((type) => {
+          return {
+            ...type,
+            disabled: data.area !== type.id ? type.disabled : true,
+          };
+        });
+        doctorTypes = updatedStaffTypes;
+
         specializationsQuery.refetch();
         Notification.Success({
           msg: id
@@ -147,10 +163,16 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
     } finally {
       setIsLoading(false);
     }
+    const disabledStaffTypesLength = updatedStaffTypes?.filter(
+      (item) => item.disabled,
+    ).length;
 
-    if (source !== "doctor-save") handleClose();
+    if (
+      source !== "doctor-save" ||
+      disabledStaffTypesLength === doctorTypes.length
+    )
+      handleClose();
   };
-  console.log(isLastOptionType || headerText == "Add Staff Capacity");
 
   return (
     <div className={className}>

@@ -2,6 +2,7 @@ import { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CapacityModal, OptionsType } from "@/components/Facility/models";
+import Form from "@/components/Form/Form";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 
@@ -10,8 +11,6 @@ import { BED_TYPES } from "@/common/constants";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-
-import Form from "../Form/Form";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;
@@ -55,7 +54,6 @@ export const BedCapacity = (props: BedCapacityProps) => {
   const { t } = useTranslation();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(bedCountReducer, initialState);
-  const [isLastOptionType, setIsLastOptionType] = useState(false);
   const [bedTypes, setBedTypes] = useState<OptionsType[]>(
     BED_TYPES.map((o) => ({ id: o, text: t(`bed_type__${o}`) })),
   );
@@ -121,21 +119,28 @@ export const BedCapacity = (props: BedCapacityProps) => {
         errors[field] = t("field_required");
         validForm = false;
       } else if (field === "currentOccupancy" && Number(form[field] < 0)) {
-        errors[field] = "Occupied cannot be negative";
-        validForm = false;
-      } else if (
-        field === "currentOccupancy" &&
-        Number(form[field]) > Number(form.totalCapacity)
-      ) {
-        errors[field] = "Occupied must be less than or equal to total capacity";
-        validForm = false;
-      }
-      if (field === "totalCapacity" && Number(form[field]) === 0) {
-        errors[field] = "Total capacity cannot be 0";
-        validForm = false;
-      } else if (field === "totalCapacity" && Number(form[field]) < 0) {
-        errors[field] = "Total capacity cannot be negative";
-        validForm = false;
+        if (Number(form[field] < 0)) {
+          errors[field] = "Occupied cannot be negative";
+          validForm = false;
+        } else if (Number(form[field]) > Number(form.totalCapacity)) {
+          errors[field] =
+            "Occupied must be less than or equal to total capacity";
+          validForm = false;
+        } else if (isNaN(Number(form[field]))) {
+          errors[field] = "Only numbers are allowed";
+          validForm = false;
+        }
+      } else if (field === "totalCapacity" && Number(form[field]) === 0) {
+        if (Number(form[field]) === 0) {
+          errors[field] = "Total capacity cannot be 0";
+          validForm = false;
+        } else if (Number(form[field]) < 0) {
+          errors[field] = "Total capacity cannot be negative";
+          validForm = false;
+        } else if (isNaN(Number(form[field]))) {
+          errors[field] = "Only numbers are allowed";
+          validForm = false;
+        }
       }
     });
     if (!validForm) {
@@ -149,12 +154,9 @@ export const BedCapacity = (props: BedCapacityProps) => {
   const headerText = !id ? "Add Bed Capacity" : "Edit Bed Capacity";
   const buttonText = !id ? "Save Bed Capacity" : "Update Bed Capacity";
 
-  useEffect(() => {
-    const lastBedType =
-      bedTypes.filter((i: OptionsType) => i.disabled).length ===
-      BED_TYPES.length - 1;
-    setIsLastOptionType(lastBedType);
-  }, [bedTypes]);
+  const isLastOptionType =
+    bedTypes.filter((i: OptionsType) => i.disabled).length ===
+    BED_TYPES.length - 1;
 
   const handleSubmit = async (form: typeof initForm, source?: string) => {
     const valid = validateData(form);
