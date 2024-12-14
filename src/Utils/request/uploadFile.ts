@@ -23,7 +23,12 @@ const uploadFile = async (
     xhr.onload = () => {
       onLoad(xhr);
       if (400 <= xhr.status && xhr.status <= 499) {
-        const error = JSON.parse(xhr.responseText);
+        let error;
+        try {
+          error = JSON.parse(xhr.responseText);
+        } catch {
+          error = xhr.responseText;
+        }
         if (typeof error === "object" && !Array.isArray(error)) {
           Object.values(error).forEach((msg) => {
             Notification.Error({ msg: msg || "Something went wrong!" });
