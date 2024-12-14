@@ -18,6 +18,10 @@ export default async function request<TData, TBody>(
     silent,
     signal,
   }: Options<TData, TBody> = {},
+  errorObj?: {
+    code: string;
+    detail: string;
+  },
 ): Promise<RequestResult<TData>> {
   const url = `${careConfig.apiUrl}${makeUrl(path, query, pathParams)}`;
 
@@ -43,7 +47,11 @@ export default async function request<TData, TBody>(
     result = {
       res,
       data: res.ok ? data : undefined,
-      error: res.ok ? undefined : (data as Record<string, unknown>),
+      error: res.ok
+        ? undefined
+        : errorObj
+          ? errorObj
+          : (data as Record<string, unknown>),
     };
 
     onResponse?.(result);

@@ -92,10 +92,17 @@ const DischargeModal = ({
     setFacility(referred_to);
   }, [referred_to]);
 
-  const initialDiagnoses = useTanStackQueryInstead(routes.getConsultation, {
-    pathParams: { id: consultationData.id ?? "" },
-    prefetch: !!consultationData.id,
-  }).data?.diagnoses;
+  const initialDiagnoses = useTanStackQueryInstead(
+    routes.getConsultation,
+    {
+      pathParams: { id: consultationData.id ?? "" },
+      prefetch: !!consultationData.id,
+    },
+    {
+      code: "",
+      detail: t("consultation_missing_warning"),
+    },
+  ).data?.diagnoses;
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;

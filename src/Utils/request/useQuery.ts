@@ -17,6 +17,10 @@ export interface QueryOptions<TData> extends RequestOptions<TData> {
 export default function useTanStackQueryInstead<TData>(
   route: QueryRoute<TData>,
   options?: QueryOptions<TData>,
+  errorObj?: {
+    code: string;
+    detail: string;
+  },
 ) {
   const overridesRef = useRef<QueryOptions<TData>>();
 
@@ -35,7 +39,7 @@ export default function useTanStackQueryInstead<TData>(
         ? mergeRequestOptions(options || {}, overridesRef.current)
         : options;
 
-      return await request(route, { ...resolvedOptions, signal });
+      return await request(route, { ...resolvedOptions, signal }, errorObj);
     },
     enabled: options?.prefetch ?? true,
     refetchOnWindowFocus: false,
