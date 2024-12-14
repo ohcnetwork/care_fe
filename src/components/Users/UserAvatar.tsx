@@ -21,7 +21,7 @@ import { formatDisplayName, sleep } from "@/Utils/utils";
 
 export default function UserAvatar({
   username,
-  refetchUserData: userDataRefetch,
+  refetchUserData,
 }: {
   username: string;
   refetchUserData?: () => void;
@@ -30,15 +30,14 @@ export default function UserAvatar({
   const [editAvatar, setEditAvatar] = useState(false);
   const authUser = useAuthUser();
 
-  const {
-    data: userData,
-    loading: isLoading,
-    refetch: refetchUserData,
-  } = useTanStackQueryInstead(routes.getUserDetails, {
-    pathParams: {
-      username: username,
+  const { data: userData, loading: isLoading } = useTanStackQueryInstead(
+    routes.getUserDetails,
+    {
+      pathParams: {
+        username: username,
+      },
     },
-  });
+  );
 
   if (isLoading || !userData) {
     return <Loading />;
@@ -60,7 +59,7 @@ export default function UserAvatar({
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
-          userDataRefetch?.();
+          refetchUserData?.();
           Notification.Success({ msg: t("avatar_updated_success") });
           setEditAvatar(false);
         }
@@ -78,8 +77,7 @@ export default function UserAvatar({
     });
     if (res?.ok) {
       Notification.Success({ msg: "Profile picture deleted" });
-      await refetchUserData();
-      await userDataRefetch?.();
+      refetchUserData?.();
       setEditAvatar(false);
     } else {
       onError();
