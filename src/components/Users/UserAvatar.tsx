@@ -19,7 +19,13 @@ import uploadFile from "@/Utils/request/uploadFile";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDisplayName, sleep } from "@/Utils/utils";
 
-export default function UserAvatar({ username }: { username: string }) {
+export default function UserAvatar({
+  username,
+  refetchUserData: userDataRefetch,
+}: {
+  username: string;
+  refetchUserData?: () => void;
+}) {
   const { t } = useTranslation();
   const [editAvatar, setEditAvatar] = useState(false);
   const authUser = useAuthUser();
@@ -43,7 +49,7 @@ export default function UserAvatar({ username }: { username: string }) {
     formData.append("profile_picture", file);
     const url = `${careConfig.apiUrl}/api/v1/users/${userData.username}/profile_picture/`;
 
-    uploadFile(
+    await uploadFile(
       url,
       formData,
       "POST",
@@ -54,7 +60,7 @@ export default function UserAvatar({ username }: { username: string }) {
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
-          refetchUserData();
+          userDataRefetch?.();
           Notification.Success({ msg: t("avatar_updated_success") });
           setEditAvatar(false);
         }
@@ -73,6 +79,7 @@ export default function UserAvatar({ username }: { username: string }) {
     if (res?.ok) {
       Notification.Success({ msg: "Profile picture deleted" });
       await refetchUserData();
+      await userDataRefetch?.();
       setEditAvatar(false);
     } else {
       onError();
