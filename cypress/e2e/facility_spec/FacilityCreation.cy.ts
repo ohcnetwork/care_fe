@@ -50,11 +50,7 @@ describe("Facility Creation", () => {
     "Required",
     "Invalid Phone Number",
   ];
-  const bedErrorMessage = [
-    "This field is required",
-    "Total capacity cannot be 0",
-    "This field is required",
-  ];
+  const bedErrorMessage = ["This field is required", "This field is required"];
   const doctorErrorMessage = [
     "This field is required",
     "This field is required",

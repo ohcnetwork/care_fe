@@ -118,7 +118,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
       if (!form[field]) {
         errors[field] = t("field_required");
         validForm = false;
-      } else if (field === "currentOccupancy" && Number(form[field] < 0)) {
+      } else if (field === "currentOccupancy") {
         if (Number(form[field] < 0)) {
           errors[field] = "Occupied cannot be negative";
           validForm = false;
