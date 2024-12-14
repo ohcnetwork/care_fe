@@ -52,10 +52,18 @@ const PatientNotesList = (props: PatientNotesProps) => {
     });
 
   useEffect(() => {
-    setState((prevState: any) => ({
-      ...prevState,
-      notes: data?.pages.flatMap((page) => page.results) || [],
-    }));
+    if (data?.pages) {
+      const allNotes = data.pages.flatMap((page) => page.results);
+
+      const notesMap = new Map(allNotes.map((note) => [note.id, note]));
+
+      const deduplicatedNotes = Array.from(notesMap.values());
+
+      setState((prevState: any) => ({
+        ...prevState,
+        notes: deduplicatedNotes,
+      }));
+    }
   }, [data]);
 
   useEffect(() => {
