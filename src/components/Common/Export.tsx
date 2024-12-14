@@ -1,9 +1,8 @@
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import DropdownMenu, {
-  DropdownItem,
-  DropdownItemProps,
-} from "@/components/Common/Menu";
+import { DropdownItemProps } from "@/components/Common/Menu";
 
 import useExport from "@/hooks/useExport";
 
@@ -11,6 +10,12 @@ import request from "@/Utils/request/request";
 import { Route } from "@/Utils/request/types";
 
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 interface ExportItem {
   options?: DropdownItemProps;
@@ -74,33 +79,46 @@ export const ExportMenu = ({
   }
 
   return (
-    <div key="export-menu" id="export-button">
-      <DropdownMenu
-        disabled={isExporting || disabled}
-        title={isExporting ? "Exporting..." : label}
-        icon={<CareIcon icon="l-export" />}
-        className="tooltip border-primary-700 bg-white text-primary-700 hover:bg-primary-100 enabled:border"
-      >
-        {exportItems.map((item) => (
-          <DropdownItem
-            key={item.label}
-            onClick={() => {
-              let action = item.action;
-              if (item.route) {
-                action = async () => {
-                  const { data } = await request(item.route!);
-                  return data ?? null;
-                };
-              }
-              if (action) {
-                exportFile(action, item.filePrefix, item.type, item.parse);
-              }
-            }}
-            {...item.options}
+    <div key="export-menu" id="export-button" className="w-full">
+      <DropdownMenu>
+        <DropdownMenuTrigger className={cn("w-full")}>
+          <Button
+            variant={"outline_primary"}
+            size={"lg"}
+            className="w-full gap-2 cursor-pointer"
+            disabled={isExporting || disabled}
           >
-            {item.label}
-          </DropdownItem>
-        ))}
+            <CareIcon
+              icon="l-export"
+              className="text-base import-assets-button lg:w-fit"
+            />
+            {isExporting ? "Exporting..." : label}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {exportItems.map((item) => (
+            <div
+              key={item.label}
+              onClick={() => {
+                let action = item.action;
+                if (item.route) {
+                  action = async () => {
+                    const { data } = await request(item.route!);
+                    return data ?? null;
+                  };
+                }
+                if (action) {
+                  exportFile(action, item.filePrefix, item.type, item.parse);
+                }
+              }}
+              {...item.options}
+            >
+              <DropdownMenuItem className="cursor-pointer">
+                {item.label}
+              </DropdownMenuItem>
+            </div>
+          ))}
+        </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
