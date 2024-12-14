@@ -79,9 +79,7 @@ export default function ShiftingTable(props: {
   return (
     <div>
       {isPrintMode ? (
-        <div className="fixed inset-0 z-50 bg-white overflow-auto flex flex-col p-4">
-          {printData(shiftData)}
-        </div>
+        <div>{printData(shiftData)}</div>
       ) : (
         <div>
           <div
@@ -96,10 +94,10 @@ export default function ShiftingTable(props: {
               </div>
             )}
 
-            <div className="col-span-1 px-3 hidden text-left uppercase sm:hidden md:hidden lg:block">
+            <div className="col-span-1  pl-4 hidden text-left uppercase sm:hidden md:hidden lg:block">
               {t("consent__status")}
             </div>
-            <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
+            <div className="col-span-1 px-2 hidden text-left uppercase sm:hidden md:hidden lg:block">
               {t("From")}
             </div>
             <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
@@ -221,11 +219,15 @@ export default function ShiftingTable(props: {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className=" hover:font-bold cursor-pointer"
+                            disabled={
+                              shift?.status === "COMPLETED" ||
+                              shift?.status === "CANCELLED"
+                            }
                             onClick={(_) =>
                               navigate(`/shifting/${shift.external_id}/update`)
                             }
                           >
-                            {t("Update details")}
+                            {t("update_status_details")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className=" hover:font-bold cursor-pointer"
@@ -234,7 +236,7 @@ export default function ShiftingTable(props: {
                               setselectedShiftId(shift.id);
                             }}
                           >
-                            {t("Referral letter")}
+                            {t("referral_letter")}
                           </DropdownMenuItem>
                           {shift.status === "COMPLETED" &&
                             shift.assigned_facility && (
