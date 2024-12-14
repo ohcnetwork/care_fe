@@ -407,7 +407,7 @@ const AssetsList = () => {
                         icon: (
                           <CareIcon
                             icon="l-import"
-                            className="import-assets-button mr-5 w-full lg:w-fit"
+                            className="import-assets-button"
                           />
                         ),
                         onClick: () => setImportAssetModalOpen(true),

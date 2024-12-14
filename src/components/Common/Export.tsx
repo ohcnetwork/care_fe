@@ -88,10 +88,7 @@ export const ExportMenu = ({
             className="w-full gap-2 cursor-pointer"
             disabled={isExporting || disabled}
           >
-            <CareIcon
-              icon="l-export"
-              className="text-base import-assets-button lg:w-fit"
-            />
+            <CareIcon icon="l-export" className="text-base lg:w-fit" />
             {isExporting ? "Exporting..." : label}
           </Button>
         </DropdownMenuTrigger>
@@ -113,7 +110,8 @@ export const ExportMenu = ({
               }}
               {...item.options}
             >
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className={cn("cursor-pointer gap-2")}>
+                {item.options?.icon}
                 {item.label}
               </DropdownMenuItem>
             </div>
