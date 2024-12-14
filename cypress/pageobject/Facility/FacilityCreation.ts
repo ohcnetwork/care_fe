@@ -89,7 +89,9 @@ class FacilityPage {
   }
 
   submitForm() {
+    cy.intercept("POST", "**/api/v1/facility/").as("postFacility");
     cy.get("button#submit").click();
+    cy.wait("@postFacility").its("response.statusCode").should("eq", 201);
   }
 
   selectBedType(bedType: string) {
