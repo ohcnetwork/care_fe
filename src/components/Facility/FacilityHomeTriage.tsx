@@ -21,11 +21,11 @@ export function FacilityHomeTriage({ facilityId }: FacilityHomeTriageProps) {
   const tableRows =
     data?.results?.map((result) => [
       String(result.entry_date),
-      String(result.num_patients_visited),
-      String(result.num_patients_home_quarantine),
-      String(result.num_patients_isolation),
-      String(result.num_patient_referred),
-      String(result.num_patient_confirmed_positive),
+      String(Math.max(0, result.num_patients_visited || 0)),
+      String(Math.max(0, result.num_patients_home_quarantine || 0)),
+      String(Math.max(0, result.num_patients_isolation || 0)),
+      String(Math.max(0, result.num_patient_referred || 0)),
+      String(Math.max(0, result.num_patient_confirmed_positive || 0)),
       <ButtonV2
         key={result.id}
         id="edit-button"
