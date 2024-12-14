@@ -165,8 +165,58 @@ export default function PatientIndex() {
   const onlyAccessibleFacility =
     permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
 
+  function AddPatientButton(props: { outline?: boolean }) {
+    return (
+      <Button
+        variant={props.outline ? "outline_primary" : "primary"}
+        className="gap-3"
+        onClick={() => {
+          let facilityId = "";
+          const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+          const userCanSeeAllFacilities = showAllFacilityUsers.includes(
+            authUser.user_type,
+          );
+          const userHomeFacilityId = authUser.home_facility_object?.id;
+          if (qParams.facility && userCanSeeAllFacilities)
+            facilityId = qParams.facility;
+          else if (
+            qParams.facility &&
+            !userCanSeeAllFacilities &&
+            userHomeFacilityId !== qParams.facility
+          )
+            Notification.Error({
+              msg: t("permission_denied"),
+            });
+          else if (!userCanSeeAllFacilities && userHomeFacilityId) {
+            facilityId = userHomeFacilityId;
+          } else if (onlyAccessibleFacility)
+            facilityId = onlyAccessibleFacility.id || "";
+          else if (!userCanSeeAllFacilities && !userHomeFacilityId) {
+            Notification.Error({
+              msg: t("no_home_facility_found"),
+            });
+            return;
+          } else {
+            setShowDialog("create");
+            return;
+          }
+          navigate(`/facility/${facilityId}/register-patient`);
+        }}
+      >
+        <CareIcon icon="l-plus" />
+        {t("add_new_patient")}
+        <KeyboardShortcutKey shortcut={["Shift", "P"]} />
+      </Button>
+    );
+  }
+
   return (
-    <Page title="Patients" hideBack breadcrumbs={false}>
+    <Page
+      title="Patients"
+      hideBack
+      breadcrumbs={false}
+      options={<AddPatientButton />}
+    >
       <TabbedSections
         tabs={[
           {
@@ -185,7 +235,7 @@ export default function PatientIndex() {
                       onClick={() => advancedFilter.setShow(true)}
                     >
                       <CareIcon icon="l-filter" />
-                      Filters
+                      {t("filters")}
                     </Button>
                   </div>
                   <SearchByMultipleFields
@@ -197,18 +247,23 @@ export default function PatientIndex() {
                   />
                 </div>
                 {isValidSearch && !listingQuery.data?.results.length && (
-                  <div className="py-10 text-gray-400">
+                  <div className="py-10 text-gray-600 text-sm flex flex-col gap-4 text-center">
                     {t("no_records_found")}
+                    <br />
+                    {t("to_proceed_with_registration")}
+                    <AddPatientButton outline />
                   </div>
                 )}
                 {isValidSearch && !!listingQuery.data?.results.length && (
                   <Table className="mt-4">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="">Name/IP/OP</TableHead>
-                        <TableHead className="">Primary Ph. No.</TableHead>
-                        <TableHead className="">DOB</TableHead>
-                        <TableHead className="">Sex</TableHead>
+                        <TableHead className="">{t("name")}/IP/OP</TableHead>
+                        <TableHead className="">
+                          {t("primary_phone_no")}
+                        </TableHead>
+                        <TableHead className="">{t("dob")}</TableHead>
+                        <TableHead className="">{t("sex")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -245,56 +300,6 @@ export default function PatientIndex() {
                 {listingQuery.data && (
                   <Pagination totalCount={listingQuery?.data?.count} />
                 )}
-                <div className="w-full mt-4">
-                  <Button
-                    variant={"outline_primary"}
-                    className="gap-3"
-                    onClick={() => {
-                      const showAllFacilityUsers = [
-                        "DistrictAdmin",
-                        "StateAdmin",
-                      ];
-                      if (
-                        qParams.facility &&
-                        showAllFacilityUsers.includes(authUser.user_type)
-                      )
-                        navigate(
-                          `/facility/${qParams.facility}/register-patient`,
-                        );
-                      else if (
-                        qParams.facility &&
-                        !showAllFacilityUsers.includes(authUser.user_type) &&
-                        authUser.home_facility_object?.id !== qParams.facility
-                      )
-                        Notification.Error({
-                          msg: "Oops! Non-Home facility users don't have permission to perform this action.",
-                        });
-                      else if (
-                        !showAllFacilityUsers.includes(authUser.user_type) &&
-                        authUser.home_facility_object?.id
-                      ) {
-                        navigate(
-                          `/facility/${authUser.home_facility_object.id}/register-patient`,
-                        );
-                      } else if (onlyAccessibleFacility)
-                        navigate(
-                          `/facility/${onlyAccessibleFacility.id}/register-patient`,
-                        );
-                      else if (
-                        !showAllFacilityUsers.includes(authUser.user_type) &&
-                        !authUser.home_facility_object?.id
-                      )
-                        Notification.Error({
-                          msg: "Oops! No home facility found",
-                        });
-                      else setShowDialog("create");
-                    }}
-                  >
-                    <CareIcon icon="l-plus" />
-                    Add new patient
-                    <KeyboardShortcutKey shortcut={["Shift", "P"]} />
-                  </Button>
-                </div>
               </div>
             ),
           },

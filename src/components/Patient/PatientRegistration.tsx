@@ -1,6 +1,7 @@
 import careConfig from "@careConfig";
 import { RadioGroupItem } from "@radix-ui/react-radio-group";
 import { useQuery } from "@tanstack/react-query";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,14 +18,21 @@ import {
 import countryList from "@/common/static/countries.json";
 import { validatePincode } from "@/common/validation";
 
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { getPincodeDetails, includesIgnoreCase } from "@/Utils/utils";
+import useMutation from "@/Utils/request/useMutation";
+import {
+  dateQueryString,
+  getPincodeDetails,
+  includesIgnoreCase,
+} from "@/Utils/utils";
 
 import Page from "../Common/Page";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
+import { InputErrors } from "../ui/errors";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { RadioGroup } from "../ui/radio-group";
@@ -47,8 +55,20 @@ interface PatientRegistrationPageProps {
 export default function PatientRegistration(
   props: PatientRegistrationPageProps,
 ) {
-  const { patientId } = props;
+  const { patientId, facilityId } = props;
   const { t } = useTranslation();
+
+  const [samePhoneNumber, setSamePhoneNumber] = useState(false);
+  const [sameAddress, setSameAddress] = useState(false);
+  const [ageDob, setAgeDob] = useState<"dob" | "age">("dob");
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+  const [form, setForm] = useState<Partial<PatientModel>>({
+    nationality: "India",
+  });
+  const [age, setAge] = useState<number>();
+  const [feErrors, setFeErrors] = useState<
+    Partial<Record<keyof PatientModel, string[]>>
+  >({});
 
   const sidebarItems = [
     { label: t("patient__general-info"), id: "general-info" },
@@ -57,8 +77,25 @@ export default function PatientRegistration(
     { label: t("patient__insurance-details"), id: "insurance-details" },
   ];
 
-  const [form, setForm] = useState<Partial<PatientModel>>({
-    nationality: "India",
+  const mutationData: Partial<PatientModel> = {
+    ...form,
+    date_of_birth:
+      ageDob === "dob" ? dateQueryString(form.date_of_birth) : undefined,
+    year_of_birth:
+      ageDob === "age" ? new Date().getFullYear() - (age || 0) : undefined,
+    is_active: true,
+    blood_group: "B+",
+    is_antenatal: false,
+  };
+
+  const createPatientMutation = useMutation(routes.addPatient, {
+    body: { ...mutationData, facility: facilityId },
+    onResponse: (resp) => {
+      Notification.Success({
+        msg: t("patient_registration_success"),
+      });
+      navigate(`/facility/${facilityId}/patient/${resp.data?.id}/consultation`);
+    },
   });
 
   const statesQuery = useQuery({
@@ -89,11 +126,6 @@ export default function PatientRegistration(
       pathParams: { id: form.local_body?.toString() || "" },
     }),
   });
-
-  const [samePhoneNumber, setSamePhoneNumber] = useState(false);
-  const [sameAddress, setSameAddress] = useState(false);
-  const [ageDob, setAgeDob] = useState<"dob" | "age">("dob");
-  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
 
   const handlePincodeChange = async (value: string) => {
     if (!validatePincode(value)) return;
@@ -142,15 +174,46 @@ export default function PatientRegistration(
     ? t("add_details_of_patient")
     : t("update_patient_details");
 
+  const errors = { ...feErrors, ...createPatientMutation.error };
+
   const fieldProps = (field: keyof typeof form) => ({
     value: form[field] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((f) => ({ ...f, [field]: e.target.value })),
+    errors: errors[field],
   });
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    //...
+    const errors: Record<string, string[]> = {};
+    const requiredFields: Array<keyof typeof form> = [
+      "name",
+      "phone_number",
+      "emergency_phone_number",
+      "gender",
+      ageDob === "dob" ? "date_of_birth" : "age",
+      "pincode",
+      "nationality",
+      "address",
+      "permanent_address",
+    ];
+
+    if (form.nationality === "India") {
+      requiredFields.push("state", "district", "local_body");
+    }
+
+    requiredFields.forEach((field) => {
+      if (!form[field]) {
+        errors[field] = errors[field] || [];
+        errors[field].push(`This field is required`);
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFeErrors(errors);
+    } else {
+      createPatientMutation.mutate();
+    }
   };
 
   return (
@@ -212,6 +275,7 @@ export default function PatientRegistration(
               onValueChange={(value) =>
                 setForm((f) => ({ ...f, gender: Number(value) }))
               }
+              errors={errors["gender"]}
               className="flex items-center gap-4"
             >
               {GENDER_TYPES.map((g) => (
@@ -253,6 +317,7 @@ export default function PatientRegistration(
                         date_of_birth: `${e.target.value}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
                       }))
                     }
+                    errors={errors["date_of_birth"] ? [""] : undefined}
                   />
                   <Input
                     required
@@ -264,6 +329,7 @@ export default function PatientRegistration(
                         date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${e.target.value}-${form.date_of_birth?.split("-")[2] || ""}`,
                       }))
                     }
+                    errors={errors["date_of_birth"] ? [""] : undefined}
                   />
                   <Input
                     required
@@ -275,25 +341,51 @@ export default function PatientRegistration(
                         date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${e.target.value}`,
                       }))
                     }
+                    errors={errors["date_of_birth"] ? [""] : undefined}
                   />
                 </div>
+                {errors["date_of_birth"] && (
+                  <InputErrors errors={errors["date_of_birth"]} />
+                )}
               </TabsContent>
               <TabsContent value="age">
-                <Input required type="number" label={t("age")} />
+                <Input
+                  value={age}
+                  errors={errors["age"]}
+                  onChange={(e) => setAge(Number(e.target.value))}
+                  required
+                  type="number"
+                  label={t("age")}
+                />
               </TabsContent>
             </Tabs>
             <br />
             <Textarea
               {...fieldProps("address")}
               label={t("current_address")}
+              required
               onChange={(e) =>
-                setForm((f) => ({ ...f, address: e.target.value }))
+                setForm((f) => ({
+                  ...f,
+                  address: e.target.value,
+                  permanent_address: sameAddress
+                    ? e.target.value
+                    : f.permanent_address,
+                }))
               }
             />
             <div className="mt-1">
               <Checkbox
                 checked={sameAddress}
-                onCheckedChange={() => setSameAddress(!sameAddress)}
+                onCheckedChange={() => {
+                  setSameAddress(!sameAddress);
+                  setForm((f) => ({
+                    ...f,
+                    permanent_address: !sameAddress
+                      ? f.address
+                      : f.permanent_address,
+                  }));
+                }}
                 id="same-address"
                 label={t("use_address_as_permanent")}
               />
@@ -302,7 +394,8 @@ export default function PatientRegistration(
             <Textarea
               {...fieldProps("permanent_address")}
               label={t("permanent_address")}
-              value={sameAddress ? form.address : form.permanent_address}
+              required
+              value={form.permanent_address}
               onChange={(e) =>
                 setForm((f) => ({ ...f, permanent_address: e.target.value }))
               }
@@ -340,9 +433,18 @@ export default function PatientRegistration(
                 </Label>
                 <Select
                   value={form.nationality}
-                  onValueChange={(value) =>
-                    setForm((f) => ({ ...f, nationality: value }))
-                  }
+                  onValueChange={(value) => {
+                    setForm((f) => ({
+                      ...f,
+                      nationality: value,
+                      state: undefined,
+                      district: undefined,
+                      local_body: undefined,
+                      ward: undefined,
+                      village: undefined,
+                      passport_no: undefined,
+                    }));
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -354,124 +456,133 @@ export default function PatientRegistration(
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label className="mb-2">
-                  {t("state")} <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={form.state?.toString()}
-                  disabled={statesQuery.isLoading}
-                  onValueChange={(value) =>
-                    setForm((f) => ({
-                      ...f,
-                      state: Number(value),
-                      district: undefined,
-                      local_body: undefined,
-                      ward: undefined,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statesQuery.data?.results.map((state) => (
-                      <SelectItem value={state.id.toString()}>
-                        {state.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="mb-2">
-                  {t("district")} <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={form.district?.toString()}
-                  onValueChange={(value) =>
-                    setForm((f) => ({
-                      ...f,
-                      district: Number(value),
-                      local_body: undefined,
-                      ward: undefined,
-                    }))
-                  }
-                  disabled={
-                    !form.state ||
-                    districtsQuery.isLoading ||
-                    !districtsQuery.data?.length
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {districtsQuery.data?.map((district) => (
-                      <SelectItem value={district.id.toString()}>
-                        {district.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="mb-2">
-                  {t("local_body")} <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={form.local_body?.toString()}
-                  onValueChange={(value) =>
-                    setForm((f) => ({
-                      ...f,
-                      local_body: Number(value),
-                      ward: undefined,
-                    }))
-                  }
-                  disabled={
-                    !form.district ||
-                    localBodyQuery.isLoading ||
-                    !localBodyQuery.data?.length
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {localBodyQuery.data?.map((localbody) => (
-                      <SelectItem value={localbody.id.toString()}>
-                        {localbody.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="mb-2">{t("ward")}</Label>
-                <Select
-                  value={form.ward?.toString()}
-                  onValueChange={(value) =>
-                    setForm((f) => ({ ...f, ward: value }))
-                  }
-                  disabled={
-                    !form.local_body ||
-                    wardsQuery.isLoading ||
-                    !wardsQuery.data?.results.length
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {wardsQuery.data?.results.map((ward) => (
-                      <SelectItem value={ward.id.toString()}>
-                        {ward.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Input {...fieldProps("village")} label={t("village")} />
+              {form.nationality === "India" ? (
+                <>
+                  <div>
+                    <Label className="mb-2">
+                      {t("state")} <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={form.state?.toString()}
+                      disabled={statesQuery.isLoading}
+                      onValueChange={(value) =>
+                        setForm((f) => ({
+                          ...f,
+                          state: Number(value),
+                          district: undefined,
+                          local_body: undefined,
+                          ward: undefined,
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statesQuery.data?.results.map((state) => (
+                          <SelectItem value={state.id.toString()}>
+                            {state.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="mb-2">
+                      {t("district")} <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={form.district?.toString()}
+                      onValueChange={(value) =>
+                        setForm((f) => ({
+                          ...f,
+                          district: Number(value),
+                          local_body: undefined,
+                          ward: undefined,
+                        }))
+                      }
+                      disabled={
+                        !form.state ||
+                        districtsQuery.isLoading ||
+                        !districtsQuery.data?.length
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {districtsQuery.data?.map((district) => (
+                          <SelectItem value={district.id.toString()}>
+                            {district.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="mb-2">
+                      {t("local_body")} <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={form.local_body?.toString()}
+                      onValueChange={(value) =>
+                        setForm((f) => ({
+                          ...f,
+                          local_body: Number(value),
+                          ward: undefined,
+                        }))
+                      }
+                      disabled={
+                        !form.district ||
+                        localBodyQuery.isLoading ||
+                        !localBodyQuery.data?.length
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {localBodyQuery.data?.map((localbody) => (
+                          <SelectItem value={localbody.id.toString()}>
+                            {localbody.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="mb-2">{t("ward")}</Label>
+                    <Select
+                      value={form.ward?.toString()}
+                      onValueChange={(value) =>
+                        setForm((f) => ({ ...f, ward: value }))
+                      }
+                      disabled={
+                        !form.local_body ||
+                        wardsQuery.isLoading ||
+                        !wardsQuery.data?.results.length
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {wardsQuery.data?.results.map((ward) => (
+                          <SelectItem value={ward.id.toString()}>
+                            {ward.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Input {...fieldProps("village")} label={t("village")} />
+                </>
+              ) : (
+                <Input
+                  {...fieldProps("passport_no")}
+                  label={t("passport_number")}
+                />
+              )}
             </div>
           </div>
           <div id="social-profile" className="mt-10">
@@ -483,9 +594,12 @@ export default function PatientRegistration(
             <div>
               <Label className="mb-2">{t("occupation")}</Label>
               <Select
-                value={form.occupation}
+                value={form.meta_info?.occupation}
                 onValueChange={(value) =>
-                  setForm((f) => ({ ...f, occupation: value }))
+                  setForm((f) => ({
+                    ...f,
+                    meta_info: { ...(f.meta_info as any), occupation: value },
+                  }))
                 }
               >
                 <SelectTrigger className="w-full">
@@ -524,10 +638,15 @@ export default function PatientRegistration(
             <br />
             <RadioGroup
               label={t("socioeconomic_status")}
-              required
-              value={form.gender?.toString()}
+              value={form.meta_info?.socioeconomic_status}
               onValueChange={(value) =>
-                setForm((f) => ({ ...f, gender: Number(value) }))
+                setForm((f) => ({
+                  ...f,
+                  meta_info: {
+                    ...(f.meta_info as any),
+                    socioeconomic_status: value,
+                  },
+                }))
               }
               className="flex items-center gap-4"
             >
@@ -543,10 +662,15 @@ export default function PatientRegistration(
             <br />
             <RadioGroup
               label={t("has_domestic_healthcare_support")}
-              required
-              value={form.gender?.toString()}
+              value={form.meta_info?.domestic_healthcare_support}
               onValueChange={(value) =>
-                setForm((f) => ({ ...f, gender: Number(value) }))
+                setForm((f) => ({
+                  ...f,
+                  meta_info: {
+                    ...(f.meta_info as any),
+                    domestic_healthcare_support: value,
+                  },
+                }))
               }
               className="flex items-center gap-4"
             >
@@ -576,7 +700,11 @@ export default function PatientRegistration(
             <br />
           </div>
           <div className="flex justify-end mt-20">
-            <Button type="submit" variant={"primary"}>
+            <Button
+              type="submit"
+              variant={"primary"}
+              disabled={createPatientMutation.isProcessing}
+            >
               {t("save_and_continue")}
             </Button>
           </div>

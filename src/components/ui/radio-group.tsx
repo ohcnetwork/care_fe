@@ -6,12 +6,15 @@ import { cn } from "@/lib/utils";
 
 import { Label } from "@/components/ui/label";
 
+import { InputErrors } from "./errors";
+
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> & {
     label?: string;
+    errors?: string[];
   }
->(({ className, label, ...props }, ref) => {
+>(({ className, label, errors, ...props }, ref) => {
   return (
     <div>
       {label && (
@@ -25,6 +28,7 @@ const RadioGroup = React.forwardRef<
         {...props}
         ref={ref}
       />
+      <InputErrors errors={errors} />
     </div>
   );
 });
