@@ -243,7 +243,7 @@ describe("Facility Creation", () => {
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickDeleteFacilityOption();
     facilityPage.confirmDeleteFacility();
-    cy.verifyNotification(`${facilityName} deleted successfully`);
+    cy.verifyNotification("Facility deleted successfully");
   });
 
   it("Create a new facility with single bed and doctor capacity", () => {
