@@ -1179,7 +1179,7 @@ const UserAddEditForm = (props: UserProps) => {
             )}
           </>
         )}
-        {includedFields?.includes("local_body") && (
+        {showLocalbody && includedFields?.includes("local_body") && (
           <>
             {isLocalbodyLoading ? (
               <CircularProgress />
