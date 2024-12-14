@@ -2,7 +2,6 @@ import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterH
 import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
 import { ImmunisationRecords } from "@/components/Patient/PatientDetailsTab//ImmunisationRecords";
 import PatientNotes from "@/components/Patient/PatientDetailsTab//Notes";
-import { SampleTestHistory } from "@/components/Patient/PatientDetailsTab//SampleTestHistory";
 import ShiftingHistory from "@/components/Patient/PatientDetailsTab//ShiftingHistory";
 import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 import { PatientModel } from "@/components/Patient/models";
@@ -34,10 +33,6 @@ export const patientTabs = [
   {
     route: "shift",
     component: ShiftingHistory,
-  },
-  {
-    route: "request-sample-test",
-    component: SampleTestHistory,
   },
   {
     route: "patient-notes",
