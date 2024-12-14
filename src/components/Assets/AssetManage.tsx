@@ -34,7 +34,7 @@ import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDate, formatDateTime, formatName } from "@/Utils/utils";
 
 interface AssetManageProps {
@@ -69,7 +69,11 @@ const AssetManage = (props: AssetManageProps) => {
   >();
   const [transactionFilter, setTransactionFilter] = useState<any>({});
 
-  const { data: asset, loading } = useQuery(routes.getAsset, {
+  const {
+    data: asset,
+    loading,
+    refetch,
+  } = useTanStackQueryInstead(routes.getAsset, {
     pathParams: {
       external_id: assetId,
     },
@@ -84,21 +88,24 @@ const AssetManage = (props: AssetManageProps) => {
     },
   });
 
-  const { data: transactions } = useQuery(routes.listAssetTransaction, {
-    prefetch: !!asset,
-    query: {
-      ...transactionFilter,
-      limit,
-      offset,
+  const { data: transactions } = useTanStackQueryInstead(
+    routes.listAssetTransaction,
+    {
+      prefetch: !!asset,
+      query: {
+        ...transactionFilter,
+        limit,
+        offset,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.status === 200 && data) {
+          setTotalCount(data.count);
+        }
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setTotalCount(data.count);
-      }
-    },
-  });
+  );
 
-  const { data: services, refetch: serviceRefetch } = useQuery(
+  const { data: services, refetch: serviceRefetch } = useTanStackQueryInstead(
     routes.listAssetService,
     {
       pathParams: {
@@ -594,7 +601,10 @@ const AssetManage = (props: AssetManageProps) => {
           handleClose={() =>
             setServiceEditData({ ...serviceEditData, open: false })
           }
-          handleUpdate={() => serviceRefetch()}
+          handleUpdate={() => {
+            serviceRefetch();
+            refetch();
+          }}
           show={serviceEditData.open}
           viewOnly={serviceEditData.viewOnly}
         />

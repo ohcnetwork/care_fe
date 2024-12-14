@@ -19,6 +19,7 @@ export interface PageTitleProps {
   // New props for Breadcrumbs
   hideBack?: boolean;
   backUrl?: string;
+  hideTitleOnPage?: boolean;
   onBackClick?: () => boolean | void;
 }
 
@@ -35,6 +36,7 @@ export default function PageTitle({
   hideBack = false,
   backUrl,
   onBackClick,
+  hideTitleOnPage,
 }: PageTitleProps) {
   const divRef = useRef<any>();
 
@@ -70,7 +72,9 @@ export default function PageTitle({
         )}
       >
         <div className="flex items-center">
-          <h2 className="ml-0 text-2xl leading-tight">{title}</h2>
+          {!hideTitleOnPage && (
+            <h2 className="ml-0 text-2xl leading-tight">{title}</h2>
+          )}
         </div>
         {componentRight}
       </div>

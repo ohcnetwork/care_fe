@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { useCallback, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -22,7 +21,7 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { PaginatedResponse } from "@/Utils/request/types";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatPatientAge } from "@/Utils/utils";
 
 const RESULT_PER_PAGE = 14;
@@ -179,16 +178,16 @@ const InvestigationReports = ({ id }: any) => {
       ),
     );
 
-    const investigationList = _.chain(data)
-      .flatMap((i) => i?.data?.results)
-      .compact()
-      .flatten()
-      .map((i) => ({
-        ...i,
-        name: `${i.name} ${i.groups[0].name && " | " + i.groups[0].name} `,
-      }))
-      .unionBy("external_id")
-      .value();
+    const investigationList = Array.from(
+      data
+        .flatMap((i) => i?.data?.results || [])
+        .map((i) => ({
+          ...i,
+          name: `${i.name} ${i.groups[0].name ? " | " + i.groups[0].name : ""}`,
+        }))
+        .reduce((map, item) => map.set(item.external_id, item), new Map())
+        .values(),
+    );
 
     dispatch({ type: "set_investigations", payload: investigationList });
     dispatch({
@@ -197,7 +196,7 @@ const InvestigationReports = ({ id }: any) => {
     });
   }, [isLoading, selectedGroup]);
 
-  useQuery(routes.listInvestigationGroups, {
+  useTanStackQueryInstead(routes.listInvestigationGroups, {
     onResponse: (res) => {
       if (res && res.data) {
         dispatch({
@@ -208,12 +207,10 @@ const InvestigationReports = ({ id }: any) => {
     },
   });
 
-  const { data: patientData, loading: patientLoading } = useQuery(
-    routes.getPatient,
-    {
+  const { data: patientData, loading: patientLoading } =
+    useTanStackQueryInstead(routes.getPatient, {
       pathParams: { id: id },
-    },
-  );
+    });
 
   const handleGroupSelect = ({ value }: FieldChangeEvent<string[]>) => {
     dispatch({ type: "set_investigations", payload: [] });

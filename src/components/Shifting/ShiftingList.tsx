@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
+
 import { ExportButton } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -17,7 +18,7 @@ import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 import ShiftingTable from "./ShiftingTable";
 
@@ -32,11 +33,15 @@ export default function ListView() {
   } = useFilters({ cacheBlacklist: ["patient_name"] });
 
   const { t } = useTranslation();
+  const onBoardViewBtnClick = () => {
+    navigate("/shifting/board", { query: qParams });
+    localStorage.setItem("defaultShiftView", "board");
+  };
   const {
     data: shiftData,
     loading,
     refetch: fetchData,
-  } = useQuery(routes.listShiftRequests, {
+  } = useTanStackQueryInstead(routes.listShiftRequests, {
     query: formatFilter({
       ...qParams,
       offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -73,13 +78,10 @@ export default function ListView() {
           </div>
 
           <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-            <ButtonV2
-              className="py-[11px]"
-              onClick={() => navigate("/shifting/board", { query: qParams })}
-            >
-              <CareIcon icon="l-list-ul" className="rotate-90" />
+            <Button variant={"primary"} onClick={onBoardViewBtnClick}>
+              <CareIcon icon="l-list-ul" className="rotate-90 mr-2" />
               {t("board_view")}
-            </ButtonV2>
+            </Button>
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />

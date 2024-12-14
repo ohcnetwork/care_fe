@@ -22,7 +22,7 @@ import {
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
 
 export default function PatientConsentRecords(props: {
@@ -56,21 +56,24 @@ export default function PatientConsentRecords(props: {
     },
   });
 
-  const { data: patient } = useQuery(routes.getPatient, {
+  const { data: patient } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: {
       id: patientId,
     },
   });
 
-  const { data: consentRecordsData, refetch } = useQuery(routes.listConsents, {
-    pathParams: {
-      consultationId,
+  const { data: consentRecordsData, refetch } = useTanStackQueryInstead(
+    routes.listConsents,
+    {
+      pathParams: {
+        consultationId,
+      },
+      query: {
+        limit: 1000,
+        offset: 0,
+      },
     },
-    query: {
-      limit: 1000,
-      offset: 0,
-    },
-  });
+  );
 
   const consentRecords = consentRecordsData?.results;
 
@@ -112,6 +115,10 @@ export default function PatientConsentRecords(props: {
       crumbsReplacements={{
         [facilityId]: { name: patient?.facility_object?.name },
         [patientId]: { name: patient?.name },
+        consultation: {
+          name: "Consultation",
+          uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`,
+        },
         [consultationId]: {
           name:
             patient?.last_consultation?.suggestion === "A"
@@ -121,7 +128,7 @@ export default function PatientConsentRecords(props: {
               : patient?.last_consultation?.suggestion_text,
         },
       }}
-      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/`}
+      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/update`}
     >
       {fileUpload.Dialogues}
       {fileManager.Dialogues}

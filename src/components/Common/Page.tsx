@@ -1,9 +1,9 @@
 import { RefObject, useContext, useEffect } from "react";
 
+import { cn } from "@/lib/utils";
+
 import PageTitle, { PageTitleProps } from "@/components/Common/PageTitle";
 import { SidebarShrinkContext } from "@/components/Common/Sidebar/Sidebar";
-
-import { classNames } from "@/Utils/utils";
 
 interface PageProps extends PageTitleProps {
   children: React.ReactNode | React.ReactNode[];
@@ -17,6 +17,7 @@ interface PageProps extends PageTitleProps {
    * @default false
    **/
   collapseSidebar?: boolean;
+  hideTitleOnPage?: boolean;
 }
 
 export default function Page(props: PageProps) {
@@ -33,12 +34,12 @@ export default function Page(props: PageProps) {
 
   let padding = "";
   if (!props.noImplicitPadding) {
-    if (!props.hideBack || props.componentRight) padding = "py-3 md:p-6";
+    if (!props.hideBack || props.componentRight) padding = "py-3 md:px-6";
     else padding = "px-6 py-5";
   }
 
   return (
-    <div className={classNames(padding, props.className)} ref={props.ref}>
+    <div className={cn(padding, props.className)} ref={props.ref}>
       <div className="flex flex-col justify-between gap-2 px-3 md:flex-row md:items-center md:gap-6 md:px-0">
         <PageTitle
           changePageMetadata={props.changePageMetadata}
@@ -51,6 +52,7 @@ export default function Page(props: PageProps) {
           focusOnLoad={props.focusOnLoad}
           onBackClick={props.onBackClick}
           isInsidePage={true}
+          hideTitleOnPage={props.hideTitleOnPage}
         />
         {props.options}
       </div>

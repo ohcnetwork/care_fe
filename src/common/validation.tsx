@@ -57,6 +57,11 @@ export const validatePincode = (pincode: string) => {
   return pattern.test(pincode);
 };
 
+export const validateNumber = (number: string) => {
+  const pattern = /^[0-9]+$/;
+  return pattern.test(number);
+};
+
 export const checkIfValidIP = (str: string) => {
   // Regular expression to check if string is a IP address
   const regexExp =

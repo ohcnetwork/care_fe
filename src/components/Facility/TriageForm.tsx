@@ -19,7 +19,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { dateQueryString, scrollTo } from "@/Utils/utils";
 
 interface Props extends PatientStatsModel {
@@ -70,7 +70,7 @@ export const TriageForm = ({ facilityId, id }: Props) => {
   const headerText = !id ? "Add Triage" : "Edit Triage";
   const buttonText = !id ? "Save Triage" : "Update Triage";
 
-  const triageDetailsQuery = useQuery(routes.getTriageDetails, {
+  const triageDetailsQuery = useTanStackQueryInstead(routes.getTriageDetails, {
     pathParams: { facilityId, id: id! },
     prefetch: !!id,
     onResponse: ({ data }) => {
@@ -85,13 +85,13 @@ export const TriageForm = ({ facilityId, id }: Props) => {
     },
   });
 
-  const patientStatsQuery = useQuery(routes.getTriage, {
+  const patientStatsQuery = useTanStackQueryInstead(routes.getTriage, {
     pathParams: { facilityId },
   });
 
   const patientStatsData = patientStatsQuery.data?.results ?? [];
 
-  const facilityQuery = useQuery(routes.getAnyFacility, {
+  const facilityQuery = useTanStackQueryInstead(routes.getAnyFacility, {
     pathParams: { id: facilityId },
   });
   const facilityName = facilityQuery.data?.name ?? "";

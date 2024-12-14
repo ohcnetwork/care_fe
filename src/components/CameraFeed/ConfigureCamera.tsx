@@ -35,7 +35,7 @@ import { checkIfValidIP } from "@/common/validation";
 import { Error, Success } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getCameraConfig, makeAccessKey } from "@/Utils/transformUtils";
 import { classNames, compareBy } from "@/Utils/utils";
 
@@ -68,11 +68,11 @@ export default function ConfigureCamera(props: Props) {
   const [presetName, setPresetName] = useState("");
   const [showUnlinkConfirmation, setShowUnlinkConfirmation] = useState(false);
 
-  const assetBedsQuery = useQuery(routes.listAssetBeds, {
+  const assetBedsQuery = useTanStackQueryInstead(routes.listAssetBeds, {
     query: { asset: props.asset.id, limit: 50 },
   });
 
-  const bedsQuery = useQuery(routes.listFacilityBeds, {
+  const bedsQuery = useTanStackQueryInstead(routes.listFacilityBeds, {
     query: { location: props.asset.location_object.id, limit: 50 },
   });
 
@@ -89,22 +89,24 @@ export default function ConfigureCamera(props: Props) {
 
   const firstBedId =
     linkedAssetBeds?.[0]?.bed_object.id ?? unlinkedBeds?.[0]?.id;
-  useEffect(() => {
-    if (!query.bed && firstBedId) {
-      setQuery({ bed: firstBedId });
-    }
-  }, [query.bed, firstBedId]);
+
+  const selectedBedId = query.bed || firstBedId;
 
   const selectedAssetBed = linkedAssetBeds?.find(
-    (a) => a.bed_object.id === query.bed,
+    (a) => a.bed_object.id === selectedBedId,
   );
-  const selectedUnlinkedBed = unlinkedBeds?.find((bed) => bed.id === query.bed);
+  const selectedUnlinkedBed = unlinkedBeds?.find(
+    (bed) => bed.id === selectedBedId,
+  );
 
-  const cameraPresetsQuery = useQuery(FeedRoutes.listAssetBedPresets, {
-    pathParams: { assetbed_id: selectedAssetBed?.id ?? "" },
-    query: { position: true, limit: 50 },
-    prefetch: !!selectedAssetBed?.id,
-  });
+  const cameraPresetsQuery = useTanStackQueryInstead(
+    FeedRoutes.listAssetBedPresets,
+    {
+      pathParams: { assetbed_id: selectedAssetBed?.id ?? "" },
+      query: { position: true, limit: 50 },
+      prefetch: !!selectedAssetBed?.id,
+    },
+  );
 
   useEffect(() => setMeta(props.asset.meta), [props.asset]);
 

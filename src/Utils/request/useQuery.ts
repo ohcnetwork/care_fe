@@ -1,66 +1,58 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useRef } from "react";
 
 import request from "@/Utils/request/request";
-import {
-  QueryRoute,
-  RequestOptions,
-  RequestResult,
-} from "@/Utils/request/types";
-import { mergeRequestOptions } from "@/Utils/request/utils";
+import { QueryRoute, RequestOptions } from "@/Utils/request/types";
+
+import { mergeRequestOptions } from "./utils";
 
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
-  refetchOnWindowFocus?: boolean;
   key?: string;
 }
 
-export default function useQuery<TData>(
+/**
+ * @deprecated use `useQuery` from `@tanstack/react-query` instead.
+ */
+export default function useTanStackQueryInstead<TData>(
   route: QueryRoute<TData>,
   options?: QueryOptions<TData>,
 ) {
-  const [response, setResponse] = useState<RequestResult<TData>>();
-  const [loading, setLoading] = useState(false);
+  const overridesRef = useRef<QueryOptions<TData>>();
 
-  const controllerRef = useRef<AbortController>();
+  // Ensure unique key for each usage of the hook unless explicitly provided
+  // (hack to opt-out of tanstack query's caching between usages)
+  const key = useMemo(() => options?.key ?? Math.random(), [options?.key]);
 
-  const runQuery = useCallback(
-    async (overrides?: QueryOptions<TData>) => {
-      controllerRef.current?.abort();
+  const {
+    data: response,
+    refetch,
+    isFetching: isLoading,
+  } = useQuery({
+    queryKey: [route.path, options?.pathParams, options?.query, key],
+    queryFn: async ({ signal }) => {
+      const resolvedOptions = overridesRef.current
+        ? mergeRequestOptions(options || {}, overridesRef.current)
+        : options;
 
-      const controller = new AbortController();
-      controllerRef.current = controller;
-
-      const resolvedOptions =
-        options && overrides
-          ? mergeRequestOptions(options, overrides)
-          : (overrides ?? options);
-
-      setLoading(true);
-      const response = await request(route, { ...resolvedOptions, controller });
-      if (response.error?.name !== "AbortError") {
-        setResponse(response);
-        setLoading(false);
-      }
-      return response;
+      return await request(route, { ...resolvedOptions, signal });
     },
-    [route, JSON.stringify(options)],
-  );
+    enabled: options?.prefetch ?? true,
+    refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    if (options?.prefetch ?? true) {
-      runQuery();
-    }
-  }, [runQuery, options?.prefetch]);
-
-  useEffect(() => {
-    if (options?.refetchOnWindowFocus) {
-      const onFocus = () => runQuery();
-
-      window.addEventListener("focus", onFocus);
-
-      return () => window.removeEventListener("focus", onFocus);
-    }
-  }, [runQuery, options?.refetchOnWindowFocus]);
-
-  return { ...response, loading, refetch: runQuery };
+  return {
+    data: response?.data,
+    loading: isLoading,
+    error: response?.error,
+    res: response?.res,
+    /**
+     * Refetch function that applies new options and fetches fresh data.
+     */
+    refetch: async (overrides?: QueryOptions<TData>) => {
+      overridesRef.current = overrides;
+      await refetch();
+      return response!;
+    },
+  };
 }

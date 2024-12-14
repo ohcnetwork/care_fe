@@ -19,7 +19,7 @@ import AuthorizeFor, { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface BedManagementProps {
   facilityId: string;
@@ -87,7 +87,10 @@ const BedCard = ({
         handleCancel={handleDeleteCancel}
         handleOk={handleDeleteConfirm}
       />
-      <div className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
+      <div
+        className="flex h-full w-full flex-col rounded border border-secondary-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400"
+        id="bed-cards"
+      >
         <div className="flex-1">
           <div className="flex w-full flex-col items-start justify-between gap-2">
             <div>
@@ -173,12 +176,15 @@ export const BedManagement = (props: BedManagementProps) => {
   const { qParams, resultsPerPage } = useFilters({ limit: 16 });
   const { t } = useTranslation();
 
-  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facility_external_id: facilityId,
-      external_id: locationId,
+  const { data: location } = useTanStackQueryInstead(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: facilityId,
+        external_id: locationId,
+      },
     },
-  });
+  );
 
   return (
     <PaginatedList

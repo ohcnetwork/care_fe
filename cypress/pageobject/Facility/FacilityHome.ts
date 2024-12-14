@@ -1,7 +1,6 @@
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";
-  searchButton = "#search";
   menuItem = "[role='menuitem']";
 
   // Operations
@@ -10,8 +9,24 @@ class FacilityHome {
     cy.get(this.exportButton).click();
   }
 
-  clickSearchButton() {
-    cy.get(this.searchButton).click();
+  navigateToFacilityHomepage() {
+    cy.visit("/facility");
+  }
+
+  assertFacilityInCard(facilityName: string) {
+    cy.get("#facility-name-card").should("contain", facilityName);
+  }
+
+  interceptFacilitySearchReq() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("searchFacility");
+  }
+
+  verifyFacilitySearchReq() {
+    cy.wait("@searchFacility").its("response.statusCode").should("eq", 200);
+  }
+
+  typeFacilitySearch(facilityName: string) {
+    cy.get("#facility-search").click().clear().type(facilityName);
   }
 
   clickMenuItem(itemName: string) {
@@ -35,8 +50,9 @@ class FacilityHome {
   }
 
   clickFacilityNotifyButton() {
-    cy.get("#facility-notify", { timeout: 10000 }).should("be.visible");
-    cy.get("#facility-notify").focus().click();
+    cy.get("#facility-notify").as("facilityNotify");
+    cy.get("@facilityNotify", { timeout: 10000 }).should("be.visible");
+    cy.get("@facilityNotify").first().click();
   }
 
   clickLiveMonitorButton() {
@@ -76,11 +92,6 @@ class FacilityHome {
     cy.get('[data-test-id="occupancy-badge"]').should("be.visible");
   }
 
-  verifyAndCloseNotifyModal() {
-    cy.get("#cancel").should("be.visible");
-    cy.get("#cancel").click();
-  }
-
   navigateBack() {
     cy.go(-1);
   }
@@ -103,6 +114,21 @@ class FacilityHome {
   verifyURLContains(searchText: string) {
     const encodedText = encodeURIComponent(searchText).replace(/%20/g, "+");
     this.getURL().should("include", `search=${encodedText}`);
+  }
+
+  assertFacilityBadgeContent(occupied: string, total: string) {
+    cy.get('[data-test-id="occupancy-badge-text"]').should(
+      "contain.text",
+      `Occupancy: ${occupied} / ${total}`,
+    );
+  }
+
+  assertFacilityBadgeBackgroundColor(color: string) {
+    cy.get('[data-test-id="occupancy-badge"]').should(
+      "have.css",
+      "background-color",
+      color,
+    );
   }
 }
 

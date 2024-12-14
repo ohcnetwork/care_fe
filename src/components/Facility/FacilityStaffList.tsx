@@ -17,7 +17,7 @@ import { DOCTOR_SPECIALIZATION } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export const FacilityStaffList = (props: any) => {
   const { t } = useTranslation();
@@ -25,18 +25,21 @@ export const FacilityStaffList = (props: any) => {
   const { qParams, resultsPerPage, updatePage } = useFilters({ limit: 15 });
   const [totalDoctors, setTotalDoctors] = useState(0);
 
-  const { data: doctorsList, refetch } = useQuery(routes.listDoctor, {
-    pathParams: { facilityId: props.facilityId },
-    query: {
-      limit: resultsPerPage,
-      offset: (qParams.page - 1) * resultsPerPage,
+  const { data: doctorsList, refetch } = useTanStackQueryInstead(
+    routes.listDoctor,
+    {
+      pathParams: { facilityId: props.facilityId },
+      query: {
+        limit: resultsPerPage,
+        offset: (qParams.page - 1) * resultsPerPage,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data?.results.length) {
+          setTotalDoctors(data.results[0]?.total_doctors ?? 0);
+        }
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data?.results.length) {
-        setTotalDoctors(data.results[0]?.total_doctors ?? 0);
-      }
-    },
-  });
+  );
 
   const handlePageChange = (page: number) => {
     updatePage(page);

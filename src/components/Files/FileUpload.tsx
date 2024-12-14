@@ -19,7 +19,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export const LinearProgressWithLabel = (props: { value: number }) => {
   return (
@@ -69,6 +69,8 @@ export interface StateInterface {
   isZoomInDisabled: boolean;
   isZoomOutDisabled: boolean;
   rotation: number;
+  id?: string;
+  associating_id?: string;
 }
 
 export const FileUpload = (props: FileUploadProps) => {
@@ -116,7 +118,7 @@ export const FileUpload = (props: FileUploadProps) => {
       CLAIM: claimId,
     }[type] || "";
 
-  const activeFilesQuery = useQuery(routes.viewUpload, {
+  const activeFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: type,
       associating_id: associatedId,
@@ -126,7 +128,7 @@ export const FileUpload = (props: FileUploadProps) => {
     },
   });
 
-  const archivedFilesQuery = useQuery(routes.viewUpload, {
+  const archivedFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: type,
       associating_id: associatedId,
@@ -136,7 +138,7 @@ export const FileUpload = (props: FileUploadProps) => {
     },
   });
 
-  const dischargeSummaryQuery = useQuery(routes.viewUpload, {
+  const dischargeSummaryQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: "DISCHARGE_SUMMARY",
       associating_id: associatedId,
@@ -208,8 +210,15 @@ export const FileUpload = (props: FileUploadProps) => {
     type,
     onArchive: refetchAll,
     onEdit: refetchAll,
+    uploadedFiles:
+      fileQuery?.data?.results
+        .slice()
+        .reverse()
+        .map((file) => ({
+          ...file,
+          associating_id: associatedId,
+        })) || [],
   });
-
   const dischargeSummaryFileManager = useFileManager({
     type: "DISCHARGE_SUMMARY",
     onArchive: refetchAll,
@@ -244,7 +253,6 @@ export const FileUpload = (props: FileUploadProps) => {
       id: "record-audio",
     },
   ];
-
   return (
     <div className={`md:p-4 ${props.className}`}>
       {fileUpload.Dialogues}
