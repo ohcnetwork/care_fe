@@ -4,11 +4,13 @@ import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
+// import Card from "@/CAREUI/display/Card";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
+// import Page from "@/components/Common/Page";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import { FieldLabel } from "@/components/Form/FormFields/FormField";
@@ -38,11 +40,13 @@ import { parsePhoneNumber } from "@/Utils/utils";
 interface patientShiftProps {
   facilityId: string;
   patientId: string;
+  open: boolean;
+  setOpen: (state: boolean) => void;
 }
 
 export const ShiftCreate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
-  const { facilityId, patientId } = props;
+  const { patientId } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [patientCategory, setPatientCategory] = useState<any>();
   const { t } = useTranslation();
@@ -108,7 +112,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const { data: patientData } = useTanStackQueryInstead(routes.getPatient, {
+  const { data: _patientData } = useTanStackQueryInstead(routes.getPatient, {
     pathParams: {
       id: patientId,
     },
@@ -261,15 +265,14 @@ export const ShiftCreate = (props: patientShiftProps) => {
   });
 
   return (
-    <Page
-      title={"Create Shift Request"}
-      crumbsReplacements={{
-        [facilityId]: { name: patientData?.facility_object?.name || "" },
-        [patientId]: { name: patientData?.name || "" },
-      }}
-      backUrl={`/facility/${facilityId}/patient/${patientId}`}
+    <SlideOver
+      open={props.open}
+      setOpen={props.setOpen}
+      title="Create Shift Request"
+      slideFrom="right"
+      dialogClass="md:w-[650px]"
     >
-      <Card className="mx-auto mt-4 flex w-full max-w-3xl flex-col px-8 py-5 md:px-16 md:py-11">
+      <Card className="mx-auto mt-4 flex  flex-col ">
         <TextFormField
           {...field("refering_facility_contact_name")}
           label="Name of Contact person at the current facility"
@@ -397,6 +400,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
           <Submit onClick={handleSubmit} />
         </div>
       </Card>
-    </Page>
+    </SlideOver>
   );
 };

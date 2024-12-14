@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -14,11 +14,14 @@ import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 import { PatientProps } from ".";
+import { ShiftCreate } from "../ShiftCreate";
 import { PatientModel } from "../models";
 
 const ShiftingHistory = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
   const { t } = useTranslation();
+  const [isSlideOverOpen, setIsSlideOverOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("current");
   const { qParams, Pagination, resultsPerPage } = useFilters({
     cacheBlacklist: ["patient_name"],
   });
@@ -44,19 +47,53 @@ const ShiftingHistory = (props: PatientProps) => {
     },
   );
 
+  const CURRENT_STATUSES = [
+    "APPROVED",
+    "DESTINATION APPROVED",
+    "PATIENT TO BE PICKED UP",
+    "TRANSFER IN PROGRESS",
+  ];
+  const PREVIOUS_STATUSES = ["COMPLETED", "PATIENT EXPIRED", "CANCELLED"];
+
+  const filteredShiftData =
+    activeTab === "current"
+      ? shiftData?.results.filter((shift) =>
+          CURRENT_STATUSES.includes(shift.status),
+        )
+      : shiftData?.results.filter((shift) =>
+          PREVIOUS_STATUSES.includes(shift.status),
+        );
+
   return (
     <section className="mt-4">
       <div className="flex justify-between items-center">
-        <h2 className="my-4 ml-0 text-2xl font-semibold leading-tight">
-          {t("shifting_history")}
-        </h2>
+        <div className="flex mb-4 bg-gray-100 w-fit rounded-lg px-2 py-1">
+          <button
+            className={`px-4 py-2 ${
+              activeTab === "current"
+                ? "bg-white rounded-lg font-bold shadow"
+                : ""
+            }`}
+            onClick={() => setActiveTab("current")}
+          >
+            {t("current_shifting")}
+          </button>
+          <button
+            className={`px-4 py-2 ${
+              activeTab === "previous"
+                ? "bg-white rounded-lg font-bold shadow"
+                : ""
+            }`}
+            onClick={() => setActiveTab("previous")}
+          >
+            {t("previous_shifting")}
+          </button>
+        </div>
         <ButtonV2
           className=""
           disabled={isPatientInactive(patientData, facilityId)}
           size="default"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/patient/${id}/shift/new`)
-          }
+          onClick={() => setIsSlideOverOpen(true)}
           authorizeFor={NonReadOnlyUsers}
         >
           <span className="flex w-full items-center justify-start gap-2">
@@ -64,11 +101,18 @@ const ShiftingHistory = (props: PatientProps) => {
             {t("shift")}
           </span>
         </ButtonV2>
+        <ShiftCreate
+          facilityId={facilityId}
+          patientId={id}
+          open={isSlideOverOpen}
+          setOpen={setIsSlideOverOpen}
+        />
       </div>
-      <ShiftingTable hidePatient data={shiftData?.results} loading={loading} />
+
+      <ShiftingTable hidePatient data={filteredShiftData} loading={loading} />
       <div>
-        <Pagination totalCount={shiftData?.count || 0} />
-      </div>{" "}
+        <Pagination totalCount={filteredShiftData?.length || 0} />
+      </div>
     </section>
   );
 };
