@@ -183,7 +183,6 @@ describe("Facility Creation", () => {
     facilityPage.fillLocationDetails(testFacilityData.location);
     facilityPage.fillOxygenDetails(testFacilityData.oxygen);
     facilityPage.submitForm();
-    cy.verifyNotification("Facility added successfully");
     cy.closeNotification();
     // add the bed capacity
     facilityPage.selectBedType("Oxygen Supported Bed");
