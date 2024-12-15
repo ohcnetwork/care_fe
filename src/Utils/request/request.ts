@@ -61,7 +61,7 @@ export default async function request<TData, TBody>(
   return result;
 }
 
-async function getResponseBody<TData>(res: Response): Promise<TData> {
+export async function getResponseBody<TData>(res: Response): Promise<TData> {
   if (!(res.headers.get("content-length") !== "0")) {
     return null as TData;
   }
