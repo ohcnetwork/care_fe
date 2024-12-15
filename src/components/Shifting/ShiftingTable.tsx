@@ -201,7 +201,7 @@ export default function ShiftingTable(props: {
                     <div className="col-span-1 mr-2 mb-1 flex flex-col text-left ">
                       <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
-                          <h1 className="hover:cursor-pointer  font-bold text-lg text-green-700">
+                          <h1 className="hover:cursor-pointer font-bold text-lg text-green-700">
                             . . .
                           </h1>
                         </DropdownMenuTrigger>

@@ -90,7 +90,7 @@ const ShiftingHistory = (props: PatientProps) => {
           </button>
         </div>
         <ButtonV2
-          className=""
+          id="shift_create_button"
           disabled={isPatientInactive(patientData, facilityId)}
           size="default"
           onClick={() => setIsSlideOverOpen(true)}
