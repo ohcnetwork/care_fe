@@ -2,14 +2,13 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName } from "@/Utils/utils";
-
-import { Avatar } from "../Common/Avatar";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
@@ -41,6 +40,7 @@ export const NoticeBoard = () => {
             <div className="bg-gray-200 py-2 flex items-center ">
               <Avatar
                 name={item.caused_by.user_type || ""}
+                aria-label={`${formatName(item.caused_by)}'s avatar`}
                 className="border-0 border-b border-b-secondary-300 rounded-full h-10 w-10 ml-5"
               />
               <div className="text-md my-1 text-secondary-700  px-3">
