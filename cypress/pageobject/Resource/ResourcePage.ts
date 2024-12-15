@@ -28,6 +28,10 @@ class ResourcePage {
     cy.contains("button", "Active").click();
   }
 
+  navigationToResourcePage() {
+    cy.awaitUrl("/resource");
+  }
+
   verifyActiveResources() {
     cy.wait("@resource").its("response.statusCode").should("eq", 200);
     cy.contains("button", "Active").should("have.class", "text-white");
