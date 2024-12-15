@@ -52,10 +52,6 @@ export const ImmunisationRecords = (props: PatientProps) => {
   const handleSearchChange = ({ value }: { value: string }) => {
     setSearchTerm(value.toLowerCase()); // Make it case-insensitive
   };
-  const filteredData =
-    !searchTerm ||
-    (patientData.vaccine_name &&
-      patientData.vaccine_name.toLowerCase().includes(searchTerm));
 
   return (
     <section className="mt-6">
@@ -65,7 +61,6 @@ export const ImmunisationRecords = (props: PatientProps) => {
         </h2>
       </div>
 
-      {/* Search and Filter Section */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
         <SearchInput
           className="w-72 sm:w-108 mb-4 sm:mb-0"
@@ -75,7 +70,6 @@ export const ImmunisationRecords = (props: PatientProps) => {
           name="vaccineNameSearch"
         />
         <div className="flex sm:ml-4 sm:space-x-4 w-full sm:w-auto mb-4 sm:mb-0">
-          {/* Filter Dropdown */}
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button
@@ -98,7 +92,6 @@ export const ImmunisationRecords = (props: PatientProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Edit Button */}
           <Button
             variant="outline"
             disabled={!patientData.is_active}
@@ -119,10 +112,8 @@ export const ImmunisationRecords = (props: PatientProps) => {
         </div>
       </div>
 
-      {/* Table Section */}
       <div className="overflow-x-auto shadow-sm rounded-lg mt-4">
         <table className="min-w-full table-auto border-separate border-spacing-0 bg-white">
-          {/* Table Header */}
           <thead className="bg-gray-200">
             <tr>
               <th className="border-b-2 border-gray-200 px-4 py-2 text-left text-sm font-medium text-secondary-600">
@@ -146,9 +137,8 @@ export const ImmunisationRecords = (props: PatientProps) => {
             </tr>
           </thead>
 
-          {/* Table Body */}
           <tbody>
-            {filteredData ? (
+            {patientData.is_vaccinated ? (
               <tr>
                 <td className="border-b border-gray-200 px-4 py-3 text-sm text-gray-800 font-semibold">
                   COVID-19
