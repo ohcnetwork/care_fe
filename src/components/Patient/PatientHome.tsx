@@ -5,9 +5,9 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 import { Avatar } from "@/components/Common/Avatar";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -222,10 +222,11 @@ export const PatientHome = (props: {
                         (!patientData?.last_consultation ||
                           patientData?.last_consultation?.discharge_date) && (
                           <div>
-                            <ButtonV2
+                            <Button
                               id="create-consultation"
                               className="w-full"
                               size="default"
+                              variant={"success"}
                               onClick={() =>
                                 navigate(
                                   `/facility/${patientData?.facility}/patient/${id}/consultation`,
@@ -239,7 +240,7 @@ export const PatientHome = (props: {
                                 />
                                 {t("add_consultation")}
                               </span>
-                            </ButtonV2>
+                            </Button>
                           </div>
                         )}
                     </div>
@@ -437,11 +438,12 @@ export const PatientHome = (props: {
                   {t("actions")}
                 </div>
                 <div className="mt-2 h-full space-y-2">
-                  <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
+                  <div className="space-y-2 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
-                      <ButtonV2
-                        className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        size="large"
+                      <Button
+                        className="w-full text-green-800 font-semibold hover:text-green-900"
+                        size="lg"
+                        variant="outline"
                         onClick={() =>
                           navigate(`/patient/${id}/investigation_reports`)
                         }
@@ -453,13 +455,14 @@ export const PatientHome = (props: {
                           />
                           {t("investigations_summary")}
                         </span>
-                      </ButtonV2>
+                      </Button>
                     </div>
                     <div>
-                      <ButtonV2
-                        className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
+                      <Button
+                        className="w-full text-green-800 font-semibold hover:text-green-900"
                         id="upload-patient-files"
-                        size="large"
+                        size="lg"
+                        variant="outline"
                         onClick={() =>
                           navigate(
                             `/facility/${patientData?.facility}/patient/${id}/files`,
@@ -470,18 +473,19 @@ export const PatientHome = (props: {
                           <CareIcon icon="l-file-upload" className="text-xl" />
                           {t("view_update_patient_files")}
                         </span>
-                      </ButtonV2>
+                      </Button>
                     </div>
 
                     {NonReadOnlyUsers && (
                       <div>
-                        <ButtonV2
+                        <Button
                           id="assign-volunteer"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
                           disabled={false}
+                          variant="outline"
                           authorizeFor={NonReadOnlyUsers}
-                          className="w-full bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                          size="large"
+                          className="w-full text-green-800 font-semibold hover:text-green-900"
+                          size="lg"
                         >
                           <span className="flex w-full items-center justify-start gap-2">
                             <CareIcon icon="l-users-alt" className="text-lg" />{" "}
@@ -489,15 +493,16 @@ export const PatientHome = (props: {
                               ? t("update_volunteer")
                               : t("assign_to_volunteer")}
                           </span>
-                        </ButtonV2>
+                        </Button>
                       </div>
                     )}
 
                     <div>
-                      <ButtonV2
+                      <Button
                         id="patient-allow-transfer"
-                        className="flex w-full flex-row bg-white font-semibold text-green-800 hover:bg-secondary-200"
-                        size="large"
+                        className="w-full text-green-800 font-semibold hover:text-green-900"
+                        size="lg"
+                        variant="outline"
                         disabled={
                           !patientData.last_consultation?.id ||
                           !patientData.is_active
@@ -518,7 +523,7 @@ export const PatientHome = (props: {
                             ? t("disable_transfer")
                             : t("allow_transfer")}
                         </span>
-                      </ButtonV2>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -647,7 +652,7 @@ export const PatientHome = (props: {
                 {patientData.last_consultation?.new_discharge_reason ===
                   DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
-                    <ButtonV2
+                    <Button
                       id="death-report"
                       className="my-2 w-full"
                       name="death_report"
@@ -655,7 +660,7 @@ export const PatientHome = (props: {
                     >
                       <CareIcon icon="l-file-download" className="text-lg" />
                       {t("death_report")}
-                    </ButtonV2>
+                    </Button>
                   </div>
                 )}
               </div>

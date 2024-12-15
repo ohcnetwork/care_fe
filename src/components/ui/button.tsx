@@ -4,6 +4,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
+
+import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
+
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-gray-300",
   {
@@ -24,6 +28,8 @@ const buttonVariants = cva(
         link: "text-gray-900 underline-offset-4 hover:underline dark:text-gray-50",
         outline_primary:
           "border border-primary-700 text-primary-700 bg-white shadow-sm hover:bg-primary-700 hover:text-white dark:border-primary-700 dark:bg-primary-700 dark:text-white",
+        success:
+          "bg-green-500 text-white shadow hover:bg-green-600 dark:bg-green-700 dark:text-white dark:hover:bg-green-800",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -42,13 +48,33 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+    VariantProps<typeof buttonVariants>,
+    AuthorizedElementProps {
   asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  (
+    { className, variant, size, asChild = false, authorizeFor, ...props },
+    ref,
+  ) => {
     const Comp = asChild ? Slot : "button";
+
+    if (authorizeFor) {
+      return (
+        <AuthorizedChild authorizeFor={authorizeFor}>
+          {({ isAuthorized }) => (
+            <Comp
+              className={cn(buttonVariants({ variant, size, className }))}
+              ref={ref}
+              disabled={!isAuthorized || props.disabled}
+              {...props}
+            />
+          )}
+        </AuthorizedChild>
+      );
+    }
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
