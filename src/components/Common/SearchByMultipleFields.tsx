@@ -84,6 +84,9 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
         .some((element) => clearSearch.params?.includes(element));
       clearinput ? setSearchValue("") : null;
       inputRef.current?.focus();
+      if (clearSearch?.params && clearSearch?.params.includes("search")) {
+        setSearchValue("");
+      }
     }
   }, [clearSearch]);
 
@@ -109,6 +112,14 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
       ) {
         e.preventDefault();
         setOpen(true);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setOpen(false);
+      }
+      if (e.key === "Escape") {
+        setSearchValue("");
       }
       if (open) {
         if (e.key === "ArrowDown") {
