@@ -92,7 +92,9 @@ export const ExportMenu = ({
             {isExporting ? "Exporting..." : label}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent
+          className={cn(label === "Importing..." ? "hidden" : "block")}
+        >
           {exportItems.map((item) => (
             <div
               key={item.label}
