@@ -94,21 +94,35 @@ export default function PatientRegistration(
   const createPatientMutation = useMutation(routes.addPatient, {
     body: { ...mutationData, facility: facilityId },
     onResponse: (resp) => {
-      Notification.Success({
-        msg: t("patient_registration_success"),
-      });
-      navigate(`/facility/${facilityId}/patient/${resp.data?.id}/consultation`);
+      if (resp.error) {
+        Notification.Error({
+          msg: t("patient_registration_error"),
+        });
+      } else {
+        Notification.Success({
+          msg: t("patient_registration_success"),
+        });
+        navigate(
+          `/facility/${facilityId}/patient/${resp.data?.id}/consultation`,
+        );
+      }
     },
   });
 
   const updatePatientMutation = useMutation(routes.updatePatient, {
     pathParams: { id: patientId || "" },
     body: { ...mutationData },
-    onResponse: () => {
-      Notification.Success({
-        msg: t("patient_update_success"),
-      });
-      goBack();
+    onResponse: (data) => {
+      if (data.error) {
+        Notification.Error({
+          msg: t("patient_update_error"),
+        });
+      } else {
+        Notification.Success({
+          msg: t("patient_update_success"),
+        });
+        goBack();
+      }
     },
   });
 
@@ -253,6 +267,13 @@ export default function PatientRegistration(
       if (!form[field]) {
         errors[field] = errors[field] || [];
         errors[field].push(`This field is required`);
+      } else if (
+        ageDob === "dob" &&
+        field === "date_of_birth" &&
+        !/^\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/.test(form[field])
+      ) {
+        errors[field] = errors[field] || [];
+        errors[field].push(`Invalid date format, expected DD-MM-YYYY`);
       }
     });
 
@@ -375,18 +396,20 @@ export default function PatientRegistration(
                 <div className="flex items-center gap-2">
                   <Input
                     required
+                    placeholder="DD"
                     type="number"
                     label={t("day")}
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
-                        date_of_birth: `${e.target.value}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
+                        date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${e.target.value}`,
                       }))
                     }
                     errors={errors["date_of_birth"] ? [""] : undefined}
                   />
                   <Input
                     required
+                    placeholder="MM"
                     type="number"
                     label={t("month")}
                     onChange={(e) =>
@@ -400,11 +423,12 @@ export default function PatientRegistration(
                   <Input
                     required
                     type="number"
+                    placeholder="YYYY"
                     label={t("year")}
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
-                        date_of_birth: `${form.date_of_birth?.split("-")[0] || ""}-${form.date_of_birth?.split("-")[1] || ""}-${e.target.value}`,
+                        date_of_birth: `${e.target.value}-${form.date_of_birth?.split("-")[1] || ""}-${form.date_of_birth?.split("-")[2] || ""}`,
                       }))
                     }
                     errors={errors["date_of_birth"] ? [""] : undefined}
@@ -475,7 +499,6 @@ export default function PatientRegistration(
             <br />
             <Input
               // TODO: add this to the backend?
-              required
               label={t("landmark")}
             />
             <br />
@@ -639,7 +662,6 @@ export default function PatientRegistration(
                     >
                       <SelectTrigger
                         label={t("ward")}
-                        required
                         errors={errors["ward"]}
                         className="w-full"
                       >
