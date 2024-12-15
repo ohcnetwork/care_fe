@@ -1,10 +1,19 @@
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
+import SearchInput from "@/components/Form/SearchInput";
 import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -37,90 +46,153 @@ export const ImmunisationRecords = (props: PatientProps) => {
     );
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const vaccineStatuses = ["Completed", "In-Progress", "Not-Done"];
+
+  const handleSearchChange = ({ value }: { value: string }) => {
+    setSearchTerm(value.toLowerCase()); // Make it case-insensitive
+  };
+  const filteredData =
+    !searchTerm ||
+    (patientData.vaccine_name &&
+      patientData.vaccine_name.toLowerCase().includes(searchTerm));
+
   return (
-    <div className="mt-4 px-4 md:px-0">
-      <div className="w-full rounded-md bg-white p-4 shadow-md">
-        <hr className="mb-1 mr-5 h-1 w-5 border-0 bg-blue-500" />
-        <div>
-          <div className="flex flex-row justify-between items-center gap-x-4">
-            <h1 className="text-xl">{t("covid_details")}</h1>
-            <Button
-              variant="outline"
-              disabled={!patientData.is_active}
-              onClick={() => {
-                if (!canEditPatient(authUser, patientData)) {
-                  Notification.Error({
-                    msg: t("permission_denied"),
-                  });
-                } else {
-                  handleEditClick("covid-details");
-                }
-              }}
-            >
-              <CareIcon icon="l-edit-alt" className="text-md pr-1" />
-              {t("edit")}
-            </Button>
-          </div>
+    <section className="mt-6">
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">
+          {t("immunisation-records")}
+        </h2>
+      </div>
 
-          <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-2">
-            <div className="sm:col-span-1">
-              <div className="text-sm font-semibold leading-5 text-zinc-400">
-                {t("number_of_covid_vaccine_doses")}
-              </div>
-              <div className="mt-1 text-sm font-medium leading-5">
-                {patientData.is_vaccinated && patientData.number_of_doses
-                  ? patientData.number_of_doses
-                  : "-"}
-              </div>
-            </div>
+      {/* Search and Filter Section */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+        <SearchInput
+          className="w-72 sm:w-108 mb-4 sm:mb-0"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          placeholder="Search by Vaccine Name"
+          name="vaccineNameSearch"
+        />
+        <div className="flex sm:ml-4 sm:space-x-4 w-full sm:w-auto mb-4 sm:mb-0">
+          {/* Filter Dropdown */}
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center w-full sm:w-auto"
+              >
+                <CareIcon icon="l-filter" className="mr-2" />
+                {t("filter")}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-full font-medium">
+              {vaccineStatuses.map((status) => (
+                <DropdownMenuItem
+                  key={status}
+                  className="hover:font-bold cursor-pointer"
+                >
+                  {status}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-            <div className="sm:col-span-1">
-              <div className="text-sm font-semibold leading-5 text-zinc-400">
-                {t("vaccine_name")}
-              </div>
-              <div className="mt-1 text-sm font-medium leading-5">
-                {patientData.is_vaccinated && patientData.vaccine_name
-                  ? patientData.vaccine_name
-                  : "-"}
-              </div>
-            </div>
-
-            <div className="sm:col-span-1">
-              <div className="text-sm font-semibold leading-5 text-zinc-400">
-                {t("last_vaccinated_on")}
-              </div>
-              <div className="mt-1 text-sm font-medium leading-5">
-                {patientData.is_vaccinated && patientData.last_vaccinated_date
-                  ? formatDateTime(patientData.last_vaccinated_date)
-                  : "-"}
-              </div>
-            </div>
-
-            <div className="sm:col-span-1">
-              <div className="text-sm font-semibold leading-5 text-zinc-400">
-                {t("countries_travelled")}
-              </div>
-              <div className="mt-1 text-sm font-medium leading-5">
-                {patientData.countries_travelled &&
-                patientData.countries_travelled.length > 0
-                  ? patientData.countries_travelled.join(", ")
-                  : "-"}
-              </div>
-            </div>
-
-            <div className="sm:col-span-1">
-              <div className="text-sm font-semibold leading-5 text-zinc-400">
-                {t("date_of_return")}
-              </div>
-              <div className="mt-1 text-sm font-medium leading-5">
-                {patientData.date_of_return
-                  ? formatDateTime(patientData.date_of_return)
-                  : "-"}
-              </div>
-            </div>
-          </div>
+          {/* Edit Button */}
+          <Button
+            variant="outline"
+            disabled={!patientData.is_active}
+            onClick={() => {
+              if (!canEditPatient(authUser, patientData)) {
+                Notification.Error({
+                  msg: t("permission_denied"),
+                });
+              } else {
+                handleEditClick("immunisation");
+              }
+            }}
+            className="w-full sm:w-auto"
+          >
+            <CareIcon icon="l-edit-alt" className="text-md pr-1" />
+            {t("edit")}
+          </Button>
         </div>
       </div>
-    </div>
+
+      {/* Table Section */}
+      <div className="overflow-x-auto shadow-sm rounded-lg mt-4">
+        <table className="min-w-full table-auto border-separate border-spacing-0 bg-white">
+          {/* Table Header */}
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="border-b-2 border-gray-200 px-4 py-2 text-left text-sm font-medium text-secondary-600">
+                Immunisation Type
+              </th>
+              <th className="border-b-2 border-gray-200 px-4 py-2 text-left text-sm font-medium text-secondary-600">
+                Covin ID
+              </th>
+              <th className="border-b-2 border-gray-200 px-4 py-2 text-left text-sm font-medium text-secondary-600">
+                {t("vaccine_name")}
+              </th>
+              <th className="border-b-2 border-gray-200 px-4 py-2 text-left text-sm font-medium text-secondary-600">
+                {t("status")}
+              </th>
+              <th className="border-b-2 border-gray-200 px-4 py-2 text-left text-sm font-medium text-secondary-600">
+                {t("last_vaccinated_on")}
+              </th>
+              <th className="border-b-2 border-gray-200 px-4 py-2 text-left text-sm font-medium text-secondary-600">
+                Series Progress
+              </th>
+            </tr>
+          </thead>
+
+          {/* Table Body */}
+          <tbody>
+            {filteredData ? (
+              <tr>
+                <td className="border-b border-gray-200 px-4 py-3 text-sm text-gray-800 font-semibold">
+                  COVID-19
+                </td>
+                <td className="border-b border-gray-200 px-4 py-3 text-sm text-secondary-800">
+                  {patientData.is_vaccinated && patientData.covin_id
+                    ? patientData.covin_id
+                    : "-"}
+                </td>
+                <td className="border-b border-gray-200 px-4 py-3 text-sm text-secondary-800">
+                  {patientData.is_vaccinated && patientData.vaccine_name
+                    ? patientData.vaccine_name
+                    : "-"}
+                </td>
+                <td className="border-b border-gray-200 px-4 py-3 text-sm text-secondary-800">
+                  <Chip
+                    text="Completed"
+                    className="text-green rounded-full text-sm font-semibold"
+                  />
+                </td>
+                <td className="border-b border-gray-200 px-4 py-3 text-sm text-secondary-800">
+                  {patientData.is_vaccinated && patientData.last_vaccinated_date
+                    ? formatDateTime(patientData.last_vaccinated_date)
+                    : "-"}
+                </td>
+                <td className="border-b border-gray-200 px-4 py-3 text-sm text-secondary-800">
+                  {patientData.is_vaccinated && patientData.number_of_doses
+                    ? patientData.number_of_doses + "/3"
+                    : "-"}
+                </td>
+              </tr>
+            ) : (
+              <tr>
+                <td
+                  className="border-b border-gray-200 px-4 py-3 text-center text-secondary-800 text-sm font-semibold"
+                  colSpan={6}
+                >
+                  No Immunisation Record Available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 };
