@@ -770,7 +770,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         );
 
         if (data.suggestion === "R") {
-          navigate(`/facility/${facilityId}/patient/${patientId}/shift/new`);
+          navigate(`/facility/${facilityId}/patient/${patientId}/shift/`);
           return;
         } else if (!id && data.suggestion === "A") {
           navigate(
