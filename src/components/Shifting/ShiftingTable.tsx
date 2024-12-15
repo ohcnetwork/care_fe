@@ -223,8 +223,8 @@ export default function ShiftingTable(props: {
                               shift?.status === "COMPLETED" ||
                               shift?.status === "CANCELLED"
                             }
-                            onClick={(_) =>
-                              navigate(`/shifting/${shift.external_id}/update`)
+                            onClick={() =>
+                              navigate(`/shifting/${shift?.external_id}/update`)
                             }
                           >
                             {t("update_status_details")}
@@ -264,6 +264,7 @@ export default function ShiftingTable(props: {
                             )}
                         </DropdownMenuContent>
                       </DropdownMenu>
+
                       <ConfirmDialog
                         title={t("confirm_transfer_complete")}
                         description={t("mark_transfer_complete_confirmation")}

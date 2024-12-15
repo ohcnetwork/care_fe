@@ -526,7 +526,7 @@ export default function ShiftDetails(props: { id: string }) {
                   )}
                 </div>
                 <button
-                  className="w-full sm:w-auto underline text-green-600 flex items-center"
+                  className="w-full sm:w-auto underline text-green-600 "
                   onClick={() => setIsPrintMode(true)}
                 >
                   <CareIcon icon="l-file-alt" className="mr-2 text-base" />
@@ -535,9 +535,9 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
 
-            <div className="mt-4 h-full rounded-lg border bg-white p-4 text-sm text-gray-600 shadow px-4 sm:px-6">
+            <div className="mt-4 h-full rounded-lg bg-white p-4 text-sm text-gray-600 shadow px-4 sm:px-6 md:px-8 lg:px-10">
               <div className="flex flex-wrap justify-between mb-3">
-                <div className="w-full sm:w-auto">
+                <div className="w-full md:w-auto">
                   <span className="font-semibold text-lg leading-relaxed mr-2">
                     {t("patient_name")} :
                   </span>
@@ -545,7 +545,7 @@ export default function ShiftDetails(props: { id: string }) {
                     {data?.patient_object?.name}
                   </span>
                 </div>
-                <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                <div className="w-full md:w-auto mt-2 md:mt-0">
                   <Link
                     className="underline text-blue-700 font-semibold leading-5"
                     href={`/patient/${data?.patient_object?.id}`}
@@ -554,7 +554,7 @@ export default function ShiftDetails(props: { id: string }) {
                   </Link>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div>
                   <span className="font-semibold leading-relaxed">
                     Status :{" "}
@@ -680,7 +680,7 @@ export default function ShiftDetails(props: { id: string }) {
                       "--"}
                   </span>
                 </div>
-                <div className="col-span-1 sm:col-span-4">
+                <div className="col-span-1 sm:col-span-2 md:col-span-4">
                   <span className="font-semibold leading-relaxed">
                     {t("reason")} :
                   </span>
