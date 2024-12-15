@@ -363,13 +363,6 @@ export const GENDER_TYPES = [
   { id: 3, text: "Transgender", icon: "TRANS" },
 ] as const;
 
-export const SAMPLE_TEST_RESULT = [
-  { id: 1, text: "POSITIVE" },
-  { id: 2, text: "NEGATIVE" },
-  { id: 3, text: "AWAITING" },
-  { id: 4, text: "INVALID" },
-];
-
 export const CONSULTATION_SUGGESTION = [
   { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
@@ -462,48 +455,6 @@ export const PATIENT_CATEGORIES: {
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
-
-export const SAMPLE_TEST_STATUS = [
-  { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
-  { id: 2, text: "APPROVED", desc: "Approved for Sample Collection" },
-  { id: 3, text: "DENIED", desc: "Request Denied" },
-  {
-    id: 4,
-    text: "SENT_TO_COLLECTON_CENTRE",
-    desc: "Sample taken and sent to collection centre",
-  },
-  { id: 5, text: "RECEIVED_AND_FORWARED", desc: "Received And Forwarded" },
-  { id: 6, text: "RECEIVED_AT_LAB", desc: "Received At Lab" },
-  { id: 7, text: "COMPLETED", desc: "Test Completed" },
-];
-
-export const SAMPLE_FLOW_RULES = {
-  REQUEST_SUBMITTED: ["APPROVED", "DENIED"],
-  APPROVED: [
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-    "RECEIVED_AT_LAB",
-    "COMPLETED",
-  ],
-  DENIED: ["REQUEST_SUBMITTED"],
-  SENT_TO_COLLECTON_CENTRE: [
-    "RECEIVED_AND_FORWARED",
-    "RECEIVED_AT_LAB",
-    "COMPLETED",
-  ],
-  RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
-  RECEIVED_AT_LAB: ["COMPLETED"],
-};
-
-export const TEST_TYPE = [
-  "UNK",
-  "ANTIGEN",
-  "RTPCR",
-  "CBNAAT",
-  "TRUENAT",
-  "RTLAMP",
-  "POCPCR",
-];
 
 export const VACCINES = [
   "CoviShield",

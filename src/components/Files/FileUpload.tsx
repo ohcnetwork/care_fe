@@ -19,7 +19,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 export const LinearProgressWithLabel = (props: { value: number }) => {
   return (
@@ -118,7 +118,7 @@ export const FileUpload = (props: FileUploadProps) => {
       CLAIM: claimId,
     }[type] || "";
 
-  const activeFilesQuery = useQuery(routes.viewUpload, {
+  const activeFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: type,
       associating_id: associatedId,
@@ -128,7 +128,7 @@ export const FileUpload = (props: FileUploadProps) => {
     },
   });
 
-  const archivedFilesQuery = useQuery(routes.viewUpload, {
+  const archivedFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: type,
       associating_id: associatedId,
@@ -138,7 +138,7 @@ export const FileUpload = (props: FileUploadProps) => {
     },
   });
 
-  const dischargeSummaryQuery = useQuery(routes.viewUpload, {
+  const dischargeSummaryQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: "DISCHARGE_SUMMARY",
       associating_id: associatedId,

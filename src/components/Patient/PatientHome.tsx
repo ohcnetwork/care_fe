@@ -11,7 +11,6 @@ import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   OCCUPATION_TYPES,
-  SAMPLE_TEST_STATUS,
 } from "@/common/constants";
 
 import dayjs from "@/Utils/dayjs";
@@ -23,7 +22,7 @@ import { triggerGoal } from "../../Integrations/Plausible";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import * as Notification from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
-import useQuery from "../../Utils/request/useQuery";
+import useTanStackQueryInstead from "../../Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
@@ -40,7 +39,7 @@ import Page from "../Common/Page";
 import { SkillModel, UserBareMinimum } from "../Users/models";
 import { patientTabs } from "./PatientDetailsTab";
 import { isPatientMandatoryDataFilled } from "./Utils";
-import { AssignedToObjectModel, PatientModel, SampleTestModel } from "./models";
+import { AssignedToObjectModel, PatientModel } from "./models";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
@@ -56,10 +55,6 @@ export const PatientHome = (props: {
 
   const authUser = useAuthUser();
   const { t } = useTranslation();
-  const [selectedStatus, _setSelectedStatus] = useState<{
-    status: number;
-    sample: SampleTestModel | null;
-  }>({ status: 0, sample: null });
 
   const [assignedVolunteer, setAssignedVolunteer] = useState<
     AssignedToObjectModel | undefined
@@ -69,28 +64,32 @@ export const PatientHome = (props: {
     setAssignedVolunteer(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
 
-  const [showAlertMessage, setShowAlertMessage] = useState(false);
   const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
     useState(false);
 
   const initErr: any = {};
   const errors = initErr;
-  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
-    pathParams: {
-      id,
+  const { loading: isLoading, refetch } = useTanStackQueryInstead(
+    routes.getPatient,
+    {
+      pathParams: {
+        id,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data) {
+          setPatientData(data);
+        }
+        triggerGoal("Patient Profile Viewed", {
+          facilityId: facilityId,
+          userId: authUser.id,
+        });
+      },
     },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setPatientData(data);
-      }
-      triggerGoal("Patient Profile Viewed", {
-        facilityId: facilityId,
-        userId: authUser.id,
-      });
-    },
-  });
+  );
 
   const handleAssignedVolunteer = async () => {
+    const previousVolunteerId = patientData?.assigned_to;
+
     const { res, data } = await request(routes.patchPatient, {
       pathParams: {
         id: patientData.id as string,
@@ -99,25 +98,34 @@ export const PatientHome = (props: {
         assigned_to: (assignedVolunteer as UserBareMinimum)?.id || null,
       },
     });
+
     if (res?.ok && data) {
       setPatientData(data);
-      if (!assignedVolunteer) {
+
+      if (!previousVolunteerId && assignedVolunteer) {
         Notification.Success({
           msg: t("volunteer_assigned"),
         });
-      } else {
+      } else if (previousVolunteerId && assignedVolunteer) {
+        Notification.Success({
+          msg: t("volunteer_update"),
+        });
+      } else if (!assignedVolunteer) {
         Notification.Success({
           msg: t("volunteer_unassigned"),
         });
       }
+
       refetch();
     }
+
     setOpenAssignVolunteerDialog(false);
+
     if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
   };
 
   const consultation = patientData?.last_consultation;
-  const skillsQuery = useQuery(routes.userListSkill, {
+  const skillsQuery = useTanStackQueryInstead(routes.userListSkill, {
     pathParams: {
       username: consultation?.treating_physician_object?.username ?? "",
     },
@@ -136,31 +144,6 @@ export const PatientHome = (props: {
 
     const [first, second, ...rest] = skills;
     return `${first}, ${second} and ${rest.length} other skills...`;
-  };
-
-  const handleApproval = async () => {
-    const { status, sample } = selectedStatus;
-    const sampleData = {
-      id: sample?.id,
-      status: status.toString(),
-      consultation: sample?.consultation,
-    };
-    const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
-
-    await request(routes.patchSample, {
-      body: sampleData,
-      pathParams: {
-        id: sample?.id || "",
-      },
-      onResponse: ({ res }) => {
-        if (res?.ok) {
-          Notification.Success({
-            msg: `Request ${statusName}`,
-          });
-        }
-        setShowAlertMessage(false);
-      },
-    });
   };
 
   if (isLoading) {
@@ -202,15 +185,6 @@ export const PatientHome = (props: {
       }}
       backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
     >
-      <ConfirmDialog
-        title={t("send_sample_to_collection_centre_title")}
-        description={t("send_sample_to_collection_centre_description")}
-        show={showAlertMessage}
-        action={t("approve")}
-        onConfirm={() => handleApproval()}
-        onClose={() => setShowAlertMessage(false)}
-      />
-
       <div className="mt-3" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
           <div className="rounded-md bg-white p-3 shadow-sm">
@@ -225,7 +199,10 @@ export const PatientHome = (props: {
                       />
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold capitalize text-gray-950">
+                      <h1
+                        id="patient-name"
+                        className="text-xl font-bold capitalize text-gray-950"
+                      >
                         {patientData.name}
                       </h1>
                       <h3 className="text-sm font-medium text-gray-600">
@@ -243,6 +220,7 @@ export const PatientHome = (props: {
                           patientData?.last_consultation?.discharge_date) && (
                           <div>
                             <ButtonV2
+                              id="create-consultation"
                               className="w-full"
                               size="default"
                               onClick={() =>
@@ -344,13 +322,14 @@ export const PatientHome = (props: {
                       text={t("TELEMEDICINE")}
                     />
                   )}
-                  {patientData.allergies && (
-                    <Chip
-                      variant="danger"
-                      size="small"
-                      text={`${t("allergies")} ${patientData.allergies.length}`}
-                    />
-                  )}
+                  {patientData.allergies &&
+                    patientData.allergies.trim().length > 0 && (
+                      <Chip
+                        variant="danger"
+                        size="small"
+                        text={t("has_allergies")}
+                      />
+                    )}
                 </div>
               </div>
 
@@ -526,7 +505,9 @@ export const PatientHome = (props: {
                         >
                           <span className="flex w-full items-center justify-start gap-2">
                             <CareIcon icon="l-users-alt" className="text-lg" />{" "}
-                            {t("assign_to_volunteer")}
+                            {patientData.assigned_to
+                              ? t("update_volunteer")
+                              : t("assign_to_volunteer")}
                           </span>
                         </ButtonV2>
                       </div>
@@ -709,7 +690,11 @@ export const PatientHome = (props: {
             />
           </div>
         }
-        action={t("assign")}
+        action={
+          assignedVolunteer || !patientData.assigned_to
+            ? t("assign")
+            : t("unassign")
+        }
         onConfirm={handleAssignedVolunteer}
       />
     </Page>

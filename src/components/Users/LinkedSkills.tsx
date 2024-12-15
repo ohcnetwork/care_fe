@@ -12,7 +12,7 @@ import AuthorizeFor from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 import UnlinkSkillDialog from "./UnlinkSkillDialog";
 import { SkillModel } from "./models";
@@ -30,7 +30,7 @@ export default function LinkedSkills({ username }: { username: string }) {
   const [selectedSkill, setSelectedSkill] = useState<SkillModel | null>(null);
   const { t } = useTranslation();
 
-  const { data: skills, refetch: refetchUserSkills } = useQuery(
+  const { data: skills, refetch: refetchUserSkills } = useTanStackQueryInstead(
     routes.userListSkill,
     {
       pathParams: { username },

@@ -8,7 +8,7 @@ import {
 } from "@/components/Form/FormFields/Utils";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { mergeQueryOptions } from "@/Utils/utils";
 
 export type InsurerOptionModel = {
@@ -25,9 +25,12 @@ export default function InsurerAutocomplete(props: Props) {
 
   const [query, setQuery] = useState("");
 
-  const { data, loading } = useQuery(routes.hcx.policies.listPayors, {
-    query: { query, limit: 10 },
-  });
+  const { data, loading } = useTanStackQueryInstead(
+    routes.hcx.policies.listPayors,
+    {
+      query: { query, limit: 10 },
+    },
+  );
 
   return (
     <FormField field={field}>

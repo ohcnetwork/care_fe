@@ -8,7 +8,7 @@ import Loading from "@/components/Common/Loading";
 import { MedibaseMedicine, Prescription } from "@/components/Medicine/models";
 import MedicineRoutes from "@/components/Medicine/routes";
 
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { humanizeStrings } from "@/Utils/utils";
 
 interface MedicinePrescriptionSummaryProps {
@@ -24,7 +24,7 @@ export const MedicinePrescriptionSummary = ({
     name: "",
     medicineId: "",
   });
-  const { data } = useQuery(MedicineRoutes.listPrescriptions, {
+  const { data } = useTanStackQueryInstead(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
     query: { limit: 100 },
   });
@@ -120,12 +120,15 @@ export default function ConsultationMedicineLogs({
   consultationId,
   medicineId,
 }: ConsultationMedicineLogsProps) {
-  const { data, loading } = useQuery(MedicineRoutes.listPrescriptions, {
-    pathParams: { consultation: consultationId },
-    query: {
-      medicine: medicineId,
+  const { data, loading } = useTanStackQueryInstead(
+    MedicineRoutes.listPrescriptions,
+    {
+      pathParams: { consultation: consultationId },
+      query: {
+        medicine: medicineId,
+      },
     },
-  });
+  );
 
   if (loading) {
     return <Loading />;
