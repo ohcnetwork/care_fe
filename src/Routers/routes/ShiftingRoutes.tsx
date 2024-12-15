@@ -2,7 +2,7 @@ import { Redirect } from "raviger";
 
 // import { ShiftCreate } from "@/components/Patient/ShiftCreate";
 import ShiftDetails from "@/components/Shifting/ShiftDetails";
-import { ShiftDetailsUpdate } from "@/components/Shifting/ShiftDetailsUpdate";
+// import { ShiftDetailsUpdate } from "@/components/Shifting/ShiftDetailsUpdate";
 import BoardView from "@/components/Shifting/ShiftingBoard";
 import ListView from "@/components/Shifting/ShiftingList";
 
@@ -16,7 +16,7 @@ const ShiftingRoutes: AppRoutes = {
   "/shifting/board": () => <BoardView />,
   "/shifting/list": () => <ListView />,
   "/shifting/:id": ({ id }) => <ShiftDetails id={id} />,
-  "/shifting/:id/update": ({ id }) => <ShiftDetailsUpdate id={id} />,
+  // "/shifting/:id/update": ({ id }) => <ShiftDetailsUpdate id={id} />,
   // "/facility/:facilityId/patient/:patientId/shift/new": ({
   //   facilityId,
   //   patientId,

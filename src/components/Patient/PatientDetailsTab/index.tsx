@@ -30,7 +30,7 @@ export const patientTabs = [
     component: ImmunisationRecords,
   },
   {
-    route: "shift",
+    route: "shifting",
     component: ShiftingHistory,
   },
   {

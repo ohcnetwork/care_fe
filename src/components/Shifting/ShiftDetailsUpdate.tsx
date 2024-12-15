@@ -4,12 +4,11 @@ import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import CircularProgress from "@/components/Common/CircularProgress";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
 import { LinkedFacilityUsers } from "@/components/Common/UserAutocompleteFormField";
 import DischargeModal from "@/components/Facility/DischargeModal";
 import { ConsultationModel, ShiftingModel } from "@/components/Facility/models";
@@ -46,6 +45,8 @@ import { parsePhoneNumber } from "@/Utils/utils";
 
 interface patientShiftProps {
   id: string;
+  open: boolean;
+  setOpen: (state: boolean) => void;
 }
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
@@ -314,11 +315,17 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
 
   if (isLoading) {
-    return <Loading />;
+    return "";
   }
 
   return (
-    <Page title={t("update_shift_request")} backUrl={`/shifting/${props.id}`}>
+    <SlideOver
+      open={props.open}
+      setOpen={props.setOpen}
+      title="Update Shift Request"
+      slideFrom="right"
+      dialogClass="md:w-[750px]"
+    >
       <DischargeModal
         show={showDischargeModal}
         onClose={() => setShowDischargeModal(false)}
@@ -566,6 +573,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           </div>
         </div>
       </Card>
-    </Page>
+    </SlideOver>
   );
 };

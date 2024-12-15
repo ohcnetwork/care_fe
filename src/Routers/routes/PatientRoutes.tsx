@@ -40,9 +40,9 @@ const PatientRoutes: AppRoutes = {
     facilityId,
     patientId,
   }) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
-  "/facility/:facilityId/patient/:patientId/shift/:shiftId": ({ shiftId }) => (
-    <ShiftDetails id={shiftId} />
-  ),
+  "/facility/:facilityId/patient/:patientId/shifting/:shiftId": ({
+    shiftId,
+  }) => <ShiftDetails id={shiftId} />,
   "/facility/:facilityId/patient/:patientId/files": ({
     facilityId,
     patientId,

@@ -69,7 +69,7 @@ const ShiftingHistory = (props: PatientProps) => {
       <div className="flex justify-between items-center">
         <div className="flex mb-4 bg-gray-100 w-fit rounded-lg px-2 py-1">
           <button
-            className={`px-4 py-2 ${
+            className={`px-3 py-2 ${
               activeTab === "current"
                 ? "bg-white rounded-lg font-bold shadow"
                 : ""
@@ -79,7 +79,7 @@ const ShiftingHistory = (props: PatientProps) => {
             {t("current_shifting")}
           </button>
           <button
-            className={`px-4 py-2 ${
+            className={`px-3 py-2 ${
               activeTab === "previous"
                 ? "bg-white rounded-lg font-bold shadow"
                 : ""

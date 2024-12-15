@@ -398,45 +398,39 @@ export default function ShiftDetails(props: { id: string }) {
 
   const showFacilityCard = (facilityData: any) => {
     return (
-      <div className="mt-2 h-full rounded-lg shadow bg-white p-5 text-gray-800 ">
-        <div className="my-2">
-          <span className="mr-2 font-semibold leading-relaxed">
-            {t("name")} :
-          </span>
-          <span className="ml-14">{facilityData?.name || "--"}</span>
-        </div>
-        <div className="my-2">
-          <span className="mr-2 font-semibold leading-relaxed">
-            {t("facility_type")} :
-          </span>
-          <span className="ml-1">
-            {facilityData?.facility_type?.name || "--"}
-          </span>
-        </div>
-        <div className="my-2">
-          <span className="mr-2 font-semibold leading-relaxed">
-            {t("district")} :
-          </span>
-          <span className="ml-11">
-            {facilityData?.district_object?.name || "--"}
-          </span>
-        </div>
-        <div className="my-2">
-          <span className="mr-2 font-semibold leading-relaxed">
-            {t("local_body")} :
-          </span>
-          <span className="ml-4">
-            {facilityData?.local_body_object?.name || "--"}
-          </span>
-        </div>
-        <div className="my-2">
-          <span className="mr-2 font-semibold leading-relaxed">
-            {t("state")} :
-          </span>
-          <span className="ml-14">
-            {facilityData?.state_object?.name || "--"}
-          </span>
-        </div>
+      <div className="mt-2 h-full rounded-lg shadow bg-white p-5 text-gray-700">
+        <table className="w-full">
+          <tbody>
+            <tr>
+              <td className="font-semibold">{t("name")} :</td>
+              <td className="pl-4">{facilityData?.name || "--"}</td>
+            </tr>
+            <tr>
+              <td className="font-semibold">{t("facility_type")} :</td>
+              <td className="pl-4">
+                {facilityData?.facility_type?.name || "--"}
+              </td>
+            </tr>
+            <tr>
+              <td className="font-semibold">{t("district")} :</td>
+              <td className="pl-4">
+                {facilityData?.district_object?.name || "--"}
+              </td>
+            </tr>
+            <tr>
+              <td className="font-semibold">{t("local_body")} :</td>
+              <td className="pl-4">
+                {facilityData?.local_body_object?.name || "--"}
+              </td>
+            </tr>
+            <tr>
+              <td className="font-semibold">{t("state")} :</td>
+              <td className="pl-4">
+                {facilityData?.state_object?.name || "--"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   };
@@ -692,7 +686,7 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
 
-          <div className="grid-cols-4 gap-4 md:grid text-secondary-900">
+          <div className="grid-cols-4 gap-4 md:grid text-secondary-800">
             <div className="col-span-2">
               {/* <div>
                 <h4 className="mt-8">
@@ -713,37 +707,41 @@ export default function ShiftDetails(props: { id: string }) {
               <div className="pb-16 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
                 <h4 className="text-lg">{t("Ambulance Details")}</h4>
 
-                <div className="mt-2 h-full rounded-lg  bg-white p-4  text-gray-800 shadow">
-                  <div className="my-2">
-                    <span className="font-semibold leading-relaxed ">
-                      {t("ambulance_driver_name")} :
-                    </span>
-                    <span className="ml-7">
-                      {data?.ambulance_driver_name || "--"}
-                    </span>
-                  </div>
-                  <div className="my-2">
-                    <span className="font-semibold leading-relaxed">
-                      {t("ambulance_phone_number")}:
-                    </span>
-                    <span className="ml-2">
-                      {data?.ambulance_phone_number ? (
-                        <a href={`tel:${data?.ambulance_phone_number}`}>
-                          {data?.ambulance_phone_number}
-                        </a>
-                      ) : (
-                        "--"
-                      )}
-                    </span>
-                  </div>
-                  <div className="my-2">
-                    <span className="font-semibold leading-relaxed">
-                      {t("ambulance_number")} :
-                    </span>
-                    <span className="ml-28">
-                      {data?.ambulance_number || "--"}
-                    </span>
-                  </div>
+                <div className="mt-2 h-full rounded-lg bg-white p-4 text-gray-700 shadow">
+                  <table className="w-full">
+                    <tbody>
+                      <tr>
+                        <td className="font-semibold text-left">
+                          {t("ambulance_driver_name")} :
+                        </td>
+                        <td className="pl-2 md:pl-4">
+                          {data?.ambulance_driver_name || "--"}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold text-left">
+                          {t("ambulance_phone_number")} :
+                        </td>
+                        <td className="pl-2 md:pl-4">
+                          {data?.ambulance_phone_number ? (
+                            <a href={`tel:${data?.ambulance_phone_number}`}>
+                              {data?.ambulance_phone_number}
+                            </a>
+                          ) : (
+                            "--"
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="font-semibold text-left">
+                          {t("ambulance_number")} :
+                        </td>
+                        <td className="pl-2 md:pl-4">
+                          {data?.ambulance_number || "--"}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
               {!data?.assigned_facility_external && (

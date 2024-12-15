@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { navigate } from "raviger";
+import { navigate, usePath } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { printData } from "./ShiftDetails";
+import { ShiftDetailsUpdate } from "./ShiftDetailsUpdate";
 
 export default function ShiftingTable(props: {
   data?: ShiftingModel[];
@@ -34,7 +35,9 @@ export default function ShiftingTable(props: {
 
   const { t } = useTranslation();
   const authUser = useAuthUser();
+  const currentPath = usePath();
   const [isPrintMode, setIsPrintMode] = useState(false);
+  const [isSlideOverOpen, setIsSlideOverOpen] = useState(false);
   const [selectedShiftId, setselectedShiftId] = useState<string>("");
 
   const [modalFor, setModalFor] = useState<{
@@ -211,8 +214,11 @@ export default function ShiftingTable(props: {
                         >
                           <DropdownMenuItem
                             className=" hover:font-bold cursor-pointer"
-                            onClick={(_) =>
-                              navigate(`/shifting/${shift.external_id}`)
+                            onClick={() =>
+                              currentPath?.includes("/shifting/list") ||
+                              currentPath?.includes("/shifting/board")
+                                ? navigate(`/shifting/${shift.external_id}`)
+                                : navigate(`shifting/${shift.external_id}`)
                             }
                           >
                             {t("View details")}
@@ -223,9 +229,10 @@ export default function ShiftingTable(props: {
                               shift?.status === "COMPLETED" ||
                               shift?.status === "CANCELLED"
                             }
-                            onClick={() =>
-                              navigate(`/shifting/${shift?.external_id}/update`)
-                            }
+                            onClick={() => setIsSlideOverOpen(true)}
+                            // onClick={() =>
+                            //   navigate(`/shifting/${shift?.external_id}/update`)
+                            // }
                           >
                             {t("update_status_details")}
                           </DropdownMenuItem>
@@ -264,7 +271,11 @@ export default function ShiftingTable(props: {
                             )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-
+                      <ShiftDetailsUpdate
+                        id={shift?.external_id}
+                        open={isSlideOverOpen}
+                        setOpen={setIsSlideOverOpen}
+                      />
                       <ConfirmDialog
                         title={t("confirm_transfer_complete")}
                         description={t("mark_transfer_complete_confirmation")}
