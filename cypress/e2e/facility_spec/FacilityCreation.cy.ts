@@ -118,7 +118,7 @@ describe("Facility Creation with multiple user roles", () => {
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickDeleteFacilityOption();
     facilityPage.confirmDeleteFacility();
-    cy.verifyNotification("Facility deleted successfully");
+    cy.verifyNotification(`${facilityName} deleted successfully`);
   });
 
   it("Should display error when district admin tries to create facility in a different district", () => {

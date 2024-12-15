@@ -60,7 +60,7 @@ class FacilityPage {
   }
 
   clickSaveFacilityButton() {
-    cy.clickSubmitButton("Save Facility");
+    cy.verifyAndClickElement("#submit", "Save Facility");
   }
 
   verifyFacilityCreatedNotification() {
@@ -86,7 +86,7 @@ class FacilityPage {
   }
 
   clickUpdateFacilityButton() {
-    cy.clickSubmitButton("Update Facility");
+    cy.verifyAndClickElement("#submit", "Update Facility");
   }
 
   clickConfigureFacilityOption() {

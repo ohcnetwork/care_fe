@@ -634,7 +634,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             </div>
             <div className="mt-12 flex flex-col-reverse justify-end gap-3 sm:flex-row">
               <Cancel onClick={() => goBack()} />
-              <Submit type="submit" onClick={handleSubmit} label={buttonText} />
+              <Submit type="button" onClick={handleSubmit} label={buttonText} />
             </div>
           </form>
         </div>
