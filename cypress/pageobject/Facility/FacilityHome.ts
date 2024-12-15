@@ -9,7 +9,7 @@ class FacilityHome {
   }
 
   navigateToFacilityHomepage() {
-    cy.visit("/facility");
+    cy.awaitUrl("/facility");
   }
 
   assertFacilityInCard(facilityName: string) {
