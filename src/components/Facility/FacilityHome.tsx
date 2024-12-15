@@ -211,7 +211,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   onClick={() => setEditCoverImage(true)}
                   className="md:mr-2 lg:mr-6 lg:h-80 lg:w-80"
                 />
-                <div className="mb-6 grid gap-4 md:mb-0">
+                <div
+                  className="mb-6 grid gap-4 md:mb-0"
+                  id="facility-details-card"
+                >
                   <div className="flex-col justify-between md:flex lg:flex-1">
                     <div className="mb-4" id="facility-name">
                       <h1 className="text-3xl font-bold">
