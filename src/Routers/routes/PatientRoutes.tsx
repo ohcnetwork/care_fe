@@ -6,7 +6,6 @@ import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
 import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientNotes from "@/components/Patient/PatientNotes";
-import { PatientRegister } from "@/components/Patient/PatientRegister";
 import PatientRegistration from "@/components/Patient/PatientRegistration";
 
 import { AppRoutes } from "@/Routers/AppRouter";
@@ -38,7 +37,7 @@ const PatientRoutes: AppRoutes = {
     <InsuranceDetails facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }) => (
-    <PatientRegister facilityId={facilityId} id={id} />
+    <PatientRegistration facilityId={facilityId} patientId={id} />
   ),
   "/facility/:facilityId/patient/:patientId/notes": ({
     facilityId,

@@ -802,50 +802,7 @@ export const PatientManager = () => {
   return (
     <>
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-        <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
-          <ButtonV2
-            id="add-patient-details"
-            onClick={() => {
-              const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-              if (
-                qParams.facility &&
-                showAllFacilityUsers.includes(authUser.user_type)
-              )
-                navigate(`/facility/${qParams.facility}/patient`);
-              else if (
-                qParams.facility &&
-                !showAllFacilityUsers.includes(authUser.user_type) &&
-                authUser.home_facility_object?.id !== qParams.facility
-              )
-                Notification.Error({
-                  msg: "Oops! Non-Home facility users don't have permission to perform this action.",
-                });
-              else if (
-                !showAllFacilityUsers.includes(authUser.user_type) &&
-                authUser.home_facility_object?.id
-              ) {
-                navigate(
-                  `/facility/${authUser.home_facility_object.id}/patient`,
-                );
-              } else if (onlyAccessibleFacility)
-                navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
-              else if (
-                !showAllFacilityUsers.includes(authUser.user_type) &&
-                !authUser.home_facility_object?.id
-              )
-                Notification.Error({
-                  msg: "Oops! No home facility found",
-                });
-              else setShowDialog("create");
-            }}
-            className="w-full lg:w-fit"
-          >
-            <CareIcon icon="l-plus" className="text-lg" />
-            <p id="add-patient-div" className="lg:my-[2px]">
-              Add Patient
-            </p>
-          </ButtonV2>
-        </div>
+        <div></div>
         <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
           <Tabs
             tabs={[

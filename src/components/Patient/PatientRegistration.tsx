@@ -1,5 +1,4 @@
 import careConfig from "@careConfig";
-import { RadioGroupItem } from "@radix-ui/react-radio-group";
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
@@ -7,6 +6,8 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
+
+import useAppHistory from "@/hooks/useAppHistory";
 
 import {
   DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
@@ -29,13 +30,14 @@ import {
   includesIgnoreCase,
 } from "@/Utils/utils";
 
+import Loading from "../Common/Loading";
 import Page from "../Common/Page";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { InputErrors } from "../ui/errors";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { RadioGroup } from "../ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -57,6 +59,7 @@ export default function PatientRegistration(
 ) {
   const { patientId, facilityId } = props;
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
 
   const [samePhoneNumber, setSamePhoneNumber] = useState(false);
   const [sameAddress, setSameAddress] = useState(false);
@@ -74,7 +77,7 @@ export default function PatientRegistration(
     { label: t("patient__general-info"), id: "general-info" },
     { label: t("social_profile"), id: "social-profile" },
     //{ label: t("volunteer_contact"), id: "volunteer-contact" },
-    { label: t("patient__insurance-details"), id: "insurance-details" },
+    //{ label: t("patient__insurance-details"), id: "insurance-details" },
   ];
 
   const mutationData: Partial<PatientModel> = {
@@ -97,6 +100,44 @@ export default function PatientRegistration(
       navigate(`/facility/${facilityId}/patient/${resp.data?.id}/consultation`);
     },
   });
+
+  const updatePatientMutation = useMutation(routes.updatePatient, {
+    pathParams: { id: patientId || "" },
+    body: { ...mutationData },
+    onResponse: () => {
+      Notification.Success({
+        msg: t("patient_update_success"),
+      });
+      goBack();
+    },
+  });
+
+  const patientQuery = useQuery({
+    queryKey: ["patient", patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId || "" },
+    }),
+    enabled: !!patientId,
+  });
+
+  useEffect(() => {
+    if (patientQuery.data) {
+      setForm(patientQuery.data);
+      if (patientQuery.data.year_of_birth) {
+        const calculatedAge =
+          new Date().getFullYear() - patientQuery.data.year_of_birth;
+        setAge(calculatedAge);
+        setAgeDob("age");
+      }
+      if (
+        patientQuery.data.phone_number ===
+        patientQuery.data.emergency_phone_number
+      )
+        setSamePhoneNumber(true);
+      if (patientQuery.data.address === patientQuery.data.permanent_address)
+        setSameAddress(true);
+    }
+  }, [patientQuery.data]);
 
   const statesQuery = useQuery({
     queryKey: ["states"],
@@ -183,6 +224,12 @@ export default function PatientRegistration(
     errors: errors[field],
   });
 
+  const selectProps = (field: keyof typeof form) => ({
+    value: (form[field] as string)?.toString(),
+    onValueChange: (value: string) =>
+      setForm((f) => ({ ...f, [field]: value })),
+  });
+
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors: Record<string, string[]> = {};
@@ -191,7 +238,7 @@ export default function PatientRegistration(
       "phone_number",
       "emergency_phone_number",
       "gender",
-      ageDob === "dob" ? "date_of_birth" : "age",
+      ageDob === "dob" ? "date_of_birth" : "year_of_birth",
       "pincode",
       "nationality",
       "address",
@@ -212,9 +259,15 @@ export default function PatientRegistration(
     if (Object.keys(errors).length > 0) {
       setFeErrors(errors);
     } else {
-      createPatientMutation.mutate();
+      patientId
+        ? updatePatientMutation.mutate()
+        : createPatientMutation.mutate();
     }
   };
+
+  if (patientId && patientQuery.isLoading) {
+    return <Loading />;
+  }
 
   return (
     <Page title={title}>
@@ -237,13 +290,31 @@ export default function PatientRegistration(
             <br />
             <Input
               {...fieldProps("phone_number")}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  phone_number: e.target.value,
+                  emergency_phone_number: samePhoneNumber
+                    ? e.target.value
+                    : f.emergency_phone_number,
+                }))
+              }
               required
               label={t("phone_number")}
             />
             <div className="mt-1">
               <Checkbox
                 checked={samePhoneNumber}
-                onCheckedChange={() => setSamePhoneNumber(!samePhoneNumber)}
+                onCheckedChange={() => {
+                  const newValue = !samePhoneNumber;
+                  setSamePhoneNumber(newValue);
+                  if (newValue) {
+                    setForm((f) => ({
+                      ...f,
+                      emergency_phone_number: f.phone_number,
+                    }));
+                  }
+                }}
                 id="same-phone-number"
                 label={t("use_phone_number_for_emergency")}
               />
@@ -253,11 +324,6 @@ export default function PatientRegistration(
               {...fieldProps("emergency_phone_number")}
               required
               disabled={samePhoneNumber}
-              value={
-                samePhoneNumber
-                  ? form.phone_number
-                  : form.emergency_phone_number
-              }
               label={t("emergency_phone_number")}
             />
             <br />
@@ -349,6 +415,11 @@ export default function PatientRegistration(
                 )}
               </TabsContent>
               <TabsContent value="age">
+                <div className="bg-yellow-500/10 border border-yellow-500 rounded-md p-4 text-sm text-yellow-800 mb-4">
+                  {t("age_input_warning")}
+                  <br />
+                  <b>{t("age_input_warning_bold")}</b>
+                </div>
                 <Input
                   value={age}
                   errors={errors["age"]}
@@ -432,7 +503,7 @@ export default function PatientRegistration(
                   {t("nationality")} <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  value={form.nationality}
+                  {...selectProps("nationality")}
                   onValueChange={(value) => {
                     setForm((f) => ({
                       ...f,
@@ -459,11 +530,8 @@ export default function PatientRegistration(
               {form.nationality === "India" ? (
                 <>
                   <div>
-                    <Label className="mb-2">
-                      {t("state")} <span className="text-red-500">*</span>
-                    </Label>
                     <Select
-                      value={form.state?.toString()}
+                      {...selectProps("state")}
                       disabled={statesQuery.isLoading}
                       onValueChange={(value) =>
                         setForm((f) => ({
@@ -475,7 +543,12 @@ export default function PatientRegistration(
                         }))
                       }
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger
+                        label={t("state")}
+                        required
+                        errors={errors["state"]}
+                        className="w-full"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -488,10 +561,8 @@ export default function PatientRegistration(
                     </Select>
                   </div>
                   <div>
-                    <Label className="mb-2">
-                      {t("district")} <span className="text-red-500">*</span>
-                    </Label>
                     <Select
+                      {...selectProps("district")}
                       value={form.district?.toString()}
                       onValueChange={(value) =>
                         setForm((f) => ({
@@ -507,7 +578,12 @@ export default function PatientRegistration(
                         !districtsQuery.data?.length
                       }
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger
+                        label={t("district")}
+                        required
+                        errors={errors["district"]}
+                        className="w-full"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -520,11 +596,8 @@ export default function PatientRegistration(
                     </Select>
                   </div>
                   <div>
-                    <Label className="mb-2">
-                      {t("local_body")} <span className="text-red-500">*</span>
-                    </Label>
                     <Select
-                      value={form.local_body?.toString()}
+                      {...selectProps("local_body")}
                       onValueChange={(value) =>
                         setForm((f) => ({
                           ...f,
@@ -538,7 +611,12 @@ export default function PatientRegistration(
                         !localBodyQuery.data?.length
                       }
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger
+                        label={t("local_body")}
+                        required
+                        errors={errors["local_body"]}
+                        className="w-full"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -551,19 +629,20 @@ export default function PatientRegistration(
                     </Select>
                   </div>
                   <div>
-                    <Label className="mb-2">{t("ward")}</Label>
                     <Select
-                      value={form.ward?.toString()}
-                      onValueChange={(value) =>
-                        setForm((f) => ({ ...f, ward: value }))
-                      }
+                      {...selectProps("ward")}
                       disabled={
                         !form.local_body ||
                         wardsQuery.isLoading ||
                         !wardsQuery.data?.results.length
                       }
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger
+                        label={t("ward")}
+                        required
+                        errors={errors["ward"]}
+                        className="w-full"
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -592,7 +671,6 @@ export default function PatientRegistration(
             <div className="text-sm">{t("social_profile_detail")}</div>
             <br />
             <div>
-              <Label className="mb-2">{t("occupation")}</Label>
               <Select
                 value={form.meta_info?.occupation}
                 onValueChange={(value) =>
@@ -602,7 +680,7 @@ export default function PatientRegistration(
                   }))
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger label={t("occupation")} className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -616,14 +694,11 @@ export default function PatientRegistration(
             </div>
             <br />
             <div>
-              <Label className="mb-2">{t("ration_card_category")}</Label>
-              <Select
-                value={form.ration_card_category || ""}
-                onValueChange={(value) =>
-                  setForm((f) => ({ ...f, ration_card_category: value as any }))
-                }
-              >
-                <SelectTrigger className="w-full">
+              <Select {...selectProps("ration_card_category")}>
+                <SelectTrigger
+                  label={t("ration_card_category")}
+                  className="w-full"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -692,20 +767,24 @@ export default function PatientRegistration(
             <br />
   
           </div> */}
-          <div id="insurance-details" className="mt-10">
+          {/* <div id="insurance-details" className="mt-10">
             <h2 className="text-lg font-semibold">
               {t("patient__insurance-details")}
             </h2>
             <div className="text-sm">{t("insurance_details_detail")}</div>
             <br />
-          </div>
+          </div> */}
           <div className="flex justify-end mt-20">
             <Button
               type="submit"
               variant={"primary"}
-              disabled={createPatientMutation.isProcessing}
+              disabled={
+                patientId
+                  ? updatePatientMutation.isProcessing
+                  : createPatientMutation.isProcessing
+              }
             >
-              {t("save_and_continue")}
+              {patientId ? t("save") : t("save_and_continue")}
             </Button>
           </div>
         </form>
