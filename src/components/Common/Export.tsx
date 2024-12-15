@@ -126,11 +126,8 @@ export const ExportMenu = ({
                 }}
                 {...item.options}
               >
-                <DropdownMenuItem
-                  id={item.options?.id}
-                  disabled={isExporting || disabled}
-                >
-                  <div>
+                <DropdownMenuItem disabled={isExporting || disabled}>
+                  <div id={item.options?.id}>
                     <i>{item.options?.icon}</i>
                     <span className="w-full">{item.label}</span>
                   </div>
