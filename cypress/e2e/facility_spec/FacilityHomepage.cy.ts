@@ -116,7 +116,6 @@ describe("Facility Homepage Function", () => {
     // Verify Facility Export
     facilityHome.csvDownloadIntercept(facilitiesAlias, "");
     facilityHome.clickExportButton();
-    facilityHome.clickMenuItem("Facilities");
     facilityHome.verifyDownload(facilitiesAlias);
   });
 

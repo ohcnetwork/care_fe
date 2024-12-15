@@ -1,7 +1,6 @@
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";
-  menuItem = "[role='menuitem']";
 
   // Operations
   clickExportButton() {
@@ -27,10 +26,6 @@ class FacilityHome {
 
   typeFacilitySearch(facilityName: string) {
     cy.get("#facility-search").click().clear().type(facilityName);
-  }
-
-  clickMenuItem(itemName: string) {
-    cy.get(this.menuItem).contains(itemName).click();
   }
 
   csvDownloadIntercept(alias: string, queryParam: string) {
