@@ -70,12 +70,7 @@ import {
   NotificationData,
   PNconfigData,
 } from "@/components/Notifications/models";
-import {
-  DailyRoundsModel,
-  PatientModel,
-  SampleReportModel,
-  SampleTestModel,
-} from "@/components/Patient/models";
+import { DailyRoundsModel, PatientModel } from "@/components/Patient/models";
 import {
   CreateFileRequest,
   CreateFileResponse,
@@ -785,22 +780,6 @@ const routes = {
     method: "GET",
     TRes: Type<PaginatedResponse<PatientNotesEditModel>>(),
   },
-  sampleTestList: {
-    path: "/api/v1/patient/{patientId}/test_sample/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<SampleTestModel>>(),
-  },
-  createSampleTest: {
-    path: "/api/v1/patient/{patientId}/test_sample/",
-    method: "POST",
-    TRes: Type<PatientModel>(),
-    TBody: Type<SampleTestModel>(),
-  },
-  sampleReport: {
-    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample/",
-    method: "GET",
-    TRes: Type<SampleReportModel>(),
-  },
 
   // States
   statesList: {
@@ -867,24 +846,6 @@ const routes = {
     path: "/api/v1/ward/?local_body={id}",
     method: "GET",
     TRes: Type<PaginatedResponse<WardModel>>(),
-  },
-
-  // Sample Test
-  getTestSampleList: {
-    path: "/api/v1/test_sample/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<SampleTestModel>>(),
-  },
-  getTestSample: {
-    path: "/api/v1/test_sample/{id}/",
-    method: "GET",
-    TRes: Type<SampleTestModel>(),
-  },
-  patchSample: {
-    path: "/api/v1/test_sample/{id}/",
-    method: "PATCH",
-    TBody: Type<SampleTestModel>(),
-    TRes: Type<PatientModel>(),
   },
 
   //inventory
