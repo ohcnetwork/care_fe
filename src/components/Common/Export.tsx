@@ -105,32 +105,32 @@ export const ExportMenu = ({
         {label !== "Importing..." && (
           <DropdownMenuContent>
             {exportItems.map((item) => (
-              <div key={item.label} {...item.options}>
-                <DropdownMenuItem disabled={isExporting || disabled}>
-                  <div
-                    className={classNames(
-                      isAuthorized
-                        ? "pointer-events-auto cursor-pointer"
-                        : "!hidden",
-                    )}
-                    onClick={() => {
-                      let action = item.action;
-                      if (item.route) {
-                        action = async () => {
-                          const { data } = await request(item.route!);
-                          return data ?? null;
-                        };
-                      }
-                      if (action) {
-                        exportFile(
-                          action,
-                          item.filePrefix,
-                          item.type,
-                          item.parse,
-                        );
-                      }
-                    }}
-                  >
+              <div
+                key={item.label}
+                className={classNames(
+                  isAuthorized
+                    ? "pointer-events-auto cursor-pointer"
+                    : "!hidden",
+                )}
+                onClick={() => {
+                  let action = item.action;
+                  if (item.route) {
+                    action = async () => {
+                      const { data } = await request(item.route!);
+                      return data ?? null;
+                    };
+                  }
+                  if (action) {
+                    exportFile(action, item.filePrefix, item.type, item.parse);
+                  }
+                }}
+                {...item.options}
+              >
+                <DropdownMenuItem
+                  id={item.options?.id}
+                  disabled={isExporting || disabled}
+                >
+                  <div>
                     <i>{item.options?.icon}</i>
                     <span className="w-full">{item.label}</span>
                   </div>
