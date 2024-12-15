@@ -164,21 +164,6 @@ export const FacilityList = () => {
                 route: routes.downloadFacility,
                 filePrefix: "facilities",
               },
-              {
-                label: "Capacities",
-                route: routes.downloadFacilityCapacity,
-                filePrefix: "capacities",
-              },
-              {
-                label: "Doctors",
-                route: routes.downloadFacilityDoctors,
-                filePrefix: "doctors",
-              },
-              {
-                label: "Triages",
-                route: routes.downloadFacilityTriage,
-                filePrefix: "triages",
-              },
             ]}
           />
         </div>
