@@ -233,6 +233,7 @@ export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
   if (phoneNumber === "+91") return "";
   const phoneCodes: Record<string, CountryData> = phoneCodesJson;
   let parsedNumber = phoneNumber.replace(/[-+() ]/g, "");
+  if (parsedNumber.length < 12) return "";
   if (countryCode && phoneCodes[countryCode]) {
     parsedNumber = phoneCodes[countryCode].code + parsedNumber;
   } else if (!phoneNumber.startsWith("+")) {
@@ -393,7 +394,7 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
 
   const years = end.diff(start, "years");
   if (years) {
-    return `${years}${suffixes.year}`;
+    return `${years} ${suffixes.year}`;
   }
 
   // Skip representing as no. of months/days if we don't know the date of birth

@@ -952,7 +952,7 @@ export const PatientManager = () => {
           className="w-full"
         />
       </div>
-      <div className="col-span-3 flex flex-wrap">
+      <div className="col-span-3 flex flex-wrap my-2">
         <FilterBadges
           badges={({
             badge,

@@ -2,9 +2,11 @@ import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import useKeyboardShortcut from "use-keyboard-shortcut";
+
+import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { KeyboardShortcutKey } from "@/CAREUI/interactive/KeyboardShortcut";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
@@ -16,6 +18,7 @@ import useQuery from "@/Utils/request/useQuery";
 import { formatPatientAge, parsePhoneNumber } from "@/Utils/utils";
 
 import * as Notification from "../../Utils/Notifications";
+import Loading from "../Common/Loading";
 import Page from "../Common/Page";
 import SearchByMultipleFields from "../Common/SearchByMultipleFields";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
@@ -165,47 +168,57 @@ export default function PatientIndex() {
   const onlyAccessibleFacility =
     permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
 
+  const handleAddPatient = () => {
+    let facilityId = "";
+    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+    const userCanSeeAllFacilities = showAllFacilityUsers.includes(
+      authUser.user_type,
+    );
+    const userHomeFacilityId = authUser.home_facility_object?.id;
+    if (qParams.facility && userCanSeeAllFacilities)
+      facilityId = qParams.facility;
+    else if (
+      qParams.facility &&
+      !userCanSeeAllFacilities &&
+      userHomeFacilityId !== qParams.facility
+    )
+      Notification.Error({
+        msg: t("permission_denied"),
+      });
+    else if (!userCanSeeAllFacilities && userHomeFacilityId) {
+      facilityId = userHomeFacilityId;
+    } else if (onlyAccessibleFacility)
+      facilityId = onlyAccessibleFacility.id || "";
+    else if (!userCanSeeAllFacilities && !userHomeFacilityId) {
+      Notification.Error({
+        msg: t("no_home_facility_found"),
+      });
+      return;
+    } else {
+      setShowDialog("create");
+      return;
+    }
+    navigate(`/facility/${facilityId}/register-patient`);
+  };
+
   function AddPatientButton(props: { outline?: boolean }) {
+    useKeyboardShortcut(["Shift", "P"], handleAddPatient);
     return (
       <Button
         variant={props.outline ? "outline_primary" : "primary"}
-        className="gap-3"
-        onClick={() => {
-          let facilityId = "";
-          const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-          const userCanSeeAllFacilities = showAllFacilityUsers.includes(
-            authUser.user_type,
-          );
-          const userHomeFacilityId = authUser.home_facility_object?.id;
-          if (qParams.facility && userCanSeeAllFacilities)
-            facilityId = qParams.facility;
-          else if (
-            qParams.facility &&
-            !userCanSeeAllFacilities &&
-            userHomeFacilityId !== qParams.facility
-          )
-            Notification.Error({
-              msg: t("permission_denied"),
-            });
-          else if (!userCanSeeAllFacilities && userHomeFacilityId) {
-            facilityId = userHomeFacilityId;
-          } else if (onlyAccessibleFacility)
-            facilityId = onlyAccessibleFacility.id || "";
-          else if (!userCanSeeAllFacilities && !userHomeFacilityId) {
-            Notification.Error({
-              msg: t("no_home_facility_found"),
-            });
-            return;
-          } else {
-            setShowDialog("create");
-            return;
-          }
-          navigate(`/facility/${facilityId}/register-patient`);
-        }}
+        className="gap-3 group"
+        onClick={handleAddPatient}
       >
         <CareIcon icon="l-plus" />
         {t("add_new_patient")}
-        <KeyboardShortcutKey shortcut={["Shift", "P"]} />
+        <div
+          className={cn(
+            "border border-white/50 rounded-md opacity-50 px-2 py-0.5 text-xs",
+            props.outline && "border-black/50 group-hover:border-white/50",
+          )}
+        >
+          SHIFT P
+        </div>
       </Button>
     );
   }
@@ -246,14 +259,17 @@ export default function PatientIndex() {
                     className="w-full"
                   />
                 </div>
-                {isValidSearch && !listingQuery.data?.results.length && (
-                  <div className="py-10 text-gray-600 text-sm flex flex-col gap-4 text-center">
-                    {t("no_records_found")}
-                    <br />
-                    {t("to_proceed_with_registration")}
-                    <AddPatientButton outline />
-                  </div>
-                )}
+                {isValidSearch &&
+                  !listingQuery.loading &&
+                  !listingQuery.data?.results.length && (
+                    <div className="py-10 text-gray-600 text-sm flex flex-col gap-4 text-center">
+                      {t("no_records_found")}
+                      <br />
+                      {t("to_proceed_with_registration")}
+                      <AddPatientButton outline />
+                    </div>
+                  )}
+                {isValidSearch && listingQuery.loading && <Loading />}
                 {isValidSearch && !!listingQuery.data?.results.length && (
                   <Table className="mt-4">
                     <TableHeader>
@@ -262,7 +278,9 @@ export default function PatientIndex() {
                         <TableHead className="">
                           {t("primary_phone_no")}
                         </TableHead>
-                        <TableHead className="">{t("dob")}</TableHead>
+                        <TableHead className="">
+                          {t("dob")}/{t("age")}
+                        </TableHead>
                         <TableHead className="">{t("sex")}</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -283,8 +301,11 @@ export default function PatientIndex() {
                             {patient.phone_number}
                           </TableCell>
                           <TableCell className="">
-                            {patient.date_of_birth} ({formatPatientAge(patient)}
-                            )
+                            {!!patient.date_of_birth &&
+                              dayjs(patient.date_of_birth).format(
+                                "DD-MM-YYYY",
+                              )}{" "}
+                            ({formatPatientAge(patient)})
                           </TableCell>
                           <TableCell className="">
                             {

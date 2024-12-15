@@ -10,6 +10,7 @@ import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 import useAppHistory from "@/hooks/useAppHistory";
 
 import {
+  BLOOD_GROUPS,
   DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
   GENDER_TYPES,
   OCCUPATION_TYPES,
@@ -27,10 +28,14 @@ import {
   dateQueryString,
   getPincodeDetails,
   includesIgnoreCase,
+  parsePhoneNumber,
 } from "@/Utils/utils";
 
+import DialogModal from "../Common/Dialog";
 import Loading from "../Common/Loading";
 import Page from "../Common/Page";
+import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
+import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { InputErrors } from "../ui/errors";
@@ -66,11 +71,16 @@ export default function PatientRegistration(
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [form, setForm] = useState<Partial<PatientModel>>({
     nationality: "India",
+    phone_number: "+91",
+    emergency_phone_number: "+91",
   });
   const [age, setAge] = useState<number>();
   const [feErrors, setFeErrors] = useState<
     Partial<Record<keyof PatientModel, string[]>>
   >({});
+  const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
+    useState(!!patientId);
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
 
   const sidebarItems = [
     { label: t("patient__general-info"), id: "general-info" },
@@ -79,19 +89,50 @@ export default function PatientRegistration(
     //{ label: t("patient__insurance-details"), id: "insurance-details" },
   ];
 
+  const mutationFields: (keyof PatientModel)[] = [
+    "name",
+    "phone_number",
+    "emergency_phone_number",
+    "gender",
+    "blood_group",
+    "date_of_birth",
+    "age",
+    "address",
+    "permanent_address",
+    "pincode",
+    "nationality",
+    "state",
+    "district",
+    "local_body",
+    "ward",
+    "village",
+    "meta_info",
+  ];
+
   const mutationData: Partial<PatientModel> = {
-    ...form,
+    ...Object.fromEntries(
+      Object.entries(form).filter(([key]) =>
+        mutationFields.includes(key as keyof PatientModel),
+      ),
+    ),
     date_of_birth:
       ageDob === "dob" ? dateQueryString(form.date_of_birth) : undefined,
     year_of_birth:
       ageDob === "age" ? new Date().getFullYear() - (age || 0) : undefined,
     is_active: true,
-    blood_group: "B+",
     is_antenatal: false,
+    passport_no: form.nationality === "Indian" ? form.passport_no : undefined,
+    meta_info: {
+      ...(form.meta_info as any),
+      occupation:
+        form.meta_info?.occupation === ""
+          ? undefined
+          : form.meta_info?.occupation,
+    },
   };
 
   const createPatientMutation = useMutation(routes.addPatient, {
-    body: { ...mutationData, facility: facilityId },
+    body: { ...mutationData, facility: facilityId, ward_old: undefined },
     onResponse: (resp) => {
       if (resp.error) {
         Notification.Error({
@@ -110,7 +151,7 @@ export default function PatientRegistration(
 
   const updatePatientMutation = useMutation(routes.updatePatient, {
     pathParams: { id: patientId || "" },
-    body: { ...mutationData },
+    body: { ...mutationData, ward_old: undefined },
     onResponse: (data) => {
       if (data.error) {
         Notification.Error({
@@ -239,6 +280,7 @@ export default function PatientRegistration(
 
   const handlePincodeChange = async (value: string) => {
     if (!validatePincode(value)) return;
+    if (form.state && form.district) return;
 
     const pincodeDetails = await getPincodeDetails(
       value,
@@ -289,7 +331,10 @@ export default function PatientRegistration(
   const fieldProps = (field: keyof typeof form) => ({
     value: form[field] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-      setForm((f) => ({ ...f, [field]: e.target.value })),
+      setForm((f) => ({
+        ...f,
+        [field]: e.target.value === "" ? undefined : e.target.value,
+      })),
     errors: errors[field],
   });
 
@@ -299,6 +344,17 @@ export default function PatientRegistration(
       setForm((f) => ({ ...f, [field]: value })),
   });
 
+  const handleDialogClose = (action: string) => {
+    if (action === "transfer") {
+      setShowTransferDialog(true);
+    } else if (action === "back") {
+      setShowTransferDialog(false);
+    } else {
+      setSuppressDuplicateWarning(true);
+      setShowTransferDialog(false);
+    }
+  };
+
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors: Record<string, string[]> = {};
@@ -307,6 +363,7 @@ export default function PatientRegistration(
       "phone_number",
       "emergency_phone_number",
       "gender",
+      "blood_group",
       ageDob === "dob" ? "date_of_birth" : "year_of_birth",
       "pincode",
       "nationality",
@@ -343,6 +400,34 @@ export default function PatientRegistration(
     }
   };
 
+  const [debouncedNumber, setDebouncedNumber] = useState<string>();
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (!patientId || patientQuery.data?.phone_number !== form.phone_number) {
+        setSuppressDuplicateWarning(false);
+      }
+      setDebouncedNumber(form.phone_number);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [form.phone_number]);
+
+  const patientPhoneSearch = useQuery({
+    queryKey: ["patients", "phone-number", debouncedNumber],
+    queryFn: query(routes.searchPatient, {
+      queryParams: {
+        phone_number: parsePhoneNumber(debouncedNumber || "") || "",
+      },
+    }),
+    enabled: !!parsePhoneNumber(debouncedNumber || ""),
+  });
+
+  const duplicatePatients = patientPhoneSearch.data?.results.filter(
+    (p) => p.patient_id !== patientId,
+  );
   if (patientId && patientQuery.isLoading) {
     return <Loading />;
   }
@@ -353,6 +438,14 @@ export default function PatientRegistration(
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
         <form className="md:w-[500px]" onSubmit={handleFormSubmit}>
+          {/* <PLUGIN_Component
+                __name="ExtendPatientRegisterForm"
+                facilityId={facilityId}
+                patientId={patientId}
+                state={state}
+                dispatch={dispatch}
+                field={field}
+              /> */}
           <div id={"general-info"}>
             <h2 className="text-lg font-semibold">
               {t("patient__general-info")}
@@ -368,15 +461,15 @@ export default function PatientRegistration(
             <br />
             <Input
               {...fieldProps("phone_number")}
-              onChange={(e) =>
+              onChange={(e) => {
                 setForm((f) => ({
                   ...f,
                   phone_number: e.target.value,
                   emergency_phone_number: samePhoneNumber
                     ? e.target.value
                     : f.emergency_phone_number,
-                }))
-              }
+                }));
+              }}
               required
               label={t("phone_number")}
             />
@@ -404,13 +497,13 @@ export default function PatientRegistration(
               disabled={samePhoneNumber}
               label={t("emergency_phone_number")}
             />
-            <br />
+            {/* <br />
             <Input
               // TODO: add this to the backend?
               required
               label={t("emergency_contact_person_name_details")}
               placeholder={t("emergency_contact_person_name")}
-            />
+            /> */}
             <br />
             <RadioGroup
               label={t("sex")}
@@ -434,6 +527,22 @@ export default function PatientRegistration(
                 </>
               ))}
             </RadioGroup>
+            <br />
+            <Select {...selectProps("blood_group")}>
+              <SelectTrigger
+                label={t("blood_group")}
+                required
+                errors={errors["blood_group"]}
+                className="w-full"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {BLOOD_GROUPS.map((bg) => (
+                  <SelectItem value={bg}>{bg}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <br />
             <Tabs
               value={ageDob}
@@ -553,11 +662,11 @@ export default function PatientRegistration(
               }
               disabled={sameAddress}
             />
-            <br />
+            {/* <br />
             <Input
               // TODO: add this to the backend?
               label={t("landmark")}
-            />
+            /> */}
             <br />
             <Input
               {...fieldProps("pincode")}
@@ -579,9 +688,6 @@ export default function PatientRegistration(
             <br />
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="mb-2">
-                  {t("nationality")} <span className="text-red-500">*</span>
-                </Label>
                 <Select
                   {...selectProps("nationality")}
                   onValueChange={(value) => {
@@ -597,7 +703,11 @@ export default function PatientRegistration(
                     }));
                   }}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger
+                    label={t("nationality")}
+                    required
+                    className="w-full"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -868,6 +978,37 @@ export default function PatientRegistration(
           </div>
         </form>
       </div>
+      {!patientPhoneSearch.isLoading &&
+        !!duplicatePatients?.length &&
+        !!parsePhoneNumber(debouncedNumber || "") &&
+        !suppressDuplicateWarning && (
+          <DuplicatePatientDialog
+            patientList={duplicatePatients}
+            handleOk={handleDialogClose}
+            handleCancel={() => {
+              handleDialogClose("close");
+            }}
+          />
+        )}
+      {!!duplicatePatients?.length && (
+        <DialogModal
+          show={showTransferDialog}
+          onClose={() => {
+            handleDialogClose("close");
+          }}
+          title="Patient Transfer Form"
+          className="max-w-md md:min-w-[600px]"
+        >
+          <TransferPatientDialog
+            patientList={duplicatePatients}
+            handleOk={() => handleDialogClose("close")}
+            handleCancel={() => {
+              handleDialogClose("close");
+            }}
+            facilityId={facilityId}
+          />
+        </DialogModal>
+      )}
     </Page>
   );
 }

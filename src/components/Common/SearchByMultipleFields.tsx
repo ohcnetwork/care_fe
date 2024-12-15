@@ -249,7 +249,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
             </Command>
           </PopoverContent>
         </Popover>
-        {renderSearchInput}
+        <div className="w-full">{renderSearchInput}</div>
       </div>
       {error && (
         <div className="error-text px-2 mb-1 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300">
