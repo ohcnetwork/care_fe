@@ -75,14 +75,14 @@ export function LandingPage() {
             Find Healthcare Facilities
           </h1>
 
-          <div className="space-y-4">
+          <div className="flex flex-col items-center gap-4">
             <Popover open={openDistrict} onOpenChange={setOpenDistrict}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={openDistrict}
-                  className="w-full justify-between"
+                  className="w-[400px] justify-between"
                 >
                   {selectedDistrict
                     ? selectedDistrict.name
@@ -94,10 +94,10 @@ export function LandingPage() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
-                <Command>
+                <Command className="w-[400px]">
                   <CommandInput placeholder="Search district..." />
                   <CommandEmpty>No district found.</CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="overflow-y-auto max-h-80">
                     {districts.map((district) => (
                       <CommandItem
                         key={district.id}
@@ -121,7 +121,7 @@ export function LandingPage() {
                   variant="outline"
                   role="combobox"
                   aria-expanded={openLocalBody}
-                  className="w-full justify-between"
+                  className="w-[400px] justify-between overflow-x-hidden"
                   disabled={!selectedDistrict}
                 >
                   {selectedLocalBody
@@ -134,10 +134,10 @@ export function LandingPage() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
-                <Command>
+                <Command className="w-[400px]">
                   <CommandInput placeholder="Search local body..." />
                   <CommandEmpty>No local body found.</CommandEmpty>
-                  <CommandGroup>
+                  <CommandGroup className="overflow-y-auto max-h-80">
                     {localBodies.map((localBody) => (
                       <CommandItem
                         key={localBody.id}
@@ -155,10 +155,12 @@ export function LandingPage() {
             </Popover>
 
             <Button
-              className="w-full"
+              variant="primary_gradient"
+              className="w-[400px] h-12 text-lg"
               onClick={handleSearch}
               disabled={!selectedDistrict}
             >
+              <span className="absolute inset-0 bg-gradient-to-b from-white/15 to-transparent"></span>
               Search Facilities
             </Button>
           </div>

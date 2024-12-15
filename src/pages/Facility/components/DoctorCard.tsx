@@ -34,17 +34,15 @@ export function DoctorCard({ doctor, className, facilityId }: Props) {
               <h3 className="truncate text-xl font-semibold">
                 {`Dr. ${doctor.first_name} ${doctor.last_name}`}
               </h3>
-              <p className="text-sm text-muted-foreground truncate">
-                {doctor.role}
-              </p>
+              <p className="text-sm text-muted-foreground">{doctor.role}</p>
 
               <p className="text-xs mt-3">Education: </p>
-              <p className="text-sm text-muted-foreground truncate">
+              <p className="text-sm text-muted-foreground">
                 {doctor.education}
               </p>
 
               <p className="text-xs mt-3">Languages: </p>
-              <p className="text-sm text-muted-foreground truncate">
+              <p className="text-sm text-muted-foreground">
                 {doctor.languages.join(", ")}
               </p>
             </div>
@@ -52,13 +50,13 @@ export function DoctorCard({ doctor, className, facilityId }: Props) {
         </div>
 
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-y-2">
             <div className="text-sm text-muted-foreground">
               {getExperience(doctor)}
             </div>
             <Button variant="outline" asChild>
               <Link
-                href={`/facility/${facilityId}/appointments/${doctor.username}/`}
+                href={`/facility/${facilityId}/appointments/${doctor.username}/otp/send`}
               >
                 Book Appointment
               </Link>

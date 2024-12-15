@@ -13,7 +13,6 @@ const MENU_TAGS: { [key: string]: string } = {
   facility: "Facilities",
   patients: "Patients",
   assets: "Assets",
-  sample: "Sample Tests",
   shifting: "Shiftings",
   resource: "Resources",
   users: "Users",

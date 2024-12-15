@@ -24,6 +24,10 @@ const buttonVariants = cva(
         link: "text-gray-900 underline-offset-4 hover:underline dark:text-gray-50",
         outline_primary:
           "border border-primary-700 text-primary-700 bg-white shadow-sm hover:bg-primary-700 hover:text-white dark:border-primary-700 dark:bg-primary-700 dark:text-white",
+        primary_gradient:
+          "text-white border border-primary-900 rounded-lg font-medium relative overflow-hidden bg-gradient-to-b from-primary-700 to-primary-800 hover:from-primary-800 hover:to-primary-900 shadow-lg",
+        white:
+          "bg-white border border-secondary-400 text-gray-900 shadow-sm hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80",
       },
       size: {
         default: "h-9 px-4 py-2",

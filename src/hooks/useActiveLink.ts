@@ -12,7 +12,6 @@ const activeLinkPriority = {
   "/patient/": "/patients",
   "/death_report": "/patients",
   "/assets": "/assets",
-  "/sample": "/sample",
   "/shifting": "/shifting",
   "/resource": "/resource",
   "/users": "/users",

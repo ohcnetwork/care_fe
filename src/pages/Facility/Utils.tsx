@@ -120,7 +120,6 @@ export const FACILITY_FEATURES = {
 export type FeatureId = keyof typeof FACILITY_FEATURES;
 
 export const FeatureBadge = ({ featureId }: { featureId: FeatureId }) => {
-  console.log(featureId);
   const feature = FACILITY_FEATURES[featureId];
   const variantStyles = {
     green: "bg-green-100 text-green-800 hover:bg-green-100",
