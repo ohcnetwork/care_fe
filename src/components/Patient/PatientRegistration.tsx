@@ -22,7 +22,6 @@ import { validatePincode } from "@/common/validation";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import request from "@/Utils/request/request";
 import useMutation from "@/Utils/request/useMutation";
 import {
   dateQueryString,
@@ -195,22 +194,22 @@ export default function PatientRegistration(
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
-
-    const fetchedDistricts = await request(routes.getDistrictByState, {
-      pathParams: { id: matchedState.id?.toString() || "" },
-    });
-    if (!fetchedDistricts.data) return;
-
-    const matchedDistrict = fetchedDistricts.data.find((district) => {
-      return includesIgnoreCase(district.name, pincodeDetails.districtname);
-    });
-    if (!matchedDistrict) return;
-
     setForm((f) => ({
       ...f,
       state: matchedState.id,
+    }));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const districts = await districtsQuery.refetch();
+
+    const matchedDistrict = districts.data?.find((district) => {
+      return includesIgnoreCase(district.name, pincodeDetails.districtname);
+    });
+    if (!matchedDistrict) return;
+    setForm((f) => ({
+      ...f,
       district: matchedDistrict.id,
     }));
+
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
@@ -270,7 +269,9 @@ export default function PatientRegistration(
       } else if (
         ageDob === "dob" &&
         field === "date_of_birth" &&
-        !/^\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/.test(form[field])
+        !/^(19[0-9]{2}|20[0-9]{2}|2100)-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/.test(
+          form[field],
+        )
       ) {
         errors[field] = errors[field] || [];
         errors[field].push(`Invalid date format, expected DD-MM-YYYY`);
