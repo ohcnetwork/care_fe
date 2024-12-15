@@ -52,6 +52,10 @@ export const ImmunisationRecords = (props: PatientProps) => {
   const handleSearchChange = ({ value }: { value: string }) => {
     setSearchTerm(value.toLowerCase()); // Make it case-insensitive
   };
+  const filteredData =
+    !searchTerm ||
+    (patientData.vaccine_name &&
+      patientData.vaccine_name.toLowerCase().includes(searchTerm));
 
   return (
     <section className="mt-6">
@@ -138,7 +142,7 @@ export const ImmunisationRecords = (props: PatientProps) => {
           </thead>
 
           <tbody>
-            {patientData.is_vaccinated ? (
+            {patientData.is_vaccinated && filteredData ? (
               <tr>
                 <td className="border-b border-gray-200 px-4 py-3 text-sm text-gray-800 font-semibold">
                   COVID-19
