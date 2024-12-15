@@ -106,6 +106,7 @@ export const ExportMenu = ({
           <DropdownMenuContent>
             {exportItems.map((item) => (
               <div
+                {...item.options}
                 key={item.label}
                 className={classNames(
                   isAuthorized
@@ -124,10 +125,9 @@ export const ExportMenu = ({
                     exportFile(action, item.filePrefix, item.type, item.parse);
                   }
                 }}
-                {...item.options}
               >
                 <DropdownMenuItem disabled={isExporting || disabled}>
-                  <div id={item.options?.id}>
+                  <div>
                     <i>{item.options?.icon}</i>
                     <span className="w-full">{item.label}</span>
                   </div>
