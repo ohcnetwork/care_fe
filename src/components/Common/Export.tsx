@@ -5,9 +5,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { DropdownItemProps } from "@/components/Common/Menu";
 
 import useExport from "@/hooks/useExport";
+import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
+import { Anyone, AuthorizedForCB } from "@/Utils/AuthorizeFor";
 import request from "@/Utils/request/request";
 import { Route } from "@/Utils/request/types";
+import { classNames } from "@/Utils/utils";
 
 import { Button } from "../ui/button";
 import {
@@ -28,9 +31,11 @@ interface ExportItem {
 }
 
 interface ExportMenuProps {
+  variant?: string;
   disabled?: boolean | undefined;
   label?: string;
   exportItems: ExportItem[];
+  authorizeFor?: AuthorizedForCB | undefined;
 }
 
 interface ExportButtonProps {
@@ -48,8 +53,10 @@ export const ExportMenu = ({
   label = "Export",
   disabled,
   exportItems,
+  authorizeFor = Anyone,
 }: ExportMenuProps) => {
   const { isExporting, exportFile } = useExport();
+  const isAuthorized = useIsAuthorized(authorizeFor);
 
   if (exportItems.length === 1) {
     const item = exportItems[0];
@@ -79,46 +86,59 @@ export const ExportMenu = ({
   }
 
   return (
-    <div key="export-menu" id="export-button" className="w-full">
+    <div
+      key="export-menu"
+      id="export-button"
+      className={cn("tooltip border-primary-500 enabled:border")}
+    >
       <DropdownMenu>
-        <DropdownMenuTrigger className={cn("w-full")}>
+        <DropdownMenuTrigger asChild className="w-full">
           <Button
             variant={"outline_primary"}
             size={"lg"}
-            className="w-full gap-2 cursor-pointer"
             disabled={isExporting || disabled}
           >
-            <CareIcon icon="l-export" className="text-base lg:w-fit" />
+            <CareIcon icon="l-export" />
             {isExporting ? "Exporting..." : label}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className={cn(label === "Importing..." ? "hidden" : "block")}
-        >
-          {exportItems.map((item) => (
-            <div
-              key={item.label}
-              onClick={() => {
-                let action = item.action;
-                if (item.route) {
-                  action = async () => {
-                    const { data } = await request(item.route!);
-                    return data ?? null;
-                  };
-                }
-                if (action) {
-                  exportFile(action, item.filePrefix, item.type, item.parse);
-                }
-              }}
-              {...item.options}
-            >
-              <DropdownMenuItem className={cn("cursor-pointer gap-2")}>
-                {item.options?.icon}
-                {item.label}
-              </DropdownMenuItem>
-            </div>
-          ))}
-        </DropdownMenuContent>
+        {label !== "Importing..." && (
+          <DropdownMenuContent>
+            {exportItems.map((item) => (
+              <div key={item.label} {...item.options}>
+                <DropdownMenuItem disabled={isExporting || disabled}>
+                  <div
+                    className={classNames(
+                      isAuthorized
+                        ? "pointer-events-auto cursor-pointer"
+                        : "!hidden",
+                    )}
+                    onClick={() => {
+                      let action = item.action;
+                      if (item.route) {
+                        action = async () => {
+                          const { data } = await request(item.route!);
+                          return data ?? null;
+                        };
+                      }
+                      if (action) {
+                        exportFile(
+                          action,
+                          item.filePrefix,
+                          item.type,
+                          item.parse,
+                        );
+                      }
+                    }}
+                  >
+                    <i>{item.options?.icon}</i>
+                    <span className="w-full">{item.label}</span>
+                  </div>
+                </DropdownMenuItem>
+              </div>
+            ))}
+          </DropdownMenuContent>
+        )}
       </DropdownMenu>
     </div>
   );
