@@ -368,7 +368,10 @@ describe("Patient Consultation in multiple combination", () => {
     // Create a shifting request
     cy.closeNotification();
     // cy.clickSubmitButton("Shift Patient");
-    cy.get("#shift_create_button").click();
+    cy.get("#shift_create_button", { timeout: 10000 })
+      .should("be.visible")
+      .click();
+
     shiftCreation.typeCurrentFacilityPerson("Current Facility Person");
     shiftCreation.typeCurrentFacilityPhone("9999999999");
     shiftCreation.typeShiftReason("reason for shift");
