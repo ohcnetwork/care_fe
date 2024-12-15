@@ -133,6 +133,56 @@ export default function PatientRegistration(
     enabled: !!patientId,
   });
 
+  const setAddress = async (args: {
+    state: (typeof form)["state"];
+    district?: (typeof form)["district"];
+    local_body?: (typeof form)["local_body"];
+    ward?: string;
+  }) => {
+    const { state, district, local_body, ward } = args;
+    setForm((f) => ({
+      ...f,
+      state,
+    }));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const districts = await districtsQuery.refetch();
+
+    const matchedDistrict = districts.data?.find((d) => d.id === district);
+    if (!matchedDistrict) return;
+    setForm((f) => ({
+      ...f,
+      district: matchedDistrict.id,
+    }));
+
+    if (local_body) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const localBodies = await localBodyQuery.refetch();
+
+      const matchedLocalBody = localBodies.data?.find(
+        (lb) => lb.id === local_body,
+      );
+      if (!matchedLocalBody) return;
+      setForm((f) => ({
+        ...f,
+        local_body: matchedLocalBody.id,
+      }));
+
+      if (ward) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        const wards = await wardsQuery.refetch();
+
+        const matchedWard = wards.data?.results.find(
+          (w) => w.id === Number(ward),
+        );
+        if (!matchedWard) return;
+        setForm((f) => ({
+          ...f,
+          ward: matchedWard.id.toString(),
+        }));
+      }
+    }
+  };
+
   useEffect(() => {
     if (patientQuery.data) {
       setForm(patientQuery.data);
@@ -149,6 +199,12 @@ export default function PatientRegistration(
         setSamePhoneNumber(true);
       if (patientQuery.data.address === patientQuery.data.permanent_address)
         setSameAddress(true);
+      setAddress({
+        state: patientQuery.data.state,
+        district: patientQuery.data.district,
+        local_body: patientQuery.data.local_body,
+        ward: patientQuery.data.ward,
+      });
     }
   }, [patientQuery.data]);
 
