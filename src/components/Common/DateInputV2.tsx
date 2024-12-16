@@ -270,7 +270,7 @@ const DateInputV2: React.FC<Props> = ({
       });
     }
   };
-
+  //min and max setting for year
   const setYearValue = (year: number) => () => {
     if (isYearWithinConstraints(year)) {
       const newDate = new Date(
