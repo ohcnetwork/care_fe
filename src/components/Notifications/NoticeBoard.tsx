@@ -15,7 +15,6 @@ export const NoticeBoard = () => {
   const { data, loading } = useTanStackQueryInstead(routes.getNotifications, {
     query: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
   });
-
   let notices;
 
   if (data?.results.length) {
@@ -40,6 +39,7 @@ export const NoticeBoard = () => {
             <div className="bg-gray-200 py-2 flex items-center ">
               <Avatar
                 name={item.caused_by.user_type || ""}
+                imageUrl={item.caused_by.read_profile_picture_url}
                 aria-label={`${formatName(item.caused_by)}'s avatar`}
                 className="border-0 border-b border-b-secondary-300 rounded-full h-10 w-10 ml-5"
               />
