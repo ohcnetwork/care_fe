@@ -2,8 +2,7 @@
 
 export class AssetPage {
   createAsset() {
-    cy.get("button").should("contain", "Create Asset");
-    cy.get("[data-testid=create-asset-buttom] button").click();
+    cy.get("#create-asset-button").click();
   }
 
   selectFacility(facilityName: string) {

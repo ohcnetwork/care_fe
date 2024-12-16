@@ -333,10 +333,11 @@ const AssetsList = () => {
               </Button>
             </div>
 
-            <div className="w-full lg:w-fit" data-testid="create-asset-button">
+            <div className="w-full lg:w-fit">
               <Button
                 variant="primary"
                 size="lg"
+                id="create-asset-button"
                 disabled={!NonReadOnlyUsers}
                 className="w-full p-[10px] md:w-auto"
                 onClick={() => {
