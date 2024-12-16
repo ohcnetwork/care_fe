@@ -50,6 +50,11 @@ const DateInputV2: React.FC<Props> = ({
   isOpen,
   popOverClassName,
 }) => {
+  const is24Hour =
+    Intl.DateTimeFormat(undefined, { hour: "numeric" }).resolvedOptions()
+      .hour12 === false;
+  const dateFormat = `DD/MM/YYYY${allowTime ? (is24Hour ? " HH:mm" : " hh:mm a") : ""}`;
+
   const [dayCount, setDayCount] = useState<Array<number>>([]);
   const [blankDays, setBlankDays] = useState<Array<number>>([]);
 
@@ -61,7 +66,7 @@ const DateInputV2: React.FC<Props> = ({
 
   const [popOverOpen, setPopOverOpen] = useState(false);
 
-  const hours = dayjs(value).hour() % 12;
+  const hours = is24Hour ? dayjs(value).hour() : dayjs(value).hour() % 12;
   const minutes = dayjs(value).minute();
   const ampm = dayjs(value).hour() > 11 ? "PM" : "AM";
 
@@ -149,7 +154,10 @@ const DateInputV2: React.FC<Props> = ({
     newMinutes?: typeof minutes;
     newAmpm?: typeof ampm;
   }) => {
-    const { newHours = hours, newMinutes = minutes, newAmpm = ampm } = options;
+    const { newHours = hours, newMinutes = minutes } = options;
+    const { newAmpm = is24Hour ? (newHours > 11 ? "PM" : "AM") : ampm } =
+      options;
+
     handleChange(
       new Date(
         datePickerHeaderDate.getFullYear(),
@@ -276,8 +284,6 @@ const DateInputV2: React.FC<Props> = ({
     isOpen && popoverButtonRef.current?.click();
   }, [isOpen]);
 
-  const dateFormat = `DD/MM/YYYY${allowTime ? " hh:mm a" : ""}`;
-
   const getPosition = () => {
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = document.documentElement.clientHeight;
@@ -308,7 +314,7 @@ const DateInputV2: React.FC<Props> = ({
         className={`${containerClassName ?? "container mx-auto text-black"}`}
         data-cui-dateinput
         data-cui-dateinput-value={JSON.stringify(
-          dayjs(value).format("YYYY-MM-DDTHH:mm"),
+          dayjs(value).format(dateFormat),
         )}
       >
         <Popover className="relative">
@@ -561,8 +567,8 @@ const DateInputV2: React.FC<Props> = ({
                                   name: "Hours",
                                   value: hours,
                                   options: Array.from(
-                                    { length: 12 },
-                                    (_, i) => i + 1,
+                                    { length: is24Hour ? 24 : 12 },
+                                    (_, i) => (is24Hour ? i : i + 1),
                                   ),
                                   onChange: (val: any) => {
                                     handleTimeChange({
@@ -623,36 +629,37 @@ const DateInputV2: React.FC<Props> = ({
                                   }
                                 }}
                               >
-                                {[
-                                  ...input.options,
-                                  ...(input.name === "am/pm"
-                                    ? []
-                                    : input.options),
-                                  ...(input.name === "am/pm"
-                                    ? []
-                                    : input.options),
-                                ].map((option, j) => (
-                                  <button
-                                    type="button"
-                                    key={j}
-                                    className={`flex aspect-square w-9 shrink-0 items-center justify-center rounded-md border transition-all ${(input.name === "Hours" && option === 12 ? [0, 12].includes(input.value) : input.value === option) ? "border-primary-600 bg-primary-500 font-bold text-white" : "border-gray-200 hover:bg-secondary-300"} text-sm`}
-                                    onClick={() =>
-                                      input.onChange(option as any)
-                                    }
-                                    data-selected={
-                                      (input.name === "Hours" && option === 12
-                                        ? [0, 12].includes(input.value)
-                                        : input.value === option) &&
-                                      j + 1 >= input.options.length &&
-                                      j + 1 <= input.options.length * 2
-                                    }
-                                  >
-                                    {option.toLocaleString("en-US", {
-                                      minimumIntegerDigits: 2,
-                                      useGrouping: false,
-                                    })}
-                                  </button>
-                                ))}
+                                {(!is24Hour || input.name !== "am/pm") &&
+                                  [
+                                    ...input.options,
+                                    ...(input.name === "am/pm"
+                                      ? []
+                                      : input.options),
+                                    ...(input.name === "am/pm"
+                                      ? []
+                                      : input.options),
+                                  ].map((option, j) => (
+                                    <button
+                                      type="button"
+                                      key={j}
+                                      className={`flex aspect-square w-9 shrink-0 items-center justify-center rounded-md border transition-all ${(input.name === "Hours" && option === 12 ? [0, 12].includes(input.value) : input.value === option) ? "border-primary-600 bg-primary-500 font-bold text-white" : "border-gray-200 hover:bg-secondary-300"} text-sm`}
+                                      onClick={() =>
+                                        input.onChange(option as any)
+                                      }
+                                      data-selected={
+                                        (input.name === "Hours" && option === 12
+                                          ? [0, 12].includes(input.value)
+                                          : input.value === option) &&
+                                        j + 1 >= input.options.length &&
+                                        j + 1 <= input.options.length * 2
+                                      }
+                                    >
+                                      {option.toLocaleString("en-US", {
+                                        minimumIntegerDigits: 2,
+                                        useGrouping: false,
+                                      })}
+                                    </button>
+                                  ))}
                               </div>
                             ))}
                           </div>

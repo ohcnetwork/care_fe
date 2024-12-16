@@ -24,6 +24,9 @@ export default function DateTextInput(props: {
   onFinishInitialTyping?: () => unknown;
   error?: string;
 }) {
+  const is24Hour =
+    Intl.DateTimeFormat(undefined, { hour: "numeric" }).resolvedOptions()
+      .hour12 === false;
   const { value, onChange, allowTime, error, onFinishInitialTyping } = props;
 
   const [editingText, setDirtyEditingText] = useState({
@@ -71,7 +74,7 @@ export default function DateTextInput(props: {
   };
 
   const goToInput = (i: number) => {
-    if (i < 0 || i > 4) return;
+    if (i < 0 || i > 5) return;
     (
       document.querySelectorAll(
         `[data-time-input]`,
@@ -116,7 +119,7 @@ export default function DateTextInput(props: {
       date: `${value ? formatUnfocused(value.getDate(), 0) : ""}`,
       month: `${value ? formatUnfocused(value.getMonth() + 1, 1) : ""}`,
       year: `${value ? formatUnfocused(value.getFullYear(), 2, 4) : ""}`,
-      hour: `${value ? formatUnfocused(value.getHours() % 12, 3) : ""}`,
+      hour: `${value ? formatUnfocused(is24Hour ? value.getHours() : value.getHours() % 12 || 12, 3) : ""}`,
       minute: `${value ? formatUnfocused(value.getMinutes(), 4) : ""}`,
     });
   }, [value]);
@@ -155,21 +158,14 @@ export default function DateTextInput(props: {
                 data-time-input={i}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (
-                    value.endsWith("/") ||
-                    value.endsWith(" ") ||
-                    value.endsWith(":") ||
-                    value.length > (key === "year" ? 3 : 1)
-                  ) {
-                    goToInput((i + 1) % 5);
-                  } else {
-                    setEditingText({
-                      ...editingText,
-                      [key]: value
-                        .replace(/\D/g, "")
-                        .slice(0, key === "year" ? 4 : 2),
-                    });
-                  }
+                  if (value.length > (key === "year" ? 3 : 1)) goToInput(i + 1);
+
+                  setEditingText({
+                    ...editingText,
+                    [key]: value
+                      .replace(/\D/g, "")
+                      .slice(0, key === "year" ? 4 : 2),
+                  });
                 }}
                 onBlur={(e) => handleBlur(e.target.value, key)}
               />
