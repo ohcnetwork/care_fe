@@ -52,7 +52,6 @@ export const useAddPatientNote = (options: {
         },
       });
       if (res?.status === 201 && data) return data;
-      throw new Error();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
