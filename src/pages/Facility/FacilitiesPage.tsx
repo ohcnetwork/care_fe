@@ -68,7 +68,6 @@ export function FacilitiesPage() {
           options={[
             {
               key: "facility_district_pincode",
-              label: "Facility/District/Pincode",
               type: "text" as const,
               placeholder: "facility_search_placeholder_pincode",
               value: qParams.search || "",

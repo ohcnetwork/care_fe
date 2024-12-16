@@ -138,7 +138,6 @@ export interface PatientModel {
   created_by?: UserBareMinimum;
   assigned_to?: number | null;
   assigned_to_object?: AssignedToObjectModel;
-  occupation?: Occupation;
   meta_info?: PatientMeta;
   age?: string;
 }

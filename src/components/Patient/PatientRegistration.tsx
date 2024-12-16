@@ -107,6 +107,7 @@ export default function PatientRegistration(
     "ward",
     "village",
     "meta_info",
+    "ration_card_category",
   ];
 
   const mutationData: Partial<PatientModel> = {
@@ -231,7 +232,9 @@ export default function PatientRegistration(
         const calculatedAge =
           new Date().getFullYear() - patientQuery.data.year_of_birth;
         setAge(calculatedAge);
-        setAgeDob("age");
+        if (!patientQuery.data.date_of_birth) {
+          setAgeDob("age");
+        }
       }
       if (
         patientQuery.data.phone_number ===
@@ -387,7 +390,13 @@ export default function PatientRegistration(
         )
       ) {
         errors[field] = errors[field] || [];
-        errors[field].push(`Invalid date format, expected DD-MM-YYYY`);
+        errors[field].push(t("invalid_date_format", { format: "DD-MM-YYYY" }));
+      } else if (
+        (field === "phone_number" || field === "emergency_phone_number") &&
+        form[field]?.length < 13
+      ) {
+        errors[field] = errors[field] || [];
+        errors[field].push(t("phone_number_min_error"));
       }
     });
 
@@ -462,6 +471,7 @@ export default function PatientRegistration(
             <Input
               {...fieldProps("phone_number")}
               onChange={(e) => {
+                if (e.target.value.length > 13) return;
                 setForm((f) => ({
                   ...f,
                   phone_number: e.target.value,
@@ -493,6 +503,13 @@ export default function PatientRegistration(
             <br />
             <Input
               {...fieldProps("emergency_phone_number")}
+              onChange={(e) => {
+                if (e.target.value.length > 13) return;
+                setForm((f) => ({
+                  ...f,
+                  emergency_phone_number: e.target.value,
+                }));
+              }}
               required
               disabled={samePhoneNumber}
               label={t("emergency_phone_number")}
@@ -565,6 +582,7 @@ export default function PatientRegistration(
                     placeholder="DD"
                     type="number"
                     label={t("day")}
+                    value={form.date_of_birth?.split("-")[2] || ""}
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
@@ -578,6 +596,7 @@ export default function PatientRegistration(
                     placeholder="MM"
                     type="number"
                     label={t("month")}
+                    value={form.date_of_birth?.split("-")[1] || ""}
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
@@ -591,6 +610,7 @@ export default function PatientRegistration(
                     type="number"
                     placeholder="YYYY"
                     label={t("year")}
+                    value={form.date_of_birth?.split("-")[0] || ""}
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
@@ -612,7 +632,7 @@ export default function PatientRegistration(
                 </div>
                 <Input
                   value={age}
-                  errors={errors["age"]}
+                  errors={errors["year_of_birth"]}
                   onChange={(e) => setAge(Number(e.target.value))}
                   required
                   type="number"
@@ -874,7 +894,7 @@ export default function PatientRegistration(
                 </SelectTrigger>
                 <SelectContent>
                   {OCCUPATION_TYPES.map((occupation) => (
-                    <SelectItem value={occupation.id.toString()}>
+                    <SelectItem value={occupation.value}>
                       {occupation.text}
                     </SelectItem>
                   ))}
