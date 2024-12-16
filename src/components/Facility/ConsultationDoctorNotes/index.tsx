@@ -81,14 +81,12 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
         notes: [newNote, ...prevState.notes],
       }));
       setReplyTo(undefined);
+      setNoteField("");
       Notification.Success({ msg: "Note added successfully" });
 
       queryClient.invalidateQueries({
         queryKey: ["notes"],
       });
-    },
-    onError: () => {
-      Notification.Error({ msg: "Failed to add note" });
     },
   });
 
@@ -100,7 +98,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       return;
     }
     addNoteMutation.mutate(noteField);
-    setNoteField("");
   };
 
   useTanStackQueryInstead(routes.getPatient, {
@@ -161,9 +158,10 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
                   : "border-secondary-300 text-secondary-800",
               )}
               onClick={() => {
-                setReload(true);
-                setThread(PATIENT_NOTES_THREADS[current]);
-                setState(initialData);
+                if (thread !== PATIENT_NOTES_THREADS[current]) {
+                  setThread(PATIENT_NOTES_THREADS[current]);
+                  setState(initialData);
+                }
               }}
             >
               {t(`patient_notes_thread__${current}`)}
