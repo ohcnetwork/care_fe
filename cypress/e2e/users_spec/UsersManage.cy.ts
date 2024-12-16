@@ -66,7 +66,7 @@ describe("Manage User", () => {
     manageUserPage.verifyEditUserDetails(
       "Devo",
       "Districto",
-      "8/11/1999",
+      "11/08/1999",
       "Female",
     );
   });

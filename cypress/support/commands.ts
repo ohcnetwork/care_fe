@@ -241,3 +241,21 @@ Cypress.Commands.add("verifyErrorMessages", (errorMessages: string[]) => {
     });
   });
 });
+
+Cypress.Commands.add(
+  "typeIntoField",
+  (
+    selector: string,
+    value: string,
+    options: { clearBeforeTyping?: boolean } = {},
+  ) => {
+    const { clearBeforeTyping = false } = options;
+    const inputField = cy.get(selector);
+
+    if (clearBeforeTyping) {
+      inputField.clear(); // Clear the input field
+    }
+
+    inputField.click().type(value); // Click and type the new value
+  },
+);
