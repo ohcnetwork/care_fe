@@ -51,11 +51,10 @@ const ensurePathNotMissingReplacements = (path: string) => {
 };
 
 export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    ...additionalHeaders,
-  });
+  const headers = new Headers(additionalHeaders);
+
+  headers.set("Content-Type", "application/json");
+  headers.append("Accept", "application/json");
 
   if (!noAuth) {
     const token = localStorage.getItem(LocalStorageKeys.accessToken);
