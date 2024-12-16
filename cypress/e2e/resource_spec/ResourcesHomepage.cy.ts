@@ -20,14 +20,15 @@ describe("Resource Page", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
-    cy.awaitUrl("/resource");
   });
 
   it("Checks if all download button works", () => {
+    resourcePage.navigationToResourcePage();
     resourcePage.verifyDownloadButtonWorks();
   });
 
   it("Switch between active/completed", () => {
+    resourcePage.navigationToResourcePage();
     resourcePage.spyResourceApi();
     resourcePage.clickCompletedResources();
     resourcePage.verifyCompletedResources();
@@ -37,6 +38,7 @@ describe("Resource Page", () => {
   });
 
   it("Switch between list view and board view", () => {
+    resourcePage.navigationToResourcePage();
     resourcePage.clickListViewButton();
     resourcePage.clickBoardViewButton();
   });
@@ -68,7 +70,7 @@ describe("Resource Page", () => {
   });
 
   it("Update the status of resource", () => {
-    cy.visit(createdResource);
+    cy.awaitUrl(createdResource);
     resourcePage.clickUpdateStatus();
     resourcePage.updateStatus("APPROVED");
     resourcePage.clickSubmitButton();
@@ -78,7 +80,7 @@ describe("Resource Page", () => {
   });
 
   it("Post comment for a resource", () => {
-    cy.visit(createdResource);
+    cy.awaitUrl(createdResource);
     resourcePage.addCommentForResource("Test comment");
     resourcePage.clickPostCommentButton();
     resourcePage.verifySuccessNotification("Comment added successfully");
