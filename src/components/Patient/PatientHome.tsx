@@ -370,7 +370,7 @@ export const PatientHome = (props: {
                         {isPostPartum(patientData.date_of_delivery) && (
                           <Badge
                             variant="custom"
-                            className="border-pink-300 bg-pink-100 text-pink-600"
+                            className="border-pink-300 bg-pink-100  text-pink-600"
                           >
                             <CareIcon icon="l-baby-carriage" className="mr-1" />
                             {t("post_partum")}
