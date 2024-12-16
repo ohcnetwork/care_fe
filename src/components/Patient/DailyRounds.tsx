@@ -439,7 +439,7 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${obj.id}/critical_care/update`,
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/log_updates/${obj.id}/update`,
             );
           }
         }
