@@ -3,8 +3,6 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
-
 const badgeVariants = cva(
   "inline-flex items-center rounded-md border border-gray-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 dark:border-gray-800 dark:focus:ring-gray-300",
   {
@@ -23,7 +21,6 @@ const badgeVariants = cva(
         warning:
           "border-transparent bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500 dark:bg-yellow-400 dark:text-gray-900 dark:hover:bg-yellow-500",
         outline: "text-gray-950 dark:text-gray-50",
-
         custom: "",
       },
     },
@@ -35,29 +32,16 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {
-  startIcon?: IconName;
-  endIcon?: IconName;
-}
+    VariantProps<typeof badgeVariants> {}
 
-function Badge({
-  className,
-  variant,
-  startIcon,
-  endIcon,
-  ...props
-}: BadgeProps) {
+function Badge({ className, variant, ...props }: BadgeProps) {
   return (
     <div
       role="status"
       aria-label={props.children?.toString()}
       className={cn(badgeVariants({ variant }), className)}
       {...props}
-    >
-      {startIcon && <CareIcon icon={startIcon} className="mr-1" />}
-      <span>{props.children}</span>
-      {endIcon && <CareIcon icon={endIcon} className="ml-1" />}
-    </div>
+    />
   );
 }
 

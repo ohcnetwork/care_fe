@@ -344,8 +344,8 @@ export const PatientHome = (props: {
                       <Badge
                         variant="custom"
                         className="bg-blue-100 text-blue-800"
-                        startIcon="l-syringe"
                       >
+                        <CareIcon icon="l-syringe" className="mr-1" />
                         {t("vaccinated")}
                       </Badge>
                     )}
@@ -359,8 +359,11 @@ export const PatientHome = (props: {
                             <Badge
                               variant="custom"
                               className="border-pink-300 bg-pink-100 text-pink-600"
-                              startIcon="l-baby-carriage"
                             >
+                              <CareIcon
+                                icon="l-baby-carriage"
+                                className="mr-1"
+                              />
                               {t("antenatal")}
                             </Badge>
                           )}
@@ -368,15 +371,16 @@ export const PatientHome = (props: {
                           <Badge
                             variant="custom"
                             className="border-pink-300 bg-pink-100 text-pink-600"
-                            startIcon="l-baby-carriage"
                           >
+                            <CareIcon icon="l-baby-carriage" className="mr-1" />
                             {t("post_partum")}
                           </Badge>
                         )}
                       </>
                     )}
                     {patientData.last_consultation?.is_telemedicine && (
-                      <Badge variant="alert" startIcon="l-phone">
+                      <Badge variant="alert">
+                        <CareIcon icon="l-phone" className="mr-1" />
                         {t("TELEMEDICINE")}
                       </Badge>
                     )}
@@ -531,11 +535,13 @@ export const PatientHome = (props: {
             </section>
             <hr className="mb-2" />
             {patientData.allow_transfer ? (
-              <Badge variant="primary" startIcon="l-unlock">
+              <Badge variant="primary">
+                <CareIcon icon="l-unlock" className="mr-1" />
                 {t("transfer_allowed")}
               </Badge>
             ) : (
-              <Badge variant="warning" startIcon="l-lock">
+              <Badge variant="warning">
+                <CareIcon icon="l-lock" className="mr-1" />
                 {t("transfer_blocked")}
               </Badge>
             )}
