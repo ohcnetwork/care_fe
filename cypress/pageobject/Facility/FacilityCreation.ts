@@ -68,7 +68,7 @@ class FacilityPage {
   }
 
   verifyFacilityRes() {
-    cy.wait("@postFacility").its("response.statusCode").should("eq", 401);
+    cy.wait("@postFacility").its("response.statusCode").should("eq", 201);
   }
 
   verifyErrorFacility() {
