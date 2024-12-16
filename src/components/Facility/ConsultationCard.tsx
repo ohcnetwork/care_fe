@@ -80,11 +80,11 @@ export const ConsultationCard = (props: ConsultationProps) => {
               size="medium"
               variant="custom"
               className={
-                !isLastConsultation
+                !itemData.discharge_date
                   ? "bg-blue-100 text-blue-800"
                   : "bg-red-100 text-red-800"
               }
-              text={!isLastConsultation ? "LIVE" : "DISCHARGED"}
+              text={!itemData.discharge_date ? "LIVE" : "DISCHARGED"}
             />
           </div>
         </div>

@@ -74,7 +74,8 @@ const EncounterHistory = (props: PatientProps) => {
               <ConsultationCard
                 itemData={item}
                 isLastConsultation={
-                  item.id !== patientData.last_consultation?.id
+                  !!patientData.last_consultation &&
+                  item.id === patientData.last_consultation.id
                 }
                 refetch={refetch}
               />
