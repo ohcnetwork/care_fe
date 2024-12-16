@@ -22,20 +22,21 @@ async function queryRequest<TData, TBody>(
 ): Promise<TData> {
   const url = `${careConfig.apiUrl}${makeUrl(path, options?.queryParams, options?.pathParams)}`;
 
-  // Convert Headers object to a plain object
-  const defaultHeaders = Object.fromEntries(
-    makeHeaders(noAuth ?? false).entries(),
-  );
+  // Create a Headers object from the default headers
+  const defaultHeaders = makeHeaders(noAuth ?? false);
 
-  // Merge default headers with custom headers, with custom headers taking precedence
-  const headers = {
-    ...defaultHeaders,
-    ...(options?.headers || {}),
-  };
+  // If custom headers are provided, merge them with the default headers
+  if (options?.headers) {
+    const customHeaders = new Headers(options.headers);
+    customHeaders.forEach((value, key) => {
+      // Use set() to replace existing values, ensuring proper header handling
+      defaultHeaders.set(key, value);
+    });
+  }
 
   const fetchOptions: RequestInit = {
     method,
-    headers,
+    headers: defaultHeaders, // Headers API object directly used
     signal: options?.signal,
   };
 
