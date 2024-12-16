@@ -331,7 +331,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
               <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
                 <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
-                  <div className="flex">
+                  <div className="flex items-center">
                     <span className="text-secondary-900">Created: </span>&nbsp;
                     <RelativeDateUserMention
                       actionDate={consultationData.created_date}
@@ -342,7 +342,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
                 <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
-                  <div className="flex">
+                  <div className="flex items-center">
                     <span className="text-secondary-900">Last Modified: </span>
                     &nbsp;
                     <RelativeDateUserMention
