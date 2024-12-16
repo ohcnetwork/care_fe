@@ -320,8 +320,8 @@ const AssetsList = () => {
       hideBack
       options={
         <div className="flex flex-wrap items-center gap-3">
-          <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
-            <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
+          <div className="mb-2 flex w-full flex-col items-center gap-3 lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
+            <div className="w-full lg:w-fit">
               <Button
                 variant="primary"
                 size="lg"
@@ -333,10 +333,7 @@ const AssetsList = () => {
               </Button>
             </div>
 
-            <div
-              className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5"
-              data-testid="create-asset-button"
-            >
+            <div className="w-full lg:w-fit" data-testid="create-asset-button">
               <Button
                 variant="primary"
                 size="lg"
