@@ -111,15 +111,13 @@ export default function Breadcrumbs({
               </li>
             )}
             <BreadcrumbItem>
-              <li>
-                <Button
-                  asChild
-                  variant="link"
-                  className="p-1 font-normal text-gray-800 underline underline-offset-2 hover:text-gray-700"
-                >
-                  <Link href="/">Home</Link>
-                </Button>
-              </li>
+              <Button
+                asChild
+                variant="link"
+                className="p-1 font-normal text-gray-800 hover:text-gray-700"
+              >
+                <Link href="/">Home</Link>
+              </Button>
             </BreadcrumbItem>
             {crumbs && crumbs.length > 1 && (
               <>
