@@ -11,13 +11,11 @@ import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import AssetFilter from "@/components/Assets/AssetFilter";
 import AssetImportModal from "@/components/Assets/AssetImportModal";
 import { AssetData, assetClassProps } from "@/components/Assets/AssetTypes";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
 import { FacilityModel } from "@/components/Facility/models";
-import SearchInput from "@/components/Form/SearchInput";
 
 import useFilters from "@/hooks/useFilters";
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
@@ -29,6 +27,9 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
+import SearchByMultipleFields from "../Common/SearchByMultipleFields";
+import { Button } from "../ui/button";
+
 const AssetsList = () => {
   const { t } = useTranslation();
   const {
@@ -38,6 +39,7 @@ const AssetsList = () => {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
+    clearSearch,
   } = useFilters({
     limit: 18,
     cacheBlacklist: ["search"],
@@ -317,9 +319,56 @@ const AssetsList = () => {
       breadcrumbs={false}
       hideBack
       options={
-        <>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
+            <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full p-[10px] md:w-auto"
+                onClick={() => setIsScannerActive(true)}
+              >
+                <CareIcon icon="l-search" className="text-base mr-2" />
+                Scan Asset QR
+              </Button>
+            </div>
+
+            <div
+              className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5"
+              data-testid="create-asset-button"
+            >
+              <Button
+                variant="primary"
+                size="lg"
+                disabled={!NonReadOnlyUsers}
+                className="w-full p-[10px] md:w-auto"
+                onClick={() => {
+                  if (qParams.facility) {
+                    navigate(`/facility/${qParams.facility}/assets/new`);
+                  } else {
+                    setShowFacilityDialog(true);
+                  }
+                }}
+              >
+                <CareIcon icon="l-plus-circle" className="text-lg mr-2" />
+                <span>{t("create_asset")}</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Advanced Filter Button */}
+          <div className="w-full md:w-auto">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+          </div>
+
+          {/* Import/Export Menu */}
           {authorizedForImportExport && (
-            <div className="tooltip" data-testid="import-asset-button">
+            <div
+              className="tooltip w-full md:w-auto"
+              data-testid="import-asset-button"
+            >
               <ExportMenu
                 label={importAssetModalOpen ? "Importing..." : "Import/Export"}
                 exportItems={[
@@ -371,62 +420,35 @@ const AssetsList = () => {
               />
             </div>
           )}
-        </>
+        </div>
       }
     >
-      <div className="mt-5 gap-3 space-y-2 lg:flex">
+      <div className="mt-4 gap-4 lg:gap-16 flex flex-col lg:flex-row lg:items-center">
         <CountBlock
           text="Total Assets"
           count={totalCount}
           loading={loading}
           icon="d-folder"
-          className="flex-1"
+          className=""
         />
-        <div className="flex-1">
-          <SearchInput
-            id="asset-search"
-            name="search"
-            value={qParams.search}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search by name/serial no./QR code ID"
-          />
-        </div>
-        <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
-          <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
-            <div className="w-full">
-              <AdvancedFilterButton
-                onClick={() => advancedFilter.setShow(true)}
-              />
-            </div>
-            <ButtonV2
-              className="w-full py-[11px]"
-              onClick={() => setIsScannerActive(true)}
-            >
-              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
-              QR
-            </ButtonV2>
-          </div>
-          <div
-            className="flex w-full flex-col md:flex-row"
-            data-testid="create-asset-buttom"
-          >
-            <ButtonV2
-              authorizeFor={NonReadOnlyUsers}
-              className="inline-flex w-full items-center justify-center"
-              onClick={() => {
-                if (qParams.facility) {
-                  navigate(`/facility/${qParams.facility}/assets/new`);
-                } else {
-                  setShowFacilityDialog(true);
-                }
-              }}
-            >
-              <CareIcon icon="l-plus-circle" className="text-lg" />
-              <span>{t("create_asset")}</span>
-            </ButtonV2>
-          </div>
-        </div>
+        <SearchByMultipleFields
+          id="asset-search"
+          options={[
+            {
+              key: "Name/ Serial no./ QR code ID",
+              label: "name/serial no./QR code ID",
+              type: "text" as const,
+              placeholder: "Search by name/serial no./QR code ID",
+              value: qParams.search || "",
+              shortcutKey: "f",
+            },
+          ]}
+          className="w-full"
+          onSearch={(key, value) => updateQuery({ search: value })}
+          clearSearch={clearSearch}
+        />
       </div>
+
       <AssetFilter {...advancedFilter} key={window.location.search} />
       {isLoading ? (
         <Loading />
