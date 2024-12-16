@@ -115,7 +115,7 @@ export const ImmunisationRecords = (props: PatientProps) => {
           </Button>
         </div>
       </div>
-
+      {/*Table for immunisation details*/}
       <div className="overflow-x-auto shadow-sm rounded-lg mt-4">
         <table className="min-w-full table-auto border-separate border-spacing-0 bg-white">
           <thead className="bg-gray-200">
@@ -180,7 +180,7 @@ export const ImmunisationRecords = (props: PatientProps) => {
                   className="border-b border-gray-200 px-4 py-3 text-center text-secondary-800 text-sm font-semibold"
                   colSpan={6}
                 >
-                  No Immunisation Record Available
+                  No Immunisation Records Available
                 </td>
               </tr>
             )}
