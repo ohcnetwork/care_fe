@@ -28,8 +28,6 @@ const buttonVariants = cva(
         link: "text-gray-900 underline-offset-4 hover:underline dark:text-gray-50",
         outline_primary:
           "border border-primary-700 text-primary-700 bg-white shadow-sm hover:bg-primary-700 hover:text-white dark:border-primary-700 dark:bg-primary-700 dark:text-white",
-        success:
-          "bg-green-500 text-white shadow hover:bg-green-600 dark:bg-green-700 dark:text-white dark:hover:bg-green-800",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -48,33 +46,13 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants>,
-    AuthorizedElementProps {
+    VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    { className, variant, size, asChild = false, authorizeFor, ...props },
-    ref,
-  ) => {
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-
-    if (authorizeFor) {
-      return (
-        <AuthorizedChild authorizeFor={authorizeFor}>
-          {({ isAuthorized }) => (
-            <Comp
-              className={cn(buttonVariants({ variant, size, className }))}
-              ref={ref}
-              disabled={!isAuthorized || props.disabled}
-              {...props}
-            />
-          )}
-        </AuthorizedChild>
-      );
-    }
-
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
@@ -86,4 +64,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+const AuthorizedButton: React.FC<AuthorizedElementProps & ButtonProps> = ({
+  authorizeFor = () => true,
+  ...props
+}) => {
+  return (
+    <AuthorizedChild authorizeFor={authorizeFor}>
+      {({ isAuthorized }) => (
+        <Button {...props} disabled={props.disabled || !isAuthorized}>
+          {props.children}
+        </Button>
+      )}
+    </AuthorizedChild>
+  );
+};
+
+export { Button, buttonVariants, AuthorizedButton };

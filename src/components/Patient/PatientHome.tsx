@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { AuthorizedButton, Button } from "@/components/ui/button";
 
 import { Avatar } from "@/components/Common/Avatar";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
@@ -226,7 +226,7 @@ export const PatientHome = (props: {
                               id="create-consultation"
                               className="w-full"
                               size="default"
-                              variant={"success"}
+                              variant={"primary"}
                               onClick={() =>
                                 navigate(
                                   `/facility/${patientData?.facility}/patient/${id}/consultation`,
@@ -478,7 +478,7 @@ export const PatientHome = (props: {
 
                     {NonReadOnlyUsers && (
                       <div>
-                        <Button
+                        <AuthorizedButton
                           id="assign-volunteer"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
                           disabled={false}
@@ -493,12 +493,12 @@ export const PatientHome = (props: {
                               ? t("update_volunteer")
                               : t("assign_to_volunteer")}
                           </span>
-                        </Button>
+                        </AuthorizedButton>
                       </div>
                     )}
 
                     <div>
-                      <Button
+                      <AuthorizedButton
                         id="patient-allow-transfer"
                         className="w-full text-green-800 font-semibold hover:text-green-900"
                         size="lg"
@@ -523,7 +523,7 @@ export const PatientHome = (props: {
                             ? t("disable_transfer")
                             : t("allow_transfer")}
                         </span>
-                      </Button>
+                      </AuthorizedButton>
                     </div>
                   </div>
                 </div>
