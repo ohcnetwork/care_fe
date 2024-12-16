@@ -8,7 +8,7 @@ import Page from "@/components/Common/Page";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatName, relativeTime } from "@/Utils/utils";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
@@ -16,7 +16,6 @@ export const NoticeBoard = () => {
     query: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
   });
   let notices;
-
   if (data?.results.length) {
     notices = (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 mt-4">
@@ -26,32 +25,35 @@ export const NoticeBoard = () => {
             className="overflow-hidden rounded shadow-md my-1"
           >
             <div
-              className="text-justify text-lg flex mx-2 py-3 px-5"
+              className="text-justify  text-lg flex mx-2 py-3 px-5"
               id="notification-message"
             >
               <CareIcon
                 icon="l-facebook-messenger"
-                className="text-xl mr-6 mt-1"
+                className="text-lg mr-6 mt-1"
               />
-              <span className="font-mono text-md">{item.message} </span>
+              <span className="font-mono text-md leading-relaxed">
+                {item.message}{" "}
+              </span>
             </div>
 
             <div className="bg-gray-200 py-2 flex items-center ">
               <Avatar
-                name={item.caused_by.user_type || ""}
+                name={item.caused_by.username || ""}
                 imageUrl={item.caused_by.read_profile_picture_url}
-                aria-label={`${formatName(item.caused_by)}'s avatar`}
+                aria-label={`${formatName(item.caused_by.username)}'s avatar`}
                 className="border-0 border-b border-b-secondary-300 rounded-full h-10 w-10 ml-5"
               />
               <div className="text-md my-1 text-secondary-700  px-3">
                 <div className="flex items-center">
-                  {formatName(item.caused_by)} -{" "}
-                  <span className="font-bold text-primary-700 ml-1">
-                    {item.caused_by.user_type}
+                  {item.caused_by.first_name + " " + item.caused_by.last_name} -
+                  {""}
+                  <span className="font-bold text-primary-700 ml-2">
+                    {item.caused_by.username}
                   </span>
                 </div>
                 <div className="text-xs text-secondary-900 font-medium ">
-                  {t("on")}: {formatDateTime(item.created_date)}
+                  {relativeTime(item.created_date)}
                 </div>
               </div>
             </div>
