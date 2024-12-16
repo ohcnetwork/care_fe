@@ -12,6 +12,8 @@ const badgeVariants = cva(
       variant: {
         default:
           "border-transparent bg-gray-900 text-gray-50 shadow hover:bg-gray-900/80 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/80",
+        primary:
+          "border-transparent bg-primary-500 text-white shadow hover:bg-primary-500/80 dark:bg-primary-900 dark:text-white dark:hover:bg-primary-900/80",
         secondary:
           "border-transparent bg-gray-100 text-gray-900 hover:bg-gray-100/80 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80",
         destructive:
@@ -21,8 +23,7 @@ const badgeVariants = cva(
         warning:
           "border-transparent bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500 dark:bg-yellow-400 dark:text-gray-900 dark:hover:bg-yellow-500",
         outline: "text-gray-950 dark:text-gray-50",
-        success:
-          "border-transparent bg-green-500 text-white shadow hover:bg-green-500/80 dark:bg-green-900 dark:text-white dark:hover:bg-green-900/80",
+
         custom: "",
       },
     },

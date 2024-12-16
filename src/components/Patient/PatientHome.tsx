@@ -531,7 +531,7 @@ export const PatientHome = (props: {
             </section>
             <hr className="mb-2" />
             {patientData.allow_transfer ? (
-              <Badge variant="success" startIcon="l-unlock">
+              <Badge variant="primary" startIcon="l-unlock">
                 {t("transfer_allowed")}
               </Badge>
             ) : (
