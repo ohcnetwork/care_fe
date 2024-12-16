@@ -157,30 +157,17 @@ export const FacilityList = () => {
       options={
         <div className="flex items-center gap-2 ">
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-          <ExportMenu
-            exportItems={[
-              {
-                label: "Facilities",
-                route: routes.downloadFacility,
-                filePrefix: "facilities",
-              },
-              {
-                label: "Capacities",
-                route: routes.downloadFacilityCapacity,
-                filePrefix: "capacities",
-              },
-              {
-                label: "Doctors",
-                route: routes.downloadFacilityDoctors,
-                filePrefix: "doctors",
-              },
-              {
-                label: "Triages",
-                route: routes.downloadFacilityTriage,
-                filePrefix: "triages",
-              },
-            ]}
-          />
+          <div id="export-button">
+            <ExportMenu
+              exportItems={[
+                {
+                  label: "Facilities",
+                  route: routes.downloadFacility,
+                  filePrefix: "facilities",
+                },
+              ]}
+            />
+          </div>
         </div>
       }
     >

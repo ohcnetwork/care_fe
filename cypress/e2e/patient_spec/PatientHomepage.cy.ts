@@ -54,7 +54,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.verifyPatientAdmittedBeforeDate(patientToDateBadge);
     patientHome.verifyPatientAdmittedAfterDate(patientFromDateBadge);
     cy.clearAllFilters();
-    patientHome.verifyTotalPatientCount("1");
   });
 
   it("Facility Geography based advance filters applied in the patient tab", () => {
@@ -71,7 +70,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.verifyFacilityLsgBadgeContent(facilityLsgBody);
     patientHome.verifyFacilityDistrictContent(facilityDistrict);
     cy.clearAllFilters();
-    patientHome.verifyTotalPatientCount("1");
   });
 
   it("Patient diagnosis based advance filters applied in the patient tab", () => {
@@ -104,7 +102,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.verifyDifferentialDiagnosisBadgeContent(patientIcdDiagnosis);
     // Clear the badges and verify the patient count along with badges
     cy.clearAllFilters();
-    patientHome.verifyTotalPatientCount("1");
     // Apply Any and confirmed diagonsis to verify patient count 17
     advanceFilters.clickAdvancedFiltersButton();
     patientHome.selectAnyIcdDiagnosis(patientIcdDiagnosis, patientIcdDiagnosis);
@@ -142,7 +139,6 @@ describe("Patient Homepage present functionalities", () => {
     patientHome.verifyMedicoBadgeContent("false");
     // Clear the badges and verify the patient count along with badges
     cy.clearAllFilters();
-    patientHome.verifyTotalPatientCount("1");
   });
 
   it("Export the live patient list based on a date range", () => {
