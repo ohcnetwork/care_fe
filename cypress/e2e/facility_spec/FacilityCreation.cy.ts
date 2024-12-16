@@ -126,7 +126,7 @@ describe("Facility Creation with multiple user roles", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.clickSaveFacilityButton();
     cy.verifyErrorMessages(facilityErrorMessage);
-    // Verify the user access based error message
+    // Verify the User access based error message
     facilityPage.fillBasicDetails(testFacilityData.basic);
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
