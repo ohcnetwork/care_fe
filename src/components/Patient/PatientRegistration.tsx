@@ -74,7 +74,6 @@ export default function PatientRegistration(
     phone_number: "+91",
     emergency_phone_number: "+91",
   });
-  const [age, setAge] = useState<number>();
   const [feErrors, setFeErrors] = useState<
     Partial<Record<keyof PatientModel, string[]>>
   >({});
@@ -118,8 +117,7 @@ export default function PatientRegistration(
     ),
     date_of_birth:
       ageDob === "dob" ? dateQueryString(form.date_of_birth) : undefined,
-    year_of_birth:
-      ageDob === "age" ? new Date().getFullYear() - (age || 0) : undefined,
+    year_of_birth: ageDob === "age" ? form.year_of_birth : undefined,
     is_active: true,
     is_antenatal: false,
     passport_no: form.nationality === "Indian" ? form.passport_no : undefined,
@@ -228,13 +226,8 @@ export default function PatientRegistration(
   useEffect(() => {
     if (patientQuery.data) {
       setForm(patientQuery.data);
-      if (patientQuery.data.year_of_birth) {
-        const calculatedAge =
-          new Date().getFullYear() - patientQuery.data.year_of_birth;
-        setAge(calculatedAge);
-        if (!patientQuery.data.date_of_birth) {
-          setAgeDob("age");
-        }
+      if (patientQuery.data.year_of_birth && !patientQuery.data.date_of_birth) {
+        setAgeDob("age");
       }
       if (
         patientQuery.data.phone_number ===
@@ -447,7 +440,9 @@ export default function PatientRegistration(
       <div className="relative mt-4 flex flex-col md:flex-row gap-4">
         <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
         <form className="md:w-[500px]" onSubmit={handleFormSubmit}>
-          {/* <PLUGIN_Component
+          {/* 
+          // This will need to be updated
+          <PLUGIN_Component
                 __name="ExtendPatientRegisterForm"
                 facilityId={facilityId}
                 patientId={patientId}
@@ -516,7 +511,7 @@ export default function PatientRegistration(
             />
             {/* <br />
             <Input
-              // TODO: add this to the backend?
+              // This field does not exist in the backend, but is present in the design
               required
               label={t("emergency_contact_person_name_details")}
               placeholder={t("emergency_contact_person_name")}
@@ -630,14 +625,32 @@ export default function PatientRegistration(
                   <br />
                   <b>{t("age_input_warning_bold")}</b>
                 </div>
-                <Input
-                  value={age}
-                  errors={errors["year_of_birth"]}
-                  onChange={(e) => setAge(Number(e.target.value))}
-                  required
-                  type="number"
-                  label={t("age")}
-                />
+                <div className="relative">
+                  <Input
+                    value={
+                      form.year_of_birth
+                        ? new Date().getFullYear() - (form.year_of_birth || 0)
+                        : undefined
+                    }
+                    errors={errors["year_of_birth"]}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        year_of_birth: e.target.value
+                          ? new Date().getFullYear() - Number(e.target.value)
+                          : undefined,
+                      }))
+                    }
+                    required
+                    type="number"
+                    label={t("age")}
+                  />
+                  {form.year_of_birth && (
+                    <div className="text-xs absolute right-6 top-[22px] bottom-0 flex items-center justify-center p-2 pointer-events-none">
+                      {t("year_of_birth")} : {form.year_of_birth}
+                    </div>
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
             <br />
@@ -684,7 +697,7 @@ export default function PatientRegistration(
             />
             {/* <br />
             <Input
-              // TODO: add this to the backend?
+              // This field does not exist in the backend, but is present in the design
               label={t("landmark")}
             /> */}
             <br />
