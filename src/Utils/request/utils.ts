@@ -50,22 +50,28 @@ const ensurePathNotMissingReplacements = (path: string) => {
   }
 };
 
-export function getJWTAccessToken() {
-  return localStorage.getItem(LocalStorageKeys.accessToken);
-}
-
 export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
   const headers = new Headers(additionalHeaders);
 
   headers.set("Content-Type", "application/json");
   headers.append("Accept", "application/json");
 
-  const jwtAccessToken = getJWTAccessToken();
-  if (jwtAccessToken && !noAuth) {
-    headers.append("Authorization", `Bearer ${jwtAccessToken}`);
+  const authorizationHeader = getAuthorizationHeader();
+  if (authorizationHeader && !noAuth) {
+    headers.append("Authorization", authorizationHeader);
   }
 
   return headers;
+}
+
+export function getAuthorizationHeader() {
+  const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
+
+  if (accessToken) {
+    return `Bearer ${accessToken}`;
+  }
+
+  return null;
 }
 
 export function mergeRequestOptions<TData>(

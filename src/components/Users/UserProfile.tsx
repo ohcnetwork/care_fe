@@ -35,7 +35,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { getJWTAccessToken } from "@/Utils/request/utils";
+import { getAuthorizationHeader } from "@/Utils/request/utils";
 import {
   dateQueryString,
   formatDate,
@@ -508,7 +508,7 @@ export default function UserProfile() {
       url,
       formData,
       "POST",
-      { Authorization: `Bearer ${getJWTAccessToken()}` },
+      { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
