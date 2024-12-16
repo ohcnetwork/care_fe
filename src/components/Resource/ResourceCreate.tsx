@@ -420,9 +420,9 @@ export default function ResourceCreate(props: resourceProps) {
                       "reason",
                       RequiredFieldValidator(t("reason_error")),
                     )}
-                    label={t("request_description")}
+                    label={t("request_reason")}
                     rows={5}
-                    placeholder={t("request_description_placeholder")}
+                    placeholder={t("request_reason_placeholder")}
                     required
                   />
                 </div>
@@ -482,7 +482,6 @@ export default function ResourceCreate(props: resourceProps) {
                     errors={state.errors.assigned_facility_object}
                   />
                 </div>
-
                 <TextFormField
                   {...field(
                     "requested_quantity",
@@ -502,7 +501,6 @@ export default function ResourceCreate(props: resourceProps) {
                   label="Approved Quantity"
                   disabled={field("status").value !== "PENDING"}
                 />
-
                 <TextFormField
                   {...field("title", RequiredFieldValidator(t("title_error")))}
                   label={t("request_title")}
@@ -522,9 +520,9 @@ export default function ResourceCreate(props: resourceProps) {
                       "reason",
                       RequiredFieldValidator(t("reason_error")),
                     )}
-                    label={t("request_description")}
+                    label={t("request_reason")}
                     rows={5}
-                    placeholder={t("request_description_placeholder")}
+                    placeholder={t("request_reason_placeholder")}
                     required
                   />
                 </div>
