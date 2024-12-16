@@ -5,7 +5,6 @@ import { FacilityCreate } from "@/components/Facility/FacilityCreate";
 import { FacilityHome } from "@/components/Facility/FacilityHome";
 import { FacilityList } from "@/components/Facility/FacilityList";
 import FacilityUsers from "@/components/Facility/FacilityUsers";
-import { TriageForm } from "@/components/Facility/TriageForm";
 import ResourceCreate from "@/components/Resource/ResourceCreate";
 
 import { AppRoutes } from "@/Routers/AppRouter";
@@ -35,12 +34,6 @@ const FacilityRoutes: AppRoutes = {
   ),
   "/facility/:facilityId/resource/new": ({ facilityId }) => (
     <ResourceCreate facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/triage": ({ facilityId }) => (
-    <TriageForm facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/triage/:id": ({ facilityId, id }) => (
-    <TriageForm facilityId={facilityId} id={id} />
   ),
   ...FacilityLocationRoutes,
   ...FacilityInventoryRoutes,
