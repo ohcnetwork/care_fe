@@ -1,8 +1,7 @@
 import careConfig from "@careConfig";
 
-import { QueryError } from "@/Utils/request/queryError";
 import { getResponseBody } from "@/Utils/request/request";
-import { QueryOptions, Route } from "@/Utils/request/types";
+import { HTTPError, QueryOptions, Route } from "@/Utils/request/types";
 import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 
 async function queryRequest<TData, TBody>(
@@ -13,7 +12,7 @@ async function queryRequest<TData, TBody>(
 
   const fetchOptions: RequestInit = {
     method,
-    headers: makeHeaders(noAuth ?? false),
+    headers: makeHeaders(noAuth ?? false, options?.headers),
     signal: options?.signal,
   };
 
@@ -32,7 +31,7 @@ async function queryRequest<TData, TBody>(
   const data = await getResponseBody<TData>(res);
 
   if (!res.ok) {
-    throw new QueryError({
+    throw new HTTPError({
       message: "Request Failed",
       status: res.status,
       silent: options?.silent ?? false,
