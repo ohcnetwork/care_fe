@@ -441,9 +441,9 @@ export const PatientHome = (props: {
                   <div className="space-y-2 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
                       <Button
-                        className="w-full text-green-800 font-semibold hover:text-green-900"
+                        className="w-full font-semibold"
                         size="lg"
-                        variant="outline"
+                        variant="outline_primary"
                         onClick={() =>
                           navigate(`/patient/${id}/investigation_reports`)
                         }
@@ -459,10 +459,10 @@ export const PatientHome = (props: {
                     </div>
                     <div>
                       <Button
-                        className="w-full text-green-800 font-semibold hover:text-green-900"
+                        className="w-full font-semibold"
+                        variant="outline_primary"
                         id="upload-patient-files"
                         size="lg"
-                        variant="outline"
                         onClick={() =>
                           navigate(
                             `/facility/${patientData?.facility}/patient/${id}/files`,
@@ -480,11 +480,11 @@ export const PatientHome = (props: {
                       <div>
                         <AuthorizedButton
                           id="assign-volunteer"
+                          variant="outline_primary"
+                          className="w-full font-semibold"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
                           disabled={false}
-                          variant="outline"
                           authorizeFor={NonReadOnlyUsers}
-                          className="w-full text-green-800 font-semibold hover:text-green-900"
                           size="lg"
                         >
                           <span className="flex w-full items-center justify-start gap-2">
@@ -500,9 +500,9 @@ export const PatientHome = (props: {
                     <div>
                       <AuthorizedButton
                         id="patient-allow-transfer"
-                        className="w-full text-green-800 font-semibold hover:text-green-900"
+                        className="w-full font-semibold"
                         size="lg"
-                        variant="outline"
+                        variant="outline_primary"
                         disabled={
                           !patientData.last_consultation?.id ||
                           !patientData.is_active
@@ -654,7 +654,8 @@ export const PatientHome = (props: {
                   <div>
                     <Button
                       id="death-report"
-                      className="my-2 w-full"
+                      className="my-2 w-full font-semibold"
+                      variant="outline_primary"
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
