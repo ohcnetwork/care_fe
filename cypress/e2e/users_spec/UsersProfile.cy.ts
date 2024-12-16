@@ -40,7 +40,12 @@ describe("Manage User Profile", () => {
     manageUserPage.clearUserBasicInfo();
     manageUserPage.editUserBasicInfo("Devo", "Doctoro", date_of_birth, gender);
     userProfilePage.clickSubmit();
-    manageUserPage.verifyEditUserDetails("Devo", "Doctoro", "1/1/1999", "Male");
+    manageUserPage.verifyEditUserDetails(
+      "Devo",
+      "Doctoro",
+      "01/01/1999",
+      "Male",
+    );
   });
 
   it("Set Email and Phone for a user and verify its reflection in user profile", () => {
