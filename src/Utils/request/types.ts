@@ -35,9 +35,9 @@ export interface RequestOptions<TData = unknown, TBody = unknown> {
   silent?: boolean;
 }
 
-export interface QueryOptions<TBody = unknown> {
-  pathParams?: Record<string, string>;
-  queryParams?: Record<string, string>;
+export interface APICallOptions<TBody = unknown> {
+  pathParams?: Record<string, string | number>;
+  queryParams?: QueryParams;
   body?: TBody;
   silent?: boolean;
   signal?: AbortSignal;
