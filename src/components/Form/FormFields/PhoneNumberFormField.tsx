@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import {
@@ -20,7 +22,6 @@ import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
 import {
   CountryData,
-  classNames,
   formatPhoneNumber as formatPhoneNumberUtil,
   getCountryCode,
   humanizeStrings,
@@ -138,7 +139,7 @@ const PhoneNumberFormField = React.forwardRef<HTMLInputElement, Props>(
                     id={field.id}
                     name={field.name}
                     autoComplete={props.autoComplete ?? "tel"}
-                    className={classNames(
+                    className={cn(
                       "cui-input-base h-full pl-14 tracking-widest sm:leading-6",
                       field.error && "border-danger-500",
                       field.className,
