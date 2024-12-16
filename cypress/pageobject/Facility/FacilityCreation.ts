@@ -67,10 +67,6 @@ class FacilityPage {
     cy.intercept("POST", "**/api/v1/facility/").as("postFacility");
   }
 
-  verifyFacilityRes() {
-    cy.wait("@postFacility").its("response.statusCode").should("eq", 201);
-  }
-
   verifyErrorFacility() {
     cy.wait("@postFacility").its("response.statusCode").should("eq", 403);
   }

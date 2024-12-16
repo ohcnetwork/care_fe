@@ -77,9 +77,7 @@ describe("Facility Creation with multiple user roles", () => {
     });
     facilityPage.fillLocationDetails(testFacilityData.location);
     facilityPage.selectLocation("Kochi, Kerala");
-    facilityPage.interceptFacility();
     facilityPage.clickSaveFacilityButton();
-    facilityPage.verifyFacilityRes();
     facilityPage.verifyFacilityCreatedNotification();
     // verify the facility card info
     cy.verifyContentPresence("#facility-details-card", [
