@@ -2,46 +2,36 @@ import careConfig from "@careConfig";
 
 import { QueryError } from "@/Utils/request/queryError";
 import { getResponseBody } from "@/Utils/request/request";
-import { QueryOptions, Route } from "@/Utils/request/types";
+import { Route } from "@/Utils/request/types";
+// Remove conflicting QueryOptions import
 import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 
-/**
- * Extend the QueryOptions interface to include customHeaders
- * @template TBody - The type of the request body
- */
-export interface QueryOptionsWithHeaders<TBody> extends QueryOptions<TBody> {
-  customHeaders?: Record<string, string>;
-  headers?: HeadersInit;
+// Define QueryOptions locally, including the 'headers' property
+export interface QueryOptions<TBody> {
+  body?: TBody;
+  queryParams?: Record<string, any>;
+  pathParams?: Record<string, any>;
+  silent?: boolean;
+  signal?: AbortSignal;
+  headers?: Record<string, string>; // Add headers support
 }
-
-// Function to sanitize custom headers
-const sanitizeHeaders = (headers: Record<string, string>) => {
-  const sanitized: Record<string, string> = {};
-  for (const [key, value] of Object.entries(headers)) {
-    // Ensure header names follow RFC 7230 and values are safe
-    if (
-      /^[!#$%&'*+-.^_`|~0-9a-zA-Z]+$/.test(key) &&
-      typeof value === "string" && // Changed 'string' to "string"
-      !value.includes("\n") && // Changed '\n' to "\n"
-      !value.includes("\r")
-    ) {
-      // Changed '\r' to "\r"
-      sanitized[key] = value;
-    }
-  }
-  return sanitized;
-};
 
 async function queryRequest<TData, TBody>(
   { path, method, noAuth }: Route<TData, TBody>,
-  options?: QueryOptionsWithHeaders<TBody>,
+  options?: QueryOptions<TBody>,
 ): Promise<TData> {
   const url = `${careConfig.apiUrl}${makeUrl(path, options?.queryParams, options?.pathParams)}`;
 
-  // Merge default headers with sanitized custom headers
-  const defaultHeaders = makeHeaders(noAuth ?? false);
-  const customHeaders = sanitizeHeaders(options?.customHeaders || {});
-  const headers = { ...defaultHeaders, ...customHeaders }; // Merging headers manually
+  // Convert Headers object to a plain object
+  const defaultHeaders = Object.fromEntries(
+    makeHeaders(noAuth ?? false).entries(),
+  );
+
+  // Merge default headers with custom headers, with custom headers taking precedence
+  const headers = {
+    ...defaultHeaders,
+    ...(options?.headers || {}),
+  };
 
   const fetchOptions: RequestInit = {
     method,
@@ -77,14 +67,12 @@ async function queryRequest<TData, TBody>(
 
 /**
  * Creates a TanStack Query compatible request function
- * @template TData - The type of the response data
- * @template TBody - The type of the request body
  */
 export default function query<TData, TBody>(
   route: Route<TData, TBody>,
-  options?: QueryOptionsWithHeaders<TBody>,
-): (params: { signal: AbortSignal }) => Promise<TData> {
-  return ({ signal }) => {
+  options?: QueryOptions<TBody>,
+) {
+  return ({ signal }: { signal: AbortSignal }) => {
     return queryRequest(route, { ...options, signal });
   };
 }
