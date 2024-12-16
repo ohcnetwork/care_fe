@@ -11,11 +11,6 @@ import {
 } from "@/components/Assets/AssetTypes";
 import { ICD11DiagnosisModel } from "@/components/Diagnosis/types";
 import {
-  IDeleteBedCapacity,
-  ILocalBodies,
-  ILocalBodyByDistrict,
-} from "@/components/ExternalResult/models";
-import {
   EventGeneric,
   type Type,
 } from "@/components/Facility/ConsultationDetails/Events/types";
@@ -27,7 +22,6 @@ import { Investigation } from "@/components/Facility/Investigations/Reports/type
 import { InvestigationSessionType } from "@/components/Facility/Investigations/investigationsTab";
 import {
   BedModel,
-  CapacityModal,
   CommentModel,
   ConsultationModel,
   CreateBedBody,
@@ -35,7 +29,6 @@ import {
   DailyRoundsBody,
   DailyRoundsRes,
   DistrictModel,
-  DoctorModal,
   FacilityModel,
   FacilityRequest,
   FacilitySpokeModel,
@@ -51,7 +44,6 @@ import {
   MinimumQuantityItemResponse,
   PatientNotesEditModel,
   PatientNotesModel,
-  PatientStatsModel,
   PatientTransferResponse,
   ResourceModel,
   ShiftingModel,
@@ -530,23 +522,6 @@ const routes = {
     method: "GET",
     TRes: Type<string>(),
   },
-  downloadFacilityCapacity: {
-    path: "/api/v1/facility/?csv&capacity",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-  downloadFacilityDoctors: {
-    path: "/api/v1/facility/?csv&doctors",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-
-  downloadFacilityTriage: {
-    path: "/api/v1/facility/?csv&triage",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-
   downloadPatients: {
     path: "/api/v1/patient/?csv",
     method: "GET",
@@ -633,86 +608,6 @@ const routes = {
     method: "GET",
     TRes: Type<PaginatedResponse<Type>>(),
   },
-
-  // Hospital Beds
-  createCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity/",
-    method: "POST",
-    TRes: Type<CapacityModal>(),
-  },
-
-  createDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
-    method: "POST",
-    TRes: Type<DoctorModal>(),
-    TBody: Type<DoctorModal>(),
-  },
-
-  getCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity/",
-    TRes: Type<PaginatedResponse<CapacityModal>>(),
-  },
-
-  getCapacityBed: {
-    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
-    TRes: Type<CapacityModal>(),
-  },
-
-  deleteCapacityBed: {
-    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
-    method: "DELETE",
-    TRes: Type<IDeleteBedCapacity>(),
-  },
-
-  listDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
-    TRes: Type<PaginatedResponse<DoctorModal>>(),
-  },
-  getDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
-    TRes: Type<DoctorModal>(),
-  },
-
-  updateCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
-    method: "PUT",
-    TRes: Type<CapacityModal>(),
-  },
-
-  updateDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
-    method: "PUT",
-    TRes: Type<DoctorModal>(),
-  },
-
-  deleteDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/{area}/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-  },
-
-  //Triage
-  createTriage: {
-    path: "/api/v1/facility/{facilityId}/patient_stats/",
-    method: "POST",
-    TBody: Type<PatientStatsModel>(),
-    TRes: Type<PatientStatsModel>(),
-  },
-  getTriage: {
-    path: "/api/v1/facility/{facilityId}/patient_stats/",
-    TRes: Type<PaginatedResponse<PatientStatsModel>>(),
-  },
-
-  getTriageDetails: {
-    path: "/api/v1/facility/{facilityId}/patient_stats/{id}/",
-    TRes: Type<PatientStatsModel>(),
-  },
-
-  // //Care Center
-  // createCenter: {
-  //     path: "/api/v1/carecenter/",
-  //     method: 'POST'
-  // }
 
   // Patient
 
@@ -813,12 +708,12 @@ const routes = {
   getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
     method: "GET",
-    TRes: Type<ILocalBodyByDistrict[]>(),
+    TRes: Type<LocalBodyModel[]>(),
   },
   getLocalbodyByDistrict: {
     path: "/api/v1/district/{id}/local_bodies/",
     method: "GET",
-    TRes: Type<ILocalBodies[]>(),
+    TRes: Type<LocalBodyModel[]>(),
   },
 
   // Local Body
