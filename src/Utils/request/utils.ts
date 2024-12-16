@@ -50,13 +50,17 @@ const ensurePathNotMissingReplacements = (path: string) => {
   }
 };
 
+export function getJWTAccessToken() {
+  return localStorage.getItem(LocalStorageKeys.accessToken);
+}
+
 export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
   const headers = new Headers(additionalHeaders);
 
   headers.set("Content-Type", "application/json");
   headers.append("Accept", "application/json");
 
-  const jwtAccessToken = localStorage.getItem(LocalStorageKeys.accessToken);
+  const jwtAccessToken = getJWTAccessToken();
   if (jwtAccessToken && !noAuth) {
     headers.append("Authorization", `Bearer ${jwtAccessToken}`);
   }
