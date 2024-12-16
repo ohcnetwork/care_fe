@@ -150,7 +150,7 @@ export const FileUpload = (props: FileUploadProps) => {
     silent: true,
   });
 
-  const discussionNotesQuery = useQuery(routes.viewUpload, {
+  const discussionNotesQuery = useTanStackQueryInstead(routes.viewUpload, {
     query: {
       file_type: "PATIENT_NOTES",
       consultation_id: consultationId,
