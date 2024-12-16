@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Link } from "raviger";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -14,6 +13,7 @@ import {
   PatientNoteStateType,
 } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+import { useAddPatientNote } from "@/components/Patient/Utils";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -76,35 +76,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [noteField, setNoteField] = useState(
     localStorage.getItem(localStorageKey) || "",
   );
-  const queryClient = useQueryClient();
-
-  const addNoteMutation = useMutation({
-    mutationFn: async (noteField: string) => {
-      const { res, data } = await request(routes.addPatientNote, {
-        pathParams: { patientId },
-        body: {
-          note: noteField,
-          thread,
-          consultation: consultationId,
-          reply_to: reply_to?.id,
-        },
-      });
-      if (res?.status === 201 && data) return data;
-      throw new Error("Failed to add note");
-    },
-    onSuccess: (newNote) => {
-      setState((prevState) => ({
-        ...prevState,
-        notes: [newNote, ...prevState.notes],
-      }));
-      setReplyTo(undefined);
-      setNoteField("");
-      Notification.Success({ msg: "Note added successfully" });
-
-      queryClient.invalidateQueries({
-        queryKey: ["notes"],
-      });
-    },
+  const { mutate: addNote } = useAddPatientNote({
+    patientId,
+    consultationId,
   });
 
   const onAddNote = () => {
@@ -114,7 +88,14 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       });
       return;
     }
-    addNoteMutation.mutate(noteField);
+    addNote({
+      noteField,
+      replyTo: reply_to,
+      thread,
+    });
+
+    setReplyTo(undefined);
+    setNoteField("");
   };
 
   useMessageListener((data) => {

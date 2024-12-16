@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 
@@ -13,6 +12,7 @@ import {
   PatientNotesModel,
 } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+import { useAddPatientNote } from "@/components/Patient/Utils";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -48,39 +48,14 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
     undefined,
   );
-  const queryClient = useQueryClient();
 
   const initialData: PatientNoteStateType = {
     notes: [],
   };
   const [state, setState] = useState(initialData);
 
-  const addNoteMutation = useMutation({
-    mutationFn: async (noteField: string) => {
-      const { res, data } = await request(routes.addPatientNote, {
-        pathParams: { patientId },
-        body: {
-          note: noteField,
-          thread,
-          reply_to: reply_to?.id,
-        },
-      });
-      if (res?.status === 201 && data) return data;
-      throw new Error("Failed to add note");
-    },
-    onSuccess: (newNote) => {
-      setState((prevState) => ({
-        ...prevState,
-        notes: [newNote, ...prevState.notes],
-      }));
-      setReplyTo(undefined);
-      setNoteField("");
-      Notification.Success({ msg: "Note added successfully" });
-
-      queryClient.invalidateQueries({
-        queryKey: ["notes"],
-      });
-    },
+  const { mutate: addNote } = useAddPatientNote({
+    patientId,
   });
 
   const onAddNote = () => {
@@ -90,7 +65,13 @@ const PatientNotes = (props: PatientNotesProps) => {
       });
       return;
     }
-    addNoteMutation.mutate(noteField);
+    addNote({
+      noteField,
+      replyTo: reply_to,
+      thread,
+    });
+    setReplyTo(undefined);
+    setNoteField("");
   };
 
   useEffect(() => {

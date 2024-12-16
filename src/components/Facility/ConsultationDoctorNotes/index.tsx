@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useState } from "react";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -14,6 +13,7 @@ import {
   PatientNoteStateType,
 } from "@/components/Facility/models";
 import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
+import { useAddPatientNote } from "@/components/Patient/Utils";
 
 import useAuthUser from "@/hooks/useAuthUser";
 import { useMessageListener } from "@/hooks/useMessageListener";
@@ -23,7 +23,6 @@ import { PATIENT_NOTES_THREADS } from "@/common/constants";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, isAppleDevice, keysOf } from "@/Utils/utils";
 
@@ -59,35 +58,10 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     patientId: patientId,
   };
   const [state, setState] = useState(initialData);
-  const queryClient = useQueryClient();
 
-  const addNoteMutation = useMutation({
-    mutationFn: async (noteField: string) => {
-      const { res, data } = await request(routes.addPatientNote, {
-        pathParams: { patientId },
-        body: {
-          note: noteField,
-          thread,
-          consultation: consultationId,
-          reply_to: reply_to?.id,
-        },
-      });
-      if (res?.status === 201 && data) return data;
-      throw new Error("Failed to add note");
-    },
-    onSuccess: (newNote) => {
-      setState((prevState) => ({
-        ...prevState,
-        notes: [newNote, ...prevState.notes],
-      }));
-      setReplyTo(undefined);
-      setNoteField("");
-      Notification.Success({ msg: "Note added successfully" });
-
-      queryClient.invalidateQueries({
-        queryKey: ["notes"],
-      });
-    },
+  const { mutate: addNote } = useAddPatientNote({
+    patientId,
+    consultationId,
   });
 
   const onAddNote = () => {
@@ -97,7 +71,13 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       });
       return;
     }
-    addNoteMutation.mutate(noteField);
+    addNote({
+      noteField,
+      replyTo: reply_to,
+      thread,
+    });
+    setReplyTo(undefined);
+    setNoteField("");
   };
 
   useTanStackQueryInstead(routes.getPatient, {
