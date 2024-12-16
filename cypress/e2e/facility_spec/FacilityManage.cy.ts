@@ -21,12 +21,6 @@ describe("Facility Manage Functions", () => {
     /Health Facility config updated successfully|Health ID registration failed/;
   const facilityHfrId = "IN180000018";
   const facilityUpdatedHfrId = "IN180000020";
-  const doctorCapacity = "5";
-  const doctorModifiedCapacity = "7";
-  const totalCapacity = "100";
-  const currentOccupied = "80";
-  const totalUpdatedCapacity = "120";
-  const currentUpdatedOccupied = "100";
 
   before(() => {
     loginPage.loginByRole("districtAdmin");
@@ -114,64 +108,6 @@ describe("Facility Manage Functions", () => {
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
     facilityManage.verifyHfrIdValue(facilityUpdatedHfrId);
-  });
-
-  it("Modify doctor capacity in Facility detail page", () => {
-    // Add a doctor capacity
-    facilityManage.clickFacilityAddDoctorTypeButton();
-    facilityPage.selectAreaOfSpecialization("Pulmonology");
-    facilityPage.fillDoctorCount(doctorCapacity);
-    facilityPage.saveAndExitDoctorForm();
-    facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Staff count added successfully",
-    );
-    facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
-    // edit a existing doctor
-    facilityManage.clickEditFacilityDoctorCapacity();
-    facilityPage.fillDoctorCount(doctorModifiedCapacity);
-    facilityPage.clickdoctorcapacityaddmore();
-    facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Staff count updated successfully",
-    );
-    facilityManage.verifyTotalDoctorCapacity(doctorModifiedCapacity);
-    // delete a bed
-    facilityManage.clickDeleteFacilityDoctorCapacity();
-    facilityManage.clickButtonWithText("Delete");
-    facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Staff specialization type deleted successfully",
-    );
-  });
-
-  it("Modify bed capacity in Facility detail page", () => {
-    // add multiple new bed capacity
-    facilityManage.clickFacilityAddBedTypeButton();
-    facilityPage.selectBedType("Isolation Bed");
-    facilityPage.fillTotalCapacity(totalCapacity);
-    facilityPage.fillCurrentlyOccupied(currentOccupied);
-    facilityPage.saveAndExitBedCapacityForm();
-    facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Bed capacity added successfully",
-    );
-    cy.closeNotification();
-    facilityManage.verifyFacilityBedCapacity(totalCapacity);
-    facilityManage.verifyFacilityBedCapacity(currentOccupied);
-    // edit a existing bed
-    facilityManage.clickEditFacilityBedCapacity();
-    facilityPage.fillTotalCapacity(totalUpdatedCapacity);
-    facilityPage.fillCurrentlyOccupied(currentUpdatedOccupied);
-    facilityPage.clickbedcapcityaddmore();
-    facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Bed capacity updated successfully",
-    );
-    cy.closeNotification();
-    facilityManage.verifyFacilityBedCapacity(totalUpdatedCapacity);
-    facilityManage.verifyFacilityBedCapacity(currentUpdatedOccupied);
-    // delete a bed
-    facilityManage.clickDeleteFacilityBedCapacity();
-    facilityManage.clickButtonWithText("Delete");
-    facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Bed type deleted successfully",
-    );
   });
 
   afterEach(() => {

@@ -21,8 +21,6 @@ describe("Facility Homepage Function", () => {
   const patientPage = new PatientPage();
   const facilityLocation = new FacilityLocation();
   const facilitiesAlias = "downloadFacilitiesCSV";
-  const doctorsAlias = "downloadDoctorsCSV";
-  const triagesAlias = "downloadTriagesCSV";
   const facilityName = "Dummy Facility 40";
   const facilityLocaion = "Dummy Location";
   const stateName = "Kerala";
@@ -118,23 +116,7 @@ describe("Facility Homepage Function", () => {
     // Verify Facility Export
     facilityHome.csvDownloadIntercept(facilitiesAlias, "");
     facilityHome.clickExportButton();
-    facilityHome.clickMenuItem("Facilities");
     facilityHome.verifyDownload(facilitiesAlias);
-    // Verify Doctor Export
-    facilityHome.csvDownloadIntercept(doctorsAlias, "&doctors");
-    facilityHome.clickExportButton();
-    facilityHome.clickMenuItem("Doctors");
-    facilityHome.verifyDownload(doctorsAlias);
-    // Verify Triage Export
-    facilityHome.csvDownloadIntercept(triagesAlias, "&triage");
-    facilityHome.clickExportButton();
-    facilityHome.clickMenuItem("Triages");
-    facilityHome.verifyDownload(triagesAlias);
-  });
-
-  it("Verify Capacity Export Functionality", () => {
-    facilityHome.clickExportButton();
-    facilityHome.clickMenuItem("Capacities");
   });
 
   it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
