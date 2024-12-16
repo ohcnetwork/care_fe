@@ -208,7 +208,7 @@ export const PatientHome = (props: {
                       >
                         {patientData.name}
                       </h1>
-                      <h3 className="text-sm font-medium text-gray-600">
+                      <h3 className="text-sm font-medium text-secondary-800">
                         {formatPatientAge(patientData, true)},{"  "}
                         {patientGender},{"  "} {patientData.blood_group || "-"}
                       </h3>
@@ -251,7 +251,7 @@ export const PatientHome = (props: {
               <div className="mt-4 flex gap-4 justify-between flex-wrap">
                 <div className="flex gap-4">
                   <div>
-                    <p className="text-xs font-normal leading-tight text-gray-600">
+                    <p className="text-xs font-normal leading-tight text-secondary-800">
                       {t("facility")}:
                     </p>
                     <p className="mt-1 flex text-sm font-semibold leading-tight text-gray-900">
@@ -262,7 +262,7 @@ export const PatientHome = (props: {
                   {patientData?.last_consultation
                     ?.treating_physician_object && (
                     <div>
-                      <h4 className="text-xs font-normal leading-tight text-gray-600">
+                      <h4 className="text-xs font-normal leading-tight text-secondary-800">
                         {t("treating_doctor")}:
                       </h4>
                       <div className="mt-1 flex space-x-2">
@@ -293,7 +293,7 @@ export const PatientHome = (props: {
                   )}
                   {patientData?.last_consultation?.assigned_to_object && (
                     <div>
-                      <p className="text-xs font-normal leading-tight text-gray-600">
+                      <p className="text-xs font-normal leading-tight text-secondary-800">
                         {t("assigned_doctor")}:
                       </p>
                       <div className="mt-1 flex space-x-2 text-sm font-semibold leading-tight text-gray-900">
@@ -308,7 +308,7 @@ export const PatientHome = (props: {
                             href={`https://wa.me/${patientData.last_consultation.assigned_to_object.alt_phone_number.replace(/\D+/g, "")}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex items-center space-x-1 text-xs text-green-500"
+                            className="flex items-center space-x-1 text-xs text-primary-500"
                           >
                             <CareIcon icon="l-whatsapp" />{" "}
                             <span>{t("video_call")}</span>
@@ -320,7 +320,7 @@ export const PatientHome = (props: {
 
                   {patientData.assigned_to_object && (
                     <div>
-                      <p className="text-xs font-normal leading-tight text-gray-600">
+                      <p className="text-xs font-normal leading-tight text-secondary-800">
                         {t("assigned_volunteer")}:
                       </p>
                       <p className="mt-1 text-sm font-semibold leading-tight text-gray-900">
@@ -402,7 +402,7 @@ export const PatientHome = (props: {
         </div>
 
         <div
-          className="sticky top-0 z-10 mt-4 w-full overflow-x-auto border-b bg-gray-50"
+          className="sticky top-0 z-10 mt-4 w-full overflow-x-auto border-b bg-secondary-50"
           role="navigation"
         >
           <div className="flex flex-row" role="tablist">
@@ -412,8 +412,8 @@ export const PatientHome = (props: {
                 href={`/facility/${facilityId}/patient/${id}/${tab.route}`}
                 className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${
                   page === tab.route
-                    ? "border-b-4 border-green-800 text-green-800 md:border-b-2"
-                    : "rounded-t-lg text-gray-600 hover:bg-gray-100"
+                    ? "border-b-4 border-primary-800 text-primary-800 md:border-b-2"
+                    : "rounded-t-lg text-secondary-800 hover:bg-secondary-200"
                 }`}
                 role="tab"
                 aria-selected={page === tab.route}
@@ -445,7 +445,7 @@ export const PatientHome = (props: {
                   <div className="space-y-2 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
                       <Button
-                        className="w-full font-semibold"
+                        className="w-full"
                         size="lg"
                         variant="outline_primary"
                         onClick={() =>
@@ -463,7 +463,7 @@ export const PatientHome = (props: {
                     </div>
                     <div>
                       <Button
-                        className="w-full font-semibold"
+                        className="w-full"
                         variant="outline_primary"
                         id="upload-patient-files"
                         size="lg"
@@ -485,7 +485,7 @@ export const PatientHome = (props: {
                         <AuthorizedButton
                           id="assign-volunteer"
                           variant="outline_primary"
-                          className="w-full font-semibold"
+                          className="w-full"
                           onClick={() => setOpenAssignVolunteerDialog(true)}
                           disabled={false}
                           authorizeFor={NonReadOnlyUsers}
@@ -504,7 +504,7 @@ export const PatientHome = (props: {
                     <div>
                       <AuthorizedButton
                         id="patient-allow-transfer"
-                        className="w-full font-semibold"
+                        className="w-full"
                         size="lg"
                         variant="outline_primary"
                         disabled={
@@ -577,7 +577,7 @@ export const PatientHome = (props: {
                 <div className="rounded-sm px-2">
                   <div className="my-1 flex justify-between">
                     <div>
-                      <div className="text-xs font-normal leading-5 text-gray-600">
+                      <div className="text-xs font-normal leading-5 text-secondary-800">
                         {t("last_discharge_reason")}
                       </div>
                       <div className="text-sm font-semibold text-gray-900">
@@ -611,7 +611,7 @@ export const PatientHome = (props: {
                 </div>
                 <div className="my-1 rounded-sm p-2">
                   <div>
-                    <div className="text-xs font-normal text-gray-600">
+                    <div className="text-xs font-normal text-secondary-800">
                       {t("last_updated_by")}{" "}
                       <span className="font-semibold text-gray-900">
                         {patientData.last_edited?.first_name}{" "}
@@ -632,7 +632,7 @@ export const PatientHome = (props: {
                     </div>
                   </div>
                   <div className="mt-4">
-                    <div className="text-xs font-normal leading-5 text-gray-600">
+                    <div className="text-xs font-normal leading-5 text-secondary-800">
                       {t("patient_profile_created_by")}{" "}
                       <span className="font-semibold text-gray-900">
                         {patientData.created_by?.first_name}{" "}
