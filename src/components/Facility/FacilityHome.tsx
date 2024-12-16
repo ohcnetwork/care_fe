@@ -22,11 +22,7 @@ import Loading from "@/components/Common/Loading";
 import { LocationSelect } from "@/components/Common/LocationSelect";
 import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
 import Page from "@/components/Common/Page";
-import Table from "@/components/Common/Table";
-import { FacilityBedCapacity } from "@/components/Facility/FacilityBedCapacity";
 import FacilityBlock from "@/components/Facility/FacilityBlock";
-import { FacilityHomeTriage } from "@/components/Facility/FacilityHomeTriage";
-import { FacilityStaffList } from "@/components/Facility/FacilityStaffList";
 import { FieldLabel } from "@/components/Form/FormFields/FormField";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -215,7 +211,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                   onClick={() => setEditCoverImage(true)}
                   className="md:mr-2 lg:mr-6 lg:h-80 lg:w-80"
                 />
-                <div className="mb-6 grid gap-4 md:mb-0">
+                <div
+                  className="mb-6 grid gap-4 md:mb-0"
+                  id="facility-details-card"
+                >
                   <div className="flex-col justify-between md:flex lg:flex-1">
                     <div className="mb-4" id="facility-name">
                       <h1 className="text-3xl font-bold">
@@ -488,44 +487,6 @@ export const FacilityHome = ({ facilityId }: Props) => {
           </div>
         </div>
       </div>
-      <FacilityBedCapacity facilityId={facilityId} />
-      <FacilityStaffList facilityId={facilityId} />
-
-      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <h1 className="mb-6 text-xl font-bold">{t("oxygen_information")}</h1>
-        <div
-          className="overflow-x-auto overflow-y-hidden"
-          id="facility-oxygen-info"
-        >
-          <Table
-            headings={[
-              "",
-              "Oxygen capacity",
-              "Type B cylinder",
-              "Type C cylinder",
-              "Type D cylinder",
-            ]}
-            rows={[
-              [
-                "Capacity",
-                String(facilityData?.oxygen_capacity),
-                String(facilityData?.type_b_cylinders),
-                String(facilityData?.type_c_cylinders),
-                String(facilityData?.type_d_cylinders),
-              ],
-              [
-                "Daily Expected Consumption",
-                String(facilityData?.expected_oxygen_requirement),
-                String(facilityData?.expected_type_b_cylinders),
-                String(facilityData?.expected_type_c_cylinders),
-                String(facilityData?.expected_type_d_cylinders),
-              ],
-            ]}
-          />
-        </div>
-      </div>
-
-      <FacilityHomeTriage facilityId={facilityId} />
     </Page>
   );
 };

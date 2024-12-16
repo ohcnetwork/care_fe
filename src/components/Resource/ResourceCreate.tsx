@@ -309,11 +309,11 @@ export default function ResourceCreate(props: resourceProps) {
 
         <div className="md:col-span-2">
           <TextAreaFormField
-            label={t("request_description")}
+            label={t("request_reason")}
             name="reason"
             rows={5}
             required
-            placeholder={t("request_description_placeholder")}
+            placeholder={t("request_reason_placeholder")}
             value={state.form.reason}
             onChange={handleChange}
             error={state.errors.reason}
