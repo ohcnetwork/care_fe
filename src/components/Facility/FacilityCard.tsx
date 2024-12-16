@@ -105,6 +105,7 @@ export const FacilityCard = (props: {
                             content={t("live_patients_total_beds")}
                           >
                             <div
+                              data-test-id="occupancy-badge"
                               className={`relative flex items-center gap-1 text-sm ${
                                 (facility.patient_count || 0) /
                                   (facility.bed_count || 0) >
@@ -114,7 +115,7 @@ export const FacilityCard = (props: {
                               }`}
                             >
                               <CareIcon icon="l-bed" />
-                              <dt>
+                              <dt data-test-id="occupancy-badge-text">
                                 {t("occupancy")}: {facility.patient_count} /{" "}
                                 {facility.bed_count}
                               </dt>

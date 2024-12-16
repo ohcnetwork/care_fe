@@ -38,4 +38,10 @@ const TooltipComponent = React.forwardRef<
   );
 });
 
-export { TooltipComponent, TooltipTrigger, TooltipContent, TooltipProvider };
+export {
+  TooltipComponent,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+  Tooltip,
+};
