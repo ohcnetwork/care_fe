@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Dispatch, SetStateAction, useEffect } from "react";
 
 import CircularProgress from "@/components/Common/CircularProgress";
@@ -26,34 +26,42 @@ interface PatientNotesProps {
 }
 
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
-  const { state, setState, setReload, disableEdit, thread, setReplyTo } = props;
+  const {
+    state,
+    setState,
+    setReload,
+    disableEdit,
+    thread,
+    setReplyTo,
+    reload,
+  } = props;
+  const queryClient = useQueryClient();
 
   const consultationId = useSlug("consultation") ?? "";
 
-  const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
-    useInfiniteQuery({
-      queryKey: [thread, state.patientId],
-      queryFn: async ({ pageParam = 0 }) => {
-        const response = await request(routes.getPatientNotes, {
-          pathParams: { patientId: state.patientId! },
-          query: { thread, offset: pageParam, consultation: consultationId },
-        });
+  const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
+    queryKey: ["notes"],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await request(routes.getPatientNotes, {
+        pathParams: { patientId: state.patientId! },
+        query: { thread, offset: pageParam, consultation: consultationId },
+      });
 
-        return {
-          results: response?.data?.results ?? [],
-          nextPage: pageParam + RESULTS_PER_PAGE_LIMIT,
-          totalResults: response?.data?.count ?? 0,
-        };
-      },
-      getNextPageParam: (lastPage, allPages) => {
-        const currentResults = allPages.flatMap((page) => page.results).length;
-        if (currentResults < lastPage.totalResults) {
-          return lastPage.nextPage;
-        }
-        return undefined;
-      },
-      initialPageParam: 0,
-    });
+      return {
+        results: response?.data?.results ?? [],
+        nextPage: pageParam + RESULTS_PER_PAGE_LIMIT,
+        totalResults: response?.data?.count ?? 0,
+      };
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      const currentResults = allPages.flatMap((page) => page.results).length;
+      if (currentResults < lastPage.totalResults) {
+        return lastPage.nextPage;
+      }
+      return undefined;
+    },
+    initialPageParam: 0,
+  });
 
   useEffect(() => {
     if (data?.pages) {
@@ -63,18 +71,22 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
 
       const deduplicatedNotes = Array.from(notesMap.values());
 
-      setState((prevState: any) => ({
+      setState((prevState) => ({
         ...prevState,
         notes: deduplicatedNotes,
       }));
+      setReload?.(false);
     }
   }, [data]);
 
   useEffect(() => {
-    refetch();
+    setReload?.(true);
+    queryClient.invalidateQueries({
+      queryKey: ["notes"],
+    });
   }, [thread]);
 
-  if (isLoading) {
+  if (isLoading || reload) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />

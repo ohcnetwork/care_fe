@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { t } from "i18next";
 import { Link } from "raviger";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -75,32 +76,48 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [noteField, setNoteField] = useState(
     localStorage.getItem(localStorageKey) || "",
   );
+  const queryClient = useQueryClient();
 
-  const onAddNote = async () => {
+  const addNoteMutation = useMutation({
+    mutationFn: async (noteField: string) => {
+      const { res, data } = await request(routes.addPatientNote, {
+        pathParams: { patientId },
+        body: {
+          note: noteField,
+          thread,
+          consultation: consultationId,
+          reply_to: reply_to?.id,
+        },
+      });
+      if (res?.status === 201 && data) return data;
+      throw new Error("Failed to add note");
+    },
+    onSuccess: (newNote) => {
+      setState((prevState) => ({
+        ...prevState,
+        notes: [newNote, ...prevState.notes],
+      }));
+      setReplyTo(undefined);
+      Notification.Success({ msg: "Note added successfully" });
+
+      queryClient.invalidateQueries({
+        queryKey: ["notes"],
+      });
+    },
+    onError: () => {
+      Notification.Error({ msg: "Failed to add note" });
+    },
+  });
+
+  const onAddNote = () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
       });
       return;
     }
-    const { res, data } = await request(routes.addPatientNote, {
-      pathParams: { patientId: patientId },
-      body: {
-        note: noteField,
-        consultation: consultationId,
-        thread,
-        reply_to: reply_to?.id,
-      },
-    });
-    if (res?.status === 201 && data) {
-      setNoteField("");
-      setState((prevState) => ({
-        ...prevState,
-        notes: [data, ...prevState.notes],
-      }));
-      setReplyTo(undefined);
-      Notification.Success({ msg: "Note added successfully" });
-    }
+    addNoteMutation.mutate(noteField);
+    setNoteField("");
   };
 
   useMessageListener((data) => {
@@ -236,6 +253,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                     : "border-primary-800 text-white/70",
                 )}
                 onClick={() => {
+                  setReload(true);
                   setThread(PATIENT_NOTES_THREADS[current]);
                   setState(initialData);
                 }}
