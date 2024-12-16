@@ -25,12 +25,12 @@ async function queryRequest<TData, TBody>(
   // Create a Headers object from the default headers
   const defaultHeaders = makeHeaders(noAuth ?? false);
 
-  // If custom headers are provided, merge them with the default headers
+  // If custom headers are provided, append them to the default headers
   if (options?.headers) {
     const customHeaders = new Headers(options.headers);
     customHeaders.forEach((value, key) => {
-      // Use set() to replace existing values, ensuring proper header handling
-      defaultHeaders.set(key, value);
+      // Use append() to add new header values without overwriting existing ones
+      defaultHeaders.append(key, value);
     });
   }
 
