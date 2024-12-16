@@ -63,6 +63,14 @@ class FacilityPage {
     cy.verifyAndClickElement("#submit", "Save Facility");
   }
 
+  interceptFacility() {
+    cy.intercept("POST", "**/api/v1/facility/").as("postFacility");
+  }
+
+  verifyErrorFacility() {
+    cy.wait("@postFacility").its("response.statusCode").should("eq", 403);
+  }
+
   verifyFacilityCreatedNotification() {
     cy.verifyNotification("Facility added successfully");
     cy.closeNotification();

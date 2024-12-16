@@ -133,7 +133,9 @@ describe("Facility Creation with multiple user roles", () => {
     facilityPage.selectDistrictOnPincode("Kottayam");
     facilityPage.selectLocalBody("Arpookara");
     facilityPage.selectWard("5");
+    facilityPage.interceptFacility();
     facilityPage.clickSaveFacilityButton();
+    facilityPage.verifyErrorFacility();
     facilityPage.verifyErrorNotification(
       "You do not have permission to perform this action.",
     );
