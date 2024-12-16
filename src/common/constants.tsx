@@ -890,36 +890,43 @@ export const FACILITY_FEATURE_TYPES: {
   id: number;
   name: string;
   icon: IconName;
+  variant: string;
 }[] = [
   {
     id: 1,
     name: "CT Scan",
     icon: "l-compact-disc",
+    variant: "green",
   },
   {
     id: 2,
     name: "Maternity Care",
     icon: "l-baby-carriage",
+    variant: "blue",
   },
   {
     id: 3,
     name: "X-Ray",
     icon: "l-clipboard-alt",
+    variant: "amber",
   },
   {
     id: 4,
     name: "Neonatal Care",
     icon: "l-baby-carriage",
+    variant: "teal",
   },
   {
     id: 5,
     name: "Operation Theater",
     icon: "l-syringe",
+    variant: "red",
   },
   {
     id: 6,
     name: "Blood Bank",
     icon: "l-medical-drip",
+    variant: "orange",
   },
 ];
 

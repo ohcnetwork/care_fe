@@ -81,6 +81,15 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontSize: {
+        "7xl": "5rem",
+      },
+      width: {
+        "[80mm]": "80mm",
+      },
+      height: {
+        "[170mm]": "170mm",
+      },
     },
   },
   content: [

@@ -1,11 +1,27 @@
 import careConfig from "@careConfig";
+import { useMutation } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import ReCaptcha from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import LegendInput from "@/CAREUI/interactive/LegendInput";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import CircularProgress from "@/components/Common/CircularProgress";
 import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
@@ -17,7 +33,30 @@ import FiltersCache from "@/Utils/FiltersCache";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import { classNames } from "@/Utils/utils";
+
+interface LoginFormData {
+  username: string;
+  password: string;
+}
+
+type LoginMode = "staff" | "patient";
+
+interface OtpError {
+  type: string;
+  loc: string[];
+  msg: string;
+  input: string;
+  ctx: {
+    error: string;
+  };
+  url: string;
+}
+
+// Update interface for OTP data
+interface OtpLoginData {
+  phone_number: string;
+  otp: string;
+}
 
 const Login = (props: { forgot?: boolean }) => {
   const { signIn } = useAuthContext();
@@ -43,6 +82,108 @@ const Login = (props: { forgot?: boolean }) => {
   // display spinner while login is under progress
   const [loading, setLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(forgot);
+  const [loginMode, setLoginMode] = useState<LoginMode>("staff");
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState<string>("");
+
+  // Staff Login Mutation
+  const staffLoginMutation = useMutation({
+    mutationFn: async (data: LoginFormData) => {
+      FiltersCache.invaldiateAll();
+      return await signIn(data);
+    },
+    onSuccess: ({ res }) => {
+      setCaptcha(res?.status === 429);
+    },
+  });
+
+  // Forgot Password Mutation
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (data: { username: string }) => {
+      const response = await request(routes.forgotPassword, {
+        body: data,
+      });
+      return response;
+    },
+    onSuccess: () => {
+      Notification.Success({
+        msg: t("password_sent"),
+      });
+    },
+    onError: (error: any) => {
+      setErrors(error);
+    },
+  });
+
+  // Send OTP Mutation
+  const sendOtpMutation = useMutation({
+    mutationFn: async (phone: string) => {
+      const response = await request(routes.otp.sendOtp, {
+        body: { phone_number: `+91${phone}` },
+      });
+      return response;
+    },
+    onSuccess: () => {
+      setIsOtpSent(true);
+      setOtpError("");
+      Notification.Success({ msg: t("otp_sent_successfully") });
+    },
+    onError: (error: any) => {
+      const errors = error?.data || [];
+      if (Array.isArray(errors) && errors.length > 0) {
+        const firstError = errors[0] as OtpError;
+        setOtpError(firstError.msg);
+      } else {
+        setOtpError(t("failed_to_send_otp"));
+      }
+    },
+  });
+
+  // Verify OTP Mutation
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (data: OtpLoginData) => {
+      const response = await request(routes.otp.loginByOtp, {
+        body: data,
+      });
+      return response;
+    },
+    onSuccess: async (response) => {
+      const { data } = response;
+      if (data?.access) {
+        localStorage.setItem("care_patient_token", data.access);
+        navigate("/patient/home");
+        Notification.Success({ msg: t("login_successful") });
+      }
+    },
+    onError: (error: any) => {
+      const errors = error?.data || [];
+      if (Array.isArray(errors) && errors.length > 0) {
+        const firstError = errors[0] as OtpError;
+        setOtpError(firstError.msg);
+      } else {
+        setOtpError(t("invalid_otp"));
+      }
+    },
+  });
+
+  // Format phone number to include +91
+  const formatPhoneNumber = (value: string) => {
+    // Remove any non-digit characters
+    const digits = value.replace(/\D/g, "");
+
+    // Limit to 10 digits
+    const truncated = digits.slice(0, 10);
+
+    return truncated;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedNumber = formatPhoneNumber(e.target.value);
+    setPhone(formattedNumber);
+    setOtpError(""); // Clear error when input changes
+  };
 
   // Login form validation
 
@@ -95,19 +236,12 @@ const Login = (props: { forgot?: boolean }) => {
     };
   }, []);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    setLoading(true);
-    FiltersCache.invaldiateAll();
     const validated = validateData();
-    if (!validated) {
-      setLoading(false);
-      return;
-    }
-    const { res } = await signIn(validated);
-    setCaptcha(res?.status === 429);
-    setLoading(false);
+    if (!validated) return;
+
+    staffLoginMutation.mutate(validated);
   };
 
   const validateForgetData = () => {
@@ -132,23 +266,12 @@ const Login = (props: { forgot?: boolean }) => {
     return form;
   };
 
-  const handleForgetSubmit = async (e: any) => {
+  const handleForgetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const valid = validateForgetData();
-    if (valid) {
-      setLoading(true);
-      const { res, error } = await request(routes.forgotPassword, {
-        body: { ...valid },
-      });
-      setLoading(false);
-      if (res?.ok) {
-        Notification.Success({
-          msg: t("password_sent"),
-        });
-      } else if (res && error) {
-        setErrors(error);
-      }
-    }
+    if (!valid) return;
+
+    forgotPasswordMutation.mutate(valid);
   };
 
   const onCaptchaChange = (value: any) => {
@@ -159,9 +282,35 @@ const Login = (props: { forgot?: boolean }) => {
     }
   };
 
+  // Handle OTP flow
+  const handlePatientLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isOtpSent) {
+      sendOtpMutation.mutate(phone);
+    } else {
+      verifyOtpMutation.mutate({ phone_number: `+91${phone}`, otp });
+    }
+  };
+
+  const resetPatientLogin = () => {
+    setIsOtpSent(false);
+    setPhone("");
+    setOtp("");
+  };
+
+  // Loading state derived from mutations
+  const isLoading =
+    staffLoginMutation.isPending ||
+    forgotPasswordMutation.isPending ||
+    sendOtpMutation.isPending ||
+    verifyOtpMutation.isPending;
+
   return (
-    <div className="relative flex flex-col-reverse overflow-hidden md:h-screen md:flex-row">
+    <div className="relative flex md:h-screen flex-col-reverse md:flex-row">
       {!forgotPassword && <BrowserWarning />}
+
+      {/* Hero Section */}
       <div className="login-hero relative flex flex-auto flex-col justify-between p-6 md:h-full md:w-[calc(50%+130px)] md:flex-none md:p-0 md:px-16 md:pr-[calc(4rem+130px)]">
         <div></div>
         <div className="mt-4 flex flex-col items-start rounded-lg py-4 md:mt-12">
@@ -262,10 +411,13 @@ const Login = (props: { forgot?: boolean }) => {
           </div>
         </div>
       </div>
+
+      {/* Login Forms Section */}
       <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
         <div className="relative h-full items-center justify-center md:flex">
-          <div className="p-8 md:w-4/5 md:p-0 lg:w-[400px]">
-            <div className="flex items-center gap-1 md:hidden">
+          <div className="w-full max-w-[400px] space-y-6">
+            {/* Logo for Mobile */}
+            <div className="flex items-center gap-4 md:hidden">
               {(customLogo || stateLogo) && (
                 <>
                   <img
@@ -273,7 +425,7 @@ const Login = (props: { forgot?: boolean }) => {
                     className="h-14 rounded-lg py-3"
                     alt="state logo"
                   />
-                  <div className="mx-4 h-8 w-px rounded-full bg-secondary-600" />
+                  <Separator orientation="vertical" className="h-8" />
                 </>
               )}
               <img
@@ -283,144 +435,247 @@ const Login = (props: { forgot?: boolean }) => {
               />
             </div>
 
-            <div className="relative flex h-full w-full items-center">
-              <div
-                className={classNames(
-                  "w-full transition-all",
-                  forgotPassword && "hidden",
-                )}
-              >
-                <div className="mb-8 w-64 max-w-full text-2xl font-black text-primary-600 lg:w-72 lg:text-4xl">
-                  {t("auth_login_title")}
-                </div>
-                <form onSubmit={handleSubmit}>
-                  <div>
-                    <LegendInput
-                      name="username"
-                      id="username"
-                      type="TEXT"
-                      legend={t("username")}
-                      value={form.username}
-                      onChange={handleChange}
-                      error={errors.username}
-                      outerClassName="mb-4"
-                      size="large"
-                      className="font-extrabold"
-                    />
-                    <LegendInput
-                      type="PASSWORD"
-                      name="password"
-                      id="password"
-                      legend={t("password")}
-                      value={form.password}
-                      onChange={handleChange}
-                      error={errors.password}
-                      size="large"
-                      className="font-extrabold"
-                    />
-                    <div className="justify-start">
-                      {isCaptchaEnabled && (
-                        <div className="grid px-8 py-4">
-                          <ReCaptcha
-                            sitekey={reCaptchaSiteKey}
-                            onChange={onCaptchaChange}
-                          />
-                          <span className="text-red-500">{errors.captcha}</span>
-                        </div>
-                      )}
+            <Card>
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl font-bold">
+                  Welcome back
+                </CardTitle>
+                <CardDescription>
+                  Choose your login method to continue
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs
+                  defaultValue="staff"
+                  value={loginMode}
+                  onValueChange={(value) => {
+                    setLoginMode(value as LoginMode);
+                    if (value === "staff") {
+                      resetPatientLogin();
+                    } else {
+                      setForgotPassword(false);
+                    }
+                  }}
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="staff">Staff Login</TabsTrigger>
+                    <TabsTrigger value="patient">Patient Login</TabsTrigger>
+                  </TabsList>
 
-                      <div className="flex w-full items-center justify-between py-4">
-                        <button
-                          onClick={() => {
-                            setForgotPassword(true);
-                          }}
+                  {/* Staff Login */}
+                  <TabsContent value="staff">
+                    {!forgotPassword ? (
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="username">Username</Label>
+                          <Input
+                            id="username"
+                            name="username"
+                            type="text"
+                            value={form.username}
+                            onChange={handleChange}
+                            className={cn(
+                              errors.username &&
+                                "border-red-500 focus-visible:ring-red-500",
+                            )}
+                          />
+                          {errors.username && (
+                            <p className="text-sm text-red-500">
+                              {errors.username}
+                            </p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="password">Password</Label>
+                          <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            className={cn(
+                              errors.password &&
+                                "border-red-500 focus-visible:ring-red-500",
+                            )}
+                          />
+                          {errors.password && (
+                            <p className="text-sm text-red-500">
+                              {errors.password}
+                            </p>
+                          )}
+                        </div>
+
+                        {isCaptchaEnabled && (
+                          <div className="py-4">
+                            <ReCaptcha
+                              sitekey={reCaptchaSiteKey}
+                              onChange={onCaptchaChange}
+                            />
+                          </div>
+                        )}
+
+                        <Button
+                          variant="link"
                           type="button"
-                          id="forgot-pass-btn"
-                          className="text-sm text-primary-400 hover:text-primary-500"
+                          onClick={() => setForgotPassword(true)}
+                          className="px-0"
                         >
                           {t("forget_password")}
-                        </button>
+                        </Button>
+
+                        <Button
+                          type="submit"
+                          className="w-full"
+                          variant="primary"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? (
+                            <CircularProgress className="text-white" />
+                          ) : (
+                            t("login")
+                          )}
+                        </Button>
+                      </form>
+                    ) : (
+                      <form onSubmit={handleForgetSubmit} className="space-y-4">
+                        <Button
+                          variant="link"
+                          type="button"
+                          onClick={() => setForgotPassword(false)}
+                          className="px-0 mb-4 flex items-center gap-2"
+                        >
+                          <CareIcon icon="l-arrow-left" className="text-lg" />
+                          <span>{t("back_to_login")}</span>
+                        </Button>
+
+                        <div className="space-y-4">
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">
+                              {t("forget_password")}
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-2">
+                              {t("forget_password_instruction")}
+                            </p>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="forgot_username">Username</Label>
+                            <Input
+                              id="forgot_username"
+                              name="username"
+                              type="text"
+                              value={form.username}
+                              onChange={handleChange}
+                              placeholder="Enter your username"
+                              className={cn(
+                                errors.username &&
+                                  "border-red-500 focus-visible:ring-red-500",
+                              )}
+                            />
+                            {errors.username && (
+                              <p className="text-sm text-red-500">
+                                {errors.username}
+                              </p>
+                            )}
+                          </div>
+
+                          <Button
+                            type="submit"
+                            className="w-full"
+                            variant="primary"
+                            disabled={isLoading}
+                          >
+                            {isLoading ? (
+                              <CircularProgress className="text-white" />
+                            ) : (
+                              t("send_reset_link")
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+                  </TabsContent>
+
+                  {/* Patient Login */}
+                  <TabsContent value="patient">
+                    <form onSubmit={handlePatientLogin} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">{t("phone_number")}</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                            +91
+                          </span>
+                          <Input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            value={phone}
+                            onChange={handlePhoneChange}
+                            disabled={isOtpSent}
+                            className="pl-12"
+                            placeholder="Enter 10 digit number"
+                          />
+                        </div>
+                        {otpError && (
+                          <p className="text-sm text-red-500">{otpError}</p>
+                        )}
                       </div>
 
-                      {loading ? (
-                        <div className="flex items-center justify-center">
-                          <CircularProgress className="text-primary-500" />
+                      {isOtpSent && (
+                        <div className="space-y-2">
+                          <Label htmlFor="otp">{t("enter_otp")}</Label>
+                          <Input
+                            id="otp"
+                            name="otp"
+                            type="text"
+                            value={otp}
+                            onChange={(e) => {
+                              setOtp(e.target.value);
+                              setOtpError(""); // Clear error when OTP changes
+                            }}
+                            maxLength={5}
+                            placeholder="Enter 5-digit OTP"
+                          />
+                          <Button
+                            variant="link"
+                            type="button"
+                            onClick={() => {
+                              setIsOtpSent(false);
+                              setOtpError("");
+                            }}
+                            className="px-0"
+                          >
+                            {t("change_phone_number")}
+                          </Button>
                         </div>
-                      ) : (
-                        <button
-                          id="login-button"
-                          type="submit"
-                          className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600"
-                        >
-                          {t("login")}
-                        </button>
                       )}
-                    </div>
-                  </div>
-                </form>
-                <LanguageSelectorLogin />
-              </div>
 
-              <div
-                className={classNames(
-                  "w-full transition-all",
-                  !forgotPassword && "hidden",
-                )}
-              >
-                <button
-                  onClick={() => {
-                    setForgotPassword(false);
-                  }}
-                  type="button"
-                  id="back-to-login-btn"
-                  className="mb-4 text-sm text-primary-400 hover:text-primary-500"
-                >
-                  <div className="flex justify-center">
-                    <CareIcon icon="l-arrow-left" className="text-lg" />
-                    <span>{t("back_to_login")}</span>
-                  </div>
-                </button>
-                <div
-                  className="mb-8 w-[300px] text-4xl font-black text-primary-600"
-                  id="forgot-password-heading"
-                >
-                  {t("forget_password")}
-                </div>
-                <form onSubmit={handleForgetSubmit}>
-                  <div id="forgot-password-instruction">
-                    {t("forget_password_instruction")}
-                    <LegendInput
-                      id="forgot_username"
-                      name="username"
-                      type="TEXT"
-                      legend={t("username")}
-                      value={form.username}
-                      onChange={handleChange}
-                      error={errors.username}
-                      outerClassName="my-4"
-                      size="large"
-                      className="font-extrabold"
-                    />
-                    <div className="justify-start">
-                      {loading ? (
-                        <div className="flex items-center justify-center">
-                          <CircularProgress className="text-primary-500" />
-                        </div>
-                      ) : (
-                        <button
-                          type="submit"
-                          id="send-reset-link-btn"
-                          className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
-                        >
-                          {t("send_reset_link")}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </form>
-                <LanguageSelectorLogin />
-              </div>
-            </div>
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        variant="primary"
+                        disabled={
+                          loading ||
+                          !phone ||
+                          phone.length !== 10 ||
+                          (isOtpSent && otp.length !== 5)
+                        }
+                      >
+                        {loading ? (
+                          <CircularProgress className="text-white" />
+                        ) : isOtpSent ? (
+                          t("verify_otp")
+                        ) : (
+                          t("send_otp")
+                        )}
+                      </Button>
+                    </form>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            <LanguageSelectorLogin />
           </div>
         </div>
       </div>

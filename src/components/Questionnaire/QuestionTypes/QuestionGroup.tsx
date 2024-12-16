@@ -64,7 +64,13 @@ export const QuestionGroup = memo(function QuestionGroup({
             )}
           </div>
         )}
-        <div className="space-y-2">
+        <div
+          className={cn(
+            "gap-2",
+            question.styling_metadata?.classes &&
+              question.styling_metadata.classes,
+          )}
+        >
           {question.questions?.map((subQuestion) => (
             <QuestionGroup
               key={subQuestion.id}

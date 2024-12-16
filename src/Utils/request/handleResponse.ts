@@ -13,6 +13,13 @@ export default function handleResponse(
     return;
   }
 
+  // 404 Not Found
+  if (res.status === 404) {
+    // TODO: Remove this after testing
+    // notify?.Error({ msg: "Not Found" });
+    return;
+  }
+
   // 400/406 Bad Request
   if (res.status === 400 || res.status === 406) {
     notify?.BadRequest({ errs: error });

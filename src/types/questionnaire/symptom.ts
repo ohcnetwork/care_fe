@@ -1,3 +1,4 @@
+import { UserBase } from "../user/base";
 import { Code } from "./code";
 
 export const SYMPTOM_CLINICAL_STATUS = [
@@ -27,14 +28,23 @@ export const SYMPTOM_SEVERITY = ["severe", "moderate", "mild"] as const;
 
 export type SymptomSeverity = (typeof SYMPTOM_SEVERITY)[number];
 
+type Onset = {
+  onset_datetime?: string;
+  onset_age?: string;
+  onset_string?: string;
+  note?: string;
+};
+
 export interface Symptom {
   code: Code;
-  clinicalStatus: SymptomClinicalStatus;
-  verificationStatus: SymptomVerificationStatus;
+  clinical_status: SymptomClinicalStatus;
+  verification_status: SymptomVerificationStatus;
   severity?: SymptomSeverity;
-  onsetDateTime?: string;
-  recordedDate?: string;
+  onset?: Onset;
+  recorded_date?: string;
   note?: string;
+  created_by: UserBase;
+  updated_by: UserBase;
 }
 
 export interface SymptomRequest {
@@ -42,7 +52,7 @@ export interface SymptomRequest {
   verification_status: SymptomVerificationStatus;
   code: Code;
   severity?: SymptomSeverity;
-  onset_date_time?: string;
+  onset?: Onset;
   recorded_date?: string;
   note?: string;
   encounter: string;

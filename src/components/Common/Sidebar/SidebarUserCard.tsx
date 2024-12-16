@@ -70,7 +70,8 @@ const SidebarUserCard: React.FC<SidebarUserCardProps> = ({ shrinked }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-full">
           <Link
-            href="/user/profile"
+            // TODO: revert this change. Temp. hack until #9382 is merged.
+            href={`/users/${user.username}`}
             className="block text-sm capitalize text-gray-900"
           >
             <DropdownMenuItem className="cursor-pointer">

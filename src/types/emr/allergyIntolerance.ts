@@ -1,14 +1,18 @@
 import { Code } from "../questionnaire/code";
+import { UserBase } from "../user/base";
 
 // Base type for allergy data
 export interface AllergyIntolerance {
   code: Code;
-  clinicalStatus?: string;
-  verificationStatus?: string;
+  clinical_status?: string;
+  verification_status?: string;
   category?: string;
   criticality?: string;
-  lastOccurrence?: string;
+  last_occurrence?: string;
   note?: string;
+  created_by: UserBase;
+  encounter: string;
+  edited_by?: UserBase;
 }
 
 // Type for API request, extends base type with required fields

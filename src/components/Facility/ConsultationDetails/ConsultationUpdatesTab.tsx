@@ -21,7 +21,8 @@ import Tabs from "@/components/Common/Tabs";
 import { ConsultationTabProps } from "@/components/Facility/ConsultationDetails/index";
 import { BedModel } from "@/components/Facility/models";
 import PrescriptionsTable from "@/components/Medicine/PrescriptionsTable";
-import EncounterSymptomsCard from "@/components/Symptoms/SymptomsCard";
+import { DiagnosisList } from "@/components/Patient/diagnosis/list";
+import { SymptomsList } from "@/components/Patient/symptoms/list";
 import HL7PatientVitalsMonitor from "@/components/VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "@/components/VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "@/components/VitalsMonitor/useVitalsAspectRatioConfig";
@@ -330,8 +331,18 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               </div>
             )}
 
-            <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6 md:col-span-2">
-              <EncounterSymptomsCard />
+            <div className="md:col-span-2">
+              <SymptomsList
+                patientId={props.patientId}
+                encounterId={props.consultationId}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <DiagnosisList
+                patientId={props.patientId}
+                encounterId={props.consultationId}
+              />
             </div>
 
             {props.consultationData.history_of_present_illness && (

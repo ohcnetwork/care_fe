@@ -4,13 +4,13 @@ import {
   ScheduleException,
   ScheduleExceptionCreate,
   ScheduleTemplate,
-  ScheduleTemplateCreate,
-  TokenSlot,
+  SlotAvailability,
 } from "@/components/Schedule/types";
-import { UserBareMinimum } from "@/components/Users/models";
 
 import { Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { WritableOnly } from "@/Utils/types";
+import { UserBase } from "@/types/user/base";
 
 export const ScheduleAPIs = {
   templates: {
@@ -18,7 +18,12 @@ export const ScheduleAPIs = {
       path: "/api/v1/facility/{facility_id}/schedule/",
       method: "POST",
       TRes: Type<ScheduleTemplate>(),
-      TBody: Type<ScheduleTemplateCreate>(),
+      TBody: Type<WritableOnly<ScheduleTemplate>>(),
+    },
+    delete: {
+      path: "/api/v1/facility/{facility_id}/schedule/{id}/",
+      method: "DELETE",
+      TRes: Type<void>(),
     },
     list: {
       path: "/api/v1/facility/{facility_id}/schedule/",
@@ -46,22 +51,26 @@ export const ScheduleAPIs = {
     },
   },
 
+  slots: {
+    getAvailableSlotsForADay: {
+      path: "/api/v1/facility/{facility_id}/slots/get_slots_for_day/",
+      method: "POST",
+      TRes: Type<{ results: SlotAvailability[] }>(),
+      TBody: Type<{ resource: string; day: string }>(),
+    },
+    createAppointment: {
+      path: "/api/v1/facility/{facility_id}/slots/{slot_id}/create_appointment/",
+      method: "POST",
+      TBody: Type<AppointmentCreate>(),
+      TRes: Type<Appointment>(),
+    },
+  },
+
   appointments: {
     availableDoctors: {
       path: "/api/v1/facility/{facility_id}/appointments/available_doctors/",
       method: "GET",
-      TRes: Type<PaginatedResponse<UserBareMinimum>>(),
-    },
-    slots: {
-      path: "/api/v1/facility/{facility_id}/appointments/slots/",
-      method: "GET",
-      TRes: Type<TokenSlot[]>(),
-    },
-    create: {
-      path: "/api/v1/facility/{facility_id}/appointments/",
-      method: "POST",
-      TBody: Type<AppointmentCreate>(),
-      TRes: Type<Appointment>(),
+      TRes: Type<{ users: UserBase[] }>(),
     },
     list: {
       path: "/api/v1/facility/{facility_id}/appointments/",
@@ -71,6 +80,12 @@ export const ScheduleAPIs = {
     retrieve: {
       path: "/api/v1/facility/{facility_id}/appointments/{id}/",
       method: "GET",
+      TRes: Type<Appointment>(),
+    },
+    update: {
+      path: "/api/v1/facility/{facility_id}/appointments/{id}/",
+      method: "PUT",
+      TBody: Type<Partial<WritableOnly<Appointment>>>(),
       TRes: Type<Appointment>(),
     },
   },

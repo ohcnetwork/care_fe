@@ -80,7 +80,11 @@ export default function OTP({
       navigate(
         `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
       );
+      const OTPaccessToken = response.data?.access;
       localStorage.setItem("phoneNumber", phoneNumber);
+      if (OTPaccessToken) {
+        localStorage.setItem("OTPaccessToken", OTPaccessToken);
+      }
     }
     // To Do: Mock, remove this
     navigate(
@@ -115,7 +119,7 @@ export default function OTP({
             type="submit"
             className="w-full h-12 text-lg"
           >
-            <span className="absolute inset-0 bg-gradient-to-b from-white/15 to-transparent"></span>
+            <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
             Send OTP
           </Button>
         </form>
@@ -147,7 +151,7 @@ export default function OTP({
               onChange={(e) => setOtp(e.toString())}
               value={otp}
               error={error}
-              length={4}
+              length={5}
             />
           </div>
           <Button

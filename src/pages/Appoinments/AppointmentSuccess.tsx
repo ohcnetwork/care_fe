@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { ScheduleAPIs } from "@/components/Schedule/api";
 import { Appointment } from "@/components/Schedule/types";
 
+import * as Notification from "@/Utils/Notifications";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 
 interface AppointmentSuccessProps {
   facilityId: string;
@@ -17,37 +19,64 @@ interface AppointmentSuccessProps {
 }
 
 export function AppointmentSuccess(props: AppointmentSuccessProps) {
-  const { appointmentId } = props;
+  const { appointmentId, facilityId } = props;
 
-  const { data } = useQuery<Appointment>({
+  const { data, error } = useQuery<Appointment>({
     queryKey: ["appointment", appointmentId],
     queryFn: query(ScheduleAPIs.appointments.retrieve, {
-      queryParams: { appointment_id: appointmentId },
+      pathParams: { id: appointmentId, facility_id: facilityId },
+      silent: true,
     }),
   });
+
+  if (error) {
+    Notification.Error({ msg: "Appointment not found" });
+    //To do: disabled for mock appointment, remove this
+    //navigate(`/facility/${facilityId}/`);
+  }
 
   const mockAppointment: Appointment = {
     id: "123",
     resource: {
       id: "456",
-      name: "Anjali Narayanan, B.Sc. Nursing",
+      first_name: "Anjali",
+      last_name: "Narayanan",
+      username: "anjali.narayanan",
+      email: "anjali.narayanan@carecompanion.in",
+      user_type: 15,
+      last_login: "2024-03-15T09:30:00Z",
     },
     patient: {
       id: "789",
       name: "Janaki Sivaraman",
+      gender: 2,
+      date_of_birth: "1990-05-15",
+      age: 30,
+      address: "123 Main Street, City, Country",
+      pincode: "123456",
     },
     token_slot: {
       start_datetime: "2023-12-20T12:30:00Z",
       end_datetime: "2023-12-20T13:30:00Z",
       id: "123",
-      resource: {
-        id: "456",
+      availability: {
         name: "Anjali Narayanan, B.Sc. Nursing",
+        tokens_per_slot: 1,
       },
-      tokens_count: 1,
-      tokens_remaining: 1,
+      allocated: 1,
     },
     reason_for_visit: "General Checkup",
+    booked_on: "2024-03-15T09:30:00Z",
+    booked_by: {
+      id: "123",
+      first_name: "Anjali",
+      last_name: "Narayanan",
+      username: "anjali.narayanan",
+      email: "anjali.narayanan@carecompanion.in",
+      user_type: 15,
+      last_login: "2024-03-15T09:30:00Z",
+    },
+    status: "booked",
   } as const;
 
   const appointmentData = data ?? mockAppointment;
@@ -66,7 +95,7 @@ export function AppointmentSuccess(props: AppointmentSuccessProps) {
           <span className="text-sm underline">Back to Home</span>
         </Button>
       </div>
-      <div className="bg-white rounded-lg shadow-sm p-12 border border-secondary-300 text-center mb-12">
+      <div className="bg-secondary-100/50 rounded-lg shadow-sm p-12 border border-secondary-400 text-center mb-12">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
           <CareIcon icon="l-check" className="w-8 h-8 text-green-600" />
         </div>
@@ -78,9 +107,11 @@ export function AppointmentSuccess(props: AppointmentSuccessProps) {
 
       <div className="grid grid-cols-2 gap-8">
         <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-1">Nurse:</h2>
+          <h2 className="text-sm font-medium text-gray-500 mb-1">
+            Doctor/Nurse:
+          </h2>
           <p className="text-lg font-medium">
-            {appointmentData?.resource.name}
+            {formatName(appointmentData?.resource)}
           </p>
         </div>
 
@@ -110,9 +141,9 @@ export function AppointmentSuccess(props: AppointmentSuccessProps) {
         </div>
       </div>
 
-      <div className="mt-12 text-center space-y-2">
+      <div className="mt-12 text-left space-y-2">
         <p className="text-gray-900">
-          Nurse {appointmentData?.resource.name} will visit the patient at the
+          {formatName(appointmentData?.resource)} will visit the patient at the
           scheduled time.
         </p>
         <p className="text-gray-600">Thank you for choosing our care service</p>

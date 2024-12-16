@@ -6,6 +6,7 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense } from "react";
 
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 
 import Loading from "@/components/Common/Loading";
@@ -17,15 +18,21 @@ import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { FeatureFlagsProvider } from "@/Utils/featureFlags";
 import { handleQueryError } from "@/Utils/request/errorHandler";
+import { QueryError } from "@/Utils/request/queryError";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
+
+declare module "@tanstack/react-query" {
+  interface Register {
+    defaultError: QueryError;
+  }
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 2,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
   queryCache: new QueryCache({
@@ -50,6 +57,12 @@ const App = () => {
               <Integrations.Sentry disabled={!import.meta.env.PROD} />
               <Integrations.Plausible />
             </HistoryAPIProvider>
+            <Sonner
+              position="top-right"
+              theme="light"
+              richColors
+              toastOptions={{}}
+            />
             <Toaster />
           </PluginEngine>
         </PubSubProvider>

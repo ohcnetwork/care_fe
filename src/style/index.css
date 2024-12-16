@@ -1310,6 +1310,37 @@ input[type="number"] {
     font-size: 1rem;
 }
 
+
+.grid-2-col, .grid-3-col, .grid-2-1-col, .grid-3-1-col, .grid-1-2-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .grid-2-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .grid-3-col {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .grid-2-1-col {
+        grid-template-columns: 2fr 1fr;
+    }
+    .grid-1-2-col {
+        grid-template-columns: 1fr 2fr;
+    }
+}
+
+.input-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.col-span-all {
+    grid-column: 1 / -1;
+}
+
 @layer base {
   :root {
         --radius:  0.5rem;

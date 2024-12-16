@@ -10,6 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -41,12 +42,14 @@ import {
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 
 interface DiagnosisQuestionProps {
+  question: any;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
 }
 
 export function DiagnosisQuestion({
+  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -110,6 +113,10 @@ export function DiagnosisQuestion({
 
   return (
     <div className="space-y-4">
+      <Label className="text-base font-medium">
+        {question.link_id} - {question.text}
+        {question.required && <span className="ml-1 text-red-500">*</span>}
+      </Label>
       <div className="rounded-lg border p-4">
         <div className="overflow-x-auto">
           <Table>
@@ -181,10 +188,11 @@ export function DiagnosisQuestion({
                   </TableCell>
                   <TableCell className="min-w-[150px]">
                     <Select
-                      value={diagnosis.clinicalStatus}
+                      value={diagnosis.clinical_status}
                       onValueChange={(value) =>
                         updateDiagnosis(index, {
-                          clinicalStatus: value as Diagnosis["clinicalStatus"],
+                          clinical_status:
+                            value as Diagnosis["clinical_status"],
                         })
                       }
                       disabled={disabled}
@@ -207,11 +215,11 @@ export function DiagnosisQuestion({
                   </TableCell>
                   <TableCell className="min-w-[150px]">
                     <Select
-                      value={diagnosis.verificationStatus}
+                      value={diagnosis.verification_status}
                       onValueChange={(value) =>
                         updateDiagnosis(index, {
-                          verificationStatus:
-                            value as Diagnosis["verificationStatus"],
+                          verification_status:
+                            value as Diagnosis["verification_status"],
                         })
                       }
                       disabled={disabled}
@@ -236,10 +244,12 @@ export function DiagnosisQuestion({
                     <input
                       type="date"
                       className="w-full rounded-md border p-2"
-                      value={diagnosis.onsetDateTime || ""}
+                      value={diagnosis.onset?.onset_datetime || ""}
                       onChange={(e) =>
                         updateDiagnosis(index, {
-                          onsetDateTime: e.target.value,
+                          onset: {
+                            onset_datetime: e.target.value,
+                          },
                         })
                       }
                       disabled={disabled}

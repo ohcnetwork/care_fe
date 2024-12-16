@@ -59,6 +59,7 @@ const Avatar: React.FC<AvatarProps> = ({
   const [bgColor] = propColors || toColor(name);
   return (
     <div
+      title={name}
       className={cn(
         `flex aspect-square w-full items-center justify-center overflow-hidden border border-black/10`,
         className,

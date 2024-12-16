@@ -13,7 +13,6 @@ const logo = (value?: string, fallback?: ILogo) => {
   try {
     return JSON.parse(value) as ILogo;
   } catch {
-    // TODO: define vite plugin to validate care.config.ts during build step
     return fallback;
   }
 };

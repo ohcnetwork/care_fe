@@ -4,6 +4,7 @@ import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -26,12 +27,14 @@ import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 
 interface AllergyQuestionProps {
+  question: any;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
 }
 
 export function AllergyQuestion({
+  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -47,13 +50,13 @@ export function AllergyQuestion({
       ...allergies,
       { code: { code: "", display: "", system: "" } },
     ];
-    setAllergies(newAllergies);
+    setAllergies(newAllergies as AllergyIntolerance[]);
     updateQuestionnaireResponseCB({
       ...questionnaireResponse,
       values: [
         {
           type: "allergy_intolerance",
-          value: newAllergies,
+          value: newAllergies as AllergyIntolerance[],
         },
       ],
     });
@@ -96,6 +99,10 @@ export function AllergyQuestion({
 
   return (
     <div className="space-y-4">
+      <Label className="text-base font-medium">
+        {question.link_id} - {question.text}
+        {question.required && <span className="ml-1 text-red-500">*</span>}
+      </Label>
       <div className="rounded-lg border p-4">
         <div className="overflow-x-auto">
           <Table>
@@ -126,9 +133,9 @@ export function AllergyQuestion({
                   </TableCell>
                   <TableCell className="min-w-[150px]">
                     <Select
-                      value={allergy.clinicalStatus}
+                      value={allergy.clinical_status}
                       onValueChange={(value) =>
-                        updateAllergy(index, { clinicalStatus: value })
+                        updateAllergy(index, { clinical_status: value })
                       }
                       disabled={disabled}
                     >
@@ -183,9 +190,11 @@ export function AllergyQuestion({
                   </TableCell>
                   <TableCell className="min-w-[150px]">
                     <Select
-                      value={allergy.verificationStatus}
+                      value={allergy.verification_status}
                       onValueChange={(value) =>
-                        updateAllergy(index, { verificationStatus: value })
+                        updateAllergy(index, {
+                          verification_status: value,
+                        })
                       }
                       disabled={disabled}
                     >
@@ -207,9 +216,11 @@ export function AllergyQuestion({
                     <input
                       type="date"
                       className="w-full rounded-md border p-2"
-                      value={allergy.lastOccurrence || ""}
+                      value={allergy.last_occurrence || ""}
                       onChange={(e) =>
-                        updateAllergy(index, { lastOccurrence: e.target.value })
+                        updateAllergy(index, {
+                          last_occurrence: e.target.value,
+                        })
                       }
                       disabled={disabled}
                     />

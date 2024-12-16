@@ -80,6 +80,5 @@ const routes = {
 };
 
 export default function SessionRouter() {
-  console.log("Current path:", window.location.pathname); // Add this logging
   return useRoutes(routes) || <Login />;
 }

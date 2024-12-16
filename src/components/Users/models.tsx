@@ -33,6 +33,7 @@ export type UserBareMinimum = {
 export type GenderType = "Male" | "Female" | "Transgender";
 
 export type UserModel = UserBareMinimum & {
+  external_id: string;
   local_body?: number;
   district?: number;
   state?: number;

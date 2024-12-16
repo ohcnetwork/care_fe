@@ -144,26 +144,25 @@ const Form = <T extends FormDetails>({
           <div className={classNames(!disableMarginOnChildren && "my-6")}>
             <Consumer>{props.children}</Consumer>
           </div>
-          {!hideCancelButton ||
-            (!hideSubmitButton && (
-              <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
-                {!hideCancelButton && (
-                  <Cancel
-                    onClick={handleCancel}
-                    label={props.cancelLabel ?? "Cancel"}
-                  />
-                )}
-                {!hideSubmitButton && (
-                  <Submit
-                    data-testid="submit-button"
-                    type="submit"
-                    disabled={disabled}
-                    label={props.submitLabel ?? "Submit"}
-                    className={props?.submitButtonClassName}
-                  />
-                )}
-              </div>
-            ))}
+          {(!hideCancelButton || !hideSubmitButton) && (
+            <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
+              {!hideCancelButton && (
+                <Cancel
+                  onClick={handleCancel}
+                  label={props.cancelLabel ?? "Cancel"}
+                />
+              )}
+              {!hideSubmitButton && (
+                <Submit
+                  data-testid="submit-button"
+                  type="submit"
+                  disabled={disabled}
+                  label={props.submitLabel ?? "Submit"}
+                  className={props?.submitButtonClassName}
+                />
+              )}
+            </div>
+          )}
         </Provider>
       </DraftSection>
     </form>

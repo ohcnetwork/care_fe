@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 
 import { FacilityModel } from "@/components/Facility/models";
 
-import { FeatureBadge, FeatureId } from "../Utils";
+import { FeatureBadge } from "../Utils";
 
 interface Props {
   facility: FacilityModel;
@@ -49,7 +49,7 @@ export function FacilityCard({ facility, className }: Props) {
                 {facility.features?.map((featureId) => (
                   <FeatureBadge
                     key={featureId}
-                    featureId={featureId as FeatureId}
+                    featureId={featureId as number}
                   />
                 ))}
               </div>

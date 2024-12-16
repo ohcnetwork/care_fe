@@ -1,3 +1,4 @@
+import { UserBase } from "../user/base";
 import { Code } from "./code";
 
 export const DIAGNOSIS_CLINICAL_STATUS = [
@@ -24,20 +25,29 @@ export const DIAGNOSIS_VERIFICATION_STATUS = [
 export type DiagnosisVerificationStatus =
   (typeof DIAGNOSIS_VERIFICATION_STATUS)[number];
 
+export type Onset = {
+  onset_datetime?: string;
+  onset_age?: string;
+  onset_string?: string;
+  note?: string;
+};
+
 export interface Diagnosis {
   code: Code;
-  clinicalStatus: DiagnosisClinicalStatus;
-  verificationStatus: DiagnosisVerificationStatus;
-  onsetDateTime?: string;
-  recordedDate?: string;
+  clinical_status: DiagnosisClinicalStatus;
+  verification_status: DiagnosisVerificationStatus;
+  onset?: Onset;
+  recorded_date?: string;
   note?: string;
+  created_by: UserBase;
+  updated_by: UserBase;
 }
 
 export interface DiagnosisRequest {
   clinical_status: DiagnosisClinicalStatus;
   verification_status: DiagnosisVerificationStatus;
   code: Code;
-  onset_date_time?: string;
+  onset?: Onset;
   recorded_date?: string;
   note?: string;
   encounter: string;

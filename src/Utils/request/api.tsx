@@ -77,6 +77,11 @@ import {
 } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
+import {
+  AppointmentPatient,
+  AppointmentPatientRegister,
+} from "@/pages/Patient/Utils";
+import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
 import { Observation } from "@/types/emr/observation";
 import { PlugConfig } from "@/types/plugConfig";
 import {
@@ -84,8 +89,10 @@ import {
   BatchSubmissionResult,
 } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
+import { Diagnosis } from "@/types/questionnaire/diagnosis";
 import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
+import { Symptom } from "@/types/questionnaire/symptom";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -104,6 +111,37 @@ export interface LoginCredentials {
   username: string;
   password: string;
 }
+
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export const API = <TResponse = undefined, TBody = undefined>(
+  route: `${HttpMethod} ${string}`,
+) => {
+  const [method, path] = route.split(" ") as [HttpMethod, string];
+  return {
+    path,
+    method,
+    TRes: Type<TResponse>(),
+    TBody: Type<TBody>(),
+  };
+};
+
+export const ModelCrudApis = <
+  TModel extends object,
+  TCreate = TModel,
+  TListResponse = TModel,
+  TUpdate = TModel,
+>(
+  route: string,
+) => {
+  return {
+    list: API<PaginatedResponse<TListResponse>>(`GET ${route}/`),
+    create: API<TModel, TCreate>(`POST ${route}/`),
+    retrieve: API<TModel>(`GET ${route}/{id}/`),
+    update: API<TModel, TUpdate>(`PUT ${route}/{id}/`),
+    delete: API(`DELETE ${route}/{id}/`),
+  };
+};
 
 const routes = {
   // Auth Endpoints
@@ -1417,6 +1455,25 @@ const routes = {
     TRes: Type<PaginatedResponse<Observation>>(),
   },
 
+  // Diagnosis Routes
+  getDiagnosis: {
+    path: "/api/v1/patient/{patientId}/diagnosis/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<Diagnosis>>(),
+  },
+  // Get Symptom
+  getSymptom: {
+    path: "/api/v1/patient/{patientId}/symptom/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<Symptom>>(),
+  },
+
+  getAllergy: {
+    path: "/api/v1/patient/{patientId}/allergy_intolerance/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<AllergyIntolerance>>(),
+  },
+
   // OTP Routes
   otp: {
     sendOtp: {
@@ -1435,16 +1492,22 @@ const routes = {
       method: "POST",
       TBody: Type<{ phone_number: string; otp: string }>(),
       TRes: Type<Record<string, never>>(),
-      auth: {
-        key: "Authorization",
-        value: "{OTP_API_KEY}",
-        type: "header",
-      },
     },
     getPatient: {
       path: "/api/v1/otp/patient/",
       method: "GET",
       TRes: Type<PaginatedResponse<PatientModel>>(),
+      auth: {
+        key: "Authorization",
+        value: "Bearer {token}",
+        type: "header",
+      },
+    },
+    createPatient: {
+      path: "/api/v1/otp/patient/",
+      method: "POST",
+      TBody: Type<AppointmentPatientRegister>(),
+      TRes: Type<AppointmentPatient>(),
       auth: {
         key: "Authorization",
         value: "Bearer {token}",

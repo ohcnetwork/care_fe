@@ -43,6 +43,7 @@ export type EnableWhen = {
 
 export interface AnswerOption {
   value: string;
+  display?: string;
   initialSelected?: boolean;
 }
 
@@ -54,6 +55,9 @@ export interface Question {
   description?: string;
   type: QuestionType;
   structured_type?: StructuredQuestionType;
+  styling_metadata?: {
+    classes?: string;
+  };
   required?: boolean;
   collect_time?: boolean;
   collect_performer?: boolean;

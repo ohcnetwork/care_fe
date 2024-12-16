@@ -9,7 +9,7 @@ const UserRoutes: AppRoutes = {
   "/users": () => <ManageUsers />,
   "/users/add": () => <UserAdd />,
   "/users/:username": ({ username }) => (
-    <UserHome username={username} tab={"profile"} />
+    <UserHome username={username} tab="profile" />
   ),
   "/users/:username/:tab": ({ username, tab }) => (
     <UserHome username={username} tab={tab} />

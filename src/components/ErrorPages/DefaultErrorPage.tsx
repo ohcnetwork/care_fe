@@ -4,14 +4,18 @@ import { useTranslation } from "react-i18next";
 
 import * as Notification from "@/Utils/Notifications";
 
-type ErrorType = "PAGE_NOT_FOUND" | "PAGE_LOAD_ERROR";
+type ErrorType = "PAGE_NOT_FOUND" | "PAGE_LOAD_ERROR" | "CUSTOM_ERROR";
 
 interface ErrorPageProps {
   forError?: ErrorType;
+  title?: string;
+  message?: string;
+  image?: string;
 }
 
 export default function ErrorPage({
   forError = "PAGE_NOT_FOUND",
+  ...props
 }: ErrorPageProps) {
   const { t } = useTranslation();
 
@@ -30,9 +34,17 @@ export default function ErrorPage({
       title: t("page_load_error"),
       message: t("could_not_load_page"),
     },
+    CUSTOM_ERROR: {
+      image: "/images/404.svg",
+      title: t("page_load_error"),
+      message: t("could_not_load_page"),
+    },
   };
 
-  const { image, title, message } = errorContent[forError];
+  const { image, title, message } = {
+    ...errorContent[forError],
+    ...props,
+  };
 
   return (
     <div className="flex h-screen items-center justify-center text-center">

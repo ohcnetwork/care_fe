@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { FacilityModel } from "@/components/Facility/models";
-import { ScheduleAPIs } from "@/components/Schedule/api";
-import { UserBareMinimum } from "@/components/Users/models";
+import { SkillObjectModel, UserAssignedModel } from "@/components/Users/models";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -17,12 +16,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
 
-import {
-  DoctorModel,
-  FACILITY_FEATURES,
-  FeatureBadge,
-  mockDoctors,
-} from "./Utils";
+import { DoctorModel, FeatureBadge, mockDoctors } from "./Utils";
 import { DoctorCard } from "./components/DoctorCard";
 
 interface Props {
@@ -44,17 +38,14 @@ export function FacilityDetailsPage({ id }: Props) {
   });
 
   const { data: docReponse } = useQuery<
-    RequestResult<PaginatedResponse<UserBareMinimum>>
+    RequestResult<PaginatedResponse<UserAssignedModel>>
   >({
-    queryKey: [ScheduleAPIs.appointments.availableDoctors, id],
+    queryKey: [routes.getFacilityUsers, id],
     queryFn: async () => {
-      const response = await request(
-        ScheduleAPIs.appointments.availableDoctors,
-        {
-          pathParams: { facility_id: id },
-          silent: true,
-        },
-      );
+      const response = await request(routes.getFacilityUsers, {
+        pathParams: { facility_id: id },
+        silent: true,
+      });
       if (response.res?.status !== 200) {
         Notification.Error({ msg: "Error while fetching doctors data" });
       }
@@ -63,17 +54,27 @@ export function FacilityDetailsPage({ id }: Props) {
   });
 
   // To Do: Mock, remove/adjust this
+  const createMockRole = (skills: SkillObjectModel[]) => {
+    if (skills.length === 0) {
+      return "General Practitioner";
+    }
+    const randomSkill = skills[Math.floor(Math.random() * skills.length)];
+    return randomSkill.name;
+  };
+
+  // To Do: Mock, remove/adjust this
   // Need to adjust DoctorModel to match the data from the backend
-  function extendDoctors(doctors: UserBareMinimum[]): DoctorModel[] {
+  function extendDoctors(doctors: UserAssignedModel[]): DoctorModel[] {
     const randomDoc =
       mockDoctors[Math.floor(Math.random() * mockDoctors.length)];
     return doctors.map((doctor) => ({
       ...doctor,
-      role: randomDoc.role,
-      education: randomDoc.education,
-      experience: randomDoc.experience,
+      role: createMockRole(doctor.skills),
+      education: doctor.qualification ?? "",
+      experience: doctor.doctor_experience_commenced_on?.toString() ?? "",
       languages: randomDoc.languages,
-      specializations: randomDoc.specializations,
+      read_profile_picture_url: doctor.read_profile_picture_url ?? "",
+      skills: doctor.skills,
     }));
   }
 
@@ -152,10 +153,7 @@ export function FacilityDetailsPage({ id }: Props) {
 
             <div className="flex flex-wrap gap-2">
               {facility.features?.map((featureId) => (
-                <FeatureBadge
-                  key={featureId}
-                  featureId={featureId as keyof typeof FACILITY_FEATURES}
-                />
+                <FeatureBadge key={featureId} featureId={featureId as number} />
               ))}
             </div>
           </div>
@@ -166,7 +164,11 @@ export function FacilityDetailsPage({ id }: Props) {
           <>
             <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 lg:grid-cols-2">
               {doctors?.map((doctor) => (
-                <DoctorCard key={doctor.id} doctor={doctor} facilityId={id} />
+                <DoctorCard
+                  key={doctor.username}
+                  doctor={doctor}
+                  facilityId={id}
+                />
               ))}
             </div>
             <Pagination totalCount={doctors.length ?? 0} />

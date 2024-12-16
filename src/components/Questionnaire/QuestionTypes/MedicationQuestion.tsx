@@ -129,7 +129,10 @@ export function MedicationQuestion({
 
   return (
     <div className="space-y-4">
-      <Label>{question.text}</Label>
+      <Label className="text-base font-medium">
+        {question.link_id} - {question.text}
+        {question.required && <span className="ml-1 text-red-500">*</span>}
+      </Label>
       <div className="rounded-lg border p-4">
         <div>
           <ul className="space-y-2">
@@ -296,7 +299,10 @@ export function MedicationQuestion({
 
   return (
     <div className="space-y-4">
-      <Label>{question.text}</Label>
+      <Label className="text-base font-medium">
+        {question.link_id} - {question.text}
+        {question.required && <span className="ml-1 text-red-500">*</span>}
+      </Label>
       <div className="rounded-lg border p-4">
         <div className="overflow-x-auto">
           <Table>

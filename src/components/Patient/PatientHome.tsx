@@ -2,6 +2,8 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
+
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 
@@ -184,6 +186,17 @@ export const PatientHome = (props: {
         [id]: { name: patientData?.name },
       }}
       backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
+      options={
+        <>
+          <Button asChild variant="primary">
+            <Link
+              href={`/facility/${facilityId}/patient/${id}/appointments/create`}
+            >
+              Doctor Consultation
+            </Link>
+          </Button>
+        </>
+      }
     >
       <div className="mt-3" data-testid="patient-dashboard">
         <div className="px-3 md:px-0">
@@ -215,7 +228,7 @@ export const PatientHome = (props: {
                 <div className="h-full space-y-2">
                   <div className="space-y-3 border-b border-dashed text-left text-lg font-semibold text-secondary-900">
                     <div>
-                      {patientData?.is_active &&
+                      {/* {patientData?.is_active &&
                         (!patientData?.last_consultation ||
                           patientData?.last_consultation?.discharge_date) && (
                           <div>
@@ -238,7 +251,7 @@ export const PatientHome = (props: {
                               </span>
                             </ButtonV2>
                           </div>
-                        )}
+                        )} */}
                     </div>
                   </div>
                 </div>
@@ -673,7 +686,6 @@ export const PatientHome = (props: {
           </div>
         </div>
       </div>
-
       <ConfirmDialog
         className="w-full justify-between"
         title={t("assign_a_volunteer_to", { name: patientData.name })}

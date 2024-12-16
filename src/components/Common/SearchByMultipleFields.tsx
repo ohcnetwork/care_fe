@@ -46,6 +46,7 @@ interface SearchByMultipleFieldsProps {
   inputClassName?: string;
   buttonClassName?: string;
   clearSearch?: { value: boolean; params?: string[] };
+  enableOptionButtons?: boolean;
 }
 
 type EventType = React.ChangeEvent<HTMLInputElement> | { value: string };
@@ -59,6 +60,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
   inputClassName,
   buttonClassName,
   clearSearch,
+  enableOptionButtons = true,
 }) => {
   const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(
@@ -256,25 +258,27 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
           {t("invalid_phone_number")}
         </div>
       )}
-      <div className="flex flex-wrap gap-2 rounded-b-lg bg-gray-50 border-t border-t-gray-100 p-2">
-        {options.map((option, i) => (
-          <Button
-            key={option.key}
-            onClick={() => handleOptionChange(i)}
-            variant="outline"
-            size="xs"
-            data-test-id={id + "__" + option.key}
-            className={cn(
-              selectedOption.key === option.key
-                ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-              buttonClassName,
-            )}
-          >
-            {t(option.key)}
-          </Button>
-        ))}
-      </div>
+      {enableOptionButtons && (
+        <div className="flex flex-wrap gap-2 rounded-b-lg bg-gray-50 border-t border-t-gray-100 p-2">
+          {options.map((option, i) => (
+            <Button
+              key={option.key}
+              onClick={() => handleOptionChange(i)}
+              variant="outline"
+              size="xs"
+              data-test-id={id + "__" + option.key}
+              className={cn(
+                selectedOption.key === option.key
+                  ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                buttonClassName,
+              )}
+            >
+              {t(option.key)}
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
