@@ -297,7 +297,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 placeholder="Type your description here"
                 value={state.form.reason}
                 onChange={handleChange}
-                label="Description of request*"
+                label="Reason of Request*"
                 error={state.errors.reason}
               />
             </div>
