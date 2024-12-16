@@ -2,8 +2,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { PatientModel } from "@/components/Patient/models";
 
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+
+import { PatientNotesModel } from "../Facility/models";
 
 export function isPatientMandatoryDataFilled(patient: PatientModel) {
   return (
@@ -36,7 +39,7 @@ export const useAddPatientNote = (options: {
       replyTo,
     }: {
       noteField: string;
-      thread: 10 | 20;
+      thread: PatientNotesModel["thread"];
       replyTo?: { id: string };
     }) => {
       const { res, data } = await request(routes.addPatientNote, {
@@ -53,6 +56,7 @@ export const useAddPatientNote = (options: {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
+      Notification.Success({ msg: "Note added successfully" });
       return data;
     },
   });
