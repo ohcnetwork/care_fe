@@ -436,7 +436,7 @@ const AssetsList = () => {
               key: "Name/ Serial no./ QR code ID",
               label: "name/serial no./QR code ID",
               type: "text" as const,
-              placeholder: "Search by name/serial no./QR code ID",
+              placeholder: "Search by Name / Serial no. / QR code ID",
               value: qParams.search || "",
               shortcutKey: "f",
             },
