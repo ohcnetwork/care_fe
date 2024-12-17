@@ -7,6 +7,29 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { InputErrors } from "@/components/ui/errors";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+
+import DialogModal from "@/components/Common/Dialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import TransferPatientDialog from "@/components/Facility/TransferPatientDialog";
+import { PatientModel } from "@/components/Patient/models";
+
 import useAppHistory from "@/hooks/useAppHistory";
 
 import {
@@ -30,28 +53,6 @@ import {
   includesIgnoreCase,
   parsePhoneNumber,
 } from "@/Utils/utils";
-
-import DialogModal from "../Common/Dialog";
-import Loading from "../Common/Loading";
-import Page from "../Common/Page";
-import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
-import { InputErrors } from "../ui/errors";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Textarea } from "../ui/textarea";
-import { PatientModel } from "./models";
 
 interface PatientRegistrationPageProps {
   facilityId: string;

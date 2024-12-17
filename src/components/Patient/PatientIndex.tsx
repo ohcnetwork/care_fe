@@ -8,22 +8,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import useAuthUser from "@/hooks/useAuthUser";
-import useFilters from "@/hooks/useFilters";
-
-import { GENDER_TYPES } from "@/common/constants";
-
-import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
-import { formatPatientAge, parsePhoneNumber } from "@/Utils/utils";
-
-import * as Notification from "../../Utils/Notifications";
-import Loading from "../Common/Loading";
-import Page from "../Common/Page";
-import SearchByMultipleFields from "../Common/SearchByMultipleFields";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { FacilityModel } from "../Facility/models";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -31,11 +16,29 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { TabbedSections } from "../ui/tabs";
-import { PatientManager } from "./ManagePatients";
-import PatientFilter, { PatientFilterBadges } from "./PatientFilter";
-import { getPatientUrl } from "./Utils";
+} from "@/components/ui/table";
+import { TabbedSections } from "@/components/ui/tabs";
+
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
+import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
+import { FacilityModel } from "@/components/Facility/models";
+import { PatientManager } from "@/components/Patient/ManagePatients";
+import PatientFilter, {
+  PatientFilterBadges,
+} from "@/components/Patient/PatientFilter";
+import { getPatientUrl } from "@/components/Patient/Utils";
+
+import useAuthUser from "@/hooks/useAuthUser";
+import useFilters from "@/hooks/useFilters";
+
+import { GENDER_TYPES } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
+import routes from "@/Utils/request/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatPatientAge, parsePhoneNumber } from "@/Utils/utils";
 
 export default function PatientIndex() {
   const { t } = useTranslation();
