@@ -5,15 +5,15 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { PatientModel } from "@/components/Patient/models";
 import { UserModel } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { ADMIN_USER_TYPES } from "@/common/constants";
 
-import { PatientProps } from ".";
-import * as Notification from "../../../Utils/Notifications";
-import { PatientModel } from "../models";
+import * as Notification from "@/Utils/Notifications";
 
 export const HealthProfileSummary = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
