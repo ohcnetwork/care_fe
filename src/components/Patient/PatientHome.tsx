@@ -432,6 +432,7 @@ export const PatientHome = (props: {
                 facilityId={facilityId || ""}
                 id={id}
                 patientData={patientData}
+                refetch={refetch}
               />
             )}
           </div>

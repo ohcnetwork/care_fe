@@ -9,20 +9,20 @@ import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
 
 import { Button } from "@/components/ui/button";
 
+import { InsuranceDetailsCard } from "@/components/Patient/InsuranceDetailsCard";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { parseOccupation } from "@/components/Patient/PatientHome";
+import { AssignedToObjectModel } from "@/components/Patient/models";
+
 import useAuthUser from "@/hooks/useAuthUser";
 
 import { GENDER_TYPES } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatName, formatPatientAge } from "@/Utils/utils";
-
-import { PatientProps } from ".";
-import * as Notification from "../../../Utils/Notifications";
-import { InsuranceDetailsCard } from "../InsuranceDetailsCard";
-import { parseOccupation } from "../PatientHome";
-import { AssignedToObjectModel } from "../models";
 
 export const Demography = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
@@ -64,9 +64,7 @@ export const Demography = (props: PatientProps) => {
   const { data: insuranceDetials } = useTanStackQueryInstead(
     routes.hcx.policies.list,
     {
-      query: {
-        patient: id,
-      },
+      query: { patient: id },
     },
   );
 

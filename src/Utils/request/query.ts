@@ -13,7 +13,7 @@ async function queryRequest<TData, TBody>(
 
   const fetchOptions: RequestInit = {
     method,
-    headers: makeHeaders(noAuth ?? false),
+    headers: makeHeaders(noAuth ?? false, options?.headers),
     signal: options?.signal,
   };
 
