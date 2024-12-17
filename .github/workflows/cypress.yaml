@@ -10,7 +10,7 @@ on:
 jobs:
   cypress-run:
     permissions: write-all
-    if: github.repository == 'ohcnetwork/care_fe'
+    if: github.repository == 'manmeetnagii/care_fe'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
