@@ -8,10 +8,11 @@ import CountBlock from "@/CAREUI/display/Count";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 
+import { Button } from "@/components/ui/button";
+
 import AssetFilter from "@/components/Assets/AssetFilter";
 import AssetImportModal from "@/components/Assets/AssetImportModal";
 import { AssetData, assetClassProps } from "@/components/Assets/AssetTypes";
-import ButtonV2 from "@/components/Common/ButtonV2";
 import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -19,6 +20,7 @@ import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
 import { FacilityModel } from "@/components/Facility/models";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
 
@@ -37,8 +39,8 @@ const AssetsList = () => {
     Pagination,
     FilterBadges,
     advancedFilter,
-    clearSearch,
     resultsPerPage,
+    clearSearch,
   } = useFilters({
     limit: 18,
     cacheBlacklist: ["name", "serial_number", "qr_code_id"],
@@ -56,10 +58,10 @@ const AssetsList = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>();
   const params = {
     limit: resultsPerPage,
-    page: qParams.page || 1,
-    name: qParams.name || undefined,
-    serial_number: qParams.serial_number || undefined,
-    qr_code_id: qParams.qr_code_id || undefined,
+    page: qParams.page,
+    name: qParams.name || "",
+    serial_number: qParams.serial_number || "",
+    qr_code_id: qParams.qr_code_id || "",
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     search_text: qParams.search || "",
     facility: qParams.facility || "",
@@ -117,6 +119,9 @@ const AssetsList = () => {
       prefetch: !!(qParams.facility && qParams.location),
     },
   );
+
+  const authUser = useAuthUser();
+  const isDisabled = !NonReadOnlyUsers(authUser.user_type);
 
   function isValidURL(url: string) {
     try {
@@ -346,16 +351,19 @@ const AssetsList = () => {
     <Page
       title="Assets"
       breadcrumbs={false}
+      className="px-4 md:px-6"
       hideBack
       options={
-        <div className="flex w-full flex-col gap-2 items-center justify-between lg:flex-row">
+        <div className="flex w-full flex-col items-center justify-between lg:flex-row">
           <div
-            className="flex flex-col w-full lg:w-auto md:flex-row"
+            className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5"
             data-testid="create-asset-buttom"
           >
-            <ButtonV2
-              authorizeFor={NonReadOnlyUsers}
-              className="inline-flex w-full items-center justify-center"
+            <Button
+              disabled={isDisabled}
+              variant={"primary"}
+              size={"lg"}
+              className="gap-2 w-full lg:w-fit"
               onClick={() => {
                 if (qParams.facility) {
                   navigate(`/facility/${qParams.facility}/assets/new`);
@@ -366,25 +374,28 @@ const AssetsList = () => {
             >
               <CareIcon icon="l-plus-circle" className="text-lg" />
               <span>{t("create_asset")}</span>
-            </ButtonV2>
+            </Button>
           </div>
-          <div className="flex flex-col lg:flex-row w-full lg:w-auto justify-between gap-2 lg:ml-2">
-            <div className="flex flex-col gap-2 md:flex-row lg:w-auto">
-              <ButtonV2
-                className="w-full py-[11px]"
-                onClick={() => setIsScannerActive(true)}
-              >
-                <CareIcon icon="l-search" className="mr-1 text-base" /> Scan
-                Asset QR
-              </ButtonV2>
-              <div>
-                <AdvancedFilterButton
-                  onClick={() => advancedFilter.setShow(true)}
-                />
-              </div>
-            </div>
-            {authorizedForImportExport && (
-              <div className="tooltip" data-testid="import-asset-button">
+          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+
+            <Button
+              variant={"primary"}
+              size={"lg"}
+              className="gap-2 w-full"
+              onClick={() => setIsScannerActive(true)}
+            >
+              <CareIcon icon="l-search" className="mr-1 text-base" />
+              Scan Asset QR
+            </Button>
+
+            <div
+              className="tooltip w-full md:w-auto"
+              data-testid="import-asset-button"
+            >
+              {authorizedForImportExport && (
                 <ExportMenu
                   label={
                     importAssetModalOpen ? "Importing..." : "Import/Export"
@@ -396,7 +407,7 @@ const AssetsList = () => {
                         icon: (
                           <CareIcon
                             icon="l-import"
-                            className="import-assets-button"
+                            className="import-assets-button mr-5 w-full lg:w-fit"
                           />
                         ),
                         onClick: () => setImportAssetModalOpen(true),
@@ -438,31 +449,28 @@ const AssetsList = () => {
                     },
                   ]}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       }
     >
-      <div className="mt-5 gap-8 items-center justify-between space-y-2 lg:flex">
-        <div className="mr-8">
-          <CountBlock
-            text="Total Assets"
-            count={totalCount}
-            loading={loading}
-            icon="d-folder"
-            className="flex-1"
-          />
-        </div>
-        <div className="w-full">
-          <SearchByMultipleFields
-            id="asset-search"
-            options={searchOptions}
-            onSearch={(key, value) => updateQuery({ search: value })}
-            clearSearch={clearSearch}
-            className="w-full"
-          />
-        </div>
+      <div className="mt-4 gap-4 lg:gap-16 flex flex-col lg:flex-row lg:items-center">
+        <CountBlock
+          text="Total Assets"
+          count={totalCount}
+          loading={loading}
+          icon="d-folder"
+          className="flex-1"
+        />
+
+        <SearchByMultipleFields
+          id="asset-search"
+          options={searchOptions}
+          onSearch={(key, value) => updateQuery({ search: value })}
+          clearSearch={clearSearch}
+          className="w-full"
+        />
       </div>
       <AssetFilter {...advancedFilter} key={window.location.search} />
       {isLoading ? (
@@ -478,7 +486,6 @@ const AssetsList = () => {
               ),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Class", "asset_class", asset_class ?? ""),
-              value("Name", "name", qParams.name ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
               value(
                 "Location",
