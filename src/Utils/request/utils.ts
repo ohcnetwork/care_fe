@@ -50,31 +50,21 @@ const ensurePathNotMissingReplacements = (path: string) => {
   }
 };
 
-export function makeHeaders(noAuth: boolean) {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  });
+export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
+  const headers = new Headers(additionalHeaders);
+
+  headers.set("Content-Type", "application/json");
+  headers.append("Accept", "application/json");
 
   if (!noAuth) {
-    const token = getAuthorizationHeader();
+    const token = localStorage.getItem(LocalStorageKeys.accessToken);
 
     if (token) {
-      headers.append("Authorization", token);
+      headers.append("Authorization", `Bearer ${token}`);
     }
   }
 
   return headers;
-}
-
-export function getAuthorizationHeader() {
-  const bearerToken = localStorage.getItem(LocalStorageKeys.accessToken);
-
-  if (bearerToken) {
-    return `Bearer ${bearerToken}`;
-  }
-
-  return null;
 }
 
 export function mergeRequestOptions<TData>(

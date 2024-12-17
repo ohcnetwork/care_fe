@@ -41,6 +41,7 @@ export interface QueryOptions<TBody = unknown> {
   body?: TBody;
   silent?: boolean;
   signal?: AbortSignal;
+  headers?: HeadersInit;
 }
 
 export interface PaginatedResponse<TItem> {
