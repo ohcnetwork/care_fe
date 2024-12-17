@@ -28,11 +28,7 @@ import { FieldLabel } from "@/components/Form/FormFields/FormField";
 import useAuthUser from "@/hooks/useAuthUser";
 import useSlug from "@/hooks/useSlug";
 
-import {
-  FACILITY_FEATURE_TYPES,
-  LocalStorageKeys,
-  USER_TYPES,
-} from "@/common/constants";
+import { FACILITY_FEATURE_TYPES, USER_TYPES } from "@/common/constants";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
@@ -42,6 +38,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { sleep } from "@/Utils/utils";
 
 import { patientRegisterAuth } from "../Patient/PatientRegister";
@@ -121,10 +118,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
       url,
       formData,
       "POST",
-      {
-        Authorization:
-          "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-      },
+      { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);
