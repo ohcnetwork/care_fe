@@ -56,15 +56,22 @@ export function makeHeaders(noAuth: boolean, additionalHeaders?: HeadersInit) {
   headers.set("Content-Type", "application/json");
   headers.append("Accept", "application/json");
 
-  if (!noAuth) {
-    const token = localStorage.getItem(LocalStorageKeys.accessToken);
-
-    if (token) {
-      headers.append("Authorization", `Bearer ${token}`);
-    }
+  const authorizationHeader = getAuthorizationHeader();
+  if (authorizationHeader && !noAuth) {
+    headers.append("Authorization", authorizationHeader);
   }
 
   return headers;
+}
+
+export function getAuthorizationHeader() {
+  const accessToken = localStorage.getItem(LocalStorageKeys.accessToken);
+
+  if (accessToken) {
+    return `Bearer ${accessToken}`;
+  }
+
+  return null;
 }
 
 export function mergeRequestOptions<TData>(
