@@ -214,7 +214,7 @@ export default function LinkedFacilities({
               )}
             </div>
             <DropdownMenuTrigger
-              disabled={userData.user_type == "Volunteer"}
+              disabled={authUser.user_type == "Volunteer"}
               id="linked-facility-settings"
             >
               <div className="flex items-center justify-center rounded-r bg-secondary-300 px-2 min-h-16">
@@ -277,7 +277,7 @@ export default function LinkedFacilities({
                 onClick={() =>
                   handleOnClick("clear_home_facility", homeFacility)
                 }
-                disabled={userData.user_type == "Volunteer"}
+                disabled={authUser.user_type == "Volunteer"}
                 title={t("clear_home_facility")}
                 aria-label={t("clear_home_facility")}
               >
