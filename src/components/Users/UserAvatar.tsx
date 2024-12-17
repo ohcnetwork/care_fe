@@ -9,14 +9,13 @@ import Loading from "@/components/Common/Loading";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { LocalStorageKeys } from "@/common/constants";
-
 import * as Notification from "@/Utils/Notifications";
 import { showAvatarEdit } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { getAuthorizationHeader } from "@/Utils/request/utils";
 import { formatDisplayName, sleep } from "@/Utils/utils";
 
 export default function UserAvatar({ username }: { username: string }) {
@@ -47,10 +46,7 @@ export default function UserAvatar({ username }: { username: string }) {
       url,
       formData,
       "POST",
-      {
-        Authorization:
-          "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-      },
+      { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);

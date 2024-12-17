@@ -26,7 +26,7 @@ import {
 
 import useAuthUser, { useAuthContext } from "@/hooks/useAuthUser";
 
-import { GENDER_TYPES, LocalStorageKeys } from "@/common/constants";
+import { GENDER_TYPES } from "@/common/constants";
 import { validateEmailAddress } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
@@ -35,6 +35,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import uploadFile from "@/Utils/request/uploadFile";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { getAuthorizationHeader } from "@/Utils/request/utils";
 import {
   dateQueryString,
   formatDate,
@@ -507,10 +508,7 @@ export default function UserProfile() {
       url,
       formData,
       "POST",
-      {
-        Authorization:
-          "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-      },
+      { Authorization: getAuthorizationHeader() },
       async (xhr: XMLHttpRequest) => {
         if (xhr.status === 200) {
           await sleep(1000);

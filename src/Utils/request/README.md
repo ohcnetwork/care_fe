@@ -67,10 +67,12 @@ function FacilityDetails({ id }: { id: string }) {
 - Integrates with our global error handling.
 
 ```typescript
-interface QueryOptions {
+interface APICallOptions {
   pathParams?: Record<string, string>;  // URL parameters
-  queryParams?: Record<string, string>; // Query string parameters
+  queryParams?: QueryParams;            // Query string parameters
+  body?: TBody;                         // Request body
   silent?: boolean;                     // Suppress error notifications
+  headers?: HeadersInit;                // Additional headers
 }
 
 // Basic usage
@@ -99,6 +101,82 @@ All API errors are now handled globally. Common scenarios like:
 are automatically handled.
 
 Use the `silent: true` option to suppress error notifications for specific queries.
+
+## Using Mutations with TanStack Query
+
+For data mutations, we provide a `mutate` utility that works seamlessly with TanStack Query's `useMutation` hook.
+
+```tsx
+import { useMutation } from "@tanstack/react-query";
+import mutate from "@/Utils/request/mutate";
+
+function CreatePrescription({ consultationId }: { consultationId: string }) {
+  const { mutate: createPrescription, isPending } = useMutation({
+    mutationFn: mutate(MedicineRoutes.createPrescription, {
+      pathParams: { consultationId },
+    }),
+    onSuccess: () => {
+      toast.success("Prescription created successfully");
+    },
+  });
+
+  return (
+    <Button 
+      onClick={() => createPrescription({ medicineId: "123", dosage: "1x daily" })}
+      disabled={isPending}
+    >
+      Create Prescription
+    </Button>
+  );
+}
+
+// With path parameters and complex payload
+function UpdatePatient({ patientId }: { patientId: string }) {
+  const { mutate: updatePatient } = useMutation({
+    mutationFn: mutate(PatientRoutes.update, {
+      pathParams: { id: patientId },
+      silent: true // Optional: suppress error notifications
+    })
+  });
+
+  const handleSubmit = (data: PatientData) => {
+    updatePatient(data);
+  };
+
+  return <PatientForm onSubmit={handleSubmit} />;
+}
+```
+
+### mutate
+
+`mutate` is our wrapper around the API call functionality that works with TanStack Query's `useMutation`. It:
+- Handles request body serialization
+- Sets appropriate headers
+- Integrates with our global error handling
+- Provides TypeScript type safety for your mutation payload
+
+```typescript
+interface APICallOptions {
+  pathParams?: Record<string, string>;  // URL parameters
+  queryParams?: QueryParams;            // Query string parameters
+  body?: TBody;                         // Request body
+  silent?: boolean;                     // Suppress error notifications
+  headers?: HeadersInit;                // Additional headers
+}
+
+// Basic usage
+useMutation({
+  mutationFn: mutate(routes.users.create)
+});
+
+// With parameters
+useMutation({
+  mutationFn: mutate(routes.users.update, {
+    pathParams: { id },
+    silent: true  // Optional: suppress error notifications
+  })
+});
+```
 
 ## Migration Guide & Reference
 
