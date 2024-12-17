@@ -154,8 +154,8 @@ describe("Patient Creation with consultation", () => {
     patientPage.visitUpdatePatientUrl();
     patientPage.verifyStatusCode();
     patientPage.patientformvisibility();
-    cy.wait(3000);
     // change the gender to female and input data to related changed field
+    cy.wait(3000);
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.clickPatientAntenatalStatusYes();
