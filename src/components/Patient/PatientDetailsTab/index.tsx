@@ -1,15 +1,16 @@
-import { PatientModel } from "../models";
-import { Demography } from "./Demography";
-import EncounterHistory from "./EncounterHistory";
-import { HealthProfileSummary } from "./HealthProfileSummary";
-import { ImmunisationRecords } from "./ImmunisationRecords";
-import PatientNotes from "./Notes";
-import ShiftingHistory from "./ShiftingHistory";
+import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
+import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
+import { ImmunisationRecords } from "@/components/Patient/PatientDetailsTab//ImmunisationRecords";
+import PatientNotes from "@/components/Patient/PatientDetailsTab//Notes";
+import ShiftingHistory from "@/components/Patient/PatientDetailsTab//ShiftingHistory";
+import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
+import { PatientModel } from "@/components/Patient/models";
 
 export interface PatientProps {
   facilityId: string;
   id: string;
   patientData: PatientModel;
+  refetch: () => void;
 }
 
 export const patientTabs = [

@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { ShiftCreate } from "@/components/Patient/ShiftCreate";
+import { PatientModel } from "@/components/Patient/models";
 import { formatFilter } from "@/components/Resource/ResourceCommons";
 import ShiftingTable from "@/components/Shifting/ShiftingTable";
 
@@ -12,10 +15,6 @@ import useFilters from "@/hooks/useFilters";
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-
-import { PatientProps } from ".";
-import { ShiftCreate } from "../ShiftCreate";
-import { PatientModel } from "../models";
 
 const ShiftingHistory = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
