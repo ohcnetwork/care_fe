@@ -1,10 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import Page from "@/components/Common/Page";
 import PatientNotesListComponent from "@/components/Facility/PatientNotesListComponent";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 
 interface PatientNotesProps {
   patientId: string;
@@ -18,15 +19,25 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
 
-  useQuery(routes.getPatient, {
-    pathParams: { id: patientId },
-    onResponse: ({ data }) => {
-      if (data) {
-        setPatientName(data.name ?? "");
-        setFacilityName(data.facility_object?.name ?? "");
-      }
-    },
+  const { data: patientData } = useQuery({
+    queryKey: [routes.getPatient.path, patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId },
+    }),
+    enabled: !!patientId,
   });
+
+  if (patientData) {
+    if (patientData.name && patientData.name !== patientName) {
+      setPatientName(patientData.name);
+    }
+    if (
+      patientData.facility_object?.name &&
+      patientData.facility_object.name !== facilityName
+    ) {
+      setFacilityName(patientData.facility_object.name);
+    }
+  }
 
   return (
     <Page

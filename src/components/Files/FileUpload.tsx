@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +20,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 
 export const LinearProgressWithLabel = (props: { value: number }) => {
   return (
@@ -118,66 +119,112 @@ export const FileUpload = (props: FileUploadProps) => {
       CLAIM: claimId,
     }[type] || "";
 
-  const activeFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
-    query: {
-      file_type: type,
-      associating_id: associatedId,
-      is_archived: false,
-      limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
-    },
+  const {
+    data: activeFilesData,
+    isLoading: isLoadingActiveFiles,
+    refetch: refetchActiveFiles,
+  } = useQuery({
+    queryKey: [routes.viewUpload.path, type, associatedId, false, offset],
+    queryFn: query(routes.viewUpload, {
+      queryParams: {
+        file_type: type,
+        associating_id: associatedId,
+        is_archived: false,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset,
+      },
+    }),
   });
 
-  const archivedFilesQuery = useTanStackQueryInstead(routes.viewUpload, {
-    query: {
-      file_type: type,
-      associating_id: associatedId,
-      is_archived: true,
-      limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
-    },
+  const {
+    data: archivedFilesData,
+    isLoading: isLoadingArchivedFiles,
+    refetch: refetchArchivedFiles,
+  } = useQuery({
+    queryKey: [routes.viewUpload.path, type, associatedId, true, offset],
+    queryFn: query(routes.viewUpload, {
+      queryParams: {
+        file_type: type,
+        associating_id: associatedId,
+        is_archived: true,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset,
+      },
+    }),
   });
 
-  const dischargeSummaryQuery = useTanStackQueryInstead(routes.viewUpload, {
-    query: {
-      file_type: "DISCHARGE_SUMMARY",
-      associating_id: associatedId,
-      is_archived: false,
-      limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
-    },
-    prefetch: type === "CONSULTATION",
-    silent: true,
+  const {
+    data: dischargeSummaryData,
+    isLoading: isLoadingDischargeSummary,
+    refetch: refetchDischargeSummary,
+  } = useQuery({
+    queryKey: [
+      routes.viewUpload.path,
+      "DISCHARGE_SUMMARY",
+      associatedId,
+      offset,
+    ],
+    queryFn: query(routes.viewUpload, {
+      queryParams: {
+        file_type: "DISCHARGE_SUMMARY",
+        associating_id: associatedId,
+        is_archived: false,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset,
+      },
+    }),
+    enabled: type === "CONSULTATION",
   });
 
-  const discussionNotesQuery = useTanStackQueryInstead(routes.viewUpload, {
-    query: {
-      file_type: "PATIENT_NOTES",
-      consultation_id: consultationId,
-      is_archived: false,
-      limit: RESULTS_PER_PAGE_LIMIT,
-      offset: offset,
-    },
-    prefetch: !!consultationId,
+  const {
+    data: discussionNotesData,
+    isLoading: isLoadingDiscussionNotes,
+    refetch: refetchDiscussionNotes,
+  } = useQuery({
+    queryKey: [routes.viewUpload.path, "PATIENT_NOTES", consultationId, offset],
+    queryFn: query(routes.viewUpload, {
+      queryParams: {
+        file_type: "PATIENT_NOTES",
+        consultation_id: consultationId || "",
+        is_archived: false,
+        limit: RESULTS_PER_PAGE_LIMIT,
+        offset,
+      },
+    }),
+    enabled: !!consultationId,
   });
 
   const queries = {
-    UNARCHIVED: activeFilesQuery,
-    ARCHIVED: archivedFilesQuery,
-    DISCHARGE_SUMMARY: dischargeSummaryQuery,
-    PATIENT_NOTES: discussionNotesQuery,
+    UNARCHIVED: {
+      data: activeFilesData,
+      isLoading: isLoadingActiveFiles,
+      refetch: refetchActiveFiles,
+    },
+    ARCHIVED: {
+      data: archivedFilesData,
+      isLoading: isLoadingArchivedFiles,
+      refetch: refetchArchivedFiles,
+    },
+    DISCHARGE_SUMMARY: {
+      data: dischargeSummaryData,
+      isLoading: isLoadingDischargeSummary,
+      refetch: refetchDischargeSummary,
+    },
+    PATIENT_NOTES: {
+      data: discussionNotesData,
+      isLoading: isLoadingDiscussionNotes,
+      refetch: refetchDiscussionNotes,
+    },
   };
 
-  const refetchAll = async () =>
-    Promise.all(Object.values(queries).map((q) => q.refetch()));
-  const loading = Object.values(queries).some((q) => q.loading);
+  const loading = Object.values(queries).some((q) => q.isLoading);
 
   const fileQuery = queries[tab as keyof typeof queries];
 
   const tabs = [
     { text: "Active Files", value: "UNARCHIVED" },
     { text: "Archived Files", value: "ARCHIVED" },
-    ...(dischargeSummaryQuery.data?.results?.length
+    ...(dischargeSummaryData?.results?.length
       ? [
           {
             text: "Discharge Summary",
@@ -185,10 +232,10 @@ export const FileUpload = (props: FileUploadProps) => {
           },
         ]
       : []),
-    ...(discussionNotesQuery.data?.results?.length
+    ...(discussionNotesData?.results?.length
       ? [
           {
-            text: "Patient Notes",
+            text: t("patient_notes"),
             value: "PATIENT_NOTES",
           },
         ]
@@ -223,13 +270,13 @@ export const FileUpload = (props: FileUploadProps) => {
       "pdf",
     ],
     allowNameFallback: false,
-    onUpload: refetchAll,
+    onUpload: () => fileQuery.refetch(),
   });
 
   const fileManager = useFileManager({
     type,
-    onArchive: refetchAll,
-    onEdit: refetchAll,
+    onArchive: () => fileQuery.refetch(),
+    onEdit: () => fileQuery.refetch(),
     uploadedFiles:
       fileQuery?.data?.results
         .slice()
@@ -241,14 +288,14 @@ export const FileUpload = (props: FileUploadProps) => {
   });
   const dischargeSummaryFileManager = useFileManager({
     type: "DISCHARGE_SUMMARY",
-    onArchive: refetchAll,
-    onEdit: refetchAll,
+    onArchive: () => refetchDischargeSummary(),
+    onEdit: () => refetchDischargeSummary(),
   });
 
   const patientNotesFileManager = useFileManager({
     type: "PATIENT_NOTES",
-    onArchive: refetchAll,
-    onEdit: refetchAll,
+    onArchive: () => refetchDiscussionNotes(),
+    onEdit: () => refetchDiscussionNotes(),
   });
 
   const uploadButtons: {

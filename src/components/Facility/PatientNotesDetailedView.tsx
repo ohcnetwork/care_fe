@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useEffect, useRef, useState } from "react";
 
@@ -16,8 +17,8 @@ import {
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   patientId: string;
@@ -38,17 +39,27 @@ const PatientNotesDetailedView = (props: Props) => {
 
   const {
     data: state,
-    loading,
+    isLoading,
     refetch,
-  } = useQuery(routes.getPatientNote, {
-    pathParams: {
-      patientId: patientId,
+    isRefetching,
+  } = useQuery({
+    queryKey: [
+      routes.getPatientNote.path,
+      patientId,
       noteId,
-    },
-    query: {
-      consultation: consultationId,
+      consultationId,
       thread,
-    },
+    ],
+    queryFn: query(routes.getPatientNote, {
+      pathParams: {
+        patientId,
+        noteId,
+      },
+      queryParams: {
+        consultation: consultationId,
+        thread,
+      },
+    }),
   });
 
   const scrollToBottom = () => {
@@ -101,7 +112,7 @@ const PatientNotesDetailedView = (props: Props) => {
     }
   };
 
-  if (loading) {
+  if (isLoading || isRefetching) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />

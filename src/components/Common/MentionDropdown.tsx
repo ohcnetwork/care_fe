@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -6,7 +7,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import useSlug from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import query from "@/Utils/request/query";
 import { formatDisplayName } from "@/Utils/utils";
 
 interface MentionsDropdownProps {
@@ -32,14 +33,19 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
   parentRef,
 }) => {
   const facilityId = useSlug("facility");
-  const { data, loading } = useQuery(routes.getFacilityUsers, {
-    pathParams: { facility_id: facilityId },
+  const { data, isLoading } = useQuery({
+    queryKey: [routes.getFacilityUsers.path, facilityId],
+    queryFn: query(routes.getFacilityUsers, {
+      pathParams: { facility_id: facilityId },
+    }),
+    enabled: !!facilityId,
   });
 
   const users = data?.results || [];
 
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
   useEffect(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -114,7 +120,7 @@ const MentionsDropdown: React.FC<MentionsDropdownProps> = ({
       role="listbox"
       aria-label={t("user_mentions")}
     >
-      {loading ? (
+      {isLoading ? (
         <div
           className="p-2 text-secondary-500"
           role="status"

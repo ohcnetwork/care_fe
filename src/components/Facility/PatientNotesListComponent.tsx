@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,8 +25,8 @@ import {
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
 import { classNames, keysOf } from "@/Utils/utils";
 
 interface PatientNotesProps {
@@ -70,31 +71,59 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
   };
   const [state, setState] = useState(initialData);
 
-  const { refetch, loading } = useQuery(routes.getPatientNotes, {
-    pathParams: { patientId },
-    query: {
-      consultation: consultationId,
-      offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
+  const {
+    data: notesData,
+    isLoading: isLoadingNotes,
+    refetch: refetchNotes,
+    isRefetching,
+  } = useQuery({
+    queryKey: [
+      routes.getPatientNotes.path,
+      patientId,
+      consultationId,
+      state.cPage,
       thread,
-    },
-    onResponse: ({ data }) => {
-      if (data) {
-        setState((prevState) => ({
-          ...prevState,
-          notes:
-            prevState.cPage === 1
-              ? data.results
-              : [...prevState.notes, ...data.results],
-          totalPages: Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT),
-        }));
-      }
-    },
+    ],
+    queryFn: query(routes.getPatientNotes, {
+      pathParams: { patientId },
+      queryParams: {
+        consultation: consultationId,
+        offset: String((state.cPage - 1) * RESULTS_PER_PAGE_LIMIT),
+        thread,
+      },
+    }),
   });
+
+  useEffect(() => {
+    if (notesData) {
+      setState((prevState) => ({
+        ...prevState,
+        notes:
+          prevState.cPage === 1
+            ? notesData.results
+            : [...prevState.notes, ...notesData.results],
+        totalPages: Math.ceil(notesData.count / RESULTS_PER_PAGE_LIMIT),
+      }));
+    }
+  }, [notesData]);
 
   useEffect(() => {
     setThreadViewNote("");
     setState((prev) => ({ ...prev, notes: [], cPage: 1 }));
   }, [thread]);
+
+  const { data: patientData } = useQuery({
+    queryKey: [routes.getPatient.path, patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId },
+    }),
+  });
+
+  useEffect(() => {
+    if (patientData) {
+      setPatientActive(patientData.is_active ?? true);
+    }
+  }, [patientData]);
 
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
@@ -104,38 +133,34 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
       return;
     }
 
-    const { res, data } = await request(routes.addPatientNote, {
-      pathParams: {
-        patientId: patientId,
-      },
-      body: {
-        note: noteField,
-        thread,
-        consultation: consultationId,
-        reply_to: reply_to?.id,
-      },
-    });
+    try {
+      const { res, data } = await request(routes.addPatientNote, {
+        pathParams: {
+          patientId: patientId,
+        },
+        body: {
+          note: noteField,
+          thread,
+          consultation: consultationId,
+          reply_to: reply_to?.id,
+        },
+      });
 
-    if (res?.status === 201) {
-      Notification.Success({ msg: "Note added successfully" });
-      setState({ ...state, cPage: 1 });
-      setNoteField("");
-      setReplyTo(undefined);
-    } else {
-      Notification.Error({ msg: "Failed to add note. Please try again." });
-    }
-
-    return data?.id;
-  };
-
-  useQuery(routes.getPatient, {
-    pathParams: { id: patientId },
-    onResponse: ({ data }) => {
-      if (data) {
-        setPatientActive(data.is_active ?? true);
+      if (res?.status === 201) {
+        Notification.Success({ msg: "Note added successfully" });
+        setState({ ...state, cPage: 1 });
+        setNoteField("");
+        setReplyTo(undefined);
+      } else {
+        Notification.Error({ msg: "Failed to add note. Please try again." });
       }
-    },
-  });
+
+      return data?.id;
+    } catch (error) {
+      Notification.Error({ msg: "An error occurred while adding the note." });
+      return undefined;
+    }
+  };
 
   useMessageListener((data) => {
     const message = data?.message;
@@ -145,7 +170,7 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
       message?.facility_id == facilityId &&
       message?.patient_id == patientId
     ) {
-      refetch();
+      refetchNotes();
     }
   });
 
@@ -201,12 +226,12 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
                   }));
                 }
               }}
-              refetch={refetch}
+              refetch={refetchNotes}
               disableEdit={!patientActive}
               setReplyTo={setReplyTo}
               mode={mode}
               setThreadViewNote={setThreadViewNote}
-              isLoading={loading}
+              isLoading={isLoadingNotes || isRefetching}
             />
             <div className="mt-2">
               <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
@@ -220,7 +245,7 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
                       onChange={setNoteField}
                       onAddNote={onAddNote}
                       isAuthorized={isAuthorized && patientActive}
-                      onRefetch={refetch}
+                      onRefetch={refetchNotes}
                       maxRows={10}
                       className="mt-2"
                     />

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,8 +26,8 @@ import {
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
 import { classNames, keysOf } from "@/Utils/utils";
 
 interface PatientNotesProps {
@@ -53,6 +54,66 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const slideoverRef = useRef<HTMLDivElement>(null);
 
+  const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
+    props;
+
+  const initialData: PatientNoteStateType = {
+    notes: [],
+    cPage: 1,
+    totalPages: 1,
+    patientId: patientId,
+    facilityId: facilityId,
+  };
+  const [state, setState] = useState(initialData);
+
+  const localStorageKey = `patientNotesNoteField_${consultationId}`;
+  const [noteField, setNoteField] = useState(
+    localStorage.getItem(localStorageKey) || "",
+  );
+
+  const {
+    data: notesData,
+    isLoading,
+    isRefetching,
+    refetch: refetchNotes,
+  } = useQuery({
+    queryKey: [routes.getPatientNotes.path, patientId, state.cPage, thread],
+    queryFn: query(routes.getPatientNotes, {
+      pathParams: { patientId },
+      queryParams: {
+        offset: String((state.cPage - 1) * RESULTS_PER_PAGE_LIMIT),
+        thread,
+      },
+    }),
+  });
+
+  useEffect(() => {
+    if (notesData) {
+      setState((prevState) => ({
+        ...prevState,
+        notes:
+          state.cPage === 1
+            ? notesData.results
+            : [...prevState.notes, ...notesData.results],
+        totalPages: Math.ceil(notesData.count / RESULTS_PER_PAGE_LIMIT),
+      }));
+    }
+  }, [notesData, state.cPage]);
+
+  const { data: patientData } = useQuery({
+    queryKey: [routes.getPatient.path, patientId],
+    queryFn: query(routes.getPatient, {
+      pathParams: { id: patientId },
+    }),
+    enabled: !!patientId,
+  });
+
+  useEffect(() => {
+    if (patientData) {
+      setPatientActive(patientData.is_active ?? true);
+    }
+  }, [patientData]);
+
   useEffect(() => {
     if (notificationSubscriptionState === "unsubscribed") {
       Notification.Warn({
@@ -65,43 +126,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     }
   }, [notificationSubscriptionState]);
 
-  const initialData: PatientNoteStateType = {
-    notes: [],
-    cPage: 1,
-    totalPages: 1,
-    patientId: props.patientId,
-    facilityId: props.facilityId,
-  };
-  const [state, setState] = useState(initialData);
-
-  const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
-    props;
-
-  const localStorageKey = `patientNotesNoteField_${consultationId}`;
-  const [noteField, setNoteField] = useState(
-    localStorage.getItem(localStorageKey) || "",
-  );
-
-  const { refetch, loading } = useQuery(routes.getPatientNotes, {
-    pathParams: { patientId },
-    query: {
-      offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
-      thread,
-    },
-    onResponse: ({ data }) => {
-      if (data) {
-        setState((prevState) => ({
-          ...prevState,
-          notes:
-            state.cPage === 1
-              ? data.results
-              : [...prevState.notes, ...data.results],
-          totalPages: Math.ceil(data.count / RESULTS_PER_PAGE_LIMIT),
-        }));
-      }
-    },
-  });
-
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -109,24 +133,31 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       });
       return;
     }
-    const { res, data } = await request(routes.addPatientNote, {
-      pathParams: { patientId: patientId },
-      body: {
-        note: noteField,
-        consultation: consultationId,
-        thread,
-        reply_to: reply_to?.id,
-      },
-    });
-    if (res?.status === 201) {
-      Notification.Success({ msg: "Note added successfully" });
-      setNoteField("");
-      setState({ ...state, cPage: 1 });
-      setReplyTo(undefined);
-    } else {
-      Notification.Error({ msg: "Failed to add note. Please try again." });
+
+    try {
+      const { res, data } = await request(routes.addPatientNote, {
+        pathParams: { patientId: patientId },
+        body: {
+          note: noteField,
+          consultation: consultationId,
+          thread,
+          reply_to: reply_to?.id,
+        },
+      });
+
+      if (res?.status === 201) {
+        Notification.Success({ msg: "Note added successfully" });
+        setNoteField("");
+        setState({ ...state, cPage: 1 });
+        setReplyTo(undefined);
+      } else {
+        Notification.Error({ msg: "Failed to add note. Please try again." });
+      }
+      return data?.id;
+    } catch (error) {
+      Notification.Error({ msg: "An error occurred while adding the note." });
+      return undefined;
     }
-    return data?.id;
   };
 
   useMessageListener((data) => {
@@ -137,23 +168,13 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       message?.facility_id == facilityId &&
       message?.patient_id == patientId
     ) {
-      refetch();
+      refetchNotes();
     }
   });
 
   useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const { data } = await request(routes.getPatient, {
-          pathParams: { id: patientId },
-        });
-        if (data) {
-          setPatientActive(data.is_active ?? true);
-        }
-      }
-    }
-    fetchPatientName();
-  }, [patientId]);
+    localStorage.setItem(localStorageKey, noteField);
+  }, [noteField, localStorageKey]);
 
   const notesActionIcons = (
     <div className="flex gap-1">
@@ -211,10 +232,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     </div>
   );
 
-  useEffect(() => {
-    localStorage.setItem(localStorageKey, noteField);
-  }, [noteField, localStorageKey]);
-
   return (
     <div
       ref={slideoverRef}
@@ -266,10 +283,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                 }));
               }
             }}
-            refetch={refetch}
+            refetch={refetchNotes}
             disableEdit={!patientActive}
             setReplyTo={setReplyTo}
-            isLoading={loading}
+            isLoading={isLoading || isRefetching}
           />
           {patientActive && (
             <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
@@ -283,7 +300,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                     onChange={setNoteField}
                     onAddNote={onAddNote}
                     isAuthorized={isAuthorized}
-                    onRefetch={refetch}
+                    onRefetch={refetchNotes}
                     maxRows={10}
                     className="mt-2"
                     parentRef={slideoverRef}

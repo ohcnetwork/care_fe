@@ -36,8 +36,8 @@ export interface RequestOptions<TData = unknown, TBody = unknown> {
 }
 
 export interface QueryOptions<TBody = unknown> {
-  pathParams?: Record<string, string>;
-  queryParams?: Record<string, string>;
+  pathParams?: Record<string, string | number>;
+  queryParams?: QueryParams;
   body?: TBody;
   silent?: boolean;
   signal?: AbortSignal;
