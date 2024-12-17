@@ -15,6 +15,7 @@ interface ExportItem {
   options?: DropdownItemProps;
   type?: "csv" | "json";
   filePrefix?: string;
+  id?: string;
   label: string;
   parse?: (data: string) => string;
   action?: Parameters<ReturnType<typeof useExport>["exportFile"]>[0];
