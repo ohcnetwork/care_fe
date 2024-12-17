@@ -1,6 +1,7 @@
 import { PatientModel } from "../models";
 import { Demography } from "./Demography";
 import EncounterHistory from "./EncounterHistory";
+import PatientFiles from "./Files";
 import { HealthProfileSummary } from "./HealthProfileSummary";
 import { ImmunisationRecords } from "./ImmunisationRecords";
 import PatientNotes from "./Notes";
@@ -32,6 +33,10 @@ export const patientTabs = [
   {
     route: "shift",
     component: ShiftingHistory,
+  },
+  {
+    route: "patient-files",
+    component: PatientFiles,
   },
   {
     route: "patient-notes",
