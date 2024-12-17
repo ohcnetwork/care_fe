@@ -89,15 +89,18 @@ const DateInputV2: React.FC<Props> = ({
         );
         break;
       case "month":
-        setDatePickerHeaderDate((prev) =>
-          dayjs(prev).subtract(1, "year").toDate(),
-        );
+        setDatePickerHeaderDate((prev) => {
+          const newDate = dayjs(prev).subtract(1, "year").toDate();
+          if (min && newDate < min) {
+            return new Date(min.getFullYear(), min.getMonth(), 1);
+          }
+          return newDate;
+        });
         break;
       case "year":
-        setDatePickerHeaderDate((prev) =>
-          dayjs(prev).subtract(1, "year").toDate(),
-        );
-        setYear((prev) => dayjs(prev).subtract(10, "year").toDate());
+        if (!min || year.getFullYear() - 10 >= min.getFullYear()) {
+          setYear((prev) => dayjs(prev).subtract(10, "year").toDate());
+        }
         break;
     }
   };
@@ -108,11 +111,18 @@ const DateInputV2: React.FC<Props> = ({
         setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "month").toDate());
         break;
       case "month":
-        setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "year").toDate());
+        setDatePickerHeaderDate((prev) => {
+          const newDate = dayjs(prev).add(1, "year").toDate();
+          if (max && newDate > max) {
+            return new Date(max.getFullYear(), max.getMonth(), 1);
+          }
+          return newDate;
+        });
         break;
       case "year":
-        setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "year").toDate());
-        setYear((prev) => dayjs(prev).add(10, "year").toDate());
+        if (!max || year.getFullYear() + 10 <= max.getFullYear()) {
+          setYear((prev) => dayjs(prev).add(10, "year").toDate());
+        }
         break;
     }
   };
@@ -209,6 +219,33 @@ const DateInputV2: React.FC<Props> = ({
     return true;
   };
 
+  const isMonthWithinConstraints = (month: number) => {
+    const year = datePickerHeaderDate.getFullYear();
+
+    if (min && year < min.getFullYear()) return false;
+    if (max && year > max.getFullYear()) return false;
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    if (min && lastDay < min) return false;
+    if (max && firstDay > max) return false;
+
+    return true;
+  };
+
+  const isYearWithinConstraints = (year: number) => {
+    if (min && year < min.getFullYear()) return false;
+    if (max && year > max.getFullYear()) return false;
+
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year, 11, 31);
+
+    if (min && yearEnd < min) return false;
+    if (max && yearStart > max) return false;
+
+    return true;
+  };
+
   const isSelectedMonth = (month: number) =>
     month === datePickerHeaderDate.getMonth();
 
@@ -216,25 +253,48 @@ const DateInputV2: React.FC<Props> = ({
     year === datePickerHeaderDate.getFullYear();
 
   const setMonthValue = (month: number) => () => {
-    setDatePickerHeaderDate(
-      new Date(
+    if (isMonthWithinConstraints(month)) {
+      const lastDayOfMonth = new Date(
         datePickerHeaderDate.getFullYear(),
-        month,
-        datePickerHeaderDate.getDate(),
-      ),
-    );
-    setType("date");
+        month + 1,
+        0,
+      ).getDate();
+      const newDate = Math.min(datePickerHeaderDate.getDate(), lastDayOfMonth);
+      setDatePickerHeaderDate(
+        new Date(datePickerHeaderDate.getFullYear(), month, newDate),
+      );
+      setType("date");
+    } else {
+      Notification.Error({
+        msg: outOfLimitsErrorMessage ?? "Cannot select month out of range",
+      });
+    }
   };
-
+  //min and max setting for year
   const setYearValue = (year: number) => () => {
-    setDatePickerHeaderDate(
-      new Date(
+    if (isYearWithinConstraints(year)) {
+      const newDate = new Date(
         year,
         datePickerHeaderDate.getMonth(),
         datePickerHeaderDate.getDate(),
-      ),
-    );
-    setType("date");
+      );
+      if (min && year === min.getFullYear() && newDate < min) {
+        setDatePickerHeaderDate(
+          new Date(min.getFullYear(), min.getMonth(), min.getDate()),
+        );
+      } else if (max && year === max.getFullYear() && newDate > max) {
+        setDatePickerHeaderDate(
+          new Date(max.getFullYear(), max.getMonth(), max.getDate()),
+        );
+      } else {
+        setDatePickerHeaderDate(newDate);
+      }
+      setType("date");
+    } else {
+      Notification.Error({
+        msg: outOfLimitsErrorMessage ?? "Cannot select year out of range",
+      });
+    }
   };
 
   useEffect(() => {
@@ -331,6 +391,7 @@ const DateInputV2: React.FC<Props> = ({
                     data-scribe-ignore
                     className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
                     placeholder={placeholder ?? t("select_date")}
+                    title={placeholder}
                     value={value ? dayjs(value).format(dateFormat) : ""}
                   />
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
@@ -371,23 +432,62 @@ const DateInputV2: React.FC<Props> = ({
                       <div className="flex flex-col items-center gap-4 px-4 md:flex-row md:px-0">
                         <div className="flex flex-1 flex-col items-center justify-between">
                           <div className="flex">
-                            <button
-                              type="button"
-                              disabled={
-                                !isDateWithinConstraints(
-                                  getLastDay(),
-                                  datePickerHeaderDate.getMonth() - 1,
-                                )
-                              }
-                              className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
-                              onClick={decrement}
-                              data-test-id="decrement-date-range"
-                            >
-                              <CareIcon
-                                icon="l-angle-left-b"
-                                className="text-lg"
-                              />
-                            </button>
+                            {type === "date" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  !isDateWithinConstraints(
+                                    getLastDay(),
+                                    datePickerHeaderDate.getMonth() - 1,
+                                    datePickerHeaderDate.getFullYear(),
+                                  )
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={decrement}
+                                data-test-id="decrement-date-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-left-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
+                            {type === "month" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  min &&
+                                  datePickerHeaderDate.getFullYear() <=
+                                    min.getFullYear()
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={decrement}
+                                data-test-id="decrement-month-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-left-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
+
+                            {type === "year" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  min &&
+                                  year.getFullYear() - 10 < min.getFullYear()
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={decrement}
+                                data-test-id="decrement-year-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-left-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
 
                             <div className="flex items-center justify-center text-sm">
                               {type === "date" && (
@@ -411,23 +511,62 @@ const DateInputV2: React.FC<Props> = ({
                                 </p>
                               </div>
                             </div>
-                            <button
-                              type="button"
-                              disabled={
-                                (type === "year" &&
-                                  new Date().getFullYear() ===
-                                    year.getFullYear()) ||
-                                !isDateWithinConstraints(getLastDay())
-                              }
-                              className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
-                              onClick={increment}
-                              data-test-id="increment-date-range"
-                            >
-                              <CareIcon
-                                icon="l-angle-right-b"
-                                className="text-lg"
-                              />
-                            </button>
+                            {type === "date" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  !isDateWithinConstraints(
+                                    getLastDay(),
+                                    datePickerHeaderDate.getMonth(),
+                                    datePickerHeaderDate.getFullYear(),
+                                  )
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={increment}
+                                data-test-id="increment-date-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-right-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
+                            {type === "month" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  max &&
+                                  datePickerHeaderDate.getFullYear() >=
+                                    max.getFullYear()
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={increment}
+                                data-test-id="increment-month-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-right-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
+
+                            {type === "year" && (
+                              <button
+                                type="button"
+                                disabled={
+                                  max &&
+                                  year.getFullYear() + 10 > max.getFullYear()
+                                }
+                                className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-secondary-300"
+                                onClick={increment}
+                                data-test-id="increment-year-range"
+                              >
+                                <CareIcon
+                                  icon="l-angle-right-b"
+                                  className="text-lg"
+                                />
+                              </button>
+                            )}
                           </div>
 
                           {type === "date" && (
@@ -510,10 +649,12 @@ const DateInputV2: React.FC<Props> = ({
                                     key={i}
                                     id={`month-${i}`}
                                     className={classNames(
-                                      "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
-                                      value && isSelectedMonth(i)
-                                        ? "bg-primary-500 text-white"
-                                        : "text-secondary-700 hover:bg-secondary-300",
+                                      "w-1/4 rounded-lg px-2 py-4 text-center text-sm font-semibold",
+                                      isSelectedMonth(i)
+                                        ? "bg-primary-500 text-white cursor-pointer"
+                                        : isMonthWithinConstraints(i)
+                                          ? "text-secondary-700 hover:bg-secondary-300 cursor-pointer"
+                                          : "!text-secondary-400 !cursor-not-allowed",
                                     )}
                                     onClick={setMonthValue(i)}
                                   >
@@ -533,16 +674,18 @@ const DateInputV2: React.FC<Props> = ({
                               {Array(12)
                                 .fill(null)
                                 .map((_, i) => {
-                                  const y = year.getFullYear() - 11 + i;
+                                  const y = year.getFullYear() - 10 + i;
                                   return (
                                     <div
                                       key={i}
                                       id={`year-${i}`}
                                       className={classNames(
-                                        "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
-                                        value && isSelectedYear(y)
-                                          ? "bg-primary-500 text-white"
-                                          : "text-secondary-700 hover:bg-secondary-300",
+                                        "w-1/4 rounded-lg px-2 py-4 text-center text-sm font-semibold",
+                                        isSelectedYear(y)
+                                          ? "bg-primary-500 text-white cursor-pointer"
+                                          : isYearWithinConstraints(y)
+                                            ? "text-secondary-700 hover:bg-secondary-300 cursor-pointer"
+                                            : "!text-secondary-400 !cursor-not-allowed",
                                       )}
                                       onClick={setYearValue(y)}
                                     >

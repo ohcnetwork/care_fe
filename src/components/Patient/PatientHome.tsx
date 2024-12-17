@@ -2,8 +2,22 @@ import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Avatar } from "@/components/Common/Avatar";
+import ButtonV2 from "@/components/Common/ButtonV2";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
+import { patientTabs } from "@/components/Patient/PatientDetailsTab";
+import { isPatientMandatoryDataFilled } from "@/components/Patient/Utils";
+import {
+  AssignedToObjectModel,
+  PatientModel,
+} from "@/components/Patient/models";
+import { SkillModel, UserBareMinimum } from "@/components/Users/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
 
@@ -13,16 +27,13 @@ import {
   OCCUPATION_TYPES,
 } from "@/common/constants";
 
+import { triggerGoal } from "@/Integrations/Plausible";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 import routes from "@/Utils/request/api";
-
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { triggerGoal } from "../../Integrations/Plausible";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import * as Notification from "../../Utils/Notifications";
-import request from "../../Utils/request/request";
-import useTanStackQueryInstead from "../../Utils/request/useQuery";
+import request from "@/Utils/request/request";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   formatName,
@@ -31,15 +42,7 @@ import {
   isAntenatal,
   isPostPartum,
   relativeDate,
-} from "../../Utils/utils";
-import { Avatar } from "../Common/Avatar";
-import ButtonV2 from "../Common/ButtonV2";
-import Loading from "../Common/Loading";
-import Page from "../Common/Page";
-import { SkillModel, UserBareMinimum } from "../Users/models";
-import { patientTabs } from "./PatientDetailsTab";
-import { isPatientMandatoryDataFilled } from "./Utils";
-import { AssignedToObjectModel, PatientModel } from "./models";
+} from "@/Utils/utils";
 
 export const parseOccupation = (occupation: string | undefined) => {
   return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
@@ -447,6 +450,7 @@ export const PatientHome = (props: {
                 facilityId={facilityId || ""}
                 id={id}
                 patientData={patientData}
+                refetch={refetch}
               />
             )}
           </div>
