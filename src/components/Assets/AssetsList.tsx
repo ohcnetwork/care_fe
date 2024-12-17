@@ -15,9 +15,9 @@ import ButtonV2 from "@/components/Common/ButtonV2";
 import ExportMenu from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import FacilitiesSelectDialogue from "@/components/ExternalResult/FacilitiesSelectDialogue";
 import { FacilityModel } from "@/components/Facility/models";
-import SearchInput from "@/components/Form/SearchInput";
 
 import useFilters from "@/hooks/useFilters";
 import { useIsAuthorized } from "@/hooks/useIsAuthorized";
@@ -37,10 +37,11 @@ const AssetsList = () => {
     Pagination,
     FilterBadges,
     advancedFilter,
+    clearSearch,
     resultsPerPage,
   } = useFilters({
     limit: 18,
-    cacheBlacklist: ["search"],
+    cacheBlacklist: ["name", "serial_number", "qr_code_id"],
   });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +57,9 @@ const AssetsList = () => {
   const params = {
     limit: resultsPerPage,
     page: qParams.page,
+    name: qParams.name || "",
+    serial_number: qParams.serial_number || "",
+    qr_code_id: qParams.qr_code_id || "",
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     search_text: qParams.search || "",
     facility: qParams.facility || "",
@@ -311,103 +315,42 @@ const AssetsList = () => {
     );
   }
 
+  const searchOptions = [
+    {
+      key: "name",
+      label: "Name",
+      type: "text" as const,
+      placeholder: "Search by Name",
+      value: qParams.name || "",
+      shortcutKey: "n",
+    },
+    {
+      key: "serial_number",
+      label: "Serial No.",
+      type: "text" as const,
+      placeholder: "Search by Serial No.",
+      value: qParams.serial_number || "",
+      shortcutKey: "u",
+    },
+    {
+      key: "asset_qr_id",
+      label: "QR Code ID",
+      type: "text" as const,
+      placeholder: "Search by QR Code ID",
+      value: qParams.qr_code_id || "",
+      shortcutKey: "p",
+    },
+  ];
+
   return (
     <Page
       title="Assets"
       breadcrumbs={false}
       hideBack
       options={
-        <>
-          {authorizedForImportExport && (
-            <div className="tooltip" data-testid="import-asset-button">
-              <ExportMenu
-                label={importAssetModalOpen ? "Importing..." : "Import/Export"}
-                exportItems={[
-                  {
-                    label: "Import Assets",
-                    options: {
-                      icon: (
-                        <CareIcon
-                          icon="l-import"
-                          className="import-assets-button"
-                        />
-                      ),
-                      onClick: () => setImportAssetModalOpen(true),
-                    },
-                  },
-                  {
-                    label: "Export Assets (JSON)",
-                    action: async () => {
-                      const { data } = await request(routes.listAssets, {
-                        query: { ...qParams, json: true, limit: totalCount },
-                      });
-                      return data ?? null;
-                    },
-                    type: "json",
-                    filePrefix: `assets_${facility?.name ?? "all"}`,
-                    options: {
-                      icon: <CareIcon icon="l-export" />,
-                      disabled: totalCount === 0 || !authorizedForImportExport,
-                      id: "export-json-option",
-                    },
-                  },
-                  {
-                    label: "Export Assets (CSV)",
-                    action: async () => {
-                      const { data } = await request(routes.listAssets, {
-                        query: { ...qParams, csv: true, limit: totalCount },
-                      });
-                      return data ?? null;
-                    },
-                    type: "csv",
-                    filePrefix: `assets_${facility?.name ?? "all"}`,
-                    options: {
-                      icon: <CareIcon icon="l-export" />,
-                      disabled: totalCount === 0 || !authorizedForImportExport,
-                      id: "export-csv-option",
-                    },
-                  },
-                ]}
-              />
-            </div>
-          )}
-        </>
-      }
-    >
-      <div className="mt-5 gap-3 space-y-2 lg:flex">
-        <CountBlock
-          text="Total Assets"
-          count={totalCount}
-          loading={loading}
-          icon="d-folder"
-          className="flex-1"
-        />
-        <div className="flex-1">
-          <SearchInput
-            id="asset-search"
-            name="search"
-            value={qParams.search}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search by name/serial no./QR code ID"
-          />
-        </div>
-        <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
-          <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
-            <div className="w-full">
-              <AdvancedFilterButton
-                onClick={() => advancedFilter.setShow(true)}
-              />
-            </div>
-            <ButtonV2
-              className="w-full py-[11px]"
-              onClick={() => setIsScannerActive(true)}
-            >
-              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
-              QR
-            </ButtonV2>
-          </div>
+        <div className="flex w-full flex-col gap-2 items-center justify-between lg:flex-row">
           <div
-            className="flex w-full flex-col md:flex-row"
+            className="flex flex-col w-full lg:w-auto md:flex-row"
             data-testid="create-asset-buttom"
           >
             <ButtonV2
@@ -425,6 +368,100 @@ const AssetsList = () => {
               <span>{t("create_asset")}</span>
             </ButtonV2>
           </div>
+          <div className="flex flex-col lg:flex-row w-full lg:w-auto justify-between gap-2 lg:ml-2">
+            <div className="flex flex-col gap-2 md:flex-row lg:w-auto">
+              <ButtonV2
+                className="w-full py-[11px]"
+                onClick={() => setIsScannerActive(true)}
+              >
+                <CareIcon icon="l-search" className="mr-1 text-base" /> Scan
+                Asset QR
+              </ButtonV2>
+              <div>
+                <AdvancedFilterButton
+                  onClick={() => advancedFilter.setShow(true)}
+                />
+              </div>
+            </div>
+            {authorizedForImportExport && (
+              <div className="tooltip" data-testid="import-asset-button">
+                <ExportMenu
+                  label={
+                    importAssetModalOpen ? "Importing..." : "Import/Export"
+                  }
+                  exportItems={[
+                    {
+                      label: "Import Assets",
+                      options: {
+                        icon: (
+                          <CareIcon
+                            icon="l-import"
+                            className="import-assets-button"
+                          />
+                        ),
+                        onClick: () => setImportAssetModalOpen(true),
+                      },
+                    },
+                    {
+                      label: "Export Assets (JSON)",
+                      action: async () => {
+                        const { data } = await request(routes.listAssets, {
+                          query: { ...qParams, json: true, limit: totalCount },
+                        });
+                        return data ?? null;
+                      },
+                      type: "json",
+                      filePrefix: `assets_${facility?.name ?? "all"}`,
+                      options: {
+                        icon: <CareIcon icon="l-export" />,
+                        disabled:
+                          totalCount === 0 || !authorizedForImportExport,
+                        id: "export-json-option",
+                      },
+                    },
+                    {
+                      label: "Export Assets (CSV)",
+                      action: async () => {
+                        const { data } = await request(routes.listAssets, {
+                          query: { ...qParams, csv: true, limit: totalCount },
+                        });
+                        return data ?? null;
+                      },
+                      type: "csv",
+                      filePrefix: `assets_${facility?.name ?? "all"}`,
+                      options: {
+                        icon: <CareIcon icon="l-export" />,
+                        disabled:
+                          totalCount === 0 || !authorizedForImportExport,
+                        id: "export-csv-option",
+                      },
+                    },
+                  ]}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      }
+    >
+      <div className="mt-5 gap-8 items-center justify-between space-y-2 lg:flex">
+        <div className="mr-8">
+          <CountBlock
+            text="Total Assets"
+            count={totalCount}
+            loading={loading}
+            icon="d-folder"
+            className="flex-1"
+          />
+        </div>
+        <div className="w-full">
+          <SearchByMultipleFields
+            id="asset-search"
+            options={searchOptions}
+            onSearch={(key, value) => updateQuery({ search: value })}
+            clearSearch={clearSearch}
+            className="w-full"
+          />
         </div>
       </div>
       <AssetFilter {...advancedFilter} key={window.location.search} />
