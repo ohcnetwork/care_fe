@@ -404,12 +404,12 @@ const AssetsList = () => {
                     {
                       label: "Import Assets",
                       options: {
-                        icon:
+                        icon: (
                           <CareIcon
                             icon="l-import"
                             className="import-assets-button"
                           />
-                        ,
+                        ),
                         onClick: () => setImportAssetModalOpen(true),
                       },
                     },
@@ -427,8 +427,8 @@ const AssetsList = () => {
                         icon: <CareIcon icon="l-export" />,
                         disabled:
                           totalCount === 0 || !authorizedForImportExport,
+                        id: "export-json-option",
                       },
-                      id: "export-json-option",
                     },
                     {
                       label: "Export Assets (CSV)",
@@ -440,11 +440,11 @@ const AssetsList = () => {
                       },
                       type: "csv",
                       filePrefix: `assets_${facility?.name ?? "all"}`,
-                      id: "export-csv-option",
                       options: {
                         icon: <CareIcon icon="l-export" />,
                         disabled:
                           totalCount === 0 || !authorizedForImportExport,
+                        id: "export-csv-option",
                       },
                     },
                   ]}
@@ -571,7 +571,7 @@ export const warrantyAmcValidityChip = (
 
   const days = Math.ceil(
     Math.abs(Number(warrantyAmcEndDate) - Number(today)) /
-    (1000 * 60 * 60 * 24),
+      (1000 * 60 * 60 * 24),
   );
 
   if (warrantyAmcEndDate < today) {
