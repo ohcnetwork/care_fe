@@ -331,6 +331,7 @@ const DateInputV2: React.FC<Props> = ({
                     data-scribe-ignore
                     className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
                     placeholder={placeholder ?? t("select_date")}
+                    title={placeholder}
                     value={value ? dayjs(value).format(dateFormat) : ""}
                   />
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
