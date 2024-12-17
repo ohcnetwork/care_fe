@@ -6,6 +6,13 @@ on:
       - develop
       - staging
   workflow_dispatch:
+  
+on:
+  push:
+    branches:
+      - develop
+      - staging
+  workflow_dispatch:
 
 jobs:
   cypress-run:
