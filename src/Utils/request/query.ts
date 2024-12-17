@@ -1,19 +1,18 @@
 import careConfig from "@careConfig";
 
-import { QueryError } from "@/Utils/request/queryError";
 import { getResponseBody } from "@/Utils/request/request";
-import { QueryOptions, Route } from "@/Utils/request/types";
+import { APICallOptions, HTTPError, Route } from "@/Utils/request/types";
 import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 
-async function queryRequest<TData, TBody>(
+export async function callApi<TData, TBody>(
   { path, method, noAuth }: Route<TData, TBody>,
-  options?: QueryOptions<TBody>,
+  options?: APICallOptions<TBody>,
 ): Promise<TData> {
   const url = `${careConfig.apiUrl}${makeUrl(path, options?.queryParams, options?.pathParams)}`;
 
   const fetchOptions: RequestInit = {
     method,
-    headers: makeHeaders(noAuth ?? false),
+    headers: makeHeaders(noAuth ?? false, options?.headers),
     signal: options?.signal,
   };
 
@@ -32,7 +31,7 @@ async function queryRequest<TData, TBody>(
   const data = await getResponseBody<TData>(res);
 
   if (!res.ok) {
-    throw new QueryError({
+    throw new HTTPError({
       message: "Request Failed",
       status: res.status,
       silent: options?.silent ?? false,
@@ -44,13 +43,27 @@ async function queryRequest<TData, TBody>(
 }
 
 /**
- * Creates a TanStack Query compatible request function
+ * Creates a TanStack Query compatible query function.
+ *
+ * Example:
+ * ```tsx
+ * const { data, isLoading } = useQuery({
+ *   queryKey: ["prescription", consultationId],
+ *   queryFn: query(MedicineRoutes.prescription, {
+ *     pathParams: { consultationId },
+ *     queryParams: {
+ *       limit: 10,
+ *       offset: 0,
+ *     },
+ *   }),
+ * });
+ * ```
  */
 export default function query<TData, TBody>(
   route: Route<TData, TBody>,
-  options?: QueryOptions<TBody>,
+  options?: APICallOptions<TBody>,
 ) {
   return ({ signal }: { signal: AbortSignal }) => {
-    return queryRequest(route, { ...options, signal });
+    return callApi(route, { ...options, signal });
   };
 }

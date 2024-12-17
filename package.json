@@ -67,7 +67,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.1.4",
-    "@sentry/browser": "^8.42.0",
+    "@sentry/browser": "^8.45.1",
     "@tanstack/react-query": "^5.62.3",
     "@tanstack/react-query-devtools": "^5.62.7",
     "@yudiel/react-qr-scanner": "^2.0.8",
