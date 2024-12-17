@@ -16,7 +16,6 @@ const TooltipComponent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
 >(({ children, content, sideOffset = 4, className }, ref) => {
   const [open, setOpen] = React.useState(false);
-  //Reusable tooltip with dynamic content.
   return (
     <TooltipProvider>
       <Tooltip open={open} onOpenChange={setOpen} delayDuration={0}>
