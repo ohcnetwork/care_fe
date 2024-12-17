@@ -248,7 +248,7 @@ const AssetsList = () => {
             >
               <div className="md:flex">
                 <p className="flex break-words text-xl font-medium capitalize">
-                  <span className="mr-2 text-primary-500">
+                  <span className="mr-2 text-primary-600">
                     <CareIcon
                       icon={
                         (
