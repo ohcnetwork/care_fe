@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import CircularProgress from "@/components/Common/CircularProgress";
 import { CommentModel } from "@/components/Facility/models";
+import AutoExpandingTextInputFormField from "@/components/Form/FormFields/AutoExpandingTextInputFormField";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
@@ -15,6 +17,7 @@ import { formatDateTime, formatName } from "@/Utils/utils";
 interface CommentSectionProps {
   id: string;
 }
+
 const CommentSection = (props: CommentSectionProps) => {
   const [commentBox, setCommentBox] = useState("");
   const { t } = useTranslation();
@@ -41,9 +44,8 @@ const CommentSection = (props: CommentSectionProps) => {
       pathParams={{ id: props.id }}
     >
       {(_, query) => (
-        <div className="flex w-full flex-col">
-          {/* Comments Section with Scroll */}
-          <div className="w-full max-h-[530px] overflow-y-auto rounded-lg border border-secondary-300 bg-white p-4">
+        <div className="flex w-full flex-col h-full rounded-lg shadow-sm bg-white p-4">
+          <div className="w-full max-h-[530px] overflow-y-auto  flex flex-col">
             <PaginatedList.WhenLoading>
               <CircularProgress />
             </PaginatedList.WhenLoading>
@@ -55,23 +57,28 @@ const CommentSection = (props: CommentSectionProps) => {
             </div>
           </div>
 
-          {/* Comment Input Box */}
-          <textarea
-            rows={3}
-            value={commentBox}
-            placeholder={t("type_your_comment")}
-            className="mt-4 w-full rounded-lg border border-secondary-500 p-4 focus:ring-primary-500"
-            onChange={(e) => setCommentBox(e.target.value)}
-          />
-          <div className="flex w-full justify-end">
+          <div className="relative mx-4 flex items-center mt-auto">
+            <AutoExpandingTextInputFormField
+              value={commentBox}
+              placeholder={t("type_your_comment")}
+              onChange={(e) => setCommentBox(e.value)}
+              className="w-full grow"
+              maxHeight={200}
+              name="comment"
+              errorClassName="hidden"
+              innerClassName="pr-10"
+            />
             <ButtonV2
-              className="mt-4"
+              border={false}
+              className="absolute right-2"
+              ghost
+              size="small"
               onClick={async () => {
                 await onSubmitComment();
                 query.refetch();
               }}
             >
-              {t("post_your_comment")}
+              <CareIcon icon="l-message" className="text-lg" />
             </ButtonV2>
           </div>
         </div>
@@ -82,7 +89,6 @@ const CommentSection = (props: CommentSectionProps) => {
 
 export default CommentSection;
 
-// Comment Component
 export const Comment = ({
   id,
   comment,
@@ -91,8 +97,7 @@ export const Comment = ({
 }: CommentModel) => {
   const { t } = useTranslation();
   return (
-    <div key={id} className="mb-4 flex flex-col rounded-lg   p-4">
-      {/* Comment Header */}
+    <div key={id} className="mb-4 flex flex-col rounded-lg p-4">
       <div className="flex items-center mb-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 text-white uppercase">
           {created_by_object?.first_name?.charAt(0) || t("unknown")}
@@ -101,13 +106,12 @@ export const Comment = ({
           <span className="font-bold text-secondary-800">
             {formatName(created_by_object)}
           </span>
-
           <span className="ml-2 text-sm text-secondary-500">
             {modified_date ? formatDateTime(modified_date) : "-"}
           </span>
         </div>
       </div>
-      {/* Comment Body */}
+
       <div className="w-5/6 rounded-md border-secondary-300 bg-gray-300 p-3 text-white">
         {comment}
       </div>

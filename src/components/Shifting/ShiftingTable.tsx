@@ -17,6 +17,7 @@ import { formatDateTime } from "@/Utils/utils";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import Loading from "../Common/Loading";
 import { ShiftingModel } from "../Facility/models";
+import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -132,23 +133,26 @@ export default function ShiftingTable(props: {
 
                   <div className="col-span-1 flex mt-1 flex-col px-3 text-left">
                     <div className="3xl:flex-row  flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row">
-                      <dt
-                        title={t("shifting_status")}
-                        className={`mt-1 flex h-5 shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${
-                          shift.status === "COMPLETED"
-                            ? "bg-sky-200"
-                            : "bg-yellow-200 text-yellow-500"
-                        }`}
-                      >
-                        <CareIcon icon="l-truck" className="mr-2" />
-                        <dd className="text-sky-600">{shift.status}</dd>
+                      <dt title={t("shifting_status")}>
+                        {shift.status === "COMPLETED" ? (
+                          <Badge
+                            variant="custom"
+                            className="bg-blue-100 text-blue-800"
+                          >
+                            <CareIcon icon="l-truck" className="mr-2" />
+                            <dd>{shift.status}</dd>
+                          </Badge>
+                        ) : (
+                          <Badge variant="warning">
+                            <CareIcon icon="l-truck" className="mr-2" />
+                            <dd>{shift.status}</dd>
+                          </Badge>
+                        )}
                       </dt>
 
                       <div>
                         {shift.emergency && (
-                          <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
-                            {t("emergency")}
-                          </span>
+                          <Badge variant="danger">{t("emergency")}</Badge>
                         )}
                       </div>
                     </div>

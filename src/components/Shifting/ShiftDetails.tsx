@@ -28,6 +28,8 @@ import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
 
+import { Badge } from "../ui/badge";
+
 export const printData = (data: any) => {
   const patientData = data.patient_object;
   const consultation = data.patient.last_consultation as ConsultationModel;
@@ -281,7 +283,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("medical_worker")}{" "}
               </span>
-              <span className="badge badge-pill badge-primary">{t("yes")}</span>
+              <Badge variant="warning">{t("yes")}</Badge>
             </div>
           )}
           <div>
@@ -440,7 +442,7 @@ export default function ShiftDetails(props: { id: string }) {
   }
 
   return (
-    <div>
+    <div className="lg:mx-9">
       {isPrintMode ? (
         <div className="my-4">{printData(data)}</div>
       ) : (
@@ -553,37 +555,48 @@ export default function ShiftDetails(props: { id: string }) {
                   <span className="font-semibold leading-relaxed">
                     Status :{" "}
                   </span>
-                  <span className="badge badge-pill badge-primary px-2 py-1">
+
+                  <Badge variant="primary">
+                    {" "}
                     {shiftStatusOptions.find(
                       (option) => data?.status === option.text,
                     )?.label || data?.status}
-                  </span>
+                  </Badge>
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">
                     {t("is_up_shift")} :
                   </span>
-                  <span className="badge badge-pill badge-warning px-2 py-1 ml-1">
+                  <Badge
+                    variant={data?.is_up_shift ? "warning" : "secondary"}
+                    className="ml-1"
+                  >
                     {data?.is_up_shift ? t("yes") : t("no")}
-                  </span>
+                  </Badge>
                 </div>
+
                 <div>
                   <span className="font-semibold leading-relaxed">
                     {t("is_emergency")} :
                   </span>
-                  <span className="badge badge-pill badge-danger px-2 py-1 ml-1">
+                  <Badge
+                    variant={data?.emergency ? "danger" : "secondary"}
+                    className="ml-1"
+                  >
                     {data?.emergency ? t("yes") : t("no")}
-                  </span>
+                  </Badge>
                 </div>
+
                 <div>
                   <span className="font-semibold leading-relaxed">
                     {t("patient_category")} :
                   </span>
-                  <span className="badge badge-pill badge-warning px-2 py-1 ml-1">
+
+                  <Badge variant={"warning"} className="ml-1">
                     {data?.patient_object.last_consultation?.last_daily_round
                       ?.patient_category ??
                       data?.patient_object.last_consultation?.category}
-                  </span>
+                  </Badge>
                 </div>
                 <div>
                   <span className="font-semibold leading-relaxed">
@@ -686,8 +699,8 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
 
-          <div className="grid-cols-4 gap-4 md:grid text-secondary-800">
-            <div className="col-span-2">
+          <div className="grid-cols-2 gap-x-14 md:grid text-secondary-800">
+            <div className="col-span-1">
               {/* <div>
                 <h4 className="mt-8">
                   {t("details_of_patient")} {showCopyToclipBoard(data)}
@@ -761,7 +774,7 @@ export default function ShiftDetails(props: { id: string }) {
                 </div>
               )}
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1 h-full">
               <div className="mb-10 ">
                 <h4 className="mt-8">{t("comments")}</h4>
                 <CommentSection id={props.id} />
