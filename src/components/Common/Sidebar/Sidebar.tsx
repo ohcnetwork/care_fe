@@ -6,12 +6,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipComponent, TooltipProvider } from "@/components/ui/tooltip";
 
 import {
   ShrinkedSidebarItem,
@@ -243,24 +238,19 @@ const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => {
   const { t } = useTranslation();
   return (
     <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${
-              shrinked ? "mx-auto" : "mr-4"
-            } transition-all ease-in-out`}
-            onClick={toggle}
-          >
-            <CareIcon
-              icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
-              className="text-lg transition"
-            />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{shrinked ? t("expand_sidebar") : t("collapse_sidebar")}</p>
-        </TooltipContent>
-      </Tooltip>
+      <TooltipComponent
+        content={shrinked ? t("expand_sidebar") : t("collapse_sidebar")}
+      >
+        <button
+          className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${shrinked ? "bg-gray-200" : "bg-gray-100"} text-gray-600 hover:bg-primary-200 hover:text-primary-800 ${shrinked ? "mx-auto" : "mr-4"} transition-all ease-in-out`}
+          onClick={toggle}
+        >
+          <CareIcon
+            icon={shrinked ? "l-arrow-bar-right" : "l-layout-sidebar-alt"}
+            className="text-lg transition"
+          />
+        </button>
+      </TooltipComponent>
     </TooltipProvider>
   );
 };
