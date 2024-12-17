@@ -182,7 +182,9 @@ export class PatientPage {
   }
 
   visitPatientUrl() {
+    this.interceptGetPatient();
     cy.visit(patient_url);
+    this.verifyGetPatientResponse();
   }
 
   visitConsultationPage() {
