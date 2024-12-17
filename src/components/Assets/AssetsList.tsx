@@ -588,7 +588,7 @@ export const warrantyAmcValidityChip = (
       <Chip
         id="warranty-amc-expiring-soon-orange"
         variant="custom"
-        className="border-orange-300 bg-orange-100 text-orange-900"
+        className="border-orange-200 bg-orange-100 text-orange-900"
         startIcon="l-exclamation-circle"
         text="AMC/Warranty Expiring Soon"
       />
