@@ -56,10 +56,10 @@ const AssetsList = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>();
   const params = {
     limit: resultsPerPage,
-    page: qParams.page,
-    name: qParams.name || "",
-    serial_number: qParams.serial_number || "",
-    qr_code_id: qParams.qr_code_id || "",
+    page: qParams.page || 1,
+    name: qParams.name || undefined,
+    serial_number: qParams.serial_number || undefined,
+    qr_code_id: qParams.qr_code_id || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     search_text: qParams.search || "",
     facility: qParams.facility || "",
@@ -478,6 +478,7 @@ const AssetsList = () => {
               ),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Class", "asset_class", asset_class ?? ""),
+              value("Name", "name", qParams.name ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
               value(
                 "Location",
