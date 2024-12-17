@@ -158,6 +158,7 @@ export const FileUpload = (props: FileUploadProps) => {
       limit: RESULTS_PER_PAGE_LIMIT,
       offset: offset,
     },
+    prefetch: !!consultationId,
   });
 
   const queries = {
