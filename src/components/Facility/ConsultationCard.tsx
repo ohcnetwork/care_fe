@@ -77,7 +77,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               {t("patient_status")}
             </div>
             <Chip
-              size="medium"
+              size="small"
               variant="custom"
               className={
                 !itemData.discharge_date
