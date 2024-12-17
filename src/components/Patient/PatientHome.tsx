@@ -661,7 +661,7 @@ export const PatientHome = (props: {
                   <div>
                     <Button
                       id="death-report"
-                      className="my-2 w-full font-semibold"
+                      className="my-2 w-full"
                       variant="outline_primary"
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
