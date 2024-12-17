@@ -20,13 +20,9 @@ const CommentSection = (props: CommentSectionProps) => {
   const { t } = useTranslation();
 
   const onSubmitComment = async () => {
-    const payload = {
-      comment: commentBox,
-    };
+    const payload = { comment: commentBox };
     if (!/\S+/.test(commentBox)) {
-      Notification.Error({
-        msg: t("comment_min_length"),
-      });
+      Notification.Error({ msg: t("comment_min_length") });
       return;
     }
     const { res } = await request(routes.addShiftComments, {
@@ -35,7 +31,6 @@ const CommentSection = (props: CommentSectionProps) => {
     });
     if (res?.ok) {
       Notification.Success({ msg: t("comment_added_successfully") });
-
       setCommentBox("");
     }
   };
@@ -47,7 +42,8 @@ const CommentSection = (props: CommentSectionProps) => {
     >
       {(_, query) => (
         <div className="flex w-full flex-col">
-          <div className="w-full">
+          {/* Comments Section with Scroll */}
+          <div className="w-full max-h-[530px] overflow-y-auto rounded-lg border border-secondary-300 bg-white p-4">
             <PaginatedList.WhenLoading>
               <CircularProgress />
             </PaginatedList.WhenLoading>
@@ -58,12 +54,13 @@ const CommentSection = (props: CommentSectionProps) => {
               <PaginatedList.Paginator hideIfSinglePage />
             </div>
           </div>
+
+          {/* Comment Input Box */}
           <textarea
             rows={3}
             value={commentBox}
-            minLength={3}
             placeholder={t("type_your_comment")}
-            className="mt-4 rounded-lg border border-secondary-500 p-4 focus:ring-primary-500"
+            className="mt-4 w-full rounded-lg border border-secondary-500 p-4 focus:ring-primary-500"
             onChange={(e) => setCommentBox(e.target.value)}
           />
           <div className="flex w-full justify-end">
@@ -85,6 +82,7 @@ const CommentSection = (props: CommentSectionProps) => {
 
 export default CommentSection;
 
+// Comment Component
 export const Comment = ({
   id,
   comment,
@@ -93,25 +91,25 @@ export const Comment = ({
 }: CommentModel) => {
   const { t } = useTranslation();
   return (
-    <div
-      key={id}
-      className="mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800"
-    >
-      <div className="w-full">
-        <p className="break-words">{comment}</p>
-      </div>
-      <div className="mt-3">
-        <span className="text-xs text-secondary-500">
-          {modified_date ? formatDateTime(modified_date) : "-"}
-        </span>
-      </div>
-      <div className="mr-auto flex items-center rounded-md border bg-secondary-100 py-1 pl-2 pr-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 p-1 uppercase text-white">
+    <div key={id} className="mb-4 flex flex-col rounded-lg   p-4">
+      {/* Comment Header */}
+      <div className="flex items-center mb-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 text-white uppercase">
           {created_by_object?.first_name?.charAt(0) || t("unknown")}
         </div>
-        <span className="pl-2 text-sm text-secondary-700">
-          {formatName(created_by_object)}
-        </span>
+        <div className="ml-2">
+          <span className="font-bold text-secondary-800">
+            {formatName(created_by_object)}
+          </span>
+
+          <span className="ml-2 text-sm text-secondary-500">
+            {modified_date ? formatDateTime(modified_date) : "-"}
+          </span>
+        </div>
+      </div>
+      {/* Comment Body */}
+      <div className="w-5/6 rounded-md border-secondary-300 bg-gray-300 p-3 text-white">
+        {comment}
       </div>
     </div>
   );
