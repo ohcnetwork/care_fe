@@ -92,7 +92,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setState((prevState) => ({
         ...prevState,
         notes:
-          state.cPage === 1
+          prevState.cPage === 1
             ? notesData.results
             : [...prevState.notes, ...notesData.results],
         totalPages: Math.ceil(notesData.count / RESULTS_PER_PAGE_LIMIT),

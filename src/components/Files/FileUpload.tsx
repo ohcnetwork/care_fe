@@ -444,7 +444,7 @@ export const FileUpload = (props: FileUploadProps) => {
               authUser.user_type === "DistrictAdmin" ||
               authUser.user_type === "StateAdmin"
             }
-            archivable={tab !== "DISCHARGE_SUMMARY"}
+            archivable={!["DISCHARGE_SUMMARY", "PATIENT_NOTES"].includes(tab)}
           />
         ))}
         {!(fileQuery?.data?.results || []).length && (
