@@ -6,18 +6,11 @@ on:
       - develop
       - staging
   workflow_dispatch:
-  
-on:
-  push:
-    branches:
-      - develop
-      - staging
-  workflow_dispatch:
 
 jobs:
   cypress-run:
     permissions: write-all
-    if: github.repository == 'manmeetnagii/care_fe'
+    if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
