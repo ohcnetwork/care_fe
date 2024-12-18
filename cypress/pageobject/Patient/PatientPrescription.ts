@@ -61,8 +61,7 @@ export class PatientPrescription {
   }
 
   enterDiscontinueReason(reason: string) {
-    cy.wait(2000);
-    cy.get("#discontinuedReason").type(reason);
+    cy.get("#discontinuedReason").should("be.visible").type(reason);
   }
 
   enterAdministerDosage(dosage: string) {
@@ -79,6 +78,16 @@ export class PatientPrescription {
 
   selectDosageFrequency(frequency: string) {
     cy.clickAndSelectOption("#frequency", frequency);
+  }
+
+  interceptPrescriptions() {
+    cy.intercept("GET", "**/api/v1/consultation/*/prescriptions/*").as(
+      "getPrescriptions",
+    );
+  }
+
+  verifyPrescription() {
+    cy.wait("@getPrescriptions").its("response.statusCode").should("eq", 200);
   }
 
   clickReturnToDashboard() {
