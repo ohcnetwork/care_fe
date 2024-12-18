@@ -120,7 +120,7 @@ export default function ModelCrudEditor<TRes extends Identifier, TReq, TErr>(
             onClick={() => handleDelete(props.item.id)}
             className="w-full text-xl text-red-500 hover:text-red-700 disabled:grayscale md:w-auto"
           >
-            <CareIcon icon="l-times-circle" />{" "}
+            <CareIcon icon="l-times-circle" />
             <span className="text-sm md:hidden">{t("remove")}</span>
           </button>
         )}

@@ -21,7 +21,7 @@ export interface FacilityData {
 class FacilityPage {
   visitCreateFacilityPage() {
     cy.intercept("GET", "**/facility/create").as("getCreateFacilities");
-    cy.visit("/facility/create");
+    cy.awaitUrl("/facility/create");
     cy.wait("@getCreateFacilities")
       .its("response.statusCode")
       .should("eq", 200);
@@ -44,8 +44,7 @@ class FacilityPage {
   }
 
   selectWard(ward: string) {
-    cy.get("div#ward button").click();
-    cy.get("[role='option']").contains(ward).click();
+    advanceFilters.selectWard(ward);
   }
 
   typeFacilityAddress(address: string, clearBeforeTyping: boolean = false) {
@@ -61,6 +60,14 @@ class FacilityPage {
 
   clickSaveFacilityButton() {
     cy.verifyAndClickElement("#submit", "Save Facility");
+  }
+
+  interceptFacility() {
+    cy.intercept("POST", "**/api/v1/facility/").as("postFacility");
+  }
+
+  verifyErrorFacility() {
+    cy.wait("@postFacility").its("response.statusCode").should("eq", 403);
   }
 
   verifyFacilityCreatedNotification() {
@@ -159,8 +166,7 @@ class FacilityPage {
     cy.get("#facility-location-button").click();
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
-    cy.wait(2000);
-    cy.get("div#map-close").click();
+    cy.get("div#map-close").should("be.visible").click();
   }
 
   fillMiddleWareAddress(url: string) {
@@ -202,21 +208,27 @@ class FacilityPage {
     cy.url().should("include", "/assets?facility=");
   }
 
+  interceptManageInventoryItem() {
+    cy.intercept("GET", "/api/v1/items/**").as("getItems");
+  }
+
   clickManageInventory() {
     cy.contains("Manage Inventory").click();
   }
 
+  verifyManageInventoryItem() {
+    cy.wait("@getItems").its("response.statusCode").should("eq", 200);
+  }
+
   fillInventoryDetails(name: string, status: string, quantity: string) {
-    cy.wait(2000);
-    cy.get("div#id").click();
-    cy.get("div#id ul li").contains(name).click();
     cy.get("div#isIncoming").click();
     cy.get("div#isIncoming ul li").contains(status).click();
+    cy.get("div#id").click();
+    cy.get("div#id ul li").contains(name).click();
     cy.get("[name='quantity']").type(quantity);
   }
 
   fillInventoryMinimumDetails(name: string, quantity: string) {
-    cy.wait(2000);
     cy.get("div#id").click();
     cy.get("div#id ul li").contains(name).click();
     cy.get("[name='quantity']").type(quantity);
@@ -262,39 +274,12 @@ class FacilityPage {
       .should("eq", 201);
   }
 
-  getStateElement() {
-    return cy.get("#state");
-  }
-
-  getDistrictElement() {
-    return cy.get("#district");
-  }
-
   selectStateOnPincode(stateName: string) {
-    this.getStateElement()
-      .scrollIntoView()
-      .wait(2000)
-      .should("be.visible")
-      .then(($element) => {
-        const text = $element.text();
-        if (!text.includes(stateName)) {
-          this.getStateElement().click();
-          cy.get("li[role=option]").contains(stateName).click();
-        }
-      });
+    advanceFilters.selectState(stateName);
   }
 
   selectDistrictOnPincode(districtName: string) {
-    this.getDistrictElement().as("district").scrollIntoView().wait(2000);
-    cy.get("@district")
-      .should("be.visible")
-      .then(($element) => {
-        const text = $element.text();
-        if (!text.includes(districtName)) {
-          this.getDistrictElement().click();
-          cy.get("li[role=option]").contains(districtName).click();
-        }
-      });
+    advanceFilters.selectDistrict(districtName);
   }
 
   verifyPpeQuantity(text: string) {
@@ -317,8 +302,18 @@ class FacilityPage {
     cy.get(badgeClass).contains(text).should("exist");
   }
 
-  clickAddMinimumQuanitity() {
+  interceptMinimumQuantity() {
+    cy.intercept("GET", "**/api/v1/facility/*/min_quantity/**").as(
+      "getMinQuantity",
+    );
+  }
+
+  clickAddMinimumQuantity() {
     cy.get("#add-minimum-quantity").click();
+  }
+
+  verifyMinimumQuantity() {
+    cy.wait("@getMinQuantity").its("response.statusCode").should("eq", 200);
   }
 
   clickUpdateMinimumQuantity() {

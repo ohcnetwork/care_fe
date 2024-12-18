@@ -3,6 +3,7 @@ import { PatientModel } from "@/components/Patient/models";
 import { AREACODES, IN_LANDLINE_AREA_CODES } from "@/common/constants";
 import phoneCodesJson from "@/common/static/countryPhoneAndFlags.json";
 
+import * as Notification from "@/Utils/Notifications";
 import dayjs from "@/Utils/dayjs";
 
 interface ApacheParams {
@@ -561,3 +562,12 @@ export function omitBy<T extends Record<string, unknown>>(
     Object.entries(obj).filter(([_, value]) => !predicate(value)),
   ) as Partial<T>;
 }
+
+export const copyToClipboard = async (content: string) => {
+  try {
+    await navigator.clipboard.writeText(content);
+    Notification.Success({ msg: "Copied to clipboard" });
+  } catch (err) {
+    Notification.Error({ msg: "Copying is not allowed" });
+  }
+};

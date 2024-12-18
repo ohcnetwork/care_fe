@@ -113,7 +113,6 @@ rolesToTest.forEach((role) => {
     it("Export the list of assets in CSV & Json", () => {
       if (role === "districtAdmin") {
         assetHome.selectAssetImportButton("click");
-        cy.wait(2000);
         assetHome.selectJsonExportButton();
         assetHome.selectAssetImportButton("click");
         assetHome.selectCsvExportButton();
