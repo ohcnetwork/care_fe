@@ -21,7 +21,7 @@ export interface FacilityData {
 class FacilityPage {
   visitCreateFacilityPage() {
     cy.intercept("GET", "**/facility/create").as("getCreateFacilities");
-    cy.visit("/facility/create");
+    cy.awaitUrl("/facility/create");
     cy.wait("@getCreateFacilities")
       .its("response.statusCode")
       .should("eq", 200);
@@ -44,8 +44,7 @@ class FacilityPage {
   }
 
   selectWard(ward: string) {
-    cy.get("div#ward button").click();
-    cy.get("[role='option']").contains(ward).click();
+    advanceFilters.selectWard(ward);
   }
 
   typeFacilityAddress(address: string, clearBeforeTyping: boolean = false) {
@@ -275,39 +274,12 @@ class FacilityPage {
       .should("eq", 201);
   }
 
-  getStateElement() {
-    return cy.get("#state");
-  }
-
-  getDistrictElement() {
-    return cy.get("#district");
-  }
-
   selectStateOnPincode(stateName: string) {
-    this.getStateElement()
-      .scrollIntoView()
-      .wait(2000)
-      .should("be.visible")
-      .then(($element) => {
-        const text = $element.text();
-        if (!text.includes(stateName)) {
-          this.getStateElement().click();
-          cy.get("li[role=option]").contains(stateName).click();
-        }
-      });
+    advanceFilters.selectState(stateName);
   }
 
   selectDistrictOnPincode(districtName: string) {
-    this.getDistrictElement().as("district").scrollIntoView().wait(2000);
-    cy.get("@district")
-      .should("be.visible")
-      .then(($element) => {
-        const text = $element.text();
-        if (!text.includes(districtName)) {
-          this.getDistrictElement().click();
-          cy.get("li[role=option]").contains(districtName).click();
-        }
-      });
+    advanceFilters.selectDistrict(districtName);
   }
 
   verifyPpeQuantity(text: string) {
