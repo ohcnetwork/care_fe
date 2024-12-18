@@ -120,7 +120,7 @@ export const ReferralLetter = (id: any) => {
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 text-lg">
                 <div>
                   <p>
-                    <span className="font-semibold leading-relaxed">
+                    <span className="font-semibold  leading-relaxed">
                       {t("date_of_admission")}:{" "}
                     </span>
                     {formatDateTime(
