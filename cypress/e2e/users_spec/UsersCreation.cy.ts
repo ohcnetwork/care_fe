@@ -112,6 +112,7 @@ describe("User Creation", () => {
   });
 
   it("view user redirection from facility page", () => {
+    loginPage.ensureLoggedIn();
     facilityHome.navigateToFacilityHomepage();
     facilityHome.typeFacilitySearch(fillFacilityName);
     advanceFilters.verifyFilterBadgePresence(
