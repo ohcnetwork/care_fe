@@ -36,8 +36,7 @@ class PatientLogupdate {
   }
 
   typePhysicalExamination(examination: string) {
-    cy.get("#physical_examination_info").click().type(examination);
-    cy.get("#physical_examination_info").should("contain", examination);
+    cy.typeAndVerifyValue("#physical_examination_info", examination);
   }
 
   typeOtherDetails(details: string) {
@@ -63,19 +62,19 @@ class PatientLogupdate {
   }
 
   typePulse(pulse: string) {
-    cy.get("#pulse").click().type(pulse);
+    cy.typeAndVerifyValue("#pulse", pulse);
   }
 
   typeTemperature(temperature: string) {
-    cy.get("#temperature").click().type(temperature);
+    cy.typeAndVerifyValue("#temperature", temperature);
   }
 
   typeRespiratory(respiratory: string) {
-    cy.get("#resp").click().type(respiratory);
+    cy.typeAndVerifyValue("#resp", respiratory);
   }
 
   typeSpo2(spo: string) {
-    cy.get("#ventilator_spo2").click().type(spo);
+    cy.typeAndVerifyValue("#ventilator_spo2", spo);
   }
 
   selectRhythm(rhythm: string) {
@@ -83,7 +82,7 @@ class PatientLogupdate {
   }
 
   typeRhythm(rhythm: string) {
-    cy.get("#rhythm_detail").click().type(rhythm);
+    cy.typeAndVerifyValue("#rhythm_detail", rhythm);
   }
 
   interceptDailyRounds() {

@@ -191,6 +191,7 @@ Cypress.Commands.add(
   "typeAndVerifyValue",
   (selector: string, value: string) => {
     cy.get(selector)
+      .scrollIntoView()
       .should("be.visible")
       .click()
       .type(value)
