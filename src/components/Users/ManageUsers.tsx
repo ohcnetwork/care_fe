@@ -28,7 +28,7 @@ import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
-export default function ManageUsers() {
+export default function ManageUsers({ defaultView }: { defaultView: string }) {
   const { t } = useTranslation();
   const {
     qParams,
@@ -47,7 +47,7 @@ export default function ManageUsers() {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(defaultView === "list" ? 1 : 0);
 
   const { data: homeFacilityData } = useTanStackQueryInstead(
     routes.getAnyFacility,
@@ -105,6 +105,12 @@ export default function ManageUsers() {
   if (userListLoading || districtDataLoading || !userListData?.results) {
     return <Loading />;
   }
+  const handleTabChange = (tab: number) => {
+    setActiveTab(tab);
+    const newView = tab === 1 ? "list" : "card";
+    localStorage.setItem("usersDefaultView", newView);
+    navigate(`/users/${newView}`);
+  };
 
   manageUsers = (
     <div>
@@ -113,7 +119,7 @@ export default function ManageUsers() {
         onSearch={(username) => updateQuery({ username })}
         searchValue={qParams.username}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
       />
       <Pagination totalCount={userListData.count} />
     </div>
