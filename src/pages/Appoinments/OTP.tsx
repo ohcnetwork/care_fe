@@ -1,5 +1,7 @@
+import { useMutation } from "@tanstack/react-query";
 import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -11,9 +13,13 @@ import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormFi
 
 import useAppHistory from "@/hooks/useAppHistory";
 
+import { CarePatientTokenKey } from "@/common/constants";
+
+import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { parsePhoneNumber } from "@/Utils/utils";
+import { TokenData } from "@/types/auth/otpToken";
 
 export default function OTP({
   facilityId,
@@ -25,6 +31,7 @@ export default function OTP({
   page: string;
 }) {
   const { goBack } = useAppHistory();
+  const { t } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("+91");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
@@ -36,27 +43,32 @@ export default function OTP({
       !parsedPhoneNumber ||
       !(PhoneNumberValidator(["mobile"])(parsedPhoneNumber ?? "") === undefined)
     ) {
-      errors = "Please enter valid phone number";
+      errors = t("invalid_phone");
     }
     return errors;
   };
 
-  const handleSendOTP = async (phoneNumber: string) => {
-    const response = await request(routes.otp.sendOtp, {
-      body: {
-        phone_number: phoneNumber,
-      },
-    });
-    if (response.res?.status === 200 && page === "send") {
-      navigate(
-        `/facility/${facilityId}/appointments/${staffUsername}/otp/verify`,
-      );
-    }
-    // To Do: Mock, remove this
-    navigate(
-      `/facility/${facilityId}/appointments/${staffUsername}/otp/verify`,
-    );
-  };
+  const { mutate: sendOTP } = useMutation({
+    mutationFn: (phoneNumber: string) =>
+      request(routes.otp.sendOtp, {
+        body: {
+          phone_number: phoneNumber,
+        },
+        silent: true,
+      }),
+    onSuccess: () => {
+      if (page === "send") {
+        navigate(
+          `/facility/${facilityId}/appointments/${staffUsername}/otp/verify`,
+        );
+      }
+    },
+    onError: () => {
+      Notification.Error({
+        msg: t("error_sending_otp"),
+      });
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,39 +77,48 @@ export default function OTP({
       setError(errors);
       return;
     }
-    handleSendOTP(phoneNumber);
+    sendOTP(phoneNumber);
   };
 
-  const handleVerifySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const response = await request(routes.otp.loginByOtp, {
-      body: {
-        phone_number: phoneNumber,
-        otp: otp,
-      },
-    });
-    if (response.res?.status === 200) {
+  const { mutate: verifyOTP } = useMutation({
+    mutationFn: (otp: string) =>
+      request(routes.otp.loginByOtp, {
+        body: {
+          phone_number: phoneNumber,
+          otp: otp,
+        },
+      }),
+    onSuccess: (response: any) => {
+      const CarePatientToken = response.data?.access;
+      if (CarePatientToken) {
+        const tokenData: TokenData = {
+          token: CarePatientToken,
+          phoneNumber: phoneNumber,
+          createdAt: new Date().toISOString(),
+        };
+        localStorage.setItem(CarePatientTokenKey, JSON.stringify(tokenData));
+      }
       navigate(
         `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
       );
-      const OTPaccessToken = response.data?.access;
-      localStorage.setItem("phoneNumber", phoneNumber);
-      if (OTPaccessToken) {
-        localStorage.setItem("OTPaccessToken", OTPaccessToken);
-      }
-    }
-    // To Do: Mock, remove this
-    navigate(
-      `/facility/${facilityId}/appointments/${staffUsername}/book-appointment`,
-    );
-    localStorage.setItem("phoneNumber", phoneNumber);
+    },
+    onError: () => {
+      Notification.Error({
+        msg: t("error_verifying_otp"),
+      });
+    },
+  });
+
+  const handleVerifySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    verifyOTP(otp);
   };
 
   const renderPhoneNumberForm = () => {
     return (
       <div className="mt-4 flex flex-col gap-2">
         <span className="text-xl font-semibold">
-          Enter phone number to login/register
+          {t("enter_phone_number_to_login_register")}
         </span>
         <form
           onSubmit={handleSubmit}
@@ -106,7 +127,7 @@ export default function OTP({
           <div className="space-y-4">
             <PhoneNumberFormField
               name="phone_number"
-              label="Phone Number"
+              label={t("phone_number")}
               required
               types={["mobile"]}
               onChange={(e) => setPhoneNumber(e.value)}
@@ -115,12 +136,12 @@ export default function OTP({
             />
           </div>
           <Button
-            variant="primary_gradient"
+            variant="primary"
             type="submit"
             className="w-full h-12 text-lg"
           >
             <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-            Send OTP
+            {t("send_otp")}
           </Button>
         </form>
       </div>
@@ -131,10 +152,10 @@ export default function OTP({
     return (
       <div className="mt-4 flex flex-col gap-1">
         <span className="text-xl font-semibold">
-          Please check your messages
+          {t("please_check_your_messages")}
         </span>
         <span className="text-sm">
-          We've sent you a code to{" "}
+          {t("we_ve_sent_you_a_code_to")}{" "}
           <span className="font-bold">{phoneNumber}</span>
         </span>
         <form
@@ -143,7 +164,7 @@ export default function OTP({
         >
           <div className="flex flex-col space-y-4">
             <span className="text-xl self-center">
-              Enter the verification code sent to your phone
+              {t("enter_the_verification_code")}
             </span>
             <OtpFormField
               name="otp"
@@ -159,13 +180,13 @@ export default function OTP({
             type="submit"
             className="w-full h-12 text-lg"
           >
-            Verify OTP
+            {t("verify_otp")}
           </Button>
           <a
             className="w-full text-sm underline text-center cursor-pointer text-secondary-800"
-            onClick={() => handleSendOTP(phoneNumber)}
+            onClick={() => sendOTP(phoneNumber)}
           >
-            Didn't receive a message? Resend
+            {t("didnt_receive_a_message")} {t("resend_otp")}
           </a>
         </form>
       </div>

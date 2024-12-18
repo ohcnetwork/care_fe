@@ -7,12 +7,14 @@ import { QuestionnaireForm } from "@/components/Questionnaire/QuestionnaireForm"
 
 import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
+import { conditionalObject } from "@/Utils/utils";
 
 interface Props {
   facilityId: string;
   patientId: string;
-  consultationId: string;
+  consultationId?: string;
   questionnaireSlug?: string;
+  subjectType?: string;
 }
 
 export default function EncounterQuestionnaire({
@@ -20,13 +22,15 @@ export default function EncounterQuestionnaire({
   patientId,
   consultationId,
   questionnaireSlug,
+  subjectType,
 }: Props) {
   const {
     data: consultation,
     loading,
     error,
   } = useQuery(routes.getConsultation, {
-    pathParams: { id: consultationId },
+    pathParams: { id: consultationId || "" },
+    prefetch: consultationId ? true : false,
   });
 
   const { data: patient } = useQuery(routes.getPatient, {
@@ -54,15 +58,17 @@ export default function EncounterQuestionnaire({
       crumbsReplacements={{
         [facilityId]: { name: patient?.facility_object?.name },
         [patientId]: { name: patient?.name },
-        consultation: {
-          name: "Consultation",
-          uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
-        },
-        [consultationId]: {
-          name: consultation?.encounter_date
-            ? `Admitted on ${consultation.encounter_date}`
-            : consultation?.suggestion_text,
-        },
+        ...conditionalObject(consultationId, {
+          consultation: {
+            name: "Consultation",
+            uri: `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
+          },
+          [consultationId as string]: {
+            name: consultation?.encounter_date
+              ? `Admitted on ${consultation.encounter_date}`
+              : consultation?.suggestion_text,
+          },
+        }),
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
     >
@@ -70,7 +76,8 @@ export default function EncounterQuestionnaire({
         <Card>
           <CardContent className="pt-6">
             <QuestionnaireForm
-              resourceId={patientId}
+              patientId={patientId}
+              subjectType={subjectType}
               encounterId={consultationId}
               questionnaireSlug={questionnaireSlug}
             />

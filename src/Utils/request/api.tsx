@@ -69,10 +69,16 @@ import {
   FileUploadModel,
 } from "@/components/Patient/models";
 import {
+  Appointment,
+  AppointmentCreate,
+  SlotAvailability,
+} from "@/components/Schedule/types";
+import {
   SkillModel,
   SkillObjectModel,
   UpdatePasswordForm,
   UserAssignedModel,
+  UserBareMinimum,
   UserModel,
 } from "@/components/Users/models";
 
@@ -142,6 +148,42 @@ export const ModelCrudApis = <
     delete: API(`DELETE ${route}/{id}/`),
   };
 };
+
+interface FacilityAppointment {
+  id: string;
+  token_slot: {
+    id: string;
+    availability: {
+      name: string;
+      tokens_per_slot: number;
+    };
+    start_datetime: string;
+    end_datetime: string;
+    allocated: number;
+  };
+  patient: {
+    id: string;
+    name: string;
+    gender: number;
+    date_of_birth: string | null;
+    age: number | null;
+    address: string;
+    pincode: number;
+    ward: string | null;
+  };
+  booked_on: string;
+  booked_by?: {
+    id: number;
+    last_login: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    username: string;
+    user_type: number;
+  };
+  status: "booked" | "checked_in" | "cancelled";
+  reason_for_visit: string;
+}
 
 const routes = {
   // Auth Endpoints
@@ -569,23 +611,6 @@ const routes = {
     method: "GET",
     TRes: Type<string>(),
   },
-  downloadFacilityCapacity: {
-    path: "/api/v1/facility/?csv&capacity",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-  downloadFacilityDoctors: {
-    path: "/api/v1/facility/?csv&doctors",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-
-  downloadFacilityTriage: {
-    path: "/api/v1/facility/?csv&triage",
-    method: "GET",
-    TRes: Type<string>(),
-  },
-
   downloadPatients: {
     path: "/api/v1/patient/?csv",
     method: "GET",
@@ -924,6 +949,11 @@ const routes = {
     path: "/api/v1/users/{username}/",
     method: "GET",
     TRes: Type<UserModel>(),
+  },
+  getUserBareMinimum: {
+    path: "/api/v1/facility/{facilityId}/get_users/{userExternalId}/",
+    method: "GET",
+    TRes: Type<UserBareMinimum>(),
   },
   updateUserDetails: {
     path: "/api/v1/users/",
@@ -1381,7 +1411,8 @@ const routes = {
       TRes: Type<Record<string, never>>(),
       TBody: Type<{
         resource_id: string;
-        encounter: string;
+        encounter?: string;
+        patient: string;
         responses: Array<{
           question_id: string;
           value: string | number | boolean;
@@ -1496,7 +1527,7 @@ const routes = {
     getPatient: {
       path: "/api/v1/otp/patient/",
       method: "GET",
-      TRes: Type<PaginatedResponse<PatientModel>>(),
+      TRes: Type<PaginatedResponse<AppointmentPatient>>(),
       auth: {
         key: "Authorization",
         value: "Bearer {token}",
@@ -1514,6 +1545,29 @@ const routes = {
         type: "header",
       },
     },
+    getAvailableSlotsForADay: {
+      path: "/api/v1/otp/slots/get_slots_for_day/",
+      method: "POST",
+      TRes: Type<{ results: SlotAvailability[] }>(),
+      TBody: Type<{ facility: string; resource: string; day: string }>(),
+    },
+    getAppointments: {
+      path: "/api/v1/otp/slots/get_appointments/",
+      method: "GET",
+      TRes: Type<{ results: Appointment[] }>(),
+    },
+    createAppointment: {
+      path: "/api/v1/otp/slots/{id}/create_appointment/",
+      method: "POST",
+      TRes: Type<Appointment>(),
+      TBody: Type<AppointmentCreate>(),
+    },
+  },
+
+  getFacilityAppointments: {
+    path: "/api/v1/facility/{facility_id}/appointments/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FacilityAppointment>>(),
   },
 } as const;
 

@@ -1,197 +1,102 @@
-// Disable autoformatting so that keys maintain wrapped
+import { BedModel, FacilityModel } from "@/components/Facility/models";
+import { UserBareMinimum } from "@/components/Users/models";
 
-// prettier-ignore
-export const encounterQuestionnaireJSON = {
-  "slug": "encounter-form",
-  "version": "1.0",
-  "title": "Encounter Form",
-  "description": "Questionnaire for patient encounters/consultations",
-  "status": "active",
-  "subject_type": "patient",
-  "styling_metadata": {},
-  "questions": [
-    {
-      "text": "Consultation Details",
-      "type": "group",
-      "link_id": "1",
-      "questions": [
-        {
-          "text": "Route to Facility",
-          "type": "choice",
-          "link_id": "1.1",
-          "required": true,
-          "answer_option": [
-            { "value": "10", "display": "Direct" },
-            { "value": "20", "display": "Referred" },
-            { "value": "30", "display": "Transfer" }
-          ]
-        },
-        {
-          "text": "Symptoms",
-          "type": "group",
-          "link_id": "1.2",
-          "required": true,
-          "questions": [
-            {
-              "text": "Is the patient Asymptomatic?",
-              "type": "boolean",
-              "link_id": "1.2.1"
-            },
-            {
-              "text": "Symptoms List",
-              "type": "structured",
-              "link_id": "1.2.2"
-            }
-          ]
-        },
-        {
-          "text": "History of present illness",
-          "type": "text",
-          "link_id": "1.3"
-        },
-        {
-          "text": "Examination details and Clinical conditions",
-          "type": "text",
-          "link_id": "1.4"
-        },
-        {
-          "text": "Body Measurements",
-          "type": "group",
-          "link_id": "1.5",
-          "questions": [
-            {
-              "text": "Weight (kg)",
-              "type": "decimal",
-              "link_id": "1.5.1"
-            },
-            {
-              "text": "Height (cm)",
-              "type": "decimal",
-              "link_id": "1.5.2"
-            }
-          ]
-        },
-        {
-          "text": "Decision after consultation",
-          "type": "choice",
-          "link_id": "1.6",
-          "required": true,
-          "answer_option": [
-            { "value": "A", "display": "Admit" },
-            { "value": "R", "display": "Refer" },
-            { "value": "OP", "display": "OP Consultation" },
-            { "value": "DC", "display": "Discharge" },
-            { "value": "DD", "display": "Declare Death" }
-          ]
-        },
-        {
-          "text": "Encounter Date & Time",
-          "type": "dateTime",
-          "link_id": "1.7",
-          "required": true
-        },
-        {
-          "text": "Patient Number",
-          "type": "string",
-          "link_id": "1.8"
-        },
-        {
-          "text": "Category",
-          "type": "choice",
-          "link_id": "1.9",
-          "required": true,
-          "answer_option": [
-            { "value": "Category-A", "display": "Mild" },
-            { "value": "Category-B", "display": "Moderate" },
-            { "value": "Category-C", "display": "Severe" }
-          ]
-        }
-      ]
-    },
-    {
-      "text": "Diagnosis",
-      "type": "group",
-      "link_id": "2",
-      "required": true,
-      "questions": [
-        {
-          "text": "Diagnoses",
-          "type": "structured",
-          "link_id": "2.1"
-        }
-      ]
-    },
-    {
-      "text": "Treatment Plan",
-      "type": "group",
-      "link_id": "3",
-      "questions": [
-        {
-          "text": "Investigations Suggestions",
-          "type": "structured",
-          "link_id": "3.1"
-        },
-        {
-          "text": "Procedure Suggestions",
-          "type": "structured",
-          "link_id": "3.2"
-        },
-        {
-          "text": "Treatment Plan / Treatment Summary",
-          "type": "text",
-          "link_id": "3.3"
-        },
-        {
-          "text": "General Instructions (Advice)",
-          "type": "text",
-          "link_id": "3.4"
-        },
-        {
-          "text": "Special Instructions",
-          "type": "text",
-          "link_id": "3.5"
-        },
-        {
-          "text": "Treating Doctor",
-          "type": "string",
-          "link_id": "3.6",
-          "required": true
-        },
-        {
-          "text": "Review After",
-          "type": "choice",
-          "link_id": "3.7",
-          "answer_option": [
-            { "value": "0", "display": "No Review" },
-            { "value": "1", "display": "1 Day" },
-            { "value": "2", "display": "2 Days" },
-            { "value": "3", "display": "3 Days" },
-            { "value": "4", "display": "4 Days" },
-            { "value": "5", "display": "5 Days" },
-            { "value": "6", "display": "6 Days" },
-            { "value": "7", "display": "1 Week" },
-            { "value": "14", "display": "2 Weeks" },
-            { "value": "28", "display": "4 Weeks" }
-          ]
-        },
-        {
-          "text": "Telemedicine",
-          "type": "group",
-          "link_id": "3.8",
-          "questions": [
-            {
-              "text": "Would you like to refer the patient for remote monitoring to an external doctor?",
-              "type": "boolean",
-              "link_id": "3.8.1"
-            },
-            {
-              "text": "Assigned to",
-              "type": "string",
-              "link_id": "3.8.2"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
+import { PatientCategoryID } from "@/common/constants";
+
+import { UserBase } from "@/types/user/base";
+
+export const ENCOUNTER_SUGGESTIONS = [
+  "A", // Admit
+  "R", // Refer
+  "OP", // Outpatient
+  "DC", // Discharge
+  "DD", // Death
+] as const;
+
+export type EncounterSuggestion = (typeof ENCOUNTER_SUGGESTIONS)[number];
+
+export const ROUTE_TO_FACILITY = [
+  10, // Direct
+  20, // Referred
+  30, // Transfer
+] as const;
+
+export type RouteToFacility = (typeof ROUTE_TO_FACILITY)[number];
+
+export interface Encounter {
+  id: string;
+  patient: string;
+  facility: string;
+  created_by: UserBase;
+  updated_by: UserBase;
+  created_date: string;
+  modified_date: string;
+
+  suggestion: EncounterSuggestion;
+  route_to_facility?: RouteToFacility;
+
+  // Admission details
+  admitted: boolean;
+  admitted_to?: string;
+  category: PatientCategoryID;
+  encounter_date: string;
+  icu_admission_date?: string;
+  discharge_date: string | null;
+  patient_no: string;
+  current_bed?: { bed_object: BedModel };
+
+  // Referral details
+  referred_to?: string;
+  referred_to_object?: FacilityModel;
+  referred_to_external?: string;
+  referred_from_facility?: string;
+  referred_from_facility_object?: FacilityModel;
+  referred_from_facility_external?: string;
+  referred_by_external?: string;
+  transferred_from_location?: string;
+
+  // Doctor details
+  treating_physician: string;
+  treating_physician_object: UserBareMinimum | null;
+  assigned_to?: string;
+  assigned_to_object?: UserBareMinimum;
+
+  // Death details
+  new_discharge_reason?: number;
+  discharge_notes?: string; // cause_of_death
+  death_datetime?: string;
+  death_confirmed_doctor?: string;
+
+  // Other flags
+  kasp_enabled_date: string | null;
+}
+
+export interface EncounterRequest {
+  suggestion: EncounterSuggestion;
+  route_to_facility?: RouteToFacility;
+
+  patient: string;
+  facility: string;
+  admitted: boolean;
+  category: string;
+  encounter_date: string;
+  icu_admission_date?: string;
+  patient_no: string | null;
+  bed?: string;
+
+  referred_to?: string;
+  referred_to_external?: string;
+  referred_from_facility?: string;
+  referred_from_facility_external?: string;
+  referred_by_external?: string;
+  transferred_from_location?: string;
+
+  treating_physician: string;
+  assigned_to?: string;
+
+  // Death details
+  new_discharge_reason?: number;
+  discharge_notes?: string;
+  death_datetime?: string;
+  death_confirmed_doctor?: string;
+}

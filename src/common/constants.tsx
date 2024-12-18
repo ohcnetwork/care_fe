@@ -1676,3 +1676,5 @@ export const HEADER_CONTENT_TYPES = {
 } as const;
 
 export const ADMIN_USER_TYPES = ["DistrictAdmin", "StateAdmin"] as const;
+
+export const CarePatientTokenKey = "care_patient_token";

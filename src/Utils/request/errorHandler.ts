@@ -1,14 +1,14 @@
 import { navigate } from "raviger";
 
 import * as Notifications from "@/Utils/Notifications";
-import { QueryError } from "@/Utils/request/queryError";
+import { HTTPError } from "@/Utils/request/types";
 
-export function handleQueryError(error: Error) {
+export function handleHttpError(error: Error) {
   if (error.name === "AbortError") {
     return;
   }
 
-  if (!(error instanceof QueryError)) {
+  if (!(error instanceof HTTPError)) {
     Notifications.Error({ msg: error.message || "Something went wrong!" });
     return;
   }
@@ -34,7 +34,7 @@ export function handleQueryError(error: Error) {
   });
 }
 
-function isSessionExpired(error: QueryError["cause"]) {
+function isSessionExpired(error: HTTPError["cause"]) {
   return (
     // If Authorization header is not valid
     error?.code === "token_not_valid" ||
@@ -49,6 +49,6 @@ function handleSessionExpired() {
   }
 }
 
-function isBadRequest(error: QueryError) {
+function isBadRequest(error: HTTPError) {
   return error.status === 400 || error.status === 406;
 }

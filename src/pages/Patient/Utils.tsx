@@ -14,6 +14,7 @@ export type AppointmentPatientRegister = {
 
 export type AppointmentPatient = {
   id: string;
+  external_id: string;
   name: string;
   phone_number: string;
   address: string;

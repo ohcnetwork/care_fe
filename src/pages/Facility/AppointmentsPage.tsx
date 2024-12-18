@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -15,40 +16,43 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { FacilityModel } from "@/components/Facility/models";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 import { SlotAvailability } from "@/components/Schedule/types";
-import { SkillModel, UserAssignedModel } from "@/components/Users/models";
+
+import { CarePatientTokenKey } from "@/common/constants";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
+import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
+import { RequestResult } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
-
-import { DoctorModel, getExperience, mockDoctors } from "./Utils";
+import { TokenData } from "@/types/auth/otpToken";
 
 interface AppointmentsProps {
   facilityId: string;
-  staffUsername: string;
+  staffExternalId: string;
 }
 
 export function AppointmentsPage(props: AppointmentsProps) {
-  const { facilityId, staffUsername } = props;
-  const phoneNumber = localStorage.getItem("phoneNumber");
+  const { t } = useTranslation();
+  const { facilityId, staffExternalId } = props;
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<SlotAvailability>();
   const [reason, setReason] = useState("");
-  const doctorData: UserAssignedModel = JSON.parse(
-    localStorage.getItem("doctor") ?? "{}",
+
+  const tokenData: TokenData = JSON.parse(
+    localStorage.getItem(CarePatientTokenKey) || "{}",
   );
 
-  if (!staffUsername) {
+  if (!staffExternalId) {
     Notification.Error({ msg: "Staff username not found" });
     navigate(`/facility/${facilityId}/`);
-  } else if (!phoneNumber) {
+  } else if (!tokenData) {
     Notification.Error({ msg: "Phone number not found" });
-    navigate(`/facility/${facilityId}/appointments/${staffUsername}/otp/send`);
+    navigate(
+      `/facility/${facilityId}/appointments/${staffExternalId}/otp/send`,
+    );
   }
 
   const { data: facilityResponse, error: facilityError } = useQuery<
@@ -66,57 +70,47 @@ export function AppointmentsPage(props: AppointmentsProps) {
     Notification.Error({ msg: "Error while fetching facility data" });
   }
 
-  // Long term, should make this route available
-  /* const { data: doctorResponse, error: doctorError } = useQuery<
-    RequestResult<UserModel>
-  >({
-    queryKey: ["doctor", staffUsername],
+  const { data: userData, error: userError } = useQuery({
+    queryKey: ["user", staffExternalId],
     queryFn: () =>
-      request(routes.getUserDetails, {
-        pathParams: { username: staffUsername ?? "" },
-        silent: true,
+      request(routes.getUserBareMinimum, {
+        pathParams: { facilityId: facilityId, userExternalId: staffExternalId },
       }),
-    enabled: !!staffUsername,
+    enabled: !!staffExternalId,
   });
 
-  if (doctorError) {
-    Notification.Error({ msg: "Error while fetching doctor data" });
-  } */
-
-  const { data: skills, error: skillsError } = useQuery<
-    RequestResult<PaginatedResponse<SkillModel>>
-  >({
-    queryKey: ["skills", staffUsername],
-    queryFn: () =>
-      request(routes.userListSkill, {
-        pathParams: { username: staffUsername },
-        silent: true,
-      }),
-    enabled: !!staffUsername,
-  });
-
-  if (skillsError) {
-    Notification.Error({ msg: "Error while fetching skills data" });
+  if (userError) {
+    Notification.Error({ msg: "Error while fetching user data" });
   }
 
-  const slotsQuery = useQuery<RequestResult<{ results: SlotAvailability[] }>>({
-    queryKey: ["slots", facilityId, staffUsername, selectedDate],
-    queryFn: () =>
-      request(ScheduleAPIs.slots.getAvailableSlotsForADay, {
-        pathParams: {
-          facility_id: facilityId,
-        },
-        body: {
-          resource: doctorData?.id?.toString() ?? "",
-          day: dateQueryString(selectedDate),
-        },
-        silent: true,
-      }),
-    enabled: !!staffUsername && !!doctorData && !!selectedDate,
+  const slotsQuery = useQuery<{ results: SlotAvailability[] }>({
+    queryKey: ["slots", facilityId, staffExternalId, selectedDate],
+    queryFn: query(routes.otp.getAvailableSlotsForADay, {
+      body: {
+        facility: facilityId,
+        resource: staffExternalId,
+        day: dateQueryString(selectedDate),
+      },
+      headers: {
+        Authorization: `Bearer ${tokenData.token}`,
+      },
+      silent: true,
+    }),
+    enabled: !!selectedDate && !!tokenData.token,
   });
 
   if (slotsQuery.error) {
-    Notification.Error({ msg: "Error while fetching slots data" });
+    if (
+      slotsQuery.error.cause?.errors &&
+      Array.isArray(slotsQuery.error.cause.errors) &&
+      slotsQuery.error.cause.errors[0][0] === "Resource is not schedulable"
+    ) {
+      Notification.Error({
+        msg: t("user_not_available_for_appointments"),
+      });
+    } else {
+      Notification.Error({ msg: t("error_fetching_slots_data") });
+    }
   }
 
   useEffect(() => {
@@ -139,162 +133,25 @@ export function AppointmentsPage(props: AppointmentsProps) {
     );
   };
 
-  // To Do: Mock, remove/adjust this
-  function extendDoctor(
-    doctor: UserAssignedModel | undefined,
-  ): DoctorModel | undefined {
-    if (!doctor) return undefined;
-    const randomDoc = mockDoctors[0];
-    return {
-      ...doctor,
-      role: randomDoc.role,
-      gender: randomDoc.gender,
-      education: doctor.qualification
-        ? doctor.qualification.toString()
-        : randomDoc.education,
-      experience: doctor.doctor_experience_commenced_on
-        ? doctor.doctor_experience_commenced_on.toString()
-        : randomDoc.experience,
-      languages: randomDoc.languages,
-      read_profile_picture_url: doctor.read_profile_picture_url ?? "",
-      skills:
-        skills?.data?.results.map((s) => s.skill_object) ??
-        randomDoc.skills.map((s) => s),
-    };
+  if (!userData?.data) {
+    return <div>Loading user data...</div>;
   }
 
-  // To Do: Mock, remove/adjust this
-  const doctor: DoctorModel | undefined =
-    extendDoctor(doctorData) ??
-    mockDoctors.find((d) => d.username === staffUsername);
+  const user = userData.data;
 
-  if (!doctor) {
-    return <div>Doctor not found</div>;
-  }
-
-  // To Do: Mock, remove/adjust this
-  const mockTokenSlots: SlotAvailability[] = [
-    // Dec 20 - Morning slots
-    {
-      id: "1",
-      start_datetime: "2024-12-20T09:00:00+05:30",
-      end_datetime: "2024-12-20T09:30:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 3,
-    },
-    {
-      id: "2",
-      start_datetime: "2024-12-20T09:30:00+05:30",
-      end_datetime: "2024-12-20T10:00:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 4,
-    },
-    // Dec 20 - Evening slots
-    {
-      id: "3",
-      start_datetime: "2024-12-20T14:00:00+05:30",
-      end_datetime: "2024-12-20T14:30:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 0,
-    },
-    {
-      id: "4",
-      start_datetime: "2024-12-20T14:30:00+05:30",
-      end_datetime: "2024-12-20T15:00:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 2,
-    },
-    // Dec 21 - Morning slots
-    {
-      id: "5",
-      start_datetime: "2024-12-21T09:00:00+05:30",
-      end_datetime: "2024-12-21T09:30:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 4,
-    },
-    {
-      id: "6",
-      start_datetime: "2024-12-21T09:30:00+05:30",
-      end_datetime: "2024-12-21T10:00:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 1,
-    },
-    // Dec 21 - Evening slots
-    {
-      id: "7",
-      start_datetime: "2024-12-21T15:00:00+05:30",
-      end_datetime: "2024-12-21T15:30:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 4,
-    },
-    // Dec 22 - Morning slots
-    {
-      id: "8",
-      start_datetime: "2024-12-22T10:00:00+05:30",
-      end_datetime: "2024-12-22T10:30:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 2,
-    },
-    {
-      id: "9",
-      start_datetime: "2024-12-22T10:30:00+05:30",
-      end_datetime: "2024-12-22T11:00:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 4,
-    },
-    // Dec 22 - Evening slots
-    {
-      id: "10",
-      start_datetime: "2024-12-22T16:00:00+05:30",
-      end_datetime: "2024-12-22T16:30:00+05:30",
-      availability: {
-        name: doctor.id?.toString() ?? "",
-        tokens_per_slot: 4,
-      },
-      allocated: 3,
-    },
-  ];
-
-  // To Do: Mock, remove/adjust this
-  const slotsData = slotsQuery.data?.data?.results ?? mockTokenSlots;
-  const morningSlots = slotsData.filter((slot) => {
+  const slotsData = slotsQuery.data?.results;
+  const morningSlots = slotsData?.filter((slot) => {
     const slotTime = parseISO(slot.start_datetime);
-    return slotTime.getHours() <= 12;
+    return slotTime.getHours() < 12;
   });
 
-  const eveningSlots = slotsData.filter((slot) => {
+  const eveningSlots = slotsData?.filter((slot) => {
     const slotTime = parseISO(slot.start_datetime);
     return slotTime.getHours() >= 12;
   });
 
-  const getSlotButtons = (slots: SlotAvailability[]) => {
+  const getSlotButtons = (slots: SlotAvailability[] | undefined) => {
+    if (!slots) return [];
     return slots.map((slot) => (
       <Button
         key={slot.id}
@@ -334,32 +191,25 @@ export function AppointmentsPage(props: AppointmentsProps) {
               <div className="flex flex-col">
                 <div className="flex flex-col gap-4 py-4 justify-between h-full">
                   <Avatar
-                    imageUrl={doctor.read_profile_picture_url}
-                    name={`${doctor.first_name} ${doctor.last_name}`}
+                    imageUrl={user.read_profile_picture_url}
+                    name={`${user.first_name} ${user.last_name}`}
                     className="h-96 w-96 self-center rounded-sm"
                   />
 
                   <div className="flex grow flex-col px-4">
                     <h3 className="truncate text-xl font-semibold">
-                      {doctor.user_type === "Doctor"
-                        ? `Dr. ${doctor.first_name} ${doctor.last_name}`
-                        : `${doctor.first_name} ${doctor.last_name}`}
+                      {user.user_type === "Doctor"
+                        ? `Dr. ${user.first_name} ${user.last_name}`
+                        : `${user.first_name} ${user.last_name}`}
                     </h3>
                     <p className="text-sm text-muted-foreground truncate">
-                      {doctor.role}
+                      {user.user_type}
                     </p>
 
-                    <p className="text-xs mt-4">Education: </p>
+                    {/* <p className="text-xs mt-4">Education: </p>
                     <p className="text-sm text-muted-foreground truncate">
-                      {doctor.education}
-                    </p>
-
-                    <p className="text-xs mt-4">Languages: </p>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {doctor.languages.join(", ")}
-                    </p>
-
-                    <p className="text-sm mt-6">{getExperience(doctor)}</p>
+                      {user.qualification}
+                    </p> */}
                   </div>
                 </div>
 
@@ -377,9 +227,9 @@ export function AppointmentsPage(props: AppointmentsProps) {
             <div className="flex flex-col gap-6">
               <span className="text-base font-semibold">
                 Book an Appointment with{" "}
-                {doctor.user_type === "Doctor"
-                  ? `Dr. ${doctor.first_name} ${doctor.last_name}`
-                  : `${doctor.first_name} ${doctor.last_name}`}
+                {user.user_type === "Doctor"
+                  ? `Dr. ${user.first_name} ${user.last_name}`
+                  : `${user.first_name} ${user.last_name}`}
               </span>
               <div>
                 <Label className="mb-2">Reason for visit</Label>
@@ -397,14 +247,17 @@ export function AppointmentsPage(props: AppointmentsProps) {
               />
               <div className="space-y-6">
                 {slotsData &&
-                (morningSlots.length > 0 || eveningSlots.length > 0) ? (
+                ((morningSlots && morningSlots.length > 0) ||
+                  (eveningSlots && eveningSlots.length > 0)) ? (
                   <div>
-                    <span className="mb-6 text-xs">Available Time Slots</span>
+                    <span className="mb-6 text-xs">
+                      {t("available_time_slots")}
+                    </span>
                     <div className="flex flex-col gap-4">
-                      {morningSlots.length > 0 && (
+                      {morningSlots && morningSlots.length > 0 && (
                         <div className="flex flex-col gap-2">
                           <span className="text-xs text-muted-foreground">
-                            Morning Slots: {morningSlots.length}{" "}
+                            {t("morning_slots")}: {morningSlots?.length}{" "}
                             {morningSlots.length > 1 ? "Slots" : "Slot"}
                           </span>
                           <div className="flex flex-wrap gap-2">
@@ -412,10 +265,10 @@ export function AppointmentsPage(props: AppointmentsProps) {
                           </div>
                         </div>
                       )}
-                      {eveningSlots.length > 0 && (
+                      {eveningSlots && eveningSlots.length > 0 && (
                         <div className="flex flex-col gap-2">
                           <span className="text-xs text-muted-foreground">
-                            Evening Slots: {eveningSlots.length}{" "}
+                            {t("evening_slots")}: {eveningSlots.length}{" "}
                             {eveningSlots.length > 1 ? "Slots" : "Slot"}
                           </span>
                           <div className="flex flex-wrap gap-2">
@@ -426,7 +279,7 @@ export function AppointmentsPage(props: AppointmentsProps) {
                     </div>
                   </div>
                 ) : (
-                  <div>No slots available</div>
+                  <div>{t("no_slots_available")}</div>
                 )}
               </div>
             </div>
@@ -445,7 +298,7 @@ export function AppointmentsPage(props: AppointmentsProps) {
                 );
                 localStorage.setItem("reason", reason);
                 navigate(
-                  `/facility/${facilityId}/appointments/${staffUsername}/patient-select`,
+                  `/facility/${facilityId}/appointments/${staffExternalId}/patient-select`,
                 );
               }}
             >

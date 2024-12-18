@@ -583,3 +583,8 @@ export const getMonthStartAndEnd = (date: Date) => {
     end: new Date(date.getFullYear(), date.getMonth() + 1, 0),
   };
 };
+
+export const conditionalObject = (condition: unknown, object?: object) => {
+  if (condition) return object;
+  else return {};
+};

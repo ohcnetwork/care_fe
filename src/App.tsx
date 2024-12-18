@@ -1,4 +1,5 @@
 import {
+  MutationCache,
   QueryCache,
   QueryClient,
   QueryClientProvider,
@@ -17,16 +18,9 @@ import AuthUserProvider from "@/Providers/AuthUserProvider";
 import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { FeatureFlagsProvider } from "@/Utils/featureFlags";
-import { handleQueryError } from "@/Utils/request/errorHandler";
-import { QueryError } from "@/Utils/request/queryError";
+import { handleHttpError } from "@/Utils/request/errorHandler";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
-
-declare module "@tanstack/react-query" {
-  interface Register {
-    defaultError: QueryError;
-  }
-}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,7 +30,10 @@ const queryClient = new QueryClient({
     },
   },
   queryCache: new QueryCache({
-    onError: handleQueryError,
+    onError: handleHttpError,
+  }),
+  mutationCache: new MutationCache({
+    onError: handleHttpError,
   }),
 });
 

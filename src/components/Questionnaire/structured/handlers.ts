@@ -3,11 +3,13 @@ import {
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
 
+import routes from "@/Utils/request/api";
 import { StructuredQuestionType } from "@/types/questionnaire/question";
 
 interface StructuredHandlerContext {
-  resourceId: string;
+  patientId: string;
   encounterId: string;
+  facilityId?: string;
 }
 
 type StructuredHandler<T extends StructuredQuestionType> = {
@@ -26,7 +28,7 @@ const handlers: {
   [K in StructuredQuestionType]: StructuredHandler<K>;
 } = {
   allergy_intolerance: {
-    getRequests: (allergies, { resourceId, encounterId }) =>
+    getRequests: (allergies, { patientId, encounterId }) =>
       allergies.map((allergy) => {
         // Ensure all required fields have default values
         const body: RequestTypeFor<"allergy_intolerance"> = {
@@ -41,7 +43,7 @@ const handlers: {
         };
 
         return {
-          url: `/api/v1/patient/${resourceId}/allergy_intolerance/`,
+          url: `/api/v1/patient/${patientId}/allergy_intolerance/`,
           method: "POST",
           body,
           reference_id: "allergy_intolerance",
@@ -61,7 +63,7 @@ const handlers: {
     },
   },
   symptom: {
-    getRequests: (symptoms, { resourceId, encounterId }) =>
+    getRequests: (symptoms, { patientId, encounterId }) =>
       symptoms.map((symptom) => {
         const body: RequestTypeFor<"symptom"> = {
           clinical_status: symptom.clinical_status,
@@ -75,7 +77,7 @@ const handlers: {
         };
 
         return {
-          url: `/api/v1/patient/${resourceId}/symptom/`,
+          url: `/api/v1/patient/${patientId}/symptom/`,
           method: "POST",
           body,
           reference_id: "symptom",
@@ -83,7 +85,7 @@ const handlers: {
       }),
   },
   diagnosis: {
-    getRequests: (diagnoses, { resourceId, encounterId }) =>
+    getRequests: (diagnoses, { patientId, encounterId }) =>
       diagnoses.map((diagnosis) => {
         const body: RequestTypeFor<"diagnosis"> = {
           clinical_status: diagnosis.clinical_status,
@@ -96,12 +98,55 @@ const handlers: {
         };
 
         return {
-          url: `/api/v1/patient/${resourceId}/diagnosis/`,
+          url: `/api/v1/patient/${patientId}/diagnosis/`,
           method: "POST",
           body,
           reference_id: "diagnosis",
         };
       }),
+  },
+  encounter: {
+    getRequests: (encounters, { patientId, facilityId }) => {
+      console.log("Encounters", encounters, facilityId);
+      if (!encounters.length || !facilityId) return [];
+
+      return encounters.map((encounter) => {
+        const body: RequestTypeFor<"encounter"> = {
+          suggestion: encounter.suggestion,
+          route_to_facility: encounter.route_to_facility,
+          patient: patientId,
+          facility: facilityId,
+          admitted: encounter.suggestion === "A",
+          category: encounter.category,
+          encounter_date: new Date().toISOString(),
+          patient_no: encounter.patient_no,
+
+          // Referral details
+          referred_to: encounter.referred_to,
+          referred_to_external: encounter.referred_to_external,
+          referred_from_facility: encounter.referred_from_facility,
+          referred_from_facility_external:
+            encounter.referred_from_facility_external,
+          referred_by_external: encounter.referred_by_external,
+          transferred_from_location: encounter.transferred_from_location,
+
+          // Doctor details
+          treating_physician: encounter.treating_physician,
+
+          // Death details
+          discharge_notes: encounter.discharge_notes,
+          death_datetime: encounter.death_datetime,
+          death_confirmed_doctor: encounter.death_confirmed_doctor,
+        };
+
+        return {
+          url: routes.createConsultation.path,
+          method: "POST",
+          body,
+          reference_id: "encounter",
+        };
+      });
+    },
   },
 };
 

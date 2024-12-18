@@ -192,7 +192,8 @@ export function QuestionnaireShow({ id }: QuestionnaireShowProps) {
             <CardContent>
               <QuestionnaireForm
                 questionnaireSlug={id}
-                resourceId={"some_patient_id"}
+                patientId={"some_patient_id"}
+                subjectType={"encounter"}
                 encounterId={"some_encounter_id"}
               />
             </CardContent>

@@ -1,3 +1,4 @@
+import { UserBase } from "../user/base";
 import { QuestionnaireResponse as Response } from "./form";
 import { StructuredQuestionType } from "./question";
 import { QuestionnaireDetail } from "./questionnaire";
@@ -20,9 +21,5 @@ export interface QuestionnaireResponse {
     StructuredQuestionType,
     StructuredResponseValue
   >;
-  created_by: {
-    first_name: string;
-    last_name: string;
-    title?: string;
-  };
+  created_by: UserBase;
 }

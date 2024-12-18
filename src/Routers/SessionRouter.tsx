@@ -32,14 +32,17 @@ const routes = {
   }) => (
     <OTP facilityId={facilityId} staffUsername={staffUsername} page={page} />
   ),
-  "/facility/:facilityId/appointments/:staffUsername/book-appointment": ({
+  "/facility/:facilityId/appointments/:staffExternalId/book-appointment": ({
     facilityId,
-    staffUsername,
+    staffExternalId,
   }: {
     facilityId: string;
-    staffUsername: string;
+    staffExternalId: string;
   }) => (
-    <AppointmentsPage facilityId={facilityId} staffUsername={staffUsername} />
+    <AppointmentsPage
+      facilityId={facilityId}
+      staffExternalId={staffExternalId}
+    />
   ),
   "/facility/:facilityId/appointments/:staffUsername/patient-select": ({
     facilityId,
@@ -61,14 +64,10 @@ const routes = {
     />
   ),
   "/facility/:facilityId/appointments/:appointmentId/success": ({
-    facilityId,
     appointmentId,
   }: {
-    facilityId: string;
     appointmentId: string;
-  }) => (
-    <AppointmentSuccess facilityId={facilityId} appointmentId={appointmentId} />
-  ),
+  }) => <AppointmentSuccess appointmentId={appointmentId} />,
   "/login": () => <Login />,
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: { token: string }) => (

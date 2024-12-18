@@ -55,7 +55,7 @@ export const QuestionGroup = memo(function QuestionGroup({
         {question.text && (
           <div className="space-y-1">
             <Label className="text-lg font-semibold text-green-600">
-              {question.link_id} - {question.text}
+              {question.text}
             </Label>
             {question.description && (
               <p className="text-sm text-muted-foreground">

@@ -1,4 +1,5 @@
 import { AllergyIntolerance } from "@/types/emr/allergyIntolerance";
+import { Encounter } from "@/types/emr/encounter";
 import { MedicationRequest } from "@/types/emr/medicationRequest";
 import { Code } from "@/types/questionnaire/code";
 import { Quantity } from "@/types/questionnaire/quantity";
@@ -15,7 +16,8 @@ export type ResponseValue = {
     | "allergy_intolerance"
     | "medication_request"
     | "symptom"
-    | "diagnosis";
+    | "diagnosis"
+    | "encounter";
 
   value?:
     | string
@@ -24,7 +26,8 @@ export type ResponseValue = {
     | AllergyIntolerance[]
     | MedicationRequest[]
     | Symptom[]
-    | Diagnosis[];
+    | Diagnosis[]
+    | Encounter;
   value_code?: Code;
   value_quantity?: Quantity;
 };

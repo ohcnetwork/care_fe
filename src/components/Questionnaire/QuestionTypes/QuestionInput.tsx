@@ -13,6 +13,7 @@ import { AllergyQuestion } from "./AllergyQuestion";
 import { BooleanQuestion } from "./BooleanQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
 import { DiagnosisQuestion } from "./DiagnosisQuestion";
+import { EncounterQuestion } from "./EncounterQuestion";
 import { MedicationQuestion } from "./MedicationQuestion";
 import { NotesInput } from "./NotesInput";
 import { NumberQuestion } from "./NumberQuestion";
@@ -148,6 +149,8 @@ export function QuestionInput({
             return <SymptomQuestion {...commonProps} />;
           case "diagnosis":
             return <DiagnosisQuestion {...commonProps} />;
+          case "encounter":
+            return <EncounterQuestion {...commonProps} />;
         }
         return null;
 
@@ -181,10 +184,8 @@ export function QuestionInput({
             );
 
           return (
-            <div key={index}>
-              <div className=" gap-2">
-                <div className="flex-1">{renderSingleInput()}</div>
-              </div>
+            <div key={index} className="mt-2 gap-2">
+              <div>{renderSingleInput()}</div>
               {removeButton}
             </div>
           );

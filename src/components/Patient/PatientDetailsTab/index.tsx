@@ -1,22 +1,30 @@
-import { PatientModel } from "../models";
-import { Demography } from "./Demography";
-import EncounterHistory from "./EncounterHistory";
-import { HealthProfileSummary } from "./HealthProfileSummary";
-import { ImmunisationRecords } from "./ImmunisationRecords";
-import PatientNotes from "./Notes";
+import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
+import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
+import { ImmunisationRecords } from "@/components/Patient/PatientDetailsTab//ImmunisationRecords";
+import PatientNotes from "@/components/Patient/PatientDetailsTab//Notes";
+import ShiftingHistory from "@/components/Patient/PatientDetailsTab//ShiftingHistory";
+import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
+import { Updates } from "@/components/Patient/PatientDetailsTab/patientUpdates";
+import { PatientModel } from "@/components/Patient/models";
+
+import { Appointments } from "./Appointments";
 import { ResourceRequests } from "./ResourceRequests";
-import ShiftingHistory from "./ShiftingHistory";
 
 export interface PatientProps {
   facilityId: string;
   id: string;
   patientData: PatientModel;
+  refetch: () => void;
 }
 
 export const patientTabs = [
   {
     route: "demography",
     component: Demography,
+  },
+  {
+    route: "appointments",
+    component: Appointments,
   },
   {
     route: "encounters",
@@ -27,6 +35,10 @@ export const patientTabs = [
     component: HealthProfileSummary,
   },
   {
+    route: "updates",
+    component: Updates,
+  },
+  {
     route: "immunisation-records",
     component: ImmunisationRecords,
   },
@@ -35,7 +47,7 @@ export const patientTabs = [
     component: ShiftingHistory,
   },
   {
-    route: "resource-requests",
+    route: "resource_requests",
     component: ResourceRequests,
   },
   {

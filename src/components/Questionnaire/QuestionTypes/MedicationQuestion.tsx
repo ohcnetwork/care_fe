@@ -130,7 +130,7 @@ export function MedicationQuestion({
   return (
     <div className="space-y-4">
       <Label className="text-base font-medium">
-        {question.link_id} - {question.text}
+        {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
       <div className="rounded-lg border p-4">
@@ -300,7 +300,7 @@ export function MedicationQuestion({
   return (
     <div className="space-y-4">
       <Label className="text-base font-medium">
-        {question.link_id} - {question.text}
+        {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
       <div className="rounded-lg border p-4">

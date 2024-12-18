@@ -20,7 +20,8 @@ export type StructuredQuestionType =
   | "allergy_intolerance"
   | "medication_request"
   | "symptom"
-  | "diagnosis";
+  | "diagnosis"
+  | "encounter";
 
 type EnableWhenNumeric = {
   operator: "greater" | "less" | "greater_or_equals" | "less_or_equals";

@@ -1,5 +1,6 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "raviger";
 import { useEffect } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -57,11 +58,11 @@ export function FacilitiesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-4 mb-6">
+      <Link href="/" className="flex items-center gap-4 mb-6">
         <div className="mb-8">
           <img src={mainLogo?.dark} alt="Care Logo" className="h-12 w-auto" />
         </div>
-      </div>
+      </Link>
       <div className="flex flex-col justify-between sm:flex-row items-center gap-4 mb-6">
         <SearchByMultipleFields
           id="facility-search"

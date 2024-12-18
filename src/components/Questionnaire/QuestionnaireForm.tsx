@@ -1,3 +1,4 @@
+import { usePathParams } from "raviger";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ import { Error, Success } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import useMutation from "@/Utils/request/useMutation";
 import useQuery from "@/Utils/request/useQuery";
+import { Encounter } from "@/types/emr/encounter";
 import {
   DetailedValidationError,
   QuestionValidationError,
@@ -39,16 +41,18 @@ interface BatchRequest {
 
 export interface QuestionnaireFormProps {
   questionnaireSlug?: string;
-  resourceId: string;
-  encounterId: string;
+  patientId: string;
+  encounterId?: string;
+  subjectType?: string;
   onSubmit?: () => void;
   onCancel?: () => void;
 }
 
 export function QuestionnaireForm({
   questionnaireSlug,
-  resourceId,
+  patientId,
   encounterId,
+  subjectType,
   onSubmit,
   onCancel,
 }: QuestionnaireFormProps) {
@@ -58,6 +62,11 @@ export function QuestionnaireForm({
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
+
+  const pathParams = usePathParams(
+    "/facility/:facilityId/patient/:patientId/*",
+  );
+  const facilityId = pathParams?.facilityId;
 
   const {
     data: questionnaireData,
@@ -165,25 +174,85 @@ export function QuestionnaireForm({
   const handleSubmit = async () => {
     if (hasErrors) return;
 
-    const requests: BatchRequest[] = [];
-    const context = { resourceId, encounterId };
+    let requestEncounterId: string | undefined = encounterId;
+    // Loop through responses and check if there are any responses of structured_type = "encounter"
 
-    // First, collect all structured data requests
-    questionnaireForms.forEach((form) => {
-      form.responses.forEach((response) => {
-        if (response.structured_type) {
-          const structuredData = response.values?.[0]?.value;
-          if (Array.isArray(structuredData) && structuredData.length > 0) {
-            const structuredRequests = getStructuredRequests(
-              response.structured_type,
-              structuredData,
-              context,
-            );
-            requests.push(...structuredRequests);
+    if (!requestEncounterId) {
+      console.log("No encounterId found, Checking for encounter response");
+      const encounterResponse = questionnaireForms.reduce(
+        (found: QuestionnaireResponse | undefined, form) => {
+          return found
+            ? found
+            : form.responses.find((response) => {
+                if (response.structured_type === "encounter") {
+                  return response;
+                }
+              });
+        },
+        undefined,
+      );
+
+      // If there is a question of type encounter, a new encounter is being created, then use the /encounter/create endpoint, to create the encounter, and use the encounterId in the API call to save the questionnaire responses.
+
+      if (
+        encounterResponse &&
+        encounterResponse.values?.[0]?.type === "encounter"
+      ) {
+        console.log("Encounter response found, creating encounter");
+        const encounter = encounterResponse.values?.[0]?.value as Encounter;
+        console.log("Creating encounter", encounter);
+        // Create encounter first
+        const encounterRequests = getStructuredRequests(
+          "encounter",
+          [encounter],
+          {
+            patientId: patientId,
+            encounterId: "not-applicable",
+            facilityId: facilityId,
+          },
+        );
+
+        console.log("Encounter requests", encounterRequests);
+
+        if (encounterRequests.length) {
+          console.log("Creating encounter");
+          const encounterResponse = await submitBatch({
+            body: { requests: encounterRequests },
+          });
+
+          // Use the consultationId as encounterId for other requests
+          if (encounterResponse.data?.results[0]?.data?.id) {
+            requestEncounterId = encounterResponse.data.results[0].data.id;
+          } else {
+            Error({
+              msg: "Could not create an encounter",
+            });
+            return;
           }
         }
+      }
+    }
+
+    const requests: BatchRequest[] = [];
+    if (requestEncounterId) {
+      const context = { patientId, encounterId: requestEncounterId };
+      // First, collect all structured data requests if encounterId is provided
+      questionnaireForms.forEach((form) => {
+        form.responses.forEach((response) => {
+          if (response.structured_type) {
+            const structuredData = response.values?.[0]?.value;
+            if (Array.isArray(structuredData) && structuredData.length > 0) {
+              const structuredRequests = getStructuredRequests(
+                response.structured_type,
+                structuredData,
+                context,
+              );
+              requests.push(...structuredRequests);
+            }
+          }
+        });
       });
-    });
+    }
 
     // Then, add questionnaire submission requests
     questionnaireForms.forEach((form) => {
@@ -200,8 +269,9 @@ export function QuestionnaireForm({
           method: "POST",
           reference_id: form.questionnaire.id,
           body: {
-            resource_id: resourceId,
-            encounter: encounterId,
+            resource_id: requestEncounterId ?? patientId,
+            encounter: requestEncounterId,
+            patient: patientId,
             results: nonStructuredResponses
               .filter(
                 (response) =>
@@ -212,7 +282,7 @@ export function QuestionnaireForm({
                 values: response.values.map((value) => ({
                   ...(value.value_code
                     ? { value_code: value.value_code }
-                    : { value: String(value.value || "") }),
+                    : { value: String(value.value) }),
                 })),
                 note: response.note,
                 body_site: response.body_site,
@@ -290,6 +360,7 @@ export function QuestionnaireForm({
 
           <div className="flex gap-4 items-center">
             <QuestionnaireSearch
+              subjectType={subjectType}
               onSelect={(selected) => {
                 if (
                   questionnaireForms.some(
@@ -414,12 +485,14 @@ export function QuestionnaireForm({
           )}
         </div>
         {/* Add a Preview of the QuestionnaireForm */}
-        <div className="p-4 space-y-6">
-          <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
-          <pre className="text-sm text-muted-foreground">
-            {JSON.stringify(questionnaireForms, null, 2)}
-          </pre>
-        </div>
+        {import.meta.env.DEV && (
+          <div className="p-4 space-y-6">
+            <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
+            <pre className="text-sm text-muted-foreground">
+              {JSON.stringify(questionnaireForms, null, 2)}
+            </pre>
+          </div>
+        )}
       </div>
     </div>
   );

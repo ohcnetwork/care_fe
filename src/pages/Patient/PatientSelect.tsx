@@ -1,23 +1,29 @@
-import careConfig from "@careConfig";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { navigate } from "raviger";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import { PatientModel } from "@/components/Patient/models";
-import { ScheduleAPIs } from "@/components/Schedule/api";
 import {
+  Appointment,
   AppointmentCreate,
   SlotAvailability,
 } from "@/components/Schedule/types";
 
+import { CarePatientTokenKey } from "@/common/constants";
+
 import * as Notification from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
-import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
-import { formatDate } from "@/Utils/utils";
+import routes from "@/Utils/request/api";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { TokenData } from "@/types/auth/otpToken";
+
+import { AppointmentPatient } from "./Utils";
 
 export default function PatientSelect({
   facilityId,
@@ -26,18 +32,20 @@ export default function PatientSelect({
   facilityId: string;
   staffUsername: string;
 }) {
-  const phoneNumber = localStorage.getItem("phoneNumber");
+  const { t } = useTranslation();
   const selectedSlot = JSON.parse(
     localStorage.getItem("selectedSlot") ?? "",
   ) as SlotAvailability;
   const reason = localStorage.getItem("reason");
-  const OTPaccessToken = localStorage.getItem("OTPaccessToken");
+  const tokenData: TokenData = JSON.parse(
+    localStorage.getItem(CarePatientTokenKey) || "{}",
+  );
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   if (!staffUsername) {
     Notification.Error({ msg: "Staff Username Not Found" });
     navigate(`/facility/${facilityId}/`);
-  } else if (!phoneNumber) {
+  } else if (!tokenData) {
     Notification.Error({ msg: "Phone Number Not Found" });
     navigate(`/facility/${facilityId}/appointments/${staffUsername}/otp/send`);
   } else if (!selectedSlot) {
@@ -47,92 +55,58 @@ export default function PatientSelect({
     );
   }
 
-  const { data: patientData } = useQuery<
-    RequestResult<PaginatedResponse<PatientModel>>
-  >({
-    queryKey: ["patient", phoneNumber],
-    queryFn: async () => {
-      const res = await fetch(
-        `${careConfig.apiUrl}/api/v1/otp/patient/?phone_number=${phoneNumber ?? ""}`,
-        {
-          headers: {
-            Authorization: `Bearer ${OTPaccessToken}`,
-            "Content-Type": "application/json",
-          },
+  const { data: patientData } = useQuery<PaginatedResponse<AppointmentPatient>>(
+    {
+      queryKey: ["otp-patient"],
+      queryFn: query(routes.otp.getPatient, {
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
+          "Content-Type": "application/json",
         },
-      );
-      const data = await res.json();
-      return { res, data, error: res.ok ? undefined : data };
+      }),
+      enabled: !!tokenData.token,
     },
-    enabled: !!phoneNumber && !!OTPaccessToken,
-  });
+  );
 
   const { mutate: createAppointment } = useMutation({
-    mutationFn: async (body: AppointmentCreate) => {
-      const { res, data } = await request(
-        ScheduleAPIs.slots.createAppointment,
-        {
-          pathParams: {
-            facility_id: facilityId,
-            slot_id: selectedSlot?.id ?? "",
-          },
-          body,
+    mutationFn: (body: AppointmentCreate) =>
+      mutate(routes.otp.createAppointment, {
+        pathParams: { id: selectedSlot?.id },
+        body,
+        headers: {
+          Authorization: `Bearer ${tokenData.token}`,
         },
-      );
-      if (res?.status === 200) {
-        Notification.Success({ msg: "Appointment created successfully" });
-        navigate(`/facility/${facilityId}/appointments/${data?.id}/success`);
-      }
-      //To do: mock appointment creation, remove this
-      navigate(`/facility/${facilityId}/appointments/123/success`);
-      return res;
+      })(body),
+    onSuccess: (data: Appointment) => {
+      Notification.Success({ msg: t("appointment_created_success") });
+      navigate(`/facility/${facilityId}/appointments/${data.id}/success`);
+    },
+    onError: (error) => {
+      Notification.Error({
+        msg: error?.message || t("failed_to_create_appointment"),
+      });
     },
   });
 
-  const mockPatientData = [
-    {
-      id: "T105690908240017",
-      name: "Leo Westervelt",
-      phone_number: "9876543120",
-      date_of_birth: "1996-01-04",
-      gender: 1,
-      blood_group: "O+",
-      nationality: "India",
-      is_active: true,
-    },
-    {
-      id: "T105690908240019",
-      name: "Tatiana Franci",
-      phone_number: "9876543120",
-      date_of_birth: "1998-06-02",
-      gender: 2,
-      blood_group: "B+",
-      nationality: "India",
-      is_active: true,
-    },
-    {
-      id: "T105690908240032",
-      name: "Rayna Passaquindici Arcand",
-      phone_number: "9876543120",
-      date_of_birth: "1991-05-23",
-      gender: 2,
-      blood_group: "A+",
-      nationality: "India",
-      is_active: true,
-    },
-  ];
-
-  const patients = patientData?.data?.results ?? mockPatientData;
+  const patients = patientData?.results;
 
   const renderNoPatientFound = () => {
     return (
       <div className="">
         <span className="text-base font-medium">
-          No patients found with this phone number. Please create a new patient
-          to proceed with booking appointment.
+          {t("no_patients_found_phone_number")}
         </span>
       </div>
     );
+  };
+
+  const getPatienDoBorAge = (patient: AppointmentPatient) => {
+    if (patient.date_of_birth) {
+      return dayjs(patient.date_of_birth).format("DD MMM YYYY");
+    }
+    const yearOfBirth = parseInt(patient.year_of_birth ?? "");
+    const age = dayjs().year() - yearOfBirth;
+    return `${age} years`;
   };
 
   const renderPatientList = () => {
@@ -141,10 +115,16 @@ export default function PatientSelect({
         <table className="w-full">
           <thead className="text-sm bg-secondary-200 font-medium">
             <tr>
-              <th className="w-2/6 p-2 text-left">Patient Name/UHID</th>
-              <th className="w-1/6 p-2 text-left">Primary Ph No.</th>
-              <th className="w-1/6 p-2 text-left">Date of birth/Age</th>
-              <th className="w-1/6 p-2 text-left">Sex</th>
+              <th className="w-2/6 px-4 py-2 text-left">
+                {t("patient_name_uhid")}
+              </th>
+              <th className="w-1/6 px-4 py-2 text-left">
+                {t("primary_ph_no")}
+              </th>
+              <th className="w-1/6 px-4 py-2 text-left">
+                {t("date_of_birth_age")}
+              </th>
+              <th className="w-1/6 px-4 py-2 text-left">{t("sex")}</th>
             </tr>
           </thead>
           <tbody className="divide-y rounded-lg border bg-card">
@@ -182,21 +162,20 @@ export default function PatientSelect({
                   </td>
                 ) : (
                   <>
-                    <td className="p-4">
+                    <td className="p-4 align-middle text-left">
                       <div className="font-medium">{patient.name}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         {patient.id}
                       </div>
                     </td>
-                    <td className="p-4">{patient.phone_number}</td>
-                    <td className="p-4">
-                      {formatDate(
-                        new Date(patient.date_of_birth ?? ""),
-                        "dd MMM yyyy",
-                      )}
+                    <td className="p-4 align-middle text-left">
+                      {patient.phone_number}
                     </td>
-                    <td className="p-4">
-                      {patient.gender === 1 ? "Male" : "Female"}
+                    <td className="p-4 align-middle text-left">
+                      {getPatienDoBorAge(patient as AppointmentPatient)}
+                    </td>
+                    <td className="p-4 align-middle text-left">
+                      {t(`GENDER__${patient.gender}`)}
                     </td>
                   </>
                 )}
@@ -221,11 +200,11 @@ export default function PatientSelect({
           }
         >
           <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
-          <span className="text-sm underline">Back</span>
+          <span className="text-sm underline">{t("back")}</span>
         </Button>
       </div>
       <div className="flex flex-col justify-center space-y-4 bg-white rounded-lg shadow-md p-8">
-        <h3 className="text-lg font-medium">Select/Register Patient</h3>
+        <h3 className="text-lg font-medium">{t("select_register_patient")}</h3>
         {(patients?.length ?? 0) > 0
           ? renderPatientList()
           : renderNoPatientFound()}
@@ -239,7 +218,7 @@ export default function PatientSelect({
           }
         >
           <span className="bg-gradient-to-b from-white/15 to-transparent"></span>
-          Add New Patient
+          {t("add_new_patient")}
         </Button>
       </div>
     </div>

@@ -64,7 +64,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     await refetch();
 
     const redirectURL = getRedirectURL();
-    navigate(redirectURL ? `/?redirect=${redirectURL}` : "/");
+    navigate(redirectURL ? `/login?redirect=${redirectURL}` : "/login");
   }, [refetch]);
 
   // Handles signout from current tab, if signed out from another tab.

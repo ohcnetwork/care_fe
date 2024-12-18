@@ -78,12 +78,9 @@ export default function QuestionnaireResponsesList() {
                         <span>{formatDateTime(item.created_date)}</span>
                       </div>
                       <div className="mt-1 text-sm text-muted-foreground">
-                        by{" "}
-                        {item.created_by?.title
-                          ? `${item.created_by.title} `
-                          : "Dr. "}
-                        {item.created_by?.first_name || ""}{" "}
+                        by {item.created_by?.first_name || ""}{" "}
                         {item.created_by?.last_name || ""}
+                        {` (${item.created_by?.user_type})`}
                       </div>
                     </div>
                   </div>

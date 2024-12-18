@@ -39,7 +39,7 @@ export function NumberQuestion({
   return (
     <div className={cn(classes)}>
       <Label className="text-base font-medium">
-        {question.link_id} - {question.text}
+        {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </Label>
       <Input

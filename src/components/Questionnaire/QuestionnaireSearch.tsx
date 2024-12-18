@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -8,30 +9,40 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import query from "@/Utils/request/query";
+import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
 interface QuestionnaireSearchProps {
   onSelect: (questionnaire: QuestionnaireDetail) => void;
+  subjectType?: string;
   disabled?: boolean;
+}
+
+interface QuestionnaireListResponse {
+  results: QuestionnaireDetail[];
+  count: number;
 }
 
 export function QuestionnaireSearch({
   onSelect,
+  subjectType,
   disabled,
 }: QuestionnaireSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const {
-    data: questionnaireList,
-    loading: listLoading,
-    error: _listError,
-  } = useQuery(routes.questionnaire.list);
+  const { data: questionnaires, isLoading } =
+    useQuery<QuestionnaireListResponse>({
+      queryKey: ["questionnaires", "list"],
+      queryFn: query(routes.questionnaire.list, {
+        queryParams: subjectType ? { subject_type: subjectType } : undefined,
+      }),
+    });
 
-  const filteredQuestionnaires = (questionnaireList?.results ?? []).filter(
+  const filteredQuestionnaires = (questionnaires?.results ?? []).filter(
     (item: QuestionnaireDetail) =>
       item.title.toLowerCase().includes(search.toLowerCase()),
   );
@@ -42,9 +53,9 @@ export function QuestionnaireSearch({
         <Button
           variant="outline"
           className="w-full justify-between"
-          disabled={disabled || listLoading}
+          disabled={disabled || isLoading}
         >
-          {listLoading ? (
+          {isLoading ? (
             <>
               <CareIcon
                 icon="l-spinner"
@@ -72,7 +83,13 @@ export function QuestionnaireSearch({
           />
         </div>
         <div className="max-h-[400px] overflow-y-auto p-0">
-          {filteredQuestionnaires.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-2 p-4">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : filteredQuestionnaires.length === 0 ? (
             <div className="p-4 text-sm text-muted-foreground">
               No questionnaires found
             </div>

@@ -420,7 +420,10 @@ export const PatientManager = () => {
   if (data?.count) {
     patientList = data.results.map((patient) => {
       let patientUrl = "";
-      if (!isPatientMandatoryDataFilled(patient)) {
+      // Open Patient Details Page for Volunteer Users; Encounter is not accessible for Volunteer Users
+      if (authUser.user_type === "Volunteer") {
+        patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
+      } else if (!isPatientMandatoryDataFilled(patient)) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
       } else if (
         patient.last_consultation &&

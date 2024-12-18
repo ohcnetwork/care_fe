@@ -19,7 +19,7 @@ export default function PluginEngine({
       <ErrorBoundary
         fallback={
           <div className="flex h-screen w-screen items-center justify-center">
-            Error loading plugins
+            Care has encountered an unexpected error.
           </div>
         }
       >

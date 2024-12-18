@@ -68,11 +68,9 @@ export default function QuestionnaireResponseView({
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-user" className="h-4 w-4" />
                 <span>
-                  {formResponse.created_by?.title
-                    ? `${formResponse.created_by.title} `
-                    : "Dr. "}
                   {formResponse.created_by?.first_name}{" "}
                   {formResponse.created_by?.last_name}
+                  {` (${formResponse.created_by?.user_type})`}
                 </span>
               </div>
             </div>

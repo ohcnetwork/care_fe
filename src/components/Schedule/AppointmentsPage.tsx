@@ -188,7 +188,7 @@ function AppointmentColumn(props: {
   return (
     <div
       className={cn(
-        "bg-gray-100 py-4 px-3 rounded-lg w-[20rem] h-[calc(100vh-17rem)]",
+        "bg-gray-100 py-4 px-3 rounded-lg w-[20rem] overflow-y-hidden",
         !data && "animate-pulse",
       )}
     >
@@ -200,28 +200,29 @@ function AppointmentColumn(props: {
           {data?.count ?? "..."}
         </span>
       </div>
-      <ScrollArea>
-        <ul className="space-y-3 px-0.5 pb-4 pt-1">
-          {appointments.map((appointment) => (
-            <li key={appointment.id}>
-              <Link
-                href={`/facility/${props.facilityId}/patient/${appointment.patient.id}/encounters`}
-                className="text-inherit"
-              >
-                <AppointmentCard
-                  appointment={appointment}
-                  facilityId={props.facilityId}
-                />
-              </Link>
-            </li>
-          ))}
-        </ul>
-        {appointments.length === 0 && (
-          <div className="flex justify-center items-center h-full">
-            <p className="text-gray-500">No appointments</p>
-          </div>
-        )}
-      </ScrollArea>
+      {appointments.length === 0 ? (
+        <div className="flex justify-center items-center h-full">
+          <p className="text-gray-500">No appointments</p>
+        </div>
+      ) : (
+        <ScrollArea>
+          <ul className="space-y-3 px-0.5 pb-4 pt-1 h-[calc(100vh-22rem)]">
+            {appointments.map((appointment) => (
+              <li key={appointment.id}>
+                <Link
+                  href={`/facility/${props.facilityId}/patient/${appointment.patient.id}/encounters`}
+                  className="text-inherit"
+                >
+                  <AppointmentCard
+                    appointment={appointment}
+                    facilityId={props.facilityId}
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </ScrollArea>
+      )}
     </div>
   );
 }

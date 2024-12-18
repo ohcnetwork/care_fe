@@ -19,8 +19,9 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { RequestResult } from "@/Utils/request/types";
 
-const { mainLogo } = careConfig;
+const { customLogo, stateLogo, mainLogo } = careConfig;
 
+// Todo: Lets read the default state ID from ENV.
 const STATE_ID = "1"; // Kerala's state ID
 
 export function LandingPage() {
@@ -88,7 +89,6 @@ export function LandingPage() {
     const district = districts.find(
       (d) => d.name.toLowerCase() === value.toLowerCase(),
     );
-    console.log(district);
     if (district) {
       setSelectedDistrict(district);
       setSearchQuery("");
@@ -114,8 +114,22 @@ export function LandingPage() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center pt-24">
         {/* Logo Section */}
+        {stateLogo && stateLogo.dark && (
+          <div className="mb-2">
+            <img src={stateLogo.dark} alt="Logo" className="h-28 w-auto" />
+          </div>
+        )}
+
         <div className="mb-8">
-          <img src={mainLogo?.dark} alt="Care Logo" className="h-24 w-auto" />
+          {(customLogo || mainLogo) && (
+            <>
+              <img
+                src={customLogo?.dark ?? mainLogo?.dark}
+                alt="Logo"
+                className="h-20 w-auto"
+              />
+            </>
+          )}
         </div>
 
         {/* Search Section */}

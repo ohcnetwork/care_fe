@@ -161,6 +161,16 @@ const consultationRoutes: AppRoutes = {
         consultationId={consultationId}
       />
     ),
+  "/facility/:facilityId/patient/:patientId/questionnaire": ({
+    facilityId,
+    patientId,
+  }) => (
+    <EncounterQuestionnaire
+      facilityId={facilityId}
+      patientId={patientId}
+      subjectType="patient"
+    />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/questionnaire":
     ({ facilityId, patientId, consultationId }) => (
       <EncounterQuestionnaire

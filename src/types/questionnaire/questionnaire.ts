@@ -10,7 +10,8 @@ export type QuestionnaireType =
   | "allergy_intolerance"
   | "medication_request"
   | "medication_statement"
-  | "immunization";
+  | "immunization"
+  | "encounter";
 
 export interface QuestionnaireDetail {
   id: string;

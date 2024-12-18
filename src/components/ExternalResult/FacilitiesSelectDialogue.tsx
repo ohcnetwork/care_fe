@@ -28,7 +28,7 @@ const FacilitiesSelectDialog = (props: Props) => {
     >
       <FacilitySelect
         name="facilities"
-        selected={selectedFacility}
+        selected={selectedFacility ?? null}
         setSelected={setSelected}
         errors=""
         showAll={false}

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { FacilityModel } from "@/components/Facility/models";
-import { SkillObjectModel, UserAssignedModel } from "@/components/Users/models";
+import { UserAssignedModel } from "@/components/Users/models";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -16,14 +17,15 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
 
-import { DoctorModel, FeatureBadge, mockDoctors } from "./Utils";
-import { DoctorCard } from "./components/DoctorCard";
+import { FeatureBadge } from "./Utils";
+import { UserCard } from "./components/UserCard";
 
 interface Props {
   id: string;
 }
 
 export function FacilityDetailsPage({ id }: Props) {
+  const { t } = useTranslation();
   const { data: facilityResponse, isLoading } = useQuery<
     RequestResult<FacilityModel>
   >({
@@ -33,11 +35,12 @@ export function FacilityDetailsPage({ id }: Props) {
         pathParams: { id },
       }),
   });
+
   const { Pagination } = useFilters({
     limit: 18,
   });
 
-  const { data: docReponse } = useQuery<
+  const { data: docResponse } = useQuery<
     RequestResult<PaginatedResponse<UserAssignedModel>>
   >({
     queryKey: [routes.getFacilityUsers, id],
@@ -47,40 +50,13 @@ export function FacilityDetailsPage({ id }: Props) {
         silent: true,
       });
       if (response.res?.status !== 200) {
-        Notification.Error({ msg: "Error while fetching doctors data" });
+        Notification.Error({ msg: "Error while fetching users data" });
       }
       return response;
     },
   });
 
-  // To Do: Mock, remove/adjust this
-  const createMockRole = (skills: SkillObjectModel[]) => {
-    if (skills.length === 0) {
-      return "General Practitioner";
-    }
-    const randomSkill = skills[Math.floor(Math.random() * skills.length)];
-    return randomSkill.name;
-  };
-
-  // To Do: Mock, remove/adjust this
-  // Need to adjust DoctorModel to match the data from the backend
-  function extendDoctors(doctors: UserAssignedModel[]): DoctorModel[] {
-    const randomDoc =
-      mockDoctors[Math.floor(Math.random() * mockDoctors.length)];
-    return doctors.map((doctor) => ({
-      ...doctor,
-      role: createMockRole(doctor.skills),
-      education: doctor.qualification ?? "",
-      experience: doctor.doctor_experience_commenced_on?.toString() ?? "",
-      languages: randomDoc.languages,
-      read_profile_picture_url: doctor.read_profile_picture_url ?? "",
-      skills: doctor.skills,
-    }));
-  }
-
-  // To Do: Mock, remove/adjust this
-  const doctors = extendDoctors(docReponse?.data?.results ?? []);
-  doctors.push(...mockDoctors);
+  const users = docResponse?.data?.results ?? [];
 
   const facility = facilityResponse?.data;
 
@@ -98,13 +74,15 @@ export function FacilityDetailsPage({ id }: Props) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card className="p-8 text-center">
-          <h2 className="text-xl font-semibold mb-4">Facility Not Found</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            {t("facility_not_found")}
+          </h2>
           <Button
             variant="outline"
             className="border border-secondary-400"
             onClick={() => navigate("/facilities")}
           >
-            Back to Facilities
+            {t("back_to_facilities")}
           </Button>
         </Card>
       </div>
@@ -121,7 +99,7 @@ export function FacilityDetailsPage({ id }: Props) {
         >
           <Link href="/facilities">
             <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
-            <span className="text-sm underline">Back</span>
+            <span className="text-sm underline">{t("back")}</span>
           </Link>
         </Button>
       </div>
@@ -160,24 +138,20 @@ export function FacilityDetailsPage({ id }: Props) {
         </div>
       </Card>
       <div className="mt-6">
-        {doctors.length > 0 && (
+        {users.length > 0 && (
           <>
             <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 lg:grid-cols-2">
-              {doctors?.map((doctor) => (
-                <DoctorCard
-                  key={doctor.username}
-                  doctor={doctor}
-                  facilityId={id}
-                />
+              {users?.map((user) => (
+                <UserCard key={user.username} user={user} facilityId={id} />
               ))}
             </div>
-            <Pagination totalCount={doctors.length ?? 0} />
+            <Pagination totalCount={users.length ?? 0} />
           </>
         )}
-        {doctors.length === 0 && (
+        {users.length === 0 && (
           <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
             <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
-              No Doctors Found
+              No users Found
             </div>
           </div>
         )}
