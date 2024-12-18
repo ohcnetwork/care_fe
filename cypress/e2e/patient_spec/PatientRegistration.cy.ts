@@ -182,7 +182,6 @@ describe("Patient Creation with consultation", () => {
     patientPage.verifyPatientDashboardDetails(
       patientOneUpdatedGender,
       age,
-      patientOneName,
       phone_number,
       phone_number,
       yearOfBirth,

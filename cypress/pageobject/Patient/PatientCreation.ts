@@ -3,7 +3,6 @@ import FacilityPage from "pageobject/Facility/FacilityCreation";
 
 import PatientMedicalHistory from "./PatientMedicalHistory";
 
-const patient_url = "";
 const facilityPage = new FacilityPage();
 const patientMedicalHistory = new PatientMedicalHistory();
 
@@ -256,10 +255,6 @@ export class PatientPage {
       expect($dashboard).to.contain(patientLocalbody);
       expect($dashboard).to.contain(patientWard);
     });
-  }
-
-  visitUpdatePatientUrl() {
-    cy.visit(patient_url + "/update");
   }
 
   clickPatientUpdateDetails() {
