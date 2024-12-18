@@ -114,9 +114,67 @@ function generateRandomAddress(multiline: boolean = false): string {
   return multiline ? addressParts.join("\n") : addressParts.join(", ");
 }
 
+function generatePatientName(): string {
+  const firstNames = [
+    "John",
+    "Jane",
+    "Michael",
+    "Sarah",
+    "David",
+    "Emma",
+    "James",
+    "Olivia",
+    "Robert",
+    "Sophia",
+    "William",
+    "Isabella",
+    "Benjamin",
+    "Mia",
+    "Daniel",
+    "Charlotte",
+    "Lucas",
+    "Amelia",
+    "Ethan",
+    "Harper",
+  ];
+
+  const lastNames = [
+    "Smith",
+    "Johnson",
+    "Williams",
+    "Brown",
+    "Jones",
+    "Miller",
+    "Davis",
+    "Garcia",
+    "Rodriguez",
+    "Wilson",
+    "Martinez",
+    "Hernandez",
+    "Lopez",
+    "Gonzalez",
+    "Perez",
+    "Taylor",
+    "Anderson",
+    "Thomas",
+    "Jackson",
+    "White",
+  ];
+
+  // Randomly choose a first name and last name
+  const randomFirstName =
+    firstNames[Math.floor(Math.random() * firstNames.length)];
+  const randomLastName =
+    lastNames[Math.floor(Math.random() * lastNames.length)];
+
+  // Return the full name
+  return `${randomFirstName} ${randomLastName}`;
+}
+
 export {
   generatePhoneNumber,
   generateEmergencyPhoneNumber,
   generateFacilityName,
   generateRandomAddress,
+  generatePatientName,
 };

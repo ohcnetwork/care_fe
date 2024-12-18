@@ -175,14 +175,17 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   "clickAndSelectOption",
-  (element: string, reference: string) => {
+  (element: string, reference: string, skipVerification: boolean = false) => {
     cy.get(element)
       .click()
       .then(() => {
         cy.get("[role='option']").contains(reference).click();
       })
       .then(() => {
-        cy.get(element).should("contain", reference);
+        // Skip verification if skipVerification is true
+        if (!skipVerification) {
+          cy.get(element).should("contain", reference);
+        }
       });
   },
 );

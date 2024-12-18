@@ -34,6 +34,7 @@ declare global {
       clickAndSelectOption(
         element: string,
         reference: string,
+        skipVerification?: boolean,
       ): Chainable<Element>;
       verifyAndClickElement(
         element: string,

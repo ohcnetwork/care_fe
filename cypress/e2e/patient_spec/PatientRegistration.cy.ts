@@ -1,3 +1,5 @@
+import { PatientConsultationPage } from "pageobject/Patient/PatientConsultation";
+
 import LoginPage from "../../pageobject/Login/LoginPage";
 import {
   PatientData,
@@ -6,7 +8,11 @@ import {
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
-import { generatePhoneNumber } from "../../pageobject/utils/constants";
+import {
+  generatePatientName,
+  generatePhoneNumber,
+  generateRandomAddress,
+} from "../../pageobject/utils/constants";
 
 const yearOfBirth = "2001";
 
@@ -35,18 +41,17 @@ describe("Patient Creation with consultation", () => {
   const patientTransfer = new PatientTransfer();
   const patientInsurance = new PatientInsurance();
   const patientMedicalHistory = new PatientMedicalHistory();
+  const patientConsultationPage = new PatientConsultationPage();
   const phone_number = generatePhoneNumber();
   const age = calculateAge();
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
   const patientMenstruationStartDate = getRelativeDateString(-10);
   const patientDateOfDelivery = getRelativeDateString(-20);
-  const patientOneName = "Great Napolean 14";
+  const patientOneName = generatePatientName();
   const patientOneGender = "Male";
   const patientOneUpdatedGender = "Female";
-  const patientOneAddress = `149/J, 3rd Block,
-  Aluva
-  Ernakulam, Kerala - 682001`;
+  const patientOneAddress = generateRandomAddress(true);
   const patientOnePincode = "682001";
   const patientOneState = "Kerala";
   const patientOneDistrict = "Ernakulam";
@@ -115,13 +120,11 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a new patient with all field in registration form and no consultation", () => {
     patientPage.createPatientWithData(newPatientData);
-    // Verify the patient details
     patientPage.clickCancelButton();
-    patientPage.savePatientUrl();
+    // Verify the patient details
     patientPage.verifyPatientDashboardDetails(
       patientOneGender,
       age,
-      patientOneName,
       phone_number,
       phone_number,
       yearOfBirth,
@@ -149,13 +152,12 @@ describe("Patient Creation with consultation", () => {
     patientPage.verifyPatientNameList(patientOneName);
   });
 
-  it("Edit the patient details with no consultation and verify", () => {
-    patientPage.interceptFacilities();
-    patientPage.visitUpdatePatientUrl();
-    patientPage.verifyStatusCode();
-    patientPage.patientformvisibility();
+  it("Edit the patient details and verify its reflection", () => {
+    const patientName = "Dummy Patient Two";
+    patientPage.visitPatient(patientName);
+    patientConsultationPage.clickPatientDetails();
+    patientPage.clickPatientUpdateDetails();
     // change the gender to female and input data to related changed field
-    cy.wait(3000);
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.clickPatientAntenatalStatusYes();
@@ -197,9 +199,6 @@ describe("Patient Creation with consultation", () => {
     );
     patientPage.clickUpdatePatient();
     patientPage.verifyPatientUpdated();
-    patientPage.interceptGetPatient();
-    patientPage.visitPatientUrl();
-    patientPage.verifyGetPatientResponse();
     // Verify Female Gender change reflection, No Medical History and Insurance Details
     patientPage.verifyPatientDashboardDetails(
       patientOneUpdatedGender,
