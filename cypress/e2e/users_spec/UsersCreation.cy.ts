@@ -1,9 +1,9 @@
 import FacilityHome from "pageobject/Facility/FacilityHome";
-import UserProfilePage from "pageobject/Users/UserProfilePage";
 import { advanceFilters } from "pageobject/utils/advanceFilterHelpers";
 
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
+import { ManageUserPage } from "../../pageobject/Users/ManageUserPage";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 import { generatePhoneNumber } from "../../pageobject/utils/constants";
@@ -11,8 +11,8 @@ import { generatePhoneNumber } from "../../pageobject/utils/constants";
 describe("User Creation", () => {
   const userPage = new UserPage();
   const loginPage = new LoginPage();
-  const userProfilePage = new UserProfilePage();
   const userCreationPage = new UserCreationPage();
+  const manageUserPage = new ManageUserPage();
   const facilityPage = new FacilityPage();
   const facilityHome = new FacilityHome();
   const phoneNumber = generatePhoneNumber();
@@ -81,14 +81,14 @@ describe("User Creation", () => {
     userCreationPage.typeConfirmPassword(password);
     userCreationPage.selectHomeFacility(homeFacility);
     userPage.typeInPhoneNumber(phoneNumber);
-    userProfilePage.typeDateOfBirth(newUserDob);
+    manageUserPage.editDateOfBirth(newUserDob);
     userCreationPage.selectUserType(role);
-    userProfilePage.typeQualification(qualification);
-    userProfilePage.typeDoctorYoE(experience);
-    userProfilePage.typeMedicalCouncilRegistration(regNo);
+    manageUserPage.editQualification(qualification, false);
+    manageUserPage.editDoctorYoE(experience, false);
+    manageUserPage.editMedicalCouncilRegistration(regNo, false);
     userPage.typeInFirstName(newUserFirstName);
     userPage.typeInLastName(newUserLastName);
-    userProfilePage.typeEmail(email);
+    manageUserPage.editEmail(email, false);
     userCreationPage.selectGender(gender);
     userCreationPage.selectState(state);
     userCreationPage.selectDistrict(district);
