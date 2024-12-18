@@ -589,13 +589,20 @@ export const PatientManager = () => {
                   )}
                   {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
-                    Number(patient.last_consultation?.review_interval) > 0 &&
-                    dayjs().isAfter(patient.review_time) && (
+                    Number(patient.last_consultation?.review_interval) > 0 && (
                       <Chip
                         size="small"
-                        variant="danger"
+                        variant={
+                          dayjs().isAfter(patient.review_time)
+                            ? "danger"
+                            : "primary"
+                        }
                         startIcon="l-clock"
-                        text="Review Missed"
+                        text={
+                          dayjs().isAfter(patient.review_time)
+                            ? `Review Missed since ${dayjs(patient.review_time).fromNow()}`
+                            : `Review Upcoming in ${dayjs(patient.review_time).diff(dayjs(), "days")} days`
+                        }
                       />
                     )}
                   {patient.last_consultation?.is_readmission && (
