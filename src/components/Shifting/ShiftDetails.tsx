@@ -1,32 +1,31 @@
 import careConfig from "@careConfig";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useTranslation } from "react-i18next";
 
 import RecordMeta from "@/CAREUI/display/RecordMeta";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Badge } from "@/components/ui/badge";
+
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import { PatientModel } from "@/components/Patient/models";
 import CommentSection from "@/components/Shifting/ShiftingCommentsSection";
 
 import {
-  GENDER_TYPES,
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { formatName, formatPatientAge } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 
-import { Badge } from "../ui/badge";
+import { ShiftDetailsUpdate } from "./ShiftDetailsUpdate";
 
 export default function ShiftDetails(props: { id: string }) {
-  const [isCopied, setIsCopied] = useState(false);
   const { t } = useTranslation();
+  const [isSlideOverOpen, setIsSlideOverOpen] = useState(false);
 
   const shiftStatusOptions = careConfig.wartimeShifting
     ? SHIFTING_CHOICES_WARTIME
@@ -35,196 +34,6 @@ export default function ShiftDetails(props: { id: string }) {
   const { data, loading } = useTanStackQueryInstead(routes.getShiftDetails, {
     pathParams: { id: props.id },
   });
-  const _showCopyToclipBoard = (data: any) => {
-    return (
-      <a href="#">
-        <CopyToClipboard
-          text={copyContent(data)}
-          onCopy={() => setIsCopied(true)}
-        >
-          {isCopied ? (
-            <span className="copied-to-cb">{t("copied_to_clipboard")}</span>
-          ) : (
-            <span className="copy-to-cb">
-              <CareIcon icon="l-clipboard" className="text-2xl" />
-            </span>
-          )}
-        </CopyToClipboard>
-      </a>
-    );
-  };
-
-  const copyContent = (data: any) => {
-    let formattedText =
-      t("name") +
-      ":" +
-      data?.patient_object?.name +
-      "\n" +
-      t("age") +
-      ":" +
-      (data?.patient_object
-        ? formatPatientAge(data.patient_object, true)
-        : "") +
-      "\n" +
-      t("origin_facility") +
-      ":" +
-      data?.origin_facility_object?.name +
-      "\n" +
-      t("contact_number") +
-      ":" +
-      data?.patient_object?.phone_number +
-      "\n" +
-      t("address") +
-      ":" +
-      data?.patient_object?.address +
-      "\n" +
-      t("reason") +
-      ":" +
-      data?.reason;
-    if (careConfig.wartimeShifting) {
-      formattedText +=
-        t("facility_preference") + ": " + data?.assigned_facility_type + "\n";
-    }
-    return formattedText;
-  };
-
-  setTimeout(() => {
-    setIsCopied(false);
-  }, 5000);
-
-  const _showPatientCard = (patientData: PatientModel) => {
-    const patientGender = GENDER_TYPES.find(
-      (i) => i.id === patientData?.gender,
-    )?.text;
-
-    return (
-      <div className="mr-3 mt-2 h-full rounded-lg  bg-white p-4 text-black shadow md:mr-8">
-        <div className="mt-2 grid grid-cols-1 justify-between gap-4 md:grid-cols-2">
-          <div>
-            <span className="font-semibold leading-relaxed">{t("name")}: </span>
-            <Link href={`/patient/${patientData?.id}`}>
-              {patientData?.name}
-            </Link>
-          </div>
-          {patientData?.is_medical_worker && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("medical_worker")}{" "}
-              </span>
-              <Badge variant="warning">{t("yes")}</Badge>
-            </div>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("facility")}:{" "}
-            </span>
-            {patientData?.facility_object?.name || "-"}
-          </div>
-          {patientData?.date_of_birth ? (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("date_of_birth")}:{" "}
-              </span>
-              {patientData?.date_of_birth}
-            </div>
-          ) : (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("age")}:{" "}
-              </span>
-              {patientData ? formatPatientAge(patientData, true) : ""}
-            </div>
-          )}
-          {patientData?.gender === 2 && patientData?.is_antenatal && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("is_antenatal")}:{" "}
-              </span>
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            </div>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("gender")}:{" "}
-            </span>
-            {patientGender}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("phone")}:{" "}
-            </span>
-            <a href={`tel:${patientData?.phone_number}`}>
-              {patientData?.phone_number || "-"}
-            </a>
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("nationality")}:{" "}
-            </span>
-            {patientData?.nationality || "-"}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("blood_group")}:{" "}
-            </span>
-            {patientData?.blood_group || "-"}
-          </div>
-          {patientData?.nationality !== "India" && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("passport_number")}:{" "}
-              </span>
-              {patientData?.passport_no || "-"}
-            </div>
-          )}
-          {patientData?.nationality === "India" && (
-            <>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("state")}:{" "}
-                </span>
-                {patientData?.state_object?.name}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("district")}:{" "}
-                </span>
-                {patientData?.district_object?.name || "-"}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("local_body")}:{" "}
-                </span>
-                {patientData?.local_body_object?.name || "-"}
-              </div>
-            </>
-          )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("address")}:{" "}
-            </span>
-            {patientData?.address || "-"}
-          </div>
-          {patientData?.ongoing_medication && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                {t("ongoing_medications")}:{" "}
-              </span>
-              {patientData?.ongoing_medication}
-            </div>
-          )}
-          {patientData?.allergies && (
-            <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
-                {t("allergies")}:{" "}
-              </span>
-              {patientData?.allergies}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   const showFacilityCard = (facilityData: any) => {
     return (
@@ -296,6 +105,13 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
         )}
+
+        <ShiftDetailsUpdate
+          id={data?.external_id || ""}
+          open={isSlideOverOpen}
+          setOpen={setIsSlideOverOpen}
+        />
+
         <div>
           <div className="flex flex-col lg:flex-row justify-between mt-2 rounded-lg border p-4">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8 w-full lg:w-auto">
@@ -334,14 +150,12 @@ export default function ShiftDetails(props: { id: string }) {
                   className={`w-full px-4 py-2 rounded-lg sm:w-auto underline ${
                     ["COMPLETED", "CANCELLED"].includes(data?.status || "")
                       ? "cursor-not-allowed bg-secondary-100"
-                      : "hover:text-green-700 text-green-600"
+                      : "hover:text-primary-700 text-primary-600"
                   }`}
                   disabled={["COMPLETED", "CANCELLED"].includes(
                     data?.status || "",
                   )}
-                  onClick={() =>
-                    navigate(`/shifting/${data?.external_id}/update`)
-                  }
+                  onClick={() => setIsSlideOverOpen(true)}
                 >
                   {t("update_status_details")}
                 </button>
@@ -355,7 +169,7 @@ export default function ShiftDetails(props: { id: string }) {
 
               {/* Referral Letter Button */}
               <button
-                className="w-full sm:w-auto underline hover:text-green-700 text-green-600 flex items-center justify-center lg:justify-start"
+                className="w-full sm:w-auto underline hover:text-primary-700 text-primary-600 flex items-center justify-center lg:justify-start"
                 onClick={() =>
                   navigate(`/shifting/${props.id}/referral-letter`)
                 }
@@ -533,12 +347,6 @@ export default function ShiftDetails(props: { id: string }) {
 
         <div className="grid-cols-2 gap-x-14 text-sm md:grid text-secondary-800">
           <div className="col-span-1">
-            {/* <div>
-                <h4 className="mt-8">
-                  {t("details_of_patient")} {showCopyToclipBoard(data)}
-                </h4>
-                {data?.patient_object && showPatientCard(data?.patient_object)}
-              </div> */}
             <div
               className="pb-12 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 
                mt-2 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all"
@@ -550,7 +358,7 @@ export default function ShiftDetails(props: { id: string }) {
               {showFacilityCard(data?.origin_facility_object)}
             </div>
             <div className="pb-12 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
-              <h4 className="text-lg">{t("Ambulance Details")}</h4>
+              <h4 className="text-lg">{t("ambulance_details")}</h4>
 
               <div className="mt-2 h-full rounded-lg bg-white p-4 text-gray-700 shadow">
                 <table className="w-full text-left">

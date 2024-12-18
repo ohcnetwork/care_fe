@@ -4,13 +4,11 @@ import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
-// import Card from "@/CAREUI/display/Card";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
 import Loading from "@/components/Common/Loading";
-// import Page from "@/components/Common/Page";
 import { PhoneNumberValidator } from "@/components/Form/FieldValidators";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import { FieldLabel } from "@/components/Form/FormFields/FormField";
@@ -270,131 +268,128 @@ export const ShiftCreate = (props: patientShiftProps) => {
       setOpen={props.setOpen}
       title="Create Shift Request"
       slideFrom="right"
-      dialogClass="md:w-[650px]"
+      dialogClass="md:w-[780px]"
     >
-      <Card className="mx-auto mt-4 flex  flex-col ">
-        <TextFormField
-          {...field("refering_facility_contact_name")}
-          label="Name of Contact person at the current facility"
-          required
-        />
-
-        <PhoneNumberFormField
-          {...field("refering_facility_contact_number")}
-          label="Contact person phone number"
-          required
-          types={["mobile", "landline"]}
-        />
-
-        {careConfig.wartimeShifting && (
-          <div>
-            <FieldLabel required>
-              Name of shifting approving facility
-            </FieldLabel>
+      <Card className="mx-auto mt-4 flex flex-col ">
+        <div className="lg:grid gap-4 lg:grid-cols-2 ">
+          <TextFormField
+            {...field("refering_facility_contact_name")}
+            label="Name of Contact person at the current facility"
+            required
+          />
+          <PhoneNumberFormField
+            {...field("refering_facility_contact_number")}
+            label="Contact person phone number"
+            required
+            types={["mobile", "landline"]}
+          />
+          {careConfig.wartimeShifting && (
+            <div className="col-span-2">
+              <FieldLabel required>
+                Name of shifting approving facility
+              </FieldLabel>
+              <FacilitySelect
+                multiple={false}
+                facilityType={1300}
+                name="shifting_approving_facility"
+                selected={state.form.shifting_approving_facility}
+                setSelected={(value) =>
+                  handleFormFieldChange({
+                    name: "shifting_approving_facility",
+                    value,
+                  })
+                }
+                errors={state.errors.shifting_approving_facility}
+              />
+            </div>
+          )}
+          <div className="col-span-2">
+            <FieldLabel>{t("what_facility_assign_the_patient_to")}</FieldLabel>
             <FacilitySelect
               multiple={false}
-              facilityType={1300}
-              name="shifting_approving_facility"
-              selected={state.form.shifting_approving_facility}
+              name="assigned_facility"
+              selected={state.form.assigned_facility}
               setSelected={(value) =>
                 handleFormFieldChange({
-                  name: "shifting_approving_facility",
+                  name: "assigned_facility",
                   value,
                 })
               }
-              errors={state.errors.shifting_approving_facility}
+              freeText={true}
+              errors={state.errors.assigned_facility}
             />
           </div>
-        )}
 
-        <div>
-          <FieldLabel>{t("what_facility_assign_the_patient_to")}</FieldLabel>
-          <FacilitySelect
-            multiple={false}
-            name="assigned_facility"
-            selected={state.form.assigned_facility}
-            setSelected={(value) =>
-              handleFormFieldChange({ name: "assigned_facility", value })
-            }
-            freeText={true}
-            errors={state.errors.assigned_facility}
+          <CheckBoxFormField
+            {...field("emergency")}
+            label="This is an emergency"
           />
+          <CheckBoxFormField
+            {...field("is_up_shift")}
+            label="This is an upshift"
+          />
+          <PatientCategorySelect
+            required={true}
+            {...field("patient_category")}
+            value={patientCategory}
+            onChange={(e) => setPatientCategory(e.value)}
+            label="Patient Category"
+          />
+          {careConfig.wartimeShifting && (
+            <>
+              <SelectFormField
+                {...field("preferred_vehicle_choice")}
+                required
+                label="Preferred Vehicle"
+                options={SHIFTING_VEHICLE_CHOICES}
+                optionLabel={(option) => option.text}
+                optionValue={(option) => option.text}
+              />
+              <SelectFormField
+                {...field("assigned_facility_type")}
+                required
+                label="Preferred Facility Type"
+                options={FACILITY_TYPES}
+                optionLabel={(option) => option.text}
+                optionValue={(option) => option.text}
+              />
+              <SelectFormField
+                {...field("breathlessness_level")}
+                required
+                label="Severity of Breathlessness"
+                options={BREATHLESSNESS_LEVEL}
+                optionLabel={(option) => option}
+                optionValue={(option) => option}
+              />
+            </>
+          )}
+
+          <TextFormField
+            {...field("ambulance_driver_name")}
+            label="Name of ambulance driver"
+          />
+          <PhoneNumberFormField
+            {...field("ambulance_phone_number")}
+            label="Ambulance Phone Number"
+            types={["mobile", "landline"]}
+          />
+          <TextFormField {...field("ambulance_number")} label="Ambulance No." />
+          <div className="col-span-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <TextAreaFormField
+              {...field("comments")}
+              label="Any other comments"
+              rows={5}
+              placeholder="Type any extra comments here"
+            />
+            <TextAreaFormField
+              {...field("reason")}
+              label="Reason for shift"
+              required
+              rows={5}
+              placeholder="Type your reason here"
+            />
+          </div>
         </div>
-
-        <CheckBoxFormField
-          className="mt-6"
-          {...field("emergency")}
-          label="This is an emergency"
-        />
-
-        <CheckBoxFormField
-          {...field("is_up_shift")}
-          label="This is an upshift"
-        />
-
-        <PatientCategorySelect
-          required={true}
-          {...field("patient_category")}
-          value={patientCategory}
-          onChange={(e) => setPatientCategory(e.value)}
-          label="Patient Category"
-        />
-
-        {careConfig.wartimeShifting && (
-          <>
-            <SelectFormField
-              {...field("preferred_vehicle_choice")}
-              required
-              label="Preferred Vehicle"
-              options={SHIFTING_VEHICLE_CHOICES}
-              optionLabel={(option) => option.text}
-              optionValue={(option) => option.text}
-            />
-            <SelectFormField
-              {...field("assigned_facility_type")}
-              required
-              label="Preferred Facility Type"
-              options={FACILITY_TYPES}
-              optionLabel={(option) => option.text}
-              optionValue={(option) => option.text}
-            />
-            <SelectFormField
-              {...field("breathlessness_level")}
-              required
-              label="Severity of Breathlessness"
-              options={BREATHLESSNESS_LEVEL}
-              optionLabel={(option) => option}
-              optionValue={(option) => option}
-            />
-          </>
-        )}
-
-        <TextAreaFormField
-          {...field("reason")}
-          label="Reason for shift"
-          required
-          rows={5}
-          placeholder="Type your reason here"
-        />
-
-        <TextFormField
-          {...field("ambulance_driver_name")}
-          label="Name of ambulance driver"
-        />
-
-        <PhoneNumberFormField
-          {...field("ambulance_phone_number")}
-          label="Ambulance Phone Number"
-          types={["mobile", "landline"]}
-        />
-
-        <TextFormField {...field("ambulance_number")} label="Ambulance No." />
-        <TextAreaFormField
-          {...field("comments")}
-          label="Any other comments"
-          placeholder="Type any extra comments here"
-        />
-
         <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} />

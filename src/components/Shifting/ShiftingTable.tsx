@@ -88,13 +88,13 @@ export default function ShiftingTable(props: {
           {t("consent__status")}
         </div>
         <div className="col-span-1 px-2 hidden text-left uppercase sm:hidden md:hidden lg:block">
-          {t("From")}
+          {t("from")}
         </div>
         <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
-          {t("To")}
+          {t("to")}
         </div>
         <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
-          {t("Date and Time")}
+          {t("date_and_time")}
         </div>
       </div>
       <div>
@@ -194,7 +194,7 @@ export default function ShiftingTable(props: {
                 <div className="col-span-1 mr-2 mb-1 flex flex-col text-left ">
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <h1 className="hover:cursor-pointer font-bold text-lg text-green-700">
+                      <h1 className="w-7 hover:cursor-pointer font-bold text-lg text-green-700">
                         . . .
                       </h1>
                     </DropdownMenuTrigger>
@@ -203,7 +203,7 @@ export default function ShiftingTable(props: {
                       className="w-full font-medium "
                     >
                       <DropdownMenuItem
-                        className=" hover:font-bold cursor-pointer"
+                        className=" cursor-pointer"
                         onClick={() =>
                           currentPath?.includes("/shifting/list") ||
                           currentPath?.includes("/shifting/board")
@@ -211,23 +211,20 @@ export default function ShiftingTable(props: {
                             : navigate(`shifting/${shift.external_id}`)
                         }
                       >
-                        {t("View details")}
+                        {t("view_details")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        className=" hover:font-bold cursor-pointer"
+                        className=" cursor-pointer"
                         disabled={
                           shift?.status === "COMPLETED" ||
                           shift?.status === "CANCELLED"
                         }
                         onClick={() => setIsSlideOverOpen(true)}
-                        // onClick={() =>
-                        //   navigate(`/shifting/${shift?.external_id}/update`)
-                        // }
                       >
                         {t("update_status_details")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        className=" hover:font-bold cursor-pointer"
+                        className="cursor-pointer"
                         onClick={() =>
                           navigate(
                             `/shifting/${shift.external_id}/referral-letter`,
@@ -239,7 +236,7 @@ export default function ShiftingTable(props: {
                       {shift.status === "COMPLETED" &&
                         shift.assigned_facility && (
                           <DropdownMenuItem
-                            className=" hover:font-bold cursor-pointer"
+                            className="cursor-pointer"
                             onClick={() =>
                               setModalFor({
                                 externalId: shift.external_id,

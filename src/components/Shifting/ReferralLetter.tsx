@@ -4,15 +4,16 @@ import { QRCodeSVG } from "qrcode.react";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import Loading from "@/components/Common/Loading";
+import { ConsultationModel } from "@/components/Facility/models";
+
 import { GENDER_TYPES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-
-import Loading from "../Common/Loading";
-import { ConsultationModel } from "../Facility/models";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 export const ReferralLetter = (id: any) => {
   const { data, loading } = useTanStackQueryInstead(routes.getShiftDetails, {
@@ -69,9 +70,7 @@ export const ReferralLetter = (id: any) => {
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 text-lg">
                 <div>
-                  <h3 className="mb-2 font-semibold">
-                    {t("Patient Information")}
-                  </h3>
+                  <h3 className="mb-2 font-semibold">{t("patient_details")}</h3>
                   <p>
                     <span className="font-semibold leading-relaxed">
                       {t("name")}:{" "}

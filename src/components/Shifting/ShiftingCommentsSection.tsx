@@ -51,7 +51,7 @@ const CommentSection = (props: CommentSectionProps) => {
             </PaginatedList.WhenLoading>
             <PaginatedList.WhenEmpty>
               <div className="flex items-center justify-center text-gray-500 h-full my-24">
-                {t("No comments available")}
+                {t("no_comments_available")}
               </div>
             </PaginatedList.WhenEmpty>
 

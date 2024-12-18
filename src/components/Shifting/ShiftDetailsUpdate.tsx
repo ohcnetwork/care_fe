@@ -339,29 +339,40 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       />
       <Card className="mx-auto mt-4 w-full max-w-4xl md:p-6 lg:p-8">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <SelectFormField
-            name="status"
-            label={t("status")}
-            required
-            options={
-              careConfig.wartimeShifting
-                ? SHIFTING_CHOICES_WARTIME
-                : SHIFTING_CHOICES_PEACETIME
-            }
-            value={state.form.status}
-            optionLabel={(option) => option.text}
-            optionValue={(option) => option.text}
-            optionDisabled={(option) =>
-              // disable all options except `Destination Approved` for non-admin destination facility users
-              home_facility === state.form.assigned_facility_object?.id &&
-              USER_TYPES.findIndex((type) => user_type === type) <
-                USER_TYPES.findIndex((type) => type === "DistrictAdmin") &&
-              !["DESTINATION APPROVED"].includes(option.text)
-            }
-            optionSelectedLabel={(option) => option.text}
-            onChange={handleFormFieldChange}
-            className="w-full bg-white md:col-span-1 md:leading-5"
-          />
+          <div className="col-span-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <SelectFormField
+              name="status"
+              label={t("status")}
+              required
+              options={
+                careConfig.wartimeShifting
+                  ? SHIFTING_CHOICES_WARTIME
+                  : SHIFTING_CHOICES_PEACETIME
+              }
+              value={state.form.status}
+              optionLabel={(option) => option.text}
+              optionValue={(option) => option.text}
+              optionDisabled={(option) =>
+                home_facility === state.form.assigned_facility_object?.id &&
+                USER_TYPES.findIndex((type) => user_type === type) <
+                  USER_TYPES.findIndex((type) => type === "DistrictAdmin") &&
+                !["DESTINATION APPROVED"].includes(option.text)
+              }
+              optionSelectedLabel={(option) => option.text}
+              onChange={handleFormFieldChange}
+              className="w-full bg-white"
+            />
+
+            <PatientCategorySelect
+              required={true}
+              name="patient_category"
+              value={state.form.patient_category}
+              onChange={handleFormFieldChange}
+              label="Patient Category"
+              className="w-full"
+              error={state.errors.patient_category}
+            />
+          </div>
 
           {careConfig.wartimeShifting &&
             (assignedUserLoading ? (
@@ -395,7 +406,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             </div>
           )}
 
-          <div>
+          <div className="col-span-2">
             <FieldLabel
               required={[
                 "DESTINATION APPROVED",
@@ -465,16 +476,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             onChange={handleFormFieldChange}
           />
 
-          <PatientCategorySelect
-            required={true}
-            name="patient_category"
-            value={state.form.patient_category}
-            onChange={handleFormFieldChange}
-            label="Patient Category"
-            className="md:col-span-2"
-            error={state.errors.patient_category}
-          />
-
           {careConfig.wartimeShifting && (
             <>
               <SelectFormField
@@ -514,18 +515,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             </>
           )}
 
-          <TextAreaFormField
-            className="md:col-span-2"
-            rows={5}
-            name="reason"
-            label={t("reason_for_shift")}
-            required
-            placeholder={t("type_your_reason_here") + "*"}
-            value={state.form.reason}
-            onChange={handleFormFieldChange}
-            error={state.errors.reason}
-          />
-
           <TextFormField
             className="md:col-span-2"
             label="Name of ambulance driver"
@@ -558,7 +547,17 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           />
 
           <TextAreaFormField
-            className="md:col-span-2"
+            rows={5}
+            name="reason"
+            label={t("reason_for_shift")}
+            required
+            placeholder={t("type_your_reason_here") + "*"}
+            value={state.form.reason}
+            onChange={handleFormFieldChange}
+            error={state.errors.reason}
+          />
+
+          <TextAreaFormField
             rows={5}
             name="comments"
             label={t("any_other_comments")}
