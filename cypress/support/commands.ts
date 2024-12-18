@@ -180,6 +180,9 @@ Cypress.Commands.add(
       .click()
       .then(() => {
         cy.get("[role='option']").contains(reference).click();
+      })
+      .then(() => {
+        cy.get(element).should("contain", reference);
       });
   },
 );
