@@ -15,9 +15,12 @@ import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
-export const ReferralLetter = (id: any) => {
+interface ReferralLetterProps {
+  id: string;
+}
+export const ReferralLetter = ({ id }: ReferralLetterProps) => {
   const { data, loading } = useTanStackQueryInstead(routes.getShiftDetails, {
-    pathParams: { id: id?.id },
+    pathParams: { id },
   });
 
   const patientData = data?.patient_object;

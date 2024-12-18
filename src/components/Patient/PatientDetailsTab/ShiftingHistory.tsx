@@ -55,15 +55,15 @@ const ShiftingHistory = (props: PatientProps) => {
   ];
   const PREVIOUS_STATUSES = ["COMPLETED", "PATIENT EXPIRED", "CANCELLED"];
 
-  const filteredShiftData =
-    activeTab === "current"
-      ? shiftData?.results.filter((shift) =>
+  const filteredShiftData = shiftData?.results
+    ? activeTab === "current"
+      ? shiftData.results.filter((shift) =>
           CURRENT_STATUSES.includes(shift.status),
         )
-      : shiftData?.results.filter((shift) =>
+      : shiftData.results.filter((shift) =>
           PREVIOUS_STATUSES.includes(shift.status),
-        );
-
+        )
+    : [];
   return (
     <section className="mt-4">
       <div className="flex justify-between items-center">
