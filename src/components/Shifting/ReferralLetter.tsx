@@ -184,7 +184,7 @@ export const ReferralLetter = ({ id }: ReferralLetterProps) => {
               <div className="my-6 border-b-2"></div>
 
               <div className="text-center">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm  text-muted-foreground">
                   {t("approved_by_district_covid_control_room")}
                 </p>
                 <p className="text-sm">{t("auto_generated_for_care")}</p>
