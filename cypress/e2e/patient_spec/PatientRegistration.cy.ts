@@ -117,7 +117,6 @@ describe("Patient Creation with consultation", () => {
     patientPage.createPatientWithData(newPatientData);
     // Verify the patient details
     patientPage.clickCancelButton();
-    cy.wait(3000);
     patientPage.savePatientUrl();
     patientPage.verifyPatientDashboardDetails(
       patientOneGender,
@@ -197,11 +196,11 @@ describe("Patient Creation with consultation", () => {
       patientOneSecondInsurerName,
     );
     patientPage.clickUpdatePatient();
-    cy.wait(3000);
     patientPage.verifyPatientUpdated();
+    patientPage.interceptGetPatient();
     patientPage.visitPatientUrl();
+    patientPage.verifyGetPatientResponse();
     // Verify Female Gender change reflection, No Medical History and Insurance Details
-    cy.wait(5000);
     patientPage.verifyPatientDashboardDetails(
       patientOneUpdatedGender,
       age,
@@ -218,7 +217,6 @@ describe("Patient Creation with consultation", () => {
     cy.get("[data-testid=patient-details]")
       .contains("Member ID")
       .scrollIntoView();
-    cy.wait(2000);
     patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
@@ -249,7 +247,7 @@ describe("Patient Creation with consultation", () => {
     // allow the transfer button of a patient
     patientTransfer.clickAllowPatientTransferButton();
     // Verify the patient error message for the same facility
-    cy.awaitUrl("/patients");
+    cy.visit("/patients");
     patientPage.createPatient();
     patientPage.selectFacility(patientTransferFacility);
     patientPage.patientformvisibility();
