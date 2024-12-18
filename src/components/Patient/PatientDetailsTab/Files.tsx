@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -7,11 +8,18 @@ import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
@@ -20,10 +28,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import AudioPlayer from "@/components/Common/AudioPlayer";
 import Loading from "@/components/Common/Loading";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
 
 import useFileManager from "@/hooks/useFileManager";
-import useFileUpload from "@/hooks/useFileUpload";
+import useFileUpload, { FileUploadReturn } from "@/hooks/useFileUpload";
 import useFilters from "@/hooks/useFilters";
 
 import { FILE_EXTENSIONS } from "@/common/constants";
@@ -39,6 +49,10 @@ const PatientFiles = (props: PatientProps) => {
   const { patientData, id } = props;
   const { qParams, updateQuery } = useFilters({});
   const { t } = useTranslation();
+  const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [selectedAudioFile, setSelectedAudioFile] =
+    useState<FileUploadModel | null>(null);
+  const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
 
   const fileCategories = [
     { value: "all", label: "All" },
@@ -120,6 +134,20 @@ const PatientFiles = (props: PatientProps) => {
     onUpload: () => refetch(),
   });
 
+  useEffect(() => {
+    if (fileUpload.files.length > 0 && fileUpload.files[0] !== undefined) {
+      setOpenUploadDialog(true);
+    } else {
+      setOpenUploadDialog(false);
+    }
+  }, [fileUpload.files]);
+
+  useEffect(() => {
+    if (!openUploadDialog) {
+      fileUpload.clearFiles();
+    }
+  }, [openUploadDialog]);
+
   const getFileType = (file: FileUploadModel) => {
     return fileManager.getFileType(file);
   };
@@ -161,29 +189,21 @@ const PatientFiles = (props: PatientProps) => {
 
   const GetButtons = (file: FileUploadModel) => {
     const filetype = getFileType(file);
-    const fileData = useQuery({
-      queryKey: [routes.retrieveUpload, "PATIENT", file.id],
-      queryFn: async () => {
-        const response = await request(routes.retrieveUpload, {
-          query: { file_type: "PATIENT", associating_id: id },
-          pathParams: { id: file.id || "" },
-        });
-        return response.data;
-      },
-      enabled: filetype === "AUDIO" && !file.is_archived,
-    });
     return (
       <div className="flex flex-row gap-2 justify-end">
-        {filetype === "AUDIO" && (
-          <div className="w-full md:w-[300px]">
-            <audio
-              className="max-h-full w-full object-contain rounded-lg"
-              src={fileData.data?.read_signed_url}
-              controls
-              preload="auto"
-              controlsList="nodownload"
-            />
-          </div>
+        {filetype === "AUDIO" && !file.is_archived && (
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setSelectedAudioFile(file);
+              setOpenAudioPlayerDialog(true);
+            }}
+          >
+            <span className="flex flex-row items-center gap-1">
+              <CareIcon icon="l-play-circle" className="mr-1" />
+              {t("play")}
+            </span>
+          </Button>
         )}
         {fileManager.isPreviewable(file) && (
           <Button
@@ -196,33 +216,35 @@ const PatientFiles = (props: PatientProps) => {
             </span>
           </Button>
         )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary">
-              <CareIcon icon="l-ellipsis-h" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-2">
-            <DropdownMenuItem className="text-primary-900">
-              <button onClick={() => fileManager.downloadFile(file, id)}>
-                <CareIcon icon="l-arrow-circle-down" className="mr-1" />
-                <span>{t("download")}</span>
-              </button>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-primary-900">
-              <button onClick={() => fileManager.archiveFile(file, id)}>
-                <CareIcon icon="l-archive-alt" className="mr-1" />
-                <span>{t("archive")}</span>
-              </button>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-primary-900">
-              <button onClick={() => fileManager.editFile(file, id)}>
-                <CareIcon icon="l-pen" className="mr-1" />
-                <span>{t("rename")}</span>
-              </button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">
+                <CareIcon icon="l-ellipsis-h" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-2">
+              <DropdownMenuItem className="text-primary-900">
+                <button onClick={() => fileManager.downloadFile(file, id)}>
+                  <CareIcon icon="l-arrow-circle-down" className="mr-1" />
+                  <span>{t("download")}</span>
+                </button>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-primary-900">
+                <button onClick={() => fileManager.archiveFile(file, id)}>
+                  <CareIcon icon="l-archive-alt" className="mr-1" />
+                  <span>{t("archive")}</span>
+                </button>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-primary-900">
+                <button onClick={() => fileManager.editFile(file, id)}>
+                  <CareIcon icon="l-pen" className="mr-1" />
+                  <span>{t("rename")}</span>
+                </button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
       </div>
     );
   };
@@ -303,10 +325,15 @@ const PatientFiles = (props: PatientProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-full">
-          <DropdownMenuItem className="flex flex-row items-center">
+          <DropdownMenuItem
+            className="flex flex-row items-center"
+            onSelect={(e) => {
+              e.preventDefault();
+            }}
+          >
             <label
               htmlFor="file_upload_patient"
-              className="flex flex-row items-center cursor-pointer  text-primary-900 font-normal"
+              className="flex flex-row items-center cursor-pointer text-primary-900 font-normal w-full"
             >
               <CareIcon icon="l-file-upload-alt" className="mr-1" />
               <span>{t("choose_file")}</span>
@@ -407,7 +434,24 @@ const PatientFiles = (props: PatientProps) => {
       <div className="z-40">
         {fileUpload.Dialogues}
         {fileManager.Dialogues}
+        <AudioPlayerDialog
+          open={openAudioPlayerDialog}
+          onOpenChange={(open) => {
+            setOpenAudioPlayerDialog(open);
+            if (!open) {
+              setSelectedAudioFile(null);
+            }
+          }}
+          file={selectedAudioFile || null}
+          patientId={id}
+        />
       </div>
+      <FileUploadDialog
+        open={openUploadDialog}
+        onOpenChange={setOpenUploadDialog}
+        fileUpload={fileUpload}
+        id={id}
+      />
       <Tabs
         defaultValue="all"
         value={qParams.file_category || "all"}
@@ -438,6 +482,124 @@ const PatientFiles = (props: PatientProps) => {
         ))}
       </Tabs>
     </div>
+  );
+};
+
+const FileUploadDialog = ({
+  open,
+  onOpenChange,
+  fileUpload,
+  id,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  fileUpload: FileUploadReturn;
+  id: string;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      aria-labelledby="file-upload-dialog"
+    >
+      <DialogContent
+        className="mb-8 rounded-lg p-5"
+        aria-describedby="file-upload"
+      >
+        <DialogHeader>
+          <DialogTitle>{t("upload_file")}</DialogTitle>
+        </DialogHeader>
+        <div className="mb-1 flex items-center justify-between gap-2 rounded-md bg-secondary-300 px-4 py-2">
+          <span>
+            <CareIcon icon="l-paperclip" className="mr-2" />
+            {fileUpload.files?.[0]?.name}
+          </span>
+        </div>
+        <TextFormField
+          name="consultation_file"
+          type="text"
+          label={t("enter_file_name")}
+          id="upload-file-name"
+          required
+          value={fileUpload.fileNames[0] || ""}
+          disabled={fileUpload.uploading}
+          onChange={(e) => fileUpload.setFileName(e.value)}
+          error={fileUpload.error || undefined}
+        />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline_primary"
+            onClick={() => fileUpload.handleFileUpload(id)}
+            disabled={fileUpload.uploading}
+            className="w-full"
+            id="upload_file_button"
+          >
+            <CareIcon icon="l-check" className="mr-1" />
+            {t("upload")}
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={fileUpload.clearFiles}
+            disabled={fileUpload.uploading}
+          >
+            <CareIcon icon="l-trash-alt" className="mr-1" />
+            {t("discard")}
+          </Button>
+        </div>
+        {!!fileUpload.progress && (
+          <Progress value={fileUpload.progress} className="mt-4" />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const AudioPlayerDialog = ({
+  open,
+  onOpenChange,
+  file,
+  patientId,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  file: FileUploadModel | null;
+  patientId: string;
+}) => {
+  const { t } = useTranslation();
+  const { data: fileData } = useQuery({
+    queryKey: [routes.retrieveUpload, "PATIENT", file?.id],
+    queryFn: async () => {
+      const response = await request(routes.retrieveUpload, {
+        query: { file_type: "PATIENT", associating_id: patientId },
+        pathParams: { id: file?.id || "" },
+      });
+      return response.data;
+    },
+    enabled: !!file?.id,
+  });
+  const { Player, stopPlayback } = AudioPlayer({
+    src: fileData?.read_signed_url || "",
+  });
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={() => {
+        stopPlayback();
+        onOpenChange(false);
+      }}
+      aria-labelledby="audio-player-dialog"
+    >
+      <DialogContent
+        className="mb-2 rounded-lg p-4"
+        aria-describedby="audio-player"
+      >
+        <DialogHeader>
+          <DialogTitle>{t("play_audio")}</DialogTitle>
+        </DialogHeader>
+        <Player />
+      </DialogContent>
+    </Dialog>
   );
 };
 
