@@ -65,7 +65,6 @@ describe("Facility Creation with multiple user roles", () => {
   beforeEach(() => {
     cy.viewport(1280, 720);
     cy.restoreLocalStorage();
-    cy.awaitUrl("/facility");
   });
 
   it("Create a new facility with all fields | Edit Existing Data | Verify its reflection", () => {
