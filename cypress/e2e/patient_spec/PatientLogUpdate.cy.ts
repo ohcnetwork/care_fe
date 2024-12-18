@@ -13,6 +13,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const patientInvestigation = new PatientInvestigation();
   const patientPrescription = new PatientPrescription();
   const patientCategory = "Moderate";
+  const patientModifiedCategory = "Critical";
   const additionalSymptoms = "Fever";
   const physicalExamination = "physical examination details";
   const otherExamination = "Other";
@@ -150,6 +151,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
     // verify the edit functionality
     patientLogupdate.clickUpdateDetail();
+    patientLogupdate.selectPatientCategory(patientModifiedCategory);
     patientLogupdate.typeSystolic(patientModifiedSystolic);
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.clickSubmitButton("Continue");
@@ -318,10 +320,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
       patientRhythm,
     ]);
     patientLogupdate.clickUpdateDetail();
-    patientLogupdate.clearIntoElementById("#systolic");
-    patientLogupdate.typeSystolic(patientModifiedSystolic);
-    patientLogupdate.clearIntoElementById("#diastolic");
-    patientLogupdate.typeDiastolic(patientModifiedDiastolic);
+    patientLogupdate.typeSystolic(patientModifiedSystolic, true);
+    patientLogupdate.typeDiastolic(patientModifiedDiastolic, true);
     cy.clickSubmitButton("Continue");
     cy.verifyNotification("Brief Update updated successfully");
     cy.contains("button", "Log Updates").click();

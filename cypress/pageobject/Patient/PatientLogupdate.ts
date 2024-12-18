@@ -35,12 +35,17 @@ class PatientLogupdate {
     cy.clickAndSelectOption("#patientCategory", category);
   }
 
-  typePhysicalExamination(examination: string) {
-    cy.typeAndVerifyValue("#physical_examination_info", examination);
+  typePhysicalExamination(
+    examination: string,
+    clearBeforeTyping: boolean = false,
+  ) {
+    cy.typeIntoField("#physical_examination_info", examination, {
+      clearBeforeTyping,
+    });
   }
 
-  typeOtherDetails(details: string) {
-    cy.get("#other_details").click().type(details);
+  typeOtherDetails(details: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#other_details", details, { clearBeforeTyping });
   }
 
   typeAndMultiSelectSymptoms(input: string, symptoms: string[]) {
@@ -53,36 +58,36 @@ class PatientLogupdate {
     cy.get("#add-symptom").click();
   }
 
-  typeSystolic(systolic: string) {
-    cy.typeAndVerifyValue("#systolic", systolic);
+  typeSystolic(systolic: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#systolic", systolic, { clearBeforeTyping });
   }
 
-  typeDiastolic(diastolic: string) {
-    cy.typeAndVerifyValue("#diastolic", diastolic);
+  typeDiastolic(diastolic: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#diastolic", diastolic, { clearBeforeTyping });
   }
 
-  typePulse(pulse: string) {
-    cy.typeAndVerifyValue("#pulse", pulse);
+  typePulse(pulse: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#pulse", pulse, { clearBeforeTyping });
   }
 
-  typeTemperature(temperature: string) {
-    cy.typeAndVerifyValue("#temperature", temperature);
+  typeTemperature(temperature: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#temperature", temperature, { clearBeforeTyping });
   }
 
-  typeRespiratory(respiratory: string) {
-    cy.typeAndVerifyValue("#resp", respiratory);
+  typeRespiratory(respiratory: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#resp", respiratory, { clearBeforeTyping });
   }
 
-  typeSpo2(spo: string) {
-    cy.typeAndVerifyValue("#ventilator_spo2", spo);
+  typeSpo2(spo: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#ventilator_spo2", spo, { clearBeforeTyping });
   }
 
   selectRhythm(rhythm: string) {
     cy.clickAndSelectOption("#rhythm", rhythm);
   }
 
-  typeRhythm(rhythm: string) {
-    cy.typeAndVerifyValue("#rhythm_detail", rhythm);
+  typeRhythm(rhythm: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#rhythm_detail", rhythm, { clearBeforeTyping });
   }
 
   interceptDailyRounds() {
@@ -127,10 +132,6 @@ class PatientLogupdate {
     this.verifyDailyRounds();
   }
 
-  clearIntoElementById(elementId) {
-    cy.get(elementId).click().clear();
-  }
-
   clickVitals() {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.verifyAndClickElement("#consultation_tab_nav", "Vitals");
@@ -140,8 +141,8 @@ class PatientLogupdate {
     cy.get("#bilateral_air_entry-option-false").click();
   }
 
-  typeEtco2(etco2: string) {
-    cy.get("#etco2-range-input").type(etco2);
+  typeEtco2(etco2: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#etco2-range-input", etco2, { clearBeforeTyping });
   }
 
   selectOxygenSupport() {
@@ -152,36 +153,48 @@ class PatientLogupdate {
     cy.get("#ventilator_oxygen_modality-option-NON_REBREATHING_MASK").click();
   }
 
-  typeOxygenFlowRate(flowRate: string) {
-    cy.get("#oxygen_flow_rate-range-input").type(flowRate);
+  typeOxygenFlowRate(flowRate: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#oxygen_flow_rate-range-input", flowRate, {
+      clearBeforeTyping,
+    });
   }
 
-  typeVentilatorSpo2(spo2: string) {
-    cy.get("#ventilator_spo2-range-input").type(spo2);
+  typeVentilatorSpo2(spo2: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#ventilator_spo2-range-input", spo2, {
+      clearBeforeTyping,
+    });
   }
 
   selectCriticalCareSection(sectionName: string) {
     cy.contains("button", sectionName).click();
   }
 
-  typeBloodSugar(bloodSugar: string) {
-    cy.get("#blood_sugar_level-range-input").type(bloodSugar);
+  typeBloodSugar(bloodSugar: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#blood_sugar_level-range-input", bloodSugar, {
+      clearBeforeTyping,
+    });
   }
 
-  typeInsulinDosage(insulinDosage: string) {
-    cy.get("#insulin_intake_dose-range-input").type(insulinDosage);
+  typeInsulinDosage(insulinDosage: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#insulin_intake_dose-range-input", insulinDosage, {
+      clearBeforeTyping,
+    });
   }
 
   clickGoBackConsultation() {
     cy.get("#back-to-consultation").click();
   }
 
-  typeFluidBalance(fluid: string) {
-    cy.get("#dialysis_fluid_balance-range-input").type(fluid);
+  typeFluidBalance(fluid: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#dialysis_fluid_balance-range-input", fluid, {
+      clearBeforeTyping,
+    });
   }
 
-  typeNetBalance(netBalance: string) {
-    cy.get("#dialysis_net_balance-range-input").type(netBalance);
+  typeNetBalance(netBalance: string, clearBeforeTyping: boolean = false) {
+    cy.typeIntoField("#dialysis_net_balance-range-input", netBalance, {
+      clearBeforeTyping,
+    });
   }
 }
 export default PatientLogupdate;

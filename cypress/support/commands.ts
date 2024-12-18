@@ -190,18 +190,6 @@ Cypress.Commands.add(
   },
 );
 
-Cypress.Commands.add(
-  "typeAndVerifyValue",
-  (selector: string, value: string) => {
-    cy.get(selector)
-      .scrollIntoView()
-      .should("be.visible")
-      .click()
-      .type(value)
-      .should("have.value", value);
-  },
-);
-
 Cypress.Commands.add("selectRadioOption", (name: string, value: string) => {
   cy.get(`input[type='radio'][name='${name}'][value=${value}]`).click();
 });
@@ -274,6 +262,11 @@ Cypress.Commands.add(
       inputField.clear(); // Clear the input field
     }
 
-    inputField.click().type(value); // Click and type the new value
+    inputField
+      .scrollIntoView()
+      .should("be.visible")
+      .click()
+      .type(value)
+      .should("have.value", value); // Click and type the new value
   },
 );
