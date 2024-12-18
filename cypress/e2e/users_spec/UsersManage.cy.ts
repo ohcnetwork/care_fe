@@ -242,14 +242,15 @@ describe("Manage User", () => {
     userPage.checkUsernameText(usernameforworkinghour);
     manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
     manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.interceptLinkedSkillTab();
     manageUserPage.clickLinkedSkillTab();
-    cy.wait(500);
+    manageUserPage.verifyLinkedSkillResponse();
     manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
+    manageUserPage.interceptAddSkill();
     manageUserPage.clickAddSkillButton(usernameforworkinghour);
-    cy.wait(500);
+    manageUserPage.verifyAddSkillResponse();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
-    cy.wait(500);
     manageUserPage.clickUnlinkSkill();
     manageUserPage.verifyUnlinkSkillModal();
     manageUserPage.clickConfirmUnlinkSkill();

@@ -8,7 +8,9 @@ export class ManageUserPage {
   }
 
   selectSkillFromDropdown(skill: string) {
+    cy.intercept("GET", "/api/v1/skill/*").as("getSkills");
     cy.typeAndSelectOption("input[name='skill']", skill);
+    cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
   }
 
   assertLinkedFacility(facilityName: string) {
@@ -271,6 +273,14 @@ export class ManageUserPage {
     cy.get("#facility-patients").click();
   }
 
+  interceptLinkedSkillTab() {
+    cy.intercept("GET", "**/api/v1/users/*/skill").as("getUserSkill");
+  }
+
+  verifyLinkedSkillResponse() {
+    cy.wait("@getUserSkill").its("response.statusCode").should("eq", 200);
+  }
+
   clickLinkedSkillTab() {
     cy.get("#skills").click();
   }
@@ -357,7 +367,14 @@ export class ManageUserPage {
   clickAddSkillButton(username: string) {
     cy.intercept("GET", `**/api/v1/users/${username}/skill/**`).as("getSkills");
     cy.get("#add-skill-button").click();
-    cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
+  }
+
+  interceptAddSkill() {
+    cy.intercept("GET", "**/api/v1/users/*/skill").as("getUserSkills");
+  }
+
+  verifyAddSkillResponse() {
+    cy.wait("@getUserSkills").its("response.statusCode").should("eq", 200);
   }
 
   assertSkillIndoctorconnect(skillName: string) {
