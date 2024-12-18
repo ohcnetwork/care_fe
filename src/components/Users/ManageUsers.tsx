@@ -27,6 +27,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
+import { setDefaultView } from "@/Utils/viewStorageUtils";
 
 export default function ManageUsers({ defaultView }: { defaultView: string }) {
   const { t } = useTranslation();
@@ -108,8 +109,7 @@ export default function ManageUsers({ defaultView }: { defaultView: string }) {
   const handleTabChange = (tab: number) => {
     setActiveTab(tab);
     const newView = tab === 1 ? "list" : "card";
-    localStorage.setItem("usersDefaultView", newView);
-    navigate(`/users/${newView}`);
+    setDefaultView("usersDefaultView", newView);
   };
 
   manageUsers = (

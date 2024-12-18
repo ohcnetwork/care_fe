@@ -6,12 +6,14 @@ import { ResourceDetailsUpdate } from "@/components/Resource/ResourceDetailsUpda
 import ListView from "@/components/Resource/ResourceList";
 
 import { AppRoutes } from "@/Routers/AppRouter";
-
-const getDefaultView = () =>
-  localStorage.getItem("defaultResourceView") === "list" ? "list" : "board";
+import { getDefaultView } from "@/Utils/viewStorageUtils";
 
 const ResourceRoutes: AppRoutes = {
-  "/resource": () => <Redirect to={`/resource/${getDefaultView()}`} />,
+  "/resource": () => (
+    <Redirect
+      to={`/resource/${getDefaultView("defaultResourceView", "board")}`}
+    />
+  ),
   "/resource/board": () => <BoardView />,
   "/resource/list": () => <ListView />,
   "/resource/:id": ({ id }) => <ResourceDetails id={id} />,

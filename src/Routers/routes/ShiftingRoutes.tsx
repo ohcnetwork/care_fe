@@ -7,12 +7,14 @@ import BoardView from "@/components/Shifting/ShiftingBoard";
 import ListView from "@/components/Shifting/ShiftingList";
 
 import { AppRoutes } from "@/Routers/AppRouter";
-
-const getDefaultView = () =>
-  localStorage.getItem("defaultShiftView") === "list" ? "list" : "board";
+import { getDefaultView } from "@/Utils/viewStorageUtils";
 
 const ShiftingRoutes: AppRoutes = {
-  "/shifting": () => <Redirect to={`/shifting/${getDefaultView()}`} />,
+  "/shifting": () => (
+    <Redirect
+      to={`/shifting/${getDefaultView("defaultResourceView", "board")}`}
+    />
+  ),
   "/shifting/board": () => <BoardView />,
   "/shifting/list": () => <ListView />,
   "/shifting/:id": ({ id }) => <ShiftDetails id={id} />,
