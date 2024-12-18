@@ -36,9 +36,20 @@ import {
 } from "@/common/constants";
 import { parseOptionId } from "@/common/utils";
 
+import * as Notification from "@/Utils/Notifications";
+import { preventDuplicatePatientsDuetoPolicyId } from "@/Utils/removeDuplicates";
 import routes from "@/Utils/request/api";
+import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
-import { formatPatientAge, humanizeStrings } from "@/Utils/utils";
+import {
+  calculateDateRangeDuration,
+  formatPatientAge,
+  humanizeStrings,
+  parsePhoneNumber,
+} from "@/Utils/utils";
+
+import ButtonV2 from "../Common/ButtonV2";
+import ExportMenu from "../Common/Export";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -55,6 +66,7 @@ const DischargedPatientsList = ({
     updateQuery,
     advancedFilter,
     FilterBadges,
+    resultsPerPage,
     updatePage,
     clearSearch,
   } = useFilters({
@@ -124,6 +136,71 @@ const DischargedPatientsList = ({
     [updateQuery],
   );
 
+  const params = {
+    page: qParams.page || 1,
+    limit: resultsPerPage,
+    name: qParams.name || undefined,
+    patient_no: qParams.patient_no || undefined,
+    phone_number: qParams.phone_number
+      ? parsePhoneNumber(qParams.phone_number)
+      : undefined,
+    emergency_phone_number: qParams.emergency_phone_number
+      ? parsePhoneNumber(qParams.emergency_phone_number)
+      : undefined,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    ordering: qParams.ordering || undefined,
+
+    gender: qParams.gender || undefined,
+    category: qParams.category || undefined,
+    age_min: qParams.age_min || undefined,
+    age_max: qParams.age_max || undefined,
+    last_consultation_admitted_bed_type_list:
+      qParams.last_consultation_admitted_bed_type_list || undefined,
+    last_consultation__consent_types:
+      qParams.last_consultation__consent_types || undefined,
+    last_consultation__new_discharge_reason:
+      qParams.last_consultation__new_discharge_reason || undefined,
+    last_consultation_is_telemedicine:
+      qParams.last_consultation_is_telemedicine || undefined,
+    ventilator_interface: qParams.ventilator_interface || undefined,
+    last_consultation_medico_legal_case:
+      qParams.last_consultation_medico_legal_case || undefined,
+    ration_card_category: qParams.ration_card_category || undefined,
+
+    diagnoses: qParams.diagnoses || undefined,
+    diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
+    diagnoses_provisional: qParams.diagnoses_provisional || undefined,
+    diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
+    diagnoses_differential: qParams.diagnoses_differential || undefined,
+
+    created_date_before: qParams.created_date_before || undefined,
+    created_date_after: qParams.created_date_after || undefined,
+    modified_date_before: qParams.modified_date_before || undefined,
+    modified_date_after: qParams.modified_date_after || undefined,
+    last_consultation_encounter_date_before:
+      qParams.last_consultation_encounter_date_before || undefined,
+    last_consultation_encounter_date_after:
+      qParams.last_consultation_encounter_date_after || undefined,
+    last_consultation_discharge_date_before:
+      qParams.last_consultation_discharge_date_before || undefined,
+    last_consultation_discharge_date_after:
+      qParams.last_consultation_discharge_date_after || undefined,
+
+    local_body: qParams.lsgBody || undefined,
+    district: qParams.district || undefined,
+
+    number_of_doses: qParams.number_of_doses || undefined,
+    is_declared_positive: qParams.is_declared_positive || undefined,
+    covin_id: qParams.covin_id || undefined,
+    date_declared_positive_before:
+      qParams.date_declared_positive_before || undefined,
+    date_declared_positive_after:
+      qParams.date_declared_positive_after || undefined,
+    last_vaccinated_date_before:
+      qParams.last_vaccinated_date_before || undefined,
+    last_vaccinated_date_after: qParams.last_vaccinated_date_after || undefined,
+  };
+
   useEffect(() => {
     if (!qParams.phone_number && phone_number.length >= 13) {
       setPhoneNumber("+91");
@@ -135,6 +212,29 @@ const DischargedPatientsList = ({
       setEmergencyPhoneNumber("+91");
     }
   }, [qParams]);
+
+  const date_range_fields = [
+    [params.created_date_before, params.created_date_after],
+    [params.modified_date_before, params.modified_date_after],
+    [params.date_declared_positive_before, params.date_declared_positive_after],
+    [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
+    [
+      params.last_consultation_encounter_date_before,
+      params.last_consultation_encounter_date_after,
+    ],
+    [
+      params.last_consultation_discharge_date_before,
+      params.last_consultation_discharge_date_after,
+    ],
+  ];
+
+  const durations = date_range_fields.map(([startDate, endDate]) =>
+    calculateDateRangeDuration(startDate, endDate),
+  );
+
+  const isExportAllowed =
+    durations.every((x) => x >= 0 && x <= 7) &&
+    !durations.every((x) => x === 0);
 
   const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
     pathParams: {
@@ -293,6 +393,68 @@ const DischargedPatientsList = ({
               selected={qParams.ordering}
               onSelect={(e) => updateQuery({ ordering: e.ordering })}
             />
+            <div className="tooltip w-full md:w-auto" id="patient-export">
+              {!isExportAllowed ? (
+                <ButtonV2
+                  onClick={() => {
+                    advancedFilter.setShow(true);
+                    setTimeout(() => {
+                      const element =
+                        document.getElementById("bed-type-select");
+                      if (element)
+                        element.scrollIntoView({ behavior: "smooth" });
+                      Notification.Warn({
+                        msg: "Please select a seven day period.",
+                      });
+                    }, 500);
+                  }}
+                  className="mr-5 w-full lg:w-fit"
+                >
+                  <CareIcon icon="l-export" />
+                  <span className="lg:my-[3px]">Export</span>
+                </ButtonV2>
+              ) : (
+                <ExportMenu
+                  disabled={!isExportAllowed}
+                  exportItems={[
+                    {
+                      label: "Export Discharged patients",
+                      action: async () => {
+                        const query = {
+                          ...params,
+                          csv: true,
+                        };
+                        const pathParams = { facility_external_id };
+                        const { data } = await request(
+                          routes.listFacilityDischargedPatients,
+                          {
+                            query,
+                            pathParams,
+                          },
+                        );
+                        return data ?? null;
+                      },
+                      parse: (data) => {
+                        try {
+                          return preventDuplicatePatientsDuetoPolicyId(data);
+                        } catch (error) {
+                          Notification.Error({
+                            msg: error,
+                          });
+                          return "";
+                        }
+                      },
+                    },
+                  ]}
+                />
+              )}
+
+              {!isExportAllowed && (
+                <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                  Select a seven day period
+                </span>
+              )}
+            </div>
           </div>
         </>
       }

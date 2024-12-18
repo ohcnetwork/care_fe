@@ -27,6 +27,7 @@ import {
 } from "@/common/constants";
 import { parseOptionId } from "@/common/utils";
 
+import { preventDuplicatePatientsDuetoPolicyId } from "@/Utils/removeDuplicates";
 import routes from "@/Utils/request/api";
 
 import Chip from "../../CAREUI/display/Chip";
@@ -40,6 +41,7 @@ import * as Notification from "../../Utils/Notifications";
 import request from "../../Utils/request/request";
 import useTanStackQueryInstead from "../../Utils/request/useQuery";
 import {
+  calculateDateRangeDuration,
   formatPatientAge,
   humanizeStrings,
   isAntenatal,
@@ -221,74 +223,15 @@ export const PatientManager = () => {
     ],
   ];
 
-  const durations = date_range_fields.map((field: string[]) => {
-    // XOR (checks if only one of the dates is set)
-    if (!field[0] !== !field[1]) {
-      return -1;
-    }
-    if (field[0] && field[1]) {
-      return dayjs(field[0]).diff(dayjs(field[1]), "days");
-    }
-    return 0;
-  });
+  const durations = date_range_fields.map(([startDate, endDate]) =>
+    calculateDateRangeDuration(startDate, endDate),
+  );
 
   const isExportAllowed =
     durations.every((x) => x >= 0 && x <= 7) &&
     !durations.every((x) => x === 0);
 
   let managePatients: any = null;
-  const preventDuplicatePatientsDuetoPolicyId = (data: any) => {
-    // Generate a array which contains imforamation of duplicate patient IDs and there respective linenumbers
-    const lines = data.split("\n"); // Split the data into individual lines
-    const idsMap = new Map(); // To store indices of lines with the same patient ID
-
-    lines.map((line: any, i: number) => {
-      const patientId = line.split(",")[0]; // Extract the patient ID from each line
-      if (idsMap.has(patientId)) {
-        idsMap.get(patientId).push(i); // Add the index to the existing array
-      } else {
-        idsMap.set(patientId, [i]); // Create a new array with the current index
-      }
-    });
-
-    const linesWithSameId = Array.from(idsMap.entries())
-      .filter(([_, indices]) => indices.length > 1)
-      .map(([patientId, indices]) => ({
-        patientId,
-        indexSame: indices,
-      }));
-
-    // after getting the array of duplicate patient IDs and there respective linenumbers we will merge the policy IDs of the duplicate patients
-
-    linesWithSameId.map((lineInfo) => {
-      const indexes = lineInfo.indexSame;
-      //get policyid of all the duplicate patients and merge them by seperating them with a semicolon
-      const mergedPolicyId = `${indexes.map((currentIndex: number) => {
-        return `${lines[currentIndex].split(",")[5]};`;
-      })}`.replace(/,/g, "");
-      // replace the policy ID of the first patient with the merged policy ID
-      const arrayOfCurrentLine = lines[indexes[0]].split(",");
-      arrayOfCurrentLine[5] = mergedPolicyId;
-      const lineAfterMerge = arrayOfCurrentLine.join(",");
-      lines[indexes[0]] = `${lineAfterMerge}`;
-    });
-
-    // after merging the policy IDs of the duplicate patients we will remove the duplicate patients from the data
-    const uniqueLines = [];
-    const ids = new Set(); // To keep track of unique patient IDs
-
-    for (const line of lines) {
-      const patientId = line.split(",")[0]; // Extract the patient ID from each line
-      if (!ids.has(patientId)) {
-        uniqueLines.push(line);
-        ids.add(patientId);
-      }
-    }
-
-    const cleanedData = uniqueLines.join("\n"); // Join the unique lines back together
-    return cleanedData;
-  };
-
   const { loading: isLoading, data } = useTanStackQueryInstead(
     routes.patientList,
     {
@@ -948,7 +891,16 @@ export const PatientManager = () => {
                         });
                         return data ?? null;
                       },
-                      parse: preventDuplicatePatientsDuetoPolicyId,
+                      parse: (data) => {
+                        try {
+                          return preventDuplicatePatientsDuetoPolicyId(data);
+                        } catch (error) {
+                          Notification.Error({
+                            msg: error,
+                          });
+                          return "";
+                        }
+                      },
                     },
                   ]}
                 />
