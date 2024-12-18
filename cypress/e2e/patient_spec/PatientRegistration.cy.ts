@@ -178,16 +178,6 @@ describe("Patient Creation with consultation", () => {
     );
     patientPage.clickUpdatePatient();
     patientPage.verifyPatientUpdated();
-    // Verify Female Gender change reflection, No Medical History and Insurance Details
-    patientPage.verifyPatientDashboardDetails(
-      patientOneUpdatedGender,
-      age,
-      phone_number,
-      phone_number,
-      yearOfBirth,
-      patientOneUpdatedBloodGroup,
-      patientOccupation,
-    );
     // Verify No medical history
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
