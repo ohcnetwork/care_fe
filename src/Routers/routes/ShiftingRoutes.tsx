@@ -12,7 +12,7 @@ import { getDefaultView } from "@/Utils/viewStorageUtils";
 const ShiftingRoutes: AppRoutes = {
   "/shifting": () => (
     <Redirect
-      to={`/shifting/${getDefaultView("defaultResourceView", "board")}`}
+      to={`/shifting/${getDefaultView("defaultShiftingView", "board")}`}
     />
   ),
   "/shifting/board": () => <BoardView />,
