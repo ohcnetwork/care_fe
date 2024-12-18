@@ -5,14 +5,15 @@ export class PatientDoctorNotes {
   }
 
   addDiscussionNotes(notes: string) {
-    cy.wait(2000);
     cy.get("#discussion_notes_textarea").scrollIntoView();
     cy.get("#discussion_notes_textarea").click().type(notes);
   }
 
   selectNurseDiscussion() {
     cy.get("#patient-note-tab-Nurses").scrollIntoView();
+    cy.intercept("GET", "/api/v1/patient/*/notes/*").as("getPatientNotes");
     cy.get("#patient-note-tab-Nurses").click();
+    cy.wait("@getPatientNotes").its("response.statusCode").should("eq", 200);
   }
 
   verifyDiscussionMessage(text: string) {

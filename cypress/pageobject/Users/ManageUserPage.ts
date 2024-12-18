@@ -8,7 +8,9 @@ export class ManageUserPage {
   }
 
   selectSkillFromDropdown(skill: string) {
+    cy.intercept("GET", "/api/v1/skill/*").as("getSkills");
     cy.typeAndSelectOption("input[name='skill']", skill);
+    cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
   }
 
   assertLinkedFacility(facilityName: string) {
@@ -193,19 +195,15 @@ export class ManageUserPage {
   }
 
   verifyWorkingHours(expectedHours: string) {
-    cy.get("input[name='weekly_working_hours']").scrollIntoView();
-    cy.get("input[name='weekly_working_hours']").should("be.visible");
-    cy.get("input[name='weekly_working_hours']").should(
-      "have.value",
+    cy.verifyContentPresence("#view-average_weekly_working_hours", [
       expectedHours,
-    );
+    ] as string[]);
   }
 
   verifyProfileWorkingHours(expectedHours: string) {
-    cy.get("#view-average_weekly_working_hours").should(
-      "contain.text",
+    cy.verifyContentPresence("#averageworkinghour-profile-details", [
       expectedHours,
-    );
+    ] as string[]);
   }
 
   navigateToManageUser() {
@@ -215,6 +213,14 @@ export class ManageUserPage {
   clickFacilityPatients() {
     cy.get("#facility-patients").should("be.visible");
     cy.get("#facility-patients").click();
+  }
+
+  interceptLinkedSkillTab() {
+    cy.intercept("GET", "**/api/v1/users/*/skill").as("getUserSkill");
+  }
+
+  verifyLinkedSkillResponse() {
+    cy.wait("@getUserSkill").its("response.statusCode").should("eq", 200);
   }
 
   clickLinkedSkillTab() {
@@ -365,9 +371,15 @@ export class ManageUserPage {
   clickAddSkillButton(username: string) {
     cy.intercept("GET", `**/api/v1/users/${username}/skill/**`).as("getSkills");
     cy.get("#add-skill-button").click();
-    cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
   }
 
+  interceptAddSkill() {
+    cy.intercept("GET", "**/api/v1/users/*/skill").as("getUserSkills");
+  }
+
+  verifyAddSkillResponse() {
+    cy.wait("@getUserSkills").its("response.statusCode").should("eq", 200);
+  }
   assertSkillInAlreadyLinkedSkills(skillName: string) {
     cy.get("#already-linked-skills")
       .contains(skillName)

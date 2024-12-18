@@ -1,7 +1,6 @@
 class FacilityHome {
   // Selectors
   exportButton = "#export-button";
-  menuItem = "[role='menuitem']";
 
   // Operations
   clickExportButton() {
@@ -10,7 +9,7 @@ class FacilityHome {
   }
 
   navigateToFacilityHomepage() {
-    cy.visit("/facility");
+    cy.awaitUrl("/facility");
   }
 
   assertFacilityInCard(facilityName: string) {
@@ -27,10 +26,6 @@ class FacilityHome {
 
   typeFacilitySearch(facilityName: string) {
     cy.get("#facility-search").click().clear().type(facilityName);
-  }
-
-  clickMenuItem(itemName: string) {
-    cy.get(this.menuItem).contains(itemName).click();
   }
 
   csvDownloadIntercept(alias: string, queryParam: string) {
@@ -50,8 +45,9 @@ class FacilityHome {
   }
 
   clickFacilityNotifyButton() {
-    cy.get("#facility-notify", { timeout: 10000 }).should("be.visible");
-    cy.get("#facility-notify").focus().click();
+    cy.get("#facility-notify").as("facilityNotify");
+    cy.get("@facilityNotify", { timeout: 10000 }).should("be.visible");
+    cy.get("@facilityNotify").first().click();
   }
 
   clickLiveMonitorButton() {
@@ -113,6 +109,21 @@ class FacilityHome {
   verifyURLContains(searchText: string) {
     const encodedText = encodeURIComponent(searchText).replace(/%20/g, "+");
     this.getURL().should("include", `search=${encodedText}`);
+  }
+
+  assertFacilityBadgeContent(occupied: string, total: string) {
+    cy.get('[data-test-id="occupancy-badge-text"]').should(
+      "contain.text",
+      `Occupancy: ${occupied} / ${total}`,
+    );
+  }
+
+  assertFacilityBadgeBackgroundColor(color: string) {
+    cy.get('[data-test-id="occupancy-badge"]').should(
+      "have.css",
+      "background-color",
+      color,
+    );
   }
 }
 

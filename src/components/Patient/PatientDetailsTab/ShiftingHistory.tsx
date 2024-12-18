@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
+import { PatientModel } from "@/components/Patient/models";
 import { formatFilter } from "@/components/Resource/ResourceCommons";
 import ShiftingTable from "@/components/Shifting/ShiftingTable";
 
@@ -11,10 +13,7 @@ import useFilters from "@/hooks/useFilters";
 
 import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
-
-import { PatientProps } from ".";
-import { PatientModel } from "../models";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const ShiftingHistory = (props: PatientProps) => {
   const { patientData, facilityId, id } = props;
@@ -30,16 +29,19 @@ const ShiftingHistory = (props: PatientProps) => {
     );
   };
 
-  const { data: shiftData, loading } = useQuery(routes.listShiftRequests, {
-    query: {
-      ...formatFilter({
-        ...qParams,
-        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-      }),
-      patient: id,
+  const { data: shiftData, loading } = useTanStackQueryInstead(
+    routes.listShiftRequests,
+    {
+      query: {
+        ...formatFilter({
+          ...qParams,
+          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+        }),
+        patient: id,
+      },
+      prefetch: !!id,
     },
-    prefetch: !!id,
-  });
+  );
 
   return (
     <section className="mt-4">

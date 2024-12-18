@@ -15,7 +15,7 @@ import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { dateQueryString } from "@/Utils/utils";
 
 const getDate = (value: any) =>
@@ -36,7 +36,7 @@ function AssetFilter(props: any) {
   });
   const [qParams, _] = useQueryParams();
 
-  useQuery(routes.getPermittedFacility, {
+  useTanStackQueryInstead(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {

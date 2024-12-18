@@ -19,7 +19,7 @@ import MedicineRoutes from "@/components/Medicine/routes";
 
 import useSlug from "@/hooks/useSlug";
 
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { compareBy } from "@/Utils/utils";
 
 interface Props {
@@ -43,15 +43,18 @@ export default function PrescriptionBuilder({
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
 
-  const { data, refetch } = useQuery(MedicineRoutes.listPrescriptions, {
-    pathParams: { consultation },
-    query: {
-      dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
-      prescription_type,
-      discontinued,
-      limit: 100,
+  const { data, refetch } = useTanStackQueryInstead(
+    MedicineRoutes.listPrescriptions,
+    {
+      pathParams: { consultation },
+      query: {
+        dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+        prescription_type,
+        discontinued,
+        limit: 100,
+      },
     },
-  });
+  );
 
   return (
     <div>

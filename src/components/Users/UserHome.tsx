@@ -17,7 +17,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import * as Notification from "@/Utils/Notifications";
 import { editUserPermissions } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, formatName, keysOf } from "@/Utils/utils";
 
 export interface UserHomeProps {
@@ -39,7 +39,7 @@ export default function UserHome(props: UserHomeProps) {
     username = authUser.username;
   }
 
-  const { loading, refetch: refetchUserDetails } = useQuery(
+  const { loading, refetch: refetchUserDetails } = useTanStackQueryInstead(
     routes.getUserDetails,
     {
       pathParams: {

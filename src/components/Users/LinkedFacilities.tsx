@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,9 +23,7 @@ import AuthorizeFor from "@/Utils/AuthorizeFor";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
-
-import ButtonV2 from "../Common/ButtonV2";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 const initModalProps: {
   selectedFacility?: FacilityModel;
@@ -58,25 +57,28 @@ export default function LinkedFacilities({
 
   const isCurrentUser = userData.username === authUser.username;
 
-  const { refetch: refetchUserFacilities } = useQuery(routes.userListFacility, {
-    pathParams: { username: userData.username },
-    query: { limit: 36 },
-    onResponse({ res, data }) {
-      if (res?.status === 200 && data) {
-        let userFacilities = data?.results;
-        if (userData.home_facility_object) {
-          const homeFacility = data?.results.find(
-            (facility) => facility.id === userData.home_facility_object?.id,
-          );
-          userFacilities = userFacilities.filter(
-            (facility) => facility.id !== homeFacility?.id,
-          );
-          setHomeFacility(homeFacility);
+  const { refetch: refetchUserFacilities } = useTanStackQueryInstead(
+    routes.userListFacility,
+    {
+      pathParams: { username: userData.username },
+      query: { limit: 36 },
+      onResponse({ res, data }) {
+        if (res?.status === 200 && data) {
+          let userFacilities = data?.results;
+          if (userData.home_facility_object) {
+            const homeFacility = data?.results.find(
+              (facility) => facility.id === userData.home_facility_object?.id,
+            );
+            userFacilities = userFacilities.filter(
+              (facility) => facility.id !== homeFacility?.id,
+            );
+            setHomeFacility(homeFacility);
+          }
+          setUserFacilities(userFacilities);
         }
-        setUserFacilities(userFacilities);
-      }
+      },
     },
-  });
+  );
 
   const handleOnClick = (type: string, selectedFacility: FacilityModel) => {
     switch (type) {
@@ -198,11 +200,22 @@ export default function LinkedFacilities({
     return (
       <div id={`facility_${facility.id}`} key={`facility_${facility.id}`}>
         <DropdownMenu>
-          <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-            <div className="rounded p-1 text-sm">{facility.name}</div>
+          <div className="flex flex-row items-center rounded-sm border bg-secondary-100 w-full md:w-full">
+            <div className="text-sm text-black p-2 font-bold flex-1">
+              {facility.name}
+              {facility.district_object?.name && (
+                <div className="text-sm text-gray-500 font-medium">
+                  {facility.district_object?.name}
+                  {facility.district_object?.name &&
+                    facility.state_object?.name &&
+                    ", "}
+                  {facility.state_object?.name}
+                </div>
+              )}
+            </div>
             <DropdownMenuTrigger id="linked-facility-settings">
-              <div className="rounded-r bg-secondary-300 px-2 py-1">
-                <CareIcon icon="l-setting" className="text-sm" />
+              <div className="flex items-center justify-center rounded-r bg-secondary-300 px-2 min-h-16">
+                <CareIcon icon="l-setting" className="text-xl" />
               </div>
             </DropdownMenuTrigger>
           </div>
@@ -241,12 +254,21 @@ export default function LinkedFacilities({
         id={`facility_${homeFacility.id}`}
         key={`facility_${homeFacility.id}`}
       >
-        <div className="flex flex-row items-center rounded-sm border bg-secondary-100">
-          <div id="home-facility" className="rounded p-1 text-sm">
+        <div className="flex flex-row items-center rounded-sm border bg-secondary-100 w-full">
+          <div className="text-sm text-black p-2 font-bold flex-1">
             {homeFacility.name}
+            {homeFacility.district_object?.name && (
+              <div className="text-sm text-gray-500 font-medium">
+                {homeFacility.district_object?.name}
+                {homeFacility.district_object?.name &&
+                  homeFacility.state_object?.name &&
+                  ", "}
+                {homeFacility.state_object?.name}
+              </div>
+            )}
           </div>
           {(authorizeForHomeFacility || isCurrentUser) && (
-            <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-1">
+            <div className="border-l-3 rounded-r bg-secondary-300 px-2 py-4 h-14">
               <button
                 id="clear-home-facility"
                 onClick={() =>
@@ -255,7 +277,7 @@ export default function LinkedFacilities({
                 title={t("clear_home_facility")}
                 aria-label={t("clear_home_facility")}
               >
-                <CareIcon icon="l-multiply" className="text-sm" />
+                <CareIcon icon="l-multiply" className="text-xl" />
               </button>
             </div>
           )}
@@ -277,7 +299,7 @@ export default function LinkedFacilities({
         />
       )}
       <div className="flex flex-col gap-y-6 rounded bg-white p-4 shadow">
-        <div className="flex flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <FacilitySelect
             id="select-facility"
             multiple={false}
@@ -291,37 +313,35 @@ export default function LinkedFacilities({
             className="z-10 w-full"
             disabled={!authorizeForHomeFacility}
           />
-          <ButtonV2
-            id="link-facility"
+          <Button
+            variant="primary"
+            size="lg"
             name="Add"
-            className="mt-1 rounded-lg px-6 py-[11px] text-base"
+            id="link-facility"
+            className="mt-1 rounded-lg px-6 py-[23px] text-base"
             onClick={() => linkFacility(userData.username, facility)}
             disabled={!authorizeForHomeFacility}
-            tooltip={
-              !authorizeForHomeFacility
-                ? t("contact_your_admin_to_add_facilities")
-                : undefined
-            }
           >
             {t("add_facility")}
-          </ButtonV2>
+          </Button>
         </div>
 
         {homeFacility && (
           <div className="flex flex-col gap-2">
             <p className="text-xs">{t("home_facility")}</p>
-            <div className="flex flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               {renderHomeFacilityButton(homeFacility)}
             </div>
           </div>
         )}
+
         {userFacilities && userFacilities.length > 0 && (
           <div className="flex flex-col gap-2">
             <p className="text-xs">{t("linked_facilities")}</p>
 
             <div
               id="linked-facility-list"
-              className="flex flex-row flex-wrap gap-3"
+              className="flex flex-col sm:flex-row flex-wrap gap-3"
             >
               {userFacilities.map((facility: FacilityModel) => {
                 if (homeFacility?.id === facility.id) {

@@ -1,6 +1,36 @@
 // PatientPage.ts
+import FacilityPage from "pageobject/Facility/FacilityCreation";
+
+import PatientMedicalHistory from "./PatientMedicalHistory";
 
 let patient_url = "";
+const facilityPage = new FacilityPage();
+const patientMedicalHistory = new PatientMedicalHistory();
+
+export interface PatientData {
+  facility: string;
+  phoneNumber: string;
+  isEmergencyNumber?: boolean;
+  age: string | number;
+  name: string;
+  gender: string;
+  address: string;
+  pincode: string;
+  state: string;
+  district: string;
+  localBody: string;
+  ward: string;
+  occupation?: string;
+  socioeconomicStatus?: string;
+  domesticHealthcareSupport?: string;
+  medicalHistory?: {
+    presentHealth?: string;
+    ongoingMedication?: string;
+    conditions?: { index: number; condition: string }[];
+    allergies?: string;
+  };
+  bloodGroup?: string;
+}
 
 export class PatientPage {
   createPatient() {
@@ -15,11 +45,20 @@ export class PatientPage {
     cy.get("#patient-search").click().type(patientName); // Type the patient name
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
-    cy.wait(2000);
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
     cy.get("#patient-name-consultation")
       .should("be.visible")
       .contains(patientName);
+  }
+
+  visitPatientWithNoConsultation(patientName: string) {
+    cy.get("#name").click().type(patientName);
+    cy.intercept("GET", "**/api/v1/patient/**").as("getPatient");
+    cy.get("#patient-name-list").contains(patientName).click();
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+    cy.get("#patient-name").should("be.visible").contains(patientName);
+    cy.get("#create-consultation").should("be.visible");
+    this.clickCreateConsultationOnPatientPageWithNoConsultation();
   }
 
   selectFacility(facilityName: string) {
@@ -100,7 +139,9 @@ export class PatientPage {
   }
 
   clickCancelButton() {
+    cy.intercept("GET", "**/api/v1/patient/*/").as("getPatient");
     cy.get("#cancel").click();
+    cy.wait("@getPatient");
   }
 
   selectPatientGender(gender: string) {
@@ -141,7 +182,9 @@ export class PatientPage {
   }
 
   visitPatientUrl() {
-    cy.visit(patient_url);
+    this.interceptGetPatient();
+    cy.awaitUrl(patient_url);
+    this.verifyGetPatientResponse();
   }
 
   visitConsultationPage() {
@@ -152,6 +195,18 @@ export class PatientPage {
     cy.intercept("PUT", "**/api/v1/patient/**").as("updatePatient");
     cy.get("button").get("[data-testid=submit-button]").click();
     cy.wait("@updatePatient").its("response.statusCode").should("eq", 200);
+  }
+
+  interceptGetPatient() {
+    cy.intercept("GET", "**/api/v1/patient/*").as("getPatient");
+  }
+
+  verifyGetPatientResponse() {
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+  }
+
+  clickCreateConsultationOnPatientPageWithNoConsultation() {
+    cy.get("#create-consultation").should("be.visible").click();
   }
 
   verifyPatientUpdated() {
@@ -177,26 +232,29 @@ export class PatientPage {
     isPostPartum = false,
   ) {
     cy.url().should("include", "/facility/");
-    cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
-      expect($dashboard).to.contain(gender);
-      expect($dashboard).to.contain(age);
-      expect($dashboard).to.contain(patientName);
-      expect($dashboard).to.contain(phoneNumber);
-      expect($dashboard).to.contain(emergencyPhoneNumber);
-      //expect($dashboard).to.contain(yearOfBirth); //Commented out because new proposed UI does not have DOB. Can change later.
-      expect($dashboard).to.contain(bloodGroup);
-      expect($dashboard).to.contain(occupation);
-      socioeconomicStatus && expect($dashboard).to.contain(socioeconomicStatus);
-      domesticHealthcareSupport &&
-        expect($dashboard).to.contain(domesticHealthcareSupport);
+    cy.get("[data-testid=patient-dashboard]")
+      .should("be.visible")
+      .then(($dashboard) => {
+        expect($dashboard).to.contain(gender);
+        expect($dashboard).to.contain(age);
+        expect($dashboard).to.contain(patientName);
+        expect($dashboard).to.contain(phoneNumber);
+        expect($dashboard).to.contain(emergencyPhoneNumber);
+        expect($dashboard).to.contain(yearOfBirth);
+        expect($dashboard).to.contain(bloodGroup);
+        expect($dashboard).to.contain(occupation);
+        socioeconomicStatus &&
+          expect($dashboard).to.contain(socioeconomicStatus);
+        domesticHealthcareSupport &&
+          expect($dashboard).to.contain(domesticHealthcareSupport);
 
-      if (isAntenatal) {
-        expect($dashboard).to.contain("Antenatal");
-      }
-      if (isPostPartum) {
-        expect($dashboard).to.contain("Post-partum");
-      }
-    });
+        if (isAntenatal) {
+          expect($dashboard).to.contain("Antenatal");
+        }
+        if (isPostPartum) {
+          expect($dashboard).to.contain("Post-partum");
+        }
+      });
   }
 
   verifyPatientLocationDetails(
@@ -236,5 +294,66 @@ export class PatientPage {
 
   patientformvisibility() {
     cy.get("[data-testid='current-address']").scrollIntoView();
+  }
+
+  createPatientWithData(data: PatientData) {
+    this.createPatient();
+    this.selectFacility(data.facility);
+    this.patientformvisibility();
+
+    this.typePatientPhoneNumber(data.phoneNumber);
+    if (data.isEmergencyNumber) {
+      this.checkPhoneNumberIsEmergencyNumber();
+    }
+    this.typePatientAge(data.age.toString());
+    this.typePatientName(data.name);
+    this.selectPatientGender(data.gender);
+    this.typePatientAddress(data.address);
+
+    facilityPage.fillPincode(data.pincode);
+    facilityPage.selectStateOnPincode(data.state);
+    facilityPage.selectDistrictOnPincode(data.district);
+    facilityPage.selectLocalBody(data.localBody);
+    facilityPage.selectWard(data.ward);
+
+    if (data.occupation) {
+      this.selectPatientOccupation(data.occupation);
+    }
+    if (data.socioeconomicStatus) {
+      this.selectSocioeconomicStatus(data.socioeconomicStatus);
+    }
+    if (data.domesticHealthcareSupport) {
+      this.selectDomesticHealthcareSupport(data.domesticHealthcareSupport);
+    }
+
+    if (data.medicalHistory) {
+      if (data.medicalHistory.presentHealth) {
+        patientMedicalHistory.typePatientPresentHealth(
+          data.medicalHistory.presentHealth,
+        );
+      }
+      if (data.medicalHistory.ongoingMedication) {
+        patientMedicalHistory.typePatientOngoingMedication(
+          data.medicalHistory.ongoingMedication,
+        );
+      }
+      if (data.medicalHistory.conditions) {
+        data.medicalHistory.conditions.forEach(({ index, condition }) => {
+          patientMedicalHistory.typeMedicalHistory(index, condition);
+        });
+      }
+      if (data.medicalHistory.allergies) {
+        patientMedicalHistory.typePatientAllergies(
+          data.medicalHistory.allergies,
+        );
+      }
+    }
+
+    if (data.bloodGroup) {
+      this.selectPatientBloodGroup(data.bloodGroup);
+    }
+
+    this.clickCreatePatient();
+    this.verifyPatientIsCreated();
   }
 }

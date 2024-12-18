@@ -11,7 +11,7 @@ import AutocompleteFormField from "@/components/Form/FormFields/Autocomplete";
 
 import { Error } from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames, mergeQueryOptions } from "@/Utils/utils";
 
 interface AddICD11DiagnosisProps {
@@ -29,10 +29,13 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   const [adding, setAdding] = useState(false);
   const hasError = !!props.disallowed.find((d) => d?.id === selected?.id);
 
-  const { res, data, loading, refetch } = useQuery(routes.listICD11Diagnosis, {
-    prefetch: false,
-    silent: true,
-  });
+  const { res, data, loading, refetch } = useTanStackQueryInstead(
+    routes.listICD11Diagnosis,
+    {
+      prefetch: false,
+      silent: true,
+    },
+  );
 
   useEffect(() => {
     if (res?.status === 500) {

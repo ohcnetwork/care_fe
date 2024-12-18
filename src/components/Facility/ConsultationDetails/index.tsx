@@ -35,7 +35,7 @@ import { triggerGoal } from "@/Integrations/Plausible";
 import { CameraFeedPermittedUserTypes } from "@/Utils/permissions";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   formatDateTime,
   humanizeStrings,
@@ -106,7 +106,7 @@ export const ConsultationDetails = (props: any) => {
 
   const authUser = useAuthUser();
 
-  const consultationQuery = useQuery(routes.getConsultation, {
+  const consultationQuery = useTanStackQueryInstead(routes.getConsultation, {
     pathParams: { id: consultationId },
     onResponse: ({ data }) => {
       if (!data) {
@@ -124,12 +124,12 @@ export const ConsultationDetails = (props: any) => {
   const consultationData = consultationQuery.data;
   const bedId = consultationData?.current_bed?.bed_object?.id;
 
-  const isCameraAttached = useQuery(routes.listAssetBeds, {
+  const isCameraAttached = useTanStackQueryInstead(routes.listAssetBeds, {
     prefetch: !!bedId,
     query: { bed: bedId },
   }).data?.results.some((a) => a.asset_object.asset_class === "ONVIF");
 
-  const patientDataQuery = useQuery(routes.getPatient, {
+  const patientDataQuery = useTanStackQueryInstead(routes.getPatient, {
     pathParams: { id: consultationQuery.data?.patient ?? "" },
     prefetch: !!consultationQuery.data?.patient,
     onResponse: ({ data }) => {
@@ -331,7 +331,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
               <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
                 <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
-                  <div className="flex">
+                  <div className="flex items-center">
                     <span className="text-secondary-900">Created: </span>&nbsp;
                     <RelativeDateUserMention
                       actionDate={consultationData.created_date}
@@ -342,7 +342,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 </div>
                 <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
-                  <div className="flex">
+                  <div className="flex items-center">
                     <span className="text-secondary-900">Last Modified: </span>
                     &nbsp;
                     <RelativeDateUserMention
