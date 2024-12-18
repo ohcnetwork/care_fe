@@ -30,6 +30,7 @@ import {
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import { setDefaultView } from "@/Utils/viewStorageUtils";
 
 const KanbanBoard = lazy(
   () => import("@/components/Kanban/Board"),
@@ -78,7 +79,7 @@ export default function BoardView() {
   const { t } = useTranslation();
   const onListViewBtnClick = () => {
     navigate("/shifting/list", { query: qParams });
-    localStorage.setItem("defaultShiftView", "list");
+    setDefaultView("defaultShiftView", "list");
   };
 
   return (

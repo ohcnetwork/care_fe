@@ -25,6 +25,7 @@ import { RESOURCE_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
+import { setDefaultView } from "@/Utils/viewStorageUtils";
 
 const KanbanBoard = lazy(
   () => import("@/components/Kanban/Board"),
@@ -47,7 +48,7 @@ export default function BoardView() {
 
   const onListViewBtnClick = () => {
     navigate("/resource/list", { query: qParams });
-    localStorage.setItem("defaultResourceView", "list");
+    setDefaultView("defaultResourceView", "list");
   };
 
   return (

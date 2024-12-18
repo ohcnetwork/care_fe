@@ -4,12 +4,9 @@ import UserHome from "@/components/Users/UserHome";
 import UserProfile from "@/components/Users/UserProfile";
 
 import { AppRoutes } from "@/Routers/AppRouter";
-import { getDefaultView } from "@/Utils/viewStorageUtils";
 
 const UserRoutes: AppRoutes = {
-  "/users": () => (
-    <ManageUsers defaultView={getDefaultView("usersDefaultView", "card")} />
-  ),
+  "/users": () => <ManageUsers />,
   "/users/add": () => <UserAdd />,
   "/users/:username": ({ username }) => (
     <UserHome username={username} tab={"profile"} />

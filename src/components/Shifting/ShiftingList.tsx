@@ -19,6 +19,7 @@ import useFilters from "@/hooks/useFilters";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
+import { setDefaultView } from "@/Utils/viewStorageUtils";
 
 import ShiftingTable from "./ShiftingTable";
 
@@ -35,7 +36,7 @@ export default function ListView() {
   const { t } = useTranslation();
   const onBoardViewBtnClick = () => {
     navigate("/shifting/board", { query: qParams });
-    localStorage.setItem("defaultShiftView", "board");
+    setDefaultView("defaultShiftView", "board");
   };
   const {
     data: shiftData,

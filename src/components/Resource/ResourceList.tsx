@@ -22,6 +22,7 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime } from "@/Utils/utils";
+import { setDefaultView } from "@/Utils/viewStorageUtils";
 
 export default function ListView() {
   const {
@@ -37,7 +38,7 @@ export default function ListView() {
 
   const onBoardViewBtnClick = () => {
     navigate("/resource/board", { query: qParams });
-    localStorage.setItem("defaultResourceView", "board");
+    setDefaultView("defaultResourceView", "board");
   };
   const appliedFilters = formatFilter(qParams);
 

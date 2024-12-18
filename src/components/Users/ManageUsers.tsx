@@ -27,9 +27,9 @@ import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
-import { setDefaultView } from "@/Utils/viewStorageUtils";
+import { getDefaultView, setDefaultView } from "@/Utils/viewStorageUtils";
 
-export default function ManageUsers({ defaultView }: { defaultView: string }) {
+export default function ManageUsers() {
   const { t } = useTranslation();
   const {
     qParams,
@@ -48,7 +48,9 @@ export default function ManageUsers({ defaultView }: { defaultView: string }) {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [activeTab, setActiveTab] = useState(defaultView === "list" ? 1 : 0);
+  const [activeTab, setActiveTab] = useState(
+    getDefaultView("usersDefaultView", "card") === "list" ? 1 : 0,
+  );
 
   const { data: homeFacilityData } = useTanStackQueryInstead(
     routes.getAnyFacility,
