@@ -55,11 +55,11 @@ class PatientLogupdate {
   }
 
   typeSystolic(systolic: string) {
-    cy.get("#systolic").click().type(systolic);
+    cy.typeAndVerifyValue("#systolic", systolic);
   }
 
   typeDiastolic(diastolic: string) {
-    cy.get("#diastolic").click().type(diastolic);
+    cy.typeAndVerifyValue("#diastolic", diastolic);
   }
 
   typePulse(pulse: string) {

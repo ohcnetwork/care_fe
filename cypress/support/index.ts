@@ -39,6 +39,10 @@ declare global {
         element: string,
         reference: string,
       ): Chainable<Element>;
+      typeAndVerifyValue(
+        element: string,
+        reference: string,
+      ): Chainable<Element>;
       preventPrint(): Chainable<Window>;
       closeNotification(): Chainable<Element>;
       verifyContentPresence(
