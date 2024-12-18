@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { AuthorizedButton } from "@/components/ui/button";
+
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 import { ShiftCreate } from "@/components/Patient/ShiftCreate";
 import { PatientModel } from "@/components/Patient/models";
@@ -88,8 +89,9 @@ const ShiftingHistory = (props: PatientProps) => {
             {t("previous_shifting")}
           </button>
         </div>
-        <ButtonV2
+        <AuthorizedButton
           id="shift_create_button"
+          variant="outline"
           disabled={isPatientInactive(patientData, facilityId)}
           size="default"
           onClick={() => setIsSlideOverOpen(true)}
@@ -99,7 +101,7 @@ const ShiftingHistory = (props: PatientProps) => {
             <CareIcon icon="l-ambulance" className="text-xl" />
             {t("shift")}
           </span>
-        </ButtonV2>
+        </AuthorizedButton>
         <ShiftCreate
           facilityId={facilityId}
           patientId={id}

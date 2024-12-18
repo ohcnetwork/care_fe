@@ -4,6 +4,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
+
+import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
+
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-gray-300",
   {
@@ -60,4 +64,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+const AuthorizedButton: React.FC<AuthorizedElementProps & ButtonProps> = ({
+  authorizeFor = () => true,
+  ...props
+}) => {
+  return (
+    <AuthorizedChild authorizeFor={authorizeFor}>
+      {({ isAuthorized }) => (
+        <Button {...props} disabled={props.disabled || !isAuthorized}>
+          {props.children}
+        </Button>
+      )}
+    </AuthorizedChild>
+  );
+};
+
+export { Button, buttonVariants, AuthorizedButton };

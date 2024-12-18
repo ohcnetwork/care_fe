@@ -269,7 +269,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
       const { res, data: shiftData } = await request(routes.updateShift, {
         pathParams: { id: props.id },
-        // prefetch: props.open,
         body: data,
       });
       setIsLoading(false);

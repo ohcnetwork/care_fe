@@ -44,7 +44,7 @@ const CommentSection = (props: CommentSectionProps) => {
       pathParams={{ id: props.id }}
     >
       {(_, query) => (
-        <div className="flex w-full flex-col h-[690px] rounded-lg shadow-sm bg-white p-4 mt-4">
+        <div className="flex w-full flex-col h-[690px] rounded-lg shadow-sm bg-white p-4 mt-2">
           <div className="w-full flex flex-col grow overflow-y-auto">
             <PaginatedList.WhenLoading>
               <CircularProgress />

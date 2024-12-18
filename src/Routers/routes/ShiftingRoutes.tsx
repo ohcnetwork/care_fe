@@ -1,5 +1,6 @@
 import { Redirect } from "raviger";
 
+import { ReferralLetter } from "@/components/Shifting/ReferralLetter";
 // import { ShiftCreate } from "@/components/Patient/ShiftCreate";
 import ShiftDetails from "@/components/Shifting/ShiftDetails";
 // import { ShiftDetailsUpdate } from "@/components/Shifting/ShiftDetailsUpdate";
@@ -16,6 +17,7 @@ const ShiftingRoutes: AppRoutes = {
   "/shifting/board": () => <BoardView />,
   "/shifting/list": () => <ListView />,
   "/shifting/:id": ({ id }) => <ShiftDetails id={id} />,
+  "/shifting/:id/referral-letter": ({ id }) => <ReferralLetter id={id} />,
   // "/shifting/:id/update": ({ id }) => <ShiftDetailsUpdate id={id} />,
   // "/facility/:facilityId/patient/:patientId/shift/new": ({
   //   facilityId,
