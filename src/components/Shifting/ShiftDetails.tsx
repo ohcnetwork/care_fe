@@ -400,34 +400,38 @@ export default function ShiftDetails(props: { id: string }) {
 
   const showFacilityCard = (facilityData: any) => {
     return (
-      <div className="mt-2 h-full rounded-lg shadow bg-white p-5 text-gray-700">
+      <div className="mt-2 h-full text-left rounded-lg shadow bg-white p-4 text-gray-700">
         <table className="w-full">
           <tbody>
             <tr>
-              <td className="font-semibold">{t("name")} :</td>
-              <td className="pl-4">{facilityData?.name || "--"}</td>
+              <td className="font-semibold pb-2 w-1/4">{t("name")} :</td>
+              <td className="pb-2 w-3/4 truncate">
+                {facilityData?.name || "--"}
+              </td>
             </tr>
             <tr>
-              <td className="font-semibold">{t("facility_type")} :</td>
-              <td className="pl-4">
+              <td className="font-semibold py-2 w-1/4">
+                {t("facility_type")} :
+              </td>
+              <td className="py-2 w-3/4 truncate">
                 {facilityData?.facility_type?.name || "--"}
               </td>
             </tr>
             <tr>
-              <td className="font-semibold">{t("district")} :</td>
-              <td className="pl-4">
+              <td className="font-semibold py-2 w-1/4">{t("district")} :</td>
+              <td className="py-2 w-3/4 truncate">
                 {facilityData?.district_object?.name || "--"}
               </td>
             </tr>
             <tr>
-              <td className="font-semibold">{t("local_body")} :</td>
-              <td className="pl-4">
+              <td className="font-semibold py-2 w-1/4">{t("local_body")} :</td>
+              <td className="py-2 w-3/4 truncate">
                 {facilityData?.local_body_object?.name || "--"}
               </td>
             </tr>
             <tr>
-              <td className="font-semibold">{t("state")} :</td>
-              <td className="pl-4">
+              <td className="font-semibold pt-2 w-1/4">{t("state")} :</td>
+              <td className="pt-2 w-3/4 truncate">
                 {facilityData?.state_object?.name || "--"}
               </td>
             </tr>
@@ -469,12 +473,12 @@ export default function ShiftDetails(props: { id: string }) {
           )}
           <div>
             <div className="flex flex-col lg:flex-row justify-between mt-2 rounded-lg border p-4">
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-8 ">
-                <div className="col-span-2 border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pb-0">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8 w-full lg:w-auto">
+                <div className="border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pr-4 lg:pb-0">
                   <div className="text-sm font-medium leading-5 text-secondary-700">
                     {t("created")} on
                   </div>
-                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-700 font-semibold">
+                  <div className="mt-1 whitespace-pre-wrap text-sm leading-5 text-gray-700 font-semibold">
                     <RecordMeta
                       time={data?.created_date}
                       user={data?.created_by_object}
@@ -483,11 +487,12 @@ export default function ShiftDetails(props: { id: string }) {
                     />
                   </div>
                 </div>
-                <div className="col-span-2 mt-2 lg:mt-0">
+
+                <div className="mt-2 lg:mt-0">
                   <div className="text-sm font-medium leading-5 text-secondary-700">
                     {t("last_edited")}
                   </div>
-                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-700 font-semibold">
+                  <div className="mt-1 whitespace-pre-wrap text-sm leading-5 text-gray-700 font-semibold">
                     <RecordMeta
                       time={data?.modified_date}
                       user={data?.last_edited_by_object}
@@ -497,13 +502,14 @@ export default function ShiftDetails(props: { id: string }) {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 mt-4 lg:mt-0">
+
+              <div className="flex flex-col gap-4 mt-4 lg:mt-0 w-full lg:flex-row lg:w-auto">
                 <div className="relative group w-full sm:w-auto">
                   <button
-                    className={`w-full px-4 py-2 rounded-lg sm:w-auto underline text-green-600 ${
+                    className={`w-full px-4 py-2 rounded-lg sm:w-auto underline ${
                       ["COMPLETED", "CANCELLED"].includes(data?.status || "")
                         ? "cursor-not-allowed bg-secondary-100"
-                        : "hover:text-green-700"
+                        : "hover:text-green-700 text-green-600"
                     }`}
                     disabled={["COMPLETED", "CANCELLED"].includes(
                       data?.status || "",
@@ -521,8 +527,10 @@ export default function ShiftDetails(props: { id: string }) {
                     </div>
                   )}
                 </div>
+
+                {/* Referral Letter Button */}
                 <button
-                  className="w-full sm:w-auto underline text-green-600 "
+                  className="w-full sm:w-auto underline hover:text-green-700 text-green-600 flex items-center justify-center lg:justify-start"
                   onClick={() => setIsPrintMode(true)}
                 >
                   <CareIcon icon="l-file-alt" className="mr-2 text-base" />
@@ -531,7 +539,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
 
-            <div className="mt-4 h-full rounded-lg bg-white p-4 text-sm text-gray-600 shadow px-4 sm:px-6 md:px-8 lg:px-10">
+            <div className="mt-4 h-full rounded-lg bg-white p-4 text-sm text-gray-600 shadow ">
               <div className="flex flex-wrap justify-between mb-3">
                 <div className="w-full md:w-auto">
                   <span className="font-semibold text-lg leading-relaxed mr-2">
@@ -556,8 +564,7 @@ export default function ShiftDetails(props: { id: string }) {
                     Status :{" "}
                   </span>
 
-                  <Badge variant="primary">
-                    {" "}
+                  <Badge variant="alert">
                     {shiftStatusOptions.find(
                       (option) => data?.status === option.text,
                     )?.label || data?.status}
@@ -592,7 +599,7 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("patient_category")} :
                   </span>
 
-                  <Badge variant={"warning"} className="ml-1">
+                  <Badge variant="warning" className="ml-1">
                     {data?.patient_object.last_consultation?.last_daily_round
                       ?.patient_category ??
                       data?.patient_object.last_consultation?.category}
@@ -699,7 +706,7 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
 
-          <div className="grid-cols-2 gap-x-14 md:grid text-secondary-800">
+          <div className="grid-cols-2 gap-x-14 text-sm md:grid text-secondary-800">
             <div className="col-span-1">
               {/* <div>
                 <h4 className="mt-8">
@@ -708,7 +715,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {data?.patient_object && showPatientCard(data?.patient_object)}
               </div> */}
               <div
-                className="pb-16 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 
+                className="pb-12 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 
                mt-2 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all"
               >
                 <h4 className="mt-8 text-lg">
@@ -717,25 +724,25 @@ export default function ShiftDetails(props: { id: string }) {
 
                 {showFacilityCard(data?.origin_facility_object)}
               </div>
-              <div className="pb-16 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
+              <div className="pb-12 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
                 <h4 className="text-lg">{t("Ambulance Details")}</h4>
 
                 <div className="mt-2 h-full rounded-lg bg-white p-4 text-gray-700 shadow">
-                  <table className="w-full">
+                  <table className="w-full text-left">
                     <tbody>
                       <tr>
-                        <td className="font-semibold text-left">
+                        <td className="font-semibold text-left pb-2 w-1/2">
                           {t("ambulance_driver_name")} :
                         </td>
-                        <td className="pl-2 md:pl-4">
+                        <td className="pb-2 w-1/2">
                           {data?.ambulance_driver_name || "--"}
                         </td>
                       </tr>
                       <tr>
-                        <td className="font-semibold text-left">
+                        <td className="font-semibold text-left py-2 w-1/2">
                           {t("ambulance_phone_number")} :
                         </td>
-                        <td className="pl-2 md:pl-4">
+                        <td className="py-2 w-1/2">
                           {data?.ambulance_phone_number ? (
                             <a href={`tel:${data?.ambulance_phone_number}`}>
                               {data?.ambulance_phone_number}
@@ -746,10 +753,10 @@ export default function ShiftDetails(props: { id: string }) {
                         </td>
                       </tr>
                       <tr>
-                        <td className="font-semibold text-left">
+                        <td className="font-semibold text-left pt-2 w-1/2">
                           {t("ambulance_number")} :
                         </td>
-                        <td className="pl-2 md:pl-4">
+                        <td className="pt-2 w-1/2">
                           {data?.ambulance_number || "--"}
                         </td>
                       </tr>
@@ -757,8 +764,9 @@ export default function ShiftDetails(props: { id: string }) {
                   </table>
                 </div>
               </div>
+
               {!data?.assigned_facility_external && (
-                <div className="pb-16 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
+                <div className="pb-8 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
                   <h4 className="text-lg">
                     {t("details_of_assigned_facility")}
                   </h4>
@@ -766,7 +774,7 @@ export default function ShiftDetails(props: { id: string }) {
                 </div>
               )}
               {careConfig.wartimeShifting && (
-                <div className="pb-16 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
+                <div className="pb-8 block relative cursor-pointer border-l-2 px-4 border-l-secondary-300 hover:border-primary-500 transition-all before:absolute before:-left-[7px] before:top-0 before:w-3 before:aspect-square before:bg-secondary-400 before:rounded-full hover:before:bg-primary-500 before:transition-all">
                   <h4 className="mt-8">
                     {t("details_of_shifting_approving_facility")}
                   </h4>
@@ -774,7 +782,7 @@ export default function ShiftDetails(props: { id: string }) {
                 </div>
               )}
             </div>
-            <div className="col-span-1 h-full">
+            <div className="col-span-1">
               <div className="mb-10 ">
                 <h4 className="mt-8">{t("comments")}</h4>
                 <CommentSection id={props.id} />

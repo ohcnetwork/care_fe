@@ -44,11 +44,17 @@ const CommentSection = (props: CommentSectionProps) => {
       pathParams={{ id: props.id }}
     >
       {(_, query) => (
-        <div className="flex w-full flex-col h-full rounded-lg shadow-sm bg-white p-4">
-          <div className="w-full max-h-[530px] overflow-y-auto  flex flex-col">
+        <div className="flex w-full flex-col h-[690px] rounded-lg shadow-sm bg-white p-4 mt-4">
+          <div className="w-full flex flex-col grow overflow-y-auto">
             <PaginatedList.WhenLoading>
               <CircularProgress />
             </PaginatedList.WhenLoading>
+            <PaginatedList.WhenEmpty>
+              <div className="flex items-center justify-center text-gray-500 h-full my-24">
+                {t("No comments available")}
+              </div>
+            </PaginatedList.WhenEmpty>
+
             <PaginatedList.Items<CommentModel>>
               {(item) => <Comment {...item} />}
             </PaginatedList.Items>

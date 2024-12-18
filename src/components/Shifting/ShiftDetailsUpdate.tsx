@@ -157,7 +157,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     routes.userList,
     {
       query: { id: state.form.assigned_to },
-      prefetch: state.form.assigned_to ? true : false,
+      prefetch: state.form.assigned_to && props.open ? true : false,
       onResponse: ({ res, data }) => {
         if (res?.ok && data?.count) SetAssignedUser(data.results[0]);
       },
@@ -269,6 +269,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
       const { res, data: shiftData } = await request(routes.updateShift, {
         pathParams: { id: props.id },
+        // prefetch: props.open,
         body: data,
       });
       setIsLoading(false);
@@ -287,6 +288,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   useTanStackQueryInstead(routes.getShiftDetails, {
     pathParams: { id: props.id },
+    prefetch: props.open,
     onResponse: ({ res, data }) => {
       if (res?.ok && data) {
         const d = data;
