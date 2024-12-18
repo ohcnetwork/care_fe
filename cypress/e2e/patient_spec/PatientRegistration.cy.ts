@@ -247,7 +247,7 @@ describe("Patient Creation with consultation", () => {
     // allow the transfer button of a patient
     patientTransfer.clickAllowPatientTransferButton();
     // Verify the patient error message for the same facility
-    cy.awaitUrl("/patients");
+    cy.visit("/patients");
     patientPage.createPatient();
     patientPage.selectFacility(patientTransferFacility);
     patientPage.patientformvisibility();

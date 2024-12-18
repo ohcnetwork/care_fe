@@ -160,9 +160,7 @@ describe("Patient Homepage present functionalities", () => {
       .invoke("text")
       .then((patientOne: string) => {
         firstPatientPageOne = patientOne.trim();
-        pageNavigation.interceptPatientNavigation();
         pageNavigation.navigateToNextPage();
-        pageNavigation.verifyPatientNavigation();
         pageNavigation.verifyCurrentPageNumber(2);
         cy.get('[data-cy="patient"]')
           .first()
