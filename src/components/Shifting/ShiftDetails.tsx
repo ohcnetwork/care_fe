@@ -92,7 +92,7 @@ export default function ShiftDetails(props: { id: string }) {
         backUrl="/shifting/board"
       >
         {data?.assigned_to_object && (
-          <div className="relative rounded-lg bg-primary-200 shadow">
+          <div className="relative rounded-lg bg-primary-200 shadow my-3">
             <div className="mx-auto max-w-screen-xl p-3 sm:px-6 lg:px-8">
               <div className="pr-16 sm:px-16 sm:text-center">
                 <p className="font-bold text-primary-800">
@@ -199,7 +199,7 @@ export default function ShiftDetails(props: { id: string }) {
                 </Link>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               <div>
                 <span className="font-semibold leading-relaxed">Status : </span>
 
@@ -214,7 +214,7 @@ export default function ShiftDetails(props: { id: string }) {
                   {t("is_up_shift")} :
                 </span>
                 <Badge
-                  variant={data?.is_up_shift ? "warning" : "secondary"}
+                  variant={data?.is_up_shift ? "warning_outline" : "secondary"}
                   className="ml-1"
                 >
                   {data?.is_up_shift ? t("yes") : t("no")}
@@ -233,39 +233,42 @@ export default function ShiftDetails(props: { id: string }) {
                 </Badge>
               </div>
 
-              <div>
+              <div className="md:text-right">
                 <span className="font-semibold leading-relaxed">
                   {t("patient_category")} :
                 </span>
 
-                <Badge variant="warning" className="ml-1">
+                <Badge variant="warning_outline" className="ml-1">
                   {data?.patient_object.last_consultation?.last_daily_round
                     ?.patient_category ??
                     data?.patient_object.last_consultation?.category}
                 </Badge>
               </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("contact_person_at_the_facility")} :
-                </span>
-                <span className="ml-1 text-gray-900 font-semibold leading-5">
-                  {data?.refering_facility_contact_name || "--"}
-                </span>
+              <div className="grid grid-cols-2 col-span-1 sm:col-span-4 md:col-span-4">
+                <div className=" md:col-span-1 col-span-2">
+                  <span className="font-semibold leading-relaxed">
+                    {t("contact_person_at_the_facility")} :
+                  </span>
+                  <span className="ml-1 text-gray-900 font-semibold leading-5">
+                    {data?.refering_facility_contact_name || "--"}
+                  </span>
+                </div>
+                <div className="md:text-right">
+                  <span className="font-semibold leading-relaxed">
+                    {t("phone_number_at_current_facility")} :
+                  </span>
+                  <span className="ml-1 text-gray-900 font-semibold leading-5">
+                    {data?.refering_facility_contact_number ? (
+                      <a href={`tel:${data.refering_facility_contact_number}`}>
+                        {data.refering_facility_contact_number}
+                      </a>
+                    ) : (
+                      "--"
+                    )}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("phone_number_at_current_facility")} :
-                </span>
-                <span className="ml-1 text-gray-900 font-semibold leading-5">
-                  {data?.refering_facility_contact_number ? (
-                    <a href={`tel:${data.refering_facility_contact_number}`}>
-                      {data.refering_facility_contact_number}
-                    </a>
-                  ) : (
-                    "--"
-                  )}
-                </span>
-              </div>
+
               {careConfig.kasp.enabled && (
                 <div>
                   <span className="font-semibold leading-relaxed">
@@ -305,14 +308,7 @@ export default function ShiftDetails(props: { id: string }) {
                   </div>
                 </>
               )}
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("origin_facility")} :
-                </span>
-                <span className="ml-1 text-gray-900 font-semibold leading-5">
-                  {data?.origin_facility_object?.name || "--"}
-                </span>
-              </div>
+
               {careConfig.wartimeShifting && (
                 <div>
                   <span className="font-semibold leading-relaxed">
@@ -323,16 +319,7 @@ export default function ShiftDetails(props: { id: string }) {
                   </span>
                 </div>
               )}
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("assigned_facility")} :
-                </span>
-                <span className="ml-1 text-gray-900 font-semibold leading-5">
-                  {data?.assigned_facility_external ||
-                    data?.assigned_facility_object?.name ||
-                    "--"}
-                </span>
-              </div>
+
               <div className="col-span-1 sm:col-span-2 md:col-span-4">
                 <span className="font-semibold leading-relaxed">
                   {t("reason")} :

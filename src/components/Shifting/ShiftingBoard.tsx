@@ -87,7 +87,7 @@ export default function BoardView() {
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={t("shifting")}
-            className="mx-3 md:mx-5"
+            className="mx-3 md:mx-5 mt-4"
             hideBack
             componentRight={
               <ExportButton

@@ -44,7 +44,7 @@ const CommentSection = (props: CommentSectionProps) => {
       pathParams={{ id: props.id }}
     >
       {(_, query) => (
-        <div className="flex w-full flex-col h-[690px] rounded-lg shadow-sm bg-white p-4 mt-2">
+        <div className="flex w-full flex-col h-[700px] rounded-lg shadow-sm bg-white p-4 mt-2">
           <div className="w-full flex flex-col grow overflow-y-auto">
             <PaginatedList.WhenLoading>
               <CircularProgress />
@@ -66,6 +66,7 @@ const CommentSection = (props: CommentSectionProps) => {
           <div className="relative mx-4 flex items-center mt-auto">
             <AutoExpandingTextInputFormField
               value={commentBox}
+              rows={1}
               placeholder={t("type_your_comment")}
               onChange={(e) => setCommentBox(e.value)}
               className="w-full grow"

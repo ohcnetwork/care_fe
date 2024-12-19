@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { navigate, usePath } from "raviger";
+import { Link, navigate, usePath } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -84,7 +84,7 @@ export default function ShiftingTable(props: {
           </div>
         )}
 
-        <div className="col-span-1  pl-4 hidden text-left uppercase sm:hidden md:hidden lg:block">
+        <div className="col-span-1 hidden text-left uppercase sm:hidden md:hidden lg:block">
           {t("consent__status")}
         </div>
         <div className="col-span-1 px-2 hidden text-left uppercase sm:hidden md:hidden lg:block">
@@ -99,184 +99,211 @@ export default function ShiftingTable(props: {
       </div>
       <div>
         {data?.map((shift: ShiftingModel) => (
-          <div key={`shift_${shift.id}`} className="w-full  ">
-            <div
-              className={cn(
-                "border-3 grid w-full my-2 rounded-lg border border-gray-200 gap-1 overflow-hidden bg-white px-4 py-6 shadow sm:grid-cols-1 md:grid-cols-1",
-                hidePatient ? "lg:grid-cols-4" : "lg:grid-cols-5",
-              )}
+          <div key={`shift_${shift.id}`} className="w-full">
+            <Link
+              href={
+                currentPath?.includes("/shifting/list") ||
+                currentPath?.includes("/shifting/board")
+                  ? `/shifting/${shift.external_id}`
+                  : `shifting/${shift.external_id}`
+              }
+              className="block text-inherit no-underline"
             >
-              {!hidePatient && (
-                <div className="col-span-1 px-2 text-left">
-                  <div className="text-sm font-bold capitalize">
-                    {shift.patient_object.name}
+              <div
+                className={cn(
+                  "border-3 grid w-full my-2 rounded-lg border border-gray-200 gap-1 overflow-hidden bg-white px-4 py-6 shadow sm:grid-cols-1 md:grid-cols-1",
+                  hidePatient ? "lg:grid-cols-4" : "lg:grid-cols-5",
+                )}
+              >
+                {!hidePatient && (
+                  <div className="col-span-1 px-2 text-left">
+                    <div className="text-sm font-bold capitalize">
+                      {shift.patient_object.name}
+                    </div>
+                    <div className="text-xs font-semibold capitalize">
+                      {shift.patient_object.age}
+                    </div>
                   </div>
-                  <div className="text-xs font-semibold capitalize">
-                    {shift.patient_object.age}
+                )}
+
+                <div className="col-span-1 flex mt-1 flex-col text-left">
+                  <div className="3xl:flex-row  flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row">
+                    <dt title={t("shifting_status")}>
+                      {shift.status === "COMPLETED" ? (
+                        <Badge
+                          variant="custom"
+                          className="bg-blue-100 text-blue-800"
+                        >
+                          <CareIcon icon="l-truck" className="mr-2" />
+                          <dd>{shift.status}</dd>
+                        </Badge>
+                      ) : (
+                        <Badge variant="warning">
+                          <CareIcon icon="l-truck" className="mr-2" />
+                          <dd>{shift.status}</dd>
+                        </Badge>
+                      )}
+                    </dt>
+
+                    <div>
+                      {shift.emergency && (
+                        <Badge variant="danger">{t("emergency")}</Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
-              )}
 
-              <div className="col-span-1 flex mt-1 flex-col px-3 text-left">
-                <div className="3xl:flex-row  flex gap-2 sm:flex-row md:flex-row lg:flex-col xl:flex-row 2xl:flex-row">
-                  <dt title={t("shifting_status")}>
-                    {shift.status === "COMPLETED" ? (
-                      <Badge
-                        variant="custom"
-                        className="bg-blue-100 text-blue-800"
-                      >
-                        <CareIcon icon="l-truck" className="mr-2" />
-                        <dd>{shift.status}</dd>
-                      </Badge>
-                    ) : (
-                      <Badge variant="warning">
-                        <CareIcon icon="l-truck" className="mr-2" />
-                        <dd>{shift.status}</dd>
-                      </Badge>
-                    )}
-                  </dt>
-
-                  <div>
-                    {shift.emergency && (
-                      <Badge variant="danger">{t("emergency")}</Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-span-1 mt-2 text-left">
-                <dt
-                  title={t("origin_facility")}
-                  className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
-                >
-                  <CareIcon icon="l-plane-departure" className="mr-2" />
-                  <dd className="text-sm font-bold leading-5 text-secondary-900">
-                    {shift.origin_facility_object?.name}
-                  </dd>
-                </dt>
-
-                {careConfig.wartimeShifting && (
+                <div className="col-span-1 mt-2 text-left">
                   <dt
-                    title={t("shifting_approving_facility")}
+                    title={t("origin_facility")}
                     className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <CareIcon icon="l-user-check" className="mr-2" />
+                    <CareIcon icon="l-plane-departure" className="mr-2" />
                     <dd className="text-sm font-bold leading-5 text-secondary-900">
-                      {shift.shifting_approving_facility_object?.name}
+                      {shift.origin_facility_object?.name}
                     </dd>
                   </dt>
-                )}
-              </div>
 
-              <div className="col-span-1 mt-2 flex flex-col text-left">
-                <dt
-                  title={t("assigned_facility")}
-                  className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
-                >
-                  <CareIcon icon="l-plane-arrival" className="mr-2" />
-                  <dd className="text-sm font-bold leading-5 text-secondary-900">
-                    {shift.assigned_facility_external ||
-                      shift.assigned_facility_object?.name ||
-                      t("yet_to_be_decided")}
-                  </dd>
-                </dt>
-              </div>
-              <div className="col-span-1 mt-1 flex justify-between text-left">
-                <dt
-                  title={t("modified_date")}
-                  className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
-                >
-                  <CareIcon icon="l-stopwatch" className="mr-1" />
-                  <dd className="text-xs font-medium leading-5">
-                    {formatDateTime(shift.modified_date) || "--"}
-                  </dd>
-                </dt>
-                <div className="col-span-1 mr-2 mb-1 flex flex-col text-left ">
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <h1 className="w-7 hover:cursor-pointer font-bold text-lg text-green-700">
-                        . . .
-                      </h1>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-full font-medium "
+                  {careConfig.wartimeShifting && (
+                    <dt
+                      title={t("shifting_approving_facility")}
+                      className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
                     >
-                      <DropdownMenuItem
-                        className=" cursor-pointer"
-                        onClick={() =>
-                          currentPath?.includes("/shifting/list") ||
-                          currentPath?.includes("/shifting/board")
-                            ? navigate(`/shifting/${shift.external_id}`)
-                            : navigate(`shifting/${shift.external_id}`)
-                        }
+                      <CareIcon icon="l-user-check" className="mr-2" />
+                      <dd className="text-sm font-bold leading-5 text-secondary-900">
+                        {shift.shifting_approving_facility_object?.name}
+                      </dd>
+                    </dt>
+                  )}
+                </div>
+
+                <div className="col-span-1 mt-2 flex flex-col text-left">
+                  <dt
+                    title={t("assigned_facility")}
+                    className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+                  >
+                    <CareIcon icon="l-plane-arrival" className="mr-2" />
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
+                      {shift.assigned_facility_external ||
+                        shift.assigned_facility_object?.name ||
+                        t("yet_to_be_decided")}
+                    </dd>
+                  </dt>
+                </div>
+                <div className="col-span-1 mt-1 flex justify-between text-left">
+                  <dt
+                    title={t("modified_date")}
+                    className="flex items-center text-left text-sm font-medium leading-5 text-secondary-500"
+                  >
+                    <CareIcon icon="l-stopwatch" className="mr-1" />
+                    <dd className="text-xs font-medium leading-5">
+                      {formatDateTime(shift.modified_date) || "--"}
+                    </dd>
+                  </dt>
+                  <div className="col-span-1 mr-2 mb-1 flex flex-col text-left ">
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <h1
+                          className="w-7 hover:cursor-pointer font-bold text-lg text-green-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }}
+                        >
+                          . . .
+                        </h1>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-full font-medium"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
                       >
-                        {t("view_details")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className=" cursor-pointer"
-                        disabled={
-                          shift?.status === "COMPLETED" ||
-                          shift?.status === "CANCELLED"
-                        }
-                        onClick={() => setIsSlideOverOpen(true)}
-                      >
-                        {t("update_status_details")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() =>
-                          navigate(
-                            `/shifting/${shift.external_id}/referral-letter`,
-                          )
-                        }
-                      >
-                        {t("referral_letter")}
-                      </DropdownMenuItem>
-                      {shift.status === "COMPLETED" &&
-                        shift.assigned_facility && (
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() =>
-                              setModalFor({
-                                externalId: shift.external_id,
-                                loading: false,
-                              })
-                            }
-                            disabled={
-                              !shift.patient_object.allow_transfer ||
-                              !(
-                                ["DistrictAdmin", "StateAdmin"].includes(
-                                  authUser.user_type,
-                                ) ||
-                                authUser.home_facility_object?.id ===
-                                  shift.assigned_facility
-                              )
-                            }
-                          >
-                            {t("transfer_to_receiving_facility")}
-                          </DropdownMenuItem>
-                        )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <ShiftDetailsUpdate
-                    id={shift?.external_id}
-                    open={isSlideOverOpen}
-                    setOpen={setIsSlideOverOpen}
-                  />
-                  <ConfirmDialog
-                    title={t("confirm_transfer_complete")}
-                    description={t("mark_transfer_complete_confirmation")}
-                    action="Confirm"
-                    show={modalFor.externalId === shift.external_id}
-                    onClose={() =>
-                      setModalFor({ externalId: undefined, loading: false })
-                    }
-                    onConfirm={() => handleTransferComplete(shift)}
-                  />
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            navigate(`/shifting/${shift.external_id}`);
+                          }}
+                        >
+                          {t("view_details")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          disabled={
+                            shift?.status === "COMPLETED" ||
+                            shift?.status === "CANCELLED"
+                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setIsSlideOverOpen(true);
+                          }}
+                        >
+                          {t("update_status_details")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            navigate(
+                              `/shifting/${shift.external_id}/referral-letter`,
+                            );
+                          }}
+                        >
+                          {t("referral_letter")}
+                        </DropdownMenuItem>
+                        {shift.status === "COMPLETED" &&
+                          shift.assigned_facility && (
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                setModalFor({
+                                  externalId: shift.external_id,
+                                  loading: false,
+                                });
+                              }}
+                              disabled={
+                                !shift.patient_object.allow_transfer ||
+                                !(
+                                  ["DistrictAdmin", "StateAdmin"].includes(
+                                    authUser.user_type,
+                                  ) ||
+                                  authUser.home_facility_object?.id ===
+                                    shift.assigned_facility
+                                )
+                              }
+                            >
+                              {t("transfer_to_receiving_facility")}
+                            </DropdownMenuItem>
+                          )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <ShiftDetailsUpdate
+                      id={shift?.external_id}
+                      open={isSlideOverOpen}
+                      setOpen={setIsSlideOverOpen}
+                    />
+                    <ConfirmDialog
+                      title={t("confirm_transfer_complete")}
+                      description={t("mark_transfer_complete_confirmation")}
+                      action="Confirm"
+                      show={modalFor.externalId === shift.external_id}
+                      onClose={() =>
+                        setModalFor({ externalId: undefined, loading: false })
+                      }
+                      onConfirm={() => handleTransferComplete(shift)}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         ))}
       </div>

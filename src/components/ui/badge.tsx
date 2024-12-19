@@ -20,6 +20,8 @@ const badgeVariants = cva(
         danger: "border-danger-300 bg-danger-100 text-danger-900",
         warning:
           "border-transparent bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500 dark:bg-yellow-400 dark:text-gray-900 dark:hover:bg-yellow-500",
+        warning_outline:
+          "border-yellow-400 bg-yellow-200 text-gray-900 shadow hover:bg-yellow-300 dark:bg-yellow-400 dark:text-gray-900 dark:hover:bg-yellow-500",
         outline: "text-gray-950 dark:text-gray-50",
         custom: "",
       },
