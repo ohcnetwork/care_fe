@@ -66,8 +66,8 @@ const PatientNotes = (props: PatientNotesProps) => {
       return;
     }
     addNote({
-      noteField,
-      replyTo: reply_to,
+      note: noteField,
+      reply_to: reply_to?.id,
       thread,
     });
     setReplyTo(undefined);

@@ -78,7 +78,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   );
   const { mutate: addNote } = useAddPatientNote({
     patientId,
-    consultationId,
   });
 
   const onAddNote = () => {
@@ -89,9 +88,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       return;
     }
     addNote({
-      noteField,
-      replyTo: reply_to,
+      note: noteField,
+      reply_to: reply_to?.id,
       thread,
+      consultation: consultationId,
     });
 
     setReplyTo(undefined);

@@ -53,13 +53,12 @@ const PatientNotes = (props: PatientProps) => {
       });
       return;
     }
-
     addNote({
-      noteField,
-      replyTo: reply_to,
+      note: noteField,
+      reply_to: reply_to?.id,
       thread,
-    }),
-      setReplyTo(undefined);
+    });
+    setReplyTo(undefined);
     setNoteField("");
   };
 

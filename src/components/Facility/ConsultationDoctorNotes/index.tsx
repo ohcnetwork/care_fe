@@ -61,7 +61,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   const { mutate: addNote } = useAddPatientNote({
     patientId,
-    consultationId,
   });
 
   const onAddNote = () => {
@@ -72,9 +71,10 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       return;
     }
     addNote({
-      noteField,
-      replyTo: reply_to,
+      note: noteField,
+      reply_to: reply_to?.id,
       thread,
+      consultation: consultationId,
     });
     setReplyTo(undefined);
     setNoteField("");

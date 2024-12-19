@@ -6,8 +6,6 @@ import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 
-import { PatientNotesModel } from "../Facility/models";
-
 export function isPatientMandatoryDataFilled(patient: PatientModel) {
   return (
     patient.phone_number &&
@@ -26,33 +24,13 @@ export function isPatientMandatoryDataFilled(patient: PatientModel) {
   );
 }
 
-export const useAddPatientNote = (options: {
-  patientId: string;
-  consultationId?: string;
-}) => {
+export const useAddPatientNote = (options: { patientId: string }) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      noteField,
-      thread,
-      replyTo,
-    }: {
-      noteField: string;
-      thread: PatientNotesModel["thread"];
-      replyTo?: { id: string };
-    }) => {
-      const performMutation = mutate(routes.addPatientNote, {
-        pathParams: { patientId: options.patientId },
-      });
-
-      return performMutation({
-        note: noteField,
-        thread,
-        consultation: options.consultationId,
-        reply_to: replyTo?.id,
-      });
-    },
+    mutationFn: mutate(routes.addPatientNote, {
+      pathParams: { patientId: options.patientId },
+    }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       Notification.Success({ msg: "Note added successfully" });
