@@ -253,8 +253,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.interceptGetPatient();
     patientLogupdate.clickLogupdate();
     patientPage.verifyGetPatientResponse();
-    patientLogupdate.typePhysicalExamination(physicalExamination);
+    patientLogupdate.verifyRoundType("Brief Update");
     patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.selectSymptomsDate("01012024");
     patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
@@ -324,6 +325,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
       patientRhythm,
     ]);
     patientLogupdate.clickUpdateDetail();
+    patientLogupdate.verifyPatientCategory(patientCategory);
+    patientLogupdate.verifyRoundType("Brief Update");
     patientLogupdate.typeSystolic(patientModifiedSystolic, true);
     patientLogupdate.typeDiastolic(patientModifiedDiastolic, true);
     cy.clickSubmitButton("Continue");
