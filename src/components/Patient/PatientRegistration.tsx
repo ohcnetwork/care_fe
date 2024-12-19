@@ -67,7 +67,7 @@ export default function PatientRegistration(
   const { goBack } = useAppHistory();
 
   const [samePhoneNumber, setSamePhoneNumber] = useState(false);
-  const [sameAddress, setSameAddress] = useState(false);
+  const [sameAddress, setSameAddress] = useState(true);
   const [ageDob, setAgeDob] = useState<"dob" | "age">("dob");
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [form, setForm] = useState<Partial<PatientModel>>({
