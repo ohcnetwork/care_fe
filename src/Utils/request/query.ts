@@ -29,7 +29,6 @@ export async function callApi<TData, TBody>(
   }
 
   const data = await getResponseBody<TData>(res);
-  console.log(data);
 
   if (!res.ok) {
     throw new HTTPError({
