@@ -219,54 +219,54 @@ export const PatientHome = (props: {
                     <div>
                       {facilityId ===
                         patientData.facility_object?.id.toString() &&
-                        patientData?.is_active &&
-                        (!(
-                          patientData?.last_consultation ||
-                          patientData?.last_consultation?.discharge_date ||
-                          patientData.last_consultation?.facility !== facilityId
-                        ) ? (
-                          <div>
-                            <Button
-                              variant="primary"
-                              className="w-full"
-                              size="default"
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${patientData?.facility}/patient/${id}/consultation`,
-                                )
-                              }
-                            >
-                              <span className="flex w-full items-center justify-start gap-2">
-                                <CareIcon
-                                  icon="l-chat-bubble-user"
-                                  className="text-xl"
-                                />
-                                {t("add_consultation")}
-                              </span>
-                            </Button>
-                          </div>
-                        ) : (
-                          <div>
-                            <Button
-                              variant="primary"
-                              className="w-full"
-                              size="default"
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${patientData.facility}/patient/${id}/consultation/${patientData.last_consultation?.id}`,
-                                )
-                              }
-                            >
-                              <span className="flex w-full items-center justify-start gap-2">
-                                <CareIcon
-                                  icon="l-chat-bubble-user"
-                                  className="text-xl"
-                                />
-                                {t("view_consultation")}
-                              </span>
-                            </Button>
-                          </div>
-                        ))}
+                        patientData?.is_active && (
+                          <>
+                            {patientData?.last_consultation &&
+                            !patientData?.last_consultation.discharge_date ? (
+                              <div>
+                                <Button
+                                  variant="primary"
+                                  className="w-full"
+                                  size="default"
+                                  onClick={() =>
+                                    navigate(
+                                      `/facility/${patientData.facility}/patient/${id}/consultation/${patientData.last_consultation?.id}`,
+                                    )
+                                  }
+                                >
+                                  <span className="flex w-full items-center justify-start gap-2">
+                                    <CareIcon
+                                      icon="l-chat-bubble-user"
+                                      className="text-xl"
+                                    />
+                                    {t("view_consultation")}
+                                  </span>
+                                </Button>
+                              </div>
+                            ) : (
+                              <div>
+                                <Button
+                                  variant="primary"
+                                  className="w-full"
+                                  size="default"
+                                  onClick={() =>
+                                    navigate(
+                                      `/facility/${patientData?.facility}/patient/${id}/consultation`,
+                                    )
+                                  }
+                                >
+                                  <span className="flex w-full items-center justify-start gap-2">
+                                    <CareIcon
+                                      icon="l-chat-bubble-user"
+                                      className="text-xl"
+                                    />
+                                    {t("add_consultation")}
+                                  </span>
+                                </Button>
+                              </div>
+                            )}
+                          </>
+                        )}
                     </div>
                   </div>
                 </div>
