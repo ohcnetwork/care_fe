@@ -55,7 +55,10 @@ class FacilityPage {
     phoneNumber: string,
     clearBeforeTyping: boolean = false,
   ) {
-    cy.typeIntoField("#phone_number", phoneNumber, { clearBeforeTyping });
+    cy.typeIntoField("#phone_number", phoneNumber, {
+      clearBeforeTyping,
+      skipVerification: true,
+    });
   }
 
   clickSaveFacilityButton() {
