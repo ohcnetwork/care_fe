@@ -561,13 +561,16 @@ export interface PatientNotesReplyModel {
   reply_to?: string;
 }
 
+export type ThreadCategory =
+  (typeof PATIENT_NOTES_THREADS)[keyof typeof PATIENT_NOTES_THREADS];
+
 export interface PatientNotesModel {
   id: string;
   note: string;
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
   user_type?: UserRole | "RemoteSpecialist";
-  thread: (typeof PATIENT_NOTES_THREADS)[keyof typeof PATIENT_NOTES_THREADS];
+  thread: ThreadCategory;
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
@@ -577,6 +580,13 @@ export interface PatientNotesModel {
   root_note_object?: PatientNotesReplyModel;
   child_notes: PatientNotesReplyModel[];
   mentioned_users: UserBareMinimum[];
+}
+
+export interface PatientNotesRequest {
+  note: string;
+  thread: ThreadCategory;
+  consultation?: string;
+  reply_to?: string;
 }
 
 export interface PatientNoteStateType {

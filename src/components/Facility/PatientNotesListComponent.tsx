@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,6 +12,7 @@ import PatientNotesList from "@/components/Facility/PatientNotesList";
 import {
   PatientNoteStateType,
   PatientNotesModel,
+  PatientNotesRequest,
 } from "@/components/Facility/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -92,6 +93,7 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
         thread,
       },
     }),
+    enabled: !!patientId,
   });
 
   useEffect(() => {
@@ -105,11 +107,12 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
         totalPages: Math.ceil(notesData.count / RESULTS_PER_PAGE_LIMIT),
       }));
     }
-  }, [notesData]);
+  }, [notesData, isRefetching]);
 
   useEffect(() => {
     setThreadViewNote("");
-    setState((prev) => ({ ...prev, notes: [], cPage: 1 }));
+    setState(initialData);
+    refetchNotes();
   }, [thread]);
 
   const { data: patientData } = useQuery({
@@ -125,6 +128,24 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
     }
   }, [patientData]);
 
+  const addNoteMutation = useMutation({
+    mutationFn: (noteData: PatientNotesRequest) =>
+      request(routes.addPatientNote, {
+        pathParams: { patientId },
+        body: noteData,
+      }),
+    onSuccess: () => {
+      Notification.Success({ msg: "Note added successfully" });
+      setState((prev) => ({ ...prev, cPage: 1 }));
+      setNoteField("");
+      setReplyTo(undefined);
+      refetchNotes();
+    },
+    onError: () => {
+      Notification.Error({ msg: "An error occurred while adding the note." });
+    },
+  });
+
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -133,33 +154,14 @@ const PatientNotesListComponent = (props: PatientNotesProps) => {
       return;
     }
 
-    try {
-      const { res, data } = await request(routes.addPatientNote, {
-        pathParams: {
-          patientId: patientId,
-        },
-        body: {
-          note: noteField,
-          thread,
-          consultation: consultationId,
-          reply_to: reply_to?.id,
-        },
-      });
+    const result = await addNoteMutation.mutateAsync({
+      note: noteField,
+      thread: thread,
+      consultation: consultationId,
+      reply_to: reply_to?.id,
+    });
 
-      if (res?.status === 201) {
-        Notification.Success({ msg: "Note added successfully" });
-        setState({ ...state, cPage: 1 });
-        setNoteField("");
-        setReplyTo(undefined);
-      } else {
-        Notification.Error({ msg: "Failed to add note. Please try again." });
-      }
-
-      return data?.id;
-    } catch (error) {
-      Notification.Error({ msg: "An error occurred while adding the note." });
-      return undefined;
-    }
+    return result.data?.id;
   };
 
   useMessageListener((data) => {

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,6 +12,7 @@ import PatientNotesList from "@/components/Facility/PatientNotesList";
 import {
   PatientNoteStateType,
   PatientNotesReplyModel,
+  PatientNotesRequest,
 } from "@/components/Facility/models";
 
 import useAuthUser from "@/hooks/useAuthUser";
@@ -98,7 +99,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         totalPages: Math.ceil(notesData.count / RESULTS_PER_PAGE_LIMIT),
       }));
     }
-  }, [notesData, state.cPage]);
+  }, [notesData, isRefetching]);
 
   const { data: patientData } = useQuery({
     queryKey: [routes.getPatient.path, patientId],
@@ -126,6 +127,24 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     }
   }, [notificationSubscriptionState]);
 
+  const addNoteMutation = useMutation({
+    mutationFn: (noteData: PatientNotesRequest) =>
+      request(routes.addPatientNote, {
+        pathParams: { patientId },
+        body: noteData,
+      }),
+    onSuccess: () => {
+      Notification.Success({ msg: "Note added successfully" });
+      setNoteField("");
+      setState((prev) => ({ ...prev, cPage: 1 }));
+      setReplyTo(undefined);
+      refetchNotes();
+    },
+    onError: () => {
+      Notification.Error({ msg: "An error occurred while adding the note." });
+    },
+  });
+
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -134,30 +153,14 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       return;
     }
 
-    try {
-      const { res, data } = await request(routes.addPatientNote, {
-        pathParams: { patientId: patientId },
-        body: {
-          note: noteField,
-          consultation: consultationId,
-          thread,
-          reply_to: reply_to?.id,
-        },
-      });
+    const result = await addNoteMutation.mutateAsync({
+      note: noteField,
+      thread: thread,
+      consultation: consultationId,
+      reply_to: reply_to?.id,
+    });
 
-      if (res?.status === 201) {
-        Notification.Success({ msg: "Note added successfully" });
-        setNoteField("");
-        setState({ ...state, cPage: 1 });
-        setReplyTo(undefined);
-      } else {
-        Notification.Error({ msg: "Failed to add note. Please try again." });
-      }
-      return data?.id;
-    } catch (error) {
-      Notification.Error({ msg: "An error occurred while adding the note." });
-      return undefined;
-    }
+    return result.data?.id;
   };
 
   useMessageListener((data) => {
@@ -175,6 +178,11 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   useEffect(() => {
     localStorage.setItem(localStorageKey, noteField);
   }, [noteField, localStorageKey]);
+
+  useEffect(() => {
+    setState(initialData);
+    refetchNotes();
+  }, [thread]);
 
   const notesActionIcons = (
     <div className="flex gap-1">

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
 import { useEffect, useRef, useState } from "react";
 
@@ -13,6 +13,7 @@ import PatientNoteCard from "@/components/Facility/PatientNoteCard";
 import {
   PatientNotesModel,
   PatientNotesReplyModel,
+  PatientNotesRequest,
 } from "@/components/Facility/models";
 
 import * as Notification from "@/Utils/Notifications";
@@ -60,6 +61,7 @@ const PatientNotesDetailedView = (props: Props) => {
         thread,
       },
     }),
+    enabled: !!noteId && !!patientId,
   });
 
   const scrollToBottom = () => {
@@ -74,6 +76,24 @@ const PatientNotesDetailedView = (props: Props) => {
     }
   }, [state]);
 
+  const addNoteMutation = useMutation({
+    mutationFn: (noteData: PatientNotesRequest) =>
+      request(routes.addPatientNote, {
+        pathParams: { patientId },
+        body: noteData,
+      }),
+    onSuccess: () => {
+      Notification.Success({ msg: "Note added successfully" });
+      setNoteField("");
+      setReplyTo(undefined);
+      setTimeout(scrollToBottom, 100);
+      refetch();
+    },
+    onError: () => {
+      Notification.Error({ msg: "An error occurred while adding the note." });
+    },
+  });
+
   const onAddNote = async () => {
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -82,34 +102,14 @@ const PatientNotesDetailedView = (props: Props) => {
       return;
     }
 
-    try {
-      const { res, data } = await request(routes.addPatientNote, {
-        pathParams: {
-          patientId: patientId,
-        },
-        body: {
-          note: noteField,
-          thread,
-          consultation: consultationId,
-          reply_to: reply_to?.id || noteId,
-        },
-      });
+    const result = await addNoteMutation.mutateAsync({
+      note: noteField,
+      thread: thread,
+      consultation: consultationId,
+      reply_to: reply_to?.id ?? noteId,
+    });
 
-      setReplyTo(undefined);
-
-      if (res?.status === 201) {
-        Notification.Success({ msg: "Note added successfully" });
-        setNoteField("");
-        setTimeout(scrollToBottom, 100);
-      } else {
-        Notification.Error({ msg: "Failed to add note. Please try again." });
-      }
-
-      return data?.id;
-    } catch (error) {
-      Notification.Error({ msg: "An error occurred while adding the note." });
-      return undefined;
-    }
+    return result.data?.id;
   };
 
   if (isLoading || isRefetching) {

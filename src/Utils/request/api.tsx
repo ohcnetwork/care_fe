@@ -44,6 +44,7 @@ import {
   MinimumQuantityItemResponse,
   PatientNotesEditModel,
   PatientNotesModel,
+  PatientNotesRequest,
   PatientTransferResponse,
   ResourceModel,
   ShiftingModel,
@@ -658,12 +659,7 @@ const routes = {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
     TRes: Type<PatientNotesModel>(),
-    TBody: Type<
-      Pick<PatientNotesModel, "note" | "thread"> & {
-        consultation?: string;
-        reply_to?: string;
-      }
-    >(),
+    TBody: Type<PatientNotesRequest>(),
   },
   updatePatientNote: {
     path: "/api/v1/patient/{patientId}/notes/{noteId}/",
