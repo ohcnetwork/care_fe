@@ -84,13 +84,7 @@ const TabbedSections = (props: {
         activeTab={activeTab}
         onChange={(t) => setActiveTab(t)}
       />
-      <div>
-        {props.tabs.map(({ value, section }) => (
-          <div key={value} hidden={activeTab !== value}>
-            {section}
-          </div>
-        ))}
-      </div>
+      <div>{props.tabs.find(({ value }) => activeTab === value)?.section}</div>
     </>
   );
 };

@@ -59,6 +59,7 @@ export default function SectionNavigator(props: {
     <div className={cn("sticky top-4 left-0 flex flex-col w-52", className)}>
       {sections.map((section) => (
         <Button
+          key={section.id}
           className={cn(
             "justify-start bg-transparent shadow-none text-gray-700 hover:bg-black/5",
             activeSection === section.id && "text-primary-500 font-semibold",

@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -529,7 +529,7 @@ export default function PatientRegistration(
               className="flex items-center gap-4"
             >
               {GENDER_TYPES.map((g) => (
-                <>
+                <Fragment key={g.id}>
                   <RadioGroupItem
                     value={g.id.toString()}
                     id={"gender_" + g.id}
@@ -537,7 +537,7 @@ export default function PatientRegistration(
                   <Label htmlFor={"gender_" + g.id}>
                     {t(`GENDER__${g.id}`)}
                   </Label>
-                </>
+                </Fragment>
               ))}
             </RadioGroup>
             <br />
@@ -746,7 +746,9 @@ export default function PatientRegistration(
                   </SelectTrigger>
                   <SelectContent>
                     {countryList.map((country) => (
-                      <SelectItem value={country}>{country}</SelectItem>
+                      <SelectItem value={country} key={country}>
+                        {country}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

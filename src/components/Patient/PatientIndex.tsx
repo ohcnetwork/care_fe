@@ -175,9 +175,9 @@ export default function PatientIndex() {
     let facilityId = "";
     const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
     const userCanSeeAllFacilities = showAllFacilityUsers.includes(
-      authUser.user_type,
+      authUser?.user_type,
     );
-    const userHomeFacilityId = authUser.home_facility_object?.id;
+    const userHomeFacilityId = authUser?.home_facility_object?.id;
     if (qParams.facility && userCanSeeAllFacilities)
       facilityId = qParams.facility;
     else if (
@@ -288,10 +288,10 @@ export default function PatientIndex() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {listingQuery.data?.results.map((patient, i) => (
+                      {listingQuery.data?.results.map((patient) => (
                         <TableRow
                           className="bg-white cursor-pointer"
-                          key={i}
+                          key={patient.id}
                           onClick={() => navigate(getPatientUrl(patient))}
                         >
                           <TableCell className="min-w-[200px]">
