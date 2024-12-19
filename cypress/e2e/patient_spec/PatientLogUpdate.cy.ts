@@ -151,6 +151,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
     // verify the edit functionality
     patientLogupdate.clickUpdateDetail();
+    patientLogupdate.verifyRoundType("Progress Note");
+    patientLogupdate.verifyPatientCategory(patientCategory);
     patientLogupdate.selectPatientCategory(patientModifiedCategory);
     patientLogupdate.typeSystolic(patientModifiedSystolic);
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);

@@ -20,6 +20,12 @@ class PatientLogupdate {
     cy.clickAndSelectOption("#rounds_type", roundType);
   }
 
+  verifyRoundType(roundType: string) {
+    cy.get("#rounds_type")
+      .should("be.visible")
+      .should("contain.text", roundType);
+  }
+
   selectBed(bed: string) {
     cy.typeAndSelectOption("input[name='bed']", bed);
     cy.intercept("POST", "**/api/v1/consultationbed/").as(
@@ -33,6 +39,12 @@ class PatientLogupdate {
 
   selectPatientCategory(category: string) {
     cy.clickAndSelectOption("#patientCategory", category);
+  }
+
+  verifyPatientCategory(category: string) {
+    cy.get("#patientCategory")
+      .should("be.visible")
+      .should("contain.text", category);
   }
 
   typePhysicalExamination(
