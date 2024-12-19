@@ -1,4 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense } from "react";
 
@@ -12,17 +17,24 @@ import AuthUserProvider from "@/Providers/AuthUserProvider";
 import HistoryAPIProvider from "@/Providers/HistoryAPIProvider";
 import Routers from "@/Routers";
 import { FeatureFlagsProvider } from "@/Utils/featureFlags";
+import { handleHttpError } from "@/Utils/request/errorHandler";
 
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 3,
+      retry: 2,
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
+  queryCache: new QueryCache({
+    onError: handleHttpError,
+  }),
+  mutationCache: new MutationCache({
+    onError: handleHttpError,
+  }),
 });
 
 const App = () => {

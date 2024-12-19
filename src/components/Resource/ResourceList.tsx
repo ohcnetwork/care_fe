@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 
 import { ExportButton } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
+import PageTitle from "@/components/Common/PageTitle";
 import { ResourceModel } from "@/components/Facility/models";
 import SearchInput from "@/components/Form/SearchInput";
 import BadgesList from "@/components/Resource/ResourceBadges";
@@ -194,45 +194,55 @@ export default function ListView() {
   };
 
   return (
-    <Page
-      title={t("resource")}
-      hideBack
-      componentRight={
-        <ExportButton
-          action={async () => {
-            const { data } = await request(routes.downloadResourceRequests, {
-              query: { ...appliedFilters, csv: true },
-            });
-            return data ?? null;
-          }}
-          filenamePrefix="resource_requests"
-        />
-      }
-      breadcrumbs={false}
-      options={
-        <>
-          <div className="md:px-4"></div>
-          <div className="mt-2 flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
-            <SearchInput
-              name="title"
-              value={qParams.title}
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              placeholder={t("search_resource")}
-            />
-          </div>
+    <div className="flex-col px-2 pb-2">
+      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
+        <div className="w-1/3 lg:w-1/4">
+          <PageTitle
+            title={t("resource")}
+            hideBack
+            className="mx-3 md:mx-5"
+            componentRight={
+              <ExportButton
+                action={async () => {
+                  const { data } = await request(
+                    routes.downloadResourceRequests,
+                    {
+                      query: { ...appliedFilters, csv: true },
+                    },
+                  );
+                  return data ?? null;
+                }}
+                filenamePrefix="resource_requests"
+              />
+            }
+            breadcrumbs={false}
+          />
+        </div>
 
-          <div className="mt-2 flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-            <Button variant={"primary"} onClick={onBoardViewBtnClick}>
-              <CareIcon icon="l-list-ul" className="rotate-90 mr-2" />
+        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
+          <SearchInput
+            name="title"
+            value={qParams.title}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
+            placeholder={t("search_resource")}
+            className="w-full md:w-60"
+          />
+
+          <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
+            <Button
+              variant={"primary"}
+              onClick={onBoardViewBtnClick}
+              className="h-10.8 px-4 py-2"
+            >
+              <CareIcon icon="l-list-ul" className="mr-2" />
               {t("board_view")}
             </Button>
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
           </div>
-        </>
-      }
-    >
+        </div>
+      </div>
       <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       <div className="px-1">
@@ -282,6 +292,6 @@ export default function ListView() {
         showResourceStatus={true}
         key={window.location.search}
       />
-    </Page>
+    </div>
   );
 }

@@ -66,7 +66,7 @@ describe("Manage User", () => {
     manageUserPage.verifyEditUserDetails(
       "Devo",
       "Districto",
-      "8/11/1999",
+      "11/08/1999",
       "Female",
     );
   });
@@ -230,14 +230,15 @@ describe("Manage User", () => {
     userPage.checkUsernameText(usernameforworkinghour);
     manageUserPage.clickMoreDetailsButton(usernameforworkinghour);
     manageUserPage.verifyMoreDetailsPage();
+    manageUserPage.interceptLinkedSkillTab();
     manageUserPage.clickLinkedSkillTab();
-    cy.wait(500);
+    manageUserPage.verifyLinkedSkillResponse();
     manageUserPage.verifyLinkedSkillsTabPage();
     manageUserPage.selectSkillFromDropdown(linkedskill);
+    manageUserPage.interceptAddSkill();
     manageUserPage.clickAddSkillButton(usernameforworkinghour);
-    cy.wait(500);
+    manageUserPage.verifyAddSkillResponse();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
-    cy.wait(500);
     manageUserPage.navigateToProfile();
     cy.verifyContentPresence("#username-profile-details", [
       usernameforworkinghour,

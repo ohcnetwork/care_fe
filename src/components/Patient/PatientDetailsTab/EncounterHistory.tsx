@@ -1,55 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import PaginatedList from "@/CAREUI/misc/PaginatedList";
 
 import CircularProgress from "@/components/Common/CircularProgress";
-import Loading from "@/components/Common/Loading";
 import { ConsultationCard } from "@/components/Facility/ConsultationCard";
 import { ConsultationModel } from "@/components/Facility/models";
+import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
-import useAuthUser from "@/hooks/useAuthUser";
-
-import { triggerGoal } from "@/Integrations/Plausible";
 import routes from "@/Utils/request/api";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
-
-import { PatientProps } from ".";
-import { PatientModel } from "../models";
 
 const EncounterHistory = (props: PatientProps) => {
-  const { patientData: initialPatientData, facilityId, id } = props;
-  const [patientData, setPatientData] =
-    useState<PatientModel>(initialPatientData);
-  const authUser = useAuthUser();
-
-  useEffect(() => {
-    setPatientData(initialPatientData);
-  }, [initialPatientData]);
+  const { patientData, id, refetch } = props;
 
   const { t } = useTranslation();
-
-  const { loading: isLoading, refetch } = useTanStackQueryInstead(
-    routes.getPatient,
-    {
-      pathParams: {
-        id,
-      },
-      onResponse: ({ res, data }) => {
-        if (res?.ok && data) {
-          setPatientData(data);
-        }
-        triggerGoal("Patient Profile Viewed", {
-          facilityId: facilityId,
-          userId: authUser.id,
-        });
-      },
-    },
-  );
-
-  if (isLoading) {
-    return <Loading />;
-  }
 
   return (
     <PaginatedList

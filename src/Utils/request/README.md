@@ -4,34 +4,178 @@ CARE now uses TanStack Query (formerly React Query) as its data fetching solutio
 
 ## Using TanStack Query (Recommended for new code)
 
-For new API integrations, we recommend using TanStack Query directly:
+For new API integrations, we recommend using TanStack Query with `query` utility function. This is a wrapper around `fetch` that works seamlessly with TanStack Query. It handles response parsing, error handling, setting headers, and more.
 
 ```tsx
 import { useQuery } from "@tanstack/react-query";
-import request from "@/Utils/request/request";
-import FooRoutes from "@foo/routes";
+import query from "@/Utils/request/query";
 
-export default function FooDetails({ id }) {
-  const { data, isLoading, error } = useQuery({
-    queryKey: [FooRoutes.getFoo.path, id],
-    queryFn: async () => {
-      const response = await request(FooRoutes.getFoo, {
-        pathParams: { id }
-      });
-      return response.data;
-    }
+export default function UserProfile() {
+  const { data, isLoading } = useQuery({
+    queryKey: [routes.users.current.path],
+    queryFn: query(routes.users.current)
   });
 
   if (isLoading) return <Loading />;
-  if (error) return <Error error={error} />;
+  return <div>{data?.name}</div>;
+}
+
+// With path parameters
+function PatientDetails({ id }: { id: string }) {
+  const { data } = useQuery({
+    queryKey: ['patient', id],
+    queryFn: query(routes.patient.get, {
+      pathParams: { id }
+    })
+  });
+
+  return <div>{data?.name}</div>;
+}
+
+// With query parameters
+function SearchMedicines() {
+  const { data } = useQuery({
+    queryKey: ['medicines', 'paracetamol'],
+    queryFn: query(routes.medicine.search, {
+      queryParams: { search: 'paracetamol' }
+    })
+  });
+
+  return <MedicinesList medicines={data?.results} />;
+}
+
+// When you need response status/error handling
+function FacilityDetails({ id }: { id: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["facility", id],
+    queryFn: query(routes.getFacility, {
+      pathParams: { id },
+      silent: true
+    })
+  });
+
+  if (isLoading) return <Loading />;
+  return <div>{data?.name}</div>;
+}
+
+### query
+
+`query` is our wrapper around fetch that works seamlessly with TanStack Query. It:
+- Handles response parsing (JSON, text, blobs).
+- Constructs proper error objects.
+- Sets the headers appropriately.
+- Integrates with our global error handling.
+
+```typescript
+interface APICallOptions {
+  pathParams?: Record<string, string>;  // URL parameters
+  queryParams?: QueryParams;            // Query string parameters
+  body?: TBody;                         // Request body
+  silent?: boolean;                     // Suppress error notifications
+  headers?: HeadersInit;                // Additional headers
+}
+
+// Basic usage
+useQuery({
+  queryKey: ["users"],
+  queryFn: query(routes.users.list)
+});
+
+// With parameters
+useQuery({
+  queryKey: ["user", id],
+  queryFn: query(routes.users.get, {
+    pathParams: { id },
+    queryParams: { include: "details" },
+    silent: true  // Optional: suppress error notifications
+  })
+});
+```
+
+### Error Handling
+
+All API errors are now handled globally. Common scenarios like:
+
+- Session expiry -> Redirects to /session-expired
+- Bad requests (400/406) -> Shows error notification
+are automatically handled.
+
+Use the `silent: true` option to suppress error notifications for specific queries.
+
+## Using Mutations with TanStack Query
+
+For data mutations, we provide a `mutate` utility that works seamlessly with TanStack Query's `useMutation` hook.
+
+```tsx
+import { useMutation } from "@tanstack/react-query";
+import mutate from "@/Utils/request/mutate";
+
+function CreatePrescription({ consultationId }: { consultationId: string }) {
+  const { mutate: createPrescription, isPending } = useMutation({
+    mutationFn: mutate(MedicineRoutes.createPrescription, {
+      pathParams: { consultationId },
+    }),
+    onSuccess: () => {
+      toast.success("Prescription created successfully");
+    },
+  });
 
   return (
-    <div>
-      <span>{data.id}</span>
-      <span>{data.name}</span>
-    </div>
+    <Button 
+      onClick={() => createPrescription({ medicineId: "123", dosage: "1x daily" })}
+      disabled={isPending}
+    >
+      Create Prescription
+    </Button>
   );
 }
+
+// With path parameters and complex payload
+function UpdatePatient({ patientId }: { patientId: string }) {
+  const { mutate: updatePatient } = useMutation({
+    mutationFn: mutate(PatientRoutes.update, {
+      pathParams: { id: patientId },
+      silent: true // Optional: suppress error notifications
+    })
+  });
+
+  const handleSubmit = (data: PatientData) => {
+    updatePatient(data);
+  };
+
+  return <PatientForm onSubmit={handleSubmit} />;
+}
+```
+
+### mutate
+
+`mutate` is our wrapper around the API call functionality that works with TanStack Query's `useMutation`. It:
+- Handles request body serialization
+- Sets appropriate headers
+- Integrates with our global error handling
+- Provides TypeScript type safety for your mutation payload
+
+```typescript
+interface APICallOptions {
+  pathParams?: Record<string, string>;  // URL parameters
+  queryParams?: QueryParams;            // Query string parameters
+  body?: TBody;                         // Request body
+  silent?: boolean;                     // Suppress error notifications
+  headers?: HeadersInit;                // Additional headers
+}
+
+// Basic usage
+useMutation({
+  mutationFn: mutate(routes.users.create)
+});
+
+// With parameters
+useMutation({
+  mutationFn: mutate(routes.users.update, {
+    pathParams: { id },
+    silent: true  // Optional: suppress error notifications
+  })
+});
 ```
 
 ## Migration Guide & Reference
@@ -39,6 +183,7 @@ export default function FooDetails({ id }) {
 ### Understanding the Transition
 
 Our codebase contains two patterns for data fetching:
+
 1. Legacy pattern using `useTanStackQueryInstead` (wrapper around TanStack Query)
 2. Modern pattern using TanStack Query directly
 
@@ -60,12 +205,9 @@ function LegacyComponent({ id }) {
 function ModernComponent({ id }) {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [UserRoutes.getUser.path, id],
-    queryFn: async () => {
-      const response = await request(UserRoutes.getUser, {
-        pathParams: { id }
-      });
-      return response.data;
-    },
+    queryFn: query(UserRoutes.getUser, {
+      pathParams: { id }
+    }),
     enabled: true,
     refetchOnWindowFocus: false
   });
@@ -100,7 +242,7 @@ useTanStackQueryInstead(route, { prefetch: shouldFetch })
 // Modern
 useQuery({
   queryKey: [route.path],
-  queryFn: async () => (await request(route)).data,
+  queryFn: query(route),
   enabled: shouldFetch
 })
 ```
@@ -116,13 +258,10 @@ useTanStackQueryInstead(route, {
 // Modern
 useQuery({
   queryKey: [route.path, id, filter],
-  queryFn: async () => {
-    const response = await request(route, {
-      pathParams: { id },
-      query: { filter }
-    });
-    return response.data;
-  }
+  queryFn: query(route, {
+    pathParams: { id },
+    queryParams: { filter }
+  })
 })
 ```
 
@@ -135,12 +274,10 @@ if (res?.status === 403) handleForbidden();
 // Modern
 useQuery({
   queryKey: [route.path],
-  queryFn: async () => {
-    const response = await request(route);
-    if (response.res.status === 403) handleForbidden();
-    return response.data;
-  },
-  onError: (error) => handleError(error)
+  queryFn: query(route, {
+    silent: true // Optional: suppress error notifications
+  })
+  // Error handling is now done globally
 })
 ```
 
