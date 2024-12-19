@@ -31,9 +31,10 @@ function generateFacilityName(): string {
     "Ernakulam",
   ];
   const identifiers = [
-    () => Math.floor(Math.random() * 100), // Numeric IDs
-    () => `Zone-${Math.floor(Math.random() * 10)}`, // Zone IDs
-    () => `Block-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`, // Alphabetic Blocks
+    () => window.crypto.getRandomValues(new Uint32Array(1))[0] % 100, // Numeric IDs
+    () => `Zone-${window.crypto.getRandomValues(new Uint32Array(1))[0] % 10}`, // Zone IDs
+    () =>
+      `Block-${String.fromCharCode(65 + (window.crypto.getRandomValues(new Uint32Array(1))[0] % 26))}`, // Alphabetic Blocks
   ];
   const suffixes = [
     "Meta",
@@ -46,12 +47,22 @@ function generateFacilityName(): string {
     "Hospital",
   ];
 
-  const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  const randomPrefix =
+    prefixes[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % prefixes.length
+    ];
   const randomLocation =
-    locations[Math.floor(Math.random() * locations.length)];
+    locations[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % locations.length
+    ];
   const randomIdentifier =
-    identifiers[Math.floor(Math.random() * identifiers.length)]();
-  const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    identifiers[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % identifiers.length
+    ]();
+  const randomSuffix =
+    suffixes[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % suffixes.length
+    ];
 
   // Randomize the format of the name
   const formats = [
@@ -60,7 +71,9 @@ function generateFacilityName(): string {
     `${randomPrefix} ${randomLocation} ${randomSuffix}`,
   ];
 
-  return formats[Math.floor(Math.random() * formats.length)];
+  return formats[
+    window.crypto.getRandomValues(new Uint32Array(1))[0] % formats.length
+  ];
 }
 
 function generateRandomAddress(multiline: boolean = false): string {
@@ -89,15 +102,26 @@ function generateRandomAddress(multiline: boolean = false): string {
   ];
   const districts = ["Kochi", "Ernakulam"];
   const states = ["Kerala"];
-  const pincode = Math.floor(682000 + Math.random() * 1000).toString(); // Generate random pincodes in the 682XXX range.
+  const pincode =
+    682000 + (window.crypto.getRandomValues(new Uint32Array(1))[0] % 1000); // Generate random pincodes in the 682XXX range.
 
   const randomLocality =
-    localities[Math.floor(Math.random() * localities.length)];
+    localities[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % localities.length
+    ];
   const randomNeighborhood =
-    neighborhoods[Math.floor(Math.random() * neighborhoods.length)];
+    neighborhoods[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] %
+        neighborhoods.length
+    ];
   const randomDistrict =
-    districts[Math.floor(Math.random() * districts.length)];
-  const randomState = states[Math.floor(Math.random() * states.length)];
+    districts[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % districts.length
+    ];
+  const randomState =
+    states[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % states.length
+    ];
 
   // Create address components
   const addressParts = [
@@ -109,8 +133,6 @@ function generateRandomAddress(multiline: boolean = false): string {
   ];
 
   // Return address as single line or multiline
-  // If 'multiline' is false, return address as a single line
-  // If 'multiline' is true, return address with each component on a new line
   return multiline ? addressParts.join("\n") : addressParts.join(", ");
 }
 
@@ -161,11 +183,14 @@ function generatePatientName(): string {
     "White",
   ];
 
-  // Randomly choose a first name and last name
   const randomFirstName =
-    firstNames[Math.floor(Math.random() * firstNames.length)];
+    firstNames[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % firstNames.length
+    ];
   const randomLastName =
-    lastNames[Math.floor(Math.random() * lastNames.length)];
+    lastNames[
+      window.crypto.getRandomValues(new Uint32Array(1))[0] % lastNames.length
+    ];
 
   // Return the full name
   return `${randomFirstName} ${randomLastName}`;
