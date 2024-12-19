@@ -286,6 +286,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
+    patientLogupdate.verifyRoundType("Brief Update");
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.selectSymptomsDate("01012024");
