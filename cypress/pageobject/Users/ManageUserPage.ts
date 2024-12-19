@@ -126,9 +126,14 @@ export class ManageUserPage {
     cy.typeIntoField("input[name='email']", email, { clearBeforeTyping });
   }
 
-  editPhoneNumber(phoneNumber: string, clearBeforeTyping = true) {
+  editPhoneNumber(
+    phoneNumber: string,
+    clearBeforeTyping = true,
+    skipVerification = true,
+  ) {
     cy.typeIntoField("input[name='phone_number']", phoneNumber, {
       clearBeforeTyping,
+      skipVerification,
     });
     cy.get("input[name='phone_number_is_whatsapp']").should("be.checked");
   }
