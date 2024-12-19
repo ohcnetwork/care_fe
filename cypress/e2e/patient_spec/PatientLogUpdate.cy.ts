@@ -13,6 +13,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const patientInvestigation = new PatientInvestigation();
   const patientPrescription = new PatientPrescription();
   const patientCategory = "Moderate";
+  const patientModifiedCategory = "Critical";
   const additionalSymptoms = "Fever";
   const physicalExamination = "physical examination details";
   const otherExamination = "Other";
@@ -150,6 +151,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
     // verify the edit functionality
     patientLogupdate.clickUpdateDetail();
+    patientLogupdate.verifyPatientCategory(patientCategory);
+    patientLogupdate.verifyRoundType("Progress Note");
+    patientLogupdate.selectPatientCategory(patientModifiedCategory);
     patientLogupdate.typeSystolic(patientModifiedSystolic);
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.clickSubmitButton("Continue");
@@ -249,8 +253,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientPage.interceptGetPatient();
     patientLogupdate.clickLogupdate();
     patientPage.verifyGetPatientResponse();
-    patientLogupdate.typePhysicalExamination(physicalExamination);
+    patientLogupdate.verifyRoundType("Brief Update");
     patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.selectSymptomsDate("01012024");
     patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
@@ -282,11 +287,13 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
+    patientLogupdate.verifyRoundType("Brief Update"); // Verify the default round type
+    patientLogupdate.selectRoundType("Brief Update");
+    patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.selectSymptomsDate("01012024");
     patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
-    patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
     patientLogupdate.typePulse(patientPulse);
@@ -318,10 +325,10 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
       patientRhythm,
     ]);
     patientLogupdate.clickUpdateDetail();
-    patientLogupdate.clearIntoElementById("#systolic");
-    patientLogupdate.typeSystolic(patientModifiedSystolic);
-    patientLogupdate.clearIntoElementById("#diastolic");
-    patientLogupdate.typeDiastolic(patientModifiedDiastolic);
+    patientLogupdate.verifyPatientCategory(patientCategory);
+    patientLogupdate.verifyRoundType("Brief Update");
+    patientLogupdate.typeSystolic(patientModifiedSystolic, true);
+    patientLogupdate.typeDiastolic(patientModifiedDiastolic, true);
     cy.clickSubmitButton("Continue");
     cy.verifyNotification("Brief Update updated successfully");
     cy.contains("button", "Log Updates").click();
