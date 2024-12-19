@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import SlideOver from "@/CAREUI/interactive/SlideOver";
@@ -17,6 +18,7 @@ import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import {
   classNames,
+  copyToClipboard,
   formatName,
   isUserOnline,
   relativeTime,
@@ -238,6 +240,9 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
     }
   }
 
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
   return (
     <div
       className={classNames(
@@ -293,18 +298,22 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
               <a
                 role="button"
                 href="#"
-                onClick={async (e) => {
+                onClick={(e) => {
                   e.stopPropagation();
-                  await navigator.clipboard.writeText(
-                    user?.alt_phone_number || "",
-                  );
+                  copyToClipboard(user?.alt_phone_number || "");
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2500);
                 }}
               >
                 <span className="tooltip" id="copy-phoneicon">
                   <span className="tooltip-text tooltip-top">
-                    Copy Phone number
+                    {t("copy_phone_number")}
                   </span>
-                  <CareIcon icon="l-clipboard" className="h-5 w-5" />
+                  <CareIcon
+                    icon={copied ? "l-check" : "l-clipboard"}
+                    id="copy-icon"
+                    className="h-5 w-5"
+                  />
                 </span>
               </a>
               <span>{user.alt_phone_number}</span>
