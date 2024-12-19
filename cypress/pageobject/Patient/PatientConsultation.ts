@@ -65,7 +65,7 @@ export class PatientConsultationPage {
   }
 
   clickPatientDetails() {
-    cy.verifyAndClickElement("#consultationpage-header", "Patient Details");
+    cy.verifyAndClickElement("#patient-details", "Patient Details");
   }
 
   typePatientIllnessHistory(history: string) {

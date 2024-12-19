@@ -4,22 +4,22 @@ export const advanceFilters = {
   },
 
   selectState(state: string) {
-    cy.wait(200);
+    cy.wait(1000);
     cy.clickAndSelectOption("#state", state);
   },
 
   selectDistrict(district: string) {
-    cy.wait(200);
+    cy.wait(1000);
     cy.clickAndSelectOption("#district", district);
   },
 
   selectLocalBody(localBody: string) {
-    cy.wait(200);
+    cy.wait(1000);
     cy.clickAndSelectOption("#local_body", localBody);
   },
 
   selectWard(ward: string) {
-    cy.wait(200);
+    cy.wait(1000);
     cy.clickAndSelectOption("#ward", ward);
   },
 

@@ -3,7 +3,6 @@ import FacilityPage from "pageobject/Facility/FacilityCreation";
 
 import PatientMedicalHistory from "./PatientMedicalHistory";
 
-let patient_url = "";
 const facilityPage = new FacilityPage();
 const patientMedicalHistory = new PatientMedicalHistory();
 
@@ -96,7 +95,7 @@ export class PatientPage {
   }
 
   typePatientAge(age: string) {
-    cy.clickAndSelectOption("#patientAge", "Age");
+    cy.clickAndSelectOption("#patientAge", "Age", true);
     cy.clickSubmitButton("Confirm");
     cy.get("#age").clear().type(age);
   }
@@ -175,22 +174,6 @@ export class PatientPage {
     cy.url().should("include", "/patient");
   }
 
-  savePatientUrl() {
-    cy.url().then((url) => {
-      patient_url = url;
-    });
-  }
-
-  visitPatientUrl() {
-    this.interceptGetPatient();
-    cy.awaitUrl(patient_url);
-    this.verifyGetPatientResponse();
-  }
-
-  visitConsultationPage() {
-    cy.visit(patient_url + "/consultation");
-  }
-
   clickUpdatePatient() {
     cy.intercept("PUT", "**/api/v1/patient/**").as("updatePatient");
     cy.get("button").get("[data-testid=submit-button]").click();
@@ -220,7 +203,6 @@ export class PatientPage {
   verifyPatientDashboardDetails(
     gender: string,
     age: number,
-    patientName: string,
     phoneNumber: string,
     emergencyPhoneNumber: string,
     yearOfBirth: string,
@@ -237,7 +219,6 @@ export class PatientPage {
       .then(($dashboard) => {
         expect($dashboard).to.contain(gender);
         expect($dashboard).to.contain(age);
-        expect($dashboard).to.contain(patientName);
         expect($dashboard).to.contain(phoneNumber);
         expect($dashboard).to.contain(emergencyPhoneNumber);
         expect($dashboard).to.contain(yearOfBirth);
@@ -274,10 +255,6 @@ export class PatientPage {
       expect($dashboard).to.contain(patientLocalbody);
       expect($dashboard).to.contain(patientWard);
     });
-  }
-
-  visitUpdatePatientUrl() {
-    cy.visit(patient_url + "/update");
   }
 
   clickPatientUpdateDetails() {
