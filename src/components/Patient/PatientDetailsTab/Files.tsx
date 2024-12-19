@@ -167,20 +167,12 @@ const PatientFiles = (props: PatientProps) => {
     return (
       <thead>
         <tr>
-          <th className="flex flex-row justify-between items-center border-2 rounded-lg text-sm font-normal">
-            <td width="20%" className="pl-4 py-2 text-left">
-              {t("file_name")}
-            </td>
-            <td width="10%" className="py-2 text-left">
-              {t("file_type")}
-            </td>
-            <td width="25%" className="py-2 text-left">
-              {t("date")}
-            </td>
-            <td width="15%" className="py-2 text-left">
-              {t("shared_by")}
-            </td>
-            <td width="30%" className="py-2 text-left"></td>
+          <th className="grid grid-cols-12 gap-4 border-2 rounded-lg text-sm font-normal  min-w-[800px]">
+            <td className="col-span-3 pl-4 py-2 text-left">{t("file_name")}</td>
+            <td className="col-span-2 py-2 text-left">{t("file_type")}</td>
+            <td className="col-span-3 py-2 text-left">{t("date")}</td>
+            <td className="col-span-2 py-2 text-left">{t("shared_by")}</td>
+            <td className="col-span-2 py-2 text-left"></td>
           </th>
         </tr>
       </thead>
@@ -223,7 +215,7 @@ const PatientFiles = (props: PatientProps) => {
                 <CareIcon icon="l-ellipsis-h" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-2">
+            <DropdownMenuContent align="start">
               <DropdownMenuItem className="text-primary-900">
                 <button onClick={() => fileManager.downloadFile(file, id)}>
                   <CareIcon icon="l-arrow-circle-down" className="mr-1" />
@@ -270,7 +262,7 @@ const PatientFiles = (props: PatientProps) => {
             </span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-2">
+        <DropdownMenuContent align="start" className="sm:w-full">
           <DropdownMenuItem
             className="text-primary-900"
             onClick={() => {
@@ -324,7 +316,7 @@ const PatientFiles = (props: PatientProps) => {
             <CareIcon icon="l-angle-down" className="ml-1" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-full">
+        <DropdownMenuContent align="end">
           <DropdownMenuItem
             className="flex flex-row items-center"
             onSelect={(e) => {
@@ -365,49 +357,42 @@ const PatientFiles = (props: PatientProps) => {
 
   const getTableRow = (file: FileUploadModel) => {
     const filetype = getFileType(file);
+    const fileName = file.name ? file.name + file.extension : "";
     return (
       <tr
         key={file.id}
         className={classNames(
-          "flex border border-secondary-300 flex-row grow justify-between items-center mt-3 mb-4 rounded-lg p-4 shadow text-sm",
+          "grid grid-cols-12 gap-4 border border-secondary-300 items-center mt-3 mb-4 rounded-lg p-4 shadow text-sm  min-w-[800px]",
           file.is_archived ? "bg-white/50" : "bg-white",
         )}
       >
-        <td width="20%">
-          <span className="inline-flex items-center gap-2">
-            <span className="p-2 rounded-full bg-gray-100">
-              <CareIcon icon={icons[filetype]} className="text-xl" />
-            </span>
-            {file.name && file.name.length > 10 ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <span className="text-gray-900">
-                      {file.name?.slice(0, 8) + "..."}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-black text-white z-40">
-                    <span>
-                      {file.name}
-                      {file.extension}
-                    </span>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              <span className="text-gray-900">
-                {file.name}
-                {file.extension}
-              </span>
-            )}
+        <td className="col-span-3 flex items-center gap-2 min-w-0">
+          <span className="p-2 rounded-full bg-gray-100 shrink-0">
+            <CareIcon icon={icons[filetype]} className="text-xl" />
           </span>
+          {file.name && file.name.length > 20 ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="truncate">
+                  <span className="text-gray-900 truncate block">
+                    {fileName}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="bg-black text-white z-40">
+                  <span>{fileName}</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="text-gray-900 truncate block">{fileName}</span>
+          )}
         </td>
-        <td width="10%">{filetype}</td>
-        <td width="25%">
+        <td className="col-span-2 truncate">{filetype}</td>
+        <td className="col-span-3 truncate">
           {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")}
         </td>
-        <td width="15%">{file.uploaded_by?.username}</td>
-        <td width="30%">
+        <td className="col-span-2 truncate">{file.uploaded_by?.username}</td>
+        <td className="ml-2 col-span-2 flex justify-end">
           {file.is_archived ? getArchivedMessage() : GetButtons(file)}
         </td>
       </tr>
@@ -417,7 +402,7 @@ const PatientFiles = (props: PatientProps) => {
   const RenderTable = () => {
     return (
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full overflow-x-auto">
           {getTableHeaders()}
           <tbody>
             {files?.results?.map((file) => {
@@ -457,9 +442,9 @@ const PatientFiles = (props: PatientProps) => {
         value={qParams.file_category || "all"}
         onValueChange={handleTabChange}
       >
-        <div className="flex flex-row justify-between">
-          <div className="flex flex-row gap-3 items-center">
-            <TabsList>
+        <div className="flex flex-col gap-3 sm:flex-row justify-between">
+          <div className="flex sm:flex-row flex-wrap flex-col gap-3 sm:items-center">
+            <TabsList className="flex flex-row overflow-x-auto">
               {fileCategories.map((category) => (
                 <TabsTrigger
                   key={category.value}
