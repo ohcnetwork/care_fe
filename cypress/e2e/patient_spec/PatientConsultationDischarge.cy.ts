@@ -35,7 +35,9 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason4);
     cy.clickSubmitButton("Confirm Discharge");
+    patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
+    patientDischarge.verifyDischargePatient();
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -53,7 +55,9 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.typeDischargeNote(patientDeathCause);
     patientDischarge.typeDoctorName(doctorName);
     cy.clickSubmitButton("Confirm Discharge");
+    patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
+    patientDischarge.verifyDischargePatient();
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -76,10 +80,10 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.clickClearButton();
     // select a non-registered facility and perform the discharge
     patientDischarge.typeReferringFacility(referringFreetextFacility);
-    cy.wait(2000);
     cy.clickSubmitButton("Confirm Discharge");
+    patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
-    cy.wait(2000);
+    patientDischarge.verifyDischargePatient();
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -106,12 +110,12 @@ describe("Patient Discharge based on multiple reason", () => {
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.clickSubmitButton("Submit");
     cy.verifyNotification("Medicine prescribed");
-    cy.wait(2000);
     cy.closeNotification();
     // submit the discharge pop-up
     cy.clickSubmitButton("Confirm Discharge");
+    patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
-    cy.wait(2000);
+    patientDischarge.verifyDischargePatient();
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection

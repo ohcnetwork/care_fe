@@ -37,6 +37,8 @@ const PatientNotesList = (props: PatientNotesProps) => {
         query: { thread, offset: pageParam },
       });
 
+      setReload(false);
+
       return {
         results: response?.data?.results ?? [],
         nextPage: pageParam + RESULTS_PER_PAGE_LIMIT,
@@ -65,7 +67,6 @@ const PatientNotesList = (props: PatientNotesProps) => {
         ...prevState,
         notes: deduplicatedNotes,
       }));
-      setReload(false);
     }
   }, [data]);
 

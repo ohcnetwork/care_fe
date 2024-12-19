@@ -46,7 +46,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
         pathParams: { patientId: state.patientId! },
         query: { thread, offset: pageParam, consultation: consultationId },
       });
-
+      setReload?.(false);
       return {
         results: response?.data?.results ?? [],
         nextPage: pageParam + RESULTS_PER_PAGE_LIMIT,
@@ -75,7 +75,6 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
         ...prevState,
         notes: deduplicatedNotes,
       }));
-      setReload?.(false);
     }
   }, [data]);
 

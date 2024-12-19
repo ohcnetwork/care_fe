@@ -25,15 +25,20 @@ describe("Inventory Management Section", () => {
 
   it("Add New Inventory | Modify data and delete last entry ", () => {
     // add a new item
+    facilityPage.interceptManageInventoryItem();
     facilityPage.clickManageInventory();
+    facilityPage.verifyManageInventoryItem();
     facilityPage.fillInventoryDetails("PPE", "Add Stock", "10");
     facilityPage.clickAddInventory();
     facilityPage.verifySuccessNotification("Inventory created successfully");
+    cy.closeNotification();
     facilityPage.clickManageInventory();
     // modify the new item
     facilityPage.fillInventoryDetails("PPE", "Use Stock", "5");
     facilityPage.clickAddInventory();
-    facilityPage.verifySuccessNotification("Inventory created successfully");
+    facilityPage.verifySuccessNotification(
+      "Inventory use stock updated successfully",
+    );
     // verify the new modification
     facilityPage.verifyPpeQuantity("PPE");
     facilityPage.verifyPpeQuantity("5");
@@ -43,7 +48,6 @@ describe("Inventory Management Section", () => {
     // verify the last entry deletion
     facilityPage.verifyStockInRow("#row-0", "Added Stock");
     facilityPage.verifyStockInRow("#row-1", "Used Stock");
-    cy.wait(3000);
     facilityHome.navigateBack();
     facilityPage.verifyPpeQuantity("PPE");
   });
@@ -57,9 +61,10 @@ describe("Inventory Management Section", () => {
     cy.closeNotification();
     // Verify Backend minimum badge
     facilityPage.verifyBadgeWithText(".badge-danger", "Low Stock");
+    facilityPage.interceptMinimumQuantity();
     // modify with manual minimum badge
-    facilityPage.clickAddMinimumQuanitity();
-    cy.wait(3000);
+    facilityPage.clickAddMinimumQuantity();
+    facilityPage.verifyMinimumQuantity();
     cy.get("body").then(($body) => {
       if ($body.find("#update-minimum-quantity").is(":visible")) {
         // If the 'update-minimum-quantity' element is visible, click it

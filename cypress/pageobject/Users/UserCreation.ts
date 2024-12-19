@@ -48,4 +48,12 @@ export class UserCreationPage {
   clickSaveUserButton() {
     cy.clickSubmitButton("Submit");
   }
+
+  interceptCreateUser() {
+    cy.intercept("POST", "/api/v1/users/add_user/").as("createUser");
+  }
+
+  verifyCreateUser() {
+    cy.wait("@createUser").its("response.statusCode").should("eq", 201);
+  }
 }

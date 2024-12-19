@@ -4,7 +4,7 @@ import { PatientModel } from "@/components/Patient/models";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import mutate from "@/Utils/request/mutate";
 
 import { PatientNotesModel } from "../Facility/models";
 
@@ -42,16 +42,16 @@ export const useAddPatientNote = (options: {
       thread: PatientNotesModel["thread"];
       replyTo?: { id: string };
     }) => {
-      const { res, data } = await request(routes.addPatientNote, {
+      const performMutation = mutate(routes.addPatientNote, {
         pathParams: { patientId: options.patientId },
-        body: {
-          note: noteField,
-          thread,
-          consultation: options.consultationId,
-          reply_to: replyTo?.id,
-        },
       });
-      if (res?.status === 201 && data) return data;
+
+      return performMutation({
+        note: noteField,
+        thread,
+        consultation: options.consultationId,
+        reply_to: replyTo?.id,
+      });
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
