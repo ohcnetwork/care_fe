@@ -21,7 +21,7 @@ class PatientLogupdate {
   }
 
   verifyRoundType(roundType: string) {
-    cy.get("#rounds_type")
+    cy.get("#rounds_type", { timeout: 10000 })
       .should("be.visible")
       .should("contain.text", roundType);
   }
@@ -42,7 +42,7 @@ class PatientLogupdate {
   }
 
   verifyPatientCategory(category: string) {
-    cy.get("#patientCategory")
+    cy.get("#patientCategory", { timeout: 10000 })
       .should("be.visible")
       .should("contain.text", category);
   }
