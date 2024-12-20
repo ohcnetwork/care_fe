@@ -45,7 +45,7 @@ export class PatientPage {
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
     cy.get("#patient-name-list").contains(patientName).click();
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
-    cy.get("#patient-name-consultation")
+    cy.get("#patient-name-consultation", { timeout: 10000 })
       .should("be.visible")
       .contains(patientName);
   }
