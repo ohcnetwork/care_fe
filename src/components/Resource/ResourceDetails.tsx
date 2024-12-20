@@ -127,7 +127,7 @@ export default function ResourceDetails(props: { id: string }) {
             </div>
             <div className="mt-1">
               <span className="font-semibold leading-relaxed">
-                Description of Request:{" "}
+                Reason of Request{" "}
               </span>
               {data.reason || "--"}
             </div>
