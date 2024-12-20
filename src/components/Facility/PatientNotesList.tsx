@@ -11,7 +11,7 @@ import {
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import { callApi } from "@/Utils/request/query";
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
@@ -32,17 +32,16 @@ const PatientNotesList = (props: PatientNotesProps) => {
   const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["notes"],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await request(routes.getPatientNotes, {
+      const response = await callApi(routes.getPatientNotes, {
         pathParams: { patientId },
-        query: { thread, offset: pageParam },
+        queryParams: { thread, offset: pageParam },
       });
-
       setReload(false);
 
       return {
-        results: response?.data?.results ?? [],
+        results: response?.results ?? [],
         nextPage: pageParam + RESULTS_PER_PAGE_LIMIT,
-        totalResults: response?.data?.count ?? 0,
+        totalResults: response?.count ?? 0,
       };
     },
     getNextPageParam: (lastPage, allPages) => {

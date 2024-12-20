@@ -13,7 +13,7 @@ import useSlug from "@/hooks/useSlug";
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
-import request from "@/Utils/request/request";
+import { callApi } from "@/Utils/request/query";
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
@@ -42,15 +42,19 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   const { data, isLoading, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["notes"],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await request(routes.getPatientNotes, {
+      const response = await callApi(routes.getPatientNotes, {
         pathParams: { patientId: state.patientId! },
-        query: { thread, offset: pageParam, consultation: consultationId },
+        queryParams: {
+          thread,
+          offset: pageParam,
+          consultation: consultationId,
+        },
       });
       setReload?.(false);
       return {
-        results: response?.data?.results ?? [],
+        results: response?.results ?? [],
         nextPage: pageParam + RESULTS_PER_PAGE_LIMIT,
-        totalResults: response?.data?.count ?? 0,
+        totalResults: response?.count ?? 0,
       };
     },
     getNextPageParam: (lastPage, allPages) => {
