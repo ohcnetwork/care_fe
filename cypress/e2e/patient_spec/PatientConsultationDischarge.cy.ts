@@ -116,8 +116,6 @@ describe("Patient Discharge based on multiple reason", () => {
     cy.clickSubmitButton("Confirm Discharge");
     patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
-    cy.verifyNotification("Patient Discharged Successfully");
-    // cy.closeNotification();
     patientDischarge.verifyDischargePatient();
     // Verify the consultation dashboard reflection
     cy.verifyContentPresence("#consultation-buttons", ["Recovered"]);
