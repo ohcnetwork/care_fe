@@ -5,8 +5,9 @@ import { useTranslation } from "react-i18next";
 import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { AuthorizedButton, Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
+import { AuthorizedButton } from "@/components/Common/AuthorizedButton";
 import ConfirmDialog from "@/components/Common/ConfirmDialog";
 import UserAutocomplete from "@/components/Common/UserAutocompleteFormField";
 
