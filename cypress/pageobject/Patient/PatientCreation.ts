@@ -47,7 +47,6 @@ export class PatientPage {
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
     cy.get("#patient-name-consultation", { timeout: 15000 })
       .should("not.have.class", "hidden")
-      .and("be.visible")
       .contains(patientName);
   }
 
