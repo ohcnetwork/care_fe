@@ -258,7 +258,7 @@ const UserAddEditForm = (props: UserProps) => {
         ...fieldMappings,
         user_type: formData.user_type,
         password: formData.password,
-        facilities: formData.facilities ? formData.facilities : undefined,
+        facilities: formData.facilities ?? undefined,
         home_facility: formData.home_facility ?? undefined,
         username: formData.username,
         state: formData.state,
@@ -1265,7 +1265,9 @@ const UserAddEditForm = (props: UserProps) => {
       defaults={userData ? state.form : initForm}
       validate={validateForm}
       onCancel={editUser ? handleCancel : () => goBack()}
-      onSubmit={editUser ? handleEditSubmit : handleSubmit}
+      onSubmit={() =>
+        editUser ? handleEditSubmit(state.form) : handleSubmit(state.form)
+      }
       onDraftRestore={(newState) => {
         dispatch({ type: "set_state", state: newState });
       }}
