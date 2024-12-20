@@ -79,12 +79,13 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
 
   useEffect(() => {
     if (clearSearch?.value) {
-      const clearinput = options
-        .map((op) => op.key)
-        .some((element) => clearSearch.params?.includes(element));
-      clearinput ? setSearchValue("") : null;
       inputRef.current?.focus();
-      if (clearSearch?.params && clearSearch?.params.includes("search")) {
+      if (
+        clearSearch?.params?.some(
+          (param) =>
+            param === "search" || options.some((op) => op.key === param),
+        )
+      ) {
         setSearchValue("");
       }
     }
