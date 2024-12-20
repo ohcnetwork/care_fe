@@ -25,6 +25,7 @@ describe("Patient Discharge based on multiple reason", () => {
   });
 
   beforeEach(() => {
+    cy.viewport(1280, 720);
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
@@ -115,9 +116,9 @@ describe("Patient Discharge based on multiple reason", () => {
     cy.clickSubmitButton("Confirm Discharge");
     patientDischarge.interceptDischargePatient();
     cy.clickSubmitButton("Acknowledge & Submit");
-    patientDischarge.verifyDischargePatient();
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
+    patientDischarge.verifyDischargePatient();
     // Verify the consultation dashboard reflection
     cy.verifyContentPresence("#consultation-buttons", ["Recovered"]);
     // Verify the dashboard and discharge information
