@@ -103,12 +103,7 @@ export class PatientConsultationPage {
   }
 
   clickEditConsultationButton() {
-    cy.get("#consultation-buttons").scrollIntoView();
-    cy.get("button").contains("Manage Patient").click();
-    cy.verifyAndClickElement(
-      "#consultation-buttons",
-      "Edit Consultation Details",
-    );
+    cy.clickAndSelectOption("#show-more", "Edit Consultation Details", true);
   }
 
   interceptConsultation() {
