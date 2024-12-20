@@ -662,7 +662,7 @@ export default function PatientInfoCard(props: PatientInfoCardProps) {
                 ].map(
                   (action: any, i) =>
                     action[3] && (
-                      <div key={i}>
+                      <div key={i} role="option">
                         <Link
                           key={i}
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
